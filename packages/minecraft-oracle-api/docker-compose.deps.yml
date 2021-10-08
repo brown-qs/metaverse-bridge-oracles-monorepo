@@ -1,0 +1,25 @@
+version: '3'
+services:
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=msama
+      - DATABASE_HOST=localhost
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./storage/postgres:/var/lib/postgresql
+
+  redis:
+    image: redis
+    container_name: redis
+    command: redis-server --appendonly yes --requirepass myPassword1111
+    ports:
+      - '6379:6379'
+    volumes:
+      - ./storage/redis:/data
