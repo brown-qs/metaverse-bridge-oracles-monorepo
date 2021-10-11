@@ -1,17 +1,20 @@
 import { Module } from '@nestjs/common';
 import {
     OracleWalletProvider,
-    EthClientProvider
+    EthClientProvider,
+    MicrosoftSetupParamsProvider
 } from '.';
 
 @Module({
     providers: [
         OracleWalletProvider,
-        EthClientProvider
+        EthClientProvider,
+        MicrosoftSetupParamsProvider
     ],
     exports: [
         OracleWalletProvider,
-        EthClientProvider
+        EthClientProvider,
+        MicrosoftSetupParamsProvider
     ]
 })
 export class ProviderModule {}

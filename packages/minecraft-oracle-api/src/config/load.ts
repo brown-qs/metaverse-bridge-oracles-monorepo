@@ -68,7 +68,18 @@ export const loadEnv = () => {
             keyPrefix: process.env.REDIS_KEY_PREFIX
         },
         server: {
-            port: process.env.SERVER_PORT
+            port: process.env.SERVER_PORT,
+            host: process.env.SERVER_HOST,
+            scheme: process.env.SERVER_SCHEME
+        },
+        app: {
+            id: process.env.AZURE_APP_ID,
+            secret: process.env.AZURE_APP_SECRET,
+            redirect: process.env.AUTH_REDIRECT_URL
+        },
+        jwt: {
+            secret: process.env.JWT_SECRET,
+            expiration: process.env.JWT_EXPIRATION_STRING
         }
     };
 };
