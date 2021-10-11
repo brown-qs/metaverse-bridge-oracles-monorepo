@@ -14,6 +14,13 @@ export const envValidationSchema = () => {
             .required(),
         // SERVER
         SERVER_PORT: Joi.string().default('3030'),
+        SERVER_HOST: Joi.string().default('localhost'),
+        SERVER_SCHEME: Joi.string().default('http'), 
+        // REDIRECT
+        AUTH_REDIRECT_URL: Joi.string().default('http://localhost:3000/login'),
+        // APP
+        AZURE_APP_ID: Joi.string().required(),
+        AZURE_APP_SECRET: Joi.string().required(),
         // DB
         DB_HOST: Joi.string().default('localhost'),
         DB_USER: Joi.string().default('postgres'),
@@ -26,6 +33,9 @@ export const envValidationSchema = () => {
         REDIS_PASSWORD: Joi.string().default('myPassword1111'),
         REDIS_KEY_EXPIRE_AFTER_S: Joi.number().default(900),
         REDIS_KEY_PREFIX: Joi.string().default('msama'),
-        REDIS_NAME: Joi.string().default('MoonsamaMinecraftBridge')
+        REDIS_NAME: Joi.string().default('MoonsamaMinecraftBridge'),
+        // JWT
+        JWT_SECRET: Joi.string().required(),
+        JWT_EXPIRATION_STRING: Joi.string().default('30m'),
     });
 };

@@ -4,17 +4,19 @@ import {
     IsString
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Column, Entity, Index, OneToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, Index, ManyToOne, OneToOne, PrimaryColumn } from 'typeorm';
 import { UserEntity } from 'src/user/user.entity';
 import { AssetType } from 'src/common/enums/AssetType';
+import { TextureType } from './texturetype.enum';
 
 @Entity()
-@Index(['assetType', 'assetAddress', 'assetTokenId'], {unique: true})
-export class SkinEntity {
-    constructor(skin: Partial<SkinEntity>) {
+@Index(['assetType', 'assetAddress', 'assetId'], {unique: true})
+export class TextureEntity {
+    constructor(skin: Partial<TextureEntity>) {
         Object.assign(this, skin);
     }
 
+    @PrimaryColumn()
     @IsEnum(AssetType)
     @Column({
         type: 'enum',
@@ -28,7 +30,15 @@ export class SkinEntity {
 
     @PrimaryColumn()
     @IsString()
-    assetTokenId: string;
+    assetId: string;
+
+    @IsEnum(TextureType)
+    @Column({
+        type: 'enum',
+        enum: TextureType,
+        nullable: false
+    })
+    type: TextureType;
 
     @ApiProperty({ description: 'texture data' })
     @IsNotEmpty()
@@ -43,6 +53,6 @@ export class SkinEntity {
     textureSignature: string;
 
     @ApiPropertyOptional({ description: 'user the skin is equipped to' })
-    @OneToOne(() => UserEntity, (user: UserEntity) => user.skin)
+    @ManyToOne(() => UserEntity, (user: UserEntity) => user.textures)
     owner?: UserEntity;
 }

@@ -10,9 +10,13 @@ import { ProviderModule } from './provider/provider.module';
 import { RedisModule } from 'nestjs-redis';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ItemEntity } from './item/item.entity';
-import { SkinEntity } from './skin/skin.entity';
+import { TextureEntity } from './texture/texture.entity';
 import { UserEntity } from './user/user.entity';
 import { SnapshotItemEntity } from './snapshot/snapshotItem';
+import { AuthModule } from './auth/auth.module';
+import { CacheModule } from './cache/cache.module';
+import { GameModule } from './game/game.module';
+import { TextureModule } from './texture/texture.module';
 
 @Module({
   imports: [
@@ -43,7 +47,7 @@ import { SnapshotItemEntity } from './snapshot/snapshotItem';
             username: configService.get<string>('db.user'),
             password: configService.get<string>('db.password'),
             database: configService.get<string>('db.name'),
-            entities: [UserEntity, SnapshotItemEntity, ItemEntity, SkinEntity],
+            entities: [UserEntity, SnapshotItemEntity, ItemEntity, TextureEntity],
             synchronize: true // ToDo: later change to migrations
         }),
         inject: [ConfigService]
@@ -60,7 +64,11 @@ import { SnapshotItemEntity } from './snapshot/snapshotItem';
         ],
         inject: [ConfigService]
     }),
-    ProviderModule
+    ProviderModule,
+    CacheModule,
+    AuthModule,
+    TextureModule,
+    GameModule
   ],
   controllers: [AppController],
   providers: [AppService],

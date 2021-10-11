@@ -1,11 +1,11 @@
 import {
+    IsBoolean,
     IsEnum,
     IsString
 } from 'class-validator';
-import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Column, Entity, Index, OneToMany, OneToOne, PrimaryColumn, Unique } from 'typeorm';
 import { UserRole } from '../common/enums/UserRole';
-import { SkinEntity } from 'src/skin/skin.entity';
+import { TextureEntity } from 'src/texture/texture.entity';
 import { SnapshotItemEntity } from 'src/snapshot/snapshotItem';
 
 @Entity()
@@ -27,20 +27,28 @@ export class UserEntity {
     })
     role?: UserRole;
 
-    @ApiPropertyOptional({ description: 'Ethereum address last used by the user' })
     @IsString()
-    @Column({ default: null })
+    @Column({ default: null, nullable: true })
+    userName?: string;
+
+    @IsBoolean()
+    @Column({ default: false })
+    allowedToPlay?: boolean;
+
+    @IsBoolean()
+    @Column({ default: false })
+    hasGame?: boolean;
+    
+    @IsString()
+    @Column({ default: null, nullable: true })
     lastUsedAddress?: string;
 
-    @ApiPropertyOptional({ description: 'Ethereum addresses used by the user so far'})
     @Column('text', { array: true, default: [] })
     usedAddresses?: string[];
 
-    @ApiPropertyOptional({ description: 'Snapshotted (exported) game items of user' })
     @OneToMany(() => SnapshotItemEntity, (sitem) => sitem.owner)
     snapshotItems?: SnapshotItemEntity[];
 
-    @ApiPropertyOptional({ description: 'Equipped skin' })
-    @OneToOne(() => SkinEntity, (skin) => skin.owner)
-    skin?: SkinEntity;
+    @OneToMany(() => TextureEntity, (skin) => skin.owner)
+    textures?: TextureEntity[];
 }
