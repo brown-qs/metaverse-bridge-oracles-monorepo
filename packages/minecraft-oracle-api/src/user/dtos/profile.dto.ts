@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { UserRole } from "src/common/enums/UserRole"
 
-export class ProfileDTO {
+export class ProfileDto {
     
     @ApiProperty({ description: 'User UUID'})
     uuid: string

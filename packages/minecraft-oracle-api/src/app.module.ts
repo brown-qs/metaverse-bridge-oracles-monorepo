@@ -9,14 +9,16 @@ import { nestLikeConsoleFormat } from './utils';
 import { ProviderModule } from './provider/provider.module';
 import { RedisModule } from 'nestjs-redis';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ItemEntity } from './item/item.entity';
 import { TextureEntity } from './texture/texture.entity';
 import { UserEntity } from './user/user.entity';
-import { SnapshotItemEntity } from './snapshot/snapshotItem';
+import { SnapshotItemEntity } from './snapshot/snapshotItem.entity';
 import { AuthModule } from './auth/auth.module';
 import { CacheModule } from './cache/cache.module';
 import { GameModule } from './game/game.module';
 import { TextureModule } from './texture/texture.module';
+import { MaterialEntity } from './material/material.entity';
+import { SnapshotModule } from './snapshot/snapshot.module';
+import { MaterialModule } from './material/material.module';
 
 @Module({
   imports: [
@@ -41,14 +43,15 @@ import { TextureModule } from './texture/texture.module';
     }),
     TypeOrmModule.forRootAsync({
         useFactory: async (configService: ConfigService) => ({
-            type: 'postgres',
-            host: configService.get<string>('db.host'),
-            port: configService.get<number>('db.port'),
-            username: configService.get<string>('db.user'),
-            password: configService.get<string>('db.password'),
-            database: configService.get<string>('db.name'),
-            entities: [UserEntity, SnapshotItemEntity, ItemEntity, TextureEntity],
-            synchronize: true // ToDo: later change to migrations
+            type: configService.get<string>('typeorm.connection') as any,
+            host: configService.get<string>('typeorm.host'),
+            port: configService.get<number>('typeorm.port'),
+            username: configService.get<string>('typeorm.username'),
+            password: configService.get<string>('typeorm.password'),
+            database: configService.get<string>('typeorm.database'),
+            entities: [UserEntity, SnapshotItemEntity, TextureEntity, MaterialEntity],
+            synchronize: configService.get<boolean>('typeorm.synchronize'),
+            logging: configService.get<boolean>('typeorm.logging'),
         }),
         inject: [ConfigService]
     }),
@@ -68,6 +71,8 @@ import { TextureModule } from './texture/texture.module';
     CacheModule,
     AuthModule,
     TextureModule,
+    MaterialModule,
+    SnapshotModule,
     GameModule
   ],
   controllers: [AppController],

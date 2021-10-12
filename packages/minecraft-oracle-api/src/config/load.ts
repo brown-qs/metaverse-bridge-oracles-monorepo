@@ -52,12 +52,15 @@ export const loadEnv = () => {
         log: {
             level: process.env.LOG_LEVEL
         },
-        db: {
-            host: process.env.DB_HOST,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            port: process.env.DB_PORT,
-            name: process.env.DB_NAME
+        typeorm: {
+            host: process.env.TYPEORM_HOST,
+            username: process.env.TYPEORM_USERNAME,
+            password: process.env.TYPEORM_PASSWORD,
+            port: process.env.TYPEORM_PORT,
+            database: process.env.TYPEORM_DATABSE,
+            synchronize: process.env.TYPEORM_SYNCHRONIZE,
+            logging: process.env.TYPEORM_LOGGING,
+            connection: process.env.TYPEORM_CONNECTION
         },
         redis: {
             host: process.env.REDIS_HOST,

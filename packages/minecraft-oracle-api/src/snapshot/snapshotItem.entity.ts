@@ -1,11 +1,11 @@
 import {
+    IsInt,
     IsNumber,
     IsString
 } from 'class-validator';
-import { ApiProperty, } from '@nestjs/swagger';
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { UserEntity } from 'src/user/user.entity';
-import { ItemEntity } from 'src/item/item.entity';
+import { MaterialEntity } from 'src/material/material.entity';
 
 @Entity()
 @Index(['id'], {unique: true})
@@ -19,17 +19,17 @@ export class SnapshotItemEntity {
     @IsString()
     id: string;
 
-    @ApiProperty({ description: 'Amount the player has'})
     @Column()
-    @IsNumber()
+    @IsInt()
     amount: number;
-    
-    @ApiProperty({ description: 'The item this belongs to'})
-    @ManyToOne(() => ItemEntity)
-    @JoinColumn()
-    item: ItemEntity;
 
-    @ApiProperty({ description: 'User this item belongs to'})
+    @Column({ nullable: true })
+    @IsNumber()
+    position: number;
+    
+    @ManyToOne(() => MaterialEntity, (material) => material.snapshots)
+    material: MaterialEntity;
+
     @ManyToOne(() => UserEntity, (user) => user.snapshotItems)
     owner: UserEntity;
 }
