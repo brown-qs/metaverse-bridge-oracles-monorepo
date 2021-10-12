@@ -15,6 +15,8 @@ import { UserService } from './user.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt';
 import { ProfileDto } from './dtos/profile.dto';
+import { User } from 'src/utils/decorators';
+import { UserEntity } from './user.entity';
 
 
 @ApiTags('user')
@@ -36,8 +38,7 @@ export class UserController {
     @ApiOperation({ summary: 'Fetches user profile' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    async profile(@Request() req: any): Promise<ProfileDto> {
-        const { user } = req;
+    async profile(@User() user: UserEntity): Promise<ProfileDto> {
         return {
             uuid: user.uuid,
             hasGame: user.hasGame,

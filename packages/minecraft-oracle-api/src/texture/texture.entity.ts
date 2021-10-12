@@ -10,7 +10,7 @@ import { AssetType } from '../common/enums/AssetType';
 import { TextureType } from './texturetype.enum';
 
 @Entity()
-@Index(['assetType', 'assetAddress', 'assetId'], {unique: true})
+@Index(['assetType', 'assetAddress', 'assetId'])
 export class TextureEntity {
     constructor(skin: Partial<TextureEntity>) {
         Object.assign(this, skin);
@@ -24,7 +24,7 @@ export class TextureEntity {
     })
     assetType: AssetType;
 
-    @PrimaryColumn()
+    @PrimaryColumn({unique: true})
     @IsString()
     assetAddress: string;
 
@@ -40,19 +40,14 @@ export class TextureEntity {
     })
     type: TextureType;
 
-    @ApiProperty({ description: 'texture data' })
-    @IsNotEmpty()
     @IsString()
     @Column()
     textureData: string;
 
-    @ApiProperty({ description: 'texture signature' })
-    @IsNotEmpty()
     @IsString()
     @Column()
     textureSignature: string;
 
-    @ApiPropertyOptional({ description: 'user the skin is equipped to' })
     @ManyToOne(() => UserEntity, (user: UserEntity) => user.textures)
     owner?: UserEntity;
 }

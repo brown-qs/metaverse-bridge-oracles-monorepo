@@ -64,7 +64,12 @@ export class GameService {
             const material = await this.materialService.findByName(snapshot.materialName)
 
             if (!material || !material.snapshottable) {
-                this.logger.warn(`processSnapshots-${user.uuid}:: material ${snapshot.materialName} is not permitted for snapshot`, this.context)
+                this.logger.error(`processSnapshots-${user.uuid}:: material ${snapshot.materialName} is not permitted for snapshot`, null, this.context)
+                return undefined
+            }
+
+            if (snapshot.amount > material.maxStackSize) {
+                this.logger.error(`processSnapshots-${user.uuid}:: material ${snapshot.materialName} had invalid amount. Received: ${snapshot.amount}. Allowed: [0, ${material.maxStackSize}]`, null, this.context)
                 return undefined
             }
 

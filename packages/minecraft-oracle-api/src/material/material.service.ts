@@ -10,18 +10,28 @@ export class MaterialService {
         private readonly repository: Repository<MaterialEntity>
     ) {}
 
-    public async create(user: MaterialEntity): Promise<MaterialEntity> {
-        const u = await this.repository.save(user);
+    public async create(material: MaterialEntity): Promise<MaterialEntity> {
+        const u = await this.repository.save(material);
         return u;
     }
 
-    public async remove(user: MaterialEntity): Promise<MaterialEntity> {
-        const u = await this.repository.remove(user);
+    public async createMultiple(materials: MaterialEntity[]): Promise<MaterialEntity[]> {
+        const u = await this.repository.save(materials);
         return u;
     }
 
-    public async update(user: MaterialEntity): Promise<MaterialEntity> {
-        const u = await this.repository.save(user)
+    public async remove(material: MaterialEntity): Promise<MaterialEntity> {
+        const u = await this.repository.remove(material);
+        return u;
+    }
+
+    public async removeMultiple(materials: MaterialEntity[]): Promise<MaterialEntity[]> {
+        const u = await this.repository.remove(materials);
+        return u;
+    }
+
+    public async update(material: MaterialEntity): Promise<MaterialEntity> {
+        const u = await this.repository.save(material)
         return u
     }
 

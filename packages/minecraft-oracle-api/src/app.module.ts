@@ -19,6 +19,7 @@ import { TextureModule } from './texture/texture.module';
 import { MaterialEntity } from './material/material.entity';
 import { SnapshotModule } from './snapshot/snapshot.module';
 import { MaterialModule } from './material/material.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -74,7 +75,8 @@ import { MaterialModule } from './material/material.module';
     TextureModule,
     MaterialModule,
     SnapshotModule,
-    GameModule
+    GameModule,
+    AdminModule
   ],
   controllers: [AppController],
   providers: [AppService],
