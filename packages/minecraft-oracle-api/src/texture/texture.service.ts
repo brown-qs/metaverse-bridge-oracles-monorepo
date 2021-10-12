@@ -11,18 +11,28 @@ export class TextureService {
         private readonly repository: Repository<TextureEntity>
     ) {}
 
-    public async create(user: TextureEntity): Promise<TextureEntity> {
-        const u = await this.repository.save(user);
+    public async create(texture: TextureEntity): Promise<TextureEntity> {
+        const u = await this.repository.save(texture);
         return u;
     }
 
-    public async remove(user: TextureEntity): Promise<TextureEntity> {
-        const u = await this.repository.remove(user);
+    public async createMultiple(textures: TextureEntity[]): Promise<TextureEntity[]> {
+        const u = await this.repository.save(textures);
         return u;
     }
 
-    public async update(user: TextureEntity): Promise<TextureEntity> {
-        const u = await this.repository.save(user)
+    public async remove(texture: TextureEntity): Promise<TextureEntity> {
+        const u = await this.repository.remove(texture);
+        return u;
+    }
+
+    public async removeMultiple(textures: TextureEntity[]): Promise<TextureEntity[]> {
+        const u = await this.repository.remove(textures);
+        return u;
+    }
+
+    public async update(texture: TextureEntity): Promise<TextureEntity> {
+        const u = await this.repository.save(texture)
         return u
     }
 
