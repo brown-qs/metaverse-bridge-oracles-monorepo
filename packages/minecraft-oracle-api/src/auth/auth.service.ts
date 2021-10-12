@@ -1,14 +1,14 @@
 import { Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
-import { UserService } from 'src/user/user.service';
+import { UserService } from '../user/user.service';
 
 import {MicrosoftAccount, MicrosoftAuth} from 'minecraft-auth'
 import { ConfigService } from '@nestjs/config';
-import { ProviderToken } from 'src/provider/token';
-import { MicrosoftSetupParams } from 'src/provider';
-import { UserEntity } from 'src/user/user.entity';
+import { ProviderToken } from '../provider/token';
+import { MicrosoftSetupParams } from '../provider';
+import { UserEntity } from '../user/user.entity';
 import { JwtService } from '@nestjs/jwt';
-import { CacheService } from 'src/cache/cache.service';
+import { CacheService } from '../cache/cache.service';
 
 @Injectable()
 export class AuthService {

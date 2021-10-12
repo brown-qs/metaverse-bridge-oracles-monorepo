@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { RedisService } from 'nestjs-redis';
-import { SESSION_CACHE_FIELD_USER } from 'src/config/constants';
+import { SESSION_CACHE_FIELD_USER } from '../config/constants';
 import IORedis from 'ioredis';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 

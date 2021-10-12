@@ -5,8 +5,8 @@ import {
     IsString
 } from 'class-validator';
 import { Column, Entity, Index, OneToMany, PrimaryColumn } from 'typeorm';
-import { AssetType } from 'src/common/enums/AssetType';
-import { SnapshotItemEntity } from 'src/snapshot/snapshotItem.entity';
+import { AssetType } from '../common/enums/AssetType';
+import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
 
 @Entity()
 @Index(['name'], {unique: true})
@@ -70,5 +70,5 @@ export class MaterialEntity {
     equippable: boolean;
 
     @OneToMany(() => SnapshotItemEntity, (snapshotItem) => snapshotItem.material )
-    snapshots: SnapshotItemEntity[];
+    snapshots?: SnapshotItemEntity[];
 }

@@ -1,7 +1,7 @@
 import { ConfigError } from './errors';
 import { ethers } from 'ethers';
 import { ALLOWED_CHAIN_IDS } from './constants';
-import { privateKeyToEthereumKeys } from 'src/crypto';
+import { privateKeyToEthereumKeys } from '../crypto';
 
 export const loadChain = async () => {
     const rpcUrl = process.env.RPC_URL.trim();
@@ -57,7 +57,7 @@ export const loadEnv = () => {
             username: process.env.TYPEORM_USERNAME,
             password: process.env.TYPEORM_PASSWORD,
             port: process.env.TYPEORM_PORT,
-            database: process.env.TYPEORM_DATABSE,
+            database: process.env.TYPEORM_DATABASE,
             synchronize: process.env.TYPEORM_SYNCHRONIZE,
             logging: process.env.TYPEORM_LOGGING,
             connection: process.env.TYPEORM_CONNECTION

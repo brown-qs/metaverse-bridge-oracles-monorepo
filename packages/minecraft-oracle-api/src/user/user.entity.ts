@@ -5,8 +5,8 @@ import {
 } from 'class-validator';
 import { Column, Entity, Index, OneToMany, OneToOne, PrimaryColumn, Unique } from 'typeorm';
 import { UserRole } from '../common/enums/UserRole';
-import { TextureEntity } from 'src/texture/texture.entity';
-import { SnapshotItemEntity } from 'src/snapshot/snapshotItem.entity';
+import { TextureEntity } from '../texture/texture.entity';
+import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
 
 @Entity()
 @Index(['uuid'], {unique: true})

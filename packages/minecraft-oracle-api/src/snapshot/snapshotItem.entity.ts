@@ -4,8 +4,8 @@ import {
     IsString
 } from 'class-validator';
 import { Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { UserEntity } from 'src/user/user.entity';
-import { MaterialEntity } from 'src/material/material.entity';
+import { UserEntity } from '../user/user.entity';
+import { MaterialEntity } from '../material/material.entity';
 
 @Entity()
 @Index(['id'], {unique: true})

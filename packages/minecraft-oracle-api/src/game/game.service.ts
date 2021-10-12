@@ -1,19 +1,17 @@
 import {Inject, Injectable} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { UserService } from 'src/user/user.service';
+import { UserService } from '../user/user.service';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
-import { TextureService } from 'src/texture/texture.service';
-import { UserEntity } from 'src/user/user.entity';
-import { TextureType } from 'src/texture/texturetype.enum';
-import { DEFAULT_SKIN } from 'src/config/constants';
+import { TextureService } from '../texture/texture.service';
+import { UserEntity } from '../user/user.entity';
+import { TextureType } from '../texture/texturetype.enum';
+import { DEFAULT_SKIN } from '../config/constants';
 import { PlayerTextureMapDto } from './dtos/texturemap.dto';
-import { SnapshotItemEntity } from 'src/snapshot/snapshotItem.entity';
-import { MaterialService } from 'src/material/material.service';
-import { SnapshotService } from 'src/snapshot/snapshot.service';
-import { MaterialEntity } from 'src/material/material.entity';
+import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
+import { MaterialService } from '../material/material.service';
+import { SnapshotService } from '../snapshot/snapshot.service';
 import { Snapshot, Snapshots } from './dtos/snapshot.dto';
 import { PermittedMaterial, PermittedMaterials } from './dtos/permitted-material.dto';
-import { number } from 'fp-ts';
 
 @Injectable()
 export class GameService {
@@ -90,7 +88,9 @@ export class GameService {
     }
 
     public async getSnapshottableMaterialsList(): Promise<PermittedMaterials> {
-        const materials = await this.materialService.find({snapshottable: true})
+        const materials = await this.materialService.findMany({where: {snapshottable: true}})
+
+        this.logger.debug(materials, this.context)
 
         if (!materials || materials.length == 0) {
             this.logger.warn(`No snapshottable materials were fetched. Oopsie.`, this.context)

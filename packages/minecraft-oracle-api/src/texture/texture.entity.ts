@@ -5,8 +5,8 @@ import {
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Column, Entity, Index, ManyToOne, OneToOne, PrimaryColumn } from 'typeorm';
-import { UserEntity } from 'src/user/user.entity';
-import { AssetType } from 'src/common/enums/AssetType';
+import { UserEntity } from '../user/user.entity';
+import { AssetType } from '../common/enums/AssetType';
 import { TextureType } from './texturetype.enum';
 
 @Entity()
