@@ -1,4 +1,4 @@
-import { TextureType } from "src/texture/texturetype.enum";
+import { TextureType } from "../../texture/texturetype.enum";
 
 export type PlayerTextureMapDto = {
     [key: string]: {

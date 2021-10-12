@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { MaterialEntity } from './material.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindConditions } from 'typeorm';
+import { Repository, FindConditions, FindManyOptions } from 'typeorm';
 
 @Injectable()
 export class MaterialService {
@@ -27,6 +26,11 @@ export class MaterialService {
     }
 
     public async find(conditions: FindConditions<MaterialEntity>): Promise<MaterialEntity[]> {
+        const u = await this.repository.find(conditions)
+        return u
+    }
+
+    public async findMany(conditions: FindManyOptions<MaterialEntity>): Promise<MaterialEntity[]> {
         const u = await this.repository.find(conditions)
         return u
     }

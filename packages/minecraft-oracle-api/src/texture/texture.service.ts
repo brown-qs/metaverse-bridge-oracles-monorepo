@@ -2,7 +2,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import {Injectable} from '@nestjs/common';
 import { FindConditions, Repository } from 'typeorm';
 import { TextureEntity } from './texture.entity';
-import { AssetType } from 'src/common/enums/AssetType';
+import { AssetType } from '../common/enums/AssetType';
 
 @Injectable()
 export class TextureService {

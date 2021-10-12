@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { MaterialModule } from 'src/material/material.module';
-import { SnapshotModule } from 'src/snapshot/snapshot.module';
-import { TextureModule } from 'src/texture/texture.module';
-import { UserModule } from 'src/user/user.module';
+import { MaterialModule } from '../material/material.module';
+import { SnapshotModule } from '../snapshot/snapshot.module';
+import { TextureModule } from '../texture/texture.module';
+import { UserModule } from '../user/user.module';
 import { GameController } from './game.controller';
 import { GameService } from './game.service';
 

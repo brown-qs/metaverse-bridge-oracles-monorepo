@@ -4,9 +4,9 @@ import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
-import { UserModule } from 'src/user/user.module';
-import { MicrosoftSetupParamsProvider } from 'src/provider';
-import { CacheModule } from 'src/cache/cache.module';
+import { UserModule } from '../user/user.module';
+import { MicrosoftSetupParamsProvider } from '../provider';
+import { CacheModule } from '../cache/cache.module';
 import { Module } from '@nestjs/common';
 
 @Module({

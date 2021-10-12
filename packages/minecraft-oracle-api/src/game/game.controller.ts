@@ -11,8 +11,8 @@ import {
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { GameService } from './game.service';
-import { UserService } from 'src/user/user.service';
-import { ProfileDto } from 'src/user/dtos/profile.dto';
+import { UserService } from '../user/user.service';
+import { ProfileDto } from '../user/dtos/profile.dto';
 import { Snapshots } from './dtos/snapshot.dto';
 import { PlayerTextureMapDto } from './dtos/texturemap.dto';
 import { PermittedMaterials } from './dtos/permitted-material.dto';
