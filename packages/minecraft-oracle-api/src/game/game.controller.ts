@@ -1,52 +1,21 @@
 import {
     Body,
     Controller,
-    Delete,
     Get,
     HttpCode,
-    HttpStatus,
     Inject,
     Param,
     Put,
-    Request,
-    UnprocessableEntityException,
-    UseGuards
+    UnprocessableEntityException
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
-import { ApiModelProperty } from '@nestjs/swagger/dist/decorators/api-model-property.decorator';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
-import { AuthenticatedUser } from 'src/auth/jwt.strategy';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { JwtService } from '@nestjs/jwt';
-import { UserRole } from 'src/common/enums/UserRole';
-import { boolean } from 'fp-ts';
-import { User } from 'src/utils/decorators';
-import { GameService, PlayerTextureMapDto } from './game.service';
+import { GameService } from './game.service';
 import { UserService } from 'src/user/user.service';
-
-class UserDto {
-    
-    @ApiProperty({ description: 'User UUID'})
-    uuid: string
-}
-
-class ProfileDto {
-    
-    @ApiProperty({ description: 'User UUID'})
-    uuid: string
-
-    @ApiProperty({ description: 'User name'})
-    userName: string
-
-    @ApiProperty({ description: 'User role'})
-    role: UserRole
-
-    @ApiProperty({ description: 'Bought the game or not'})
-    hasGame: boolean
-
-    @ApiProperty({ description: 'Is the user allowed to play'})
-    allowedToPlay: boolean
-}
+import { ProfileDto } from 'src/user/dtos/profile.dto';
+import { Snapshots } from './dtos/snapshot.dto';
+import { PlayerTextureMapDto } from './dtos/texturemap.dto';
+import { PermittedMaterials } from './dtos/permitted-material.dto';
 
 @ApiTags('game')
 @Controller('game')
@@ -79,12 +48,13 @@ export class GameController {
     @Get('player/:uuid/textures')
     @HttpCode(200)
     @ApiOperation({ summary: 'Fetches player textures' })
-    async skin(@Param('uuid') uuid: string): Promise<PlayerTextureMapDto> {
+    async textures(@Param('uuid') uuid: string): Promise<PlayerTextureMapDto> {
         const user = await this.userService.findByUuid(uuid)
         if (!user) {
             throw new UnprocessableEntityException('Player was not found')
         }
-        return this.gameService.getTexture(user)
+        const textures = await this.gameService.getTextures(user)
+        return textures
     }
 
     @Get('player/:uuid/allowed')
@@ -93,5 +63,30 @@ export class GameController {
     async allowed(@Param('uuid') uuid: string): Promise<boolean> {
         const user = await this.userService.findByUuid(uuid)
         return user?.allowedToPlay ?? false
+    }
+
+    @Put('player/:uuid/snapshot')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Saves player resources' })
+    async snapshot(
+        @Param('uuid') uuid: string,
+        @Body() snapshots: Snapshots,
+    ): Promise<boolean[]> {
+        const user = await this.userService.findByUuid(uuid)
+        
+        if (!user) {
+            throw new UnprocessableEntityException('No player found')
+        }
+
+        const [snapshottedItems, successArray, receivedNum, savedNum] = await this.gameService.processSnapshots(user, snapshots)
+        return successArray
+    }
+
+    @Get('snapshot/materials')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Returns the permitted snapshottable in-game materials' })
+    async getSnapshottableMaterials(): Promise<PermittedMaterials> {
+        const permittedMaterials = await this.gameService.getSnapshottableMaterialsList()
+        return permittedMaterials
     }
 }

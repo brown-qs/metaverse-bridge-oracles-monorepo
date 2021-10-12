@@ -43,6 +43,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         }
         const user = await this.userService.findByUuid(payload.sub)
 
+        if (!user) {
+            throw new UnauthorizedException();
+        }
+
         this.logger.debug('validate:: success:' + JSON.stringify(user), this.context)
         //req.user = { user, sessionKey: token } 
         return user;

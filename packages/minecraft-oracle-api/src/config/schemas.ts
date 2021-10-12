@@ -21,12 +21,15 @@ export const envValidationSchema = () => {
         // APP
         AZURE_APP_ID: Joi.string().required(),
         AZURE_APP_SECRET: Joi.string().required(),
-        // DB
-        DB_HOST: Joi.string().default('localhost'),
-        DB_USER: Joi.string().default('postgres'),
-        DB_PASSWORD: Joi.string().default('postgres'),
-        DB_NAME: Joi.string().default('msama-mc-bridge-db'),
-        DB_PORT: Joi.number().default(5432),
+        // TYPEORM
+        TYPEORM_HOST: Joi.string().default('localhost'),
+        TYPEORM_USERNAME: Joi.string().default('postgres'),
+        TYPEORM_PASSWORD: Joi.string().default('postgres'),
+        TYPEORM_DATABASE: Joi.string().default('msama-mc-bridge-db'),
+        TYPEORM_PORT: Joi.number().default(5432),
+        TYPEORM_SYNCHRONIZE: Joi.boolean().default(true),
+        TYPEORM_LOGGING: Joi.boolean().default(true),
+        TYPEORM_CONNECTION: Joi.string().default('postgres'),
         // REDIS
         REDIS_HOST: Joi.string().default('127.0.0.1'),
         REDIS_PORT: Joi.number().default(6379),

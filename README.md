@@ -2,7 +2,7 @@
 # Game bridge monorepo
 
 ## Prereqs
-- node 12+ LTS
+- node 14+ LTS
 - [rush](https://rushjs.io/pages/intro/get_started/)
 - -[pnpm](https://pnpm.io/installation)
 

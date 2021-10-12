@@ -14,7 +14,7 @@ import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt';
-import { ProfileDTO } from './dtos/profile.dto';
+import { ProfileDto } from './dtos/profile.dto';
 
 
 @ApiTags('user')
@@ -36,7 +36,7 @@ export class UserController {
     @ApiOperation({ summary: 'Fetches user profile' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    async profile(@Request() req: any): Promise<ProfileDTO> {
+    async profile(@Request() req: any): Promise<ProfileDto> {
         const { user } = req;
         return {
             uuid: user.uuid,

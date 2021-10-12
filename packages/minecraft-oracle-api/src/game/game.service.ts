@@ -6,25 +6,31 @@ import { TextureService } from 'src/texture/texture.service';
 import { UserEntity } from 'src/user/user.entity';
 import { TextureType } from 'src/texture/texturetype.enum';
 import { DEFAULT_SKIN } from 'src/config/constants';
-
-export type PlayerTextureMapDto = {
-    [key: string]: {
-        textureData: string
-        textureSignature: string
-        type: TextureType
-    }
-}
+import { PlayerTextureMapDto } from './dtos/texturemap.dto';
+import { SnapshotItemEntity } from 'src/snapshot/snapshotItem.entity';
+import { MaterialService } from 'src/material/material.service';
+import { SnapshotService } from 'src/snapshot/snapshot.service';
+import { MaterialEntity } from 'src/material/material.entity';
+import { Snapshot, Snapshots } from './dtos/snapshot.dto';
+import { PermittedMaterial, PermittedMaterials } from './dtos/permitted-material.dto';
+import { number } from 'fp-ts';
 
 @Injectable()
 export class GameService {
+
+    private readonly context: string;
     constructor(
         private readonly userService: UserService,
         private readonly textureService: TextureService,
+        private readonly materialService: MaterialService,
+        private readonly snapshotService: SnapshotService,
         private configService: ConfigService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
-    ) {}
+    ) {
+        this.context = GameService.name
+    }
 
-    public async getTexture(user: UserEntity): Promise<PlayerTextureMapDto> {
+    public async getTextures(user: UserEntity): Promise<PlayerTextureMapDto> {
         const textures = user.textures ?? []
         
         const textureMap: PlayerTextureMapDto = {}
@@ -43,5 +49,68 @@ export class GameService {
         }
 
         return textureMap
+    }
+
+    public async processSnapshots(user: UserEntity, snapshots: Snapshots): Promise<[SnapshotItemEntity[], boolean[], number, number]> {
+
+        if (!snapshots || !snapshots.snapshots || snapshots.snapshots.length == 0) {
+            return [[], [], 0, 0]
+        }
+
+        const snapshotSuccessArray = Array.from({length: snapshots.snapshots.length}, () => false)
+
+        const received = snapshots.snapshots.length
+        let saved = 0
+        
+        const promises: Promise<SnapshotItemEntity | undefined>[] = snapshots.snapshots.map(async (snapshot: Snapshot, i) => {
+            const material = await this.materialService.findByName(snapshot.materialName)
+
+            if (!material || !material.snapshottable) {
+                this.logger.warn(`processSnapshots-${user.uuid}:: material ${snapshot.materialName} is not permitted for snapshot`, this.context)
+                return undefined
+            }
+
+            const entity = new SnapshotItemEntity({
+                amount: snapshot.amount,
+                owner: user,
+                material,
+                position: snapshot.position ?? null
+            })
+
+            const snap = await this.snapshotService.create(entity)
+            if (snap) {
+                saved += 1
+                snapshotSuccessArray[i] = true
+            }
+        })
+
+        const snapshotItems = (await Promise.all(promises)).filter(x => !!x)
+
+        return [snapshotItems, snapshotSuccessArray, received, saved]
+    }
+
+    public async getSnapshottableMaterialsList(): Promise<PermittedMaterials> {
+        const materials = await this.materialService.find({snapshottable: true})
+
+        if (!materials || materials.length == 0) {
+            this.logger.warn(`No snapshottable materials were fetched. Oopsie.`, this.context)
+            return {materials: []}
+        }
+
+        const permittedMaterials: PermittedMaterial[] = materials.map(material => {
+            return {
+                name: material.name,
+                key: material.key,
+                ordinal: material.ordinal
+            }
+        })
+
+        if (permittedMaterials && permittedMaterials.length > 0) {
+            return {
+                materials: permittedMaterials
+            }
+        }
+
+        return {materials: []}
     }
 }
