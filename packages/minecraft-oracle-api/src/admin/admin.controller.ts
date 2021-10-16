@@ -27,6 +27,7 @@ import { GameService } from '../game/game.service';
 import { MaterialsDto } from './dtos/material.dto';
 import { AdminService } from './admin.service';
 import { TexturesDto } from './dtos/textures.dto';
+import { SecretDto, SecretNameDto, SecretsDto } from './dtos/secret.dto';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -165,5 +166,42 @@ export class AdminController {
         }
         const success = await this.adminService.deleteTextures(textures.textures)
         return success
+    }
+
+    @Put('secret')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Sets a shared secret' })
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    async setSecret(
+        @Body() sdto: SecretDto,
+    ): Promise<boolean> {
+        const success = await this.adminService.setSharedSecret(sdto.name, sdto.secret)
+        return success
+    }
+
+    @Get('secret/:name')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Gets shared secret value' })
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    async getSecret(
+        @Param('name') name: string
+    ): Promise<SecretDto> {
+        const s = await this.adminService.getSharedSecret(name)
+        if (!s) {
+            throw new UnprocessableEntityException("Shared secret not found")
+        }
+        return s
+    }
+
+    @Get('secrets')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Gets shared secrets' })
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    async getSecrets(): Promise<SecretsDto> {
+        const secrets = await this.adminService.getSharedSecrets()
+        return {secrets}
     }
 }

@@ -20,6 +20,10 @@ import { MaterialEntity } from './material/material.entity';
 import { SnapshotModule } from './snapshot/snapshot.module';
 import { MaterialModule } from './material/material.module';
 import { AdminModule } from './admin/admin.module';
+import { GameSessionModule } from './gamesession/gamesession.module';
+import { GameSessionEntity } from './gamesession/gamesession.entity';
+import { SecretEntity } from './secret/secret.entity';
+import { SecretModule } from './secret/secret.module';
 
 @Module({
   imports: [
@@ -51,7 +55,7 @@ import { AdminModule } from './admin/admin.module';
             username: configService.get<string>('typeorm.username'),
             password: configService.get<string>('typeorm.password'),
             database: configService.get<string>('typeorm.database'),
-            entities: [UserEntity, SnapshotItemEntity, TextureEntity, MaterialEntity],
+            entities: [UserEntity, SnapshotItemEntity, TextureEntity, MaterialEntity, GameSessionEntity, SecretEntity],
             synchronize: configService.get<boolean>('typeorm.synchronize'),
             logging: configService.get<boolean>('typeorm.logging'),
         }),
@@ -71,10 +75,12 @@ import { AdminModule } from './admin/admin.module';
     }),
     ProviderModule,
     CacheModule,
+    SecretModule,
     AuthModule,
     TextureModule,
     MaterialModule,
     SnapshotModule,
+    GameSessionModule,
     GameModule,
     AdminModule
   ],

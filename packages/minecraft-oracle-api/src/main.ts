@@ -22,6 +22,7 @@ async function bootstrap() {
     .setDescription(`Oracle for the Minecraft Moonriver bridge of the Moonsama metaverse`)
     .setVersion('1.0')
     .addBearerAuth({scheme: 'bearer', type: 'http'})
+    .addApiKey({type: 'apiKey', in: 'header', name: 'AuthenticationHeader'}, 'AuthenticationHeader')
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('/api/v1/docs', app, document);

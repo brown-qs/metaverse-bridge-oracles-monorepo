@@ -6,9 +6,10 @@ import {
     Inject,
     Param,
     Put,
-    UnprocessableEntityException
+    UnprocessableEntityException,
+    UseGuards
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { GameService } from './game.service';
 import { UserService } from '../user/user.service';
@@ -16,6 +17,8 @@ import { ProfileDto } from '../user/dtos/profile.dto';
 import { Snapshots } from './dtos/snapshot.dto';
 import { PlayerTextureMapDto } from './dtos/texturemap.dto';
 import { PermittedMaterials } from './dtos/permitted-material.dto';
+import { GameInProgressDto } from './dtos/gameinprogress.dto';
+import { SharedSecretGuard } from 'src/auth/secret.guard';
 
 @ApiTags('game')
 @Controller('game')
@@ -34,6 +37,8 @@ export class GameController {
     @Get('player/:uuid/profile')
     @HttpCode(200)
     @ApiOperation({ summary: 'Fetches user profile' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
     async profile(@Param('uuid') uuid: string): Promise<ProfileDto> {
         const user = await this.userService.findByUuid(uuid)
         return {
@@ -48,6 +53,8 @@ export class GameController {
     @Get('player/:uuid/textures')
     @HttpCode(200)
     @ApiOperation({ summary: 'Fetches player textures' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
     async textures(@Param('uuid') uuid: string): Promise<PlayerTextureMapDto> {
         const user = await this.userService.findByUuid(uuid)
         if (!user) {
@@ -60,6 +67,8 @@ export class GameController {
     @Get('player/:uuid/allowed')
     @HttpCode(200)
     @ApiOperation({ summary: 'Fetches user profile' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
     async allowed(@Param('uuid') uuid: string): Promise<boolean> {
         const user = await this.userService.findByUuid(uuid)
         return user?.allowedToPlay ?? false
@@ -68,6 +77,8 @@ export class GameController {
     @Put('player/:uuid/snapshot')
     @HttpCode(200)
     @ApiOperation({ summary: 'Saves player resources' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
     async snapshot(
         @Param('uuid') uuid: string,
         @Body() snapshots: Snapshots,
@@ -85,8 +96,32 @@ export class GameController {
     @Get('snapshot/materials')
     @HttpCode(200)
     @ApiOperation({ summary: 'Returns the permitted snapshottable in-game materials' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
     async getSnapshottableMaterials(): Promise<PermittedMaterials> {
         const permittedMaterials = await this.gameService.getSnapshottableMaterialsList()
         return permittedMaterials
+    }
+
+    @Put('inprogress')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Sets whether there is an active game going on or not' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async setGameInProgress(
+        @Body() progress: GameInProgressDto,
+    ): Promise<boolean> {
+        const success = await this.gameService.setGameInProgress(progress.gameInProgress)
+        return success
+    }
+
+    @Get('inprogress')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Returns whether there is an active game in progress or not' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async getGameInProgress(): Promise<boolean> {
+        const inprogress = await this.gameService.getGameInProgress()
+        return inprogress
     }
 }

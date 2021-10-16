@@ -1,4 +1,4 @@
-import {Inject, Injectable} from '@nestjs/common';
+import {Inject, Injectable, UnprocessableEntityException} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '../user/user.service';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
@@ -12,6 +12,7 @@ import { MaterialService } from '../material/material.service';
 import { SnapshotService } from '../snapshot/snapshot.service';
 import { Snapshot, Snapshots } from './dtos/snapshot.dto';
 import { PermittedMaterial, PermittedMaterials } from './dtos/permitted-material.dto';
+import { GameSessionService } from 'src/gamesession/gamesession.service';
 
 @Injectable()
 export class GameService {
@@ -22,6 +23,7 @@ export class GameService {
         private readonly textureService: TextureService,
         private readonly materialService: MaterialService,
         private readonly snapshotService: SnapshotService,
+        private readonly gameSessionService: GameSessionService,
         private configService: ConfigService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
@@ -117,5 +119,34 @@ export class GameService {
         }
 
         return {materials: []}
+    }
+
+    public async getGameInProgress(): Promise<boolean> {
+        return !!(await this.gameSessionService.getOngoing())
+    }
+
+    public async setGameInProgress(inprogress: boolean): Promise<boolean> {
+        const ongoingGame = await this.gameSessionService.getOngoing()
+        if (inprogress == true) {
+            if (ongoingGame && ongoingGame.ongoing) {
+                throw new UnprocessableEntityException("Game already in progress")
+            }
+            await this.gameSessionService.create({
+                ongoing: true,
+                startedAt: Date.now().toString(10)
+            })
+            return true;
+        }
+
+        if (ongoingGame) {
+            await this.gameSessionService.create({
+                ...ongoingGame,
+                ongoing: false,
+                endedAt: Date.now().toString(10)
+            })
+            return true;
+        }
+
+        throw new UnprocessableEntityException("Game is not in progress")
     }
 }

@@ -12,6 +12,7 @@ import { SnapshotService } from '../snapshot/snapshot.service';
 import { boolean } from 'fp-ts';
 import { MaterialEntity } from 'src/material/material.entity';
 import { TextureEntity } from 'src/texture/texture.entity';
+import { SecretService } from 'src/secret/secret.service';
 
 @Injectable()
 export class AdminService {
@@ -22,6 +23,7 @@ export class AdminService {
         private readonly textureService: TextureService,
         private readonly materialService: MaterialService,
         private readonly snapshotService: SnapshotService,
+        private readonly secretService: SecretService,
         private configService: ConfigService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
@@ -90,5 +92,24 @@ export class AdminService {
         }
 
         return textureEntities.length == textures.length
+    }
+
+    public async setSharedSecret(name: string, secret: string) {
+        const entity = await this.secretService.create({
+            name,
+            secret
+        })
+
+        return !!entity
+    }
+
+    public async getSharedSecret(name: string) {
+        const entity = await this.secretService.findOne({ name })
+        return entity
+    }
+
+    public async getSharedSecrets() {
+        const entities = await this.secretService.all()
+        return entities;
     }
 }
