@@ -53,7 +53,20 @@ export class GameService {
 
     public async processSnapshots(user: UserEntity, snapshots: SnapshotsDto): Promise<[SnapshotItemEntity[], boolean[], number, number]> {
 
-        if (!snapshots || !snapshots.snapshots || snapshots.snapshots.length == 0) {
+        if (!user || !snapshots || !snapshots.snapshots || snapshots.snapshots.length == 0) {
+            return [[], [], 0, 0]
+        }
+
+        // get user with gganbu and snapshots
+        // if user is alone, add all the items to user
+        // if user is gganbu, write half to user, half to gganbu
+
+
+        const userAll = await this.userService.findOne({ uuid: user.uuid }, { relations: ['snapshotItems', 'gganbu'] })
+
+        //console.log(userAll)
+
+        if (!userAll) {
             return [[], [], 0, 0]
         }
 
@@ -62,35 +75,34 @@ export class GameService {
         const received = snapshots.snapshots.length
         let saved = 0
 
-        const promises: Promise<SnapshotItemEntity | undefined>[] = snapshots.snapshots.map(async (snapshot: SnapshotDto, i) => {
-            const material = await this.materialService.findByName(snapshot.materialName)
+        let promises: Promise<SnapshotItemEntity | undefined>[]
 
-            if (!material || !material.snapshottable) {
-                this.logger.error(`processSnapshots-${user.uuid}:: material ${snapshot.materialName} is not permitted for snapshot`, null, this.context)
-                return undefined
-            }
+        if (!userAll.gganbu) {
+            promises = snapshots.snapshots.map(async (snapshot: SnapshotDto, i) => {
+                const savedS = await this.assignSnapshot(userAll, snapshot)
 
-            if (snapshot.amount > material.maxStackSize) {
-                this.logger.error(`processSnapshots-${user.uuid}:: material ${snapshot.materialName} had invalid amount. Received: ${snapshot.amount}. Allowed: [0, ${material.maxStackSize}]`, null, this.context)
-                return undefined
-            }
-
-            const entity = new SnapshotItemEntity({
-                amount: snapshot.amount,
-                owner: user,
-                material,
-                position: snapshot.position ?? null
+                if (!!savedS) {
+                    saved += 1
+                    snapshotSuccessArray[i] = true
+                }
+                return savedS
             })
+        } else {
+            promises = snapshots.snapshots.map(async (snapshot: SnapshotDto, i) => {
+                const gganbu = await this.userService.findOne({ uuid: userAll.gganbu.uuid }, { relations: ['snapshotItems'] })
 
-            const snap = await this.snapshotService.create(entity)
-            if (snap) {
-                saved += 1
-                snapshotSuccessArray[i] = true
-            }
-        })
+                const savedU = await this.assignSnapshot(userAll, snapshot, true, true)
+                const savedG = await this.assignSnapshot(gganbu, snapshot, true, false)
+
+                if (!!savedU && !!savedG) {
+                    saved += 1
+                    snapshotSuccessArray[i] = true
+                }
+                return savedU
+            })
+        }
 
         const snapshotItems = (await Promise.all(promises)).filter(x => !!x)
-
         return [snapshotItems, snapshotSuccessArray, received, saved]
     }
 
@@ -154,21 +166,21 @@ export class GameService {
         let players: UserEntity[]
         let player1: UserEntity, player2: UserEntity
         try {
-            console.log(1)
+            //console.log(1)
             players = await this.userService.findMany({
                 where: [{ uuid: player1UUID }, { uuid: player2UUID }],
                 relations: ['gganbu']
             })
-            console.log(2)
+            //console.log(2)
             if (!players || players.length !== 2) {
-                console.log(players)
+                //console.log(players)
                 throw new Error()
             }
             player1 = players.find(x => x.uuid === player1UUID)
             player2 = players.find(x => x.uuid === player2UUID)
 
             if (!player1 || !player2) {
-                console.log(player1, player2)
+                //console.log(player1, player2)
                 throw new Error()
             }
         } catch (err) {
@@ -199,14 +211,14 @@ export class GameService {
                 relations: ['gganbu']
             })
             if (!players || players.length !== 2) {
-                console.log(players)
+                //console.log(players)
                 throw new Error()
             }
             player1 = players.find(x => x.uuid === player1UUID)
             player2 = players.find(x => x.uuid === player2UUID)
 
             if (!player1 || !player2) {
-                console.log(player1, player2)
+                //console.log(player1, player2)
                 throw new Error()
             }
 
@@ -262,5 +274,52 @@ export class GameService {
         }
 
         return true
+    }
+
+
+    private async assignSnapshot(user: UserEntity, snapshot: SnapshotDto, half = false, roundup = true): Promise<SnapshotItemEntity> {
+        if (!snapshot.materialName) {
+            this.logger.error(`processSnapshots-${user.uuid}:: materialName was not received. Got: ${snapshot.materialName}.`, null, this.context)
+            return undefined
+        }
+
+        const material = await this.materialService.findByName(snapshot.materialName)
+
+        if (!material || !material.snapshottable) {
+            this.logger.error(`processSnapshots-${user.uuid}:: material ${snapshot.materialName} is not permitted for snapshot`, null, this.context)
+            return undefined
+        }
+
+        if (snapshot.amount > material.maxStackSize || snapshot.amount < 0) {
+            this.logger.error(`processSnapshots-${user.uuid}:: material ${snapshot.materialName} had invalid amount. Received: ${snapshot.amount}. Allowed: [0, ${material.maxStackSize}]`, null, this.context)
+            return undefined
+        }
+
+        const foundItem = user.snapshotItems.find(item => {
+            return item.id === `${user.uuid}-${material.name}`
+        })
+
+        let savedS: SnapshotItemEntity
+
+        const remainder = snapshot.amount % 2
+        const amount = half ? (roundup? Math.floor(snapshot.amount / 2) + remainder : Math.floor(snapshot.amount / 2)) : snapshot.amount
+
+        if (!!foundItem) {
+            
+            foundItem.amount += amount;
+            savedS = await this.snapshotService.create(foundItem)
+
+        } else {
+            const entity = new SnapshotItemEntity({
+                id: `${user.uuid}-${material.name}`,
+                amount: amount,
+                owner: user,
+                material,
+                position: snapshot.position ?? null
+            })
+            savedS = await this.snapshotService.create(entity)
+        }
+
+        return savedS
     }
 }
