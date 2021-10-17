@@ -24,6 +24,7 @@ import { GameSessionModule } from './gamesession/gamesession.module';
 import { GameSessionEntity } from './gamesession/gamesession.entity';
 import { SecretEntity } from './secret/secret.entity';
 import { SecretModule } from './secret/secret.module';
+import { BlockchainModule } from './blockchain/blockchain.module';
 
 @Module({
   imports: [
@@ -82,7 +83,8 @@ import { SecretModule } from './secret/secret.module';
     SnapshotModule,
     GameSessionModule,
     GameModule,
-    AdminModule
+    AdminModule,
+    BlockchainModule
   ],
   controllers: [AppController],
   providers: [AppService],
