@@ -3,7 +3,7 @@ import {
     IsEnum,
     IsString
 } from 'class-validator';
-import { Column, Entity, Index, OneToMany, OneToOne, PrimaryColumn, Unique } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, OneToMany, OneToOne, PrimaryColumn } from 'typeorm';
 import { UserRole } from '../common/enums/UserRole';
 import { TextureEntity } from '../texture/texture.entity';
 import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
@@ -51,4 +51,8 @@ export class UserEntity {
 
     @OneToMany(() => TextureEntity, (skin) => skin.owner)
     textures?: TextureEntity[];
+
+    @OneToOne(() => UserEntity, (user) => user.gganbu)
+    @JoinColumn()
+    gganbu?: UserEntity;
 }

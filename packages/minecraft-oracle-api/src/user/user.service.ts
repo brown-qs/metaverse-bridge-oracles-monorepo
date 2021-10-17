@@ -1,7 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import {Injectable} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { FindConditions, Repository } from 'typeorm';
+import { FindConditions, FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { UserEntity } from './user.entity';
 
 @Injectable()
@@ -14,6 +14,11 @@ export class UserService {
 
     public async create(user: UserEntity): Promise<UserEntity> {
         const u = await this.repository.save(user);
+        return u;
+    }
+
+    public async createMany(users: UserEntity[]): Promise<UserEntity[]> {
+        const u = await this.repository.save(users);
         return u;
     }
 
@@ -41,8 +46,13 @@ export class UserService {
         return result;
     }
 
-    public async findOne(params: UserEntity): Promise<UserEntity> {
-        const result: UserEntity = await this.repository.findOne(params);
+    public async findOne(params: FindConditions<UserEntity>, options: FindOneOptions<UserEntity>): Promise<UserEntity> {
+        const result: UserEntity = await this.repository.findOne(params, options);
         return result;
+    }
+
+    public async findMany(options: FindManyOptions<UserEntity>): Promise<UserEntity[]> {
+        const results: UserEntity[] = await this.repository.find(options);
+        return results;
     }
 }

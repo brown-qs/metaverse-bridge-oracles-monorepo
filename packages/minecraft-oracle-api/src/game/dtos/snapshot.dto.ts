@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger"
 import { IsInt } from "class-validator"
 
 
-export class Snapshot {
+export class SnapshotDto {
     @ApiProperty({ description: 'Material name'})
     materialName: string
 
@@ -15,9 +15,9 @@ export class Snapshot {
     position?: number
 }
 
-export class Snapshots {
+export class SnapshotsDto {
     @ApiProperty({ description: 'Snapshot array', default: [], isArray: true})
-    snapshots: Snapshot[]
+    snapshots: SnapshotDto[]
 
     @ApiPropertyOptional({ description: 'Uuid of user the snapshots belong to'})
     uuid?: string
