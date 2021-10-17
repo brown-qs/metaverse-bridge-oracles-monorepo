@@ -15,19 +15,17 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { UserService } from '../user/user.service';
 import { ProfileDto } from '../user/dtos/profile.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { User } from '../utils/decorators';
 import { UserEntity } from '../user/user.entity';
 import { UserRole } from '../common/enums/UserRole';
 import { PlayerTextureMapDto } from '../game/dtos/texturemap.dto';
-import { PermittedMaterials } from '../game/dtos/permitted-material.dto';
-import { Snapshots } from '../game/dtos/snapshot.dto';
 import { GameService } from '../game/game.service';
 import { MaterialsDto } from './dtos/material.dto';
 import { AdminService } from './admin.service';
 import { TexturesDto } from './dtos/textures.dto';
-import { SecretDto, SecretNameDto, SecretsDto } from './dtos/secret.dto';
+import { SecretDto, SecretsDto } from './dtos/secret.dto';
+import { SnapshotsDto } from 'src/game/dtos/snapshot.dto';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -88,7 +86,7 @@ export class AdminController {
     async snapshot(
         @User() caller: UserEntity, 
         @Param('uuid') uuid: string,
-        @Body() snapshots: Snapshots,
+        @Body() snapshots: SnapshotsDto,
     ): Promise<boolean[]> {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')

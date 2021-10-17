@@ -1,11 +1,13 @@
 import {
     Body,
     Controller,
+    Delete,
     Get,
     HttpCode,
     Inject,
     Param,
     Put,
+    Query,
     UnprocessableEntityException,
     UseGuards
 } from '@nestjs/common';
@@ -14,11 +16,12 @@ import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { GameService } from './game.service';
 import { UserService } from '../user/user.service';
 import { ProfileDto } from '../user/dtos/profile.dto';
-import { Snapshots } from './dtos/snapshot.dto';
+import { SnapshotsDto } from './dtos/snapshot.dto';
 import { PlayerTextureMapDto } from './dtos/texturemap.dto';
 import { PermittedMaterials } from './dtos/permitted-material.dto';
 import { GameInProgressDto } from './dtos/gameinprogress.dto';
 import { SharedSecretGuard } from 'src/auth/secret.guard';
+import { AreGganbusDto, GganbuDto } from './dtos/gganbu.dto';
 
 @ApiTags('game')
 @Controller('game')
@@ -81,7 +84,7 @@ export class GameController {
     @UseGuards(SharedSecretGuard)
     async snapshot(
         @Param('uuid') uuid: string,
-        @Body() snapshots: Snapshots,
+        @Body() snapshots: SnapshotsDto,
     ): Promise<boolean[]> {
         const user = await this.userService.findByUuid(uuid)
         
@@ -123,5 +126,39 @@ export class GameController {
     async getGameInProgress(): Promise<boolean> {
         const inprogress = await this.gameService.getGameInProgress()
         return inprogress
+    }
+
+    @Put('gganbu')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Makes players gganbu' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async setGganbu(
+        @Body() gganbus: GganbuDto,
+    ): Promise<boolean> {
+        const success = await this.gameService.setGganbu(gganbus.player1, gganbus.player2)
+        return success
+    }
+
+    @Get('gganbu')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Gets if players are gganbu' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async getGganbu(
+        @Query() gganbus: GganbuDto,
+    ): Promise<AreGganbusDto> {
+        const success = await this.gameService.getGganbu(gganbus.player1, gganbus.player2)
+        return {areGganbus:success}
+    }
+
+    @Delete('gganbus')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Gets if players are gganbu' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async clearGganbus(): Promise<boolean> {
+        const success = await this.gameService.clearGganbus()
+        return success
     }
 }
