@@ -77,18 +77,24 @@ export class GameService {
 
         let promises: Promise<SnapshotItemEntity | undefined>[]
 
+        let snapshotItems: SnapshotItemEntity[] = []
+
         if (!userAll.gganbu) {
-            promises = snapshots.snapshots.map(async (snapshot: SnapshotDto, i) => {
+            for(let i=0; i<received; i++) {
+                const snapshot = snapshots.snapshots[i]
                 const savedS = await this.assignSnapshot(userAll, snapshot)
 
                 if (!!savedS) {
                     saved += 1
                     snapshotSuccessArray[i] = true
+                    snapshotItems.push(savedS)
                 }
-                return savedS
-            })
+                
+            }
+                
         } else {
-            promises = snapshots.snapshots.map(async (snapshot: SnapshotDto, i) => {
+            for(let i=0; i<received; i++) {
+                const snapshot = snapshots.snapshots[i]
                 const gganbu = await this.userService.findOne({ uuid: userAll.gganbu.uuid }, { relations: ['snapshotItems'] })
 
                 const savedU = await this.assignSnapshot(userAll, snapshot, true, true)
@@ -97,12 +103,11 @@ export class GameService {
                 if (!!savedU && !!savedG) {
                     saved += 1
                     snapshotSuccessArray[i] = true
+                    snapshotItems.push(savedU)
                 }
-                return savedU
-            })
+            }
         }
 
-        const snapshotItems = (await Promise.all(promises)).filter(x => !!x)
         return [snapshotItems, snapshotSuccessArray, received, saved]
     }
 
@@ -305,17 +310,17 @@ export class GameService {
         const amount = half ? (roundup? Math.floor(snapshot.amount / 2) + remainder : Math.floor(snapshot.amount / 2)) : snapshot.amount
 
         if (!!foundItem) {
-            
-            foundItem.amount += amount;
+            console.log('founditem')
+            console.log(foundItem)
+            foundItem.amount = foundItem.amount + amount;
             savedS = await this.snapshotService.create(foundItem)
-
         } else {
+            console.log('newitem')
             const entity = new SnapshotItemEntity({
                 id: `${user.uuid}-${material.name}`,
                 amount: amount,
                 owner: user,
-                material,
-                position: snapshot.position ?? null
+                material
             })
             savedS = await this.snapshotService.create(entity)
         }

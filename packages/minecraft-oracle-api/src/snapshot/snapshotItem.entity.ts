@@ -22,10 +22,6 @@ export class SnapshotItemEntity {
     @Column()
     @IsInt()
     amount: number;
-
-    @Column({ nullable: true })
-    @IsNumber()
-    position: number;
     
     @ManyToOne(() => MaterialEntity, (material) => material.snapshots)
     material: MaterialEntity;
