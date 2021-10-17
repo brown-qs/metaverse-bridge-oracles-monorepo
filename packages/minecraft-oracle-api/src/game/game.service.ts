@@ -14,10 +14,15 @@ import { SnapshotDto, SnapshotsDto } from './dtos/snapshot.dto';
 import { PermittedMaterial, PermittedMaterials } from './dtos/permitted-material.dto';
 import { GameSessionService } from 'src/gamesession/gamesession.service';
 
+import { Mutex, MutexInterface } from 'async-mutex';
+
 @Injectable()
 export class GameService {
 
     private readonly context: string;
+
+    private locks : Map<string, MutexInterface>;
+
     constructor(
         private readonly userService: UserService,
         private readonly textureService: TextureService,
@@ -28,6 +33,7 @@ export class GameService {
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
         this.context = GameService.name
+        this.locks = new Map();
     }
 
     public async getTextures(user: UserEntity): Promise<PlayerTextureMapDto> {
@@ -51,6 +57,12 @@ export class GameService {
         return textureMap
     }
 
+    private ensureLock(key: string) {
+        if (!this.locks.has(key)) {
+          this.locks.set(key, new Mutex());
+        }
+    }
+
     public async processSnapshots(user: UserEntity, snapshots: SnapshotsDto): Promise<[SnapshotItemEntity[], boolean[], number, number]> {
 
         if (!user || !snapshots || !snapshots.snapshots || snapshots.snapshots.length == 0) {
@@ -62,7 +74,7 @@ export class GameService {
         // if user is gganbu, write half to user, half to gganbu
 
 
-        const userAll = await this.userService.findOne({ uuid: user.uuid }, { relations: ['snapshotItems', 'gganbu'] })
+        const userAll = await this.userService.findOne({ uuid: user.uuid }, { relations: ['gganbu'] })
 
         //console.log(userAll)
 
@@ -75,39 +87,44 @@ export class GameService {
         const received = snapshots.snapshots.length
         let saved = 0
 
-        let promises: Promise<SnapshotItemEntity | undefined>[]
+        //let promises: Promise<SnapshotItemEntity | undefined>[]
 
-        let snapshotItems: SnapshotItemEntity[] = []
+        this.ensureLock(userAll.uuid)
+        
+        const userlock = this.locks.get(userAll.uuid)
 
-        if (!userAll.gganbu) {
-            for(let i=0; i<received; i++) {
-                const snapshot = snapshots.snapshots[i]
-                const savedS = await this.assignSnapshot(userAll, snapshot)
+        const promises = await userlock.runExclusive(async () => {
+            if (!userAll.gganbu) {
+                const promises = await snapshots.snapshots.map(async (snapshot: SnapshotDto, i) => {
+                    const savedS = await this.assignSnapshot(userAll, snapshot)
 
-                if (!!savedS) {
-                    saved += 1
-                    snapshotSuccessArray[i] = true
-                    snapshotItems.push(savedS)
-                }
-                
+                    if (!!savedS) {
+                        saved += 1
+                        snapshotSuccessArray[i] = true
+                    }
+
+                    return savedS
+                })
+                return promises
+            } else {
+                const promises = await snapshots.snapshots.map(async (snapshot: SnapshotDto, i) => {
+                    const gganbu = await this.userService.findOne({ uuid: userAll.gganbu.uuid }, { relations: ['snapshotItems'] })
+
+                    const savedU = await this.assignSnapshot(userAll, snapshot, true, true)
+                    const savedG = await this.assignSnapshot(gganbu, snapshot, true, false)
+
+                    if (!!savedU && !!savedG) {
+                        saved += 1
+                        snapshotSuccessArray[i] = true
+                    }
+                    return savedU
+                })
+                return promises
             }
-                
-        } else {
-            for(let i=0; i<received; i++) {
-                const snapshot = snapshots.snapshots[i]
-                const gganbu = await this.userService.findOne({ uuid: userAll.gganbu.uuid }, { relations: ['snapshotItems'] })
-
-                const savedU = await this.assignSnapshot(userAll, snapshot, true, true)
-                const savedG = await this.assignSnapshot(gganbu, snapshot, true, false)
-
-                if (!!savedU && !!savedG) {
-                    saved += 1
-                    snapshotSuccessArray[i] = true
-                    snapshotItems.push(savedU)
-                }
-            }
-        }
-
+        })
+            
+        const snapshotItems = await Promise.all(promises)
+        //console.log([snapshotItems, snapshotSuccessArray, received, saved])
         return [snapshotItems, snapshotSuccessArray, received, saved]
     }
 
@@ -300,30 +317,35 @@ export class GameService {
             return undefined
         }
 
-        const foundItem = user.snapshotItems.find(item => {
-            return item.id === `${user.uuid}-${material.name}`
-        })
-
-        let savedS: SnapshotItemEntity
-
         const remainder = snapshot.amount % 2
         const amount = half ? (roundup? Math.floor(snapshot.amount / 2) + remainder : Math.floor(snapshot.amount / 2)) : snapshot.amount
 
-        if (!!foundItem) {
-            console.log('founditem')
-            console.log(foundItem)
-            foundItem.amount = foundItem.amount + amount;
-            savedS = await this.snapshotService.create(foundItem)
-        } else {
-            console.log('newitem')
-            const entity = new SnapshotItemEntity({
-                id: `${user.uuid}-${material.name}`,
-                amount: amount,
-                owner: user,
-                material
-            })
-            savedS = await this.snapshotService.create(entity)
-        }
+        const itemId = `${user.uuid}-${material.name}`
+        this.ensureLock(itemId)
+
+        const itemlock = this.locks.get(itemId)
+
+        const savedS = await itemlock.runExclusive(async () => {
+            const foundItem = await this.snapshotService.findOne({id: itemId})
+
+            if (!!foundItem) {
+                //console.log('founditem')
+                //console.log(foundItem)
+                foundItem.amount = foundItem.amount + amount;
+                const r = await this.snapshotService.create(foundItem)
+                return r
+            } else {
+                //console.log('newitem')
+                const entity = new SnapshotItemEntity({
+                    id: `${user.uuid}-${material.name}`,
+                    amount: amount,
+                    owner: user,
+                    material
+                })
+                const r = await this.snapshotService.create(entity)
+                return r
+            }
+        })
 
         return savedS
     }

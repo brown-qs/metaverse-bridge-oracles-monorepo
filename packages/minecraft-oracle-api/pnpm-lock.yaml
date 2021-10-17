@@ -14,6 +14,7 @@ specifiers:
   '@types/node': ^16.7.1
   '@types/passport-jwt': ^3.0.6
   '@types/passport-local': ^1.0.34
+  async-mutex: ^0.3.2
   bip39: ^3.0.4
   bn.js: ^5.2.0
   bs58: ^4.0.1
@@ -50,6 +51,7 @@ dependencies:
   '@nestjs/passport': 8.0.1_passport@0.5.0
   '@nestjs/swagger': 5.1.0
   '@nestjs/typeorm': 8.0.2_typeorm@0.2.38
+  async-mutex: 0.3.2
   bip39: 3.0.4
   bn.js: 5.2.0
   bs58: 4.0.1
@@ -860,6 +862,12 @@ packages:
 
   /asn1/0.2.3:
     resolution: {integrity: sha1-2sh4dxPJlmhJ/IGAd36+nB3fO4Y=}
+    dev: false
+
+  /async-mutex/0.3.2:
+    resolution: {integrity: sha512-HuTK7E7MT7jZEh1P9GtRW9+aTWiDWWi9InbZ5hjxrnRa39KS4BW04+xLBhYNS2aXhHUIKZSw3gj4Pn1pj+qGAA==}
+    dependencies:
+      tslib: 2.3.1
     dev: false
 
   /async/3.2.1:
@@ -2444,6 +2452,10 @@ packages:
 
   /tslib/2.2.0:
     resolution: {integrity: sha512-gS9GVHRU+RGn5KQM2rllAlR3dU6m7AcpJKdtH8gFvQiC4Otgk98XnmMU+nZenHt/+VhnBPWwgrJsyrdcw6i23w==}
+    dev: false
+
+  /tslib/2.3.1:
+    resolution: {integrity: sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==}
     dev: false
 
   /type/1.2.0:

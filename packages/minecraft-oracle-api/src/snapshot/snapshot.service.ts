@@ -36,7 +36,7 @@ export class SnapshotService {
         return result;
     }
 
-    public async findOne(params: SnapshotItemEntity): Promise<SnapshotItemEntity> {
+    public async findOne(params: FindConditions<SnapshotItemEntity>): Promise<SnapshotItemEntity> {
         const result: SnapshotItemEntity = await this.repository.findOne(params);
         return result;
     }
