@@ -3,7 +3,7 @@ import {
     IsNumber,
     IsString
 } from 'class-validator';
-import { Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { UserEntity } from '../user/user.entity';
 import { MaterialEntity } from '../material/material.entity';
 
@@ -15,9 +15,9 @@ export class SnapshotItemEntity {
         Object.assign(this, snapshotItem);
     }
 
-    @PrimaryGeneratedColumn("uuid")
+    @PrimaryColumn()
     @IsString()
-    id: string;
+    id: string; // convention:: {user uuid}-{materialName}
 
     @Column()
     @IsInt()
