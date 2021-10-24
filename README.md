@@ -1,13 +1,14 @@
 
-# Game bridge monorepo
+# Metaverse oracle bridge monorepo
 
 ## Prereqs
 - node 14+ LTS
 - [rush](https://rushjs.io/pages/intro/get_started/)
-- -[pnpm](https://pnpm.io/installation)
+- 1.22.15
 
 ## Setup
 ```
+cd <monorepo root>
 rush update
 ```
 
@@ -16,7 +17,7 @@ rush update
 First:
 ```bash
 cd packages/minecraft-oracle-api
-# starts a local postgres & redis instance
+# starts local postgres & redis containers
 rushx docker:deps:up 
   ```
 Second:
@@ -26,18 +27,25 @@ create a `.env` file, see `.env.example`
 Third:
 
 ```bash
-rushx docker:deps:up
+# starts backend
 rushx start
 ```
 
-### Adding a new dep
+### How to: add a new dep
 ```bash
 cd <subrepo folder>
-pnpm add <package>
+yarn add <package>
+yarn add-D <package>
 ```
 
-### Executing scripts
+### How to: execture scripts
 ```bash
 cd <subrepo folder>
-pnpm add <package>
+rushx <script>
+```
+
+### How to: fix deps
+```bash
+cd <monorepo root>
+rush update --purge
 ```
