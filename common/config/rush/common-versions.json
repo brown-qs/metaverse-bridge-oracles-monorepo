@@ -24,6 +24,8 @@
      * instead of the latest version.
      */
     // "some-library": "1.2.3"
+    "webpack":"4.44.2",
+    "jest": "26.6.0"
   },
 
   /**
@@ -58,5 +60,7 @@
     // "typescript": [
     //   "~2.4.0"
     // ]
+    "webpack": ["4.44.2"],
+    "jest": ["26.6.0"]
   }
 }
