@@ -32,6 +32,9 @@ export class TextureEntity {
     @IsString()
     assetId: string;
 
+    @Column('text', { array: true, default: [] })
+    accessories?: string[];
+
     @IsEnum(TextureType)
     @Column({
         type: 'enum',

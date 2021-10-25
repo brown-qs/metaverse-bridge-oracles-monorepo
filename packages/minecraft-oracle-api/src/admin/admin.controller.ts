@@ -57,7 +57,8 @@ export class AdminController {
             userName: user.userName,
             allowedToPlay: user.allowedToPlay,
             hasGame: user.hasGame,
-            role: user.role
+            role: user.role,
+            serverId: user.serverId
         }
     }
 

@@ -45,7 +45,9 @@ export class GameService {
             textureMap[texture.type] = {
                 textureData: texture.textureData,
                 textureSignature: texture.textureSignature,
-                type: texture.type
+                type: texture.type,
+                accessories: texture.accessories ?? undefined,
+                assetId: texture.assetId
             }
         })
 
