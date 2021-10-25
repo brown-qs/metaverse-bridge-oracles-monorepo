@@ -37,7 +37,8 @@ export class GameService {
     }
 
     public async getTextures(user: UserEntity): Promise<PlayerTextureMapDto> {
-        const textures = user.textures ?? []
+        const richUser = await this.userService.findOne(user, {relations: ['textures']})
+        const textures = await richUser.textures
 
         const textureMap: PlayerTextureMapDto = {}
 

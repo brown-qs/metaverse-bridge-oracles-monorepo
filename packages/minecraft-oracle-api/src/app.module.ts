@@ -24,7 +24,7 @@ import { GameSessionModule } from './gamesession/gamesession.module';
 import { GameSessionEntity } from './gamesession/gamesession.entity';
 import { SecretEntity } from './secret/secret.entity';
 import { SecretModule } from './secret/secret.module';
-import { BlockchainModule } from './blockchain/blockchain.module';
+import { OracleModule } from './blockchain/oracle.module';
 
 @Module({
   imports: [
@@ -84,7 +84,7 @@ import { BlockchainModule } from './blockchain/blockchain.module';
     GameSessionModule,
     GameModule,
     AdminModule,
-    BlockchainModule
+    OracleModule
   ],
   controllers: [AppController],
   providers: [AppService],

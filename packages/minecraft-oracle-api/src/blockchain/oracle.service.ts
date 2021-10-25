@@ -9,7 +9,7 @@ import { SnapshotService } from '../snapshot/snapshot.service';
 import { GameSessionService } from 'src/gamesession/gamesession.service';
 
 @Injectable()
-export class BlockchainService {
+export class OracleService {
 
     private readonly context: string;
     constructor(
@@ -21,12 +21,14 @@ export class BlockchainService {
         private configService: ConfigService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
-        this.context = BlockchainService.name
+        this.context = OracleService.name
     }
 
     public async userExport(user: UserEntity): Promise<[string, string]> {
-        const textures = user.textures ?? []
+        const richUser = await this.userService.findOne(user, {relations: ['textures']})
+        const textures = await richUser.textures
 
+        // check if user has something imported
         return ['','']
     }
 

@@ -7,7 +7,7 @@ import {config} from 'dotenv'
 import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity'
 import { UserEntity } from '../user/user.entity'
 import { TextureEntity } from '../texture/texture.entity'
-import { AssetType } from '../common/enums/AssetType'
+import { StringAssetType } from '../common/enums/AssetType'
 
 config()
 
@@ -55,7 +55,7 @@ async function main () {
             exportable: 'true' === fragments[7],
             equippable: 'true' === fragments[8],
             assetId: '0',
-            assetType: AssetType.ERC20,
+            assetType: StringAssetType.ERC20,
             assetAddress: '0x0000000000000000000000000000000000000000'
         }
         try {

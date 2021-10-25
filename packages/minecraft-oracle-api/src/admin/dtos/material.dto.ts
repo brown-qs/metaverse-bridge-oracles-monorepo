@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger"
-import { AssetType } from "src/common/enums/AssetType"
+import { StringAssetType } from "src/common/enums/AssetType"
 
 export class MaterialDto {
     @ApiProperty({ description: 'Material name'})
@@ -18,7 +18,7 @@ export class MaterialDto {
     maxStackSize: number;
 
     @ApiProperty({ description: 'Material asset type'})
-    assetType: AssetType;
+    assetType: StringAssetType;
 
     @ApiProperty({ description: 'Material asset address'})
     assetAddress: string;
