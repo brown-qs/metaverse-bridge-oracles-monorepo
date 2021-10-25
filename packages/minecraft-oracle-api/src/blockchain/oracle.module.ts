@@ -5,8 +5,8 @@ import { MaterialModule } from '../material/material.module';
 import { SnapshotModule } from '../snapshot/snapshot.module';
 import { TextureModule } from '../texture/texture.module';
 import { UserModule } from '../user/user.module';
-import { BlockchainController } from './blockchain.controller';
-import { BlockchainService } from './blockchain.service';
+import { OracleController } from './oracle.controller';
+import { OracleService } from './oracle.service';
 
 @Module({
     imports: [
@@ -17,8 +17,8 @@ import { BlockchainService } from './blockchain.service';
         SnapshotModule,
         GameSessionModule
     ],
-    providers: [BlockchainService],
-    exports: [BlockchainService],
-    controllers: [BlockchainController]
+    providers: [OracleService],
+    exports: [OracleService],
+    controllers: [OracleController]
 })
-export class BlockchainModule {}
+export class OracleModule {}

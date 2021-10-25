@@ -5,7 +5,7 @@ import {
     IsString
 } from 'class-validator';
 import { Column, Entity, Index, OneToMany, PrimaryColumn } from 'typeorm';
-import { AssetType } from '../common/enums/AssetType';
+import { StringAssetType } from '../common/enums/AssetType';
 import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
 
 @Entity()
@@ -37,13 +37,13 @@ export class MaterialEntity {
     maxStackSize: number;
 
     @Column()
-    @IsEnum(AssetType)
+    @IsEnum(StringAssetType)
     @Column({
         type: 'enum',
-        enum: AssetType,
-        default: AssetType.NONE
+        enum: StringAssetType,
+        default: StringAssetType.NONE
     })
-    assetType: AssetType;
+    assetType: StringAssetType;
 
     @Column()
     @IsString()

@@ -18,20 +18,20 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { UserEntity } from 'src/user/user.entity';
 import { User } from 'src/utils/decorators';
 import { CallParamsDto } from './dtos/callparams.dto';
-import { BlockchainService } from './blockchain.service';
+import { OracleService } from './oracle.service';
 
-@ApiTags('blockchain')
-@Controller('blockchain')
-export class BlockchainController {
+@ApiTags('oracle')
+@Controller('oracle')
+export class OracleController {
 
     private readonly context: string;
 
     constructor(
         private readonly userService: UserService,
-        private readonly blockchainService: BlockchainService,
+        private readonly oracleService: OracleService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) { 
-        this.context = BlockchainController.name;
+        this.context = OracleController.name;
     }
 
     @Get('export')
@@ -40,7 +40,7 @@ export class BlockchainController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async export(@User() user: UserEntity): Promise<CallParamsDto> {
-        const params = await this.blockchainService.userExport(user)
+        const params = await this.oracleService.userExport(user)
         return {
             params: [
                 {
@@ -57,7 +57,7 @@ export class BlockchainController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async import(@User() user: UserEntity): Promise<CallParamsDto> {
-        const params = await this.blockchainService.userImport(user)
+        const params = await this.oracleService.userImport(user)
         return {
             params: [
                 {
@@ -74,7 +74,7 @@ export class BlockchainController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async enrapture(@User() user: UserEntity): Promise<CallParamsDto> {
-        const params = await this.blockchainService.userEnrapture(user)
+        const params = await this.oracleService.userEnrapture(user)
         return {
             params: [
                 {
@@ -91,7 +91,7 @@ export class BlockchainController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async summon(@User() user: UserEntity): Promise<CallParamsDto> {
-        const params = await this.blockchainService.userSummon(user)
+        const params = await this.oracleService.userSummon(user)
         return {
             params: [
                 {
