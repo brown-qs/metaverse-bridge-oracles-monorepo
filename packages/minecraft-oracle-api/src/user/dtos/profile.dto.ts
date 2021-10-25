@@ -9,6 +9,9 @@ export class ProfileDto {
     @ApiProperty({ description: 'User name'})
     userName: string
 
+    @ApiProperty({ description: 'Server Id'})
+    serverId: string
+
     @ApiProperty({ description: 'User role'})
     role: UserRole
 

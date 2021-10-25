@@ -22,6 +22,7 @@ import { PermittedMaterials } from './dtos/permitted-material.dto';
 import { GameInProgressDto } from './dtos/gameinprogress.dto';
 import { SharedSecretGuard } from 'src/auth/secret.guard';
 import { AreGganbusDto, GganbuDto } from './dtos/gganbu.dto';
+import { ServerIdDto } from './dtos/serverId.dto';
 
 @ApiTags('game')
 @Controller('game')
@@ -49,7 +50,8 @@ export class GameController {
             userName: user.userName,
             allowedToPlay: user.allowedToPlay,
             hasGame: user.hasGame,
-            role: user.role
+            role: user.role,
+            serverId: user.serverId
         }
     }
 
@@ -94,6 +96,42 @@ export class GameController {
 
         const [snapshottedItems, successArray, receivedNum, savedNum] = await this.gameService.processSnapshots(user, snapshots)
         return successArray
+    }
+
+    @Put('player/:uuid/serverId')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Sets server id for a user' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async setServerId(
+        @Param('uuid') uuid: string,
+        @Body() {serverId}: ServerIdDto
+    ): Promise<boolean> {
+        const user = await this.userService.findByUuid(uuid)
+        await this.userService.update({
+            ...user,
+            serverId
+        })
+        return true
+    }
+
+    @Delete('player/:uuid/serverId')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Deletes server of a user' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async deleteServerId(
+        @Param('uuid') uuid: string
+    ): Promise<ServerIdDto> {
+        const user = await this.userService.findByUuid(uuid)
+        const oldId = user.serverId
+        await this.userService.update({
+            ...user,
+            serverId: null
+        })
+        return {
+            serverId: oldId
+        }
     }
 
     @Get('snapshot/materials')

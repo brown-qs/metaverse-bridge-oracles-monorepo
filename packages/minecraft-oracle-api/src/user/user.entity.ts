@@ -38,6 +38,10 @@ export class UserEntity {
     @IsBoolean()
     @Column({ default: false })
     hasGame?: boolean;
+
+    @Column({nullable: true})
+    @IsString()
+    serverId?: string;
     
     @IsString()
     @Column({ default: null, nullable: true })
