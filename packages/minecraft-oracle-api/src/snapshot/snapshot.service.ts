@@ -1,7 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import {Injectable} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { FindConditions, Repository } from 'typeorm';
+import { FindConditions, FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { SnapshotItemEntity } from './snapshotItem.entity';
 
 @Injectable()
@@ -17,8 +17,18 @@ export class SnapshotService {
         return u;
     }
 
+    public async createAll(snapshotItems: SnapshotItemEntity[]): Promise<SnapshotItemEntity[]> {
+        const u = await this.repository.save(snapshotItems);
+        return u;
+    }
+
     public async remove(snapshotItem: SnapshotItemEntity): Promise<SnapshotItemEntity> {
         const u = await this.repository.remove(snapshotItem);
+        return u;
+    }
+
+    public async removeAll(snapshotItems: SnapshotItemEntity[]): Promise<SnapshotItemEntity[]> {
+        const u = await this.repository.remove(snapshotItems);
         return u;
     }
 
@@ -36,8 +46,18 @@ export class SnapshotService {
         return result;
     }
 
-    public async findOne(params: FindConditions<SnapshotItemEntity>): Promise<SnapshotItemEntity> {
-        const result: SnapshotItemEntity = await this.repository.findOne(params);
+    public async findMany(params: FindManyOptions<SnapshotItemEntity>): Promise<SnapshotItemEntity[]> {
+        const results: SnapshotItemEntity[] = await this.repository.find(params);
+        return results;
+    }
+
+    public async find(params: FindConditions<SnapshotItemEntity>): Promise<SnapshotItemEntity[]> {
+        const results: SnapshotItemEntity[] = await this.repository.find(params);
+        return results;
+    }
+    
+    public async findOne(params: FindConditions<SnapshotItemEntity>, options?: FindOneOptions<SnapshotItemEntity>): Promise<SnapshotItemEntity> {
+        const result: SnapshotItemEntity = await this.repository.findOne(params, options);
         return result;
     }
 }

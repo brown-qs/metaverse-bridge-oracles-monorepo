@@ -320,8 +320,7 @@ export class GameService {
             return undefined
         }
 
-        const remainder = snapshot.amount % 2
-        const amount = half ? (roundup? Math.floor(snapshot.amount / 2) + remainder : Math.floor(snapshot.amount / 2)) : snapshot.amount
+        const amount = half ? snapshot.amount / 2: snapshot.amount
 
         const itemId = `${user.uuid}-${material.name}`
         this.ensureLock(itemId)

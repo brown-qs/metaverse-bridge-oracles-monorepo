@@ -24,7 +24,11 @@ import { GameSessionModule } from './gamesession/gamesession.module';
 import { GameSessionEntity } from './gamesession/gamesession.entity';
 import { SecretEntity } from './secret/secret.entity';
 import { SecretModule } from './secret/secret.module';
-import { OracleModule } from './blockchain/oracle.module';
+import { OracleModule } from './oracle/oracle.module';
+import { AssetModule } from './asset/asset.module';
+import { AssetEntity } from './asset/asset.entity';
+import { SummonEntity } from './summon/summon.entity';
+import { SummonModule } from './summon/summon.module';
 
 @Module({
   imports: [
@@ -56,7 +60,7 @@ import { OracleModule } from './blockchain/oracle.module';
             username: configService.get<string>('typeorm.username'),
             password: configService.get<string>('typeorm.password'),
             database: configService.get<string>('typeorm.database'),
-            entities: [UserEntity, SnapshotItemEntity, TextureEntity, MaterialEntity, GameSessionEntity, SecretEntity],
+            entities: [UserEntity, SnapshotItemEntity, TextureEntity, MaterialEntity, GameSessionEntity, SecretEntity, AssetEntity, SummonEntity],
             synchronize: configService.get<boolean>('typeorm.synchronize'),
             logging: configService.get<boolean>('typeorm.logging'),
         }),
@@ -77,11 +81,13 @@ import { OracleModule } from './blockchain/oracle.module';
     ProviderModule,
     CacheModule,
     SecretModule,
+    AssetModule,
     AuthModule,
     TextureModule,
     MaterialModule,
     SnapshotModule,
     GameSessionModule,
+    SummonModule,
     GameModule,
     AdminModule,
     OracleModule
