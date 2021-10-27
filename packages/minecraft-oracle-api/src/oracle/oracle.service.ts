@@ -150,7 +150,8 @@ export class OracleService {
         }
 
         const salt = await getSalt()
-        const expirationContract = (Math.floor(Number.parseInt(existingEntry.expiration) / 1000)).toString()
+        const expiration = Date.now() + CALLDATA_EXPIRATION_MS
+        const expirationContract = (Math.floor(expiration / 1000)).toString()
         const payload = await encodeExportWithSigData({ hash }, expirationContract)
         const signature = await getSignature(this.oracle, payload)
 
@@ -296,20 +297,20 @@ export class OracleService {
         const assetEntry = await this.assetService.findOne({ hash, enraptured: false, pendingOut: true })
 
         if (!assetEntry) {
-            this.logger.error(`ExportConfirm: asset not found`)
-            throw new UnprocessableEntityException('Invalid export conditions')
+            this.logger.warn(`ExportConfirm: asset not found`, this.context)
+            return true
         }
 
         const exists = await this.metaverse.existsImported(hash)
 
         if (exists) {
-            this.logger.error(`ExportConfirm: not exported yet: ${hash}`)
+            this.logger.error(`ExportConfirm: not exported yet: ${hash}`, null, this.context)
             throw new UnprocessableEntityException(`Not exported yet`)
         }
 
         const recognizedAsset = this.importableAssets.find(x => x.address === assetEntry.assetAddress.toLowerCase())
 
-        if (recognizedAsset && recognizedAsset.type.valueOf === RecognizedAssetType.MOONSAMA.valueOf) {
+        if (!!recognizedAsset && recognizedAsset.type.valueOf() === RecognizedAssetType.MOONSAMA.valueOf() && (recognizedAsset.id === undefined || recognizedAsset.id === assetEntry.assetId.toString())) {
             const texture = await this.textureService.findOne({ assetAddress: assetEntry.assetAddress, assetId: assetEntry.assetId, assetType: assetEntry.assetType })
             if (!!texture) {
                 texture.owner = null
@@ -320,13 +321,13 @@ export class OracleService {
             await this.userService.create(user)
         }
 
-        if (recognizedAsset && recognizedAsset.type.valueOf === RecognizedAssetType.TICKET.valueOf) {
+        if (!!recognizedAsset && recognizedAsset.type.valueOf() === RecognizedAssetType.TICKET.valueOf() && (recognizedAsset.id === undefined || recognizedAsset.id === assetEntry.assetId.toString())) {
             user.hasTicket = false
             user.allowedToPlay = user.hasMoonsama
             await this.userService.create(user)
         }
 
-        const finalentry = await this.assetService.remove(assetEntry)
+        await this.assetService.remove(assetEntry)
 
         return true
     }
