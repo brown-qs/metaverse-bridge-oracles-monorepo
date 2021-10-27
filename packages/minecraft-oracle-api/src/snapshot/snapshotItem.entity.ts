@@ -21,8 +21,8 @@ export class SnapshotItemEntity {
     id: string; // convention:: {user uuid}-{materialName}
 
     @Column()
-    @IsNumber()
-    amount: number;
+    @IsString()
+    amount: string;
 
     @Column({default: false})
     @IsBoolean()

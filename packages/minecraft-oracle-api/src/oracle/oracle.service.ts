@@ -176,7 +176,7 @@ export class OracleService {
 
         const groups: { [key: string]: { ids: string[], amounts: string[], entities: SnapshotItemEntity[] } } = {}
         snapshots.map(snapshot => {
-            const amount = (snapshot.material.multiplier ?? 1) * snapshot.amount
+            const amount = (snapshot.material.multiplier ?? 1) * Number.parseFloat(snapshot.amount)
             const assetAddress = snapshot.material.assetAddress.toLowerCase()
             if (!(assetAddress in groups)) {
                 groups[assetAddress] = {
