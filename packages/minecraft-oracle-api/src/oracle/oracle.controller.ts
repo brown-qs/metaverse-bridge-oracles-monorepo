@@ -136,7 +136,7 @@ export class OracleController {
         @User() user: UserEntity,
         @Body() data: ConfirmDto
     ): Promise<boolean> {
-        const success = await this.oracleService.userEnraptureConfirm(user, data)
+        const success = await this.oracleService.userExportConfirm(user, data)
         return success
     }
 
