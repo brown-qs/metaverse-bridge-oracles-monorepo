@@ -54,20 +54,44 @@ export const IMPORTABLE_ASSETS: RecognizedAsset[] = [
       chainId: ChainId.MOONRIVER,
     }, /* tickets */
     {
-      address: '0x68167b5975fbccb308444991f23a40874e24f99e',
+      address: '0x6E9F41ec2a43ECAe0Ada29587D4D40a3e83e4bEB'.toLowerCase(),
       id: undefined,
       type: RecognizedAssetType.TEST,
+      chainId: ChainId.VOLTA,
+    },
+    {
+      address: '0x564482cFeC68454f078d0CEF27cb930cBa93d05C'.toLowerCase(),
+      id: '1',
+      type: RecognizedAssetType.TICKET,
+      chainId: ChainId.VOLTA,
+    },
+    {
+      address: '0x6A89CafD0a25bCf92De623209f8899eA4B8E30B1'.toLowerCase(),
+      id: undefined,
+      type: RecognizedAssetType.MOONSAMA,
       chainId: ChainId.VOLTA,
     }
 ]
 
 export const ENRAPTURABLE_ASSETS: RecognizedAsset[] = [
    {
-      address: '0x68167b5975fbccb308444991f23a40874e24f99e',
+      address: '0x6E9F41ec2a43ECAe0Ada29587D4D40a3e83e4bEB'.toLowerCase(),
       id: undefined as string,
       type: RecognizedAssetType.TEST,
       chainId: ChainId.VOLTA,
-    } /* tickets */
+    }, /* tickets */
+    {
+      address: '0x564482cFeC68454f078d0CEF27cb930cBa93d05C'.toLowerCase(),
+      id: '1',
+      type: RecognizedAssetType.TICKET,
+      chainId: ChainId.VOLTA,
+    },
+    {
+      address: '0x6A89CafD0a25bCf92De623209f8899eA4B8E30B1'.toLowerCase(),
+      id: undefined,
+      type: RecognizedAssetType.MOONSAMA,
+      chainId: ChainId.VOLTA,
+    }
 ]
 
 export const METAVERSE = '0x03b0ce3a3c09a347630b1f2803b77e8708cacbdb24f2f74961671eb476fbd57e'

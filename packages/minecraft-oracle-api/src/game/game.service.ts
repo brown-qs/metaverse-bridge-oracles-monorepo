@@ -333,14 +333,14 @@ export class GameService {
             if (!!foundItem) {
                 //console.log('founditem')
                 //console.log(foundItem)
-                foundItem.amount = foundItem.amount + amount;
+                foundItem.amount = (Number.parseFloat(foundItem.amount) + amount).toString();
                 const r = await this.snapshotService.create(foundItem)
                 return r
             } else {
                 //console.log('newitem')
                 const entity = new SnapshotItemEntity({
                     id: `${user.uuid}-${material.name}`,
-                    amount: amount,
+                    amount: amount.toString(),
                     owner: user,
                     material
                 })
