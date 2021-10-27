@@ -226,7 +226,7 @@ export class OracleService {
 
         const mAsset: MetaAsset = await this.metaverse.getImportedMetaAsset(hash)
 
-        if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress !== assetEntry.assetAddress) {
+        if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress.toLowerCase() !== assetEntry.assetAddress.toLowerCase()) {
             this.logger.error(`ImportConfirm: on-chaind data didn't match for hash: ${hash}`)
             throw new UnprocessableEntityException(`On-chain data didn't match`)
         }
@@ -266,14 +266,18 @@ export class OracleService {
     public async userEnraptureConfirm(user: UserEntity, { hash }: { hash: string }): Promise<boolean> {
         const assetEntry = await this.assetService.findOne({ hash })
 
-        if (!assetEntry || assetEntry.hash !== hash || assetEntry.enraptured !== true || assetEntry.pendingOut !== false || assetEntry.pendingIn !== true) {
+        if (!assetEntry || assetEntry.hash !== hash || assetEntry.enraptured !== true) {
             this.logger.error(`EnraptureConfirm: invalid conditions. exists: ${!!assetEntry}, hash: ${hash}, enraptured: ${assetEntry.enraptured}, pendingOut: ${assetEntry.pendingOut}, pendingIn: ${assetEntry.pendingIn}`)
             throw new UnprocessableEntityException('Invalid enrapture confirm conditions')
         }
 
-        const mAsset: MetaAsset = await this.metaverse.getImportedMetaAsset(hash)
+        if (assetEntry.pendingIn === false) {
+            return true
+        }
 
-        if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress !== assetEntry.assetAddress) {
+        const mAsset: MetaAsset = await this.metaverse.getEnrapturedMetaAsset(hash)
+
+        if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress.toLowerCase() !== assetEntry.assetAddress.toLowerCase()) {
             this.logger.error(`EnraptureConfirm: on-chaind data didn't match for hash: ${hash}`)
             throw new UnprocessableEntityException(`On-chain data didn't match`)
         }
