@@ -1,11 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger"
-import { AssetType } from "src/common/enums/AssetType"
+import { StringAssetType } from "src/common/enums/AssetType"
 import { TextureType } from "src/texture/texturetype.enum";
 
 export class TextureDto {
 
     @ApiProperty({ description: 'Texture asset type'})
-    assetType: AssetType;
+    assetType: StringAssetType;
 
     @ApiProperty({ description: 'Texture asset address'})
     assetAddress: string;

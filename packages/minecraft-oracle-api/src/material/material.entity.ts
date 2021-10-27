@@ -53,6 +53,10 @@ export class MaterialEntity {
     @IsString()
     assetId: string;
 
+    @IsNumber()
+    @Column({default: 1, nullable: false})
+    multiplier?: number;
+    
     @IsBoolean()
     @Column()
     snapshottable: boolean;

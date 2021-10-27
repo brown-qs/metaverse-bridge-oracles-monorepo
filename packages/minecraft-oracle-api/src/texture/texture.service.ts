@@ -1,8 +1,8 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import {Injectable} from '@nestjs/common';
-import { FindConditions, Repository } from 'typeorm';
+import { FindConditions, FindOneOptions, Repository } from 'typeorm';
 import { TextureEntity } from './texture.entity';
-import { AssetType } from '../common/enums/AssetType';
+import { AssetType, StringAssetType } from '../common/enums/AssetType';
 
 @Injectable()
 export class TextureService {
@@ -40,13 +40,8 @@ export class TextureService {
         return (await this.repository.findOne(conditions)) !== undefined;
     }
 
-    public async findByCompositeIndex(compositeIndex: {assetId: string, assetAddress: string, assetType: AssetType}): Promise<TextureEntity> {
-        const result: TextureEntity = await this.repository.findOne(compositeIndex);
-        return result;
-    }
-
-    public async findOne(params: TextureEntity): Promise<TextureEntity> {
-        const result: TextureEntity = await this.repository.findOne(params);
+    public async findOne(conditions?: FindConditions<TextureEntity>, options?: FindOneOptions<TextureEntity>): Promise<TextureEntity> {
+        const result: TextureEntity = await this.repository.findOne(conditions, options);
         return result;
     }
 }

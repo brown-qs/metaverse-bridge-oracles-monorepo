@@ -7,6 +7,8 @@ import { Column, Entity, Index, JoinColumn, OneToMany, OneToOne, PrimaryColumn }
 import { UserRole } from '../common/enums/UserRole';
 import { TextureEntity } from '../texture/texture.entity';
 import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
+import { AssetEntity } from '../asset/asset.entity';
+import { SummonEntity } from '../summon/summon.entity';
 
 @Entity()
 @Index(['uuid'], {unique: true})
@@ -39,6 +41,14 @@ export class UserEntity {
     @Column({ default: false })
     hasGame?: boolean;
 
+    @IsBoolean()
+    @Column({ default: false })
+    hasTicket?: boolean;
+
+    @IsBoolean()
+    @Column({ default: false })
+    hasMoonsama?: boolean;
+
     @Column({nullable: true})
     @IsString()
     serverId?: string;
@@ -49,6 +59,12 @@ export class UserEntity {
 
     @Column('text', { array: true, default: [] })
     usedAddresses?: string[];
+
+    @OneToMany(() => AssetEntity, (ae) => ae.owner)
+    assets?: AssetEntity[];
+
+    @OneToMany(() => SummonEntity, (se) => se.owner)
+    summons?: SummonEntity[];
 
     @OneToMany(() => SnapshotItemEntity, (sitem) => sitem.owner)
     snapshotItems?: SnapshotItemEntity[];

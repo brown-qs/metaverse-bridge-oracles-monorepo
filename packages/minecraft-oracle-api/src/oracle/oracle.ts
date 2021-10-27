@@ -1,9 +1,15 @@
+import { randomBytes } from "crypto";
 import { ethers } from "ethers";
 import { AssetType } from "src/common/enums/AssetType";
 
 function encodeParameters(types: readonly (string | ethers.utils.ParamType)[], values: readonly any[]) {
     const abi = new ethers.utils.AbiCoder();
     return abi.encode(types, values);
+}
+
+function decodeParameters(types: readonly (string | ethers.utils.ParamType)[], values: readonly any[]) {
+    const abi = new ethers.utils.AbiCoder();
+    return abi.decode(types, values);
 }
 
 export async function encodeExportWithSigData(data: {hash: string}, expiration: string) {
@@ -16,7 +22,7 @@ export async function encodeExportWithSigData(data: {hash: string}, expiration: 
     )
 }
 
-export type ImportData={
+export type ImportData = {
     asset: {
         assetAddress: string,
         assetId: string,
@@ -117,4 +123,35 @@ export function bytesHexStringToMessageToSign(bytesHexString: string): Buffer {
 export async function getSignature(signer: ethers.Signer, data: string): Promise<string> {
   const sig = await signer.signMessage(bytesHexStringToMessageToSign(data))
   return sig
+}
+
+export async function getSalt() {
+  const b = "0x" + randomBytes(32).toString('hex')
+  return b
+}
+
+export async function utf8ToKeccak(data: string) {
+    const hash = await ethers.utils.keccak256(Buffer.from(data, 'utf8'))
+    return hash
+}
+
+export async function calculateMetaAssetHash(data: ImportData) {
+    const {
+        asset: {
+            assetAddress,
+            assetId,
+            assetType
+        },
+        metaverse,
+        owner,
+        beneficiary, //TODO in v2
+        amount,
+        salt
+    } = data;
+    const encoded = encodeParameters(
+        ['address', 'uint256', 'bytes32', 'address', 'uint256', 'bytes32'],
+        [assetAddress, assetId, metaverse, owner, amount, salt]
+    )
+    const hash = await ethers.utils.keccak256(encoded)
+    return hash
 }
