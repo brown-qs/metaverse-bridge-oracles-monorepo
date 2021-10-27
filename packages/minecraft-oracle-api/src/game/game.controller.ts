@@ -117,7 +117,7 @@ export class GameController {
 
     @Delete('player/:uuid/serverId')
     @HttpCode(200)
-    @ApiOperation({ summary: 'Deletes server of a user' })
+    @ApiOperation({ summary: 'Deletes server id of a user' })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
     async deleteServerId(

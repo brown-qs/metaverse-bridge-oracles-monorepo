@@ -60,23 +60,23 @@ export async function encodeEnraptureWithSigData(data: ImportData, expiration: s
 
 export type SummonData = {
     metaverse: string,
-    assetId: string,
+    assetIds: string[],
     to: string,
-    amount: string,
+    amounts: string[],
     extradata: string
 }
 
 export async function encodeSummonWithSigData(data: SummonData, expiration: string) {
     const {
         metaverse,
-        assetId,
+        assetIds,
         to,
-        amount,
+        amounts,
         extradata
     } = data;
     return encodeParameters(
-        ['bytes32', 'uint256', 'address', 'uint256', 'uint256', 'bytes'],
-        [ metaverse, assetId, to, amount, expiration, extradata]
+        ['uint256', 'bytes32', 'address', 'uint256[]', 'uint256[]', 'bytes'],
+        [ expiration, metaverse, to, assetIds, amounts, extradata]
     )
 }
 
@@ -144,13 +144,13 @@ export async function calculateMetaAssetHash(data: ImportData) {
         },
         metaverse,
         owner,
-        beneficiary, //TODO in v2
+        beneficiary,
         amount,
         salt
     } = data;
     const encoded = encodeParameters(
-        ['address', 'uint256', 'bytes32', 'address', 'uint256', 'bytes32'],
-        [assetAddress, assetId, metaverse, owner, amount, salt]
+        ['address', 'uint256', 'bytes32', 'address', 'address', 'uint256', 'bytes32'],
+        [assetAddress, assetId, metaverse, owner, beneficiary, amount, salt]
     )
     const hash = await ethers.utils.keccak256(encoded)
     return hash

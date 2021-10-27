@@ -45,7 +45,7 @@ export class OracleService {
 
     public async userInRequest(user: UserEntity, data: ImportDto, enraptured: boolean): Promise<[string, string, string, boolean]> {
         this.logger.debug(`userInRequest: ${JSON.stringify(data)}`, this.context)
-        const inAsset = enraptured ? this.enrapturableAssets.find(x => x.address === data.asset.assetAddress.toLowerCase()) : this.importableAssets.find(x => x.address == data.asset.assetAddress.toLowerCase())
+        const inAsset = enraptured ? this.enrapturableAssets.find(x => x.address === data.asset.assetAddress.toLowerCase()) : this.importableAssets.find(x => x.address === data.asset.assetAddress.toLowerCase())
 
         if (!inAsset) {
             this.logger.error(`userInRequest: not an permissioned asset`, null, this.context)
@@ -210,11 +210,18 @@ export class OracleService {
     }
 
     public async userImportConfirm(user: UserEntity, { hash }: { hash: string }): Promise<boolean> {
+        
+        this.logger.log(`ImportConfirm: started ${user.uuid}: ${hash}`, this.context)
         const assetEntry = await this.assetService.findOne({ hash })
 
-        if (!assetEntry || assetEntry.hash !== hash || assetEntry.enraptured !== false || assetEntry.pendingOut !== false || assetEntry.pendingIn !== true) {
-            this.logger.error(`ImportConfirm: invalid conditions. exists: ${!!assetEntry}, hash: ${hash}, enraptured: ${assetEntry.enraptured}, pendingOut: ${assetEntry.pendingOut}, pendingIn: ${assetEntry.pendingIn}`)
+
+        if (!assetEntry || assetEntry.hash !== hash || assetEntry.enraptured !== false) {
+            this.logger.error(`ImportConfirm: invalid conditions. exists: ${!!assetEntry}, hash: ${hash}, enraptured: ${assetEntry?.enraptured}, pendingOut: ${assetEntry?.pendingOut}, pendingIn: ${assetEntry?.pendingIn}`)
             throw new UnprocessableEntityException('Invalid import confirm conditions')
+        }
+
+        if (assetEntry.pendingIn === false) {
+            return true
         }
 
         const mAsset: MetaAsset = await this.metaverse.getImportedMetaAsset(hash)
@@ -224,9 +231,11 @@ export class OracleService {
             throw new UnprocessableEntityException(`On-chain data didn't match`)
         }
 
-        const recognizedAsset = this.importableAssets.find(x => x.address = assetEntry.assetAddress.toLowerCase())
-
-        if (recognizedAsset && recognizedAsset.type.valueOf === RecognizedAssetType.MOONSAMA.valueOf) {
+        const recognizedAsset = this.importableAssets.find(x => x.address === assetEntry.assetAddress.toLowerCase())
+        console.log(recognizedAsset)
+        console.log(user.uuid, hash, RecognizedAssetType.MOONSAMA.valueOf(), RecognizedAssetType.TICKET.valueOf(), recognizedAsset?.id, JSON.stringify(mAsset))
+        if (!!recognizedAsset && recognizedAsset.type.valueOf() === RecognizedAssetType.MOONSAMA.valueOf() && (recognizedAsset.id === undefined || recognizedAsset.id === mAsset.asset.assetId.toString())) {
+            this.logger.log(`ImportConfirm: setting moonsama for user ${user.uuid}: ${hash}`, this.context)
             const texture = await this.textureService.findOne({ assetAddress: assetEntry.assetAddress, assetId: assetEntry.assetId, assetType: assetEntry.assetType })
             if (!!texture) {
                 texture.owner = user
@@ -237,7 +246,8 @@ export class OracleService {
             await this.userService.create(user)
         }
 
-        if (recognizedAsset && recognizedAsset.type.valueOf === RecognizedAssetType.TICKET.valueOf) {
+        if (!!recognizedAsset && recognizedAsset.type.valueOf() === RecognizedAssetType.TICKET.valueOf() && (recognizedAsset.id === undefined || recognizedAsset.id === mAsset.asset.assetId.toString())) {
+            this.logger.log(`ImportConfirm: setting ticket for user ${user.uuid}: ${hash}`, this.context)
             user.allowedToPlay = true
             user.hasTicket = true
             await this.userService.create(user)
