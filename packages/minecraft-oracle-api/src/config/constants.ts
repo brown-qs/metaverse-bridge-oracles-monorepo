@@ -37,7 +37,8 @@ export type RecognizedAsset = {
     chainId: ChainId,
     address: string,
     type: RecognizedAssetType,
-    id: string | undefined
+    id: string | undefined,
+    name: string
 }
 // lwoercase
 export const IMPORTABLE_ASSETS: RecognizedAsset[] = [
@@ -45,31 +46,36 @@ export const IMPORTABLE_ASSETS: RecognizedAsset[] = [
       chainId: ChainId.MOONRIVER,
       address: '0xb654611f84a8dc429ba3cb4fda9fad236c505a1a',
       type: RecognizedAssetType.MOONSAMA,
-      id: undefined
+      id: undefined,
+      name: 'Moonsama'
     }, /* moonsama */
     {
       address: '0x1974eeaf317ecf792ff307f25a3521c35eecde86',
       id: '1',
       type: RecognizedAssetType.TICKET,
       chainId: ChainId.MOONRIVER,
+      name: 'Golden ticket'
     }, /* tickets */
     {
       address: '0x6E9F41ec2a43ECAe0Ada29587D4D40a3e83e4bEB'.toLowerCase(),
       id: undefined,
       type: RecognizedAssetType.TEST,
       chainId: ChainId.VOLTA,
+      name: 'Test'
     },
     {
       address: '0x564482cFeC68454f078d0CEF27cb930cBa93d05C'.toLowerCase(),
       id: '1',
       type: RecognizedAssetType.TICKET,
       chainId: ChainId.VOLTA,
+      name: 'Golden ticket'
     },
     {
       address: '0x6A89CafD0a25bCf92De623209f8899eA4B8E30B1'.toLowerCase(),
       id: undefined,
       type: RecognizedAssetType.MOONSAMA,
       chainId: ChainId.VOLTA,
+      name: 'Moonsama'
     }
 ]
 
@@ -79,18 +85,21 @@ export const ENRAPTURABLE_ASSETS: RecognizedAsset[] = [
       id: undefined as string,
       type: RecognizedAssetType.TEST,
       chainId: ChainId.VOLTA,
+      name: 'Test'
     }, /* tickets */
     {
       address: '0x564482cFeC68454f078d0CEF27cb930cBa93d05C'.toLowerCase(),
       id: '1',
       type: RecognizedAssetType.TICKET,
       chainId: ChainId.VOLTA,
+      name: 'Golden ticket'
     },
     {
       address: '0x6A89CafD0a25bCf92De623209f8899eA4B8E30B1'.toLowerCase(),
       id: undefined,
       type: RecognizedAssetType.MOONSAMA,
       chainId: ChainId.VOLTA,
+      name: 'Moonsama'
     }
 ]
 

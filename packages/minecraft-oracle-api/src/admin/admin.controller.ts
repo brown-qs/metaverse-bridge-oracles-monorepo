@@ -14,7 +14,7 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { UserService } from '../user/user.service';
-import { ProfileDto } from '../user/dtos/profile.dto';
+import { ProfileDto } from '../profile/dtos/profile.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { User } from '../utils/decorators';
 import { UserEntity } from '../user/user.entity';
@@ -27,6 +27,7 @@ import { TexturesDto } from './dtos/textures.dto';
 import { SecretDto, SecretsDto } from './dtos/secret.dto';
 import { SnapshotsDto } from 'src/game/dtos/snapshot.dto';
 import { PreferredServersDto } from './dtos/preferredServer.dto';
+import { ProfileService } from 'src/profile/profile.service';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -36,6 +37,7 @@ export class AdminController {
 
     constructor(
         private readonly userService: UserService,
+        private readonly profileService: ProfileService,
         private readonly gameService: GameService,
         private readonly adminService: AdminService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
@@ -53,7 +55,7 @@ export class AdminController {
             throw new ForbiddenException('Not admin')
         }
         const user = await this.userService.findByUuid(uuid)
-        return this.userService.userProfile(user)
+        return this.profileService.userProfile(user)
     }
 
     @Get('player/:uuid/textures')
