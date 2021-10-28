@@ -10,7 +10,7 @@ import { GameSessionService } from 'src/gamesession/gamesession.service';
 import { ImportDto } from './dtos/import.dto';
 import { CALLDATA_EXPIRATION_MS, CALLDATA_EXPIRATION_THRESHOLD, ENRAPTURABLE_ASSETS, IMPORTABLE_ASSETS, METAVERSE, RecognizedAsset, RecognizedAssetType } from 'src/config/constants';
 import { calculateMetaAssetHash, encodeEnraptureWithSigData, encodeExportWithSigData, encodeImportWithSigData, getSalt, getSignature, utf8ToKeccak } from './oracle';
-import { Contract, ethers, Signer } from 'ethers';
+import { BigNumber, Contract, ethers, Signer } from 'ethers';
 import { ProviderToken } from 'src/provider/token';
 import { AssetService } from 'src/asset/asset.service';
 import { assetTypeToStringAssetType } from 'src/utils';
@@ -167,13 +167,19 @@ export class OracleService {
         }
     }
 
-    public async userSummonRequest(user: UserEntity, { recipient }: SummonDto): Promise<true> {
+    public async userSummonRequest(user: UserEntity, { recipient }: SummonDto): Promise<boolean> {
         this.logger.debug(`userSummonRequest user ${user.uuid} to ${recipient}`, this.context)
 
-        const snapshots = await this.snapshotService.findMany({ relations: ['user', 'material'], where: { owner: { uuid: user.uuid } } })
+        if (!recipient || recipient.length !== 42 || !recipient.startsWith('0x')) {
+            this.logger.error(`Summon: recipient invalid: ${recipient}}`, null, this.context)
+            throw new UnprocessableEntityException('Recipient invalid')
+        }
 
-        const ids = []
-        const amounts = []
+        const snapshots = await this.snapshotService.findMany({ relations: ['owner', 'material'], where: { owner: { uuid: user.uuid } } })
+
+        if(!snapshots || snapshots.length === 0) {
+            return false
+        }
 
         const groups: { [key: string]: { ids: string[], amounts: string[], entities: SnapshotItemEntity[] } } = {}
         snapshots.map(snapshot => {
@@ -186,7 +192,7 @@ export class OracleService {
                     entities: []
                 }
             }
-            groups[assetAddress]['amounts'].push(ethers.utils.parseEther(number.toString()).toString())
+            groups[assetAddress]['amounts'].push(ethers.utils.parseEther(amount.toString()).toString())
             groups[assetAddress]['ids'].push(snapshot.material.assetId)
             groups[assetAddress]['entities'].push(snapshot)
         })
@@ -195,13 +201,21 @@ export class OracleService {
 
         for (let i = 0; i < addresses.length; i++) {
             try{
-                const x = await this.metaverse.summonFromMetaverse(METAVERSE, recipient, groups[addresses[i]].ids, groups[addresses[i]].amounts)
+                const ids = groups[addresses[i]].ids
+                const amounts = groups[addresses[i]].amounts
+                //console.log({METAVERSE, recipient, ids, amounts, i})
+                //console.log(this.metaverse)
+                //console.log(JSON.stringify(this.metaverse.summonFromMetaverse))
+
+                await (await this.metaverse.summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], {value: 0, gasPrice: '1000000000', gasLimit: '1000000'})).wait()
+
                 try{
                     await this.snapshotService.removeAll(groups[addresses[i]].entities) 
                 } catch(e) {
                     this.logger.error(`Summon: failiure to remove entities, ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
                 }
             } catch(e) {
+                //console.log(e)
                 this.logger.error(`Summon: failiure to summon ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
                 throw new UnprocessableEntityException('Summon error.')
             }
