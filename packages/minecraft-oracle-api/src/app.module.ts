@@ -29,6 +29,8 @@ import { AssetModule } from './asset/asset.module';
 import { AssetEntity } from './asset/asset.entity';
 import { SummonEntity } from './summon/summon.entity';
 import { SummonModule } from './summon/summon.module';
+import { UserModule } from './user/user.module';
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
   imports: [
@@ -82,6 +84,8 @@ import { SummonModule } from './summon/summon.module';
     CacheModule,
     SecretModule,
     AssetModule,
+    UserModule,
+    ProfileModule,
     AuthModule,
     TextureModule,
     MaterialModule,

@@ -15,7 +15,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { GameService } from './game.service';
 import { UserService } from '../user/user.service';
-import { ProfileDto } from '../user/dtos/profile.dto';
+import { ProfileDto } from '../profile/dtos/profile.dto';
 import { SnapshotsDto } from './dtos/snapshot.dto';
 import { PlayerTextureMapDto } from './dtos/texturemap.dto';
 import { PermittedMaterials } from './dtos/permitted-material.dto';
@@ -24,6 +24,7 @@ import { SharedSecretGuard } from 'src/auth/secret.guard';
 import { AreGganbusDto, GganbuDto } from './dtos/gganbu.dto';
 import { ServerIdDto } from './dtos/serverId.dto';
 import { PreferredServerDto } from '../admin/dtos/preferredServer.dto';
+import { ProfileService } from 'src/profile/profile.service';
 
 @ApiTags('game')
 @Controller('game')
@@ -34,6 +35,7 @@ export class GameController {
     constructor(
         private readonly userService: UserService,
         private readonly gameService: GameService,
+        private readonly profileService: ProfileService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) { 
         this.context = GameController.name;
@@ -46,7 +48,7 @@ export class GameController {
     @UseGuards(SharedSecretGuard)
     async profile(@Param('uuid') uuid: string): Promise<ProfileDto> {
         const user = await this.userService.findByUuid(uuid)
-        return this.userService.userProfile(user)
+        return this.profileService.userProfile(user)
     }
 
     @Get('player/:uuid/textures')
