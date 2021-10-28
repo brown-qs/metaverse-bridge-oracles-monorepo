@@ -1,4 +1,4 @@
-[
+export const METAVERSE_ABI = [
     {
       "inputs": [
         {
@@ -267,12 +267,6 @@
         },
         {
           "indexed": false,
-          "internalType": "uint256",
-          "name": "assetId",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
           "internalType": "bytes32",
           "name": "metaverse",
           "type": "bytes32"
@@ -285,9 +279,15 @@
         },
         {
           "indexed": false,
-          "internalType": "uint256",
-          "name": "amount",
-          "type": "uint256"
+          "internalType": "uint256[]",
+          "name": "assetIds",
+          "type": "uint256[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "amounts",
+          "type": "uint256[]"
         }
       ],
       "name": "AssetSummon",
@@ -724,7 +724,7 @@
       ],
       "name": "exportFromMetaverse",
       "outputs": [],
-      "stateMutability": "payable",
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -742,7 +742,7 @@
       ],
       "name": "exportFromMetaverseSig",
       "outputs": [],
-      "stateMutability": "payable",
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -1246,14 +1246,14 @@
           "type": "address"
         },
         {
-          "internalType": "uint256",
-          "name": "_id",
-          "type": "uint256"
+          "internalType": "uint256[]",
+          "name": "_ids",
+          "type": "uint256[]"
         },
         {
-          "internalType": "uint256",
-          "name": "_amount",
-          "type": "uint256"
+          "internalType": "uint256[]",
+          "name": "_amounts",
+          "type": "uint256[]"
         },
         {
           "internalType": "bytes",
@@ -1263,7 +1263,7 @@
       ],
       "name": "summonFromMetaverse",
       "outputs": [],
-      "stateMutability": "payable",
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -1281,7 +1281,7 @@
       ],
       "name": "summonFromMetaverseSig",
       "outputs": [],
-      "stateMutability": "payable",
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -1344,7 +1344,7 @@
         }
       ],
       "name": "transferAssetFrom",
-      "outputs": [],
+      "outputs": [] as any,
       "stateMutability": "nonpayable",
       "type": "function"
     },
@@ -1353,3 +1353,4 @@
       "type": "receive"
     }
   ]
+  
