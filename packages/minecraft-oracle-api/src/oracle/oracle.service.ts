@@ -257,14 +257,14 @@ export class OracleService {
                 await this.textureService.create(texture)
             }
             user.allowedToPlay = true
-            user.hasMoonsama = true
+            user.numMoonsama = (user.numMoonsama ?? 0) + 1
             await this.userService.create(user)
         }
 
         if (!!recognizedAsset && recognizedAsset.type.valueOf() === RecognizedAssetType.TICKET.valueOf() && (recognizedAsset.id === undefined || recognizedAsset.id === mAsset.asset.assetId.toString())) {
             this.logger.log(`ImportConfirm: setting ticket for user ${user.uuid}: ${hash}`, this.context)
             user.allowedToPlay = true
-            user.hasTicket = true
+            user.numTicket = (user.numTicket ?? 0) + 1
             await this.userService.create(user)
         }
 
@@ -330,14 +330,14 @@ export class OracleService {
                 texture.owner = null
                 await this.textureService.create(texture)
             }
-            user.allowedToPlay = user.hasTicket
-            user.hasMoonsama = false
+            user.numMoonsama = (user.numMoonsama ?? 0) > 0 ? user.numMoonsama - 1 : 0
+            user.allowedToPlay = (user.numTicket ?? 0) > 0 || (user.numMoonsama ?? 0) > 0 
             await this.userService.create(user)
         }
 
         if (!!recognizedAsset && recognizedAsset.type.valueOf() === RecognizedAssetType.TICKET.valueOf() && (recognizedAsset.id === undefined || recognizedAsset.id === assetEntry.assetId.toString())) {
-            user.hasTicket = false
-            user.allowedToPlay = user.hasMoonsama
+            user.numTicket = (user.numTicket ?? 0) > 0 ? user.numTicket - 1 : 0
+            user.allowedToPlay = (user.numTicket ?? 0) > 0 || (user.numMoonsama ?? 0) > 0
             await this.userService.create(user)
         }
 

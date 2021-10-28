@@ -45,7 +45,10 @@ export class UserController {
             userName: user.userName,
             role: user.role,
             allowedToPlay: user.allowedToPlay,
-            serverId: user.serverId
+            serverId: user.serverId,
+            numTicket: user.numTicket,
+            numMoonsama: user.numMoonsama,
+            vip: user.vip
         }
     }
 
