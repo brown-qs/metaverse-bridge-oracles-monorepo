@@ -39,17 +39,7 @@ export class UserController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async profile(@User() user: UserEntity): Promise<ProfileDto> {
-        return {
-            uuid: user.uuid,
-            hasGame: user.hasGame,
-            userName: user.userName,
-            role: user.role,
-            allowedToPlay: user.allowedToPlay,
-            serverId: user.serverId,
-            numTicket: user.numTicket,
-            numMoonsama: user.numMoonsama,
-            vip: user.vip
-        }
+        return this.userService.userProfile(user)
     }
 
     

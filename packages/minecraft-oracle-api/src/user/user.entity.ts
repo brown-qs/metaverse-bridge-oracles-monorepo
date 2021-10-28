@@ -57,10 +57,6 @@ export class UserEntity {
     @Column({nullable: true})
     @IsString()
     preferredServer?: string;
-
-    @Column({default: false})
-    @IsBoolean()
-    vip?: boolean;
     
     @IsString()
     @Column({ default: null, nullable: true })
