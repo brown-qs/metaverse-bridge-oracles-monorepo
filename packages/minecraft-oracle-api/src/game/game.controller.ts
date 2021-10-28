@@ -23,6 +23,7 @@ import { GameInProgressDto } from './dtos/gameinprogress.dto';
 import { SharedSecretGuard } from 'src/auth/secret.guard';
 import { AreGganbusDto, GganbuDto } from './dtos/gganbu.dto';
 import { ServerIdDto } from './dtos/serverId.dto';
+import { PreferredServerDto } from '../admin/dtos/preferredServer.dto';
 
 @ApiTags('game')
 @Controller('game')
@@ -45,17 +46,7 @@ export class GameController {
     @UseGuards(SharedSecretGuard)
     async profile(@Param('uuid') uuid: string): Promise<ProfileDto> {
         const user = await this.userService.findByUuid(uuid)
-        return {
-            uuid: user.uuid,
-            userName: user.userName,
-            allowedToPlay: user.allowedToPlay,
-            hasGame: user.hasGame,
-            role: user.role,
-            serverId: user.serverId,
-            numTicket: user.numTicket,
-            numMoonsama: user.numMoonsama,
-            vip: user.vip
-        }
+        return this.userService.userProfile(user)
     }
 
     @Get('player/:uuid/textures')
@@ -111,8 +102,7 @@ export class GameController {
         @Body() {serverId}: ServerIdDto
     ): Promise<boolean> {
         const user = await this.userService.findByUuid(uuid)
-        await this.userService.update({
-            ...user,
+        await this.userService.update(user.uuid, {
             serverId
         })
         return true
@@ -128,8 +118,7 @@ export class GameController {
     ): Promise<ServerIdDto> {
         const user = await this.userService.findByUuid(uuid)
         const oldId = user.serverId
-        await this.userService.update({
-            ...user,
+        await this.userService.update(user.uuid, {
             serverId: null
         })
         return {

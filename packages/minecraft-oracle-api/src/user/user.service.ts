@@ -1,8 +1,10 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import {Injectable} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { FindConditions, FindManyOptions, FindOneOptions, Repository } from 'typeorm';
+import { FindConditions, FindManyOptions, FindOneOptions, ObjectID, Repository, UpdateResult } from 'typeorm';
 import { UserEntity } from './user.entity';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import { ProfileDto } from './dtos/profile.dto';
 
 @Injectable()
 export class UserService {
@@ -27,8 +29,8 @@ export class UserService {
         return u;
     }
 
-    public async update(user: UserEntity): Promise<UserEntity> {
-        const u = await this.repository.save(user)
+    public async update(criteria: string | number | string[] | Date | ObjectID | number[] | Date[] | ObjectID[] | FindConditions<UserEntity>, partialEntity: QueryDeepPartialEntity<UserEntity>): Promise<UpdateResult> {
+        const u = await this.repository.update(criteria, partialEntity)
         return u
     }
 
@@ -54,5 +56,19 @@ export class UserService {
     public async findMany(options: FindManyOptions<UserEntity>): Promise<UserEntity[]> {
         const results: UserEntity[] = await this.repository.find(options);
         return results;
+    }
+
+    public userProfile(user: UserEntity): ProfileDto {
+        return {
+            uuid: user.uuid,
+            hasGame: user.hasGame,
+            userName: user.userName,
+            role: user.role,
+            allowedToPlay: user.allowedToPlay,
+            serverId: user.serverId,
+            preferredServer: user.preferredServer,
+            numTicket: user.numTicket,
+            numMoonsama: user.numMoonsama
+        }
     }
 }
