@@ -1,6 +1,7 @@
 import {
     IsBoolean,
     IsEnum,
+    IsNumber,
     IsString
 } from 'class-validator';
 import { Column, Entity, Index, JoinColumn, OneToMany, OneToOne, PrimaryColumn } from 'typeorm';
@@ -41,17 +42,25 @@ export class UserEntity {
     @Column({ default: false })
     hasGame?: boolean;
 
-    @IsBoolean()
-    @Column({ default: false })
-    hasTicket?: boolean;
+    @IsNumber()
+    @Column({ default: 0 })
+    numTicket?: number;
 
     @IsBoolean()
-    @Column({ default: false })
-    hasMoonsama?: boolean;
+    @Column({ default: 0 })
+    numMoonsama?: number;
 
     @Column({nullable: true})
     @IsString()
     serverId?: string;
+
+    @Column({nullable: true})
+    @IsString()
+    preferredServer?: string;
+
+    @Column({default: false})
+    @IsBoolean()
+    vip?: boolean;
     
     @IsString()
     @Column({ default: null, nullable: true })

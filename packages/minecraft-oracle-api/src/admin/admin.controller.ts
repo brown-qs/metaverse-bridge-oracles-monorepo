@@ -58,7 +58,10 @@ export class AdminController {
             allowedToPlay: user.allowedToPlay,
             hasGame: user.hasGame,
             role: user.role,
-            serverId: user.serverId
+            serverId: user.serverId,
+            numTicket: user.numTicket,
+            numMoonsama: user.numMoonsama,
+            vip: user.vip
         }
     }
 
