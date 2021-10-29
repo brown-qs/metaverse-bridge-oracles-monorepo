@@ -47,7 +47,9 @@ export class AuthService {
 
     public async authLogin(code: string) {
 
-        let account = new MicrosoftAccount()
+        let account = new MicrosoftAccount();
+
+        console.log(account);
 
         const successfulAuthRedirect = this.configService.get<string>('app.redirect')
 
