@@ -7,7 +7,9 @@ import {config} from 'dotenv'
 import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity'
 import { UserEntity } from '../user/user.entity'
 import { TextureEntity } from '../texture/texture.entity'
-import { AssetType } from '../common/enums/AssetType'
+import { stringToStringAssetType } from '../utils/misc'
+import { AssetEntity } from '../asset/asset.entity'
+import { SummonEntity } from '../summon/summon.entity'
 
 config()
 
@@ -23,7 +25,7 @@ async function main () {
             host: process.env.TYPEORM_HOST,
             port: Number.parseInt(process.env.TYPEORM_PORT),
             database: process.env.TYPEORM_DATABASE,
-            entities: [MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity],
+            entities: [MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity, AssetEntity, SummonEntity],
             synchronize: false
         })
     } catch (err) {
@@ -54,9 +56,10 @@ async function main () {
             importable: 'true' === fragments[6],
             exportable: 'true' === fragments[7],
             equippable: 'true' === fragments[8],
-            assetId: '0',
-            assetType: AssetType.ERC20,
-            assetAddress: '0x0000000000000000000000000000000000000000'
+            assetAddress: fragments[9],
+            assetId: fragments[10],
+            assetType: stringToStringAssetType(fragments[11]),
+            multiplier: Number.parseInt(fragments[12])
         }
         try {
             const e = connection.manager.create<MaterialEntity>(MaterialEntity, entity)

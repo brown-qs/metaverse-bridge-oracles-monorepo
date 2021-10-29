@@ -18,7 +18,4 @@ export class SnapshotDto {
 export class SnapshotsDto {
     @ApiProperty({ description: 'Snapshot array', default: [], isArray: true})
     snapshots: SnapshotDto[]
-
-    @ApiPropertyOptional({ description: 'Uuid of user the snapshots belong to'})
-    uuid?: string
 }

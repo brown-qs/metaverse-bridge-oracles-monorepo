@@ -24,7 +24,13 @@ import { GameSessionModule } from './gamesession/gamesession.module';
 import { GameSessionEntity } from './gamesession/gamesession.entity';
 import { SecretEntity } from './secret/secret.entity';
 import { SecretModule } from './secret/secret.module';
-import { BlockchainModule } from './blockchain/blockchain.module';
+import { OracleModule } from './oracle/oracle.module';
+import { AssetModule } from './asset/asset.module';
+import { AssetEntity } from './asset/asset.entity';
+import { SummonEntity } from './summon/summon.entity';
+import { SummonModule } from './summon/summon.module';
+import { UserModule } from './user/user.module';
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
   imports: [
@@ -56,7 +62,7 @@ import { BlockchainModule } from './blockchain/blockchain.module';
             username: configService.get<string>('typeorm.username'),
             password: configService.get<string>('typeorm.password'),
             database: configService.get<string>('typeorm.database'),
-            entities: [UserEntity, SnapshotItemEntity, TextureEntity, MaterialEntity, GameSessionEntity, SecretEntity],
+            entities: [UserEntity, SnapshotItemEntity, TextureEntity, MaterialEntity, GameSessionEntity, SecretEntity, AssetEntity, SummonEntity],
             synchronize: configService.get<boolean>('typeorm.synchronize'),
             logging: configService.get<boolean>('typeorm.logging'),
         }),
@@ -77,14 +83,18 @@ import { BlockchainModule } from './blockchain/blockchain.module';
     ProviderModule,
     CacheModule,
     SecretModule,
+    AssetModule,
+    UserModule,
+    ProfileModule,
     AuthModule,
     TextureModule,
     MaterialModule,
     SnapshotModule,
     GameSessionModule,
+    SummonModule,
     GameModule,
     AdminModule,
-    BlockchainModule
+    OracleModule
   ],
   controllers: [AppController],
   providers: [AppService],

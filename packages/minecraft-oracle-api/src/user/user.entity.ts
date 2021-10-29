@@ -1,12 +1,15 @@
 import {
     IsBoolean,
     IsEnum,
+    IsNumber,
     IsString
 } from 'class-validator';
 import { Column, Entity, Index, JoinColumn, OneToMany, OneToOne, PrimaryColumn } from 'typeorm';
 import { UserRole } from '../common/enums/UserRole';
 import { TextureEntity } from '../texture/texture.entity';
 import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
+import { AssetEntity } from '../asset/asset.entity';
+import { SummonEntity } from '../summon/summon.entity';
 
 @Entity()
 @Index(['uuid'], {unique: true})
@@ -38,6 +41,22 @@ export class UserEntity {
     @IsBoolean()
     @Column({ default: false })
     hasGame?: boolean;
+
+    @IsNumber()
+    @Column({ default: 0 })
+    numTicket?: number;
+
+    @IsBoolean()
+    @Column({ default: 0 })
+    numMoonsama?: number;
+
+    @Column({nullable: true})
+    @IsString()
+    serverId?: string;
+
+    @Column({nullable: true})
+    @IsString()
+    preferredServer?: string;
     
     @IsString()
     @Column({ default: null, nullable: true })
@@ -45,6 +64,12 @@ export class UserEntity {
 
     @Column('text', { array: true, default: [] })
     usedAddresses?: string[];
+
+    @OneToMany(() => AssetEntity, (ae) => ae.owner)
+    assets?: AssetEntity[];
+
+    @OneToMany(() => SummonEntity, (se) => se.owner)
+    summons?: SummonEntity[];
 
     @OneToMany(() => SnapshotItemEntity, (sitem) => sitem.owner)
     snapshotItems?: SnapshotItemEntity[];

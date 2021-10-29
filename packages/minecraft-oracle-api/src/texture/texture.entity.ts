@@ -6,7 +6,7 @@ import {
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Column, Entity, Index, ManyToOne, OneToOne, PrimaryColumn } from 'typeorm';
 import { UserEntity } from '../user/user.entity';
-import { AssetType } from '../common/enums/AssetType';
+import { StringAssetType } from '../common/enums/AssetType';
 import { TextureType } from './texturetype.enum';
 
 @Entity()
@@ -17,12 +17,12 @@ export class TextureEntity {
     }
 
     @PrimaryColumn()
-    @IsEnum(AssetType)
+    @IsEnum(StringAssetType)
     @Column({
         type: 'enum',
-        enum: AssetType
+        enum: StringAssetType
     })
-    assetType: AssetType;
+    assetType: StringAssetType;
 
     @PrimaryColumn({unique: true})
     @IsString()
@@ -31,6 +31,9 @@ export class TextureEntity {
     @PrimaryColumn()
     @IsString()
     assetId: string;
+
+    @Column('text', { array: true, default: [] })
+    accessories?: string[];
 
     @IsEnum(TextureType)
     @Column({

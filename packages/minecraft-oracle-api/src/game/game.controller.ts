@@ -15,13 +15,16 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { GameService } from './game.service';
 import { UserService } from '../user/user.service';
-import { ProfileDto } from '../user/dtos/profile.dto';
+import { ProfileDto } from '../profile/dtos/profile.dto';
 import { SnapshotsDto } from './dtos/snapshot.dto';
 import { PlayerTextureMapDto } from './dtos/texturemap.dto';
 import { PermittedMaterials } from './dtos/permitted-material.dto';
 import { GameInProgressDto } from './dtos/gameinprogress.dto';
 import { SharedSecretGuard } from 'src/auth/secret.guard';
 import { AreGganbusDto, GganbuDto } from './dtos/gganbu.dto';
+import { ServerIdDto } from './dtos/serverId.dto';
+import { PreferredServerDto } from '../admin/dtos/preferredServer.dto';
+import { ProfileService } from 'src/profile/profile.service';
 
 @ApiTags('game')
 @Controller('game')
@@ -32,6 +35,7 @@ export class GameController {
     constructor(
         private readonly userService: UserService,
         private readonly gameService: GameService,
+        private readonly profileService: ProfileService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) { 
         this.context = GameController.name;
@@ -44,13 +48,7 @@ export class GameController {
     @UseGuards(SharedSecretGuard)
     async profile(@Param('uuid') uuid: string): Promise<ProfileDto> {
         const user = await this.userService.findByUuid(uuid)
-        return {
-            uuid: user.uuid,
-            userName: user.userName,
-            allowedToPlay: user.allowedToPlay,
-            hasGame: user.hasGame,
-            role: user.role
-        }
+        return this.profileService.userProfile(user)
     }
 
     @Get('player/:uuid/textures')
@@ -94,6 +92,40 @@ export class GameController {
 
         const [snapshottedItems, successArray, receivedNum, savedNum] = await this.gameService.processSnapshots(user, snapshots)
         return successArray
+    }
+
+    @Put('player/:uuid/serverId')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Sets server id for a user' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async setServerId(
+        @Param('uuid') uuid: string,
+        @Body() {serverId}: ServerIdDto
+    ): Promise<boolean> {
+        const user = await this.userService.findByUuid(uuid)
+        await this.userService.update(user.uuid, {
+            serverId
+        })
+        return true
+    }
+
+    @Delete('player/:uuid/serverId')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Deletes server id of a user' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async deleteServerId(
+        @Param('uuid') uuid: string
+    ): Promise<ServerIdDto> {
+        const user = await this.userService.findByUuid(uuid)
+        const oldId = user.serverId
+        await this.userService.update(user.uuid, {
+            serverId: null
+        })
+        return {
+            serverId: oldId
+        }
     }
 
     @Get('snapshot/materials')
