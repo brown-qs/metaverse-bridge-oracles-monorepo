@@ -37,7 +37,7 @@ export const collections = {
   },
   types: ['ERC20', 'ERC721', 'ERC1155'],
   indexing: ['none', 'sequential'],
-  collections: [
+  assets: [
     /*
     {
       chainId: 1285,
@@ -68,23 +68,25 @@ export const collections = {
       display_name: 'Moonsama',
       symbol: 'MSAMA',
       type: 'ERC721',
-      indexing: 'sequential',
+      ids: undefined,
+      enrapturable: false,
+      importable: true,
       contractURI: 'ipfs://QmPhFz5mKCtndGLLZBwGockGAWz7o7nef4Kgf37gYsTid5',
-      tags: ['native', 'green'],
       subgraph: 'https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/nft'
     },
     {
       chainId: 1285,
       address: '0x1974eEAF317Ecf792ff307F25A3521C35eECde86',
-      display_name: '???',
+      display_name: 'Golden Ticket',
+      ids: ['1'],
+      enrapturable: false,
+      importable: true,
       symbol: '???',
       type: 'ERC1155',
-      indexing: 'sequential',
       contractURI: 'ipfs://QmWox8YqUaYVxSSB7GRhPAuczv6auL8QrkDrkMTcqGEGKA',
-      tags: ['native', 'green'],
       subgraph: 'https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/nft-1155-mx'
     }
-  ],
+  ]
 };
 
 export default collections;

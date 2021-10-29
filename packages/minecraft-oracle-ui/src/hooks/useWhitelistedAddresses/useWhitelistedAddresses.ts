@@ -1,13 +1,7 @@
-import { NFT_SUBGRAPH_URL } from '../../constants';
-import { BigNumber } from '@ethersproject/bignumber';
-import { request } from 'graphql-request';
+
 import { useActiveWeb3React } from 'hooks/useActiveWeb3React/useActiveWeb3React';
-import { useCallback, useMemo } from 'react';
-import { Asset } from 'hooks/marketplace/types';
-import { useTokenStaticDataCallbackArray } from 'hooks/useTokenStaticDataCallback/useTokenStaticDataCallback';
-import { QUERY_USER_ERC721 } from 'subgraph/erc721Queries';
-import { getAssetEntityId, StringAssetType } from 'utils/subgraph';
-import { useRawCollectionsFromList } from 'hooks/useRawCollectionsFromList/useRawCollectionsFromList';
+import { useMemo } from 'react';
+import { useRawAssetsFromList } from 'hooks/useRawAssetsFromList/useRawAssetsFromList';
 
 export interface OwnedTokens {
   id: string;
@@ -17,7 +11,7 @@ export interface OwnedTokens {
 export const useWhitelistedAddresses = () => {
   const { chainId } = useActiveWeb3React();
 
-  const collections = useRawCollectionsFromList();
+  const collections = useRawAssetsFromList();
 
   return useMemo(() => {
     return collections.map((x) => x.address.toLowerCase());
