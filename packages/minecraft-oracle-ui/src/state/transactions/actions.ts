@@ -37,6 +37,15 @@ export const addTransaction = createAction<{
     asset: Asset;
     amount: BigNumber;
   };
+  importResult?: {
+    hash: string;
+  };
+  exportResult?: {
+    hash: string;
+  };
+  enraptureResult?: {
+    hash: string;
+  };
   summary?: string;
 }>('transactions/addTransaction');
 export const clearAllTransactions = createAction<{ chainId: ChainId }>(
