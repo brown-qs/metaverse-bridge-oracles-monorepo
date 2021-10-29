@@ -8,6 +8,10 @@ export const NFT_SUBGRAPH_URL =
   process.env.REACT_APP_NFT_SUBGRAPH_URL ??
   'http://localhost:8000/subgraphs/name/moonriver/testnft';
 
+export const METAVERSE_SUBGRAPH_URL =
+  process.env.REACT_APP_NFT_SUBGRAPH_URL ??
+  'http://localhost:8000/subgraphs/name/moonriver/moonsama/metaverse-bridge';
+
 export const NetworkContextName = 'NETWORK';
 
 export const DEFAULT_ORDERBOOK_PAGINATION: number = 100;
@@ -69,6 +73,11 @@ export const WMOVR_ADDRESS: { [chainId in ChainId]?: string } = {
 };
 
 export const EXPLORER_URL: { [chainId in ChainId]?: string } = {
+  [ChainId.VOLTA]: 'https://volta-explorer.energyweb.org',
+  [ChainId.MOONRIVER]: 'https://blockscout.moonriver.moonbeam.network',
+};
+
+export const METAVERSE_ADDRESS: { [chainId in ChainId]?: string } = {
   [ChainId.VOLTA]: 'https://volta-explorer.energyweb.org',
   [ChainId.MOONRIVER]: 'https://blockscout.moonriver.moonbeam.network',
 };
