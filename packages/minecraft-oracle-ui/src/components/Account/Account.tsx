@@ -4,6 +4,7 @@ import { UnsupportedChainIdError } from '@web3-react/core';
 import { useAccountDialog, useActiveWeb3React } from 'hooks';
 import { truncateAddress } from 'utils';
 import Identicon from 'components/Identicon/Identicon';
+import PersonSharpIcon from '@mui/icons-material/PersonSharp';
 import Power from '@mui/icons-material/Power';
 import { Activity, Key } from 'react-feather';
 import { useMediaQuery } from 'beautiful-react-hooks';
@@ -52,8 +53,18 @@ export const Account = () => {
             truncateAddress(account)
           )
         ) : (
-          'Connect'
+          'Connect Wallet'
         )}
+      </Button>
+      <Button
+        className={button}
+        size="medium"
+        onClick={() => setAccountDialogOpen(true)}
+      >
+        <div style={{ fontSize: 0, margin: '0 8px' }}>
+            <PersonSharpIcon />
+        </div>
+        cleanston3r
       </Button>
     </>
   );
