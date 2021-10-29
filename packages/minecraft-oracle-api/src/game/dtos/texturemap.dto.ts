@@ -5,5 +5,7 @@ export type PlayerTextureMapDto = {
         textureData: string
         textureSignature: string
         type: TextureType
+        accessories: string[] | undefined
+        assetId: string
     }
 }

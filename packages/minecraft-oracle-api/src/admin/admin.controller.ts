@@ -14,7 +14,7 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { UserService } from '../user/user.service';
-import { ProfileDto } from '../user/dtos/profile.dto';
+import { ProfileDto } from '../profile/dtos/profile.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { User } from '../utils/decorators';
 import { UserEntity } from '../user/user.entity';
@@ -26,6 +26,8 @@ import { AdminService } from './admin.service';
 import { TexturesDto } from './dtos/textures.dto';
 import { SecretDto, SecretsDto } from './dtos/secret.dto';
 import { SnapshotsDto } from 'src/game/dtos/snapshot.dto';
+import { PreferredServersDto } from './dtos/preferredServer.dto';
+import { ProfileService } from 'src/profile/profile.service';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -35,6 +37,7 @@ export class AdminController {
 
     constructor(
         private readonly userService: UserService,
+        private readonly profileService: ProfileService,
         private readonly gameService: GameService,
         private readonly adminService: AdminService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
@@ -52,13 +55,7 @@ export class AdminController {
             throw new ForbiddenException('Not admin')
         }
         const user = await this.userService.findByUuid(uuid)
-        return {
-            uuid: user.uuid,
-            userName: user.userName,
-            allowedToPlay: user.allowedToPlay,
-            hasGame: user.hasGame,
-            role: user.role
-        }
+        return this.profileService.userProfile(user)
     }
 
     @Get('player/:uuid/textures')
@@ -172,8 +169,12 @@ export class AdminController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async setSecret(
+        @User() caller: UserEntity,
         @Body() sdto: SecretDto,
     ): Promise<boolean> {
+        if (caller.role !== UserRole.ADMIN) {
+            throw new ForbiddenException('Not admin')
+        }
         const success = await this.adminService.setSharedSecret(sdto.name, sdto.secret)
         return success
     }
@@ -184,8 +185,12 @@ export class AdminController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async getSecret(
+        @User() caller: UserEntity,
         @Param('name') name: string
     ): Promise<SecretDto> {
+        if (caller.role !== UserRole.ADMIN) {
+            throw new ForbiddenException('Not admin')
+        }
         const s = await this.adminService.getSharedSecret(name)
         if (!s) {
             throw new UnprocessableEntityException("Shared secret not found")
@@ -198,8 +203,34 @@ export class AdminController {
     @ApiOperation({ summary: 'Gets shared secrets' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    async getSecrets(): Promise<SecretsDto> {
+    async getSecrets(
+        @User() caller: UserEntity,
+    ): Promise<SecretsDto> {
+        if (caller.role !== UserRole.ADMIN) {
+            throw new ForbiddenException('Not admin')
+        }
         const secrets = await this.adminService.getSharedSecrets()
         return {secrets}
+    }
+
+     @Put('preferredServers')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Sets preferred server for a user' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    async setPerferredServer(
+        @User() caller: UserEntity,
+        @Body() psDto: PreferredServersDto
+    ): Promise<boolean> {
+        if (caller.role !== UserRole.ADMIN) {
+            throw new ForbiddenException('Not admin')
+        }
+        const promises = psDto.preferredServers.map(async(x) => {
+            await this.userService.update(x.uuid, { preferredServer: x.preferredServer})
+        })
+
+        await Promise.all(promises)
+        return true
     }
 }

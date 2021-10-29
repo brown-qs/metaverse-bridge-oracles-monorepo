@@ -4,6 +4,7 @@ import clc from 'cli-color';
 import { format } from 'winston';
 import safeStringify from 'fast-safe-stringify';
 import * as ioTs from 'io-ts';
+import { AssetType, StringAssetType } from '../common/enums/AssetType';
 
 export type ParsedErrors = {
     actual: any;
@@ -59,3 +60,58 @@ export const parseErrors = (errors: ioTs.Errors): ParsedErrors => {
         })
     };
 };
+
+
+export function stringAssetTypeToAssetType(
+  assetType?: StringAssetType
+): AssetType {
+  if (StringAssetType.NATIVE === assetType?.valueOf()) {
+    return AssetType.NATIVE;
+  }
+  if (StringAssetType.ERC20 === assetType?.valueOf()) {
+    return AssetType.ERC20;
+  }
+  if (StringAssetType.ERC721 === assetType?.valueOf()) {
+    return AssetType.ERC721;
+  }
+  if (StringAssetType.ERC1155 === assetType?.valueOf()) {
+    return AssetType.ERC1155;
+  }
+  return AssetType.NONE;
+}
+
+export function assetTypeToStringAssetType(
+  assetType?: AssetType
+): StringAssetType {
+  if (AssetType.NATIVE === assetType) {
+    return StringAssetType.NATIVE;
+  }
+  if (AssetType.ERC20 === assetType) {
+    return StringAssetType.ERC20;
+  }
+  if (AssetType.ERC721 === assetType) {
+    return StringAssetType.ERC721;
+  }
+  if (AssetType.ERC1155 === assetType) {
+    return StringAssetType.ERC1155;
+  }
+  return StringAssetType.NONE;
+}
+
+export function stringToStringAssetType(
+  data: string
+): StringAssetType {
+  if (StringAssetType.NATIVE.valueOf() === data) {
+    return StringAssetType.NATIVE;
+  }
+  if (StringAssetType.ERC20.valueOf() === data) {
+    return StringAssetType.ERC20;
+  }
+  if (StringAssetType.ERC721.valueOf() === data) {
+    return StringAssetType.ERC721;
+  }
+  if (StringAssetType.ERC1155.valueOf() === data) {
+    return StringAssetType.ERC1155;
+  }
+  return StringAssetType.NONE;
+}

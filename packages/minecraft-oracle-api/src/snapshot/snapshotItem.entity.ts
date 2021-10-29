@@ -1,4 +1,5 @@
 import {
+    IsBoolean,
     IsInt,
     IsNumber,
     IsString
@@ -20,8 +21,12 @@ export class SnapshotItemEntity {
     id: string; // convention:: {user uuid}-{materialName}
 
     @Column()
-    @IsInt()
-    amount: number;
+    @IsString()
+    amount: string;
+
+    @Column({default: false})
+    @IsBoolean()
+    summonInProgress: boolean;
     
     @ManyToOne(() => MaterialEntity, (material) => material.snapshots)
     material: MaterialEntity;

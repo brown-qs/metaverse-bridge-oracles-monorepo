@@ -1,8 +1,9 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import {Injectable} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { FindConditions, FindManyOptions, FindOneOptions, Repository } from 'typeorm';
+import { FindConditions, FindManyOptions, FindOneOptions, ObjectID, Repository, UpdateResult } from 'typeorm';
 import { UserEntity } from './user.entity';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 @Injectable()
 export class UserService {
@@ -27,8 +28,8 @@ export class UserService {
         return u;
     }
 
-    public async update(user: UserEntity): Promise<UserEntity> {
-        const u = await this.repository.save(user)
+    public async update(criteria: string | number | string[] | Date | ObjectID | number[] | Date[] | ObjectID[] | FindConditions<UserEntity>, partialEntity: QueryDeepPartialEntity<UserEntity>): Promise<UpdateResult> {
+        const u = await this.repository.update(criteria, partialEntity)
         return u
     }
 

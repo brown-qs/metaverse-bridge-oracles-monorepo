@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { GameSessionEntity } from './gamesession.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindConditions, FindManyOptions } from 'typeorm';
+import { Repository, FindConditions, FindManyOptions, FindOneOptions, ObjectID } from 'typeorm';
 
 @Injectable()
 export class GameSessionService {
@@ -54,8 +54,8 @@ export class GameSessionService {
         return result;
     }
 
-    public async findOne(params: GameSessionEntity): Promise<GameSessionEntity> {
-        const result: GameSessionEntity = await this.repository.findOne(params);
+    public async findOne(params: FindConditions<GameSessionEntity>, options?: FindOneOptions<GameSessionEntity>): Promise<GameSessionEntity> {
+        const result: GameSessionEntity = await this.repository.findOne(params, options);
         return result;
     }
 }

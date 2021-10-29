@@ -37,7 +37,8 @@ export class GameService {
     }
 
     public async getTextures(user: UserEntity): Promise<PlayerTextureMapDto> {
-        const textures = user.textures ?? []
+        const richUser = await this.userService.findOne(user, {relations: ['textures']})
+        const textures = await richUser.textures
 
         const textureMap: PlayerTextureMapDto = {}
 
@@ -45,7 +46,9 @@ export class GameService {
             textureMap[texture.type] = {
                 textureData: texture.textureData,
                 textureSignature: texture.textureSignature,
-                type: texture.type
+                type: texture.type,
+                accessories: texture.accessories ?? undefined,
+                assetId: texture.assetId
             }
         })
 
@@ -317,8 +320,7 @@ export class GameService {
             return undefined
         }
 
-        const remainder = snapshot.amount % 2
-        const amount = half ? (roundup? Math.floor(snapshot.amount / 2) + remainder : Math.floor(snapshot.amount / 2)) : snapshot.amount
+        const amount = half ? snapshot.amount / 2: snapshot.amount
 
         const itemId = `${user.uuid}-${material.name}`
         this.ensureLock(itemId)
@@ -331,14 +333,14 @@ export class GameService {
             if (!!foundItem) {
                 //console.log('founditem')
                 //console.log(foundItem)
-                foundItem.amount = foundItem.amount + amount;
+                foundItem.amount = (Number.parseFloat(foundItem.amount) + amount).toString();
                 const r = await this.snapshotService.create(foundItem)
                 return r
             } else {
                 //console.log('newitem')
                 const entity = new SnapshotItemEntity({
                     id: `${user.uuid}-${material.name}`,
-                    amount: amount,
+                    amount: amount.toString(),
                     owner: user,
                     material
                 })
