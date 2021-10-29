@@ -14,6 +14,7 @@ import GameIcon from '@mui/icons-material/VideogameAsset';
 import WalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import PeopleAltIcon from '@mui/icons-material/PeopleAltSharp';
 import RemoveIcon from '@mui/icons-material/RemoveCircleSharp';
+import { AuthContextType } from 'context/auth/AuthContext/AuthContext.types';
 
 import MinecraftBlocksBgImage from 'assets/images/minecraft-blocksbg.png';
 import Resource1 from "../../assets/images/resource1.png";
@@ -24,7 +25,15 @@ import Resource5 from "../../assets/images/resource5.png";
 import Resource6 from "../../assets/images/resource6.png";
 import MsamaImage from "../../assets/images/msama.png";
 
-const ProfilePage = () => {
+export type ProfilePageType = {
+    authData: {
+        jwt: string,
+        userProfile: object
+    } | null,
+};
+
+
+const ProfilePage = ({ authData }: ProfilePageType) => {
     const [checked, setChecked] = React.useState(['']);
 
     const handleToggle = (value: string) => () => {
@@ -53,7 +62,7 @@ const ProfilePage = () => {
     return (
         <Grid className={profileContainer}>
             <Header />
-
+            {authData?.jwt}
             <Grid container justifyContent="center" spacing={4}>
                 <Grid item md={2} xs={12} justifyContent="center">
                     <div className={statBox}>

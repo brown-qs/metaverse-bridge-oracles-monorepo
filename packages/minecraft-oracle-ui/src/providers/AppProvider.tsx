@@ -1,6 +1,7 @@
 import { Provider } from 'react-redux';
 import Theme from '../theme/Theme';
 import { ThemeOptionsContextController } from 'context/themeOptions/themeOptionsContextController/ThemeOptionsContextController';
+import { AuthContextController } from 'context/auth/AuthContextController/AuthContextController';
 import { BidDialogContextController } from 'context/bidDialog/bidDialogContextController/BidDialogContextController';
 import { PurchaseDialogContextController } from 'context/purchaseDialog/purchaseDialogContextController/PurchaseDialogContextController';
 import { AccountDialogContextController } from 'context/accountDialog/accountDialogContextController/AccountDialogContextController';
@@ -29,24 +30,26 @@ export const AppProviders = ({ children }: AppProvidersProps) => (
   <ThemeOptionsContextController>
     <Web3ReactProvider getLibrary={getLibrary}>
       <Web3ReactProviderNetwork getLibrary={getLibrary}>
-        <Provider store={store}>
-          <Updaters />
-          <Web3ReactManager>
-            <AccountDialogContextController>
-              <CancelDialogContextController>
-                <BidDialogContextController>
-                  <PurchaseDialogContextController>
-                    <TransferDialogContextController>
-                      <Router>
-                        <Theme>{children}</Theme>
-                      </Router>
-                    </TransferDialogContextController>
-                  </PurchaseDialogContextController>
-                </BidDialogContextController>
-              </CancelDialogContextController>
-            </AccountDialogContextController>
-          </Web3ReactManager>
-        </Provider>
+        <AuthContextController>
+          <Provider store={store}>
+            <Updaters />
+            <Web3ReactManager>
+              <AccountDialogContextController>
+                <CancelDialogContextController>
+                  <BidDialogContextController>
+                    <PurchaseDialogContextController>
+                      <TransferDialogContextController>
+                        <Router>
+                          <Theme>{children}</Theme>
+                        </Router>
+                      </TransferDialogContextController>
+                    </PurchaseDialogContextController>
+                  </BidDialogContextController>
+                </CancelDialogContextController>
+              </AccountDialogContextController>
+            </Web3ReactManager>
+          </Provider>
+        </AuthContextController>
       </Web3ReactProviderNetwork>
     </Web3ReactProvider>
   </ThemeOptionsContextController>
