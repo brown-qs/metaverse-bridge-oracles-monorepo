@@ -33,6 +33,15 @@ export function useTransactionAdder(): (
       asset: Asset;
       amount: BigNumber;
     };
+    importResult?: {
+      hash: string
+    },
+    exportResult?: {
+      hash: string
+    },
+    enraptureResult?: {
+      hash: string
+    },
     claim?: { recipient: string };
   }
 ) => void {
@@ -49,6 +58,9 @@ export function useTransactionAdder(): (
         fill,
         cancel,
         transfer,
+        enraptureResult,
+        importResult,
+        exportResult
       }: {
         summary?: string;
         claim?: { recipient: string };
@@ -65,6 +77,15 @@ export function useTransactionAdder(): (
         };
         cancel?: {
           orderHash: string;
+        };
+        importResult?: {
+          hash: string;
+        };
+        enraptureResult?: {
+          hash: string;
+        };
+        exportResult?: {
+          hash: string;
         };
         transfer?: {
           asset: Asset;
@@ -89,7 +110,10 @@ export function useTransactionAdder(): (
           order,
           fill,
           cancel,
-          transfer,
+          importResult,
+          exportResult,
+          enraptureResult,
+          transfer
         })
       );
     },

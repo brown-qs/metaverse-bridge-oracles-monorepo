@@ -308,11 +308,16 @@ export class OracleService {
     }
 
     public async userExportConfirm(user: UserEntity, { hash }: { hash: string }): Promise<boolean> {
-        const assetEntry = await this.assetService.findOne({ hash, enraptured: false, pendingOut: true })
+        const assetEntry = await this.assetService.findOne({ hash, enraptured: false })
 
         if (!assetEntry) {
             this.logger.warn(`ExportConfirm: asset not found`, this.context)
             return true
+        }
+
+        if (!assetEntry.pendingOut) {
+            this.logger.warn(`ExportConfirm: asset exists but is not pending for export`, this.context)
+            return false
         }
 
         const exists = await this.metaverse.existsImported(hash)

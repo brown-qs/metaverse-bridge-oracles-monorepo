@@ -1,14 +1,9 @@
 import {
     Body,
     Controller,
-    Delete,
-    Get,
     HttpCode,
     Inject,
-    Param,
     Put,
-    Query,
-    UnprocessableEntityException,
     UseGuards
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -78,17 +73,13 @@ export class OracleController {
     async enrapture(
         @User() user: UserEntity,
         @Body() data: ImportDto
-    ): Promise<CallParamsDto> {
+    ): Promise<CallparamDto> {
         const params = await this.oracleService.userInRequest(user, data, true)
         return {
-            params: [
-                {
-                    hash: params[0],
-                    data: params[1],
-                    signature: params[2],
-                    confirmed: params[3]
-                }
-            ]
+            hash: params[0],
+            data: params[1],
+            signature: params[2],
+            confirmed: params[3]
         }
     }
 
@@ -113,17 +104,13 @@ export class OracleController {
     async export(
         @User() user: UserEntity,
         @Body() data: ExportDto
-    ): Promise<CallParamsDto> {
+    ): Promise<CallparamDto> {
         const params = await this.oracleService.userOutRequest(user, data)
         return {
-            params: [
-                {
-                    hash: params[0],
-                    data: params[1],
-                    signature: params[2],
-                    confirmed: params[3]
-                }
-            ]
+            hash: params[0],
+            data: params[1],
+            signature: params[2],
+            confirmed: params[3]
         }
     }
 
