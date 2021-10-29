@@ -1,7 +1,7 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { request } from 'graphql-request';
 import { useActiveWeb3React } from 'hooks/useActiveWeb3React/useActiveWeb3React';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Asset } from 'hooks/marketplace/types';
 import { StaticTokenData, useTokenStaticDataCallbackArray } from 'hooks/useTokenStaticDataCallback/useTokenStaticDataCallback';
 import { QUERY_USER_ERC721 } from 'subgraph/erc721Queries';
@@ -9,6 +9,7 @@ import { getAssetEntityId, StringAssetType } from 'utils/subgraph';
 import { TokenMeta } from 'hooks/useFetchTokenUri.ts/useFetchTokenUri.types';
 import { QUERY_USER_ERC1155 } from 'subgraph/erc1155Queries';
 import { useRawAssetsFromList } from 'hooks/useRawAssetsFromList/useRawAssetsFromList';
+import { useBlockNumber } from 'state/application/hooks';
 
 export interface OwnedTokens {
   id: string;
@@ -32,12 +33,20 @@ export interface UserCollection {
 }
 
 export const useOnChainItems = () => {
-  const { chainId } = useActiveWeb3React();
+  const { chainId, account } = useActiveWeb3React();
+  const blocknumber = useBlockNumber()
   const staticCallback = useTokenStaticDataCallbackArray();
   const rawCollections = useRawAssetsFromList()
 
-  const fetchUserCollection = useCallback(
-    async (account: string) => {
+  const [onChainItems, setOnChainItems] = useState<UserCollection | undefined>(undefined)
+
+  const fetchUserCollection = useCallback(async () => {
+
+      if (!account) {
+        setOnChainItems(undefined)
+        return
+      }
+
       const result: UserCollection = {}
       const fetches = rawCollections.map(async (collection) => {
         
@@ -128,10 +137,14 @@ export const useOnChainItems = () => {
       })
 
       await Promise.all(fetches)
-      return result
+      setOnChainItems(result)
     },
-    [chainId]
+    [chainId, blocknumber, account]
   );
 
-  return fetchUserCollection;
+  useEffect(() => {
+    fetchUserCollection()
+  }, [chainId, blocknumber, account])
+
+  return onChainItems;
 };
