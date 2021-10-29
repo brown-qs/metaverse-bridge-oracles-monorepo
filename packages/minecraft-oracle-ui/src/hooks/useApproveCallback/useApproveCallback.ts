@@ -9,7 +9,6 @@ import {
   useERC1155Contract,
   useERC721Contract,
 } from 'hooks/useContracts/useContracts';
-import token from 'pages/token';
 import {
   useHasPendingApproval,
   useTransactionAdder,

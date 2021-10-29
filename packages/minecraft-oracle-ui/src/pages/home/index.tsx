@@ -1,61 +1,38 @@
 import { Button } from 'ui';
 import { Typography } from '@material-ui/core';
-// import { MonaLisa, ShoppingCart, WalletIcon } from "icons";
 import { GlitchText, NavLink } from 'ui';
 import { useStyles } from './styles';
+
+import WhiteLogo from 'assets/images/logo-white.svg';
+import MinecraftImage from 'assets/images/minecraft.png';
 
 const HomePage = () => {
   const {
     homeContainer,
-    betaText,
-    betaTitle,
-    pageContent,
-    exploreButton,
-    icon,
-    iconContainer,
-    iconBlock,
+    logo,
+    leftBgImage,
+    rightBgImage,
+    loginButton,
+    glitchText,
   } = useStyles();
+
+  const handleLoginWithMinecraft = () => {
+      fetch('http://localhost:3030/api/v1/auth/login').then(response => window.location.href = response.url);
+  };
+
   return (
     <div className={homeContainer}>
-      <GlitchText fontSize={48}>Discover, collect, and sell NFTs</GlitchText>
-      <GlitchText fontSize={24}>
-        Moonsama, Moonriver's first NFT marketplace
-      </GlitchText>
+     <div className={logo}>
+        <img src={WhiteLogo} alt="" />
+     </div>
+     <span className={glitchText}>
+          Minecraft Metaverse
+     </span>
+        
+      <button className={loginButton} onClick={handleLoginWithMinecraft}>Login With Minecraft</button>
 
-      {/*<div className={iconBlock}>*/}
-      {/*  <div className={iconContainer}>*/}
-      {/*    <WalletIcon className={icon} />*/}
-      {/*    <Typography>Connect your wallet</Typography>*/}
-      {/*  </div>*/}
-      {/*  <div className={iconContainer}>*/}
-      {/*    <MonaLisa className={icon} />*/}
-      {/*    <Typography>Explore the marketplace</Typography>*/}
-      {/*  </div>*/}
-      {/*  <div className={iconContainer}>*/}
-      {/*    <ShoppingCart className={icon} />*/}
-      {/*    <Typography>Buy or sell assets</Typography>*/}
-      {/*  </div>*/}
-      {/*</div>*/}
-
-      <div className={pageContent}>
-        <NavLink href="/collections">
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            className={exploreButton}
-          >
-            Explore Collections
-          </Button>
-        </NavLink>
-      </div>
-
-      <Typography variant="h5" className={betaTitle}>
-        STILL IN BETA
-      </Typography>
-      <Typography align="center" className={betaText}>
-        Report to us if you find something weird
-      </Typography>
+      <img src={MinecraftImage} className={leftBgImage} alt="" />
+      <img src={MinecraftImage} className={rightBgImage} alt="" />
     </div>
   );
 };
