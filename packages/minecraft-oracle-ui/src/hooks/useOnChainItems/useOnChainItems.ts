@@ -1,4 +1,3 @@
-import { NFT_SUBGRAPH_URL } from '../../constants';
 import { BigNumber } from '@ethersproject/bignumber';
 import { request } from 'graphql-request';
 import { useActiveWeb3React } from 'hooks/useActiveWeb3React/useActiveWeb3React';
@@ -7,9 +6,9 @@ import { Asset } from 'hooks/marketplace/types';
 import { StaticTokenData, useTokenStaticDataCallbackArray } from 'hooks/useTokenStaticDataCallback/useTokenStaticDataCallback';
 import { QUERY_USER_ERC721 } from 'subgraph/erc721Queries';
 import { getAssetEntityId, StringAssetType } from 'utils/subgraph';
-import { useRawCollectionsFromList } from 'hooks/useRawCollectionsFromList/useRawCollectionsFromList';
 import { TokenMeta } from 'hooks/useFetchTokenUri.ts/useFetchTokenUri.types';
 import { QUERY_USER_ERC1155 } from 'subgraph/erc1155Queries';
+import { useRawAssetsFromList } from 'hooks/useRawAssetsFromList/useRawAssetsFromList';
 
 export interface OwnedTokens {
   id: string;
@@ -27,13 +26,15 @@ export interface UserCollection {
     meta: TokenMeta | undefined,
     staticData: StaticTokenData,
     asset: Asset,
+    enrapturable: boolean;
+    importable: boolean;
   }[]
 }
 
-export const useUserCollection = () => {
+export const useOnChainItems = () => {
   const { chainId } = useActiveWeb3React();
   const staticCallback = useTokenStaticDataCallbackArray();
-  const rawCollections = useRawCollectionsFromList()
+  const rawCollections = useRawAssetsFromList()
 
   const fetchUserCollection = useCallback(
     async (account: string) => {
@@ -45,7 +46,7 @@ export const useUserCollection = () => {
           return; 
         }
 
-        let assets: Asset[] = []
+        let assets: (Asset | undefined)[] = []
 
         if(collection.type === 'ERC721') {
           const query = QUERY_USER_ERC721(account)
@@ -67,6 +68,9 @@ export const useUserCollection = () => {
 
           assets = ot.ownedTokens.map((x) => {
             const aid = BigNumber.from(x.id).toString();
+            if (!(collection.ids ?? []).includes(x.id)) {
+                return undefined
+            }
             return {
               assetId: aid,
               id: getAssetEntityId(x.contract.id, aid),
@@ -96,6 +100,9 @@ export const useUserCollection = () => {
           .filter(x => x.balance !== '0')
           .map((x) => {
             const aid = BigNumber.from(x.token.id).toString();
+            if (!(collection.ids ?? []).includes(x.token.id)) {
+                return undefined
+            }
             return {
               assetId: aid,
               id: getAssetEntityId(x.token.contract.id, aid),
@@ -105,13 +112,15 @@ export const useUserCollection = () => {
           });
         }
 
-        const staticDatas = await staticCallback(assets);
+        const staticDatas = await staticCallback(assets.filter(x => !!x) as Asset[]);
 
         const datas = staticDatas.map((sd, i) => {
           return {
             meta: sd.meta,
             staticData: sd.staticData,
-            asset: assets[i],
+            asset: assets[i] as Asset,
+            enrapturable: collection.enrapturable,
+            importable: collection.importable
           };
         });
         result[collection.display_name] = datas
