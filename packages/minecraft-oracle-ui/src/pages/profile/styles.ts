@@ -85,11 +85,7 @@ export const useStyles = makeStyles((theme) => ({
         paddingTop: '32px',
 
         '& img': {
-            width: '55px',
-            position: 'absolute',
-            top: '-35px',
-            left: '50%',
-            transform: 'translateX(-50%)',
+
         }
     },
     statBoxInfo: {
@@ -104,12 +100,38 @@ export const useStyles = makeStyles((theme) => ({
         color: '#fff !important'
     },
     transferButtonSmall: {
-        fontSize: '22px',
+        fontFamily: `VT323, 'arial'`,
+        border: 'none',
+        outline: 'none',
+        display: 'block',
+        fontSize: '18px',
+        lineHeight: '20px',
+        alignSelf: 'center',
+        height: '25px',
+        width: '140px',
+        padding: '2px 6px',
+        boxShadow: '3px 0px #133db9, -3px 0px #133db9, 0px 3px #133db9, 0px -3px #133db9, 0px 8px #2979ff, -3px 6px #2a6cda, 3px 6px #2a6cda',
+        background: '#133DB9',
+        color: '#eee',
+        margin: '15px 0',
+        transition: 'box-shadow 0.1s, background 0.1s, padding 0.1s',
 
-        '& svg': {
-          margin: '0 0 0 8px',
-          fontSize: '30px',
-          fill: '#133DB9',
+        '&:hover': {
+            background: '#2353E0',
         },
+        '&:active': {
+            boxShadow: '3px 3px #2353e0, -3px 3px #2353e0, 0px 6px #2353e0, 0px 0px #133db9, 0px 8px #2979ff, -3px 6px #2a6cda, 3px 6px #2a6cda',
+            background: '#2353E0',
+            paddingTop: '8px',
+            paddingBottom: '5px',
+            transition: 'box-shadow 0.1s, background 0.1s, padding 0.1s',
+        },
+    },
+    headerImage: {
+        width: '55px',
+        position: 'absolute',
+        top: '-35px',
+        left: '50%',
+        transform: 'translateX(-50%)',
     }
 }));
