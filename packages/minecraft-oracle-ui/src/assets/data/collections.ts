@@ -49,6 +49,7 @@ export const collections = {
       importable: true,
       enrapturable: false,
       contractURI: 'ipfs://QmQzz765Q6j2LjWJHPmComm1i7Kpeccz27x6tpTeHFFCxg',
+      subgraph: 'https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/nft-test'
     },
     {
       chainId: 1285,
