@@ -202,10 +202,10 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                         <div style={{ width: '50%' }}>
                             <div className={columnTitle}><span className={columnTitleText}>Wallet Items</span></div>
                             <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
-                                {!!onChainMoonsamas.length || !!onChainGoldenTickets.length ? [...onChainMoonsamas, ...onChainGoldenTickets].map((item) => {
+                                {!!onChainMoonsamas.length || !!onChainGoldenTickets.length ? [...onChainMoonsamas, ...onChainGoldenTickets].map((item, ind) => {
                                     return (
                                         <ListItem
-                                            key={1} //update key
+                                            key={ind} //update key
                                             disablePadding
                                         >
                                             <ListItemButton>
