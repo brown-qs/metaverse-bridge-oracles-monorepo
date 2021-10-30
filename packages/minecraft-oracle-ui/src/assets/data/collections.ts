@@ -38,16 +38,17 @@ export const collections = {
   types: ['ERC20', 'ERC721', 'ERC1155'],
   indexing: ['none', 'sequential'],
   assets: [
-    /*
+    
     {
       chainId: 1285,
       address: '0xaF1F85aD24Bc45fb19f5F8B5166e1Aed41c60844',
       display_name: 'SamaMoo',
       symbol: 'SAMAMOO',
       type: 'ERC721',
-      indexing: 'sequential',
+      ids: undefined,
+      importable: true,
+      enrapturable: false,
       contractURI: 'ipfs://QmQzz765Q6j2LjWJHPmComm1i7Kpeccz27x6tpTeHFFCxg',
-      tags: ['native', 'green'],
     },
     {
       chainId: 1285,
@@ -55,13 +56,13 @@ export const collections = {
       display_name: 'TestCollection',
       symbol: 'TC',
       type: 'ERC1155',
-      indexing: 'sequential',
+      ids: ['1'],
+      importable: true,
+      enrapturable: false,
       contractURI: 'ipfs://QmfZtbgLDmcDNf4tvhm1LuLmbBYSASmk6zcSBY2GRzh72S',
-      tags: ['native', 'green'],
       subgraph: 'https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/nft-1155-test'
-      
     },
-    */
+    /*
     {
       chainId: 1285,
       address: '0xb654611F84A8dc429BA3cb4FDA9Fad236C505a1a',
@@ -86,6 +87,7 @@ export const collections = {
       contractURI: 'ipfs://QmWox8YqUaYVxSSB7GRhPAuczv6auL8QrkDrkMTcqGEGKA',
       subgraph: 'https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/nft-1155-mx'
     }
+    */
   ]
 };
 

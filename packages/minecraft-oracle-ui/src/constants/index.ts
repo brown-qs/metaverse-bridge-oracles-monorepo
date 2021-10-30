@@ -77,9 +77,9 @@ export const EXPLORER_URL: { [chainId in ChainId]?: string } = {
   [ChainId.MOONRIVER]: 'https://blockscout.moonriver.moonbeam.network',
 };
 
-export const METAVERSE_V1_ADDRESS: { [chainId in ChainId]?: string } = {
+export const MULTIVERSE_BRIDGE_V1_ADDRESS: { [chainId in ChainId]?: string } = {
   [ChainId.VOLTA]: '0x58df3876BcE94941DE59088c5963781984EF264b',
-  [ChainId.MOONRIVER]: 'https://blockscout.moonriver.moonbeam.network',
+  [ChainId.MOONRIVER]: '0x710ddbaA47A4cCdC85A507a264865260e82c18EE',
 };
 
 export const PROTOCOL_FEE_BPS = '200';
