@@ -21,15 +21,7 @@ const HomePage = () => {
   const handleLoginWithMinecraft = () => {
       setIsLoading(true);
 
-      fetch('http://localhost:3030/api/v1/auth/login')
-          .then(response => {
-              console.log('Logged In');
-              setIsLoading(false);
-          })
-          .catch(error => {
-              console.log('Error Logging in: ', error);
-              setIsLoading(false);
-          });
+      window.location.href = 'http://localhost:3030/api/v1/auth/login';
   };
 
   return (

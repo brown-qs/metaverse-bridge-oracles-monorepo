@@ -53,39 +53,188 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
         setChecked(newChecked);
     };
 
+    const playerEligible = true;
+
     const {
         profileContainer,
-        footerBg,
         transferButton,
         statBox,
         columnTitle,
         columnTitleText,
         statBoxInfo,
-        checkBox,
         transferButtonSmall,
+        headerImage
     } = useStyles();
+
+    const handleSummonItems = () => {
+
+    }
 
     return (
         <Grid className={profileContainer}>
             <Header />
-            <Grid container justifyContent="center" spacing={4}>
-                <Grid item md={5} xs={12} justifyContent="center">
-                        <div className={statBox}>
-                            MSAMAS
-                            <img src={MsamaImage} alt="Moonsama" />
+            {playerEligible ? (
+                <>
+                <Grid container justifyContent="center" spacing={4}>
+                    <div style={{ width: '100%', textAlign: 'right' }}>
+                        <span style={{fontSize: '22px',}}>Welcome back Cleanston3r,</span> <br />
 
-                            <div className={statBoxInfo}>
-                            </div>
-                        </div>
-                </Grid>
-                <Grid item md={5} xs={12} justifyContent="center">
-                    <div className={statBox}>
-                        Tickets
-                        <img src={TicketImage} alt="Moonsama" />
-
-                        <div className={statBoxInfo}>
-                        </div>
+                        <span style={{ color:'#12753A', fontSize: '16px', fontWeight: 'bold' }}>You are Eligible to play!</span>
                     </div>
+
+                    <Grid container justifyContent="center" spacing={4} style={{ margin: '56px 0 0 0' }}>
+                        <Grid item md={2} xs={12} justifyContent="center">
+                            <div className={statBox}>
+                                MSAMA
+                                <img className={headerImage} src={MsamaImage} alt="Moonsama" />
+
+                                <div className={statBoxInfo}>
+                                    {/*<div><GameIcon /> 1</div>*/}
+                                    <div>4</div>
+                                    {/*<div><WalletIcon /> 3</div>*/}
+                                </div>
+                            </div>
+                        </Grid>
+                        <Grid item md={2} xs={12} justifyContent="center">
+                            <div className={statBox}>
+                                Items
+                                <img className={headerImage} src={Resource3} alt="Moonsama" />
+
+                                <div className={statBoxInfo}>
+                                    {/*<div><GameIcon /> 1</div>*/}
+                                    <div>69</div>
+                                    {/*<div><WalletIcon /> 3</div>*/}
+                                </div>
+                            </div>
+                        </Grid>
+                        <Grid item md={2} xs={12} justifyContent="center">
+                            <div className={statBox}>
+                                Wood
+                                <img className={headerImage} src={Resource1} alt="Moonsama" />
+
+                                <div className={statBoxInfo}>
+                                    {/*<div><GameIcon /> 1</div>*/}
+                                    <div>14,000</div>
+                                    {/*<div><WalletIcon /> 3</div>*/}
+                                </div>
+                            </div>
+                        </Grid>
+                        <Grid item md={2} xs={12} justifyContent="center">
+                            <div className={statBox}>
+                                Cobblestone
+                                <img className={headerImage} src={Resource3} alt="Moonsama" />
+
+                                <div className={statBoxInfo}>
+                                    <div>20,000</div>
+                                </div>
+                            </div>
+                        </Grid>
+                        <Grid item md={2} xs={12} justifyContent="center">
+                            <div className={statBox}>
+                                iron Ingot
+                                <img className={headerImage} src={Resource4} alt="Moonsama" />
+
+                                <div className={statBoxInfo}>
+                                    {/*<div><GameIcon /> 1</div>*/}
+                                    <div>669</div>
+                                    {/*<div><WalletIcon /> 3</div>*/}
+                                </div>
+                            </div>
+                        </Grid>
+                        <Grid item md={2} xs={12} justifyContent="center">
+                            <div className={statBox}>
+                                Gold Ingot
+                                <img className={headerImage} src={Resource5} alt="Moonsama" />
+
+                                <div className={statBoxInfo}>
+                                    {/*<div><GameIcon /> 1</div>*/}
+                                    <div>6</div>
+                                    {/*<div><WalletIcon /> 3</div>*/}
+                                </div>
+                            </div>
+                        </Grid>
+                    </Grid>
+
+                 <Grid container justifyContent="center" style={{ marginTop: '20px' }} spacing={4}>
+                    <Grid item md={9} xs={12} justifyContent="center" style={{ textAlign: 'center' }}>
+                    <Stack
+                        direction={{ xs: 'column', sm: 'row' }}
+                        justifyContent="space-between"
+                        alignItems="flex-start"
+                        spacing={4}
+                    >
+                        <div style={{ width: '50%' }}>
+                            <div className={columnTitle}><span className={columnTitleText}>In-game Items</span></div>
+                            <List dense sx={{ width: '100%', bgcolor: '#111' }}>
+                                {['MSAMA #45'].map((value) => {
+                                    const labelId = `checkbox-list-secondary-label-${value}`;
+                                    return (
+                                        <ListItem
+                                            key={value}
+                                            disablePadding
+                                        >
+                                            <ListItemButton>
+                                                <ListItemAvatar>
+                                                    <img src={Resource1} alt="" />
+                                                </ListItemAvatar>
+                                                <ListItemText id={labelId} primary={value} />
+
+                                                <Button className={transferButtonSmall}>Export To Wallet</Button>
+                                            </ListItemButton>
+                                        </ListItem>
+                                    );
+                                })}
+                            </List>
+                        </div>
+                        <div style={{ width: '50%' }}>
+                            <div className={columnTitle}><span className={columnTitleText}>Wallet Items</span></div>
+                            <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
+                                {['MSAMA #133', 'MSAMA #522', 'MSAMA #922'].map((value) => {
+                                    const labelId = `checkbox-list-secondary-label-${value}`;
+                                    return (
+                                        <ListItem
+                                            key={value}
+                                            disablePadding
+                                        >
+                                            <ListItemButton>
+                                                <ListItemAvatar>
+                                                    <img src={Resource4} alt="" />
+                                                </ListItemAvatar>
+                                                <ListItemText id={labelId} primary={value} />
+
+                                                <Button className={transferButtonSmall}>Import To Game</Button>
+                                            </ListItemButton>
+                                        </ListItem>
+                                    );
+                                })}
+                            </List>
+                        </div>
+                     </Stack>
+                     </Grid>
+                     <Grid item md={3} xs={12} justifyContent="center">
+                         <div className={columnTitle}><span className={columnTitleText}>GGANBU</span></div>
+                         <List dense sx={{ width: '100%', maxWidth: '100%', bgcolor: '#111', marginBottom: '16px' }}>
+                             {['t3rminat0r','gamer6969'].map((value) => {
+                                 const labelId = `checkbox-list-secondary-label-${value}`;
+                                 return (
+                                     <ListItem
+                                         key={value}
+                                         secondaryAction={
+                                             <RemoveIcon sx={{ color: "#DB3B21" }} />
+                                         }
+                                         disablePadding
+                                     >
+                                         <ListItemButton>
+                                             <ListItemAvatar>
+                                                 <PeopleAltIcon />
+                                             </ListItemAvatar>
+                                             <ListItemText id={labelId} primary={value} />
+                                         </ListItemButton>
+                                     </ListItem>
+                                 );
+                             })}
+                         </List>
+                     </Grid>
                 </Grid>
             </Grid>
             <Grid container justifyContent="center" style={{ marginTop: '80px' }} spacing={4}>
@@ -107,13 +256,6 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                         secondaryAction={
                                             <>
                                                 420
-                                                <Checkbox
-                                                    className={checkBox}
-                                                    edge="end"
-                                                    onChange={handleToggle(value)}
-                                                    checked={checked.indexOf(value) !== -1}
-                                                    inputProps={{ 'aria-labelledby': labelId }}
-                                                />
                                             </>
                                         }
                                         disablePadding
@@ -131,7 +273,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                         <Button className={transferButton}>Summon Resources</Button>
                     </div>
                     <div style={{ width: '50%' }}>
-                        <div className={columnTitle}><span className={columnTitleText}>Wallet Tokens</span></div>
+                        <div className={columnTitle}><span className={columnTitleText}>Wallet Resources</span></div>
                         <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
                             {['$RES3', '$RES4', '$RES2'].map((value) => {
                                 const labelId = `checkbox-list-secondary-label-${value}`;
@@ -139,9 +281,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                     <ListItem
                                         key={value}
                                         secondaryAction={
-                                            <>
-                                                122
-                                            </>
+                                            <>122</>
                                         }
                                         disablePadding
                                     >
@@ -173,30 +313,10 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     {/*        );*/}
                     {/*    })}*/}
                     {/*</List>*/}
-                    <div className={columnTitle}><span className={columnTitleText}>GGANBU</span></div>
-                    <List dense sx={{ width: '100%', maxWidth: '100%', bgcolor: '#111', marginBottom: '16px' }}>
-                        {['t3rminat0r','gamer6969'].map((value) => {
-                            const labelId = `checkbox-list-secondary-label-${value}`;
-                            return (
-                                <ListItem
-                                    key={value}
-                                    secondaryAction={
-                                        <RemoveIcon sx={{ color: "#DB3B21" }} />
-                                    }
-                                    disablePadding
-                                >
-                                    <ListItemButton>
-                                        <ListItemAvatar>
-                                            <PeopleAltIcon />
-                                        </ListItemAvatar>
-                                        <ListItemText id={labelId} primary={value} />
-                                    </ListItemButton>
-                                </ListItem>
-                            );
-                        })}
-                    </List>
                 </Grid>
             </Grid>
+                </>
+            ) : <p>You are not eligible to play. <a href="https://moonsama.com/freshoffers" target="_blank">Visit Marketplace</a></p>}
 
 
 
