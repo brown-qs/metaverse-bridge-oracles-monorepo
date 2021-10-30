@@ -28,6 +28,15 @@ export interface TransactionDetails {
   cancel?: {
     orderHash: string;
   };
+  importResult?: {
+    hash: string;
+  };
+  exportResult?: {
+    hash: string;
+  };
+  enraptureResult?: {
+    hash: string;
+  };
   transfer?: {
     asset: Asset;
     amount: BigNumber;
@@ -63,6 +72,9 @@ export default createReducer(initialState, (builder) =>
             summary,
             order,
             fill,
+            enraptureResult,
+            importResult,
+            exportResult,
             cancel,
             transfer,
           },
@@ -78,6 +90,9 @@ export default createReducer(initialState, (builder) =>
           fill,
           cancel,
           transfer,
+          enraptureResult,
+          importResult,
+          exportResult
         });
         if (transactions[chainId]?.[hash]) {
           throw Error('Attempted to add existing transaction.');
@@ -92,6 +107,9 @@ export default createReducer(initialState, (builder) =>
           fill,
           cancel,
           transfer,
+          enraptureResult,
+          importResult,
+          exportResult,
           addedTime: now(),
         };
         transactions[chainId] = txs;

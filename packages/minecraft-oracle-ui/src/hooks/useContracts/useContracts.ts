@@ -2,6 +2,7 @@ import { Contract } from '@ethersproject/contracts';
 import {
   ChainId,
   MARKETPLACE_V1_ADDRESS,
+  METAVERSE_V1_ADDRESS,
   MULTICALL_NETWORKS,
   RECOGNIZED_COLLECTIONS_ADDRESS,
   WAREHOUSE_ADDRESS,
@@ -10,6 +11,7 @@ import { useMemo } from 'react';
 import { getContract } from 'utils';
 import {
   MARKETPLACE_V1_ABI,
+  METAVERSE_V1_ABI,
   RECOGNIZED_COLLECTIONS_ABI,
   WAREHOUSE_ABI,
 } from '../../abi/marketplace';
@@ -39,6 +41,19 @@ export const useContract = (
     }
   }, [address, ABI, library, withSignerIfPossible, account]);
 };
+
+export function useMetaverseV1Contract(
+  withSignerIfPossible = true
+): Contract | null {
+  const { chainId } = useActiveWeb3React();
+  return useContract(
+    chainId
+      ? METAVERSE_V1_ADDRESS[(chainId as ChainId) ?? ChainId.MOONRIVER]
+      : undefined,
+    METAVERSE_V1_ABI,
+    withSignerIfPossible
+  );
+}
 
 export function useMarketplaceV1Contract(
   withSignerIfPossible = true
