@@ -57,5 +57,9 @@ export const useStyles = makeStyles((theme) => ({
   eventIconActive: {
     margin: '0 10px 0 0',
     color: '#12753A'
+  },
+  eventIconInactive: {
+    margin: '0 10px 0 0',
+    color: '#DB3B21'
   }
 }));
