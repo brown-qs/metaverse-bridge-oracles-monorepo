@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { TransferList } from 'ui';
 import { Button, Card, Grid } from '@material-ui/core';
 import Stack from '@mui/material/Stack';
 import { Header, GlitchText, NavLink } from 'ui';
@@ -9,9 +8,6 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
-import Checkbox from '@mui/material/Checkbox';
-import GameIcon from '@mui/icons-material/VideogameAsset';
-import WalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import PeopleAltIcon from '@mui/icons-material/PeopleAltSharp';
 import RemoveIcon from '@mui/icons-material/RemoveCircleSharp';
 import SwapHorizIcon from '@mui/icons-material/SwapHorizSharp';
@@ -27,6 +23,11 @@ import Resource6 from "../../assets/images/resource6.png";
 import MsamaImage from "../../assets/images/msama.png";
 import TicketImage from "../../assets/images/vipticket.png";
 import { useProfile } from 'hooks/multiverse/useProfile';
+import { useOnChainItems } from 'hooks/multiverse/useOnChainItems';
+import { useInGameItems } from 'hooks/multiverse/useInGameItems';
+import { useExportAssetCallback } from 'hooks/multiverse/useExportAsset';
+import { useImportAssetCallback } from 'hooks/multiverse/useImportAsset';
+import { useSummonCallback } from 'hooks/multiverse/useSummon';
 
 export type ProfilePagePropTypes = {
     authData: AuthData
@@ -35,7 +36,21 @@ export type ProfilePagePropTypes = {
 
 const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const [checked, setChecked] = React.useState(['']);
-    const profile = useProfile()
+    const profile = useProfile();
+
+    //On chain Items
+    const onChainItems = useOnChainItems();
+    const onChainMoonsamas = onChainItems?.['SamaMoo'] || []; //Update with live key
+    const onChainGoldenTickets = onChainItems?.['TestCollection'] || []; //Update with live key
+    const onChainResources = [];
+
+    //In Game Items
+    const inGameItems = useInGameItems();
+    const inGameMoonsamas = inGameItems?.moonsamas || [];
+    const inGameTickets = inGameItems?.tickets || [];
+    const inGameResources = inGameItems?.resources || [];
+
+    console.log(inGameItems, onChainItems, !!inGameMoonsamas.length || !!inGameTickets.length);
 
     // const { jwt, userProfile } = authData;
 
@@ -62,7 +77,8 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
         columnTitleText,
         statBoxInfo,
         transferButtonSmall,
-        headerImage
+        headerImage,
+        itemImage
     } = useStyles();
 
     const handleSummonItems = () => {
@@ -89,7 +105,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
                                 <div className={statBoxInfo}>
                                     {/*<div><GameIcon /> 1</div>*/}
-                                    <div>4</div>
+                                    <div>{onChainItems?.['Moonsama'] || 'N/A'}</div>
                                     {/*<div><WalletIcon /> 3</div>*/}
                                 </div>
                             </div>
@@ -165,11 +181,11 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                         <div style={{ width: '50%' }}>
                             <div className={columnTitle}><span className={columnTitleText}>In-game Items</span></div>
                             <List dense sx={{ width: '100%', bgcolor: '#111' }}>
-                                {['MSAMA #45'].map((value) => {
+                                {!!inGameMoonsamas.length || !!inGameTickets.length ? [...inGameMoonsamas, ...inGameTickets].map((value) => {
                                     const labelId = `checkbox-list-secondary-label-${value}`;
                                     return (
                                         <ListItem
-                                            key={value}
+                                            key={1} //update key
                                             disablePadding
                                         >
                                             <ListItemButton>
@@ -182,30 +198,37 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                             </ListItemButton>
                                         </ListItem>
                                     );
-                                })}
+                                }) : (
+                                    <ListItem>
+                                        No items found in game.
+                                    </ListItem>
+                                )}
                             </List>
                         </div>
                         <div style={{ width: '50%' }}>
                             <div className={columnTitle}><span className={columnTitleText}>Wallet Items</span></div>
                             <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
-                                {['MSAMA #133', 'MSAMA #522', 'MSAMA #922'].map((value) => {
-                                    const labelId = `checkbox-list-secondary-label-${value}`;
+                                {!!onChainMoonsamas.length || !!onChainGoldenTickets.length ? [...onChainMoonsamas, ...onChainGoldenTickets].map((item) => {
                                     return (
                                         <ListItem
-                                            key={value}
+                                            key={1} //update key
                                             disablePadding
                                         >
                                             <ListItemButton>
                                                 <ListItemAvatar>
-                                                    <img src={Resource4} alt="" />
+                                                    <img className={itemImage} src={item?.meta?.image} alt="" />
                                                 </ListItemAvatar>
-                                                <ListItemText id={labelId} primary={value} />
+                                                <ListItemText primary={item?.meta?.name} />
 
                                                 <Button className={transferButtonSmall}>Import To Game</Button>
                                             </ListItemButton>
                                         </ListItem>
                                     );
-                                })}
+                                }) : (
+                                    <ListItem>
+                                        No items found in wallet.
+                                    </ListItem>
+                                )}
                             </List>
                         </div>
                      </Stack>

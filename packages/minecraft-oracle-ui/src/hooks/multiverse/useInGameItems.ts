@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios'
 import { useBlockNumber } from 'state/application/hooks';
+import { useAuth } from 'hooks';
 
 export interface InGameItem {
     name: string
@@ -17,28 +18,29 @@ export interface ProfileInGameItems {
     resources: InGameItem[]
 }
 
-export function useInGameItems(recipient: string) {
-    const blocknumber = useBlockNumber()
+export function useInGameItems() {
+    const { authData } =  useAuth();
+    const blocknumber = useBlockNumber();
 
-    const [items, setItems] = useState<ProfileInGameItems | undefined>(undefined)
+    const [items, setItems] = useState<ProfileInGameItems | undefined>(undefined);
 
     const getUserItems = useCallback(async () => {
         try {
             const resp = await axios.request<ProfileInGameItems>({
-                method: 'put',
+                method: 'get',
                 url: `${process.env.REACT_APP_BACKEND_API_URL}/user/resources`,
-                data: {recipient}
+                headers: { Authorization: `Bearer ${authData?.jwt}` }
             });
             setItems(resp.data)
         } catch(e) {
             console.error('Error summoning. Try again later.')
             setItems(undefined)
         }
-    }, [blocknumber, recipient])
+    }, [blocknumber])
 
     useEffect(() => {
         getUserItems()
-    }, [blocknumber, recipient])
+    }, [blocknumber])
 
     return items
 }
