@@ -7,8 +7,10 @@ import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import { useStyles } from './Header.styles';
 import { NavLink, Drawer } from 'ui';
+import { useActiveGame } from 'hooks/multiverse/useActiveGame';
 import MenuIcon from '@mui/icons-material/Menu';
-import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import VideogameAssetIcon from '@mui/icons-material/VideogameAsset';
+import VideogameAssetOffIcon from '@mui/icons-material/VideogameAssetOff';
 import IconButton from '@material-ui/core/IconButton';
 
 import WhiteLogo from 'assets/images/logo-white.svg';
@@ -16,14 +18,14 @@ import { Account } from 'components';
 import { MAX_WIDTH_TO_SHOW_NAVIGATION } from '../../constants';
 
 export const Header = () => {
-  const { appBar, logo, nav, navItem, buttonContainer, navItemDrawer, eventStatusWrapper, eventIconActive } = useStyles();
+  const isGameActive = useActiveGame();
+  const { appBar, logo, nav, navItem, buttonContainer, navItemDrawer, eventStatusWrapper, eventIconActive, eventIconInactive } = useStyles();
 
   const showRegularMenu = useMediaQuery(
       `(max-width: ${MAX_WIDTH_TO_SHOW_NAVIGATION}px)`
   );
 
   const [isDrawerOpened, setIsDrawerOpened] = useState<boolean>(false);
-
 
   return (
     <>
@@ -65,7 +67,15 @@ export const Header = () => {
                         )}
 
                         <div className={eventStatusWrapper}>
-                            <EventAvailableIcon className={eventIconActive} /> Event Active - 01h:42m Remaining
+                            {isGameActive ? (
+                                <>
+                                    <VideogameAssetIcon className={eventIconActive} /> Game Active
+                                </>
+                            ) : (
+                                <>
+                                    <VideogameAssetOffIcon className={eventIconInactive} /> Game Inactive
+                                </>
+                            )}
                         </div>
 
                         <Account />

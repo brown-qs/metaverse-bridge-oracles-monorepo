@@ -11,13 +11,7 @@ export interface InGameItem {
     exportable: boolean
 }
 
-export interface ProfileInGameItems {
-    moonsamas: InGameItem[],
-    tickets: InGameItem[],
-    resources: InGameItem[]
-}
-
-export function useActiveGame(recipient: string) {
+export function useActiveGame() {
     const blocknumber = useBlockNumber()
 
     const [items, setItems] = useState<boolean>(false)
@@ -33,11 +27,11 @@ export function useActiveGame(recipient: string) {
             console.error('Error summoning. Try again later.')
             setItems(false)
         }
-    }, [blocknumber, recipient])
+    }, [blocknumber])
 
     useEffect(() => {
         getUserItems()
-    }, [blocknumber, recipient])
+    }, [blocknumber])
 
     return items
 }
