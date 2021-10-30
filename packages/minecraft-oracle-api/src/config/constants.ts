@@ -76,6 +76,20 @@ export const IMPORTABLE_ASSETS: RecognizedAsset[] = [
       type: RecognizedAssetType.MOONSAMA,
       chainId: ChainId.VOLTA,
       name: 'Moonsama'
+    },
+    {
+      address: '0x63228048121877A9e0f52020834A135074e8207C'.toLowerCase(),
+      id: '1',
+      type: RecognizedAssetType.TICKET,
+      chainId: ChainId.MOONRIVER,
+      name: 'Golden ticket'
+    },
+    {
+      address: '0xaF1F85aD24Bc45fb19f5F8B5166e1Aed41c60844'.toLowerCase(),
+      id: undefined,
+      type: RecognizedAssetType.MOONSAMA,
+      chainId: ChainId.MOONRIVER,
+      name: 'Moonsama'
     }
 ]
 
