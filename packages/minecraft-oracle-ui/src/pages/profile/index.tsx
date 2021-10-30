@@ -15,7 +15,7 @@ import WalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import PeopleAltIcon from '@mui/icons-material/PeopleAltSharp';
 import RemoveIcon from '@mui/icons-material/RemoveCircleSharp';
 import SwapHorizIcon from '@mui/icons-material/SwapHorizSharp';
-import { AuthContextType } from 'context/auth/AuthContext/AuthContext.types';
+import { AuthContextType, ProfileContextType } from 'context/auth/AuthContext/AuthContext.types';
 
 import MinecraftBlocksBgImage from 'assets/images/minecraft-blocksbg.png';
 import Resource1 from "../../assets/images/resource1.png";
@@ -30,8 +30,8 @@ import TicketImage from "../../assets/images/vipticket.png";
 export type ProfilePagePropTypes = {
     authData: {
         jwt: string,
-        userProfile: object
-    } | null,
+        userProfile: ProfileContextType | undefined
+    } | undefined,
 };
 
 

@@ -1,7 +1,7 @@
 import { Button } from 'ui';
 import { HeaderBalance } from 'components/HeaderBalance/HeaderBalance';
 import { UnsupportedChainIdError } from '@web3-react/core';
-import { useAccountDialog, useActiveWeb3React } from 'hooks';
+import { useAccountDialog, useActiveWeb3React, useAuth } from 'hooks';
 import { truncateAddress } from 'utils';
 import Identicon from 'components/Identicon/Identicon';
 import PersonSharpIcon from '@mui/icons-material/PersonSharp';
@@ -21,6 +21,8 @@ export const Account = () => {
     error instanceof UnsupportedChainIdError ? 'Wrong Network' : 'Error';
 
   const { button } = useStyles();
+
+  const {authData} = useAuth()
 
   return (
     <>
@@ -64,7 +66,7 @@ export const Account = () => {
         <div style={{ fontSize: 0, margin: '0 8px' }}>
             <PersonSharpIcon />
         </div>
-        cleanston3r
+        authData?.userProfile
       </Button>
     </>
   );

@@ -9,12 +9,14 @@ import { UserEntity } from '../user/user.entity';
 import { RecognizedAsset, RecognizedAssetType } from '../config/constants';
 import { ProviderToken } from '../provider/token';
 import { ProfileItemDto, ProfileItemsDto } from './dtos/profileItem.dto';
+import { GameSessionService } from 'src/gamesession/gamesession.service';
 
 @Injectable()
 export class ProfileService {
     constructor(
         private readonly snapshotService: SnapshotService,
         private readonly assetService: AssetService,
+        private readonly gameSessionService: GameSessionService,
         @Inject(ProviderToken.IMPORTABLE_ASSETS) private importableAssets: RecognizedAsset[],
         @Inject(ProviderToken.ENRAPTURABLE_ASSETS) private enrapturableAssets: RecognizedAsset[],
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
@@ -112,6 +114,10 @@ export class ProfileService {
             numTicket: user.numTicket,
             numMoonsama: user.numMoonsama
         }
+    }
+
+    public async getGameInProgress(): Promise<boolean> {
+        return !!(await this.gameSessionService.getOngoing())
     }
 
 }

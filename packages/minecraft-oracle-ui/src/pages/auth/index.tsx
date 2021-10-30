@@ -1,4 +1,3 @@
-import React from 'react';
 import { useParams, Redirect } from "react-router-dom";
 import { useAuth } from "hooks";
 
@@ -14,7 +13,7 @@ const AuthPage = () => {
     if(jwt) {
         setAuthData({
            jwt,
-           userProfile: {},
+           userProfile: undefined,
         });
 
         return <Redirect to='/profile'  />;
