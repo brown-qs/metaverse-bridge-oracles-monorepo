@@ -16,7 +16,9 @@ export type ProfileContextType = {
   numMoonsama: number
 }
 
+export type AuthData = { jwt?: string, userProfile?: ProfileContextType } | undefined
+
 export type AuthContextType = {
-    authData: { jwt: string, userProfile: ProfileContextType | undefined } | undefined;
-    setAuthData: React.Dispatch<React.SetStateAction<{jwt: string, userProfile: ProfileContextType | undefined } | undefined>>;
+    authData: AuthData;
+    setAuthData: React.Dispatch<React.SetStateAction<AuthData>>;
 };
