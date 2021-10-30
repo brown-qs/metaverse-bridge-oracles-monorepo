@@ -47,10 +47,8 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     //In Game Items
     const inGameItems = useInGameItems();
     const inGameMoonsamas = inGameItems?.moonsamas || [];
-    const inGameTickets = inGameItems?.tickets || [];
+    const inGameGoldenTickets = inGameItems?.tickets || [];
     const inGameResources = inGameItems?.resources || [];
-
-    console.log(inGameItems, onChainItems, !!inGameMoonsamas.length || !!inGameTickets.length);
 
     // const { jwt, userProfile } = authData;
 
@@ -92,7 +90,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                 <>
                 <Grid container justifyContent="center" spacing={4}>
                     <div style={{ width: '100%', textAlign: 'right' }}>
-                        <span style={{fontSize: '22px',}}>Welcome back Cleanston3r,</span> <br />
+                        <span style={{fontSize: '22px',}}>Welcome back {authData?.userProfile?.userName},</span> <br />
 
                         <span style={{ color:'#12753A', fontSize: '16px', fontWeight: 'bold' }}>You are Eligible to play!</span>
                     </div>
@@ -101,31 +99,27 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                         <Grid item md={2} xs={12} justifyContent="center">
                             <div className={statBox}>
                                 MSAMA
-                                <img className={headerImage} src={MsamaImage} alt="Moonsama" />
+                                <img className={headerImage} src={MsamaImage} alt="Moonsama bird" />
 
                                 <div className={statBoxInfo}>
-                                    {/*<div><GameIcon /> 1</div>*/}
-                                    <div>{onChainItems?.['Moonsama'] || 'N/A'}</div>
-                                    {/*<div><WalletIcon /> 3</div>*/}
+                                    <div>{onChainMoonsamas.length + inGameMoonsamas.length}</div>
                                 </div>
                             </div>
                         </Grid>
                         <Grid item md={2} xs={12} justifyContent="center">
                             <div className={statBox}>
-                                Items
-                                <img className={headerImage} src={Resource3} alt="Moonsama" />
+                                Tickets
+                                <img className={headerImage} src={TicketImage} alt="Moonsama VIP ticket" />
 
                                 <div className={statBoxInfo}>
-                                    {/*<div><GameIcon /> 1</div>*/}
-                                    <div>69</div>
-                                    {/*<div><WalletIcon /> 3</div>*/}
+                                    <div>{onChainGoldenTickets.length + inGameGoldenTickets.length}</div>
                                 </div>
                             </div>
                         </Grid>
                         <Grid item md={2} xs={12} justifyContent="center">
                             <div className={statBox}>
                                 Wood
-                                <img className={headerImage} src={Resource1} alt="Moonsama" />
+                                <img className={headerImage} src={Resource1} alt="Moonsama Wood" />
 
                                 <div className={statBoxInfo}>
                                     {/*<div><GameIcon /> 1</div>*/}
@@ -137,7 +131,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                         <Grid item md={2} xs={12} justifyContent="center">
                             <div className={statBox}>
                                 Cobblestone
-                                <img className={headerImage} src={Resource3} alt="Moonsama" />
+                                <img className={headerImage} src={Resource3} alt="Moonsama Cobblestone" />
 
                                 <div className={statBoxInfo}>
                                     <div>20,000</div>
@@ -147,7 +141,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                         <Grid item md={2} xs={12} justifyContent="center">
                             <div className={statBox}>
                                 iron Ingot
-                                <img className={headerImage} src={Resource4} alt="Moonsama" />
+                                <img className={headerImage} src={Resource4} alt="Moonsama Iron Ingot" />
 
                                 <div className={statBoxInfo}>
                                     {/*<div><GameIcon /> 1</div>*/}
@@ -159,7 +153,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                         <Grid item md={2} xs={12} justifyContent="center">
                             <div className={statBox}>
                                 Gold Ingot
-                                <img className={headerImage} src={Resource5} alt="Moonsama" />
+                                <img className={headerImage} src={Resource5} alt="Moonsama Gold Ingot" />
 
                                 <div className={statBoxInfo}>
                                     {/*<div><GameIcon /> 1</div>*/}
@@ -181,7 +175,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                         <div style={{ width: '50%' }}>
                             <div className={columnTitle}><span className={columnTitleText}>In-game Items</span></div>
                             <List dense sx={{ width: '100%', bgcolor: '#111' }}>
-                                {!!inGameMoonsamas.length || !!inGameTickets.length ? [...inGameMoonsamas, ...inGameTickets].map((value) => {
+                                {!!inGameMoonsamas.length || !!inGameGoldenTickets.length ? [...inGameMoonsamas, ...inGameGoldenTickets].map((value) => {
                                     const labelId = `checkbox-list-secondary-label-${value}`;
                                     return (
                                         <ListItem
