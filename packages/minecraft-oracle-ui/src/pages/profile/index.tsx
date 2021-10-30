@@ -15,7 +15,7 @@ import WalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import PeopleAltIcon from '@mui/icons-material/PeopleAltSharp';
 import RemoveIcon from '@mui/icons-material/RemoveCircleSharp';
 import SwapHorizIcon from '@mui/icons-material/SwapHorizSharp';
-import { AuthContextType } from 'context/auth/AuthContext/AuthContext.types';
+import { AuthContextType, AuthData, ProfileContextType } from 'context/auth/AuthContext/AuthContext.types';
 
 import MinecraftBlocksBgImage from 'assets/images/minecraft-blocksbg.png';
 import Resource1 from "../../assets/images/resource1.png";
@@ -26,17 +26,16 @@ import Resource5 from "../../assets/images/resource5.png";
 import Resource6 from "../../assets/images/resource6.png";
 import MsamaImage from "../../assets/images/msama.png";
 import TicketImage from "../../assets/images/vipticket.png";
+import { useProfile } from 'hooks/multiverse/useProfile';
 
 export type ProfilePagePropTypes = {
-    authData: {
-        jwt: string,
-        userProfile: object
-    } | null,
+    authData: AuthData
 };
 
 
 const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const [checked, setChecked] = React.useState(['']);
+    const profile = useProfile()
 
     // const { jwt, userProfile } = authData;
 
