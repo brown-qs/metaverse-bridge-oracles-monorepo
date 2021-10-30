@@ -133,5 +133,8 @@ export const useStyles = makeStyles((theme) => ({
         top: '-35px',
         left: '50%',
         transform: 'translateX(-50%)',
+    },
+    itemImage: {
+        width: '32px'
     }
 }));
