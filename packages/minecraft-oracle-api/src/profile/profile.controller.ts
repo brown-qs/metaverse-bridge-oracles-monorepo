@@ -64,4 +64,14 @@ export class ProfileController {
             throw new UnprocessableEntityException(err?.message ?? 'JWT verification error')
         }
     }
+
+    @Get('inprogress')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Returns whether there is an active game in progress or not' })
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    async getGameInProgress(): Promise<boolean> {
+        const inprogress = await this.profileService.getGameInProgress()
+        return inprogress
+    }
 }
