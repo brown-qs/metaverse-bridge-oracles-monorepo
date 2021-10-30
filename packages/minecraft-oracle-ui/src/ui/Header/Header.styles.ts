@@ -22,10 +22,8 @@ export const useStyles = makeStyles((theme) => ({
   },
   navItem: {
     margin: '0 20px',
-
-    a: {
-      textDecoration: 'none !important',
-    },
+    color: '#fff',
+    textDecoration: 'none !important',
   },
   navItemDrawer: {
     margin: '20px',

@@ -14,6 +14,7 @@ import GameIcon from '@mui/icons-material/VideogameAsset';
 import WalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import PeopleAltIcon from '@mui/icons-material/PeopleAltSharp';
 import RemoveIcon from '@mui/icons-material/RemoveCircleSharp';
+import SwapHorizIcon from '@mui/icons-material/SwapHorizSharp';
 import { AuthContextType } from 'context/auth/AuthContext/AuthContext.types';
 
 import MinecraftBlocksBgImage from 'assets/images/minecraft-blocksbg.png';
@@ -24,8 +25,9 @@ import Resource4 from "../../assets/images/resource4.png";
 import Resource5 from "../../assets/images/resource5.png";
 import Resource6 from "../../assets/images/resource6.png";
 import MsamaImage from "../../assets/images/msama.png";
+import TicketImage from "../../assets/images/vipticket.png";
 
-export type ProfilePageType = {
+export type ProfilePagePropTypes = {
     authData: {
         jwt: string,
         userProfile: object
@@ -33,8 +35,10 @@ export type ProfilePageType = {
 };
 
 
-const ProfilePage = ({ authData }: ProfilePageType) => {
+const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const [checked, setChecked] = React.useState(['']);
+
+    // const { jwt, userProfile } = authData;
 
     const handleToggle = (value: string) => () => {
         const currentIndex = checked.indexOf(value);
@@ -57,82 +61,29 @@ const ProfilePage = ({ authData }: ProfilePageType) => {
         columnTitle,
         columnTitleText,
         statBoxInfo,
+        checkBox,
+        transferButtonSmall,
     } = useStyles();
 
     return (
         <Grid className={profileContainer}>
             <Header />
-            {authData?.jwt}
             <Grid container justifyContent="center" spacing={4}>
-                <Grid item md={2} xs={12} justifyContent="center">
-                    <div className={statBox}>
-                        MSAMA
-                        <img src={MsamaImage} alt="Moonsama" />
+                <Grid item md={5} xs={12} justifyContent="center">
+                        <div className={statBox}>
+                            MSAMAS
+                            <img src={MsamaImage} alt="Moonsama" />
 
-                        <div className={statBoxInfo}>
-                            {/*<div><GameIcon /> 1</div>*/}
-                            <div>4</div>
-                            {/*<div><WalletIcon /> 3</div>*/}
+                            <div className={statBoxInfo}>
+                            </div>
                         </div>
-                    </div>
                 </Grid>
-                <Grid item md={2} xs={12} justifyContent="center">
+                <Grid item md={5} xs={12} justifyContent="center">
                     <div className={statBox}>
-                        Wood
-                        <img src={Resource1} alt="Moonsama" />
+                        Tickets
+                        <img src={TicketImage} alt="Moonsama" />
 
                         <div className={statBoxInfo}>
-                            {/*<div><GameIcon /> 1</div>*/}
-                            <div>14,000</div>
-                            {/*<div><WalletIcon /> 3</div>*/}
-                        </div>
-                    </div>
-                </Grid>
-                <Grid item md={2} xs={12} justifyContent="center">
-                    <div className={statBox}>
-                        Cobblestone
-                        <img src={Resource3} alt="Moonsama" />
-
-                        <div className={statBoxInfo}>
-                            {/*<div><GameIcon /> 1</div>*/}
-                            <div>20,000</div>
-                            {/*<div><WalletIcon /> 3</div>*/}
-                        </div>
-                    </div>
-                </Grid>
-                <Grid item md={2} xs={12} justifyContent="center">
-                    <div className={statBox}>
-                        iron Ingot
-                        <img src={Resource4} alt="Moonsama" />
-
-                        <div className={statBoxInfo}>
-                            {/*<div><GameIcon /> 1</div>*/}
-                            <div>669</div>
-                            {/*<div><WalletIcon /> 3</div>*/}
-                        </div>
-                    </div>
-                </Grid>
-                <Grid item md={2} xs={12} justifyContent="center">
-                    <div className={statBox}>
-                        Gold Ingot
-                        <img src={Resource5} alt="Moonsama" />
-
-                        <div className={statBoxInfo}>
-                            {/*<div><GameIcon /> 1</div>*/}
-                            <div>6</div>
-                            {/*<div><WalletIcon /> 3</div>*/}
-                        </div>
-                    </div>
-                </Grid>
-                <Grid item md={2} xs={12} justifyContent="center">
-                    <div className={statBox}>
-                        Items
-                        <img src={Resource3} alt="Moonsama" />
-
-                        <div className={statBoxInfo}>
-                            {/*<div><GameIcon /> 1</div>*/}
-                            <div>69</div>
-                            {/*<div><WalletIcon /> 3</div>*/}
                         </div>
                     </div>
                 </Grid>
@@ -142,13 +93,13 @@ const ProfilePage = ({ authData }: ProfilePageType) => {
                     <Stack
                         direction={{ xs: 'column', sm: 'row' }}
                         justifyContent="space-between"
-                        alignItems="center"
+                        alignItems="flex-start"
                         spacing={4}
                     >
                     <div style={{ width: '50%' }}>
-                        <div className={columnTitle}><GameIcon /> <span className={columnTitleText}>In-Game Assets</span></div>
+                        <div className={columnTitle}><span className={columnTitleText}>Game Resources</span></div>
                         <List dense sx={{ width: '100%', bgcolor: '#111' }}>
-                            {['MSAMA #511', 'Resource 1', 'Resource 2'].map((value) => {
+                            {['Resource 4', 'Resource 1', 'Resource 2'].map((value) => {
                                 const labelId = `checkbox-list-secondary-label-${value}`;
                                 return (
                                     <ListItem
@@ -157,6 +108,7 @@ const ProfilePage = ({ authData }: ProfilePageType) => {
                                             <>
                                                 420
                                                 <Checkbox
+                                                    className={checkBox}
                                                     edge="end"
                                                     onChange={handleToggle(value)}
                                                     checked={checked.indexOf(value) !== -1}
@@ -176,26 +128,19 @@ const ProfilePage = ({ authData }: ProfilePageType) => {
                                 );
                             })}
                         </List>
-                        {/*<TransferList />*/}
-                        <Button className={transferButton}>Transfer Assets</Button>
+                        <Button className={transferButton}>Summon Resources</Button>
                     </div>
                     <div style={{ width: '50%' }}>
-                        <div className={columnTitle}><WalletIcon /> <span className={columnTitleText}>Wallet Assets</span></div>
+                        <div className={columnTitle}><span className={columnTitleText}>Wallet Tokens</span></div>
                         <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
-                            {['Resource 3', 'MSAMA #466', 'MSAMA #32'].map((value) => {
+                            {['$RES3', '$RES4', '$RES2'].map((value) => {
                                 const labelId = `checkbox-list-secondary-label-${value}`;
                                 return (
                                     <ListItem
                                         key={value}
                                         secondaryAction={
                                             <>
-                                            122
-                                            <Checkbox
-                                                edge="end"
-                                                onChange={handleToggle(value)}
-                                                checked={checked.indexOf(value) !== -1}
-                                                inputProps={{ 'aria-labelledby': labelId }}
-                                            />
+                                                122
                                             </>
                                         }
                                         disablePadding
@@ -210,8 +155,6 @@ const ProfilePage = ({ authData }: ProfilePageType) => {
                                 );
                             })}
                         </List>
-                        {/*<TransferList />*/}
-                        <Button className={transferButton}>Transfer Assets</Button>
                     </div>
                     </Stack>
                 </Grid>
@@ -245,25 +188,6 @@ const ProfilePage = ({ authData }: ProfilePageType) => {
                                     <ListItemButton>
                                         <ListItemAvatar>
                                             <PeopleAltIcon />
-                                        </ListItemAvatar>
-                                        <ListItemText id={labelId} primary={value} />
-                                    </ListItemButton>
-                                </ListItem>
-                            );
-                        })}
-                    </List>
-                    <div className={columnTitle}><span className={columnTitleText}>Leaderboard</span></div>
-                    <List dense sx={{ width: '100%', maxWidth: '100%', bgcolor: '#111', marginBottom: '16px' }}>
-                        {['cleanston3r', 'wizard32', 'Gre3ml1n', 'squidGuy12'].map((value, index) => {
-                            const labelId = `checkbox-list-secondary-label-${value}`;
-                            return (
-                                <ListItem
-                                    key={value}
-                                    disablePadding
-                                >
-                                    <ListItemButton>
-                                        <ListItemAvatar>
-                                            {`#${index + 1}`}
                                         </ListItemAvatar>
                                         <ListItemText id={labelId} primary={value} />
                                     </ListItemButton>

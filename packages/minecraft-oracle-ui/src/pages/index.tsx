@@ -14,13 +14,13 @@ export const Routing = () => {
     return (
         <Switch>
             <Route exact path="/">
-                <AuthPage/>
+                <AuthPage />
             </Route>
             <Route exact path="/auth/:jwt">
                 <AuthPage/>
             </Route>
             <Route exact path="/login">
-                <HomePage />
+                {!!authData?.jwt ? <ProfilePage authData={authData} /> : <HomePage />}
             </Route>
             <Route path="/profile/:type/:address/:id">
                 <CancelDialog/>
@@ -29,7 +29,8 @@ export const Routing = () => {
                 <TransferDialog/>
             </Route>
             <Route path="/profile">
-                {!!authData?.jwt ? <ProfilePage authData={authData} /> : <HomePage />}
+                {!!authData?.jwt ? <ProfilePage authData={authData} /> : <AuthPage />}
+                {/*<ProfilePage authData={{ jwt: '2034823423', userProfile: { name: 'cleanston3r' } }} />*/}
             </Route>
         </Switch>
     )
