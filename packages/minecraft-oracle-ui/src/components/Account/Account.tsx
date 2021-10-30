@@ -5,7 +5,6 @@ import { useAccountDialog, useActiveWeb3React, useAuth } from 'hooks';
 import { truncateAddress } from 'utils';
 import Identicon from 'components/Identicon/Identicon';
 import PersonSharpIcon from '@mui/icons-material/PersonSharp';
-import Power from '@mui/icons-material/Power';
 import { Activity, Key } from 'react-feather';
 import { useMediaQuery } from 'beautiful-react-hooks';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWalletSharp';
@@ -23,6 +22,8 @@ export const Account = () => {
   const { button } = useStyles();
 
   const {authData} = useAuth()
+
+  console.log({authData})
 
   return (
     <>
@@ -58,7 +59,7 @@ export const Account = () => {
           'Connect Wallet'
         )}
       </Button>
-      <Button
+      {!!authData && !!authData.userProfile && <Button
         className={button}
         size="medium"
         onClick={() => setAccountDialogOpen(true)}
@@ -66,8 +67,8 @@ export const Account = () => {
         <div style={{ fontSize: 0, margin: '0 8px' }}>
             <PersonSharpIcon />
         </div>
-        authData?.userProfile
-      </Button>
+        {`${authData.userProfile.userName}`}
+      </Button>}
     </>
   );
 };

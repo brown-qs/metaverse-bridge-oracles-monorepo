@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { AuthContext } from '../AuthContext/AuthContext';
-import { ProfileContextType } from '../AuthContext/AuthContext.types';
+import { AuthData } from '../AuthContext/AuthContext.types';
 import { AuthContextControllerProps } from './AuthContextController.types';
 
 export const AuthContextController = ({ children }: AuthContextControllerProps) => {
-    const [authData, setAuthData] = useState<{jwt: string, userProfile: ProfileContextType | undefined } | undefined>(undefined);
+    const [authData, setAuthData] = useState<AuthData>(undefined);
 
     useEffect(() => {
         if(!authData) {
             const persistedAuthData = window.localStorage.getItem('authData');
 
-            if(!!persistedAuthData) {
+            console.log('Auth Data', {persistedAuthData})
+            if(!!persistedAuthData && persistedAuthData !== 'undefined') {
                 // @ts-ignore
                 setAuthData(JSON.parse(persistedAuthData));
             }
