@@ -12,4 +12,8 @@ export const useStyles = makeStyles((theme) => ({
       right: 0,
     },
   },
+  popoverListItem: {
+    borderRadius: 0,
+    color: '#fff'
+  }
 }));
