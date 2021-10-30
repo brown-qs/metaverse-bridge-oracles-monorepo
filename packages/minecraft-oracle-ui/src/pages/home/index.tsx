@@ -17,7 +17,7 @@ const HomePage = () => {
   } = useStyles();
 
   const handleLoginWithMinecraft = () => {
-      fetch('http://localhost:3030/api/v1/auth/login').then(response => window.location.href = response.url);
+      fetch('http://localhost:3030/api/v1/auth/login').then(response => console.log(response));
   };
 
   return (

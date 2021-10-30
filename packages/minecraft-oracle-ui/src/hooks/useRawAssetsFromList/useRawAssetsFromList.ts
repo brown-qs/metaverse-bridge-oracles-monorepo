@@ -6,37 +6,32 @@ import collectionsList from '../../assets/data/collections';
 import * as yup from 'yup';
 import { StringAssetType } from 'utils/subgraph';
 
-const enum Indexing {
-  Sequential = 'sequential',
-  None = 'none',
-}
-
-export type RawCollection = {
+export type RawAsset = {
+  ids: string[] | undefined
   chainId: number;
   address: string;
   display_name: string;
   symbol: string;
   type: StringAssetType;
-  indexing: Indexing;
   contractURI: string;
-  tags: string[];
-  min_items: number;
   subgraph: string;
+  enrapturable: boolean;
+  importable: boolean;
 };
 
-export type RawCollectionList = {
+export type RawAssetList = {
   name: string;
-  collections: RawCollection[];
+  assets: RawAsset[];
 };
 
-const collectionListSchema = yup.object<RawCollectionList>({
+const collectionListSchema = yup.object<RawAssetList>({
   name: yup.string().required(),
-  collections: yup
+  assets: yup
     .array()
     .of(
       yup
-        .object<RawCollection>({
-          min_items: yup.number().required(),
+        .object<RawAsset>({
+          ids: yup.array().of(yup.string()),
           chainId: yup.number().required(),
           address: yup
             .string()
@@ -52,13 +47,10 @@ const collectionListSchema = yup.object<RawCollectionList>({
               StringAssetType.ERC721,
             ])
             .required(),
-          indexing: yup
-            .mixed<Indexing>()
-            .oneOf([Indexing.Sequential, Indexing.None])
-            .required(),
           contractURI: yup.string().required(),
-          tags: yup.array().of(yup.string().required()).required(),
-          subgraph: yup.string()
+          subgraph: yup.string(),
+          enrapturable: yup.boolean(),
+          importable: yup.boolean(),
         })
         .required()
     )
@@ -66,14 +58,14 @@ const collectionListSchema = yup.object<RawCollectionList>({
 });
 
 // returns a variable indicating the state of the approval and a function which approves if necessary or early returns
-export function useRawCollectionsFromList(): RawCollection[] {
+export function useRawAssetsFromList(): RawAsset[] {
   const { chainId } = useActiveWeb3React();
   const list = useMemo(() => {
     if (!chainId) {
       return [];
     }
     const rawList = collectionListSchema.cast(collectionsList);
-    return rawList?.collections.filter((x) => x.chainId === chainId) ?? [];
+    return rawList?.assets.filter((x) => x.chainId === chainId) ?? [];
   }, [chainId]);
 
   return list;
