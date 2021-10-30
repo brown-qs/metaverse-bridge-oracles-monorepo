@@ -2,7 +2,7 @@ import { Contract } from '@ethersproject/contracts';
 import {
   ChainId,
   MARKETPLACE_V1_ADDRESS,
-  METAVERSE_V1_ADDRESS,
+  MULTIVERSE_BRIDGE_V1_ADDRESS,
   MULTICALL_NETWORKS,
   RECOGNIZED_COLLECTIONS_ADDRESS,
   WAREHOUSE_ADDRESS,
@@ -42,13 +42,13 @@ export const useContract = (
   }, [address, ABI, library, withSignerIfPossible, account]);
 };
 
-export function useMetaverseV1Contract(
+export function useMultiverseBridgeV1Contract(
   withSignerIfPossible = true
 ): Contract | null {
   const { chainId } = useActiveWeb3React();
   return useContract(
     chainId
-      ? METAVERSE_V1_ADDRESS[(chainId as ChainId) ?? ChainId.MOONRIVER]
+      ? MULTIVERSE_BRIDGE_V1_ADDRESS[(chainId as ChainId) ?? ChainId.MOONRIVER]
       : undefined,
     METAVERSE_V1_ABI,
     withSignerIfPossible
