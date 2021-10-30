@@ -11,12 +11,12 @@ export const AuthContextController = ({ children }: AuthContextControllerProps) 
 
             if(!!persistedAuthData) {
                 // @ts-ignore
-                setAuthData(persistedAuthData);
+                setAuthData(JSON.parse(persistedAuthData));
             }
         }
 
         // @ts-ignore
-        window.localStorage.setItem('authData', authData);
+        window.localStorage.setItem('authData', JSON.stringify(authData));
     }, [authData]);
 
     return (

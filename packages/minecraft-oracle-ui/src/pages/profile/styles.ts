@@ -99,5 +99,17 @@ export const useStyles = makeStyles((theme) => ({
         justifyContent: 'center',
         fontSize: '22px',
         margin: '16px 0 0 0'
+    },
+    checkBox: {
+        color: '#fff !important'
+    },
+    transferButtonSmall: {
+        fontSize: '22px',
+
+        '& svg': {
+          margin: '0 0 0 8px',
+          fontSize: '30px',
+          fill: '#133DB9',
+        },
     }
 }));
