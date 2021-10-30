@@ -70,6 +70,8 @@ export const useOnChainItems = () => {
 
           const ot: OwnedTokens = response.owners?.[0];
 
+          console.log(ot)
+
           if (!ot) {
             result[collection.display_name] = []
             return;
@@ -77,9 +79,12 @@ export const useOnChainItems = () => {
 
           assets = ot.ownedTokens.map((x) => {
             const aid = BigNumber.from(x.id).toString();
-            if (!(collection.ids ?? []).includes(x.id)) {
+            
+            if (!!collection.ids && !collection.ids.includes(aid)) {
+                console.log('fail')
                 return undefined
             }
+
             return {
               assetId: aid,
               id: getAssetEntityId(x.contract.id, aid),
@@ -87,6 +92,8 @@ export const useOnChainItems = () => {
               assetAddress: x.contract.id,
             };
           });
+
+          console.log(assets)
         } else {
           const query = QUERY_USER_ERC1155(account)
           const response = await request(collection.subgraph, query);
@@ -109,7 +116,9 @@ export const useOnChainItems = () => {
           .filter(x => x.balance !== '0')
           .map((x) => {
             const aid = BigNumber.from(x.token.id).toString();
-            if (!(collection.ids ?? []).includes(x.token.id)) {
+
+            if (!!collection.ids && !collection.ids.includes(aid)) {
+                console.log('fail')
                 return undefined
             }
             return {
