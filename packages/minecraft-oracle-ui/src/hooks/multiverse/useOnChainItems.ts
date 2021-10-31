@@ -22,11 +22,14 @@ export interface TokenOwner {
   token: { id: string, contract: {id: string} };
 }
 
+export type AssetWithBalance = Asset & {balance: string | BigNumber}
+
+
 export interface UserCollection {
   [key: string]: {
     meta: TokenMeta | undefined,
     staticData: StaticTokenData,
-    asset: Asset,
+    asset: AssetWithBalance,
     enrapturable: boolean;
     importable: boolean;
   }[]
@@ -55,7 +58,7 @@ export const useOnChainItems = () => {
           return; 
         }
 
-        let assets: (Asset | undefined)[] = []
+        let assets: (AssetWithBalance | undefined)[] = []
 
         if(collection.type === 'ERC721') {
           const query = QUERY_USER_ERC721(account)
@@ -90,6 +93,7 @@ export const useOnChainItems = () => {
               id: getAssetEntityId(x.contract.id, aid),
               assetType: StringAssetType.ERC721,
               assetAddress: x.contract.id,
+              balance: '1'
             };
           });
 
@@ -126,6 +130,7 @@ export const useOnChainItems = () => {
               id: getAssetEntityId(x.token.contract.id, aid),
               assetType: StringAssetType.ERC1155,
               assetAddress: x.token.contract.id,
+              balance: x.balance
             };
           });
         }
@@ -136,7 +141,7 @@ export const useOnChainItems = () => {
           return {
             meta: sd.meta,
             staticData: sd.staticData,
-            asset: assets[i] as Asset,
+            asset: assets[i] as AssetWithBalance,
             enrapturable: collection.enrapturable,
             importable: collection.importable
           };
