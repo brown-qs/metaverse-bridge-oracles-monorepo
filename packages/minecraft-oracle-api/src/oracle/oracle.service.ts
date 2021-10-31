@@ -13,7 +13,7 @@ import { calculateMetaAssetHash, encodeEnraptureWithSigData, encodeExportWithSig
 import { BigNumber, Contract, ethers, Signer } from 'ethers';
 import { ProviderToken } from 'src/provider/token';
 import { AssetService } from 'src/asset/asset.service';
-import { assetTypeToStringAssetType } from 'src/utils';
+import { assetTypeToStringAssetType, stringAssetTypeToAssetType } from 'src/utils';
 import { MetaAsset } from './oracle.types';
 import { ExportDto } from './dtos/export.dto';
 import { SummonDto } from './dtos/summon.dto';
@@ -45,13 +45,14 @@ export class OracleService {
 
     public async userInRequest(user: UserEntity, data: ImportDto, enraptured: boolean): Promise<[string, string, string, boolean]> {
         this.logger.debug(`userInRequest: ${JSON.stringify(data)}`, this.context)
-        const inAsset = enraptured ? this.enrapturableAssets.find(x => x.address === data.asset.assetAddress.toLowerCase()) : this.importableAssets.find(x => x.address === data.asset.assetAddress.toLowerCase())
+        const inAsset = enraptured ? this.enrapturableAssets.find(x => x.address.toLowerCase() === data.asset.assetAddress.toLowerCase()) : this.importableAssets.find(x => x.address.toLowerCase() === data.asset.assetAddress.toLowerCase())
 
         if (!inAsset) {
             this.logger.error(`userInRequest: not an permissioned asset`, null, this.context)
             throw new UnprocessableEntityException(`Not permissioned asset`)
         }
 
+        console.log(data)
         const requestHash = await utf8ToKeccak(JSON.stringify(data))
         const existingEntry = await this.assetService.findOne({ requestHash, enraptured, pendingIn: true, owner: { uuid: user.uuid } }, { order: { expiration: 'DESC' }, relations: ['owner'] })
 
@@ -239,6 +240,7 @@ export class OracleService {
             return true
         }
 
+        console.log(hash)
         const mAsset: MetaAsset = await this.metaverse.getImportedMetaAsset(hash)
 
         if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress.toLowerCase() !== assetEntry.assetAddress.toLowerCase()) {

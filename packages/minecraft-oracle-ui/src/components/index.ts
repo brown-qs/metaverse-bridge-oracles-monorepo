@@ -2,7 +2,7 @@ export { Layout } from './Layout/Layout';
 export { ErrorBoundary } from './ErrorBoundary/ErrorBoundary';
 export { Token } from './Token/Token';
 export { PurchaseDialog } from './PurchaseDialog/PurchaseDialog';
-export { BidDialog } from './BidDialog/BidDialog';
+export { ImportDialog } from './ImportDialog/ImportDialog';
 export { ExternalLink } from './ExternalLink/ExternalLink';
 export { Account } from './Account/Account';
 export { AccountDialog } from './AccountDialog/AccountDialog';

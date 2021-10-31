@@ -202,24 +202,25 @@ export function useHasPendingApproval(
   );
 }
 
-export function useSubmittedOrderTx(orderHash?: string): {
-  orderSubmitted: boolean;
-  orderTx: TransactionDetails | undefined;
+export function useSubmittedImportTx(entryHash?: string): {
+  importSubmitted: boolean;
+  importTx: TransactionDetails | undefined;
 } {
   const allTransactions = useAllTransactions();
 
   // get the txn if it has been submitted
-  const orderTx = useMemo(() => {
+  const importTx = useMemo(() => {
     const txIndex = Object.keys(allTransactions).find((hash) => {
       const tx = allTransactions[hash];
-      return tx.order && orderHash && tx.order.orderHash === orderHash;
+      console.log(tx?.importResult?.hash, entryHash, tx?.importResult?.hash === entryHash)
+      return tx.importResult && entryHash && tx.importResult.hash === entryHash;
     });
     return txIndex && allTransactions[txIndex]
       ? allTransactions[txIndex]
       : undefined;
   }, [allTransactions]);
 
-  return { orderSubmitted: Boolean(orderTx), orderTx };
+  return { importSubmitted: Boolean(importTx), importTx };
 }
 
 export function useSubmittedCancelTx(orderHash?: string): {

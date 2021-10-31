@@ -1,24 +1,35 @@
 import { useCallback } from 'react';
 import axios from 'axios'
+import { useAuth } from 'hooks';
 
 
 export function useImportConfirmCallback() {
-    return useCallback(async (hash: string) => {
+    const { authData } =  useAuth();
+    const {jwt} = authData ?? {}
+    
+    return useCallback(async (hash?: string) => {
+        if (!hash) {
+            return false;
+        }
         try {
             const resp = await axios.request<boolean>({
                 method: 'put',
                 url: `${process.env.REACT_APP_BACKEND_API_URL}/oracle/import/confirm`,
-                data: {hash}
+                data: {hash},
+                headers: { Authorization: `Bearer ${jwt}` }
             });
             return resp.data
         } catch(e) {
             console.error('Error confirming import hash. Try again later.')
             return false
         }
-    }, [])
+    }, [jwt])
 }
 
 export function useExportConfirmCallback() {
+    const { authData } =  useAuth();
+    const {jwt} = authData ?? {}
+
     return useCallback(async (hash: string) => {
         try {
             const resp = await axios.request<boolean>({
@@ -31,10 +42,13 @@ export function useExportConfirmCallback() {
             console.error('Error confirming export hash. Try again later.')
             return false
         }
-    }, [])
+    }, [jwt])
 }
 
 export function useEnraptureConfirmCallback() {
+    const { authData } =  useAuth();
+    const {jwt} = authData ?? {}
+
     return useCallback(async (hash: string) => {
         try {
             const resp = await axios.request<boolean>({
@@ -47,5 +61,5 @@ export function useEnraptureConfirmCallback() {
             console.error('Error confirming enrapture hash. Try again later.')
             return false
         }
-    }, [])
+    }, [jwt])
 }

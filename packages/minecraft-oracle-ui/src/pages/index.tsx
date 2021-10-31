@@ -4,7 +4,7 @@ import { useAuth } from "hooks";
 import HomePage from './home';
 import AuthPage from './auth';
 import ProfilePage from './profile';
-import { PurchaseDialog, BidDialog } from 'components';
+import { PurchaseDialog, ImportDialog } from 'components';
 import { CancelDialog } from 'components/CancelDialog/CancelDialog';
 import { TransferDialog } from 'components/TransferDiaog/TransferDialog';
 
@@ -25,10 +25,10 @@ export const Routing = () => {
             <Route path="/profile/:type/:address/:id">
                 <CancelDialog/>
                 <PurchaseDialog/>
-                <BidDialog/>
                 <TransferDialog/>
             </Route>
             <Route path="/profile">
+                <ImportDialog/>
                 {!!authData?.jwt ? <ProfilePage authData={authData} /> : <AuthPage />}
                 {/*<ProfilePage authData={{ jwt: '2034823423', userProfile: { name: 'cleanston3r' } }} />*/}
             </Route>
