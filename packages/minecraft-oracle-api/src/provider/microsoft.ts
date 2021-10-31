@@ -13,14 +13,12 @@ export const MicrosoftSetupParamsProvider: FactoryProvider<MicrosoftSetupParams>
     useFactory: (configService: ConfigService) => {
         const appId = configService.get<string>('app.id');
         const appSecret = configService.get<string>('app.secret');
-        const serverScheme = configService.get<string>('server.scheme');
-        const serverHost = configService.get<string>('server.host');
-        const serverPort = configService.get<string>('server.port');
+        const redirectUrl = configService.get<string>('server.redirect');
 
         return {
             appId,
             appSecret,
-            redirectUrl: `${serverScheme}://${serverHost}:${serverPort}/api/v1/auth/response`
+            redirectUrl: `${redirectUrl}/api/v1/auth/response`
         }
     },
     inject: [ConfigService],

@@ -15,7 +15,8 @@ export const envValidationSchema = () => {
         // SERVER
         SERVER_PORT: Joi.string().default('3030'),
         SERVER_HOST: Joi.string().default('localhost'),
-        SERVER_SCHEME: Joi.string().default('http'), 
+        SERVER_SCHEME: Joi.string().default('http'),
+        SERVER_REDIRECT_URL: Joi.string().required(),
         // REDIRECT
         AUTH_REDIRECT_URL: Joi.string().default('http://localhost:3000/login'),
         // APP
