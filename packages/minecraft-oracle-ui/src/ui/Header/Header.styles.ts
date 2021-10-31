@@ -52,7 +52,8 @@ export const useStyles = makeStyles((theme) => ({
   eventStatusWrapper: {
     fontSize: '12px',
     alignItems: 'center',
-    display: 'flex'
+    display: 'flex',
+    cursor: 'default'
   },
   eventIconActive: {
     margin: '0 10px 0 0',

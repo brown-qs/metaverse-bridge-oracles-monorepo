@@ -8,26 +8,21 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
-import PeopleAltIcon from '@mui/icons-material/PeopleAltSharp';
-import RemoveIcon from '@mui/icons-material/RemoveCircleSharp';
-import SwapHorizIcon from '@mui/icons-material/SwapHorizSharp';
+import { WOOD_TYPES } from '../../constants';
+
 import { AuthContextType, AuthData, ProfileContextType } from 'context/auth/AuthContext/AuthContext.types';
 
-import MinecraftBlocksBgImage from 'assets/images/minecraft-blocksbg.png';
+import PeopleAltIcon from '@mui/icons-material/PeopleAltSharp';
+import RemoveIcon from '@mui/icons-material/RemoveCircleSharp';
 import Resource1 from "../../assets/images/resource1.png";
-import Resource2 from "../../assets/images/resource2.png";
-import Resource3 from "../../assets/images/resource3.png";
 import Resource4 from "../../assets/images/resource4.png";
 import Resource5 from "../../assets/images/resource5.png";
-import Resource6 from "../../assets/images/resource6.png";
+import Cobblestone from "../../assets/images/cobblestone.png";
 import MsamaImage from "../../assets/images/msama.png";
 import TicketImage from "../../assets/images/vipticket.png";
 import { useProfile } from 'hooks/multiverse/useProfile';
 import { useOnChainItems } from 'hooks/multiverse/useOnChainItems';
 import { useInGameItems } from 'hooks/multiverse/useInGameItems';
-import { useExportAssetCallback } from 'hooks/multiverse/useExportAsset';
-import { useImportAssetCallback } from 'hooks/multiverse/useImportAsset';
-import { useSummonCallback } from 'hooks/multiverse/useSummon';
 import { useActiveWeb3React, useImportDialog } from 'hooks';
 import { useExportDialog } from 'hooks/useExportDialog/useExportDialog';
 import { useSummonDialog } from 'hooks/useSummonDialog/useSummonDialog';
@@ -57,10 +52,15 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
     //In Game Items
     const inGameItems = useInGameItems();
-    console.log('ingame items', inGameItems)
     const inGameMoonsamas = inGameItems?.moonsamas || [];
     const inGameGoldenTickets = inGameItems?.tickets || [];
-    const inGameResources = inGameItems?.resources || [];
+    const inGameResourcesWood = inGameItems?.resources?.filter(item => WOOD_TYPES.includes(item.name)) || [];
+    const inGameResourcesCobblestone = inGameItems?.resources?.filter(item => item.name === ('COBBLESTONE')) || [];
+    const inGameResourcesGold = inGameItems?.resources?.filter(item => item.name === 'GOLD_INGOT') || [];
+    const inGameResourcesIron = inGameItems?.resources?.filter(item => item.name === 'IRON_INGOT') || [];
+    const inGameResourcesDiamond = inGameItems?.resources?.filter(item => item.name === 'DIAMOND') || [];
+
+    console.log('ingame items', inGameItems, inGameResourcesWood)
 
     // const { jwt, userProfile } = authData;
 
@@ -135,7 +135,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
                                 <div className={statBoxInfo}>
                                     {/*<div><GameIcon /> 1</div>*/}
-                                    <div>14,000</div>
+                                    <div>{inGameResourcesWood[0]?.amount || 0}</div>
                                     {/*<div><WalletIcon /> 3</div>*/}
                                 </div>
                             </div>
@@ -143,10 +143,10 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                         <Grid item md={2} xs={12} justifyContent="center">
                             <div className={statBox}>
                                 Cobblestone
-                                <img className={headerImage} src={Resource3} alt="Moonsama Cobblestone" />
+                                <img className={headerImage} src={Cobblestone} alt="Moonsama Cobblestone" />
 
                                 <div className={statBoxInfo}>
-                                    <div>20,000</div>
+                                    <div>{inGameResourcesCobblestone[0]?.amount || 0}</div>
                                 </div>
                             </div>
                         </Grid>
@@ -157,7 +157,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
                                 <div className={statBoxInfo}>
                                     {/*<div><GameIcon /> 1</div>*/}
-                                    <div>669</div>
+                                    <div>{inGameResourcesIron[0]?.amount || 0}</div>
                                     {/*<div><WalletIcon /> 3</div>*/}
                                 </div>
                             </div>
@@ -169,7 +169,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
                                 <div className={statBoxInfo}>
                                     {/*<div><GameIcon /> 1</div>*/}
-                                    <div>6</div>
+                                    <div>{inGameResourcesGold[0]?.amount || 0}</div>
                                     {/*<div><WalletIcon /> 3</div>*/}
                                 </div>
                             </div>
@@ -296,29 +296,80 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                         spacing={4}
                     >
                     <div style={{ width: '50%' }}>
-                        <div className={columnTitle}><span className={columnTitleText}>Game Resources</span></div>
+                        <div className={columnTitle}><span className={columnTitleText}>In-game Resources</span></div>
                         <List dense sx={{ width: '100%', bgcolor: '#111' }}>
-                            {['Resource 4', 'Resource 1', 'Resource 2'].map((value) => {
-                                const labelId = `checkbox-list-secondary-label-${value}`;
-                                return (
-                                    <ListItem
-                                        key={value}
-                                        secondaryAction={
-                                            <>
-                                                420
-                                            </>
-                                        }
-                                        disablePadding
-                                    >
-                                        <ListItemButton>
-                                            <ListItemAvatar>
-                                                <img src={Resource1} alt="" />
-                                            </ListItemAvatar>
-                                            <ListItemText id={labelId} primary={value} />
-                                        </ListItemButton>
-                                    </ListItem>
-                                );
-                            })}
+                            {!!inGameItems?.resources.length ? (
+                                    <>
+                                        {!!inGameResourcesWood.length && (
+                                            <ListItem
+                                                secondaryAction={
+                                                    <>
+                                                        {inGameResourcesWood[0]?.amount}
+                                                    </>
+                                                }
+                                                disablePadding
+                                            >
+                                                <ListItemButton>
+                                                    <ListItemAvatar>
+                                                        <img src={Resource1} alt="Wood" />
+                                                    </ListItemAvatar>
+                                                    <ListItemText id="wood" primary="Wood" />
+                                                </ListItemButton>
+                                            </ListItem>
+                                        )}
+                                        {!!inGameResourcesCobblestone.length && (
+                                            <ListItem
+                                                secondaryAction={
+                                                    <>
+                                                        {inGameResourcesCobblestone[0]?.amount}
+                                                    </>
+                                                }
+                                                disablePadding
+                                            >
+                                                <ListItemButton>
+                                                    <ListItemAvatar>
+                                                        <img src={Resource1} alt="Cobblestone" />
+                                                    </ListItemAvatar>
+                                                    <ListItemText id="cobblestone" primary="Cobblestone"/>
+                                                </ListItemButton>
+                                            </ListItem>
+                                        )}
+                                        {!!inGameResourcesIron.length && (
+                                            <ListItem
+                                                secondaryAction={
+                                                    <>
+                                                        {inGameResourcesIron[0]?.amount}
+                                                    </>
+                                                }
+                                                disablePadding
+                                            >
+                                                <ListItemButton>
+                                                    <ListItemAvatar>
+                                                        <img src={Resource4} alt="Iron Ingot"/>
+                                                    </ListItemAvatar>
+                                                    <ListItemText id="iron-ingot" primary="Iron Ingot"/>
+                                                </ListItemButton>
+                                            </ListItem>
+                                        )}
+                                        {!!inGameResourcesGold.length && (
+                                            <ListItem
+                                                secondaryAction={
+                                                    <>
+                                                        {inGameResourcesGold[0]?.amount}
+                                                    </>
+                                                }
+                                                disablePadding
+                                            >
+                                                <ListItemButton>
+                                                    <ListItemAvatar>
+                                                        <img src={Resource5} alt="Gold Ingot"/>
+                                                    </ListItemAvatar>
+                                                    <ListItemText id="gold-ingot" primary="Gold Ingot"/>
+                                                </ListItemButton>
+                                            </ListItem>
+                                        )}
+                                    </>
+                            ) : <ListItem>No in-game resources available</ListItem>}
                         </List>
                         <Button
                             className={transferButton}

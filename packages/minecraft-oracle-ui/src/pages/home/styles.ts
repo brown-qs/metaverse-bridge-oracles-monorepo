@@ -39,6 +39,7 @@ export const useStyles = makeStyles((theme) => ({
     background: '#133DB9',
     color: '#eee',
     transition: 'box-shadow 0.1s, background 0.1s, padding 0.1s',
+    cursor: 'pointer',
 
     '&:hover': {
       background: '#2353E0',
@@ -61,11 +62,13 @@ export const useStyles = makeStyles((theme) => ({
     position: 'absolute',
     left: 0,
     bottom: 0,
+    width: '40%',
   },
   rightBgImage: {
     position: 'absolute',
     transform: 'scaleX(-1)',
     right: 0,
     bottom: 0,
+    width: '40%',
   }
 }));
