@@ -63,6 +63,18 @@ export const collections = {
       contractURI: 'ipfs://QmfZtbgLDmcDNf4tvhm1LuLmbBYSASmk6zcSBY2GRzh72S',
       subgraph: 'https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/nft-1155-test'
     },
+    {
+      chainId: 1285,
+      address: '0x63228048121877A9e0f52020834A135074e8207C',
+      display_name: 'Metaverse Asset Factory',
+      symbol: 'MAF',
+      type: 'ERC1155',
+      ids: undefined,
+      importable: false,
+      enrapturable: false,
+      contractURI: 'ipfs://QmfZtbgLDmcDNf4tvhm1LuLmbBYSASmk6zcSBY2GRzh72S',
+      subgraph: 'https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/nft-1155-testfactory'
+    },
     /*
     {
       chainId: 1285,
