@@ -99,10 +99,7 @@ export const SummonDialog = () => {
           <div className={loadingContainer}>
             <CircularProgress />
             <div>
-              <Typography>Your metaverse tokens are being conjured...</Typography>
-              <Typography color="textSecondary" variant="h5">
-                Check your wallet for potential action
-              </Typography>
+              <Typography>Your metaverse assets are being conjured by the Multiverse Bridge. This can take a while...</Typography>
             </div>
           </div>
         </>
