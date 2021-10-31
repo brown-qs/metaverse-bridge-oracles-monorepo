@@ -2,8 +2,7 @@ import { Provider } from 'react-redux';
 import Theme from '../theme/Theme';
 import { ThemeOptionsContextController } from 'context/themeOptions/themeOptionsContextController/ThemeOptionsContextController';
 import { AuthContextController } from 'context/auth/AuthContextController/AuthContextController';
-import { BidDialogContextController } from 'context/bidDialog/bidDialogContextController/BidDialogContextController';
-import { PurchaseDialogContextController } from 'context/purchaseDialog/purchaseDialogContextController/PurchaseDialogContextController';
+import { ImportDialogContextController } from 'context/importDialog/importDialogContextController/ImportDialogContextController';
 import { AccountDialogContextController } from 'context/accountDialog/accountDialogContextController/AccountDialogContextController';
 import { AppProvidersProps } from './AppProviders.types';
 import { getLibrary } from 'connectors';
@@ -14,8 +13,9 @@ import Web3ReactProviderNetwork from '../components/Web3ReactProviderNetwork/Web
 import ApplicationUpdater from '../state/application/updater';
 import TransactionUpdater from '../state/transactions/updater';
 import store from '../state';
-import { CancelDialogContextController } from 'context/cancelDialog/cancelDialogContextController/CancelDialogContextController';
+import { SummonDialogContextController } from 'context/summonDialog/summonDialogContextController/SummonDialogContextController';
 import { TransferDialogContextController } from 'context/transferDialog/transferDialogContextController/TransferDialogContextController';
+import { ExportDialogContextController } from 'context/exportDialog/exportDialogContextController/ExportDialogContextController';
 
 function Updaters() {
   return (
@@ -35,17 +35,17 @@ export const AppProviders = ({ children }: AppProvidersProps) => (
             <Updaters />
             <Web3ReactManager>
               <AccountDialogContextController>
-                <CancelDialogContextController>
-                  <BidDialogContextController>
-                    <PurchaseDialogContextController>
+                <SummonDialogContextController>
+                  <ImportDialogContextController>
+                    <ExportDialogContextController>
                       <TransferDialogContextController>
                         <Router>
                           <Theme>{children}</Theme>
                         </Router>
                       </TransferDialogContextController>
-                    </PurchaseDialogContextController>
-                  </BidDialogContextController>
-                </CancelDialogContextController>
+                    </ExportDialogContextController>
+                  </ImportDialogContextController>
+                </SummonDialogContextController>
               </AccountDialogContextController>
             </Web3ReactManager>
           </Provider>

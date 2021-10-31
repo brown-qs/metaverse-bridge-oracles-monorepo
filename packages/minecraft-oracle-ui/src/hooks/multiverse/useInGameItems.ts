@@ -10,6 +10,8 @@ export interface InGameItem {
     assetType: string
     amount: string
     exportable: boolean
+    hash?: string
+    summonable: boolean
 }
 
 export interface ProfileInGameItems {
@@ -21,6 +23,8 @@ export interface ProfileInGameItems {
 export function useInGameItems() {
     const { authData } =  useAuth();
     const blocknumber = useBlockNumber();
+
+    const {jwt} = authData ?? {}
 
     const [items, setItems] = useState<ProfileInGameItems | undefined>(undefined);
 
@@ -36,11 +40,11 @@ export function useInGameItems() {
             console.error('Error summoning. Try again later.')
             setItems(undefined)
         }
-    }, [blocknumber])
+    }, [blocknumber, jwt])
 
     useEffect(() => {
         getUserItems()
-    }, [blocknumber])
+    }, [blocknumber, jwt])
 
     return items
 }

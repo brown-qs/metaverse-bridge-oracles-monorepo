@@ -49,13 +49,28 @@ export async function encodeImportWithSigData(data: ImportData, expiration: stri
         salt
     } = data;
     return encodeParameters(
-        ['address', 'uint256', 'uint256', 'bytes32', 'address', 'address', 'uint256', 'bytes32', 'uint256'],
-        [assetAddress, assetId, assetType, metaverse, owner, beneficiary, amount, salt, expiration]
+        ['address', 'uint256', 'uint256', 'bytes32', 'address', 'address', 'uint256', 'bytes32', 'uint256', 'bool'],
+        [assetAddress, assetId, assetType, metaverse, owner, beneficiary, amount, salt, expiration, false]
     )
 }
 
 export async function encodeEnraptureWithSigData(data: ImportData, expiration: string) {
-    return encodeImportWithSigData(data, expiration)
+    const {
+        asset: {
+            assetAddress,
+            assetId,
+            assetType
+        },
+        metaverse,
+        owner,
+        beneficiary,
+        amount,
+        salt,
+    } = data;
+    return encodeParameters(
+        ['address', 'uint256', 'uint256', 'bytes32', 'address', 'address', 'uint256', 'bytes32', 'uint256', 'bool'],
+        [assetAddress, assetId, assetType, metaverse, owner, beneficiary, amount, salt, expiration, true]
+    )
 }
 
 export type SummonData = {
@@ -93,8 +108,8 @@ export async function encodeChangeBeneficiaryWithSigData(data: BeneficiaryChange
         newSalt
     } = data;
     return encodeParameters(
-        ['bytes32', 'address', 'bytes32', 'uint256'],
-        [hash, newBeneficiary, newSalt, expiration]
+        ['bytes32', 'address', 'bytes32', 'uint256', 'bool'],
+        [hash, newBeneficiary, newSalt, expiration, false]
     )
 }
 
@@ -111,8 +126,8 @@ export async function encodeChangeOwnerWithSigData(data: OwnerChangeData, expira
         newSalt
     } = data;
     return encodeParameters(
-        ['bytes32', 'address', 'bytes32', 'uint256'],
-        [hash, newOwner, newSalt, expiration]
+        ['bytes32', 'address', 'bytes32', 'uint256', 'bool'],
+        [hash, newOwner, newSalt, expiration, true]
     )
 }
 
