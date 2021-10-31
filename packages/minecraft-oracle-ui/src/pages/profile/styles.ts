@@ -47,7 +47,7 @@ export const useStyles = makeStyles((theme) => ({
         border: 'none',
         outline: 'none',
         display: 'block',
-        fontSize: '18px',
+        fontSize: '21px',
         lineHeight: '20px',
         height: '30px',
         width: '100%',

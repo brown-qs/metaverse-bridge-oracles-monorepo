@@ -92,15 +92,14 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
         itemImage
     } = useStyles();
 
-    const handleSummonItems = () => {
-
-    }
-
     return (
         <Grid className={profileContainer}>
             <Header />
                 <Grid container justifyContent="center" spacing={4}>
-                    <div style={{ width: '100%', textAlign: 'right' }}>
+                    <div style={{ width: '50%', textAlign: 'left' }}>
+                        <span style={{fontSize: '38px', fontFamily: `VT323, 'arial'`,}}>Multiverse Bridge</span> <br />
+                    </div>
+                    <div style={{ width: '50%', textAlign: 'right' }}>
                         <span style={{fontSize: '22px',}}>Welcome back {authData?.userProfile?.userName},</span> <br />
                         {profile?.allowedToPlay ? (<span style={{ color:'#12753A', fontSize: '16px', fontWeight: 'bold' }}>You are Eligible to play!</span>):
                         (
@@ -195,10 +194,10 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                             disablePadding
                                         >
                                             <ListItemButton>
-                                                <ListItemAvatar>
-                                                    <img src={Resource1} alt="" />
-                                                </ListItemAvatar>
-                                                <ListItemText id={labelId} primary={value.toString()} />
+                                                {/*<ListItemAvatar>*/}
+                                                {/*    <img src={value?.meta?.image} alt="" />*/}
+                                                {/*</ListItemAvatar>*/}
+                                                <ListItemText id={labelId} primary={value.name} />
 
                                                 <Button
                                                     className={transferButtonSmall}
@@ -405,24 +404,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     </div>
                     </Stack>
                 </Grid>
-                <Grid item md={3} xs={12} justifyContent="center">
-                    {/*<div className={columnTitle}><span className={columnTitleText}>Info</span></div>*/}
-                    {/*<List dense sx={{ width: '100%', maxWidth: '100%', bgcolor: '#111', marginBottom: '16px' }}>*/}
-                    {/*    {['Server Status: Online', 'Next Event: 02/11/21 13:00 UTC'].map((value) => {*/}
-                    {/*        const labelId = `checkbox-list-secondary-label-${value}`;*/}
-                    {/*        return (*/}
-                    {/*            <ListItem*/}
-                    {/*                key={value}*/}
-                    {/*                disablePadding*/}
-                    {/*            >*/}
-                    {/*                <ListItemText id={labelId} primary={value} />*/}
-                    {/*            </ListItem>*/}
-                    {/*        );*/}
-                    {/*    })}*/}
-                    {/*</List>*/}
-                </Grid>
             </Grid>
-
 
 
             {/*<img className={footerBg} style={{ left: 0 }} src={MinecraftBlocksBgImage} alt="" />*/}
