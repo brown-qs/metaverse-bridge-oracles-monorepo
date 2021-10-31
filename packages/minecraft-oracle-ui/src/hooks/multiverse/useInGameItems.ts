@@ -22,6 +22,8 @@ export function useInGameItems() {
     const { authData } =  useAuth();
     const blocknumber = useBlockNumber();
 
+    const {jwt} = authData ?? {}
+
     const [items, setItems] = useState<ProfileInGameItems | undefined>(undefined);
 
     const getUserItems = useCallback(async () => {
@@ -36,11 +38,11 @@ export function useInGameItems() {
             console.error('Error summoning. Try again later.')
             setItems(undefined)
         }
-    }, [blocknumber])
+    }, [blocknumber, jwt])
 
     useEffect(() => {
         getUserItems()
-    }, [blocknumber])
+    }, [blocknumber, jwt])
 
     return items
 }

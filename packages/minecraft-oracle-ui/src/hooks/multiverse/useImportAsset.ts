@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { calculateGasMargin, getSigner } from '../../utils';
-import { useMarketplaceV1Contract } from '../../hooks/useContracts/useContracts';
-import { useActiveWeb3React } from '../../hooks';
+import { useMultiverseBridgeV1Contract } from '../../hooks/useContracts/useContracts';
+import { useActiveWeb3React, useAuth } from '../../hooks';
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import axios from 'axios'
 import { StringAssetType } from 'utils/subgraph';
+import { AssetType } from 'utils/marketplace';
 
 export enum CreateImportAssetCallbackState {
     INVALID,
@@ -14,10 +15,10 @@ export enum CreateImportAssetCallbackState {
 }
 
 export interface ImportRequest {
-    asset: {
-        assetAddress: string,
-        assetId: string,
-        assetType: string
+    asset?: {
+        assetAddress?: string,
+        assetId?: string,
+        assetType?: AssetType
     },
     owner: string | undefined | null,
     beneficiary: string| undefined | null,
@@ -25,10 +26,10 @@ export interface ImportRequest {
 }
 
 export interface AssetRequest {
-    asset: {
-        assetAddress: string,
-        assetId: string,
-        assetType: string
+    asset?: {
+        assetAddress?: string,
+        assetId?: string,
+        assetType?: AssetType
     },
     amount: string
 }
@@ -44,7 +45,10 @@ export function useFetchImportAssetArgumentsCallback(importRequest: ImportReques
     const { library, account } = useActiveWeb3React();
 
     const [params, setParams] = useState<ImportRequestParams | undefined>(undefined)
-
+    const { authData } =  useAuth();
+    
+    const {jwt} = authData ?? {}
+    
     const stringedRequest = JSON.stringify(importRequest)
 
     const cb = useCallback(async () => {
@@ -55,21 +59,22 @@ export function useFetchImportAssetArgumentsCallback(importRequest: ImportReques
             const resp = await axios.request<ImportRequestParams>({
                 method: 'put',
                 url: `${process.env.REACT_APP_BACKEND_API_URL}/oracle/import`,
-                data: importRequest
+                data: importRequest,
+                headers: { Authorization: `Bearer ${jwt}` }
             });
             setParams(resp.data)
         } catch(e) {
             console.error('Error fetching import params.')
             setParams(undefined)
         }
-    }, [library, account, stringedRequest])
+    }, [library, account, stringedRequest, jwt])
 
 
     useEffect(() => {
         if (library && account && importRequest) {
             cb()
         }
-    }, [library, account, stringedRequest])
+    }, [library, account, stringedRequest, jwt])
 
     return params
 }
@@ -80,12 +85,12 @@ export function useImportAssetCallback(
     state: CreateImportAssetCallbackState;
     callback: null | (() => Promise<string>);
     error: string | null;
+    hash?: string
 } {
     const { account, chainId, library } = useActiveWeb3React();
 
     //console.log('YOLO', { account, chainId, library });
-    const contract = useMarketplaceV1Contract(true);
-    
+    const contract = useMultiverseBridgeV1Contract(true);
 
     const importRequest = {
         ...assetRequest,
@@ -99,7 +104,7 @@ export function useImportAssetCallback(
 
     //console.warn('YOLO ORDER', { inputParams, inputOptions });
     const inputOptions = {
-        value: assetRequest.asset.assetType.valueOf() == StringAssetType.NATIVE.valueOf() ? (assetRequest?.amount ?? '0') : '0'
+        value: assetRequest?.asset?.assetType?.valueOf() == AssetType.NATIVE.valueOf() ? (assetRequest?.amount ?? '0') : '0'
     }
 
     return useMemo(() => {
@@ -108,6 +113,7 @@ export function useImportAssetCallback(
                 state: CreateImportAssetCallbackState.INVALID,
                 callback: null,
                 error: 'Missing dependencies',
+                hash
             };
         }
 
@@ -116,6 +122,7 @@ export function useImportAssetCallback(
                 state: CreateImportAssetCallbackState.CONFIRMED,
                 callback: null,
                 error: 'Already confirmed',
+                hash
             };
         }
 
@@ -125,6 +132,7 @@ export function useImportAssetCallback(
             state: CreateImportAssetCallbackState.INVALID,
             callback: null,
             error: 'Error fetching input params from oracle',
+            hash
           };
         }
 
@@ -132,6 +140,7 @@ export function useImportAssetCallback(
 
         return {
             state: CreateImportAssetCallbackState.VALID,
+            hash,
             callback: async function onImportAsset(): Promise<string> {
                 const args = inputParams;
                 const methodName = 'importToMetaverseSig';

@@ -15,7 +15,7 @@ import {
 } from 'state/transactions/hooks';
 import { calculateGasMargin } from 'utils';
 import { StringAssetType } from 'utils/subgraph';
-import { WAREHOUSE_ADDRESS, ChainId } from '../../constants';
+import { MULTIVERSE_BRIDGE_V1_ADDRESS, ChainId } from '../../constants';
 import { AllowanceQuery } from './useApproveCallback.types';
 import { useBlockNumber } from 'state/application/hooks';
 
@@ -106,7 +106,7 @@ export function useApproveCallback(
 
   const operator =
     query.operator ??
-    (WAREHOUSE_ADDRESS[chainId ?? ChainId.MOONRIVER] as string);
+    (MULTIVERSE_BRIDGE_V1_ADDRESS[chainId ?? ChainId.MOONRIVER] as string);
   const toApprove = BigNumber.from(amountToApprove ?? MaxUint256);
   const currentAllowance = useAllowance(query, operator);
   const assetType = query.assetType ?? StringAssetType.ERC20;

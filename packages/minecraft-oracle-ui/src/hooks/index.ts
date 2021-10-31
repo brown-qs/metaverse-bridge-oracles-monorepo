@@ -1,5 +1,5 @@
 export { useThemeOptions } from './useThemeOptions/useThemeOptions';
-export { useBidDialog } from './useBidDialog/useBidDialog';
+export { useImportDialog } from './useImportDialog/useImportDialog';
 export { usePurchaseDialog } from './usePurchaseDialog/usePurchaseDialog';
 export { useCancelDialog } from './useCancelDialog/useCancelDialog';
 export { useAccountDialog } from './useAccountDialog/useAccountDialog';

@@ -4,7 +4,6 @@ import { useMarketplaceV1Contract } from '../../hooks/useContracts/useContracts'
 import { useActiveWeb3React } from '../../hooks';
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import axios from 'axios'
-import { StringAssetType } from 'utils/subgraph';
 
 export enum ExportAssetCallbackState {
     INVALID,

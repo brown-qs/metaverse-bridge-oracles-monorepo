@@ -2,7 +2,7 @@ import { Provider } from 'react-redux';
 import Theme from '../theme/Theme';
 import { ThemeOptionsContextController } from 'context/themeOptions/themeOptionsContextController/ThemeOptionsContextController';
 import { AuthContextController } from 'context/auth/AuthContextController/AuthContextController';
-import { BidDialogContextController } from 'context/bidDialog/bidDialogContextController/BidDialogContextController';
+import { ImportDialogContextController } from 'context/importDialog/importDialogContextController/ImportDialogContextController';
 import { PurchaseDialogContextController } from 'context/purchaseDialog/purchaseDialogContextController/PurchaseDialogContextController';
 import { AccountDialogContextController } from 'context/accountDialog/accountDialogContextController/AccountDialogContextController';
 import { AppProvidersProps } from './AppProviders.types';
@@ -36,7 +36,7 @@ export const AppProviders = ({ children }: AppProvidersProps) => (
             <Web3ReactManager>
               <AccountDialogContextController>
                 <CancelDialogContextController>
-                  <BidDialogContextController>
+                  <ImportDialogContextController>
                     <PurchaseDialogContextController>
                       <TransferDialogContextController>
                         <Router>
@@ -44,7 +44,7 @@ export const AppProviders = ({ children }: AppProvidersProps) => (
                         </Router>
                       </TransferDialogContextController>
                     </PurchaseDialogContextController>
-                  </BidDialogContextController>
+                  </ImportDialogContextController>
                 </CancelDialogContextController>
               </AccountDialogContextController>
             </Web3ReactManager>
