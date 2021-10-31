@@ -24,9 +24,17 @@ export class ProfileItemDto {
     @IsString()
     amount: string
 
-    @ApiProperty({ description: 'Whether the asset can be exported or summoned as a token.'})
+    @ApiProperty({ description: 'Whether the asset can be exported as a token.'})
     @IsBoolean()
     exportable: boolean
+
+    @ApiProperty({ description: 'Whether the asset can be summoned as a token.'})
+    @IsBoolean()
+    summonable: boolean
+
+    @ApiProperty({ description: 'Hash of the entry. Needed for exports.'})
+    @IsString()
+    hash?: string
 }
 
 export class ProfileItemsDto {

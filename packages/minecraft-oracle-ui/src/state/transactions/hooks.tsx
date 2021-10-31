@@ -202,64 +202,46 @@ export function useHasPendingApproval(
   );
 }
 
-export function useSubmittedOrderTx(orderHash?: string): {
-  orderSubmitted: boolean;
-  orderTx: TransactionDetails | undefined;
+export function useSubmittedImportTx(entryHash?: string): {
+  importSubmitted: boolean;
+  importTx: TransactionDetails | undefined;
 } {
   const allTransactions = useAllTransactions();
 
   // get the txn if it has been submitted
-  const orderTx = useMemo(() => {
+  const importTx = useMemo(() => {
     const txIndex = Object.keys(allTransactions).find((hash) => {
       const tx = allTransactions[hash];
-      return tx.order && orderHash && tx.order.orderHash === orderHash;
+      console.log(tx?.importResult?.hash, entryHash, tx?.importResult?.hash === entryHash)
+      return tx.importResult && entryHash && tx.importResult.hash === entryHash;
     });
     return txIndex && allTransactions[txIndex]
       ? allTransactions[txIndex]
       : undefined;
   }, [allTransactions]);
 
-  return { orderSubmitted: Boolean(orderTx), orderTx };
+  return { importSubmitted: Boolean(importTx), importTx };
 }
 
-export function useSubmittedCancelTx(orderHash?: string): {
-  cancelSubmitted: boolean;
-  cancelTx: TransactionDetails | undefined;
+export function useSubmittedExportTx(entryHash?: string): {
+  exportSubmitted: boolean;
+  exportTx: TransactionDetails | undefined;
 } {
   const allTransactions = useAllTransactions();
 
   // get the txn if it has been submitted
-  const cancelTx = useMemo(() => {
+  const exportTx = useMemo(() => {
     const txIndex = Object.keys(allTransactions).find((hash) => {
       const tx = allTransactions[hash];
-      return tx.cancel && orderHash && tx.cancel.orderHash === orderHash;
+      console.log(tx?.exportResult?.hash, entryHash, tx?.exportResult?.hash === entryHash)
+      return tx.exportResult && entryHash && tx.exportResult.hash === entryHash;
     });
     return txIndex && allTransactions[txIndex]
       ? allTransactions[txIndex]
       : undefined;
   }, [allTransactions]);
 
-  return { cancelSubmitted: Boolean(cancelTx), cancelTx };
-}
-
-export function useSubmittedFillTx(orderHash?: string): {
-  fillSubmitted: boolean;
-  fillTx: TransactionDetails | undefined;
-} {
-  const allTransactions = useSortedRecentTransactions();
-
-  // get the txn if it has been submitted
-  const fillTx = useMemo(() => {
-    if (!orderHash) {
-      return undefined;
-    }
-    const tx = allTransactions.find((tx) => {
-      return tx.fill && tx.fill.orderHash === orderHash;
-    });
-    return tx ? tx : undefined;
-  }, [allTransactions]);
-
-  return { fillSubmitted: Boolean(fillTx), fillTx };
+  return { exportSubmitted: Boolean(exportTx), exportTx };
 }
 
 export function useSubmittedTransferTx(

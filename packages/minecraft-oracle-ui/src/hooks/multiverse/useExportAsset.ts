@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { calculateGasMargin, getSigner } from '../../utils';
-import { useMarketplaceV1Contract } from '../../hooks/useContracts/useContracts';
-import { useActiveWeb3React } from '../../hooks';
+import { useMarketplaceV1Contract, useMultiverseBridgeV1Contract } from '../../hooks/useContracts/useContracts';
+import { useActiveWeb3React, useAuth } from '../../hooks';
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import axios from 'axios'
-import { StringAssetType } from 'utils/subgraph';
 
 export enum ExportAssetCallbackState {
     INVALID,
@@ -14,7 +13,7 @@ export enum ExportAssetCallbackState {
 }
 
 export interface ExportRequest {
-    hash: string
+    hash?: string
 }
 
 export interface AssetRequest {
@@ -33,42 +32,45 @@ export type ExportRequestParams = {
     confirmed: boolean
 }
 
-export function useFetchExportAssetArgumentsCallback(enraptureRequest: ExportRequest) {
+export function useFetchExportAssetArgumentsCallback(exportRequest: ExportRequest) {
     const { library, account } = useActiveWeb3React();
 
     const [params, setParams] = useState<ExportRequestParams | undefined>(undefined)
+    const { authData } =  useAuth();
 
-    const stringedRequest = JSON.stringify(enraptureRequest)
+    const {hash} = exportRequest ?? {}
+    const {jwt} = authData ?? {}
 
     const cb = useCallback(async () => {
-        if (!library || !account) {
+        if (!library || !account || !hash) {
             setParams(undefined);
         }
         try {
             const resp = await axios.request<ExportRequestParams>({
                 method: 'put',
-                url: `${process.env.REACT_APP_BACKEND_API_URL}/oracle/enrapture`,
-                data: enraptureRequest
+                url: `${process.env.REACT_APP_BACKEND_API_URL}/oracle/export`,
+                data: exportRequest,
+                headers: { Authorization: `Bearer ${jwt}` }
             });
             setParams(resp.data)
         } catch(e) {
-            console.error('Error fetching import params.')
+            console.error('Error fetching export params.')
             setParams(undefined)
         }
-    }, [library, account, stringedRequest])
+    }, [library, account, hash, jwt])
 
 
     useEffect(() => {
-        if (library && account && enraptureRequest) {
+        if (library && account && exportRequest) {
             cb()
         }
-    }, [library, account, stringedRequest])
+    }, [library, account, hash, jwt])
 
     return params
 }
 
 export function useExportAssetCallback(
-    assetRequest: ExportRequest,
+    exportRequest: ExportRequest,
 ): {
     state: ExportAssetCallbackState;
     callback: null | (() => Promise<string>);
@@ -77,16 +79,9 @@ export function useExportAssetCallback(
     const { account, chainId, library } = useActiveWeb3React();
 
     //console.log('YOLO', { account, chainId, library });
-    const contract = useMarketplaceV1Contract(true);
-    
+    const contract = useMultiverseBridgeV1Contract(true);
 
-    const enraptureRequest = {
-        ...assetRequest,
-        owner: account,
-        beneficiary: account
-    }
-
-    const { confirmed, data, hash, signature } = useFetchExportAssetArgumentsCallback(enraptureRequest) ?? {}
+    const { confirmed, data, hash, signature } = useFetchExportAssetArgumentsCallback(exportRequest) ?? {}
 
     const addTransaction = useTransactionAdder();
 

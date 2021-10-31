@@ -28,6 +28,10 @@ import { useInGameItems } from 'hooks/multiverse/useInGameItems';
 import { useExportAssetCallback } from 'hooks/multiverse/useExportAsset';
 import { useImportAssetCallback } from 'hooks/multiverse/useImportAsset';
 import { useSummonCallback } from 'hooks/multiverse/useSummon';
+import { useActiveWeb3React, useImportDialog } from 'hooks';
+import { useExportDialog } from 'hooks/useExportDialog/useExportDialog';
+import { useSummonDialog } from 'hooks/useSummonDialog/useSummonDialog';
+import { stringToStringAssetType } from 'utils/subgraph';
 
 export type ProfilePagePropTypes = {
     authData: AuthData
@@ -36,7 +40,14 @@ export type ProfilePagePropTypes = {
 
 const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const [checked, setChecked] = React.useState(['']);
+
+    const {account} = useActiveWeb3React()
     const profile = useProfile();
+
+    // Dialogs
+    const { setImportDialogOpen, setImportDialogData } = useImportDialog()
+    const { setExportDialogOpen, setExportDialogData } = useExportDialog()
+    const { setSummonDialogOpen, setSummonDialogData } = useSummonDialog()
 
     //On chain Items
     const onChainItems = useOnChainItems();
@@ -46,6 +57,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
     //In Game Items
     const inGameItems = useInGameItems();
+    console.log('ingame items', inGameItems)
     const inGameMoonsamas = inGameItems?.moonsamas || [];
     const inGameGoldenTickets = inGameItems?.tickets || [];
     const inGameResources = inGameItems?.resources || [];
@@ -175,20 +187,36 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                         <div style={{ width: '50%' }}>
                             <div className={columnTitle}><span className={columnTitleText}>In-game Items</span></div>
                             <List dense sx={{ width: '100%', bgcolor: '#111' }}>
-                                {!!inGameMoonsamas.length || !!inGameGoldenTickets.length ? [...inGameMoonsamas, ...inGameGoldenTickets].map((value) => {
-                                    const labelId = `checkbox-list-secondary-label-${value}`;
+                                {!!inGameMoonsamas.length || !!inGameGoldenTickets.length ? [...inGameMoonsamas, ...inGameGoldenTickets].map((value, ind) => {
+                                    const labelId = `checkbox-list-secondary-label-${ind}`;
                                     return (
                                         <ListItem
-                                            key={1} //update key
+                                            key={ind} //update key
                                             disablePadding
                                         >
                                             <ListItemButton>
                                                 <ListItemAvatar>
                                                     <img src={Resource1} alt="" />
                                                 </ListItemAvatar>
-                                                <ListItemText id={labelId} primary={value} />
+                                                <ListItemText id={labelId} primary={value.toString()} />
 
-                                                <Button className={transferButtonSmall}>Export To Wallet</Button>
+                                                <Button
+                                                    className={transferButtonSmall}
+                                                    onClick={() => {
+                                                        setExportDialogOpen(true);
+                                                        setExportDialogData(
+                                                            {
+                                                                hash: value.hash,
+                                                                asset: {
+                                                                    assetAddress: value.assetAddress,
+                                                                    assetId: value.assetId,
+                                                                    assetType: stringToStringAssetType(value.assetType),
+                                                                    id: 'x'
+                                                                }
+                                                            }
+                                                        );
+                                                    }}
+                                                >Export To Wallet</Button>
                                             </ListItemButton>
                                         </ListItem>
                                     );
@@ -214,7 +242,13 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                 </ListItemAvatar>
                                                 <ListItemText primary={item?.meta?.name} />
 
-                                                <Button className={transferButtonSmall}>Import To Game</Button>
+                                                <Button
+                                                    className={transferButtonSmall}
+                                                    onClick={() => {
+                                                        setImportDialogOpen(true);
+                                                        setImportDialogData({ asset: item.asset });
+                                                    }}
+                                                >Import To Game</Button>
                                             </ListItemButton>
                                         </ListItem>
                                     );
@@ -286,7 +320,13 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                 );
                             })}
                         </List>
-                        <Button className={transferButton}>Summon Resources</Button>
+                        <Button
+                            className={transferButton}
+                            onClick={() => {
+                                setSummonDialogOpen(true);
+                                setSummonDialogData({recipient: account ?? undefined});
+                            }}
+                        >Summon Resources</Button>
                     </div>
                     <div style={{ width: '50%' }}>
                         <div className={columnTitle}><span className={columnTitleText}>Wallet Resources</span></div>

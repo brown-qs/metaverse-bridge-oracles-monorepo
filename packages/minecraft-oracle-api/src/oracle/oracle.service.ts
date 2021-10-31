@@ -13,7 +13,7 @@ import { calculateMetaAssetHash, encodeEnraptureWithSigData, encodeExportWithSig
 import { BigNumber, Contract, ethers, Signer } from 'ethers';
 import { ProviderToken } from 'src/provider/token';
 import { AssetService } from 'src/asset/asset.service';
-import { assetTypeToStringAssetType } from 'src/utils';
+import { assetTypeToStringAssetType, stringAssetTypeToAssetType } from 'src/utils';
 import { MetaAsset } from './oracle.types';
 import { ExportDto } from './dtos/export.dto';
 import { SummonDto } from './dtos/summon.dto';
@@ -45,13 +45,14 @@ export class OracleService {
 
     public async userInRequest(user: UserEntity, data: ImportDto, enraptured: boolean): Promise<[string, string, string, boolean]> {
         this.logger.debug(`userInRequest: ${JSON.stringify(data)}`, this.context)
-        const inAsset = enraptured ? this.enrapturableAssets.find(x => x.address === data.asset.assetAddress.toLowerCase()) : this.importableAssets.find(x => x.address === data.asset.assetAddress.toLowerCase())
+        const inAsset = enraptured ? this.enrapturableAssets.find(x => x.address.toLowerCase() === data.asset.assetAddress.toLowerCase()) : this.importableAssets.find(x => x.address.toLowerCase() === data.asset.assetAddress.toLowerCase())
 
         if (!inAsset) {
             this.logger.error(`userInRequest: not an permissioned asset`, null, this.context)
             throw new UnprocessableEntityException(`Not permissioned asset`)
         }
 
+        console.log(data)
         const requestHash = await utf8ToKeccak(JSON.stringify(data))
         const existingEntry = await this.assetService.findOne({ requestHash, enraptured, pendingIn: true, owner: { uuid: user.uuid } }, { order: { expiration: 'DESC' }, relations: ['owner'] })
 
@@ -137,6 +138,10 @@ export class OracleService {
     public async userOutRequest(user: UserEntity, { hash }: ExportDto): Promise<[string, string, string, boolean]> {
         this.logger.debug(`userOutRequest: ${hash}`, this.context)
 
+        if (!hash) {
+            throw new UnprocessableEntityException(`No hash was received.`)
+        }
+
         const ongoingGame = await this.gameSessionService.findOne({ ongoing: true })
         if (!!ongoingGame) {
             this.logger.error(`userOutRequest: forbidden during ongoing game`, null, this.context)
@@ -157,14 +162,19 @@ export class OracleService {
 
         this.logger.debug(`OutData: request prepared: ${[hash, payload, signature]}`, this.context)
 
+        let confirmsuccess = false
+        existingEntry.pendingOut = true
+        await this.assetService.create(existingEntry)
+
         try {
-            const success = await this.userExportConfirm(user, { hash })
-            return [hash, payload, signature, success]
+            confirmsuccess = await this.userExportConfirm(user, { hash })
         } catch (e) {
-            existingEntry.pendingOut = true
-            this.assetService.create(existingEntry)
-            return [hash, payload, signature, false]
         }
+
+        if (confirmsuccess) {
+            return [hash, payload, signature, true]
+        }
+        return [hash, payload, signature, false]
     }
 
     public async userSummonRequest(user: UserEntity, { recipient }: SummonDto): Promise<boolean> {
@@ -239,6 +249,7 @@ export class OracleService {
             return true
         }
 
+        console.log(hash)
         const mAsset: MetaAsset = await this.metaverse.getImportedMetaAsset(hash)
 
         if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress.toLowerCase() !== assetEntry.assetAddress.toLowerCase()) {
@@ -308,6 +319,12 @@ export class OracleService {
     }
 
     public async userExportConfirm(user: UserEntity, { hash }: { hash: string }): Promise<boolean> {
+
+        if (!hash) {
+            this.logger.warn(`ExportConfirm: hash not received`, this.context)
+            return false
+        }
+
         const assetEntry = await this.assetService.findOne({ hash, enraptured: false })
 
         if (!assetEntry) {
