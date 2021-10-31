@@ -24,6 +24,7 @@ import { useIsTransactionPending, useSubmittedExportTx } from 'state/transaction
 import { ExportAssetCallbackState, useExportAssetCallback } from 'hooks/multiverse/useExportAsset';
 import { useExportConfirmCallback } from 'hooks/multiverse/useConfirm';
 import { useExportDialog } from 'hooks/useExportDialog/useExportDialog';
+import { useActiveGame } from 'hooks/multiverse/useActiveGame';
 
 
 export const ExportDialog = () => {
@@ -33,6 +34,10 @@ export const ExportDialog = () => {
   const [approvalSubmitted, setApprovalSubmitted] = useState<boolean>(false);
   const [exportConfirmed, setExportConfirmed] = useState<boolean>(false);
   const confirmCb = useExportConfirmCallback()
+
+  const activeGame = useActiveGame()
+
+  console.log({activeGame})
 
   const {
     divider,
@@ -109,6 +114,16 @@ export const ExportDialog = () => {
   }, [exportDialogData?.hash, finalTxSubmitted, exportSubmitted, isPending])
 
   const renderBody = () => {
+
+    if(activeGame) {
+      return (
+        <div className={loadingContainer}>
+          <div>
+            <Typography>Sorry you cannot export with the bridge during an ongoing game</Typography>
+          </div>
+        </div>
+      );
+    }
 
     if (!exportParamsLoaded) {
       return (
@@ -200,8 +215,7 @@ export const ExportDialog = () => {
     return (
       <>
         <Grid container spacing={1} justifyContent="center">
-          <Typography className="form-subheader">Into your wallet</Typography>
-          <Typography className="form-subheader">Asset {exportDialogData?.hash}</Typography>
+          <Typography className="form-subheader">Entry hash {exportDialogData?.hash}</Typography>
           <Grid item md={12} xs={12}>
             <Box className={formBox}>
               <Typography className="form-subheader">Token Details</Typography>
@@ -257,7 +271,7 @@ export const ExportDialog = () => {
     <Dialog
       open={isExportDialogOpen}
       onClose={handleClose}
-      title={'Export from metaverse'}
+      title={'MultiverseBridge: export'}
       maxWidth="md"
     >
       <div className={dialogContainer}>{renderBody()}</div>

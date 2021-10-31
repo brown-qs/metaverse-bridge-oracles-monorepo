@@ -376,7 +376,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                 <ListItem
                                                     key={value?.asset.assetId}
                                                     secondaryAction={
-                                                        <>{value?.asset?.balance}</>
+                                                        <>{Fraction.from(value?.asset?.balance, 18)?.toFixed(0)}</>
                                                     }
                                                     disablePadding
                                                 >
