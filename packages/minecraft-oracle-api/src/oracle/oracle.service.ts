@@ -264,7 +264,7 @@ export class OracleService {
         console.log(user.uuid, hash, RecognizedAssetType.MOONSAMA.valueOf(), RecognizedAssetType.TICKET.valueOf(), recognizedAsset?.id, JSON.stringify(mAsset))
         if (!!recognizedAsset && recognizedAsset.type.valueOf() === RecognizedAssetType.MOONSAMA.valueOf() && (recognizedAsset.id === undefined || recognizedAsset.id === mAsset.asset.assetId.toString())) {
             this.logger.log(`ImportConfirm: setting moonsama for user ${user.uuid}: ${hash}`, this.context)
-            const texture = await this.textureService.findOne({ assetAddress: assetEntry.assetAddress.toLowerCase(), assetId: assetEntry.assetId })
+            const texture = await this.textureService.findOne({ assetAddress: assetEntry.assetAddress.toLowerCase(), assetId: assetEntry.assetId }, {relations: ['owner']})
             if (!!texture) {
                 this.logger.log('ImportConfirm: Moonsama, texture found', this.context)
                 texture.owner = user
