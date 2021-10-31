@@ -99,13 +99,12 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     return (
         <Grid className={profileContainer}>
             <Header />
-            {playerEligible ? (
-                <>
                 <Grid container justifyContent="center" spacing={4}>
                     <div style={{ width: '100%', textAlign: 'right' }}>
                         <span style={{fontSize: '22px',}}>Welcome back {authData?.userProfile?.userName},</span> <br />
-
-                        <span style={{ color:'#12753A', fontSize: '16px', fontWeight: 'bold' }}>You are Eligible to play!</span>
+                        {profile?.allowedToPlay ? (<span style={{ color:'#12753A', fontSize: '16px', fontWeight: 'bold' }}>You are Eligible to play!</span>):
+                        (
+                        <p style={{ color:'#DB3B21'}}>To be eligible to play, bridge a VIP ticket, Moonsama, or <a href="https://moonsama.com/freshoffers" target="_blank">visit the Marketplace to get one</a></p>)}
                     </div>
 
                     <Grid container justifyContent="center" spacing={4} style={{ margin: '56px 0 0 0' }}>
@@ -153,7 +152,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                         </Grid>
                         <Grid item md={2} xs={12} justifyContent="center">
                             <div className={statBox}>
-                                iron Ingot
+                                Iron Ingot
                                 <img className={headerImage} src={Resource4} alt="Moonsama Iron Ingot" />
 
                                 <div className={statBoxInfo}>
@@ -186,7 +185,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                         spacing={4}
                     >
                         <div style={{ width: '50%' }}>
-                            <div className={columnTitle}><span className={columnTitleText}>In-game Items</span></div>
+                            <div className={columnTitle}><span className={columnTitleText}>In-game items: metaverse</span></div>
                             <List dense sx={{ width: '100%', bgcolor: '#111' }}>
                                 {!!inGameMoonsamas.length || !!inGameGoldenTickets.length ? [...inGameMoonsamas, ...inGameGoldenTickets].map((value, ind) => {
                                     const labelId = `checkbox-list-secondary-label-${ind}`;
@@ -229,7 +228,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                             </List>
                         </div>
                         <div style={{ width: '50%' }}>
-                            <div className={columnTitle}><span className={columnTitleText}>Wallet Items</span></div>
+                            <div className={columnTitle}><span className={columnTitleText}>On-chain items: Moonriver account</span></div>
                             <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
                                 {!!onChainMoonsamas.length || !!onChainGoldenTickets.length ? [...onChainMoonsamas, ...onChainGoldenTickets].map((item, ind) => {
                                     return (
@@ -297,7 +296,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                         spacing={4}
                     >
                     <div style={{ width: '50%' }}>
-                        <div className={columnTitle}><span className={columnTitleText}>In-game Resources</span></div>
+                        <div className={columnTitle}><span className={columnTitleText}>In-game resources: metaverse</span></div>
                         <List dense sx={{ width: '100%', bgcolor: '#111' }}>
                             {!!inGameItems?.resources.length ? (
                                     <>
@@ -381,7 +380,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                         >Summon Resources</Button>
                     </div>
                     <div style={{ width: '50%' }}>
-                        <div className={columnTitle}><span className={columnTitleText}>Wallet Resources</span></div>
+                        <div className={columnTitle}><span className={columnTitleText}>On-chain resources: Moonriver account</span></div>
                         <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
                             {onChainResources.map((value, ind) => {
                                 const labelId = `checkbox-list-secondary-label-${ind}`;
@@ -423,8 +422,6 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     {/*</List>*/}
                 </Grid>
             </Grid>
-                </>
-            ) : <p>You are not eligible to play. <a href="https://moonsama.com/freshoffers" target="_blank">Visit Marketplace</a></p>}
 
 
 
