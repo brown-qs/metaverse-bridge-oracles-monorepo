@@ -73,7 +73,8 @@ export const loadEnv = () => {
         server: {
             port: process.env.SERVER_PORT,
             host: process.env.SERVER_HOST,
-            scheme: process.env.SERVER_SCHEME
+            scheme: process.env.SERVER_SCHEME,
+            redirect: process.env.SERVER_REDIRECT_URL
         },
         app: {
             id: process.env.AZURE_APP_ID,
