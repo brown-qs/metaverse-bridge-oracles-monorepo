@@ -62,13 +62,12 @@ export const useStyles = makeStyles((theme) => ({
     position: 'absolute',
     left: 0,
     bottom: 0,
-    width: '40%',
+    width: '43%',
   },
   rightBgImage: {
     position: 'absolute',
-    transform: 'scaleX(-1)',
     right: 0,
     bottom: 0,
-    width: '40%',
+    width: '43%',
   }
 }));

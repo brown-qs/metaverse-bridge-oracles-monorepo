@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react';
-import axios from 'axios'
+import axios, { AxiosError } from 'axios';
 import { ProfileContextType } from 'context/auth/AuthContext/AuthContext.types';
 import { useActiveWeb3React, useAuth } from 'hooks';
 import { useBlockNumber } from 'state/application/hooks';
@@ -53,6 +53,12 @@ export function useProfile() {
                 userProfile: resp?.data
             })
         } catch(e) {
+            const err = e as AxiosError;
+
+            if(err?.response?.data.statusCode === 401){
+                window.localStorage.removeItem('authData');
+                setAuthData(undefined);
+            };
             console.error('Error fetching user profile', e);
         }
     }, [jwt, blocknumber])
