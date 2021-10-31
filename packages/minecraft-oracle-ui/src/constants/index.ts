@@ -79,7 +79,7 @@ export const EXPLORER_URL: { [chainId in ChainId]?: string } = {
 
 export const MULTIVERSE_BRIDGE_V1_ADDRESS: { [chainId in ChainId]?: string } = {
   [ChainId.VOLTA]: '0x58df3876BcE94941DE59088c5963781984EF264b',
-  [ChainId.MOONRIVER]: '0x710ddbaA47A4cCdC85A507a264865260e82c18EE',
+  [ChainId.MOONRIVER]: '0x59C481548CE7BA13f3288df9f4FCf44a10A589A0'//'0x710ddbaA47A4cCdC85A507a264865260e82c18EE',
 };
 
 export const PROTOCOL_FEE_BPS = '200';

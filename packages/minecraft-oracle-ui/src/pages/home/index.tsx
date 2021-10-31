@@ -41,7 +41,7 @@ const HomePage = () => {
         <img src={WhiteLogo} alt="" />
      </div>
      <span className={glitchText}>
-          Multiverse Bridge: Minecraft interface
+          Multiverse Bridge: Minecraft
      </span>
 
         <div style={{  }}>

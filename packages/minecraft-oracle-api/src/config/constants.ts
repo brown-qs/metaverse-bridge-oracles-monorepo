@@ -44,18 +44,19 @@ export type RecognizedAsset = {
 export const IMPORTABLE_ASSETS: RecognizedAsset[] = [
     {
       chainId: ChainId.MOONRIVER,
-      address: '0xb654611f84a8dc429ba3cb4fda9fad236c505a1a',
+      address: '0xb654611F84A8dc429BA3cb4FDA9Fad236C505a1a'.toLowerCase(),
       type: RecognizedAssetType.MOONSAMA,
       id: undefined,
       name: 'Moonsama'
     }, /* moonsama */
     {
-      address: '0x1974eeaf317ecf792ff307f25a3521c35eecde86',
+      address: '0x1974eEAF317Ecf792ff307F25A3521C35eECde86'.toLowerCase(),
       id: '1',
       type: RecognizedAssetType.TICKET,
       chainId: ChainId.MOONRIVER,
-      name: 'Golden ticket'
+      name: 'VIP ticket'
     }, /* tickets */
+    /*
     {
       address: '0x6E9F41ec2a43ECAe0Ada29587D4D40a3e83e4bEB'.toLowerCase(),
       id: undefined,
@@ -91,16 +92,18 @@ export const IMPORTABLE_ASSETS: RecognizedAsset[] = [
       chainId: ChainId.MOONRIVER,
       name: 'Moonsama'
     }
+    */
 ]
 
 export const ENRAPTURABLE_ASSETS: RecognizedAsset[] = [
+  /*
    {
       address: '0x6E9F41ec2a43ECAe0Ada29587D4D40a3e83e4bEB'.toLowerCase(),
       id: undefined as string,
       type: RecognizedAssetType.TEST,
       chainId: ChainId.VOLTA,
       name: 'Test'
-    }, /* tickets */
+    },
     {
       address: '0x564482cFeC68454f078d0CEF27cb930cBa93d05C'.toLowerCase(),
       id: '1',
@@ -115,12 +118,13 @@ export const ENRAPTURABLE_ASSETS: RecognizedAsset[] = [
       chainId: ChainId.VOLTA,
       name: 'Moonsama'
     }
+    */
 ]
 
 export const METAVERSE = '0x03b0ce3a3c09a347630b1f2803b77e8708cacbdb24f2f74961671eb476fbd57e'
 export const METAVERSE_ADDRESSES: {[key: number]: string} = {
   [ChainId.VOLTA]: '0x58df3876BcE94941DE59088c5963781984EF264b',
-  [ChainId.MOONRIVER]: '0x710ddbaA47A4cCdC85A507a264865260e82c18EE'
+  [ChainId.MOONRIVER]: '0x59C481548CE7BA13f3288df9f4FCf44a10A589A0'//'0x710ddbaA47A4cCdC85A507a264865260e82c18EE'
 }
 export const CALLDATA_EXPIRATION_MS = 1000 * 60 * 5
 export const CALLDATA_EXPIRATION_THRESHOLD = 1000 * 60 * 1

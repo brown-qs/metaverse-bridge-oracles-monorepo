@@ -47,9 +47,9 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
     //On chain Items
     const onChainItems = useOnChainItems();
-    const onChainMoonsamas = onChainItems?.['SamaMoo'] || []; //Update with live key
-    const onChainGoldenTickets = onChainItems?.['TestCollection'] || []; //Update with live key
-    const onChainResources = onChainItems?.['Metaverse Asset Factory'] || []; //Update with live key
+    const onChainMoonsamas = onChainItems?.['Moonsama'] || []; //Update with live key
+    const onChainGoldenTickets = onChainItems?.['VIP Ticket'] || []; //Update with live key
+    const onChainResources = onChainItems?.['Moonsama Metaverse Asset Factory'] || []; //Update with live key
 
     //In Game Items
     const inGameItems = useInGameItems();
