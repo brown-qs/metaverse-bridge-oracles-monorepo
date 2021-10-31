@@ -62,6 +62,15 @@ export class AuthService {
 
         try {
             accessToken = await account.authFlow(code)
+        } catch (err: any) {
+            this.logger.error('authLogin:: auth flow error', err, this.context)
+            throw new UnprocessableEntityException('Microsoft auth flow error')
+        }
+
+        const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+        await delay(1000)
+
+        try {
             await account.getProfile()
         } catch (err: any) {
             this.logger.error('authLogin:: error authenticating user', err, this.context)
