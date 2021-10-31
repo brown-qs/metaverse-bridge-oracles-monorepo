@@ -224,6 +224,8 @@ export class OracleService {
                 } catch(e) {
                     this.logger.error(`Summon: failiure to remove entities, ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
                 }
+
+                this.logger.log(`Summon: successful summon for user ${user.uuid}`, this.context)
             } catch(e) {
                 //console.log(e)
                 this.logger.error(`Summon: failiure to summon ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
