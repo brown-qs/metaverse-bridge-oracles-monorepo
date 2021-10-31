@@ -84,7 +84,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
             <Header />
                 <Grid container justifyContent="center" spacing={4}>
                     <div style={{ width: '50%', textAlign: 'left' }}>
-                        <span style={{fontSize: '38px', fontFamily: `VT323, 'arial'`,}}>Multiverse Bridge</span> <br />
+                        <span style={{fontSize: '38px', fontFamily: `VT323, 'arial'`,}}>Multiverse Bridge: Minecraft meta</span> <br />
                     </div>
                     <div style={{ width: '50%', textAlign: 'right' }}>
                         <span style={{fontSize: '22px',}}>Welcome back {authData?.userProfile?.userName},</span> <br />
