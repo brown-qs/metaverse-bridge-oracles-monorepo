@@ -30,12 +30,16 @@ export function useExportConfirmCallback() {
     const { authData } =  useAuth();
     const {jwt} = authData ?? {}
 
-    return useCallback(async (hash: string) => {
+    return useCallback(async (hash?: string) => {
+        if (!hash) {
+            return false;
+        }
         try {
             const resp = await axios.request<boolean>({
                 method: 'put',
                 url: `${process.env.REACT_APP_BACKEND_API_URL}/oracle/export/confirm`,
-                data: {hash}
+                data: {hash},
+                headers: { Authorization: `Bearer ${jwt}` }
             });
             return resp.data
         } catch(e) {
@@ -50,11 +54,15 @@ export function useEnraptureConfirmCallback() {
     const {jwt} = authData ?? {}
 
     return useCallback(async (hash: string) => {
+        if (!hash) {
+            return false;
+        }
         try {
             const resp = await axios.request<boolean>({
                 method: 'put',
                 url: `${process.env.REACT_APP_BACKEND_API_URL}/oracle/enrapture/confirm`,
-                data: {hash}
+                data: {hash},
+                headers: { Authorization: `Bearer ${jwt}` }
             });
             return resp.data
         } catch(e) {

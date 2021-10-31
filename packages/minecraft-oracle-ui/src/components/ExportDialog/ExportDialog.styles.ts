@@ -5,7 +5,7 @@ export const useStyles = makeStyles((theme) => ({
     display: 'flex',
     padding: theme.spacing(4),
     flexDirection: 'column',
-    minWidth: 500,
+    // minWidth: 500,
   },
   nakedInput: {
     border: 0,
@@ -16,6 +16,16 @@ export const useStyles = makeStyles((theme) => ({
     color: 'white',
     textAlign: 'right',
     outline: 'none',
+  },
+  inputContainer: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    marginTop: theme.spacing(2),
+    alignItems: 'center',
+    [theme.breakpoints.down('xs')]: {
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+    },
   },
   loadingContainer: {
     display: 'flex',
@@ -31,18 +41,5 @@ export const useStyles = makeStyles((theme) => ({
     width: '30%',
     height: 'auto',
     marginBottom: theme.spacing(2),
-  },
-  infoContainer: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginTop: theme.spacing(2),
-  },
-  divider: {
-    background: theme.palette.text.secondary,
-    opacity: 0.5,
-    marginTop: theme.spacing(2),
-  },
-  button: {
-    marginTop: theme.spacing(2),
   },
 }));

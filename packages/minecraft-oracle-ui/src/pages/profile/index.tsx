@@ -29,6 +29,8 @@ import { useExportAssetCallback } from 'hooks/multiverse/useExportAsset';
 import { useImportAssetCallback } from 'hooks/multiverse/useImportAsset';
 import { useSummonCallback } from 'hooks/multiverse/useSummon';
 import { useImportDialog } from 'hooks';
+import { useExportDialog } from 'hooks/useExportDialog/useExportDialog';
+import { stringToStringAssetType } from 'utils/subgraph';
 
 export type ProfilePagePropTypes = {
     authData: AuthData
@@ -41,6 +43,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
     // Dialogs
     const { setImportDialogOpen, setImportDialogData } = useImportDialog()
+    const { setExportDialogOpen, setExportDialogData } = useExportDialog()
 
     //On chain Items
     const onChainItems = useOnChainItems();
@@ -193,7 +196,23 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                 </ListItemAvatar>
                                                 <ListItemText id={labelId} primary={value.toString()} />
 
-                                                <Button className={transferButtonSmall}>Export To Wallet</Button>
+                                                <Button
+                                                    className={transferButtonSmall}
+                                                    onClick={() => {
+                                                        setExportDialogOpen(true);
+                                                        setExportDialogData(
+                                                            {
+                                                                hash: value.hash,
+                                                                asset: {
+                                                                    assetAddress: value.assetAddress,
+                                                                    assetId: value.assetId,
+                                                                    assetType: stringToStringAssetType(value.assetType),
+                                                                    id: 'x'
+                                                                }
+                                                            }
+                                                        );
+                                                    }}
+                                                >Export To Wallet</Button>
                                             </ListItemButton>
                                         </ListItem>
                                     );
