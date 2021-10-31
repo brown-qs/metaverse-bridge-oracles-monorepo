@@ -10,7 +10,7 @@ import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import { WOOD_TYPES } from '../../constants';
 
-import { AuthContextType, AuthData, ProfileContextType } from 'context/auth/AuthContext/AuthContext.types';
+import { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 
 import PeopleAltIcon from '@mui/icons-material/PeopleAltSharp';
 import RemoveIcon from '@mui/icons-material/RemoveCircleSharp';
@@ -27,6 +27,7 @@ import { useActiveWeb3React, useImportDialog } from 'hooks';
 import { useExportDialog } from 'hooks/useExportDialog/useExportDialog';
 import { useSummonDialog } from 'hooks/useSummonDialog/useSummonDialog';
 import { stringToStringAssetType } from 'utils/subgraph';
+import { Fraction } from 'utils/Fraction';
 
 export type ProfilePagePropTypes = {
     authData: AuthData
@@ -48,7 +49,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const onChainItems = useOnChainItems();
     const onChainMoonsamas = onChainItems?.['SamaMoo'] || []; //Update with live key
     const onChainGoldenTickets = onChainItems?.['TestCollection'] || []; //Update with live key
-    const onChainResources = [];
+    const onChainResources = onChainItems?.['Metaverse Asset Factory'] || []; //Update with live key
 
     //In Game Items
     const inGameItems = useInGameItems();
