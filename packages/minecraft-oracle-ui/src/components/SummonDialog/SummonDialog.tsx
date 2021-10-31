@@ -21,12 +21,15 @@ import { Button, Dialog } from 'ui';
 import { appStyles } from '../../app.styles';
 import { useStyles } from './SummonDialog.styles';
 import { useSummonCallback } from 'hooks/multiverse/useSummon';
+import { useActiveGame } from 'hooks/multiverse/useActiveGame';
 
 
 export const SummonDialog = () => {
   const { isSummonDialogOpen, summonDialogData, setSummonDialogData, setSummonDialogOpen } = useSummonDialog();
   const [summonConfirmed, setSummonConfirmed] = useState<number>(0);
   const [summonSubmitted, setSummonSubmitted] = useState<boolean>(false);
+
+  const activeGame = useActiveGame()
 
   const {
     divider,
@@ -72,6 +75,16 @@ export const SummonDialog = () => {
   const summonCallback = useSummonCallback()
 
   const renderBody = () => {
+
+    if(activeGame) {
+      return (
+        <div className={loadingContainer}>
+          <div>
+            <Typography>Sorry you cannot summon with the bridge during an ongoing game</Typography>
+          </div>
+        </div>
+      );
+    }
 
     if (summonSubmitted && summonConfirmed === 1) {
       return (
@@ -155,7 +168,7 @@ export const SummonDialog = () => {
     <Dialog
       open={isSummonDialogOpen}
       onClose={handleClose}
-      title={'Summon in-game resources from metaverse'}
+      title={'MultiverseBridge: summon'}
       maxWidth="md"
     >
       <div className={dialogContainer}>{renderBody()}</div>

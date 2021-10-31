@@ -69,11 +69,11 @@ export const Header = () => {
                         <div className={eventStatusWrapper}>
                             {isGameActive ? (
                                 <>
-                                    <VideogameAssetIcon className={eventIconActive} /> Game Active
+                                    <VideogameAssetIcon className={eventIconActive} /> Game ongoing
                                 </>
                             ) : (
                                 <>
-                                    <VideogameAssetOffIcon className={eventIconInactive} /> Game Inactive
+                                    <VideogameAssetOffIcon className={eventIconInactive} />  No game going on
                                 </>
                             )}
                         </div>

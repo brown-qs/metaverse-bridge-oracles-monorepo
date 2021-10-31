@@ -367,7 +367,7 @@ export const ImportDialog = () => {
     <Dialog
       open={isImportDialogOpen}
       onClose={handleClose}
-      title={'Import asset to metaverse'}
+      title={'MultiverseBridge: import'}
       maxWidth="md"
     >
       <div className={dialogContainer}>{renderBody()}</div>

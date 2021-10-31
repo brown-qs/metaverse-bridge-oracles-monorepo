@@ -15,10 +15,11 @@ export interface InGameItem {
 export function useActiveGame() {
     const blocknumber = useBlockNumber();
     const { authData, setAuthData } =  useAuth();
+    const {jwt} = authData ?? {}
 
     const [items, setItems] = useState<boolean>(false)
 
-    const getUserItems = useCallback(async () => {
+    const getActive = useCallback(async () => {
         try {
             const resp = await axios.request<boolean>({
                 method: 'get',
@@ -36,11 +37,11 @@ export function useActiveGame() {
             console.error('Error summoning. Try again later.')
             setItems(false)
         }
-    }, [blocknumber])
+    }, [blocknumber, jwt])
 
     useEffect(() => {
-        getUserItems()
-    }, [blocknumber])
+        getActive()
+    }, [blocknumber, jwt])
 
     return items
 }
