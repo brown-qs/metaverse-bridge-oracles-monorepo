@@ -184,7 +184,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                 {/*<ListItemAvatar>*/}
                                                 {/*    <img src={value?.meta?.image} alt="" />*/}
                                                 {/*</ListItemAvatar>*/}
-                                                <ListItemText id={labelId} primary={value.name} />
+                                                <ListItemText id={labelId} primary={`${value.name}-${value.assetId}`} />
 
                                                 <Button
                                                     className={transferButtonSmall}
@@ -315,7 +315,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     >
                                                         <ListItemButton>
                                                             <ListItemAvatar>
-                                                                <img src={Resource1} alt="Cobblestone" />
+                                                                <img src={Cobblestone} alt="Cobblestone" />
                                                             </ListItemAvatar>
                                                             <ListItemText id="cobblestone" primary="Cobblestone"/>
                                                         </ListItemButton>
