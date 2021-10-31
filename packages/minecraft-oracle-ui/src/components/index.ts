@@ -1,7 +1,7 @@
 export { Layout } from './Layout/Layout';
 export { ErrorBoundary } from './ErrorBoundary/ErrorBoundary';
 export { Token } from './Token/Token';
-export { PurchaseDialog } from './PurchaseDialog/PurchaseDialog';
+export { ExportDialog } from './ExportDialog/ExportDialog';
 export { ImportDialog } from './ImportDialog/ImportDialog';
 export { ExternalLink } from './ExternalLink/ExternalLink';
 export { Account } from './Account/Account';

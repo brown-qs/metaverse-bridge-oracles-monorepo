@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
 
-export type PurchaseDialogContextControllerProps = {
+export type ExportDialogContextControllerProps = {
   children: ReactNode;
 };

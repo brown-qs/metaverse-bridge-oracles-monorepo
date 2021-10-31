@@ -10,6 +10,8 @@ export interface InGameItem {
     assetType: string
     amount: string
     exportable: boolean
+    hash?: string
+    summonable: boolean
 }
 
 export interface ProfileInGameItems {

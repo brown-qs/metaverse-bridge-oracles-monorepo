@@ -32,7 +32,8 @@ export class ProfileService {
                 assetType: snapshot.material.assetType,
                 assetId: snapshot.material.assetId,
                 name: snapshot.material.name,
-                exportable: true,
+                exportable: false,
+                summonable: true
             }
         })
 
@@ -51,7 +52,9 @@ export class ProfileService {
                     assetType: asset.assetType,
                     assetId: asset.assetId,
                     name: recongizedEnraptureAsset.name,
-                    exportable: !asset.enraptured
+                    exportable: !asset.enraptured,
+                    hash: asset.hash,
+                    summonable: false
                 })
                 return
             }
@@ -63,7 +66,9 @@ export class ProfileService {
                     assetType: asset.assetType,
                     assetId: asset.assetId,
                     name: recongizedEnraptureAsset.name,
-                    exportable: !asset.enraptured
+                    exportable: !asset.enraptured,
+                    hash: asset.hash,
+                    summonable: false
                 })
                 return
             }
@@ -77,7 +82,9 @@ export class ProfileService {
                     assetType: asset.assetType,
                     assetId: asset.assetId,
                     name: recongizedImportAsset.name,
-                    exportable: !asset.enraptured
+                    exportable: !asset.enraptured,
+                    hash: asset.hash,
+                    summonable: false
                 })
                 return
             }
@@ -89,7 +96,9 @@ export class ProfileService {
                     assetType: asset.assetType,
                     assetId: asset.assetId,
                     name: recongizedImportAsset.name,
-                    exportable: !asset.enraptured
+                    exportable: !asset.enraptured,
+                    hash: asset.hash,
+                    summonable: false
                 })
                 return
             }
