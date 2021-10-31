@@ -50,7 +50,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const onChainMoonsamas = onChainItems?.['SamaMoo'] || []; //Update with live key
     const onChainGoldenTickets = onChainItems?.['TestCollection'] || []; //Update with live key
     const onChainResources = onChainItems?.['Metaverse Asset Factory'] || []; //Update with live key
-
+console.log('ONCHAIN', onChainResources);
     //In Game Items
     const inGameItems = useInGameItems();
     const inGameMoonsamas = inGameItems?.moonsamas || [];
@@ -382,25 +382,26 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                 <div style={{ width: '50%' }}>
                                     <div className={columnTitle}><span className={columnTitleText}>Wallet Resources</span></div>
                                     <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
-                                        {['$RES3', '$RES4', '$RES2'].map((value) => {
-                                            const labelId = `checkbox-list-secondary-label-${value}`;
+
+                                        {!!onChainResources.length ? onChainResources.map((value) => {
+                                            const labelId = value?.asset?.assetId;
                                             return (
                                                 <ListItem
-                                                    key={value}
+                                                    key={value?.asset.assetId}
                                                     secondaryAction={
-                                                        <>122</>
+                                                        <>{value?.asset?.balance}</>
                                                     }
                                                     disablePadding
                                                 >
                                                     <ListItemButton>
                                                         <ListItemAvatar>
-                                                            <img src={Resource4} alt="" />
+                                                            <img className={itemImage} src={value?.meta?.image} alt="" />
                                                         </ListItemAvatar>
-                                                        <ListItemText id={labelId} primary={value} />
+                                                        <ListItemText id={labelId} primary={value?.meta?.name} />
                                                     </ListItemButton>
                                                 </ListItem>
                                             );
-                                        })}
+                                        }) : <ListItem>No resources found in wallet.</ListItem>}
                                     </List>
                                 </div>
                             </Stack>
