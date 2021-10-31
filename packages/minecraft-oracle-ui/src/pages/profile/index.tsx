@@ -50,7 +50,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const onChainMoonsamas = onChainItems?.['SamaMoo'] || []; //Update with live key
     const onChainGoldenTickets = onChainItems?.['TestCollection'] || []; //Update with live key
     const onChainResources = onChainItems?.['Metaverse Asset Factory'] || []; //Update with live key
-console.log('ONCHAIN', onChainResources);
+
     //In Game Items
     const inGameItems = useInGameItems();
     const inGameMoonsamas = inGameItems?.moonsamas || [];
@@ -82,89 +82,88 @@ console.log('ONCHAIN', onChainResources);
     return (
         <Grid className={profileContainer}>
             <Header />
-            {!!playerEligible ? (
-                <>
                 <Grid container justifyContent="center" spacing={4}>
                     <div style={{ width: '50%', textAlign: 'left' }}>
                         <span style={{fontSize: '38px', fontFamily: `VT323, 'arial'`,}}>Multiverse Bridge</span> <br />
                     </div>
                     <div style={{ width: '50%', textAlign: 'right' }}>
                         <span style={{fontSize: '22px',}}>Welcome back {authData?.userProfile?.userName},</span> <br />
-
-                        <span style={{ color:'#12753A', fontSize: '16px', fontWeight: 'bold' }}>You are Eligible to play!</span>
+                        {profile?.allowedToPlay ? (<span style={{ color:'#12753A', fontSize: '16px', fontWeight: 'bold' }}>You are Eligible to play!</span>):
+                        (
+                        <p style={{ color:'#DB3B21'}}>To be eligible to play, bridge a VIP ticket, Moonsama, or <a href="https://moonsama.com/freshoffers" target="_blank">visit the Marketplace to get one</a></p>)}
                     </div>
 
-                    {/*<Grid container justifyContent="center" spacing={4} style={{ margin: '56px 0 0 0' }}>*/}
-                    {/*    <Grid item md={2} xs={12} justifyContent="center">*/}
-                    {/*        <div className={statBox}>*/}
-                    {/*            MSAMA*/}
-                    {/*            <img className={headerImage} src={MsamaImage} alt="Moonsama bird" />*/}
+                    <Grid container justifyContent="center" spacing={4} style={{ margin: '56px 0 0 0' }}>
+                        <Grid item md={2} xs={12} justifyContent="center">
+                            <div className={statBox}>
+                                MSAMA
+                                <img className={headerImage} src={MsamaImage} alt="Moonsama bird" />
 
-                    {/*            <div className={statBoxInfo}>*/}
-                    {/*                <div>{onChainMoonsamas.length + inGameMoonsamas.length}</div>*/}
-                    {/*            </div>*/}
-                    {/*        </div>*/}
-                    {/*    </Grid>*/}
-                    {/*    <Grid item md={2} xs={12} justifyContent="center">*/}
-                    {/*        <div className={statBox}>*/}
-                    {/*            Tickets*/}
-                    {/*            <img className={headerImage} src={TicketImage} alt="Moonsama VIP ticket" />*/}
+                                <div className={statBoxInfo}>
+                                    <div>{onChainMoonsamas.length + inGameMoonsamas.length}</div>
+                                </div>
+                            </div>
+                        </Grid>
+                        <Grid item md={2} xs={12} justifyContent="center">
+                            <div className={statBox}>
+                                Tickets
+                                <img className={headerImage} src={TicketImage} alt="Moonsama VIP ticket" />
 
-                    {/*            <div className={statBoxInfo}>*/}
-                    {/*                <div>{onChainGoldenTickets.length + inGameGoldenTickets.length}</div>*/}
-                    {/*            </div>*/}
-                    {/*        </div>*/}
-                    {/*    </Grid>*/}
-                    {/*    <Grid item md={2} xs={12} justifyContent="center">*/}
-                    {/*        <div className={statBox}>*/}
-                    {/*            Wood*/}
-                    {/*            <img className={headerImage} src={Resource1} alt="Moonsama Wood" />*/}
+                                <div className={statBoxInfo}>
+                                    <div>{onChainGoldenTickets.length + inGameGoldenTickets.length}</div>
+                                </div>
+                            </div>
+                        </Grid>
+                        <Grid item md={2} xs={12} justifyContent="center">
+                            <div className={statBox}>
+                                Wood
+                                <img className={headerImage} src={Resource1} alt="Moonsama Wood" />
 
-                    {/*            <div className={statBoxInfo}>*/}
-                    {/*                /!*<div><GameIcon /> 1</div>*!/*/}
-                    {/*                <div>{inGameResourcesWood[0]?.amount || 0}</div>*/}
-                    {/*                /!*<div><WalletIcon /> 3</div>*!/*/}
-                    {/*            </div>*/}
-                    {/*        </div>*/}
-                    {/*    </Grid>*/}
-                    {/*    <Grid item md={2} xs={12} justifyContent="center">*/}
-                    {/*        <div className={statBox}>*/}
-                    {/*            Cobblestone*/}
-                    {/*            <img className={headerImage} src={Cobblestone} alt="Moonsama Cobblestone" />*/}
+                                <div className={statBoxInfo}>
+                                    {/*<div><GameIcon /> 1</div>*/}
+                                    <div>{inGameResourcesWood[0]?.amount || 0}</div>
+                                    {/*<div><WalletIcon /> 3</div>*/}
+                                </div>
+                            </div>
+                        </Grid>
+                        <Grid item md={2} xs={12} justifyContent="center">
+                            <div className={statBox}>
+                                Cobblestone
+                                <img className={headerImage} src={Cobblestone} alt="Moonsama Cobblestone" />
 
-                    {/*            <div className={statBoxInfo}>*/}
-                    {/*                <div>{inGameResourcesCobblestone[0]?.amount || 0}</div>*/}
-                    {/*            </div>*/}
-                    {/*        </div>*/}
-                    {/*    </Grid>*/}
-                    {/*    <Grid item md={2} xs={12} justifyContent="center">*/}
-                    {/*        <div className={statBox}>*/}
-                    {/*            iron Ingot*/}
-                    {/*            <img className={headerImage} src={Resource4} alt="Moonsama Iron Ingot" />*/}
+                                <div className={statBoxInfo}>
+                                    <div>{inGameResourcesCobblestone[0]?.amount || 0}</div>
+                                </div>
+                            </div>
+                        </Grid>
+                        <Grid item md={2} xs={12} justifyContent="center">
+                            <div className={statBox}>
+                                Iron Ingot
+                                <img className={headerImage} src={Resource4} alt="Moonsama Iron Ingot" />
 
-                    {/*            <div className={statBoxInfo}>*/}
-                    {/*                /!*<div><GameIcon /> 1</div>*!/*/}
-                    {/*                <div>{inGameResourcesIron[0]?.amount || 0}</div>*/}
-                    {/*                /!*<div><WalletIcon /> 3</div>*!/*/}
-                    {/*            </div>*/}
-                    {/*        </div>*/}
-                    {/*    </Grid>*/}
-                    {/*    <Grid item md={2} xs={12} justifyContent="center">*/}
-                    {/*        <div className={statBox}>*/}
-                    {/*            Gold Ingot*/}
-                    {/*            <img className={headerImage} src={Resource5} alt="Moonsama Gold Ingot" />*/}
+                                <div className={statBoxInfo}>
+                                    {/*<div><GameIcon /> 1</div>*/}
+                                    <div>{inGameResourcesIron[0]?.amount || 0}</div>
+                                    {/*<div><WalletIcon /> 3</div>*/}
+                                </div>
+                            </div>
+                        </Grid>
+                        <Grid item md={2} xs={12} justifyContent="center">
+                            <div className={statBox}>
+                                Gold Ingot
+                                <img className={headerImage} src={Resource5} alt="Moonsama Gold Ingot" />
 
-                    {/*            <div className={statBoxInfo}>*/}
-                    {/*                /!*<div><GameIcon /> 1</div>*!/*/}
-                    {/*                <div>{inGameResourcesGold[0]?.amount || 0}</div>*/}
-                    {/*                /!*<div><WalletIcon /> 3</div>*!/*/}
-                    {/*            </div>*/}
-                    {/*        </div>*/}
-                    {/*    </Grid>*/}
-                    {/*</Grid>*/}
+                                <div className={statBoxInfo}>
+                                    {/*<div><GameIcon /> 1</div>*/}
+                                    <div>{inGameResourcesGold[0]?.amount || 0}</div>
+                                    {/*<div><WalletIcon /> 3</div>*/}
+                                </div>
+                            </div>
+                        </Grid>
+                    </Grid>
 
-                 <Grid container justifyContent="center" style={{ marginTop: '50px' }} spacing={4}>
-                    <Grid item md={12} xs={12} justifyContent="center" style={{ textAlign: 'center' }}>
+                 <Grid container justifyContent="center" style={{ marginTop: '20px' }} spacing={4}>
+                    <Grid item md={9} xs={12} justifyContent="center" style={{ textAlign: 'center' }}>
                     <Stack
                         direction={{ xs: 'column', sm: 'row' }}
                         justifyContent="space-between"
@@ -172,7 +171,7 @@ console.log('ONCHAIN', onChainResources);
                         spacing={4}
                     >
                         <div style={{ width: '50%' }}>
-                            <div className={columnTitle}><span className={columnTitleText}>In-game Items</span></div>
+                            <div className={columnTitle}><span className={columnTitleText}>In-game items: metaverse</span></div>
                             <List dense sx={{ width: '100%', bgcolor: '#111' }}>
                                 {!!inGameMoonsamas.length || !!inGameGoldenTickets.length ? [...inGameMoonsamas, ...inGameGoldenTickets].map((value, ind) => {
                                     const labelId = `checkbox-list-secondary-label-${ind}`;
@@ -215,7 +214,7 @@ console.log('ONCHAIN', onChainResources);
                             </List>
                         </div>
                         <div style={{ width: '50%' }}>
-                            <div className={columnTitle}><span className={columnTitleText}>Wallet Items</span></div>
+                            <div className={columnTitle}><span className={columnTitleText}>On-chain items: Moonriver account</span></div>
                             <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
                                 {!!onChainMoonsamas.length || !!onChainGoldenTickets.length ? [...onChainMoonsamas, ...onChainGoldenTickets].map((item, ind) => {
                                     return (
@@ -248,32 +247,150 @@ console.log('ONCHAIN', onChainResources);
                         </div>
                      </Stack>
                      </Grid>
-                     {/*<Grid item md={3} xs={12} justifyContent="center">*/}
-                     {/*    <div className={columnTitle}><span className={columnTitleText}>GGANBU</span></div>*/}
-                     {/*    <List dense sx={{ width: '100%', maxWidth: '100%', bgcolor: '#111', marginBottom: '16px' }}>*/}
-                     {/*        {['t3rminat0r','gamer6969'].map((value) => {*/}
-                     {/*            const labelId = `checkbox-list-secondary-label-${value}`;*/}
-                     {/*            return (*/}
-                     {/*                <ListItem*/}
-                     {/*                    key={value}*/}
-                     {/*                    secondaryAction={*/}
-                     {/*                        <RemoveIcon sx={{ color: "#DB3B21" }} />*/}
-                     {/*                    }*/}
-                     {/*                    disablePadding*/}
-                     {/*                >*/}
-                     {/*                    <ListItemButton>*/}
-                     {/*                        <ListItemAvatar>*/}
-                     {/*                            <PeopleAltIcon />*/}
-                     {/*                        </ListItemAvatar>*/}
-                     {/*                        <ListItemText id={labelId} primary={value} />*/}
-                     {/*                    </ListItemButton>*/}
-                     {/*                </ListItem>*/}
-                     {/*            );*/}
-                     {/*        })}*/}
-                     {/*    </List>*/}
-                     {/*</Grid>*/}
+                     <Grid item md={3} xs={12} justifyContent="center">
+                         <div className={columnTitle}><span className={columnTitleText}>GGANBU</span></div>
+                         <List dense sx={{ width: '100%', maxWidth: '100%', bgcolor: '#111', marginBottom: '16px' }}>
+                             {['t3rminat0r','gamer6969'].map((value) => {
+                                 const labelId = `checkbox-list-secondary-label-${value}`;
+                                 return (
+                                     <ListItem
+                                         key={value}
+                                         secondaryAction={
+                                             <RemoveIcon sx={{ color: "#DB3B21" }} />
+                                         }
+                                         disablePadding
+                                     >
+                                         <ListItemButton>
+                                             <ListItemAvatar>
+                                                 <PeopleAltIcon />
+                                             </ListItemAvatar>
+                                             <ListItemText id={labelId} primary={value} />
+                                         </ListItemButton>
+                                     </ListItem>
+                                 );
+                             })}
+                         </List>
+                     </Grid>
                 </Grid>
-
+            </Grid>
+            <Grid container justifyContent="center" style={{ marginTop: '80px' }} spacing={4}>
+                <Grid item md={9} xs={12} justifyContent="center" style={{ textAlign: 'center' }}>
+                    <Stack
+                        direction={{ xs: 'column', sm: 'row' }}
+                        justifyContent="space-between"
+                        alignItems="flex-start"
+                        spacing={4}
+                    >
+                    <div style={{ width: '50%' }}>
+                        <div className={columnTitle}><span className={columnTitleText}>In-game resources: metaverse</span></div>
+                        <List dense sx={{ width: '100%', bgcolor: '#111' }}>
+                            {!!inGameItems?.resources.length ? (
+                                    <>
+                                        {!!inGameResourcesWood.length && (
+                                            <ListItem
+                                                secondaryAction={
+                                                    <>
+                                                        {inGameResourcesWood[0]?.amount}
+                                                    </>
+                                                }
+                                                disablePadding
+                                            >
+                                                <ListItemButton>
+                                                    <ListItemAvatar>
+                                                        <img src={Resource1} alt="Wood" />
+                                                    </ListItemAvatar>
+                                                    <ListItemText id="wood" primary="Wood" />
+                                                </ListItemButton>
+                                            </ListItem>
+                                        )}
+                                        {!!inGameResourcesCobblestone.length && (
+                                            <ListItem
+                                                secondaryAction={
+                                                    <>
+                                                        {inGameResourcesCobblestone[0]?.amount}
+                                                    </>
+                                                }
+                                                disablePadding
+                                            >
+                                                <ListItemButton>
+                                                    <ListItemAvatar>
+                                                        <img src={Resource1} alt="Cobblestone" />
+                                                    </ListItemAvatar>
+                                                    <ListItemText id="cobblestone" primary="Cobblestone"/>
+                                                </ListItemButton>
+                                            </ListItem>
+                                        )}
+                                        {!!inGameResourcesIron.length && (
+                                            <ListItem
+                                                secondaryAction={
+                                                    <>
+                                                        {inGameResourcesIron[0]?.amount}
+                                                    </>
+                                                }
+                                                disablePadding
+                                            >
+                                                <ListItemButton>
+                                                    <ListItemAvatar>
+                                                        <img src={Resource4} alt="Iron Ingot"/>
+                                                    </ListItemAvatar>
+                                                    <ListItemText id="iron-ingot" primary="Iron Ingot"/>
+                                                </ListItemButton>
+                                            </ListItem>
+                                        )}
+                                        {!!inGameResourcesGold.length && (
+                                            <ListItem
+                                                secondaryAction={
+                                                    <>
+                                                        {inGameResourcesGold[0]?.amount}
+                                                    </>
+                                                }
+                                                disablePadding
+                                            >
+                                                <ListItemButton>
+                                                    <ListItemAvatar>
+                                                        <img src={Resource5} alt="Gold Ingot"/>
+                                                    </ListItemAvatar>
+                                                    <ListItemText id="gold-ingot" primary="Gold Ingot"/>
+                                                </ListItemButton>
+                                            </ListItem>
+                                        )}
+                                    </>
+                            ) : <ListItem>No in-game resources available</ListItem>}
+                        </List>
+                        <Button
+                            className={transferButton}
+                            onClick={() => {
+                                setSummonDialogOpen(true);
+                                setSummonDialogData({recipient: account ?? undefined});
+                            }}
+                        >Summon Resources</Button>
+                    </div>
+                    <div style={{ width: '50%' }}>
+                        <div className={columnTitle}><span className={columnTitleText}>On-chain resources: Moonriver account</span></div>
+                        <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
+                            {onChainResources.map((value, ind) => {
+                                const labelId = `checkbox-list-secondary-label-${ind}`;
+                                return (
+                                    <ListItem
+                                        key={ind}
+                                        secondaryAction={
+                                            <>{Fraction.from(value.asset.balance.toString(), 18)?.toFixed(0)}</>
+                                        }
+                                        disablePadding
+                                    >
+                                        <ListItemButton>
+                                            <ListItemAvatar>
+                                                <img src={Resource4} alt="" />
+                                            </ListItemAvatar>
+                                            <ListItemText id={labelId} primary={value.toString()} />
+                                        </ListItemButton>
+                                    </ListItem>
+                                );
+                            })}
+                        </List>
+                    </div>
+                    </Stack>
+                </Grid>
                     <Grid container justifyContent="center" style={{ marginTop: '30px' }} spacing={4}>
                         <Grid item md={12} xs={12} justifyContent="center" style={{ textAlign: 'center' }}>
                             <Stack
@@ -411,15 +528,6 @@ console.log('ONCHAIN', onChainResources);
                         </Grid>
                     </Grid>
             </Grid>
-            </>
-            ) : <p style={{ fontSize: '21px', textAlign: 'center' }}>You are not eligible to play. <br /><a href="https://moonsama.com/freshoffers" target="_blank">Visit Marketplace</a></p>}
-
-
-
-            {/*<img className={footerBg} style={{ left: 0 }} src={MinecraftBlocksBgImage} alt="" />*/}
-            {/*<img className={footerBg} style={{ left: '20%' }} src={MinecraftBlocksBgImage} alt="" />*/}
-            {/*<img className={footerBg} style={{ right: '20%' }} src={MinecraftBlocksBgImage} alt="" />*/}
-            {/*<img className={footerBg} style={{ right: 0 }} src={MinecraftBlocksBgImage} alt="" />*/}
         </Grid>
     );
 };
