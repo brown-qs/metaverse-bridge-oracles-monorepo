@@ -78,7 +78,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
         setChecked(newChecked);
     };
 
-    const playerEligible = profile?.allowedToPlay;
+    const playerEligible = true;
 
     const {
         profileContainer,
@@ -99,7 +99,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                 <>
                 <Grid container justifyContent="center" spacing={4}>
                     <div style={{ width: '50%', textAlign: 'left' }}>
-                        <span style={{fontSize: '38px', fontFamily: `VT323, 'arial'`,}}>Metaverse Bridge</span> <br />
+                        <span style={{fontSize: '38px', fontFamily: `VT323, 'arial'`,}}>Multiverse Bridge</span> <br />
                     </div>
                     <div style={{ width: '50%', textAlign: 'right' }}>
                         <span style={{fontSize: '22px',}}>Welcome back {authData?.userProfile?.userName},</span> <br />
