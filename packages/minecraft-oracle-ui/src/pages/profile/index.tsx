@@ -28,8 +28,9 @@ import { useInGameItems } from 'hooks/multiverse/useInGameItems';
 import { useExportAssetCallback } from 'hooks/multiverse/useExportAsset';
 import { useImportAssetCallback } from 'hooks/multiverse/useImportAsset';
 import { useSummonCallback } from 'hooks/multiverse/useSummon';
-import { useImportDialog } from 'hooks';
+import { useActiveWeb3React, useImportDialog } from 'hooks';
 import { useExportDialog } from 'hooks/useExportDialog/useExportDialog';
+import { useSummonDialog } from 'hooks/useSummonDialog/useSummonDialog';
 import { stringToStringAssetType } from 'utils/subgraph';
 
 export type ProfilePagePropTypes = {
@@ -39,11 +40,14 @@ export type ProfilePagePropTypes = {
 
 const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const [checked, setChecked] = React.useState(['']);
+
+    const {account} = useActiveWeb3React()
     const profile = useProfile();
 
     // Dialogs
     const { setImportDialogOpen, setImportDialogData } = useImportDialog()
     const { setExportDialogOpen, setExportDialogData } = useExportDialog()
+    const { setSummonDialogOpen, setSummonDialogData } = useSummonDialog()
 
     //On chain Items
     const onChainItems = useOnChainItems();
@@ -316,7 +320,13 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                 );
                             })}
                         </List>
-                        <Button className={transferButton}>Summon Resources</Button>
+                        <Button
+                            className={transferButton}
+                            onClick={() => {
+                                setSummonDialogOpen(true);
+                                setSummonDialogData({recipient: account ?? undefined});
+                            }}
+                        >Summon Resources</Button>
                     </div>
                     <div style={{ width: '50%' }}>
                         <div className={columnTitle}><span className={columnTitleText}>Wallet Resources</span></div>

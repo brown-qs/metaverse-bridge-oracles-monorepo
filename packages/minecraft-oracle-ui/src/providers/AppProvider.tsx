@@ -13,7 +13,7 @@ import Web3ReactProviderNetwork from '../components/Web3ReactProviderNetwork/Web
 import ApplicationUpdater from '../state/application/updater';
 import TransactionUpdater from '../state/transactions/updater';
 import store from '../state';
-import { CancelDialogContextController } from 'context/cancelDialog/cancelDialogContextController/CancelDialogContextController';
+import { SummonDialogContextController } from 'context/summonDialog/summonDialogContextController/SummonDialogContextController';
 import { TransferDialogContextController } from 'context/transferDialog/transferDialogContextController/TransferDialogContextController';
 import { ExportDialogContextController } from 'context/exportDialog/exportDialogContextController/ExportDialogContextController';
 
@@ -35,7 +35,7 @@ export const AppProviders = ({ children }: AppProvidersProps) => (
             <Updaters />
             <Web3ReactManager>
               <AccountDialogContextController>
-                <CancelDialogContextController>
+                <SummonDialogContextController>
                   <ImportDialogContextController>
                     <ExportDialogContextController>
                       <TransferDialogContextController>
@@ -45,7 +45,7 @@ export const AppProviders = ({ children }: AppProvidersProps) => (
                       </TransferDialogContextController>
                     </ExportDialogContextController>
                   </ImportDialogContextController>
-                </CancelDialogContextController>
+                </SummonDialogContextController>
               </AccountDialogContextController>
             </Web3ReactManager>
           </Provider>
