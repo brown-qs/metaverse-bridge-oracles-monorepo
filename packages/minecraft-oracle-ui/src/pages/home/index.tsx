@@ -3,7 +3,8 @@ import { Loader } from 'ui';
 import { useStyles } from './styles';
 
 import WhiteLogo from 'assets/images/logo-white.svg';
-import MinecraftImage from 'assets/images/minecraft.png';
+import MinecraftImage from 'assets/images/minecraft-splash-alpa.png';
+import MinecraftImageFlip from 'assets/images/minecraft-splash-alpha-flip.png';
 
 const HomePage = () => {
   const [ isLoading, setIsLoading ] = useState<boolean>(false);
@@ -51,7 +52,7 @@ const HomePage = () => {
 
 
       <img src={MinecraftImage} className={leftBgImage} alt="" />
-      <img src={MinecraftImage} className={rightBgImage} alt="" />
+      <img src={MinecraftImageFlip} className={rightBgImage} alt="" />
     </div>
   );
 };

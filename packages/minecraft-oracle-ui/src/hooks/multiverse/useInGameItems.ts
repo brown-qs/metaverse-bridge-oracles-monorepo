@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import axios from 'axios'
+import axios, { AxiosError } from 'axios';
 import { useBlockNumber } from 'state/application/hooks';
 import { useAuth } from 'hooks';
 
@@ -21,7 +21,7 @@ export interface ProfileInGameItems {
 }
 
 export function useInGameItems() {
-    const { authData } =  useAuth();
+    const { authData, setAuthData } =  useAuth();
     const blocknumber = useBlockNumber();
 
     const {jwt} = authData ?? {}
@@ -37,6 +37,12 @@ export function useInGameItems() {
             });
             setItems(resp.data)
         } catch(e) {
+            const err = e as AxiosError;
+
+            if(err?.response?.data.statusCode === 401){
+                window.localStorage.removeItem('authData');
+                setAuthData(undefined);
+            };
             console.error('Error summoning. Try again later.')
             setItems(undefined)
         }
