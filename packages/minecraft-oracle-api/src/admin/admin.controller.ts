@@ -28,6 +28,8 @@ import { SecretDto, SecretsDto } from './dtos/secret.dto';
 import { SnapshotsDto } from 'src/game/dtos/snapshot.dto';
 import { PreferredServersDto } from './dtos/preferredServer.dto';
 import { ProfileService } from 'src/profile/profile.service';
+import { AdminConfirmDto, ConfirmTypeDto } from './dtos/confirm.dto';
+import { OracleService } from 'src/oracle/oracle.service';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -40,6 +42,7 @@ export class AdminController {
         private readonly profileService: ProfileService,
         private readonly gameService: GameService,
         private readonly adminService: AdminService,
+        private readonly oracleService: OracleService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) { 
         this.context = AdminController.name;
@@ -232,5 +235,29 @@ export class AdminController {
 
         await Promise.all(promises)
         return true
+    }
+
+    @Put('confirm')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Manula trigger of confirmation of a multiverse bridge event' })
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    async getConfirmations(
+        @User() caller: UserEntity,
+        @Body() dto: AdminConfirmDto
+    ): Promise<boolean> {
+        if (caller.role !== UserRole.ADMIN) {
+            throw new ForbiddenException('Not admin')
+        }
+        const user = await this.userService.findOne({uuid: dto.uuid})
+        let success = false
+        if (dto.type.valueOf() === ConfirmTypeDto.ENRAPTURE ) {
+            success = await this.oracleService.userEnraptureConfirm(user, dto)
+        }  else if (dto.type.valueOf() === ConfirmTypeDto.IMPORT ) {
+            success = await this.oracleService.userImportConfirm(user, dto)
+        } else if (dto.type.valueOf() === ConfirmTypeDto.EXPORT ) {
+            success = await this.oracleService.userExportConfirm(user, dto)
+        }
+        return success
     }
 }
