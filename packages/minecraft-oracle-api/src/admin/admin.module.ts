@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { GameModule } from 'src/game/game.module';
 import { MaterialModule } from 'src/material/material.module';
+import { OracleModule } from 'src/oracle/oracle.module';
 import { ProfileModule } from 'src/profile/profile.module';
 import { SecretModule } from 'src/secret/secret.module';
 import { SnapshotModule } from 'src/snapshot/snapshot.module';
@@ -18,6 +19,7 @@ import { AdminService } from './admin.service';
         GameModule,
         TextureModule,
         SnapshotModule,
+        OracleModule
     ],
     providers: [AdminService],
     exports: [AdminService],
