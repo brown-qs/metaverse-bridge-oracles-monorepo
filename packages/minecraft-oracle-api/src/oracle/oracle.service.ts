@@ -20,6 +20,7 @@ import { SummonDto } from './dtos/summon.dto';
 import { SummonService } from 'src/summon/summon.service';
 import { number } from 'joi';
 import { SnapshotItemEntity } from 'src/snapshot/snapshotItem.entity';
+import { AssetEntity } from 'src/asset/asset.entity';
 
 @Injectable()
 export class OracleService {
@@ -236,10 +237,11 @@ export class OracleService {
         return true
     }
 
-    public async userImportConfirm(user: UserEntity, { hash }: { hash: string }): Promise<boolean> {
+    public async userImportConfirm(user: UserEntity, { hash }: { hash: string }, asset?: AssetEntity): Promise<boolean> {
         
         this.logger.log(`ImportConfirm: started ${user.uuid}: ${hash}`, this.context)
-        const assetEntry = await this.assetService.findOne({ hash })
+
+        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash })
 
 
         if (!assetEntry || assetEntry.hash !== hash || assetEntry.enraptured !== false) {
@@ -255,7 +257,7 @@ export class OracleService {
         const mAsset: MetaAsset = await this.metaverse.getImportedMetaAsset(hash)
 
         if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress.toLowerCase() !== assetEntry.assetAddress.toLowerCase()) {
-            this.logger.error(`ImportConfirm: on-chaind data didn't match for hash: ${hash}`)
+            this.logger.error(`ImportConfirm: on-chaind data didn't match for hash: ${hash}`, null, this.context)
             throw new UnprocessableEntityException(`On-chain data didn't match`)
         }
 
@@ -294,8 +296,8 @@ export class OracleService {
         return true
     }
 
-    public async userEnraptureConfirm(user: UserEntity, { hash }: { hash: string }): Promise<boolean> {
-        const assetEntry = await this.assetService.findOne({ hash })
+    public async userEnraptureConfirm(user: UserEntity, { hash }: { hash: string }, asset?: AssetEntity): Promise<boolean> {
+        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash })
 
         if (!assetEntry || assetEntry.hash !== hash || assetEntry.enraptured !== true) {
             this.logger.error(`EnraptureConfirm: invalid conditions. exists: ${!!assetEntry}, hash: ${hash}, enraptured: ${assetEntry.enraptured}, pendingOut: ${assetEntry.pendingOut}, pendingIn: ${assetEntry.pendingIn}`)
@@ -323,14 +325,14 @@ export class OracleService {
         return true
     }
 
-    public async userExportConfirm(user: UserEntity, { hash }: { hash: string }): Promise<boolean> {
+    public async userExportConfirm(user: UserEntity, { hash }: { hash: string }, asset?: AssetEntity): Promise<boolean> {
 
         if (!hash) {
             this.logger.warn(`ExportConfirm: hash not received`, this.context)
             return false
         }
 
-        const assetEntry = await this.assetService.findOne({ hash, enraptured: false })
+        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, enraptured: false })
 
         if (!assetEntry) {
             this.logger.warn(`ExportConfirm: asset not found`, this.context)

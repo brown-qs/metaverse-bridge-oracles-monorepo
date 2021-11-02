@@ -31,6 +31,8 @@ import { SummonEntity } from './summon/summon.entity';
 import { SummonModule } from './summon/summon.module';
 import { UserModule } from './user/user.module';
 import { ProfileModule } from './profile/profile.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { CronModule } from './cron/cron.module';
 
 @Module({
   imports: [
@@ -80,6 +82,7 @@ import { ProfileModule } from './profile/profile.module';
         ],
         inject: [ConfigService]
     }),
+    CronModule,
     ProviderModule,
     CacheModule,
     SecretModule,
