@@ -84,6 +84,9 @@ export const loadEnv = () => {
         jwt: {
             secret: process.env.JWT_SECRET,
             expiration: process.env.JWT_EXPIRATION_STRING
+        },
+        cron: {
+            confirmWatchIntervalMs: process.env.CONFIRM_WATCH_INTERVAL_MS
         }
     };
 };
