@@ -89,28 +89,33 @@ export class AssetWatchService {
 
       for(let i = 0; i < assets.length; i++) {
         let success = false
+        const asset = assets[i]
         try {
-          if (assets[i].pendingIn) {
-            if (assets[i].enraptured) {
-                this.logger.debug(`handleCleanPatrol: enrapture confirm of ${assets[i].hash}`, this.context);
-                success = await this.oracleService.userEnraptureConfirm(assets[i].owner, {hash: assets[i].hash}, assets[i])
+          if (asset.pendingIn) {
+            if (asset.enraptured) {
+                this.logger.debug(`handleCleanPatrol: enrapture confirm of ${asset.hash}`, this.context);
+                success = await this.oracleService.userEnraptureConfirm(asset.owner, {hash: asset.hash}, asset)
               } else {
-                this.logger.debug(`handleCleanPatrol: import confirm of ${assets[i].hash}`, this.context);
-                success = await this.oracleService.userImportConfirm(assets[i].owner, {hash: assets[i].hash}, assets[i])
+                this.logger.debug(`handleCleanPatrol: import confirm of ${asset.hash}`, this.context);
+                success = await this.oracleService.userImportConfirm(asset.owner, {hash: asset.hash}, asset)
               }
           }
 
-          if (assets[i].pendingOut) {
-            this.logger.debug(`handleCleanPatrol: export confirm of ${assets[i].hash}`, this.context);
-            success = await this.oracleService.userExportConfirm(assets[i].owner, {hash: assets[i].hash}, assets[i])
+          if (asset.pendingOut) {
+            this.logger.debug(`handleCleanPatrol: export confirm of ${asset.hash}`, this.context);
+            success = await this.oracleService.userExportConfirm(asset.owner, {hash: asset.hash}, asset)
+            continue
           }
         } catch (e) {
           success = false
+          if (asset.pendingOut) {
+            continue
+          }
         }
 
         if (!success) {
-          this.logger.log(`handleCleanPatrol: failed to confirm expired asset ${assets[i].hash}. Cleaning up..`, this.context);
-          await this.assetService.remove(assets[i])
+          this.logger.log(`handleCleanPatrol: failed to confirm expired asset ${asset.hash}. Cleaning up..`, this.context);
+          await this.assetService.remove(asset)
         }
       }
 
