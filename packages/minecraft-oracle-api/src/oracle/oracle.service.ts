@@ -165,6 +165,7 @@ export class OracleService {
 
         let confirmsuccess = false
         existingEntry.pendingOut = true
+        existingEntry.expiration = expiration.toString()
         await this.assetService.create(existingEntry)
 
         try {
