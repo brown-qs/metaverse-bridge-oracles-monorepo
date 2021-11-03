@@ -1,0 +1,11 @@
+name: metaverse-bridge-oracles-monorepo-ci
+on: [push,workflow_dispatch]
+jobs:
+  buid-image:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build Image
+        run: docker build -t bridge:$(git rev-parse --short HEAD)-$(date +%F-%H-%M) .
