@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { GameSessionEntity } from './gamesession.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindConditions, FindManyOptions, FindOneOptions, ObjectID } from 'typeorm';
+import { Repository, FindConditions, FindManyOptions, FindOneOptions, ObjectID, UpdateResult } from 'typeorm';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 @Injectable()
 export class GameSessionService {
@@ -30,8 +31,8 @@ export class GameSessionService {
         return u;
     }
 
-    public async update(gameSessionEntity: GameSessionEntity): Promise<GameSessionEntity> {
-        const u = await this.repository.save(gameSessionEntity)
+    public async update(criteria: string | number | Date | ObjectID | string[] | number[] | Date[] | ObjectID[] | FindConditions<GameSessionEntity>, partialEntity: QueryDeepPartialEntity<GameSessionEntity>): Promise<UpdateResult> {
+        const u = await this.repository.update(criteria, partialEntity)
         return u
     }
 

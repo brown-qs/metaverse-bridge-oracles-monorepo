@@ -102,6 +102,24 @@ export class AdminController {
         return successArray
     }
 
+    @Put('player/:uuid/vip/:vip')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Sets player vip flag' })
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    async vip(
+        @User() caller: UserEntity, 
+        @Param('uuid') uuid: string,
+        @Param('vip') vip: boolean
+    ): Promise<boolean> {
+        if (caller.role !== UserRole.ADMIN) {
+            throw new ForbiddenException('Not admin')
+        }
+
+        const success = await this.adminService.setVIP({uuid}, typeof vip === 'string' ? vip === 'true' : vip)
+        return success
+    }
+
     @Put('materials')
     @HttpCode(200)
     @ApiOperation({ summary: 'Adds or updates recognized materials' })
