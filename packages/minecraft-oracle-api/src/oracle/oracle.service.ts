@@ -21,9 +21,12 @@ import { SummonService } from 'src/summon/summon.service';
 import { number } from 'joi';
 import { SnapshotItemEntity } from 'src/snapshot/snapshotItem.entity';
 import { AssetEntity } from 'src/asset/asset.entity';
+import { Mutex, MutexInterface } from 'async-mutex';
 
 @Injectable()
 export class OracleService {
+
+    private locks : Map<string, MutexInterface>;
 
     private readonly context: string;
     constructor(
@@ -42,6 +45,8 @@ export class OracleService {
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
         this.context = OracleService.name
+        this.locks = new Map();
+
     }
 
     public async userInRequest(user: UserEntity, data: ImportDto, enraptured: boolean): Promise<[string, string, string, boolean]> {
@@ -211,6 +216,9 @@ export class OracleService {
 
         const addresses = Object.keys(groups)
 
+        this.ensureLock('oracle_summon')
+        const oracleLock = this.locks.get('oracle_summon')
+
         for (let i = 0; i < addresses.length; i++) {
             try{
                 const ids = groups[addresses[i]].ids
@@ -219,7 +227,10 @@ export class OracleService {
                 //console.log(this.metaverse)
                 //console.log(JSON.stringify(this.metaverse.summonFromMetaverse))
 
-                await (await this.metaverse.summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], {value: 0, gasPrice: '1000000000', gasLimit: '1000000'})).wait()
+                await oracleLock.runExclusive(async () => {
+                    const receipt = await (await this.metaverse.summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], {value: 0, gasPrice: '1000000000', gasLimit: '1000000'})).wait()
+                    return receipt
+                })
 
                 try{
                     await this.snapshotService.removeAll(groups[addresses[i]].entities) 
@@ -374,5 +385,11 @@ export class OracleService {
         await this.assetService.remove(assetEntry)
 
         return true
+    }
+
+    private ensureLock(key: string) {
+        if (!this.locks.has(key)) {
+          this.locks.set(key, new Mutex());
+        }
     }
 }

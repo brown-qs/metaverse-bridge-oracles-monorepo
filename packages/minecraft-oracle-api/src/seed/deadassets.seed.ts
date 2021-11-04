@@ -62,17 +62,41 @@ async function main () {
     const response = await request(subgraph, QUERY);
 
     const assets = await connection.manager.find<AssetEntity>(AssetEntity, { where: {pendingIn: false}})
+    const ids = response.metaAssets.map((x: any) => x.id)
     const hashes = assets.map(x => x.hash)
 
     const found: string[] = []
+
+    const found2: string[] = []
+
+    console.log('Check not included')
     response.metaAssets.map((ma: any) => {
         console.log('Checking', ma.id)
         if (!hashes.includes(ma.id)) {
             found.push(ma.id)
         }
     })
-    console.log('-----Non included-----')
+    
+    console.log('Check dangling')
+    console.log(ids)
+    hashes.map((hash: any) => {
+        console.log('Checking', hash)
+        if (!ids.includes(hash)) {
+            found2.push(hash)
+            console.log('oof')
+        }
+    })
+    console.log('-----Non included in DB-----')
     found.map(x => console.log(x))
+
+    console.log('-----Dangling-----')
+    found2.map(x => console.log(x))
+
+
+    console.log({lenIds: ids.length, lenHashes: hashes.length, lenMissing: found.length, lenDangling: found2.length})
+    
+    
+    
     await connection.close()
 }
 
