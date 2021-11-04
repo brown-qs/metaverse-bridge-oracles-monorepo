@@ -34,6 +34,7 @@ import { ProfileModule } from './profile/profile.module';
 import { CronModule } from './cron/cron.module';
 import { PlaySessionModule } from './playsession/playsession.module';
 import { PlaySessionEntity } from './playsession/playsession.entity';
+import { PlaySessionStatEntity } from './playsession/playsessionstat.entity';
 
 @Module({
   imports: [
@@ -65,7 +66,7 @@ import { PlaySessionEntity } from './playsession/playsession.entity';
             username: configService.get<string>('typeorm.username'),
             password: configService.get<string>('typeorm.password'),
             database: configService.get<string>('typeorm.database'),
-            entities: [UserEntity, SnapshotItemEntity, TextureEntity, MaterialEntity, GameSessionEntity, SecretEntity, AssetEntity, SummonEntity, PlaySessionEntity],
+            entities: [UserEntity, SnapshotItemEntity, TextureEntity, MaterialEntity, GameSessionEntity, SecretEntity, AssetEntity, SummonEntity, PlaySessionEntity, PlaySessionStatEntity],
             synchronize: configService.get<boolean>('typeorm.synchronize'),
             logging: configService.get<boolean>('typeorm.logging'),
         }),

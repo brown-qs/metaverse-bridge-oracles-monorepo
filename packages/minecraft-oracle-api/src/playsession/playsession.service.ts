@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PlaySessionEntity } from './playsession.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindConditions, FindManyOptions, FindOneOptions, ObjectID, IsNull, Not,  } from 'typeorm';
-import { UserEntity } from 'src/user/user.entity';
+import { Repository, FindConditions, FindManyOptions, FindOneOptions, ObjectID, IsNull, Not } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 @Injectable()
@@ -52,7 +51,7 @@ export class PlaySesionService {
     }
 
     public async getOngoing({uuid}: {uuid: string}): Promise<PlaySessionEntity | undefined> {
-        const result: PlaySessionEntity = await this.repository.findOne({ where: {endedAt: IsNull(), player: {uuid}}, relations: ['player'] });
+        const result: PlaySessionEntity = await this.repository.findOne({ where: {endedAt: IsNull(), player: {uuid}}, relations: ['player', 'stat'] });
         return result;
     }
 
