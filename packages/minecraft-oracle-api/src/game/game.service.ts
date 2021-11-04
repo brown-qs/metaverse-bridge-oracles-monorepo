@@ -167,7 +167,7 @@ export class GameService {
     public async setGameInProgress(inprogress: boolean): Promise<boolean> {
         const ongoingGame = await this.gameSessionService.getOngoing()
         if (inprogress == true) {
-            if (ongoingGame && ongoingGame.ongoing) {
+            if (!!ongoingGame && ongoingGame.ongoing) {
                 throw new UnprocessableEntityException("Game already in progress")
             }
             await this.gameSessionService.create({
@@ -177,9 +177,8 @@ export class GameService {
             return true;
         }
 
-        if (ongoingGame) {
-            await this.gameSessionService.create({
-                ...ongoingGame,
+        if (!!ongoingGame) {
+            await this.gameSessionService.update(ongoingGame.id, {
                 ongoing: false,
                 endedAt: Date.now().toString(10)
             })

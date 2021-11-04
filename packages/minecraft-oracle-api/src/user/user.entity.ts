@@ -67,14 +67,6 @@ export class UserEntity {
     @Column({ default: null, nullable: true })
     lastUsedAddress?: string;
 
-    @IsString()
-    @Column({ default: '0', nullable: true })
-    timePlayedPublic?: string;
-
-    @IsString()
-    @Column({ default: '0', nullable: true })
-    timePlayedEvent?: string;
-
     @Column('text', { array: true, default: [] })
     usedAddresses?: string[];
 
