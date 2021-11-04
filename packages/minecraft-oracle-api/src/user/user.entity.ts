@@ -10,6 +10,7 @@ import { TextureEntity } from '../texture/texture.entity';
 import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
 import { AssetEntity } from '../asset/asset.entity';
 import { SummonEntity } from '../summon/summon.entity';
+import { PlaySessionEntity } from 'src/playsession/playsession.entity';
 
 @Entity()
 @Index(['uuid'], {unique: true})
@@ -42,6 +43,10 @@ export class UserEntity {
     @Column({ default: false })
     hasGame?: boolean;
 
+    @IsBoolean()
+    @Column({ default: false })
+    vip?: boolean;
+
     @IsNumber()
     @Column({ default: 0 })
     numTicket?: number;
@@ -62,6 +67,14 @@ export class UserEntity {
     @Column({ default: null, nullable: true })
     lastUsedAddress?: string;
 
+    @IsString()
+    @Column({ default: '0', nullable: true })
+    timePlayedPublic?: string;
+
+    @IsString()
+    @Column({ default: '0', nullable: true })
+    timePlayedEvent?: string;
+
     @Column('text', { array: true, default: [] })
     usedAddresses?: string[];
 
@@ -76,6 +89,9 @@ export class UserEntity {
 
     @OneToMany(() => TextureEntity, (skin) => skin.owner)
     textures?: TextureEntity[];
+
+    @OneToMany(() => PlaySessionEntity, (session) => session.player)
+    playSessions?: PlaySessionEntity[];
 
     @OneToOne(() => UserEntity, (user) => user.gganbu)
     @JoinColumn()

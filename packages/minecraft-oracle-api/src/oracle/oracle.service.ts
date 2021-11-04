@@ -22,6 +22,7 @@ import { number } from 'joi';
 import { SnapshotItemEntity } from 'src/snapshot/snapshotItem.entity';
 import { AssetEntity } from 'src/asset/asset.entity';
 import { Mutex, MutexInterface } from 'async-mutex';
+import { UserRole } from 'src/common/enums/UserRole';
 
 @Injectable()
 export class OracleService {
@@ -246,6 +247,12 @@ export class OracleService {
             }
         }
 
+        user.lastUsedAddress = recipient.toLowerCase()
+        if(!user.usedAddresses.includes(user.lastUsedAddress)) {
+            user.usedAddresses.push(user.lastUsedAddress)
+        }
+        await this.userService.update(user.uuid, {usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress})
+
         return true
     }
 
@@ -288,14 +295,16 @@ export class OracleService {
             }
             user.allowedToPlay = true
             user.numMoonsama = (user.numMoonsama ?? 0) + 1
-            await this.userService.create(user)
+            user.role = UserRole.PLAYER
+            await this.userService.update(user.uuid, {allowedToPlay: user.allowedToPlay, numTicket: user.numTicket, role: user.role})
         }
 
         if (!!recognizedAsset && recognizedAsset.type.valueOf() === RecognizedAssetType.TICKET.valueOf() && (recognizedAsset.id === undefined || recognizedAsset.id === mAsset.asset.assetId.toString())) {
             this.logger.log(`ImportConfirm: setting ticket for user ${user.uuid}: ${hash}`, this.context)
             user.allowedToPlay = true
             user.numTicket = (user.numTicket ?? 0) + 1
-            await this.userService.create(user)
+            user.role = UserRole.PLAYER
+            await this.userService.update(user.uuid, {allowedToPlay: user.allowedToPlay, numTicket: user.numTicket, role: user.role})
         }
 
         const finalentry = await this.assetService.create({ ...assetEntry, pendingIn: false })
@@ -304,6 +313,12 @@ export class OracleService {
             this.logger.error(`ImportConfirm: couldn't change pending flag: ${hash}`)
             throw new UnprocessableEntityException(`Database error`)
         }
+
+        user.lastUsedAddress = mAsset.owner.toLowerCase()
+        if(!user.usedAddresses.includes(user.lastUsedAddress)) {
+            user.usedAddresses.push(user.lastUsedAddress)
+        }
+        await this.userService.update(user.uuid, {usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress})
 
         return true
     }
@@ -333,6 +348,12 @@ export class OracleService {
             this.logger.error(`EnraptureConfirm: couldn't change pending flag: ${hash}`)
             throw new UnprocessableEntityException(`Database error`)
         }
+
+        user.lastUsedAddress = mAsset.owner.toLowerCase()
+        if(!user.usedAddresses.includes(user.lastUsedAddress)) {
+            user.usedAddresses.push(user.lastUsedAddress)
+        }
+        await this.userService.update(user.uuid, {usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress})
 
         return true
     }
@@ -373,12 +394,14 @@ export class OracleService {
             }
             user.numMoonsama = (user.numMoonsama ?? 0) > 0 ? user.numMoonsama - 1 : 0
             user.allowedToPlay = (user.numTicket ?? 0) > 0 || (user.numMoonsama ?? 0) > 0 
+            user.role = user.allowedToPlay ? UserRole.PLAYER: UserRole.NONE
             await this.userService.create(user)
         }
 
         if (!!recognizedAsset && recognizedAsset.type.valueOf() === RecognizedAssetType.TICKET.valueOf() && (recognizedAsset.id === undefined || recognizedAsset.id === assetEntry.assetId.toString())) {
             user.numTicket = (user.numTicket ?? 0) > 0 ? user.numTicket - 1 : 0
             user.allowedToPlay = (user.numTicket ?? 0) > 0 || (user.numMoonsama ?? 0) > 0
+            user.role = user.allowedToPlay ? UserRole.PLAYER: UserRole.NONE
             await this.userService.create(user)
         }
 

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { GameSessionModule } from 'src/gamesession/gamesession.module';
+import { PlaySessionModule } from 'src/playsession/playsession.module';
 import { ProfileModule } from 'src/profile/profile.module';
 import { SecretModule } from 'src/secret/secret.module';
 import { MaterialModule } from '../material/material.module';
@@ -17,7 +18,8 @@ import { GameService } from './game.service';
         TextureModule,
         MaterialModule,
         SnapshotModule,
-        GameSessionModule
+        GameSessionModule,
+        PlaySessionModule
     ],
     providers: [GameService],
     exports: [GameService],
