@@ -29,4 +29,8 @@ export class ProfileDto {
 
     @ApiProperty({ description: 'Perferred server of user'})
     preferredServer: string
+
+    @ApiProperty({ description: 'Whether the user is a VIP guest or not'})
+    vip: boolean
+    
 }

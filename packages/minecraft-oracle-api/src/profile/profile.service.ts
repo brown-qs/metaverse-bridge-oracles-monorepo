@@ -121,7 +121,8 @@ export class ProfileService {
             serverId: user.serverId,
             preferredServer: user.preferredServer,
             numTicket: user.numTicket,
-            numMoonsama: user.numMoonsama
+            numMoonsama: user.numMoonsama,
+            vip: user.vip ?? false
         }
     }
 

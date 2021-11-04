@@ -31,8 +31,9 @@ import { SummonEntity } from './summon/summon.entity';
 import { SummonModule } from './summon/summon.module';
 import { UserModule } from './user/user.module';
 import { ProfileModule } from './profile/profile.module';
-import { ScheduleModule } from '@nestjs/schedule';
 import { CronModule } from './cron/cron.module';
+import { PlaySessionModule } from './playsession/playsession.module';
+import { PlaySessionEntity } from './playsession/playsession.entity';
 
 @Module({
   imports: [
@@ -64,7 +65,7 @@ import { CronModule } from './cron/cron.module';
             username: configService.get<string>('typeorm.username'),
             password: configService.get<string>('typeorm.password'),
             database: configService.get<string>('typeorm.database'),
-            entities: [UserEntity, SnapshotItemEntity, TextureEntity, MaterialEntity, GameSessionEntity, SecretEntity, AssetEntity, SummonEntity],
+            entities: [UserEntity, SnapshotItemEntity, TextureEntity, MaterialEntity, GameSessionEntity, SecretEntity, AssetEntity, SummonEntity, PlaySessionEntity],
             synchronize: configService.get<boolean>('typeorm.synchronize'),
             logging: configService.get<boolean>('typeorm.logging'),
         }),
@@ -82,6 +83,7 @@ import { CronModule } from './cron/cron.module';
         ],
         inject: [ConfigService]
     }),
+    PlaySessionModule,
     CronModule,
     ProviderModule,
     CacheModule,

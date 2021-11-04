@@ -15,6 +15,7 @@ import { PermittedMaterial, PermittedMaterials } from './dtos/permitted-material
 import { GameSessionService } from 'src/gamesession/gamesession.service';
 
 import { Mutex, MutexInterface } from 'async-mutex';
+import { PlaySesionService } from 'src/playsession/playsession.service';
 
 @Injectable()
 export class GameService {
@@ -29,6 +30,7 @@ export class GameService {
         private readonly materialService: MaterialService,
         private readonly snapshotService: SnapshotService,
         private readonly gameSessionService: GameSessionService,
+        private readonly playSessionService: PlaySesionService,
         private configService: ConfigService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
@@ -350,5 +352,42 @@ export class GameService {
         })
 
         return savedS
+    }
+
+    public async setPlayerGameSession(uuid: string, identifier: string, ended: boolean): Promise<boolean> {
+
+        const sess = await this.playSessionService.getOngoing({uuid})
+        
+        if (ended) {
+            if (!sess) {
+                this.logger.warn(`setPlayerGameSession:: end session: no ongoing player sessions to end for user ${uuid}`)
+                return false
+            }
+            const now = Date.now()
+            sess.endedAt = now.toString()
+            const success = await this.playSessionService.update(sess.id, {endedAt: sess.endedAt})
+            //await this.userService.update(user.uuid, {timePlayedEvent: (Number.parseInt(user.timePlayedEvent ?? '0') + now).toString() })
+            return success
+        }
+
+        if (!!sess) {
+            const now = Date.now()
+            sess.endedAt = now.toString()
+            const success = await this.playSessionService.update(sess.id, {endedAt: sess.endedAt})
+            if (success) {
+                this.logger.warn(`setPlayerGameSession:: start session: found previous ongoing play session, ended successfully for user ${uuid}`)
+                //await this.userService.update(user.uuid, {timePlayedEvent: (Number.parseInt(user.timePlayedEvent ?? '0') + now).toString() })
+            } else {
+                this.logger.warn(`setPlayerGameSession:: start session: found previous ongoing play session, could not end successfully ${uuid}`)
+            }
+        }
+
+        await this.playSessionService.create({
+            identifier,
+            startedAt: Date.now().toString(),
+            player: await this.userService.findOne({uuid})
+        })
+
+        return true
     }
 }

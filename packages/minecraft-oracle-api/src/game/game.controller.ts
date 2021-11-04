@@ -193,4 +193,30 @@ export class GameController {
         const success = await this.gameService.clearGganbus()
         return success
     }
+
+    @Put('player/:uuid/session/:identifier/end')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Logs an ongoing game session end' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async endPlayerGameSession(
+        @Param('uuid') uuid: string,
+        @Param('identifier') identifier: string
+    ): Promise<boolean> {
+        const success = await this.gameService.setPlayerGameSession(uuid, identifier,true)
+        return success
+    }
+
+    @Put('player/:uuid/session/:identifier/start')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Logs an ongoing game session start' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async startPlayerGameSession(
+        @Param('uuid') uuid: string,
+        @Param('identifier') identifier: string
+    ): Promise<boolean> {
+        const success = await this.gameService.setPlayerGameSession(uuid, identifier, false)
+        return success
+    }
 }
