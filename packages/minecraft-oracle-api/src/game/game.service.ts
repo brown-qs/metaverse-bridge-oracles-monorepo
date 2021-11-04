@@ -389,4 +389,47 @@ export class GameService {
 
         return true
     }
+
+    public async communism() {
+        
+        let items: SnapshotItemEntity[] = []
+        let batch: SnapshotItemEntity[] = []
+        let skip = 0
+        let take = 100
+        do {
+            batch = await this.snapshotService.findMany({take, skip, relations: ['material', 'owner']})
+            //console.log(batch)
+            
+            if (!!batch && batch.length > 0) {
+                items = items.concat(batch)
+            }
+
+            skip += take
+
+        } while (!!batch && batch.length > 0)
+
+        let counter: {[key: string]: number} = {}
+        let users: {[key: string]: boolean} = {}
+        let distinct = 0
+        items.map(x => {
+            counter[x.material.name] = typeof counter[x.material.name] === 'undefined' ? Number.parseFloat(x.amount) : counter[x.material.name] + Number.parseFloat(x.amount) 
+            if (!users[x.owner.uuid]) {
+                users[x.owner.uuid] = true
+                distinct+=1
+            }
+        })
+
+        //console.log({distinct, users, counter})
+        
+        Object.keys(counter).map(key => {
+            counter[key] = counter[key]/distinct 
+        })
+
+        for(let i = 0; i< items.length; i++) {
+            const item = items[i]
+            //assuming there are no duplicate snapshot entries
+            const amount = (Number.parseFloat(item.amount) + counter[item.material.name]).toString()
+            await this.snapshotService.update(item.id, {amount})
+        }
+    }
 }

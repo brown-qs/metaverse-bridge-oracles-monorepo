@@ -278,4 +278,19 @@ export class AdminController {
         }
         return success
     }
+
+    @Put('communism')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Server wide gganbu snapshot resource distribution' })
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    async communism(
+        @User() caller: UserEntity
+    ): Promise<boolean> {
+        if (caller.role !== UserRole.ADMIN) {
+            throw new ForbiddenException('Not admin')
+        }
+        await this.gameService.communism()
+        return true
+    }
 }

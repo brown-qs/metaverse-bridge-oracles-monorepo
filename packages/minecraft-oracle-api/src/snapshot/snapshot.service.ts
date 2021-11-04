@@ -1,8 +1,9 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import {Injectable} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { FindConditions, FindManyOptions, FindOneOptions, Repository } from 'typeorm';
+import { FindConditions, FindManyOptions, FindOneOptions, ObjectID, Repository, UpdateResult } from 'typeorm';
 import { SnapshotItemEntity } from './snapshotItem.entity';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 @Injectable()
 export class SnapshotService {
@@ -32,8 +33,8 @@ export class SnapshotService {
         return u;
     }
 
-    public async update(snapshotItem: SnapshotItemEntity): Promise<SnapshotItemEntity> {
-        const u = await this.repository.save(snapshotItem)
+    public async update(criteria: string | number | Date | ObjectID | string[] | number[] | Date[] | ObjectID[] | FindConditions<SnapshotItemEntity>, partialEntity: QueryDeepPartialEntity<SnapshotItemEntity>): Promise<UpdateResult> {
+        const u = await this.repository.update(criteria, partialEntity)
         return u
     }
 
