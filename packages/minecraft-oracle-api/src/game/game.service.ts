@@ -12,10 +12,11 @@ import { MaterialService } from '../material/material.service';
 import { SnapshotService } from '../snapshot/snapshot.service';
 import { SnapshotDto, SnapshotsDto } from './dtos/snapshot.dto';
 import { PermittedMaterial, PermittedMaterials } from './dtos/permitted-material.dto';
-import { GameSessionService } from 'src/gamesession/gamesession.service';
+import { GameSessionService } from '../gamesession/gamesession.service';
 
 import { Mutex, MutexInterface } from 'async-mutex';
-import { PlaySesionService } from 'src/playsession/playsession.service';
+import { PlaySesionService } from '../playsession/playsession.service';
+import { PlaySessionStatService } from '../playsession/playsessionstat.service';
 
 @Injectable()
 export class GameService {
@@ -31,6 +32,7 @@ export class GameService {
         private readonly snapshotService: SnapshotService,
         private readonly gameSessionService: GameSessionService,
         private readonly playSessionService: PlaySesionService,
+        private readonly playSessionStatService: PlaySessionStatService,
         private configService: ConfigService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
@@ -359,12 +361,14 @@ export class GameService {
         
         if (ended) {
             if (!sess) {
-                this.logger.warn(`setPlayerGameSession:: end session: no ongoing player sessions to end for user ${uuid}`)
+                this.logger.warn(`setPlayerGameSession:: end session: no ongoing player sessions to end for user ${uuid}`, this.context)
                 return false
             }
             const now = Date.now()
             sess.endedAt = now.toString()
             const success = await this.playSessionService.update(sess.id, {endedAt: sess.endedAt})
+            const delta = now - Number.parseFloat(sess.startedAt)
+            await this.playSessionStatService.update(sess.stat.id, {timePlayed: (Number.parseFloat(sess.stat.timePlayed) +  delta).toString()})
             //await this.userService.update(user.uuid, {timePlayedEvent: (Number.parseInt(user.timePlayedEvent ?? '0') + now).toString() })
             return success
         }
@@ -373,18 +377,29 @@ export class GameService {
             const now = Date.now()
             sess.endedAt = now.toString()
             const success = await this.playSessionService.update(sess.id, {endedAt: sess.endedAt})
+            const delta = now - Number.parseFloat(sess.startedAt)
+            await this.playSessionStatService.update(sess.stat.id, {timePlayed: (Number.parseFloat(sess.stat.timePlayed) +  delta).toString()})
             if (success) {
-                this.logger.warn(`setPlayerGameSession:: start session: found previous ongoing play session, ended successfully for user ${uuid}`)
+                this.logger.warn(`setPlayerGameSession:: start session: found previous ongoing play session, ended successfully for user ${uuid}`, this.context)
                 //await this.userService.update(user.uuid, {timePlayedEvent: (Number.parseInt(user.timePlayedEvent ?? '0') + now).toString() })
             } else {
-                this.logger.warn(`setPlayerGameSession:: start session: found previous ongoing play session, could not end successfully ${uuid}`)
+                this.logger.warn(`setPlayerGameSession:: start session: found previous ongoing play session, could not end successfully ${uuid}`, this.context)
             }
         }
 
+        if(! (await this.userService.exists({uuid}))) {
+            this.logger.error(`setPlayerGameSession:: user ${uuid} does not exists`, null, this.context)
+            return false
+        }
+
+        const stat = await this.playSessionStatService.create({
+            id: this.playSessionStatService.calculateId({uuid}, {identifier})
+        })
         await this.playSessionService.create({
             identifier,
             startedAt: Date.now().toString(),
-            player: await this.userService.findOne({uuid})
+            player: await this.userService.findOne({uuid}),
+            stat
         })
 
         return true

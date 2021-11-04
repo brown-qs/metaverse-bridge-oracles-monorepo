@@ -5,6 +5,7 @@ import {
 } from 'class-validator';
 import { UserEntity } from 'src/user/user.entity';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { PlaySessionStatEntity } from './playsessionstat.entity';
 
 @Entity()
 export class PlaySessionEntity {
@@ -31,4 +32,7 @@ export class PlaySessionEntity {
 
     @ManyToOne(() => UserEntity, (player) => player.playSessions)
     player: UserEntity
+
+    @ManyToOne(() => PlaySessionStatEntity, (stat) => stat.sessions)
+    stat?: PlaySessionStatEntity
 }
