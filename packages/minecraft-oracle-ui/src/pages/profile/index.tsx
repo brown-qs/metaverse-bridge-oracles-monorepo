@@ -8,6 +8,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
+import Tooltip from '@mui/material/Tooltip';
 import { WOOD_TYPES } from '../../constants';
 
 import { AuthData } from 'context/auth/AuthContext/AuthContext.types';
@@ -28,6 +29,7 @@ import { useExportDialog } from 'hooks/useExportDialog/useExportDialog';
 import { useSummonDialog } from 'hooks/useSummonDialog/useSummonDialog';
 import { stringToStringAssetType } from 'utils/subgraph';
 import { Fraction } from 'utils/Fraction';
+import { Media } from '../../components/Media/Media';
 
 export type ProfilePagePropTypes = {
     authData: AuthData
@@ -55,11 +57,11 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const inGameItems = useInGameItems();
     const inGameMoonsamas = inGameItems?.moonsamas || [];
     const inGameGoldenTickets = inGameItems?.tickets || [];
-    const inGameResourcesWood = inGameItems?.resources?.filter(item => WOOD_TYPES.includes(item.name)) || [];
-    const inGameResourcesCobblestone = inGameItems?.resources?.filter(item => item.name === ('COBBLESTONE')) || [];
-    const inGameResourcesGold = inGameItems?.resources?.filter(item => item.name === 'GOLD_INGOT') || [];
-    const inGameResourcesIron = inGameItems?.resources?.filter(item => item.name === 'IRON_INGOT') || [];
-    const inGameResourcesDiamond = inGameItems?.resources?.filter(item => item.name === 'DIAMOND') || [];
+    const inGameResourcesWood: any[] = [] // inGameItems?.resources?.filter(item => WOOD_TYPES.includes(item.name)) || [];
+    const inGameResourcesCobblestone: any[] = [] // inGameItems?.resources?.filter(item => item.name === ('COBBLESTONE')) || [];
+    const inGameResourcesGold: any[] = [] // inGameItems?.resources?.filter(item => item.name === 'GOLD_INGOT') || [];
+    const inGameResourcesIron: any[] = [] // inGameItems?.resources?.filter(item => item.name === 'IRON_INGOT') || [];
+    const inGameResourcesDiamond = [] // inGameItems?.resources?.filter(item => item.name === 'DIAMOND') || [];
 
     console.log('ingame items', inGameItems, inGameResourcesWood)
 
@@ -79,6 +81,10 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
         itemImage
     } = useStyles();
 
+    const canSummon = false
+    const hasImportedMoonsama = !!inGameMoonsamas && inGameMoonsamas.length > 0
+    const hasImportedTicket = !!inGameGoldenTickets && inGameGoldenTickets.length > 0
+
     return (
         <Grid className={profileContainer}>
             <Header />
@@ -88,7 +94,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     </div>
                     <div style={{ width: '50%', textAlign: 'right' }}>
                         <span style={{fontSize: '22px',}}>Welcome back {authData?.userProfile?.userName},</span> <br />
-                        {profile?.allowedToPlay ? (<span style={{ color:'#12753A', fontSize: '16px', fontWeight: 'bold' }}>You are Eligible to play!</span>):
+                        {profile?.allowedToPlay ? (<span style={{ color:'#12753A', fontSize: '16px', fontWeight: 'bold' }}>You are eligible to play!</span>):
                         (
                         <p style={{ color:'#DB3B21'}}>To be eligible to play, bridge a VIP ticket/Moonsama, <br /> or <a href="https://moonsama.com/freshoffers" target="_blank">visit the Marketplace to get one</a></p>)}
                     </div>
@@ -177,14 +183,15 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                     const labelId = `checkbox-list-secondary-label-${ind}`;
                                     return (
                                         <ListItem
-                                            key={ind} //update key
+                                            key={`${value?.assetAddress}-${value?.assetId}-${ind}`} //update key
                                             disablePadding
                                         >
                                             <ListItemButton>
-                                                {/*<ListItemAvatar>*/}
-                                                {/*    <img src={value?.meta?.image} alt="" />*/}
-                                                {/*</ListItemAvatar>*/}
-                                                <ListItemText id={labelId} primary={`${value.name}-${value.assetId}`} />
+                                                <ListItemAvatar>
+                                                    {/*<img className={itemImage} src={value?.meta?.image} alt="" />*/}
+                                                    <Media uri={value?.meta?.image} className={itemImage} />
+                                                </ListItemAvatar>
+                                                <ListItemText primary={value?.meta?.name ?? `${value.assetAddress} ${value.assetId}`} />
 
                                                 <Button
                                                     className={transferButtonSmall}
@@ -216,29 +223,63 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                         <div style={{ width: '50%' }}>
                             <div className={columnTitle}><span className={columnTitleText}>On-chain items: Moonriver account</span></div>
                             <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
-                                {!!onChainMoonsamas.length || !!onChainGoldenTickets.length ? [...onChainMoonsamas, ...onChainGoldenTickets].map((item, ind) => {
+                                {!!onChainMoonsamas.length || !!onChainGoldenTickets.length ? (onChainGoldenTickets ?? []).map((item, ind) => {
                                     return (
                                         <ListItem
-                                            key={ind} //update key
+                                            key={`${item?.asset?.assetAddress}-${item?.asset?.assetId}-${ind}`} //update key
                                             disablePadding
                                         >
                                             <ListItemButton>
                                                 <ListItemAvatar>
-                                                    <img className={itemImage} src={item?.meta?.image} alt="" />
+                                                    {/*<img className={itemImage} src={item?.meta?.image} alt="" />*/}
+                                                    <Media uri={item?.meta?.image} className={itemImage} />
                                                 </ListItemAvatar>
                                                 <ListItemText primary={item?.meta?.name} />
-
-                                                <Button
-                                                    className={transferButtonSmall}
-                                                    onClick={() => {
-                                                        setImportDialogOpen(true);
-                                                        setImportDialogData({ asset: item.asset });
-                                                    }}
-                                                >Import To Game</Button>
+                                                <Tooltip title={'You can have 1 VIP ticket imported at a time.'}>
+                                                    <span>
+                                                        <Button
+                                                            className={transferButtonSmall}
+                                                            onClick={() => {
+                                                                setImportDialogOpen(true);
+                                                                setImportDialogData({ asset: item.asset });
+                                                            }}
+                                                            disabled={hasImportedTicket}
+                                                        >Import to game</Button>
+                                                    </span>
+                                                </Tooltip>
                                             </ListItemButton>
                                         </ListItem>
                                     );
-                                }) : (
+                                }).concat(
+                                    (onChainMoonsamas ?? []).map((item, ind) => {
+                                        return (
+                                            <ListItem
+                                                key={`${item?.asset?.assetAddress}-${item?.asset?.assetId}-${ind}`} //update key
+                                                disablePadding
+                                            >
+                                                <ListItemButton>
+                                                    <ListItemAvatar>
+                                                        {/*<img className={itemImage} src={item?.meta?.image} alt="" />*/}
+                                                        <Media uri={item?.meta?.image} className={itemImage} />
+                                                    </ListItemAvatar>
+                                                    <ListItemText primary={item?.meta?.name} />
+                                                    <Tooltip title={'You can have 1 Moonsama imported at a time. If you want to replace, export if first, then import a new one.'}>
+                                                        <span>
+                                                        <Button
+                                                            className={transferButtonSmall}
+                                                            onClick={() => {
+                                                                setImportDialogOpen(true);
+                                                                setImportDialogData({ asset: item.asset });
+                                                            }}
+                                                            disabled={hasImportedMoonsama}
+                                                        >Import to game</Button>
+                                                        </span>
+                                                    </Tooltip>
+                                                </ListItemButton>
+                                            </ListItem>
+                                        );
+                                    })
+                                ) : (
                                     <ListItem>
                                         No items found in wallet.
                                     </ListItem>
@@ -364,6 +405,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                             setSummonDialogOpen(true);
                                             setSummonDialogData({recipient: account ?? undefined});
                                         }}
+                                        disabled={!canSummon}
                                     >Summon Resources</Button>
                                 </div>
                                 <div style={{ width: '50%' }}>
