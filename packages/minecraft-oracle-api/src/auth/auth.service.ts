@@ -63,7 +63,8 @@ export class AuthService {
         try {
             accessToken = await account.authFlow(code)
         } catch (err: any) {
-            this.logger.error('authLogin:: auth flow error', err, this.context)
+            this.logger.error('authLogin:: auth flow error', null, this.context)
+            this.logger.error(err, null, this.context)
             throw new UnprocessableEntityException('Microsoft auth flow error')
         }
 
@@ -73,7 +74,8 @@ export class AuthService {
         try {
             await account.getProfile()
         } catch (err: any) {
-            this.logger.error('authLogin:: error authenticating user', err, this.context)
+            this.logger.error('authLogin:: error authenticating user', null, this.context)
+            this.logger.error(err, null, this.context)
             throw new UnprocessableEntityException('User profile could not be fetched.')
         }
 
