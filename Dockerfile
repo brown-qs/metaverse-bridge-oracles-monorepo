@@ -15,4 +15,6 @@ USER node
 
 RUN rush update 
 
+RUN rush build
+
 ENTRYPOINT ["/home/node/start.sh","minecraft-oracle-api"]
