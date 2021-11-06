@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Loader } from 'ui';
 import { useStyles } from './styles';
+import Tooltip from '@mui/material/Tooltip';
 
 import WhiteLogo from 'assets/images/logo-white.svg';
 import MinecraftImage from 'assets/images/minecraft-splash-alpa.png';
@@ -46,7 +47,9 @@ const HomePage = () => {
 
         <div style={{  }}>
             {!isLoading ? (
-                <button className={loginButton} onClick={handleLoginWithMinecraft}>Login With Minecraft</button>
+                <Tooltip title={`Login with your Microsoft Minecraft account. If you are still on Mojang please migrate first.`}>
+                  <button className={loginButton} onClick={handleLoginWithMinecraft}>Login with Minecraft</button>
+                </Tooltip>
             ) : <Loader />}
         </div>
 

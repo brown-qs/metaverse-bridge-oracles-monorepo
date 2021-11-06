@@ -2,7 +2,7 @@ import { Inject, Injectable, UnprocessableEntityException } from '@nestjs/common
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { UserService } from '../user/user.service';
 
-import {MicrosoftAccount, MicrosoftAuth} from 'minecraft-auth'
+import {MicrosoftAccount, MicrosoftAuth} from '../minecraftauth'
 import { ConfigService } from '@nestjs/config';
 import { ProviderToken } from '../provider/token';
 import { MicrosoftSetupParams } from '../provider';
@@ -116,5 +116,8 @@ export class AuthService {
             this.logger.error('authLogin:: user uuid and userName was not received', null, this.context)
             throw new UnprocessableEntityException('User profile could not be fetched.')
         }
+    }
+
+    public async passwordLoginMicrosoft(username: string, password: string) {
     }
 }

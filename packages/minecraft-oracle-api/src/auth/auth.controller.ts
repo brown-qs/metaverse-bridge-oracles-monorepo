@@ -53,7 +53,10 @@ export class AuthController {
     @HttpCode(308)
     @ApiOperation({ summary: 'Minecraft authentication successful redirect target. Redirects again to the final destination with a jwt token.' })
     @Redirect()
-    async redirect(@Query() query: {code: string}) {
+    async redirect(@Query() query: {code: string, error?: string, error_description?: string}) {
+        if (!!query.error) {
+            this.logger.error(`Response query:: ${query?.error}: ${query?.error_description}`, null, this.context)
+        }
         this.logger.debug(`Response query: ${query?.code}`, this.context)
         const result = await this.authService.authLogin(query.code);
         this.logger.debug(`Response result: ${JSON.stringify(result)}`, this.context)
