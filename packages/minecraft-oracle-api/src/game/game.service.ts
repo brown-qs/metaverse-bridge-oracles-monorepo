@@ -464,7 +464,7 @@ export class GameService {
                     await this.snapshotService.update(existingSnap.id, {amount})
                 } else {
                     this.logger.debug(`Communism:: ${uuid} snap for ${materialName} not found. Creating..`, this.context)
-                    const amount = Number.parseFloat(existingSnap.amount)
+                    const amount = counter[existingSnap.material.name]
                     await this.assignSnapshot(user, {amount, materialName})
                 }
             })
