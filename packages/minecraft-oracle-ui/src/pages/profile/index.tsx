@@ -9,7 +9,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Tooltip from '@mui/material/Tooltip';
-import { WOOD_TYPES } from '../../constants';
+import { GOLD_TYPES, IRON_TYPES, WOOD_TYPES } from '../../constants';
 
 import { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 
@@ -23,7 +23,7 @@ import MsamaImage from "../../assets/images/msama.png";
 import TicketImage from "../../assets/images/vipticket.png";
 import { useProfile } from 'hooks/multiverse/useProfile';
 import { useOnChainItems } from 'hooks/multiverse/useOnChainItems';
-import { useInGameItems } from 'hooks/multiverse/useInGameItems';
+import { InGameItemWithStatic, useInGameItems } from 'hooks/multiverse/useInGameItems';
 import { useActiveWeb3React, useImportDialog } from 'hooks';
 import { useExportDialog } from 'hooks/useExportDialog/useExportDialog';
 import { useSummonDialog } from 'hooks/useSummonDialog/useSummonDialog';
@@ -57,11 +57,11 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const inGameItems = useInGameItems();
     const inGameMoonsamas = inGameItems?.moonsamas || [];
     const inGameGoldenTickets = inGameItems?.tickets || [];
-    const inGameResourcesWood: any[] = [] // inGameItems?.resources?.filter(item => WOOD_TYPES.includes(item.name)) || [];
-    const inGameResourcesCobblestone: any[] = [] // inGameItems?.resources?.filter(item => item.name === ('COBBLESTONE')) || [];
-    const inGameResourcesGold: any[] = [] // inGameItems?.resources?.filter(item => item.name === 'GOLD_INGOT') || [];
-    const inGameResourcesIron: any[] = [] // inGameItems?.resources?.filter(item => item.name === 'IRON_INGOT') || [];
-    const inGameResourcesDiamond = [] // inGameItems?.resources?.filter(item => item.name === 'DIAMOND') || [];
+    const inGameResourcesWood: InGameItemWithStatic[] = inGameItems?.resources?.filter(item => !!WOOD_TYPES.find(x => x.name === item.name)) || [];
+    const inGameResourcesCobblestone: InGameItemWithStatic[] = inGameItems?.resources?.filter(item => item.name === ('COBBLESTONE')) || [];
+    const inGameResourcesGold: InGameItemWithStatic[] = inGameItems?.resources?.filter(item => !!GOLD_TYPES.find(x => x.name === item.name)) || [];
+    const inGameResourcesIron: InGameItemWithStatic[] = inGameItems?.resources?.filter(item => !!IRON_TYPES.find(x => x.name === item.name)) || [];
+    // const inGameResourcesDiamond = inGameItems?.resources?.filter(item => item.name === 'DIAMOND') || [];
 
     console.log('ingame items', inGameItems, inGameResourcesWood)
 
@@ -332,7 +332,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     <ListItem
                                                         secondaryAction={
                                                             <>
-                                                                {inGameResourcesWood[0]?.amount}
+                                                                {inGameResourcesWood.reduce((prev, curr) => prev + Number.parseFloat(curr.amount) * (WOOD_TYPES.find(x => x.name === curr.name)?.multiplier ?? 1), 0)}
                                                             </>
                                                         }
                                                         disablePadding
@@ -349,7 +349,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     <ListItem
                                                         secondaryAction={
                                                             <>
-                                                                {inGameResourcesCobblestone[0]?.amount}
+                                                                {inGameResourcesCobblestone.reduce((prev, curr) => prev + Number.parseFloat(curr.amount), 0)}
                                                             </>
                                                         }
                                                         disablePadding
@@ -366,7 +366,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     <ListItem
                                                         secondaryAction={
                                                             <>
-                                                                {inGameResourcesIron[0]?.amount}
+                                                                {inGameResourcesIron.reduce((prev, curr) => prev + Number.parseFloat(curr.amount) * (IRON_TYPES.find(x => x.name === curr.name)?.multiplier ?? 1), 0)}
                                                             </>
                                                         }
                                                         disablePadding
@@ -383,7 +383,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     <ListItem
                                                         secondaryAction={
                                                             <>
-                                                                {inGameResourcesGold[0]?.amount}
+                                                                {inGameResourcesGold.reduce((prev, curr) => prev + Number.parseFloat(curr.amount) * (GOLD_TYPES.find(x => x.name === curr.name)?.multiplier ?? 1), 0)}
                                                             </>
                                                         }
                                                         disablePadding
