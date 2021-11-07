@@ -472,7 +472,7 @@ export class GameService {
                 } else {
                     this.logger.debug(`Communism:: ${uuid} snap for ${materialName} not found. Creating..`, this.context)
                     const amount = counter[materialName]
-                    await this.assignSnapshot(user, {amount, materialName})
+                    await this.assignSnapshot(user, {amount, materialName}, false, false)
                 }
             })
             await Promise.all(x)
