@@ -455,7 +455,7 @@ export class GameService {
             const user = await this.userService.findOne({uuid})
             const playStats = await this.playSessionStatService.findOne({id: `${uuid}-production`})
             this.logger.debug(`Communism:: ${uuid} played ${playStats?.timePlayed}`, this.context)
-            if (Number.parseFloat(playStats.timePlayed) < 2700000) {
+            if (!playStats || Number.parseFloat(playStats?.timePlayed) < 2700000) {
                 this.logger.warn(`Communism:: ${uuid} not eligible for gganbu`, this.context)
                 continue
             }
