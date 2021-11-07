@@ -430,8 +430,13 @@ export class GameService {
         let distinct = 0
         items.map(x => {
             counter[x.material.name] = typeof counter[x.material.name] === 'undefined' ? Number.parseFloat(x.amount) : counter[x.material.name] + Number.parseFloat(x.amount) 
-            if (!users[x.owner.uuid]) {
-                users[x.owner.uuid] = true
+        })
+
+        const allUsers = await this.userService.findMany({})
+        this.logger.warn(`Communism:: ${allUsers.length} users found`, this.context)
+        allUsers.map(user => {
+            if (!users[user.uuid]) {
+                users[user.uuid] = true
                 distinct+=1
             }
         })
