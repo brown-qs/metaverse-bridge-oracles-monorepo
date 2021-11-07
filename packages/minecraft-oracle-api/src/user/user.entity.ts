@@ -10,7 +10,7 @@ import { TextureEntity } from '../texture/texture.entity';
 import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
 import { AssetEntity } from '../asset/asset.entity';
 import { SummonEntity } from '../summon/summon.entity';
-import { PlaySessionEntity } from 'src/playsession/playsession.entity';
+import { PlaySessionEntity } from '../playsession/playsession.entity';
 
 @Entity()
 @Index(['uuid'], {unique: true})

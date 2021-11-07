@@ -8,7 +8,8 @@ import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
 import { SummonEntity } from '../summon/summon.entity';
 import { TextureEntity } from '../texture/texture.entity';
 import { UserEntity } from '../user/user.entity';
-import { map } from 'fp-ts/lib/Functor';
+import { PlaySessionEntity } from '../playsession/playsession.entity';
+import { PlaySessionStatEntity } from '../playsession/playsessionstat.entity';
 
 config()
 
@@ -48,7 +49,7 @@ async function main () {
             host: process.env.TYPEORM_HOST,
             port: Number.parseInt(process.env.TYPEORM_PORT),
             database: process.env.TYPEORM_DATABASE,
-            entities: [MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity, AssetEntity, SummonEntity],
+            entities: [MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity, AssetEntity, SummonEntity, PlaySessionEntity, PlaySessionStatEntity],
             synchronize: false
         })
     } catch (err) {

@@ -17,6 +17,8 @@ import { GameSessionService } from '../gamesession/gamesession.service';
 import { Mutex, MutexInterface } from 'async-mutex';
 import { PlaySesionService } from '../playsession/playsession.service';
 import { PlaySessionStatService } from '../playsession/playsessionstat.service';
+import { materialize } from 'rxjs';
+import { MoreThanOrEqual } from 'typeorm';
 
 @Injectable()
 export class GameService {
@@ -436,15 +438,37 @@ export class GameService {
 
         //console.log({distinct, users, counter})
         
-        Object.keys(counter).map(key => {
+        const materials = Object.keys(counter)
+        materials.map(key => {
             counter[key] = counter[key]/distinct 
         })
 
-        for(let i = 0; i< items.length; i++) {
-            const item = items[i]
-            //assuming there are no duplicate snapshot entries
-            const amount = (Number.parseFloat(item.amount) + counter[item.material.name]).toString()
-            await this.snapshotService.update(item.id, {amount})
+        const userUuids = Object.keys(users)
+        
+        for(let i = 0; i< userUuids.length; i++) {
+            const uuid = userUuids[i]
+            const user = await this.userService.findOne({uuid})
+            const playStats = await this.playSessionStatService.findOne({id: `${uuid}-production`})
+            this.logger.debug(`Communism:: ${uuid} played ${playStats?.timePlayed}`, this.context)
+            if (Number.parseFloat(playStats.timePlayed) < 2700000) {
+                this.logger.warn(`Communism:: ${uuid} not eligible for gganbu`, this.context)
+                continue
+            }
+            const snaps = items.filter(snap => snap.owner.uuid === uuid)
+
+            const x = materials.map(async (materialName) => {
+                const existingSnap = snaps.find(x => x.material.name === materialName)
+                if (!!existingSnap) {
+                    this.logger.debug(`Communism:: ${uuid} snap for ${materialName} existed. Adding..`, this.context)
+                    const amount = (Number.parseFloat(existingSnap.amount) + counter[existingSnap.material.name]).toString()
+                    await this.snapshotService.update(existingSnap.id, {amount})
+                } else {
+                    this.logger.debug(`Communism:: ${uuid} snap for ${materialName} not found. Creating..`, this.context)
+                    const amount = Number.parseFloat(existingSnap.amount)
+                    await this.assignSnapshot(user, {amount, materialName})
+                }
+            })
+            await Promise.all(x)
         }
     }
 }

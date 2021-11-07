@@ -9,9 +9,9 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { UserService } from '../user/user.service';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { UserEntity } from 'src/user/user.entity';
-import { User } from 'src/utils/decorators';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { UserEntity } from '../user/user.entity';
+import { User } from '../utils/decorators';
 import { CallparamDto, CallParamsDto } from './dtos/callparams.dto';
 import { OracleService } from './oracle.service';
 import { ImportDto } from './dtos/import.dto';

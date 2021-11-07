@@ -25,11 +25,11 @@ import { MaterialsDto } from './dtos/material.dto';
 import { AdminService } from './admin.service';
 import { TexturesDto } from './dtos/textures.dto';
 import { SecretDto, SecretsDto } from './dtos/secret.dto';
-import { SnapshotsDto } from 'src/game/dtos/snapshot.dto';
+import { SnapshotsDto } from '../game/dtos/snapshot.dto';
 import { PreferredServersDto } from './dtos/preferredServer.dto';
-import { ProfileService } from 'src/profile/profile.service';
+import { ProfileService } from '../profile/profile.service';
 import { AdminConfirmDto, ConfirmTypeDto } from './dtos/confirm.dto';
-import { OracleService } from 'src/oracle/oracle.service';
+import { OracleService } from '../oracle/oracle.service';
 
 @ApiTags('admin')
 @Controller('admin')

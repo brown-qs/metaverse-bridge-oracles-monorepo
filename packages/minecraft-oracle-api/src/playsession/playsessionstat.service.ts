@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindConditions, FindManyOptions, FindOneOptions, ObjectID, IsNull, Not,  } from 'typeorm';
-import { UserEntity } from 'src/user/user.entity';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { PlaySessionStatEntity } from './playsessionstat.entity';
 
