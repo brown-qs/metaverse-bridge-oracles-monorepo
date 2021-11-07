@@ -307,7 +307,7 @@ export class GameService {
     }
 
 
-    private async assignSnapshot(user: UserEntity, snapshot: SnapshotDto, half = false, roundup = true): Promise<SnapshotItemEntity> {
+    private async assignSnapshot(user: UserEntity, snapshot: SnapshotDto, half = false, validate = true): Promise<SnapshotItemEntity> {
         if (!snapshot.materialName) {
             this.logger.error(`processSnapshots-${user.uuid}:: materialName was not received. Got: ${snapshot.materialName}.`, null, this.context)
             return undefined
@@ -320,7 +320,7 @@ export class GameService {
             return undefined
         }
 
-        if (snapshot.amount > material.maxStackSize || snapshot.amount < 0) {
+        if (validate && (snapshot.amount > material.maxStackSize || snapshot.amount < 0)) {
             this.logger.error(`processSnapshots-${user.uuid}:: material ${snapshot.materialName} had invalid amount. Received: ${snapshot.amount}. Allowed: [0, ${material.maxStackSize}]`, null, this.context)
             return undefined
         }
@@ -447,6 +447,8 @@ export class GameService {
         materials.map(key => {
             counter[key] = counter[key]/distinct 
         })
+
+        this.logger.debug(`Communism:: avereaged values: ${counter}`, this.context)
 
         const userUuids = Object.keys(users)
         
