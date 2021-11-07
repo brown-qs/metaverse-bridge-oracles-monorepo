@@ -96,7 +96,15 @@ export const IPFS_GATEWAYS = [
 
 export const MAX_WIDTH_TO_SHOW_NAVIGATION = 1000;
 
-export const WOOD_TYPES = ['OAK_WOOD', 'ACACIA_WOOD', 'JUNGLE_WOOD', 'BIRCH_WOOD', 'SPRUCE_WOOD', 'DARK_OAK_WOOD'];
+export type MaterialType = {
+  name: string
+  multiplier: number
+}
 
-export const MATERIAL_TYPES = ['WOOD', 'GOLD_BLOCK', 'IRON_BLOCK', 'COBBLESTONE', 'IRON_INGOT', 'GOLD_INGOT', 'DIAMOND', 'DIAMOND_BLOCK'];
+export const WOOD_TYPES = [{name: 'OAK_LOG', multiplier: 1}, {name: 'ACACIA_LOG', multiplier: 1}, {name: 'JUNGLE_LOG', multiplier: 1}, {name: 'BIRCH_LOG', multiplier: 1}, {name: 'SPRUCE_LOG', multiplier: 1}, {name: 'DARK_OAK_LOG', multiplier: 1}];
+
+export const IRON_TYPES = [{name: 'IRON_INGOT', multiplier: 1}, {name: 'IRON_BLOCK', multiplier: 9}];
+export const GOLD_TYPES = [{name: 'GOLD_INGOT', multiplier: 1}, {name: 'GOLD_BLOCK', multiplier: 9}];
+
+export const MATERIAL_TYPES = ['LOG', 'GOLD_BLOCK', 'IRON_BLOCK', 'COBBLESTONE', 'IRON_INGOT', 'GOLD_INGOT', 'DIAMOND', 'DIAMOND_BLOCK'];
 
