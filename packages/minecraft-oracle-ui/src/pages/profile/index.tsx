@@ -63,7 +63,11 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const inGameResourcesIron: InGameItemWithStatic[] = inGameItems?.resources?.filter(item => !!IRON_TYPES.find(x => x.name === item.name)) || [];
     // const inGameResourcesDiamond = inGameItems?.resources?.filter(item => item.name === 'DIAMOND') || [];
 
-    console.log('ingame items', inGameItems, inGameResourcesWood)
+    const aggregatedGoldAmount = inGameResourcesGold.reduce((prev, curr) => prev + Number.parseFloat(curr.amount) * (GOLD_TYPES.find(x => x.name === curr.name)?.multiplier ?? 1), 0)
+    const aggregatedIronAmount = inGameResourcesIron.reduce((prev, curr) => prev + Number.parseFloat(curr.amount) * (IRON_TYPES.find(x => x.name === curr.name)?.multiplier ?? 1), 0)
+    const aggregatedWoodAmount = inGameResourcesWood.reduce((prev, curr) => prev + Number.parseFloat(curr.amount) * (WOOD_TYPES.find(x => x.name === curr.name)?.multiplier ?? 1), 0)
+
+    console.log('ingame items', inGameItems, inGameResourcesWood, {aggregatedGoldAmount, aggregatedIronAmount, aggregatedWoodAmount})
 
     // const { jwt, userProfile } = authData;
 
@@ -332,7 +336,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     <ListItem
                                                         secondaryAction={
                                                             <>
-                                                                {inGameResourcesWood.reduce((prev, curr) => prev + Number.parseFloat(curr.amount) * (WOOD_TYPES.find(x => x.name === curr.name)?.multiplier ?? 1), 0)}
+                                                                {aggregatedWoodAmount}
                                                             </>
                                                         }
                                                         disablePadding
@@ -349,7 +353,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     <ListItem
                                                         secondaryAction={
                                                             <>
-                                                                {inGameResourcesCobblestone.reduce((prev, curr) => prev + Number.parseFloat(curr.amount), 0)}
+                                                                {inGameResourcesCobblestone[0].amount}
                                                             </>
                                                         }
                                                         disablePadding
@@ -366,7 +370,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     <ListItem
                                                         secondaryAction={
                                                             <>
-                                                                {inGameResourcesIron.reduce((prev, curr) => prev + Number.parseFloat(curr.amount) * (IRON_TYPES.find(x => x.name === curr.name)?.multiplier ?? 1), 0)}
+                                                                {aggregatedIronAmount}
                                                             </>
                                                         }
                                                         disablePadding
@@ -383,7 +387,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     <ListItem
                                                         secondaryAction={
                                                             <>
-                                                                {inGameResourcesGold.reduce((prev, curr) => prev + Number.parseFloat(curr.amount) * (GOLD_TYPES.find(x => x.name === curr.name)?.multiplier ?? 1), 0)}
+                                                                {aggregatedGoldAmount}
                                                             </>
                                                         }
                                                         disablePadding
