@@ -29,6 +29,8 @@ export interface StaticTokenData {
   totalSupply?: BigNumber;
   tokenURI?: string;
   contractURI?: string;
+  subAssetAddress?: string;
+  tokenURIRaw?: string;
 }
 
 export type TokenStaticCallbackInput = {

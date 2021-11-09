@@ -34,6 +34,7 @@ export function useFetchTokenUri(
           ? uriToHttp(meta.external_url, false)?.[0]
           : undefined;
         meta.image = meta.image ? uriToHttp(meta.image, false)?.[0] : undefined;
+        meta.imageRaw = meta.image ?? undefined
         meta.animation_url = meta.animation_url
           ? uriToHttp(meta.animation_url, false)?.[0]
           : undefined;

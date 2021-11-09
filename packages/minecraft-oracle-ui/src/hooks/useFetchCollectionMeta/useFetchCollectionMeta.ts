@@ -6,6 +6,7 @@ export type CollectionMeta = {
   name: string;
   description: string;
   image: string;
+  imageRaw: string;
   external_link: string;
 };
 
@@ -29,6 +30,7 @@ export function useFetchCollectionMeta(
       if (meta) {
         meta.external_link = uriToHttp(meta.external_link, false)?.[0];
         meta.image = uriToHttp(meta.image, false)?.[0];
+        meta.imageRaw = meta.image ?? undefined
       }
       return meta;
     });
