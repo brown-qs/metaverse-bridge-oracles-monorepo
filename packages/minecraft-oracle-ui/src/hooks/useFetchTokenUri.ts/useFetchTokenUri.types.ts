@@ -4,6 +4,7 @@ export type TokenMeta = {
   description?: string;
   external_url?: string;
   image?: string;
+  imageRaw?: string;
   name?: string;
   title?: string;
   background_color?: string;

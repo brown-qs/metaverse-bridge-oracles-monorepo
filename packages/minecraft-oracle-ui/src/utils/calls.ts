@@ -170,6 +170,16 @@ export const getTokenStaticCalldata = (asset: Asset) => {
         'contractURI',
         [],
       ],
+      [
+        [
+          new Interface([
+            'function getAsset(uint256 _id) view returns (address)',
+          ]).getFunction('getAsset'),
+        ],
+        asset.assetAddress,
+        'getAsset',
+        [asset.assetId],
+      ],
     ];
   }
 
@@ -202,6 +212,7 @@ export const processTokenStaticCallResults = (
         symbol: results[i + offset + 1]?.[0],
         totalSupply: results[i + offset + 2]?.[0],
         tokenURI: parseTokenUri(results[i + offset + 3]?.[0], x.assetId),
+        tokenURIRaw: results[i + offset + 3]?.[0],
         contractURI: results[i + offset + 4]?.[0],
       });
       offset += 4;
@@ -216,9 +227,11 @@ export const processTokenStaticCallResults = (
         decimals: results[i + offset + 2]?.[0],
         totalSupply: results[i + offset + 3]?.[0],
         tokenURI: parseTokenUri(results[i + offset + 4]?.[0], x.assetId),
+        tokenURIRaw: results[i + offset + 4]?.[0],
         contractURI: results[i + offset + 5]?.[0],
+        subAssetAddress: results[i + offset + 6]?.[0],
       });
-      offset += 5;
+      offset += 6;
       return;
     }
   });

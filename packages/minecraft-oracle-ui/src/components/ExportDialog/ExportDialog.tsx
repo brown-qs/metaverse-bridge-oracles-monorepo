@@ -72,7 +72,10 @@ export const ExportDialog = () => {
 
   const { chainId, account } = useActiveWeb3React();
 
-  const handleClose = () => {
+  const handleClose = (event: any, reason: string) => {
+    if (reason === 'backdropClick') {
+      return
+    }
     setExportDialogOpen(false);
     setExportParamsLoaded(false);
     setFinalTxSubmitted(false);
@@ -161,7 +164,7 @@ export const ExportDialog = () => {
           )}
           <Button
             className={button}
-            onClick={handleClose}
+            onClick={() => handleClose({}, "yada")}
             variant="outlined"
             color="primary"
           >
@@ -261,7 +264,7 @@ export const ExportDialog = () => {
         >
           Export from metaverse
         </Button>
-        <Button className={formButton} onClick={handleClose} color="primary">
+        <Button className={formButton} onClick={() => handleClose({}, "yada")} color="primary">
           Cancel
         </Button>
       </>

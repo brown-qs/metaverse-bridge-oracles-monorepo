@@ -16,6 +16,7 @@ export interface StaticTokenData {
   decimals?: number;
   totalSupply?: BigNumber;
   tokenURI?: string;
+  tokenURIRaw?: string;
   contractURI?: string;
 }
 

@@ -1,11 +1,11 @@
 import { Provider } from 'react-redux';
 import Theme from '../theme/Theme';
-import { ThemeOptionsContextController } from 'context/themeOptions/themeOptionsContextController/ThemeOptionsContextController';
-import { AuthContextController } from 'context/auth/AuthContextController/AuthContextController';
-import { ImportDialogContextController } from 'context/importDialog/importDialogContextController/ImportDialogContextController';
-import { AccountDialogContextController } from 'context/accountDialog/accountDialogContextController/AccountDialogContextController';
+import { ThemeOptionsContextController } from '../context/themeOptions/themeOptionsContextController/ThemeOptionsContextController';
+import { AuthContextController } from '../context/auth/AuthContextController/AuthContextController';
+import { ImportDialogContextController } from '../context/importDialog/importDialogContextController/ImportDialogContextController';
+import { AccountDialogContextController } from '../context/accountDialog/accountDialogContextController/AccountDialogContextController';
 import { AppProvidersProps } from './AppProviders.types';
-import { getLibrary } from 'connectors';
+import { getLibrary } from '../connectors';
 import { Web3ReactProvider } from '@web3-react/core';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { Web3ReactManager } from '../components/';
@@ -13,9 +13,10 @@ import Web3ReactProviderNetwork from '../components/Web3ReactProviderNetwork/Web
 import ApplicationUpdater from '../state/application/updater';
 import TransactionUpdater from '../state/transactions/updater';
 import store from '../state';
-import { SummonDialogContextController } from 'context/summonDialog/summonDialogContextController/SummonDialogContextController';
-import { TransferDialogContextController } from 'context/transferDialog/transferDialogContextController/TransferDialogContextController';
-import { ExportDialogContextController } from 'context/exportDialog/exportDialogContextController/ExportDialogContextController';
+import { SummonDialogContextController } from '../context/summonDialog/summonDialogContextController/SummonDialogContextController';
+import { TransferDialogContextController } from '../context/transferDialog/transferDialogContextController/TransferDialogContextController';
+import { ExportDialogContextController } from '../context/exportDialog/exportDialogContextController/ExportDialogContextController';
+import { AssetDialogContextController } from '../context/assetDialog/assetDialogContextController/assetDialogContextController';
 
 function Updaters() {
   return (
@@ -39,9 +40,11 @@ export const AppProviders = ({ children }: AppProvidersProps) => (
                   <ImportDialogContextController>
                     <ExportDialogContextController>
                       <TransferDialogContextController>
-                        <Router>
-                          <Theme>{children}</Theme>
-                        </Router>
+                        <AssetDialogContextController>
+                          <Router>
+                            <Theme>{children}</Theme>
+                          </Router>
+                        </AssetDialogContextController>
                       </TransferDialogContextController>
                     </ExportDialogContextController>
                   </ImportDialogContextController>

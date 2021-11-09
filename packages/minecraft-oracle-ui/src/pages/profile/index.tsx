@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { Button, Card, Grid } from '@material-ui/core';
+import { Button, Grid } from '@material-ui/core';
 import Stack from '@mui/material/Stack';
-import { Header, GlitchText, NavLink } from 'ui';
+import { Header } from 'ui';
 import { useStyles } from './styles';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -9,27 +9,25 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Tooltip from '@mui/material/Tooltip';
-import { GOLD_TYPES, IRON_TYPES, WOOD_TYPES } from '../../constants';
+import { ChainId, GOLD_TYPES, IRON_TYPES, WOOD_TYPES } from '../../constants';
 
 import { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 
-import PeopleAltIcon from '@mui/icons-material/PeopleAltSharp';
-import RemoveIcon from '@mui/icons-material/RemoveCircleSharp';
 import Resource1 from "../../assets/images/resource1.png";
 import Resource4 from "../../assets/images/resource4.png";
 import Resource5 from "../../assets/images/resource5.png";
 import Cobblestone from "../../assets/images/cobblestone.png";
-import MsamaImage from "../../assets/images/msama.png";
-import TicketImage from "../../assets/images/vipticket.png";
 import { useProfile } from 'hooks/multiverse/useProfile';
 import { useOnChainItems } from 'hooks/multiverse/useOnChainItems';
 import { InGameItemWithStatic, useInGameItems } from 'hooks/multiverse/useInGameItems';
-import { useActiveWeb3React, useImportDialog } from 'hooks';
+import { useAccountDialog, useActiveWeb3React, useImportDialog } from 'hooks';
 import { useExportDialog } from 'hooks/useExportDialog/useExportDialog';
 import { useSummonDialog } from 'hooks/useSummonDialog/useSummonDialog';
 import { stringToStringAssetType } from 'utils/subgraph';
 import { Fraction } from 'utils/Fraction';
 import { Media } from '../../components/Media/Media';
+import { getExplorerLink } from 'utils';
+import { useAssetDialog } from 'hooks/useAssetDialog/useAssetDialog';
 
 export type ProfilePagePropTypes = {
     authData: AuthData
@@ -37,15 +35,16 @@ export type ProfilePagePropTypes = {
 
 
 const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
-    const [checked, setChecked] = React.useState(['']);
 
-    const {account} = useActiveWeb3React()
+    const {account, chainId} = useActiveWeb3React()
     const profile = useProfile();
+    const { setAccountDialogOpen } = useAccountDialog();
 
     // Dialogs
     const { setImportDialogOpen, setImportDialogData } = useImportDialog()
     const { setExportDialogOpen, setExportDialogData } = useExportDialog()
     const { setSummonDialogOpen, setSummonDialogData } = useSummonDialog()
+    const { setAssetDialogOpen, setAssetDialogData } = useAssetDialog()
 
     //On chain Items
     const onChainItems = useOnChainItems();
@@ -71,8 +70,6 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
     // const { jwt, userProfile } = authData;
 
-    const playerEligible = true;
-
     const {
         profileContainer,
         transferButton,
@@ -85,7 +82,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
         itemImage
     } = useStyles();
 
-    const canSummon = false
+    const canSummon = !!inGameItems?.resources && inGameItems?.resources.length > 0
     const hasImportedMoonsama = !!inGameMoonsamas && inGameMoonsamas.length > 0
     const hasImportedTicket = !!inGameGoldenTickets && inGameGoldenTickets.length > 0
 
@@ -200,20 +197,24 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                 <Button
                                                     className={transferButtonSmall}
                                                     onClick={() => {
-                                                        setExportDialogOpen(true);
-                                                        setExportDialogData(
-                                                            {
-                                                                hash: value.hash,
-                                                                asset: {
-                                                                    assetAddress: value.assetAddress,
-                                                                    assetId: value.assetId,
-                                                                    assetType: stringToStringAssetType(value.assetType),
-                                                                    id: 'x'
+                                                        if (!!account) {
+                                                            setExportDialogOpen(true);
+                                                            setExportDialogData(
+                                                                {
+                                                                    hash: value.hash,
+                                                                    asset: {
+                                                                        assetAddress: value.assetAddress,
+                                                                        assetId: value.assetId,
+                                                                        assetType: stringToStringAssetType(value.assetType),
+                                                                        id: 'x'
+                                                                    }
                                                                 }
-                                                            }
-                                                        );
+                                                            );
+                                                        } else {
+                                                            setAccountDialogOpen(true)
+                                                        }
                                                     }}
-                                                >Export To Wallet</Button>
+                                                >Export to wallet</Button>
                                             </ListItemButton>
                                         </ListItem>
                                     );
@@ -406,11 +407,15 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                     <Button
                                         className={transferButton}
                                         onClick={() => {
-                                            setSummonDialogOpen(true);
-                                            setSummonDialogData({recipient: account ?? undefined});
+                                            if (!!account) {
+                                                setSummonDialogOpen(true);
+                                                setSummonDialogData({recipient: account ?? undefined});
+                                            } else {
+                                                setAccountDialogOpen(true)
+                                            }
                                         }}
                                         disabled={!canSummon}
-                                    >Summon Resources</Button>
+                                    >Summon resources</Button>
                                 </div>
                                 <div style={{ width: '50%' }}>
                                     <div className={columnTitle}><span className={columnTitleText}>On-chain resources: Moonriver account</span></div>
@@ -422,9 +427,19 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                 <ListItem
                                                     key={value?.asset.assetId}
                                                     secondaryAction={
-                                                        <>{Fraction.from(value?.asset?.balance, 18)?.toFixed(0)}</>
+                                                        <>{Fraction.from(value?.asset?.balance, 18)?.toFixed(2)}</>
                                                     }
                                                     disablePadding
+                                                    onClick={() => {
+                                                        setAssetDialogOpen(true)
+                                                        setAssetDialogData({
+                                                            title: value?.staticData?.name,
+                                                            image: value?.meta?.imageRaw,
+                                                            assetERC1155: value?.asset,
+                                                            assetAddressERC20: value?.staticData?.subAssetAddress
+                                                        })
+                                                        //window.open(getExplorerLink(chainId ?? ChainId.MOONRIVER, value.asset.assetAddress,'address'))
+                                                    }}
                                                 >
                                                     <ListItemButton>
                                                         <ListItemAvatar>
@@ -462,3 +477,4 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 };
 
 export default ProfilePage;
+
