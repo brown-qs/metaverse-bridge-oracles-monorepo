@@ -28,8 +28,12 @@ import { SecretDto, SecretsDto } from './dtos/secret.dto';
 import { SnapshotsDto } from '../game/dtos/snapshot.dto';
 import { PreferredServersDto } from './dtos/preferredServer.dto';
 import { ProfileService } from '../profile/profile.service';
-import { AdminConfirmDto, ConfirmTypeDto } from './dtos/confirm.dto';
+import { AdminConfirmDto, OracleActionTypeDto } from './dtos/confirm.dto';
 import { OracleService } from '../oracle/oracle.service';
+import { OracleRequestDto } from './dtos/oraclerequest.dto';
+import { ExportDto } from 'src/oracle/dtos/export.dto';
+import { ImportDto } from 'src/oracle/dtos/import.dto';
+import { SummonDto } from 'src/oracle/dtos/summon.dto';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -257,7 +261,7 @@ export class AdminController {
 
     @Put('confirm')
     @HttpCode(200)
-    @ApiOperation({ summary: 'Manula trigger of confirmation of a multiverse bridge event' })
+    @ApiOperation({ summary: 'Manual trigger of confirmation of a multiverse bridge event' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async getConfirmations(
@@ -268,15 +272,48 @@ export class AdminController {
             throw new ForbiddenException('Not admin')
         }
         const user = await this.userService.findOne({uuid: dto.uuid})
+        if (!user) {
+            return false
+        }
         let success = false
-        if (dto.type.valueOf() === ConfirmTypeDto.ENRAPTURE ) {
+        if (dto.type.valueOf() === OracleActionTypeDto.ENRAPTURE ) {
             success = await this.oracleService.userEnraptureConfirm(user, dto)
-        }  else if (dto.type.valueOf() === ConfirmTypeDto.IMPORT ) {
+        }  else if (dto.type.valueOf() === OracleActionTypeDto.IMPORT ) {
             success = await this.oracleService.userImportConfirm(user, dto)
-        } else if (dto.type.valueOf() === ConfirmTypeDto.EXPORT ) {
+        } else if (dto.type.valueOf() === OracleActionTypeDto.EXPORT ) {
             success = await this.oracleService.userExportConfirm(user, dto)
         }
         return success
+    }
+
+    @Put('oracle/request')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Manual request for a user' })
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    async manualRequest(
+        @User() caller: UserEntity,
+        @Body() dto: OracleRequestDto
+    ): Promise<boolean> {
+        if (caller.role !== UserRole.ADMIN) {
+            throw new ForbiddenException('Not admin')
+        }
+        const user = await this.userService.findOne({uuid: dto.uuid})
+        if (!user) {
+            return false
+        }
+        if (dto.type.valueOf() === OracleActionTypeDto.ENRAPTURE.valueOf() ) {
+            await this.oracleService.userInRequest(user, dto.data as ImportDto, true)
+        }  else if (dto.type.valueOf() === OracleActionTypeDto.IMPORT.valueOf() ) {
+            await this.oracleService.userInRequest(user, dto.data as ImportDto, false)
+        } else if (dto.type.valueOf() === OracleActionTypeDto.EXPORT.valueOf()) {
+            await this.oracleService.userOutRequest(user, dto.data as ExportDto)
+        } else if (dto.type.valueOf() === OracleActionTypeDto.SUMMON.valueOf()) {
+            await this.oracleService.userSummonRequest(user, dto.data as SummonDto)
+        } else {
+            return false
+        }
+        return true
     }
 
     @Put('communism')
