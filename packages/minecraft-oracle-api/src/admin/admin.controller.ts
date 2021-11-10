@@ -34,6 +34,7 @@ import { OracleRequestDto } from './dtos/oraclerequest.dto';
 import { ExportDto } from 'src/oracle/dtos/export.dto';
 import { ImportDto } from 'src/oracle/dtos/import.dto';
 import { SummonDto } from 'src/oracle/dtos/summon.dto';
+import { CallparamDto } from 'src/oracle/dtos/callparams.dto';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -294,26 +295,33 @@ export class AdminController {
     async manualRequest(
         @User() caller: UserEntity,
         @Body() dto: OracleRequestDto
-    ): Promise<boolean> {
+    ): Promise<CallparamDto | boolean> {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
         }
         const user = await this.userService.findOne({uuid: dto.uuid})
         if (!user) {
-            return false
+            throw new UnprocessableEntityException('User not found')
         }
+        let res
         if (dto.type.valueOf() === OracleActionTypeDto.ENRAPTURE.valueOf() ) {
-            await this.oracleService.userInRequest(user, dto.data as ImportDto, true)
+            res = await this.oracleService.userInRequest(user, dto.data as ImportDto, true)
         }  else if (dto.type.valueOf() === OracleActionTypeDto.IMPORT.valueOf() ) {
-            await this.oracleService.userInRequest(user, dto.data as ImportDto, false)
+            res = await this.oracleService.userInRequest(user, dto.data as ImportDto, false)
         } else if (dto.type.valueOf() === OracleActionTypeDto.EXPORT.valueOf()) {
-            await this.oracleService.userOutRequest(user, dto.data as ExportDto)
+            res = await this.oracleService.userOutRequest(user, dto.data as ExportDto)
         } else if (dto.type.valueOf() === OracleActionTypeDto.SUMMON.valueOf()) {
-            await this.oracleService.userSummonRequest(user, dto.data as SummonDto)
+            const success = await this.oracleService.userSummonRequest(user, dto.data as SummonDto)
+            return success
         } else {
-            return false
+            throw new UnprocessableEntityException('Wrong command type')
         }
-        return true
+        return {
+            hash: res[0],
+            data: res[1],
+            signature: res[2],
+            confirmed: res[3]
+        }
     }
 
     @Put('communism')
