@@ -193,67 +193,84 @@ export class OracleService {
             throw new UnprocessableEntityException('Recipient invalid')
         }
 
-        const snapshots = await this.snapshotService.findMany({ relations: ['owner', 'material'], where: { owner: { uuid: user.uuid } } })
-
-        if(!snapshots || snapshots.length === 0) {
-            return false
-        }
-
-        const groups: { [key: string]: { ids: string[], amounts: string[], entities: SnapshotItemEntity[] } } = {}
-        snapshots.map(snapshot => {
-            const amount = (snapshot.material.multiplier ?? 1) * Number.parseFloat(snapshot.amount)
-            const assetAddress = snapshot.material.assetAddress.toLowerCase()
-            if (!(assetAddress in groups)) {
-                groups[assetAddress] = {
-                    ids: [],
-                    amounts: [],
-                    entities: []
-                }
-            }
-            groups[assetAddress]['amounts'].push(ethers.utils.parseEther(amount.toString()).toString())
-            groups[assetAddress]['ids'].push(snapshot.material.assetId)
-            groups[assetAddress]['entities'].push(snapshot)
-        })
-
-        const addresses = Object.keys(groups)
-
         this.ensureLock('oracle_summon')
         const oracleLock = this.locks.get('oracle_summon')
 
-        for (let i = 0; i < addresses.length; i++) {
-            try{
-                const ids = groups[addresses[i]].ids
-                const amounts = groups[addresses[i]].amounts
-                //console.log({METAVERSE, recipient, ids, amounts, i})
-                //console.log(this.metaverse)
-                //console.log(JSON.stringify(this.metaverse.summonFromMetaverse))
+        const res = await oracleLock.runExclusive(async () => {
 
-                await oracleLock.runExclusive(async () => {
-                    const receipt = await (await this.metaverse.summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], {value: 0, gasPrice: '1000000000', gasLimit: '1000000'})).wait()
-                    return receipt
-                })
+            const snapshots = await this.snapshotService.findMany({ relations: ['owner', 'material'], where: { owner: { uuid: user.uuid }, summonInProgress: false } })
 
-                try{
-                    await this.snapshotService.removeAll(groups[addresses[i]].entities) 
-                } catch(e) {
-                    this.logger.error(`Summon: failiure to remove entities, ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
-                }
-
-                this.logger.log(`Summon: successful summon for user ${user.uuid}`, this.context)
-            } catch(e) {
-                //console.log(e)
-                this.logger.error(`Summon: failiure to summon ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
-                throw new UnprocessableEntityException('Summon error.')
+            if(!snapshots || snapshots.length === 0) {
+                return false
             }
-        }
 
-        user.lastUsedAddress = recipient.toLowerCase()
-        if(!user.usedAddresses.includes(user.lastUsedAddress)) {
-            user.usedAddresses.push(user.lastUsedAddress)
-        }
-        await this.userService.update(user.uuid, {usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress})
+            await Promise.all(
+                snapshots.map(async (snap) => {
+                    snap.summonInProgress = true
+                    await this.snapshotService.update(snap.id, {summonInProgress: snap.summonInProgress})
+                })
+            )
 
-        return true
+            // safety vibe check
+            if (!snapshots[0].summonInProgress) {
+                this.logger.warn(`Summon: summonInProgress vibe check fail for ${user.uuid}`, this.context)
+                return false
+            }
+
+            const groups: { [key: string]: { ids: string[], amounts: string[], entities: SnapshotItemEntity[] } } = {}
+            snapshots.map(snapshot => {
+                const amount = (snapshot.material.multiplier ?? 1) * Number.parseFloat(snapshot.amount)
+                const assetAddress = snapshot.material.assetAddress.toLowerCase()
+                if (!(assetAddress in groups)) {
+                    groups[assetAddress] = {
+                        ids: [],
+                        amounts: [],
+                        entities: []
+                    }
+                }
+                groups[assetAddress]['amounts'].push(ethers.utils.parseEther(amount.toString()).toString())
+                groups[assetAddress]['ids'].push(snapshot.material.assetId)
+                groups[assetAddress]['entities'].push(snapshot)
+            })
+
+            const addresses = Object.keys(groups)
+
+
+            for (let i = 0; i < addresses.length; i++) {
+                try{
+                    const ids = groups[addresses[i]].ids
+                    const amounts = groups[addresses[i]].amounts
+                    //console.log({METAVERSE, recipient, ids, amounts, i})
+                    //console.log(this.metaverse)
+                    //console.log(JSON.stringify(this.metaverse.summonFromMetaverse))
+
+                    const receipt = await (await this.metaverse.summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], {value: 0, gasPrice: '1000000000', gasLimit: '1000000'})).wait()
+
+                    try{
+                        await this.snapshotService.removeAll(groups[addresses[i]].entities) 
+                    } catch(e) {
+                        this.logger.error(`Summon: failiure to remove entities, ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
+                    }
+
+                    this.logger.log(`Summon: successful summon for user ${user.uuid}`, this.context)
+                } catch(e) {
+                    //console.log(e)
+                    this.logger.error(`Summon: failiure to summon ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
+                    throw new UnprocessableEntityException('Summon error.')
+                }
+            }
+
+            user.lastUsedAddress = recipient.toLowerCase()
+            if(!user.usedAddresses.includes(user.lastUsedAddress)) {
+                user.usedAddresses.push(user.lastUsedAddress)
+            }
+            await this.userService.update(user.uuid, {usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress})
+
+            return true
+
+        })
+
+        return res
     }
 
     public async userImportConfirm(user: UserEntity, { hash }: { hash: string }, asset?: AssetEntity): Promise<boolean> {

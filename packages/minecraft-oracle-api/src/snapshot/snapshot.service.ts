@@ -1,7 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import {Injectable} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { FindConditions, FindManyOptions, FindOneOptions, ObjectID, Repository, UpdateResult } from 'typeorm';
+import { FindConditions, FindManyOptions, FindOneOptions, ObjectID, RemoveOptions, Repository, UpdateResult } from 'typeorm';
 import { SnapshotItemEntity } from './snapshotItem.entity';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
@@ -28,8 +28,8 @@ export class SnapshotService {
         return u;
     }
 
-    public async removeAll(snapshotItems: SnapshotItemEntity[]): Promise<SnapshotItemEntity[]> {
-        const u = await this.repository.remove(snapshotItems);
+    public async removeAll(snapshotItems: SnapshotItemEntity[], removeOptions?: RemoveOptions): Promise<SnapshotItemEntity[]> {
+        const u = await this.repository.remove(snapshotItems, removeOptions);
         return u;
     }
 
