@@ -312,7 +312,7 @@ export class OracleService {
             }
             user.allowedToPlay = true
             user.numMoonsama = (user.numMoonsama ?? 0) + 1
-            user.role = UserRole.PLAYER
+            user.role = user.role?.valueOf() === UserRole.NONE.valueOf() ? UserRole.PLAYER : user.role
             await this.userService.update(user.uuid, {allowedToPlay: user.allowedToPlay, numTicket: user.numTicket, role: user.role})
         }
 
@@ -320,7 +320,7 @@ export class OracleService {
             this.logger.log(`ImportConfirm: setting ticket for user ${user.uuid}: ${hash}`, this.context)
             user.allowedToPlay = true
             user.numTicket = (user.numTicket ?? 0) + 1
-            user.role = UserRole.PLAYER
+            user.role = user.role?.valueOf() === UserRole.NONE.valueOf() ? UserRole.PLAYER : user.role
             await this.userService.update(user.uuid, {allowedToPlay: user.allowedToPlay, numTicket: user.numTicket, role: user.role})
         }
 
@@ -411,14 +411,18 @@ export class OracleService {
             }
             user.numMoonsama = (user.numMoonsama ?? 0) > 0 ? user.numMoonsama - 1 : 0
             user.allowedToPlay = (user.numTicket ?? 0) > 0 || (user.numMoonsama ?? 0) > 0 
-            user.role = user.allowedToPlay ? UserRole.PLAYER: UserRole.NONE
+            if (!user.role || user.role?.valueOf() !== UserRole.ADMIN.valueOf()) {
+                user.role = user.allowedToPlay ? UserRole.PLAYER: UserRole.NONE
+            }
             await this.userService.create(user)
         }
 
         if (!!recognizedAsset && recognizedAsset.type.valueOf() === RecognizedAssetType.TICKET.valueOf() && (recognizedAsset.id === undefined || recognizedAsset.id === assetEntry.assetId.toString())) {
             user.numTicket = (user.numTicket ?? 0) > 0 ? user.numTicket - 1 : 0
             user.allowedToPlay = (user.numTicket ?? 0) > 0 || (user.numMoonsama ?? 0) > 0
-            user.role = user.allowedToPlay ? UserRole.PLAYER: UserRole.NONE
+            if (!user.role || user.role?.valueOf() !== UserRole.ADMIN.valueOf()) {
+                user.role = user.allowedToPlay ? UserRole.PLAYER: UserRole.NONE
+            }
             await this.userService.create(user)
         }
 

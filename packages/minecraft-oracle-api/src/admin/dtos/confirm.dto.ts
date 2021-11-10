@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger"
 
-export enum ConfirmTypeDto {
+export enum OracleActionTypeDto {
     ENRAPTURE='enrapture',
     SUMMON = 'summon',
     EXPORT = 'export',
@@ -16,7 +16,7 @@ export class AdminConfirmDto {
     hash: string;
 
     @ApiProperty({ description: 'Confirm type'})
-    type: ConfirmTypeDto;
+    type: OracleActionTypeDto;
 }
 
 export class AdminConfirmsDto {
