@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 import { useAuth } from 'hooks';
 
 
@@ -19,6 +19,10 @@ export function useSummonCallback() {
             });
             return resp.data
         } catch(e) {
+            if((e as AxiosError)?.response?.status === 504) {
+                console.error('Gateway timeout')
+                return true
+            }
             console.error('Error summoning. Try again later.')
             return false
         }
