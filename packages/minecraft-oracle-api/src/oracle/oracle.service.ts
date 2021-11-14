@@ -243,7 +243,7 @@ export class OracleService {
                     //console.log(this.metaverse)
                     //console.log(JSON.stringify(this.metaverse.summonFromMetaverse))
 
-                    const receipt = await (await this.metaverse.summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], {value: 0, gasPrice: '1000000000', gasLimit: '1000000'})).wait()
+                    const receipt = await (await this.metaverse.summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], {value: 0, gasPrice: '2500000000', gasLimit: '1000000'})).wait()
 
                     try{
                         await this.snapshotService.removeAll(groups[addresses[i]].entities) 
