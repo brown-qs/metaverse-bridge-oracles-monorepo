@@ -29,7 +29,7 @@ export const SummonDialog = () => {
   const [summonConfirmed, setSummonConfirmed] = useState<number>(0);
   const [summonSubmitted, setSummonSubmitted] = useState<boolean>(false);
 
-  const activeGame = useActiveGame()
+  //const activeGame = useActiveGame()
 
   const {
     divider,
@@ -79,7 +79,7 @@ export const SummonDialog = () => {
 
   const renderBody = () => {
 
-    if(activeGame) {
+    {/*if(activeGame) {
       return (
         <div className={loadingContainer}>
           <div>
@@ -87,7 +87,7 @@ export const SummonDialog = () => {
           </div>
         </div>
       );
-    }
+    }*/}
 
     if (summonSubmitted && summonConfirmed === 1) {
       return (
