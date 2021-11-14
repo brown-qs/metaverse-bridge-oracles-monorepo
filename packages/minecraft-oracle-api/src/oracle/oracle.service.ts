@@ -26,7 +26,7 @@ import { UserRole } from 'src/common/enums/UserRole';
 @Injectable()
 export class OracleService {
 
-    private locks : Map<string, MutexInterface>;
+    private locks: Map<string, MutexInterface>;
 
     private readonly context: string;
     constructor(
@@ -195,20 +195,26 @@ export class OracleService {
         this.ensureLock('oracle_summon')
         const oracleLock = this.locks.get('oracle_summon')
 
-        const res = await oracleLock.runExclusive(async () => {
+        const snapshots = await this.snapshotService.findMany({ relations: ['owner', 'material'], where: { owner: { uuid: user.uuid }, summonInProgress: false } })
 
-            const snapshots = await this.snapshotService.findMany({ relations: ['owner', 'material'], where: { owner: { uuid: user.uuid }, summonInProgress: false } })
+        if (!snapshots || snapshots.length === 0) {
+            const snapshots2 = await this.snapshotService.findMany({ relations: ['owner'], where: { owner: { uuid: user.uuid }, summonInProgress: true } })
 
-            if(!snapshots || snapshots.length === 0) {
+            if (!snapshots2 || snapshots2.length === 0) {
                 return false
+            } else {
+                return true
             }
+        }
 
-            await Promise.all(
-                snapshots.map(async (snap) => {
-                    snap.summonInProgress = true
-                    await this.snapshotService.update(snap.id, {summonInProgress: snap.summonInProgress})
-                })
-            )
+        await Promise.all(
+            snapshots.map(async (snap) => {
+                snap.summonInProgress = true
+                await this.snapshotService.update(snap.id, { summonInProgress: snap.summonInProgress })
+            })
+        )
+
+        const res = await oracleLock.runExclusive(async () => {
 
             // safety vibe check
             if (!snapshots[0].summonInProgress) {
@@ -236,44 +242,51 @@ export class OracleService {
 
 
             for (let i = 0; i < addresses.length; i++) {
-                try{
+                try {
                     const ids = groups[addresses[i]].ids
                     const amounts = groups[addresses[i]].amounts
                     //console.log({METAVERSE, recipient, ids, amounts, i})
                     //console.log(this.metaverse)
                     //console.log(JSON.stringify(this.metaverse.summonFromMetaverse))
 
-                    const receipt = await (await this.metaverse.summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], {value: 0, gasPrice: '2500000000', gasLimit: '1000000'})).wait()
+                    const receipt = await (await this.metaverse.summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], { value: 0, gasPrice: '3000000000', gasLimit: '1000000' })).wait()
 
-                    try{
-                        await this.snapshotService.removeAll(groups[addresses[i]].entities) 
-                    } catch(e) {
+                    try {
+                        await this.snapshotService.removeAll(groups[addresses[i]].entities)
+                    } catch (e) {
                         this.logger.error(`Summon: failiure to remove entities, ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
                     }
 
                     this.logger.log(`Summon: successful summon for user ${user.uuid}`, this.context)
-                } catch(e) {
+                } catch (e) {
                     //console.log(e)
                     this.logger.error(`Summon: failiure to summon ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
+
+                    await Promise.all(
+                        groups[addresses[i]].entities.map(async (snap) => {
+                            snap.summonInProgress = false
+                            await this.snapshotService.update(snap.id, { summonInProgress: snap.summonInProgress })
+                        })
+                    )
+
                     throw new UnprocessableEntityException('Summon error.')
                 }
             }
 
             user.lastUsedAddress = recipient.toLowerCase()
-            if(!user.usedAddresses.includes(user.lastUsedAddress)) {
+            if (!user.usedAddresses.includes(user.lastUsedAddress)) {
                 user.usedAddresses.push(user.lastUsedAddress)
             }
-            await this.userService.update(user.uuid, {usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress})
+            await this.userService.update(user.uuid, { usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress })
 
             return true
-
         })
 
         return res
     }
 
     public async userImportConfirm(user: UserEntity, { hash }: { hash: string }, asset?: AssetEntity): Promise<boolean> {
-        
+
         this.logger.log(`ImportConfirm: started ${user.uuid}: ${hash}`, this.context)
 
         const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash })
@@ -301,7 +314,7 @@ export class OracleService {
         console.log(user.uuid, hash, RecognizedAssetType.MOONSAMA.valueOf(), RecognizedAssetType.TICKET.valueOf(), recognizedAsset?.id, JSON.stringify(mAsset))
         if (!!recognizedAsset && recognizedAsset.type.valueOf() === RecognizedAssetType.MOONSAMA.valueOf() && (recognizedAsset.id === undefined || recognizedAsset.id === mAsset.asset.assetId.toString())) {
             this.logger.log(`ImportConfirm: setting moonsama for user ${user.uuid}: ${hash}`, this.context)
-            const texture = await this.textureService.findOne({ assetAddress: assetEntry.assetAddress.toLowerCase(), assetId: assetEntry.assetId }, {relations: ['owner']})
+            const texture = await this.textureService.findOne({ assetAddress: assetEntry.assetAddress.toLowerCase(), assetId: assetEntry.assetId }, { relations: ['owner'] })
             if (!!texture) {
                 this.logger.log('ImportConfirm: Moonsama, texture found', this.context)
                 texture.owner = user
@@ -312,7 +325,7 @@ export class OracleService {
             user.allowedToPlay = true
             user.numMoonsama = (user.numMoonsama ?? 0) + 1
             user.role = user.role?.valueOf() === UserRole.NONE.valueOf() ? UserRole.PLAYER : user.role
-            await this.userService.update(user.uuid, {allowedToPlay: user.allowedToPlay, numTicket: user.numTicket, role: user.role})
+            await this.userService.update(user.uuid, { allowedToPlay: user.allowedToPlay, numTicket: user.numTicket, role: user.role })
         }
 
         if (!!recognizedAsset && recognizedAsset.type.valueOf() === RecognizedAssetType.TICKET.valueOf() && (recognizedAsset.id === undefined || recognizedAsset.id === mAsset.asset.assetId.toString())) {
@@ -320,7 +333,7 @@ export class OracleService {
             user.allowedToPlay = true
             user.numTicket = (user.numTicket ?? 0) + 1
             user.role = user.role?.valueOf() === UserRole.NONE.valueOf() ? UserRole.PLAYER : user.role
-            await this.userService.update(user.uuid, {allowedToPlay: user.allowedToPlay, numTicket: user.numTicket, role: user.role})
+            await this.userService.update(user.uuid, { allowedToPlay: user.allowedToPlay, numTicket: user.numTicket, role: user.role })
         }
 
         const finalentry = await this.assetService.create({ ...assetEntry, pendingIn: false })
@@ -331,10 +344,10 @@ export class OracleService {
         }
 
         user.lastUsedAddress = mAsset.owner.toLowerCase()
-        if(!user.usedAddresses.includes(user.lastUsedAddress)) {
+        if (!user.usedAddresses.includes(user.lastUsedAddress)) {
             user.usedAddresses.push(user.lastUsedAddress)
         }
-        await this.userService.update(user.uuid, {usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress})
+        await this.userService.update(user.uuid, { usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress })
 
         return true
     }
@@ -366,10 +379,10 @@ export class OracleService {
         }
 
         user.lastUsedAddress = mAsset.owner.toLowerCase()
-        if(!user.usedAddresses.includes(user.lastUsedAddress)) {
+        if (!user.usedAddresses.includes(user.lastUsedAddress)) {
             user.usedAddresses.push(user.lastUsedAddress)
         }
-        await this.userService.update(user.uuid, {usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress})
+        await this.userService.update(user.uuid, { usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress })
 
         return true
     }
@@ -409,9 +422,9 @@ export class OracleService {
                 await this.textureService.create(texture)
             }
             user.numMoonsama = (user.numMoonsama ?? 0) > 0 ? user.numMoonsama - 1 : 0
-            user.allowedToPlay = (user.numTicket ?? 0) > 0 || (user.numMoonsama ?? 0) > 0 
+            user.allowedToPlay = (user.numTicket ?? 0) > 0 || (user.numMoonsama ?? 0) > 0
             if (!user.role || user.role?.valueOf() !== UserRole.ADMIN.valueOf()) {
-                user.role = user.allowedToPlay ? UserRole.PLAYER: UserRole.NONE
+                user.role = user.allowedToPlay ? UserRole.PLAYER : UserRole.NONE
             }
             await this.userService.create(user)
         }
@@ -420,7 +433,7 @@ export class OracleService {
             user.numTicket = (user.numTicket ?? 0) > 0 ? user.numTicket - 1 : 0
             user.allowedToPlay = (user.numTicket ?? 0) > 0 || (user.numMoonsama ?? 0) > 0
             if (!user.role || user.role?.valueOf() !== UserRole.ADMIN.valueOf()) {
-                user.role = user.allowedToPlay ? UserRole.PLAYER: UserRole.NONE
+                user.role = user.allowedToPlay ? UserRole.PLAYER : UserRole.NONE
             }
             await this.userService.create(user)
         }
@@ -432,7 +445,7 @@ export class OracleService {
 
     private ensureLock(key: string) {
         if (!this.locks.has(key)) {
-          this.locks.set(key, new Mutex());
+            this.locks.set(key, new Mutex());
         }
     }
 }

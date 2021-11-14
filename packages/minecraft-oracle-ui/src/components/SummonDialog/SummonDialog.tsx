@@ -93,9 +93,9 @@ export const SummonDialog = () => {
       return (
         <div className={successContainer}>
           <SuccessIcon className={successIcon} />
-          <Typography>{`Summon successful!`}</Typography>
+          <Typography>{`Summon request received!`}</Typography>
           <Typography color="textSecondary">
-            {`Check your account for your tokens`}
+            {`Your summon request was acknowledged by the Oracle. Depending on the number of requests and Moonriver traffic the transaction can take a while. You can sit back and relax now. Check back later.`}
           </Typography>
           <Button
             className={button}
@@ -115,7 +115,7 @@ export const SummonDialog = () => {
           <div className={loadingContainer}>
             <CircularProgress />
             <div>
-              <Typography>Your metaverse assets are being conjured by the Multiverse Bridge. This can take a while...</Typography>
+              <Typography>Multiverse Bridge Oracle processing your request...</Typography>
             </div>
           </div>
         </>
@@ -129,7 +129,7 @@ export const SummonDialog = () => {
             <div>
               <Typography>Unsuccessful summon</Typography>
               <Typography color="textSecondary" variant="h5">
-                Either you didn't have any metaverse resources to summon, or something went wrong. Try again later or contact support.
+                It seems you didn't have any metaverse resources to summon, or something went wrong. Try again later or contact support.
               </Typography>
             </div>
           </div>
@@ -151,8 +151,8 @@ export const SummonDialog = () => {
             onClick={() => {
               setSummonSubmitted(true);
               (async () => {
-                const success = await summonCallback?.(recipient)
-                setSummonConfirmed(success ? 1 : 2)
+                  const success = await summonCallback?.(recipient)
+                  setSummonConfirmed(success ? 1 : 2)
               })()
             }}
             className={formButton}
