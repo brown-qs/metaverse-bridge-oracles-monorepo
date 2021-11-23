@@ -1,7 +1,7 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger"
-import { ExportDto } from "src/oracle/dtos/export.dto";
-import { ImportDto } from "src/oracle/dtos/import.dto";
-import { SummonDto } from "src/oracle/dtos/summon.dto";
+import { ApiProperty } from "@nestjs/swagger"
+import { ExportDto } from "../../oracle/dtos/export.dto";
+import { ImportDto } from "../../oracle/dtos/import.dto";
+import { SummonDto } from "../../oracle/dtos/summon.dto";
 import { OracleActionTypeDto } from "./confirm.dto";
 
 export class OracleRequestDto {

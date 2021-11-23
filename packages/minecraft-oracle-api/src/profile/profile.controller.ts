@@ -13,10 +13,10 @@ import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt';
 import { ProfileDto } from './dtos/profile.dto';
-import { User } from 'src/utils/decorators';
+import { User } from '../utils/decorators';
 import { UserEntity } from '../user/user.entity';
-import { ProfileService } from 'src/profile/profile.service';
-import { ProfileItemsDto } from 'src/profile/dtos/profileItem.dto';
+import { ProfileService } from '../profile/profile.service';
+import { ProfileItemsDto } from '../profile/dtos/profileItem.dto';
 
 
 @ApiTags('user')
@@ -48,7 +48,7 @@ export class ProfileController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async resources(@User() user: UserEntity): Promise<ProfileItemsDto> {
-        return this.profileService.getPlayeritems(user)   
+        return this.profileService.getPlayerItems(user)   
     }
 
     

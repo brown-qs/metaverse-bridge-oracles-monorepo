@@ -1,6 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
-import { SecretService } from 'src/secret/secret.service';
+import { SecretService } from '../secret/secret.service';
 
 @Injectable()
 export class SharedSecretGuard implements CanActivate {

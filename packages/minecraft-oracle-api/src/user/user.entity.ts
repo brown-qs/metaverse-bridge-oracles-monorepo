@@ -11,6 +11,7 @@ import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
 import { AssetEntity } from '../asset/asset.entity';
 import { SummonEntity } from '../summon/summon.entity';
 import { PlaySessionEntity } from '../playsession/playsession.entity';
+import { InventoryEntity } from '../inventory/inventory.entity';
 
 @Entity()
 @Index(['uuid'], {unique: true})
@@ -78,6 +79,9 @@ export class UserEntity {
 
     @OneToMany(() => SnapshotItemEntity, (sitem) => sitem.owner)
     snapshotItems?: SnapshotItemEntity[];
+
+    @OneToMany(() => InventoryEntity, (iitem) => iitem.owner)
+    inventoryItems?: InventoryEntity[];
 
     @OneToMany(() => TextureEntity, (skin) => skin.owner)
     textures?: TextureEntity[];

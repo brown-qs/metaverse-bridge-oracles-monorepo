@@ -1,7 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 import { FactoryProvider, Scope } from '@nestjs/common';
 import { ProviderToken } from './token';
-import { ENRAPTURABLE_ASSETS, IMPORTABLE_ASSETS, RecognizedAsset } from 'src/config/constants';
+import { ENRAPTURABLE_ASSETS, IMPORTABLE_ASSETS, RecognizedAsset } from '../config/constants';
 
 export const ImportableAssetsProvider: FactoryProvider<RecognizedAsset[]> = {
     provide: ProviderToken.IMPORTABLE_ASSETS,

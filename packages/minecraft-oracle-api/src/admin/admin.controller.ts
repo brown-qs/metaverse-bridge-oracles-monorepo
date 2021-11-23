@@ -31,10 +31,11 @@ import { ProfileService } from '../profile/profile.service';
 import { AdminConfirmDto, OracleActionTypeDto } from './dtos/confirm.dto';
 import { OracleService } from '../oracle/oracle.service';
 import { OracleRequestDto } from './dtos/oraclerequest.dto';
-import { ExportDto } from 'src/oracle/dtos/export.dto';
-import { ImportDto } from 'src/oracle/dtos/import.dto';
-import { SummonDto } from 'src/oracle/dtos/summon.dto';
-import { CallparamDto } from 'src/oracle/dtos/callparams.dto';
+import { ExportDto } from '../oracle/dtos/export.dto';
+import { ImportDto } from '../oracle/dtos/import.dto';
+import { SummonDto } from '../oracle/dtos/summon.dto';
+import { CallparamDto } from '../oracle/dtos/callparams.dto';
+import { CommunismDto } from './dtos/communism.dto';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -330,12 +331,28 @@ export class AdminController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async communism(
+        @User() caller: UserEntity,
+        @Body() dto: CommunismDto
+    ): Promise<boolean> {
+        if (caller.role !== UserRole.ADMIN) {
+            throw new ForbiddenException('Not admin')
+        }
+        await this.gameService.communism(dto.minTimePlayed, dto.averageMultiplier)
+        return true
+    }
+
+    @Put('bank')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Processes snapshot items and banks them into the user inventory.' })
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    async bank(
         @User() caller: UserEntity
     ): Promise<boolean> {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
         }
-        await this.gameService.communism()
-        return true
+        const res = await this.gameService.bank()
+        return res
     }
 }

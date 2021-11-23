@@ -10,6 +10,7 @@ import { TextureEntity } from '../texture/texture.entity';
 import { UserEntity } from '../user/user.entity';
 import { PlaySessionEntity } from '../playsession/playsession.entity';
 import { PlaySessionStatEntity } from '../playsession/playsessionstat.entity';
+import { InventoryEntity } from '../inventory/inventory.entity';
 
 config()
 
@@ -49,7 +50,7 @@ async function main () {
             host: process.env.TYPEORM_HOST,
             port: Number.parseInt(process.env.TYPEORM_PORT),
             database: process.env.TYPEORM_DATABASE,
-            entities: [MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity, AssetEntity, SummonEntity, PlaySessionEntity, PlaySessionStatEntity],
+            entities: [MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity, AssetEntity, SummonEntity, PlaySessionEntity, PlaySessionStatEntity, InventoryEntity],
             synchronize: false
         })
     } catch (err) {
@@ -90,13 +91,11 @@ async function main () {
     console.log('-----Non included in DB-----')
     found.map(x => console.log(x))
 
-    console.log('-----Dangling-----')
-    found2.map(x => console.log(x))
+    //console.log('-----Dangling-----')
+    //found2.map(x => console.log(x))
 
 
     console.log({lenIds: ids.length, lenHashes: hashes.length, lenMissing: found.length, lenDangling: found2.length})
-    
-    
     
     await connection.close()
 }

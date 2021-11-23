@@ -4,7 +4,8 @@ import {
     IsNumber,
     IsString
 } from 'class-validator';
-import { Column, Entity, Index, OneToMany, PrimaryColumn } from 'typeorm';
+import { InventoryEntity } from '../inventory/inventory.entity';
+import { Column, Entity, Index, JoinColumn, OneToMany, PrimaryColumn } from 'typeorm';
 import { StringAssetType } from '../common/enums/AssetType';
 import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
 
@@ -73,6 +74,13 @@ export class MaterialEntity {
     @Column()
     equippable: boolean;
 
+    @IsString()
+    @Column({nullable: true})
+    mapsTo?: string;
+
     @OneToMany(() => SnapshotItemEntity, (snapshotItem) => snapshotItem.material )
     snapshots?: SnapshotItemEntity[];
+
+    @OneToMany(() => InventoryEntity, (iitem) => iitem.material )
+    inventoryItems?: InventoryEntity[];
 }

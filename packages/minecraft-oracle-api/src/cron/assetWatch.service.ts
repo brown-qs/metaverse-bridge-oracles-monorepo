@@ -1,22 +1,12 @@
-import { CACHE_MANAGER, Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
-import { AssetService } from 'src/asset/asset.service';
-import { GameSessionService } from 'src/gamesession/gamesession.service';
-import { MaterialService } from 'src/material/material.service';
-import { SnapshotService } from 'src/snapshot/snapshot.service';
-import { SummonService } from 'src/summon/summon.service';
-import { TextureService } from 'src/texture/texture.service';
-import { UserService } from 'src/user/user.service';
+import { AssetService } from '../asset/asset.service';
 
-import { Cron, Interval } from '@nestjs/schedule';
-import { CLEAN_CRON_INTERVAL_MS, IMPORT_CONFIRM_CRON_INTERVAL_MS } from 'src/config/constants';
-import { LessThan, MoreThan, MoreThanOrEqual } from 'typeorm';
-import { OracleService } from 'src/oracle/oracle.service';
-
-const MULTICALL_ADDRESS = '0x7d7737D8EDDDB5f3149b88a3Cde4c5E9D59098C3';
-const SUSU_ADDRESS = '0x9cd9CAECDC816C3E7123A4F130A91A684D01f4Dc';
-const XSUSU_ADDRESS = '0x1C41d2223dc95605fc4395294e65f170A4Fb1b40';
+import { Interval } from '@nestjs/schedule';
+import { CLEAN_CRON_INTERVAL_MS, IMPORT_CONFIRM_CRON_INTERVAL_MS } from '../config/constants';
+import { LessThan, MoreThanOrEqual } from 'typeorm';
+import { OracleService } from '../oracle/oracle.service';
 
 
 @Injectable()

@@ -1,5 +1,4 @@
 import { BigNumber } from "ethers";
-import { StringAssetType } from "src/common/enums/AssetType";
 
 export type MetaAsset = {
         /* the asset (token) */

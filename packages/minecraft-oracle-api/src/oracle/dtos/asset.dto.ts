@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { IsString } from "class-validator"
-import { AssetType } from "src/common/enums/AssetType"
+import { AssetType } from "../../common/enums/AssetType"
 
 export class AssetDto {
 

@@ -8,7 +8,7 @@ import { UserModule } from '../user/user.module';
 import { MicrosoftSetupParamsProvider } from '../provider';
 import { CacheModule } from '../cache/cache.module';
 import { Module } from '@nestjs/common';
-import { SecretModule } from 'src/secret/secret.module';
+import { SecretModule } from '../secret/secret.module';
 
 @Module({
     imports: [
