@@ -116,4 +116,9 @@ export class AdminService {
 
         return (res.affected ?? 1) > 0
     }
+
+    public async blacklist(user: {uuid: string}, blacklisted: boolean) {
+        const res = await this.userService.update(user.uuid, {blacklisted})
+        return (res.affected ?? 1) > 0
+    }
 }

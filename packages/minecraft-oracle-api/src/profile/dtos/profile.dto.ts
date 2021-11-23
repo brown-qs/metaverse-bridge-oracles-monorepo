@@ -32,5 +32,7 @@ export class ProfileDto {
 
     @ApiProperty({ description: 'Whether the user is a VIP guest or not'})
     vip: boolean
-    
+
+    @ApiProperty({ description: 'Whether the user is blacklisted or not'})
+    blacklisted: boolean
 }

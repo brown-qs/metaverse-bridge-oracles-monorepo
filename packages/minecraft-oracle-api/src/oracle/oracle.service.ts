@@ -1,4 +1,4 @@
-import { Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '../user/user.service';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
@@ -140,6 +140,11 @@ export class OracleService {
     public async userOutRequest(user: UserEntity, { hash }: ExportDto): Promise<[string, string, string, boolean]> {
         this.logger.debug(`userOutRequest: ${hash}`, this.context)
 
+        if (user.blacklisted) {
+            this.logger.error(`userOutRequest: user blacklisted`, null, this.context)
+            throw new UnprocessableEntityException(`Blacklisted`)
+        }
+
         if (!hash) {
             throw new UnprocessableEntityException(`No hash was received.`)
         }
@@ -186,6 +191,11 @@ export class OracleService {
         if (!recipient || recipient.length !== 42 || !recipient.startsWith('0x')) {
             this.logger.error(`Summon: recipient invalid: ${recipient}}`, null, this.context)
             throw new UnprocessableEntityException('Recipient invalid')
+        }
+
+        if (user.blacklisted) {
+            this.logger.error(`userSummonRequest: user blacklisted`, null, this.context)
+            throw new UnprocessableEntityException(`Blacklisted`)
         }
 
         this.ensureLock('oracle_summon')

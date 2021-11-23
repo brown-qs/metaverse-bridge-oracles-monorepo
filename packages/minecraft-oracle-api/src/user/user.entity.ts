@@ -42,6 +42,10 @@ export class UserEntity {
 
     @IsBoolean()
     @Column({ default: false })
+    blacklisted?: boolean;
+
+    @IsBoolean()
+    @Column({ default: false })
     hasGame?: boolean;
 
     @IsBoolean()
