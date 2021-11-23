@@ -3,7 +3,7 @@ import { FactoryProvider, Scope } from '@nestjs/common';
 import { Contract, ethers } from 'ethers';
 import { ProviderToken } from './token';
 import {METAVERSE_ABI} from '../common/contracts/Metaverse';
-import { METAVERSE_ADDRESSES } from 'src/config/constants';
+import { METAVERSE_ADDRESSES } from '../config/constants';
 
 export const OracleWalletProvider: FactoryProvider<ethers.Wallet> = {
     provide: ProviderToken.ORACLE_WALLET,

@@ -17,8 +17,9 @@ import { GameSessionService } from '../gamesession/gamesession.service';
 import { Mutex, MutexInterface } from 'async-mutex';
 import { PlaySesionService } from '../playsession/playsession.service';
 import { PlaySessionStatService } from '../playsession/playsessionstat.service';
-import { materialize } from 'rxjs';
-import { MoreThanOrEqual } from 'typeorm';
+import { InventoryEntity } from '../inventory/inventory.entity';
+import { InventoryService } from '../inventory/inventory.service';
+import { boolean } from 'fp-ts';
 
 @Injectable()
 export class GameService {
@@ -32,6 +33,7 @@ export class GameService {
         private readonly textureService: TextureService,
         private readonly materialService: MaterialService,
         private readonly snapshotService: SnapshotService,
+        private readonly inventoryService: InventoryService,
         private readonly gameSessionService: GameSessionService,
         private readonly playSessionService: PlaySesionService,
         private readonly playSessionStatService: PlaySessionStatService,
@@ -407,7 +409,10 @@ export class GameService {
         return true
     }
 
-    public async communism() {
+    public async communism(minTimePlayed?: number, averageMultiplier?: number) {
+
+        const mintT = minTimePlayed ?? 2700000
+        const averageM = averageMultiplier ?? 1
         
         let items: SnapshotItemEntity[] = []
         let batch: SnapshotItemEntity[] = []
@@ -445,7 +450,7 @@ export class GameService {
         
         const materials = Object.keys(counter)
         materials.map(key => {
-            counter[key] = counter[key]/distinct 
+            counter[key] = averageM * counter[key] / distinct 
         })
 
         this.logger.debug(`Communism:: avereaged values: ${counter}`, this.context)
@@ -457,7 +462,9 @@ export class GameService {
             const user = await this.userService.findOne({uuid})
             const playStats = await this.playSessionStatService.findOne({id: `${uuid}-production`})
             this.logger.debug(`Communism:: ${uuid} played ${playStats?.timePlayed}`, this.context)
-            if (!playStats || Number.parseFloat(playStats?.timePlayed) < 2700000) {
+
+            const tPlayed = playStats?.timePlayed ? Number.parseFloat(playStats?.timePlayed) :  0
+            if (tPlayed < mintT) {
                 this.logger.warn(`Communism:: ${uuid} not eligible for gganbu`, this.context)
                 continue
             }
@@ -477,5 +484,121 @@ export class GameService {
             })
             await Promise.all(x)
         }
+    }
+
+    public async bank(): Promise<boolean> {
+
+        this.ensureLock('bank')
+        const banklock = this.locks.get('bank')
+
+        const res = await banklock.runExclusive(async () => {
+
+            let items: SnapshotItemEntity[] = []
+            let batch: SnapshotItemEntity[] = []
+            let skip = 0
+            let take = 100
+            do {
+                batch = await this.snapshotService.findMany({take, skip, relations: ['material', 'owner']})
+                //console.log(batch)
+                
+                if (!!batch && batch.length > 0) {
+                    items = items.concat(batch)
+                }
+
+                skip += take
+
+            } while (!!batch && batch.length > 0)
+
+            let counter: {[key: string]: number} = {}
+            //let users: {[key: string]: boolean} = {}
+            //let distinct = 0
+            items.map(x => {
+                counter[x.material.name] = typeof counter[x.material.name] === 'undefined' ? Number.parseFloat(x.amount) : counter[x.material.name] + Number.parseFloat(x.amount) 
+            })
+
+            const allUsers = await this.userService.findMany({})
+            this.logger.warn(`Bank:: ${allUsers.length} users found`, this.context)
+
+            /*
+            allUsers.map(user => {
+                if (!users[user.uuid]) {
+                    users[user.uuid] = true
+                    distinct+=1
+                }
+            })
+            */
+
+            if (!items || items.length === 0) {
+                this.logger.warn(`Bank: snapshotted items were not found`, this.context)
+                return true
+            }
+
+            // get all user snapshots and aggregate them together
+            const userTasks = allUsers.map(async (user) => {
+                const userSnapshots = items.filter(item => item.owner.uuid === user.uuid)
+
+                if(!userSnapshots || userSnapshots.length === 0) {
+                    return true
+                }
+
+                const inventoryMap: {[key: string]: {inv: InventoryEntity, snaps: SnapshotItemEntity[]}} = {}
+
+                this.ensureLock(`snaplock-${user.uuid}`)
+                const slock = this.locks.get(`snaplock-${user.uuid}`)
+
+                await Promise.all(userSnapshots.map(async (snapshot) => slock.runExclusive(async () => {
+                    const amount = (snapshot.material.multiplier ?? 1) * Number.parseFloat(snapshot.amount)
+                    const materialName = snapshot.material.mapsTo ?? snapshot.material.name
+                    const id = `${user.uuid}-${materialName}`
+                    if (!inventoryMap[id]) {
+                        const material = snapshot.material.mapsTo ? (await this.materialService.findOne(materialName)) : snapshot.material
+                        inventoryMap[id] = {
+                            inv: {
+                                amount: amount.toString(),
+                                material,
+                                owner: snapshot.owner,
+                                summonable: true,
+                                id
+                            },
+                            snaps: [snapshot]
+                        }
+                    } else {
+                        inventoryMap[id].inv.amount = (Number.parseFloat(inventoryMap[id].inv.amount) + amount).toString()
+                        inventoryMap[id].snaps.push(snapshot)
+                    }
+                })))
+
+                const existingInvItems = await this.inventoryService.findMany({where: {owner: user.uuid}, relations: ['owner', 'material']})
+
+                // update inventory item and delete snapshot item on success
+                await Promise.all(Object.keys(inventoryMap).map(async (id: string) => {
+                    const newItem = inventoryMap[id]
+                    const existingItem = existingInvItems.find((x) => x.id === id)
+                    try {
+                        if(!existingItem) {
+                            await this.inventoryService.create(newItem.inv)
+                        } else {
+                            await this.inventoryService.update(existingItem.id, {amount: (Number.parseFloat(existingItem.amount) + Number.parseFloat(newItem.inv.amount)).toString()})
+                        }
+
+                        try {
+                            await this.snapshotService.removeAll(newItem.snaps)
+                        } catch(e) {
+                            this.logger.error(`Bank:: error deleting snapshot while banking ${newItem.inv}`, null, this.context)
+                            this.logger.error(e, null, this.context)
+                        }
+                    } catch(e) {
+                        this.logger.error(`Bank:: error updating user inventory ${newItem.inv}`, null, this.context)
+                        this.logger.error(e, null, this.context)
+                    }
+                }))
+
+                return true
+            })
+            await Promise.all(userTasks)
+            return true
+        })
+
+        return res
     }
 }

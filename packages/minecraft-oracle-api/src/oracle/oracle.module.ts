@@ -1,15 +1,14 @@
 import { Module } from '@nestjs/common';
-import { AssetModule } from 'src/asset/asset.module';
-import { GameSessionModule } from 'src/gamesession/gamesession.module';
-import { ProviderModule } from 'src/provider/provider.module';
-import { SecretModule } from 'src/secret/secret.module';
-import { SummonModule } from 'src/summon/summon.module';
-import { MaterialModule } from '../material/material.module';
-import { SnapshotModule } from '../snapshot/snapshot.module';
+import { AssetModule } from '../asset/asset.module';
+import { GameSessionModule } from '../gamesession/gamesession.module';
+import { ProviderModule } from '../provider/provider.module';
+import { SecretModule } from '../secret/secret.module';
+import { SummonModule } from '../summon/summon.module';
 import { TextureModule } from '../texture/texture.module';
 import { UserModule } from '../user/user.module';
 import { OracleController } from './oracle.controller';
 import { OracleService } from './oracle.service';
+import { InventoryModule } from 'src/inventory/inventory.module';
 
 @Module({
     imports: [
@@ -17,8 +16,7 @@ import { OracleService } from './oracle.service';
         UserModule,
         SecretModule,
         TextureModule,
-        MaterialModule,
-        SnapshotModule,
+        InventoryModule,
         GameSessionModule,
         SummonModule,
         ProviderModule

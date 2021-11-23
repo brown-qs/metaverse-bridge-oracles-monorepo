@@ -4,24 +4,22 @@ import { UserService } from '../user/user.service';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { TextureService } from '../texture/texture.service';
 import { UserEntity } from '../user/user.entity';
-import { MaterialService } from '../material/material.service';
-import { SnapshotService } from '../snapshot/snapshot.service';
-import { GameSessionService } from 'src/gamesession/gamesession.service';
+import { GameSessionService } from '../gamesession/gamesession.service';
 import { ImportDto } from './dtos/import.dto';
-import { CALLDATA_EXPIRATION_MS, CALLDATA_EXPIRATION_THRESHOLD, METAVERSE, RecognizedAsset, RecognizedAssetType } from 'src/config/constants';
+import { CALLDATA_EXPIRATION_MS, CALLDATA_EXPIRATION_THRESHOLD, METAVERSE, RecognizedAsset, RecognizedAssetType } from '../config/constants';
 import { calculateMetaAssetHash, encodeEnraptureWithSigData, encodeExportWithSigData, encodeImportWithSigData, getSalt, getSignature, utf8ToKeccak } from './oracle';
 import { Contract, ethers, Signer } from 'ethers';
-import { ProviderToken } from 'src/provider/token';
-import { AssetService } from 'src/asset/asset.service';
-import { assetTypeToStringAssetType } from 'src/utils';
+import { ProviderToken } from '../provider/token';
+import { AssetService } from '../asset/asset.service';
+import { assetTypeToStringAssetType } from '../utils';
 import { MetaAsset } from './oracle.types';
 import { ExportDto } from './dtos/export.dto';
 import { SummonDto } from './dtos/summon.dto';
-import { SummonService } from 'src/summon/summon.service';
-import { SnapshotItemEntity } from 'src/snapshot/snapshotItem.entity';
-import { AssetEntity } from 'src/asset/asset.entity';
+import { AssetEntity } from '../asset/asset.entity';
 import { Mutex, MutexInterface } from 'async-mutex';
-import { UserRole } from 'src/common/enums/UserRole';
+import { UserRole } from '../common/enums/UserRole';
+import { InventoryService } from '../inventory/inventory.service';
+import { InventoryEntity } from 'src/inventory/inventory.entity';
 
 @Injectable()
 export class OracleService {
@@ -32,11 +30,9 @@ export class OracleService {
     constructor(
         private readonly userService: UserService,
         private readonly textureService: TextureService,
-        private readonly materialService: MaterialService,
-        private readonly snapshotService: SnapshotService,
         private readonly gameSessionService: GameSessionService,
         private readonly assetService: AssetService,
-        private readonly summonService: SummonService,
+        private readonly inventoryService: InventoryService,
         private configService: ConfigService,
         @Inject(ProviderToken.ORACLE_WALLET) private oracle: Signer,
         @Inject(ProviderToken.METAVERSE_CONTRACT) private metaverse: Contract,
@@ -195,10 +191,10 @@ export class OracleService {
         this.ensureLock('oracle_summon')
         const oracleLock = this.locks.get('oracle_summon')
 
-        const snapshots = await this.snapshotService.findMany({ relations: ['owner', 'material'], where: { owner: { uuid: user.uuid }, summonInProgress: false } })
+        const snapshots = await this.inventoryService.findMany({ relations: ['owner', 'material'], where: { owner: { uuid: user.uuid }, summonInProgress: false } })
 
         if (!snapshots || snapshots.length === 0) {
-            const snapshots2 = await this.snapshotService.findMany({ relations: ['owner'], where: { owner: { uuid: user.uuid }, summonInProgress: true } })
+            const snapshots2 = await this.inventoryService.findMany({ relations: ['owner'], where: { owner: { uuid: user.uuid }, summonInProgress: true } })
 
             if (!snapshots2 || snapshots2.length === 0) {
                 return false
@@ -210,7 +206,7 @@ export class OracleService {
         await Promise.all(
             snapshots.map(async (snap) => {
                 snap.summonInProgress = true
-                await this.snapshotService.update(snap.id, { summonInProgress: snap.summonInProgress })
+                await this.inventoryService.update(snap.id, { summonInProgress: snap.summonInProgress })
             })
         )
 
@@ -222,7 +218,7 @@ export class OracleService {
                 return false
             }
 
-            const groups: { [key: string]: { ids: string[], amounts: string[], entities: SnapshotItemEntity[] } } = {}
+            const groups: { [key: string]: { ids: string[], amounts: string[], entities: InventoryEntity[] } } = {}
             snapshots.map(snapshot => {
                 const amount = (snapshot.material.multiplier ?? 1) * Number.parseFloat(snapshot.amount)
                 const assetAddress = snapshot.material.assetAddress.toLowerCase()
@@ -252,7 +248,7 @@ export class OracleService {
                     const receipt = await (await this.metaverse.summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], { value: 0, gasPrice: '3000000000', gasLimit: '1000000' })).wait()
 
                     try {
-                        await this.snapshotService.removeAll(groups[addresses[i]].entities)
+                        await this.inventoryService.removeAll(groups[addresses[i]].entities)
                     } catch (e) {
                         this.logger.error(`Summon: failiure to remove entities, ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
                     }
@@ -265,7 +261,7 @@ export class OracleService {
                     await Promise.all(
                         groups[addresses[i]].entities.map(async (snap) => {
                             snap.summonInProgress = false
-                            await this.snapshotService.update(snap.id, { summonInProgress: snap.summonInProgress })
+                            await this.inventoryService.update(snap.id, { summonInProgress: snap.summonInProgress })
                         })
                     )
 

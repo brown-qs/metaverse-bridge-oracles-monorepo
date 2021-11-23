@@ -23,10 +23,6 @@ export class SnapshotItemEntity {
     @Column()
     @IsString()
     amount: string;
-
-    @Column({default: false})
-    @IsBoolean()
-    summonInProgress: boolean;
     
     @ManyToOne(() => MaterialEntity, (material) => material.snapshots)
     material: MaterialEntity;

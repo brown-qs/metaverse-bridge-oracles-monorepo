@@ -1,6 +1,6 @@
 import { randomBytes } from "crypto";
 import { ethers } from "ethers";
-import { AssetType } from "src/common/enums/AssetType";
+import { AssetType } from "../common/enums/AssetType";
 
 function encodeParameters(types: readonly (string | ethers.utils.ParamType)[], values: readonly any[]) {
     const abi = new ethers.utils.AbiCoder();

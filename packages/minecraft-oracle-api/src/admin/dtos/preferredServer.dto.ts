@@ -18,5 +18,3 @@ export class PreferredServersDto {
     @IsArray()
     preferredServers: PreferredServerDto[]
 }
-
-

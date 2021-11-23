@@ -10,6 +10,9 @@ import { TextureEntity } from '../texture/texture.entity'
 import { stringToStringAssetType } from '../utils/misc'
 import { AssetEntity } from '../asset/asset.entity'
 import { SummonEntity } from '../summon/summon.entity'
+import { InventoryEntity } from '../inventory/inventory.entity'
+import { PlaySessionEntity } from '../playsession/playsession.entity'
+import { PlaySessionStatEntity } from '../playsession/playsessionstat.entity'
 
 config()
 
@@ -25,7 +28,7 @@ async function main () {
             host: process.env.TYPEORM_HOST,
             port: Number.parseInt(process.env.TYPEORM_PORT),
             database: process.env.TYPEORM_DATABASE,
-            entities: [MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity, AssetEntity, SummonEntity],
+            entities: [MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity, AssetEntity, SummonEntity, InventoryEntity, PlaySessionEntity, PlaySessionStatEntity],
             synchronize: false
         })
     } catch (err) {
@@ -59,7 +62,8 @@ async function main () {
             assetAddress: fragments[9],
             assetId: fragments[10],
             assetType: stringToStringAssetType(fragments[11]),
-            multiplier: Number.parseInt(fragments[12])
+            multiplier: Number.parseInt(fragments[12]),
+            mapsTo: fragments[13],
         }
         try {
             const e = connection.manager.create<MaterialEntity>(MaterialEntity, entity)

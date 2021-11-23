@@ -9,12 +9,13 @@ import { UserEntity } from '../user/user.entity';
 import { RecognizedAsset, RecognizedAssetType } from '../config/constants';
 import { ProviderToken } from '../provider/token';
 import { ProfileItemDto, ProfileItemsDto } from './dtos/profileItem.dto';
-import { GameSessionService } from 'src/gamesession/gamesession.service';
+import { GameSessionService } from '../gamesession/gamesession.service';
+import { InventoryService } from 'src/inventory/inventory.service';
 
 @Injectable()
 export class ProfileService {
     constructor(
-        private readonly snapshotService: SnapshotService,
+        private readonly inventoryService: InventoryService,
         private readonly assetService: AssetService,
         private readonly gameSessionService: GameSessionService,
         @Inject(ProviderToken.IMPORTABLE_ASSETS) private importableAssets: RecognizedAsset[],
@@ -22,8 +23,8 @@ export class ProfileService {
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {}
 
-    async getPlayeritems(user: UserEntity): Promise<ProfileItemsDto> {
-        const snapshots = await this.snapshotService.findMany({relations:['material', 'owner'], where: {owner: {uuid: user.uuid}}})
+    async getPlayerItems(user: UserEntity): Promise<ProfileItemsDto> {
+        const snapshots = await this.inventoryService.findMany({relations:['material', 'owner'], where: {owner: {uuid: user.uuid}}})
         
         const resources: ProfileItemDto[] = snapshots.map(snapshot => {
             return {

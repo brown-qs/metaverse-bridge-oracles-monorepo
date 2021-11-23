@@ -20,11 +20,10 @@ import { SnapshotsDto } from './dtos/snapshot.dto';
 import { PlayerTextureMapDto } from './dtos/texturemap.dto';
 import { PermittedMaterials } from './dtos/permitted-material.dto';
 import { GameInProgressDto } from './dtos/gameinprogress.dto';
-import { SharedSecretGuard } from 'src/auth/secret.guard';
+import { SharedSecretGuard } from '../auth/secret.guard';
 import { AreGganbusDto, GganbuDto } from './dtos/gganbu.dto';
 import { ServerIdDto } from './dtos/serverId.dto';
-import { PreferredServerDto } from '../admin/dtos/preferredServer.dto';
-import { ProfileService } from 'src/profile/profile.service';
+import { ProfileService } from '../profile/profile.service';
 
 @ApiTags('game')
 @Controller('game')

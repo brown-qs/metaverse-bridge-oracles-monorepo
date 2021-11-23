@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger"
-import { StringAssetType } from "src/common/enums/AssetType"
+import { StringAssetType } from "../../common/enums/AssetType"
 
 export class MaterialDto {
     @ApiProperty({ description: 'Material name'})
