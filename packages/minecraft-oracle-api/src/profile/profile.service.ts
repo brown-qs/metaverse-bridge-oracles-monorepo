@@ -123,7 +123,8 @@ export class ProfileService {
             preferredServer: user.preferredServer,
             numTicket: user.numTicket,
             numMoonsama: user.numMoonsama,
-            vip: user.vip ?? false
+            vip: user.vip ?? false,
+            blacklisted: user.blacklisted
         }
     }
 

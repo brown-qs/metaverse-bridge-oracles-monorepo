@@ -36,6 +36,7 @@ import { ImportDto } from '../oracle/dtos/import.dto';
 import { SummonDto } from '../oracle/dtos/summon.dto';
 import { CallparamDto } from '../oracle/dtos/callparams.dto';
 import { CommunismDto } from './dtos/communism.dto';
+import { BlacklistDto } from './dtos/blacklist.dto';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -353,6 +354,23 @@ export class AdminController {
             throw new ForbiddenException('Not admin')
         }
         const res = await this.gameService.bank()
+        return res
+    }
+
+    @Put('player/:uuid/blacklist')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Sets blacklist status of a user' })
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    async blacklist(
+        @User() caller: UserEntity,
+        @Param('uuid') uuid: string,
+        @Body() dto: BlacklistDto
+    ): Promise<boolean> {
+        if (caller.role !== UserRole.ADMIN) {
+            throw new ForbiddenException('Not admin')
+        }
+        const res = await this.adminService.blacklist({uuid}, dto.blacklist)
         return res
     }
 }
