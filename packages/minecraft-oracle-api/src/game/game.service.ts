@@ -409,7 +409,7 @@ export class GameService {
         return true
     }
 
-    public async communism(minTimePlayed?: number, averageMultiplier?: number) {
+    public async communism(minTimePlayed?: number, averageMultiplier?: number, serverId='production') {
 
         const mintT = minTimePlayed ?? 2700000
         const averageM = averageMultiplier ?? 1
@@ -453,14 +453,14 @@ export class GameService {
             counter[key] = averageM * counter[key] / distinct 
         })
 
-        this.logger.debug(`Communism:: avereaged values: ${counter}`, this.context)
+        this.logger.debug(`Communism:: final gganbu amounts: ${counter}`, this.context)
 
         const userUuids = Object.keys(users)
         
         for(let i = 0; i< userUuids.length; i++) {
             const uuid = userUuids[i]
             const user = await this.userService.findOne({uuid})
-            const playStats = await this.playSessionStatService.findOne({id: `${uuid}-production`})
+            const playStats = await this.playSessionStatService.findOne({id: `${uuid}-${serverId}`})
             this.logger.debug(`Communism:: ${uuid} played ${playStats?.timePlayed}`, this.context)
 
             const tPlayed = playStats?.timePlayed ? Number.parseFloat(playStats?.timePlayed) :  0

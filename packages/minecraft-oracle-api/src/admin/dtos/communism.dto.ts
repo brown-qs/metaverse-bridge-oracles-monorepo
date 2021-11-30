@@ -7,4 +7,7 @@ export class CommunismDto {
 
     @ApiProperty({ description: 'Gganbu share multiplier. Default: 1'})
     averageMultiplier?: number
+
+    @ApiProperty({ description: 'server ID to check time played for. Default: production'})
+    serverId?: string
 }
