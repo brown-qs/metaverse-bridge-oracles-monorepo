@@ -20,6 +20,7 @@ import { PlaySessionStatService } from '../playsession/playsessionstat.service';
 import { InventoryEntity } from '../inventory/inventory.entity';
 import { InventoryService } from '../inventory/inventory.service';
 import { boolean } from 'fp-ts';
+import { TextureEntity } from 'src/texture/texture.entity';
 
 @Injectable()
 export class GameService {
@@ -168,6 +169,12 @@ export class GameService {
 
     public async getGameInProgress(): Promise<boolean> {
         return !!(await this.gameSessionService.getOngoing())
+    }
+
+    public async getSkins(skinrequest: {auctionOnly: boolean}): Promise<TextureEntity[]> {
+        const skins = skinrequest.auctionOnly ? await this.textureService.findMany({where: {auction: true}}) : await this.textureService.findMany({})
+        console.log(skins, skinrequest.auctionOnly)
+        return skins
     }
 
     public async setGameInProgress(inprogress: boolean): Promise<boolean> {

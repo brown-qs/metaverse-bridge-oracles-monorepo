@@ -1,4 +1,5 @@
 import {
+    IsBoolean,
     IsEnum,
     IsNotEmpty,
     IsString
@@ -50,6 +51,10 @@ export class TextureEntity {
     @IsString()
     @Column()
     textureSignature: string;
+
+    @IsBoolean()
+    @Column({default: false})
+    auction?: boolean;
 
     @ManyToOne(() => UserEntity, (user: UserEntity) => user.textures)
     owner?: UserEntity;

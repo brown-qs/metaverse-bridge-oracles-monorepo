@@ -24,6 +24,8 @@ import { SharedSecretGuard } from '../auth/secret.guard';
 import { AreGganbusDto, GganbuDto } from './dtos/gganbu.dto';
 import { ServerIdDto } from './dtos/serverId.dto';
 import { ProfileService } from '../profile/profile.service';
+import { SkinRequestDto } from './dtos/skins.dto';
+import { TextureEntity } from 'src/texture/texture.entity';
 
 @ApiTags('game')
 @Controller('game')
@@ -157,6 +159,18 @@ export class GameController {
     async getGameInProgress(): Promise<boolean> {
         const inprogress = await this.gameService.getGameInProgress()
         return inprogress
+    }
+
+    @Get('skins')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Fetches skin data' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async skins(
+        @Query() skinrequest: SkinRequestDto,
+    ): Promise<TextureEntity[]> {
+        const skins = await this.gameService.getSkins(skinrequest)
+        return skins
     }
 
     @Put('gganbu')
