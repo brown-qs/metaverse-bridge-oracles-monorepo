@@ -1,6 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import {Injectable} from '@nestjs/common';
-import { FindConditions, FindOneOptions, Repository } from 'typeorm';
+import { FindConditions, FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { TextureEntity } from './texture.entity';
 import { AssetType, StringAssetType } from '../common/enums/AssetType';
 
@@ -43,5 +43,10 @@ export class TextureService {
     public async findOne(conditions?: FindConditions<TextureEntity>, options?: FindOneOptions<TextureEntity>): Promise<TextureEntity> {
         const result: TextureEntity = await this.repository.findOne(conditions, options);
         return result;
+    }
+
+    public async findMany( options?: FindManyOptions<TextureEntity>): Promise<TextureEntity[]> {
+        const results: TextureEntity[] = await this.repository.find(options);
+        return results;
     }
 }
