@@ -105,6 +105,7 @@ export const WOOD_TYPES = [{name: 'OAK_LOG', multiplier: 1}, {name: 'ACACIA_LOG'
 
 export const IRON_TYPES = [{name: 'IRON_INGOT', multiplier: 1}, {name: 'IRON_BLOCK', multiplier: 9}];
 export const GOLD_TYPES = [{name: 'GOLD_INGOT', multiplier: 1}, {name: 'GOLD_BLOCK', multiplier: 9}];
+export const EXP_TYPES = [{name: 'EXP', multiplier: 1}];
 
-export const MATERIAL_TYPES = ['LOG', 'GOLD_BLOCK', 'IRON_BLOCK', 'COBBLESTONE', 'IRON_INGOT', 'GOLD_INGOT', 'DIAMOND', 'DIAMOND_BLOCK'];
+export const MATERIAL_TYPES = ['LOG', 'GOLD_BLOCK', 'IRON_BLOCK', 'COBBLESTONE', 'IRON_INGOT', 'GOLD_INGOT', 'DIAMOND', 'DIAMOND_BLOCK', 'EXP'];
 

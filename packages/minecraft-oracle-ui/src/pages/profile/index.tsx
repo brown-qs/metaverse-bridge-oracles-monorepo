@@ -9,13 +9,14 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Tooltip from '@mui/material/Tooltip';
-import { ChainId, GOLD_TYPES, IRON_TYPES, WOOD_TYPES } from '../../constants';
+import { ChainId, GOLD_TYPES, IRON_TYPES, WOOD_TYPES, EXP_TYPES } from '../../constants';
 
 import { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 
 import Resource1 from "../../assets/images/resource1.png";
 import Resource4 from "../../assets/images/resource4.png";
 import Resource5 from "../../assets/images/resource5.png";
+import ExperienceOrb from "../../assets/images/experience_orb.png";
 import Cobblestone from "../../assets/images/cobblestone.png";
 import { useProfile } from 'hooks/multiverse/useProfile';
 import { useOnChainItems } from 'hooks/multiverse/useOnChainItems';
@@ -53,6 +54,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const onChainResources = onChainItems?.['Moonsama Metaverse Asset Factory'] || []; //Update with live key
 
     //In Game Items
+    // THIS IS FUCKING DISGUSTIN THAT NEEDS FIXING - Kyilkhor
     const inGameItems = useInGameItems();
     const inGameMoonsamas = inGameItems?.moonsamas || [];
     const inGameGoldenTickets = inGameItems?.tickets || [];
@@ -60,11 +62,13 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const inGameResourcesCobblestone: InGameItemWithStatic[] = inGameItems?.resources?.filter(item => item.name === ('COBBLESTONE')) || [];
     const inGameResourcesGold: InGameItemWithStatic[] = inGameItems?.resources?.filter(item => !!GOLD_TYPES.find(x => x.name === item.name)) || [];
     const inGameResourcesIron: InGameItemWithStatic[] = inGameItems?.resources?.filter(item => !!IRON_TYPES.find(x => x.name === item.name)) || [];
+    const inGameResourcesExp: InGameItemWithStatic[] = inGameItems?.resources?.filter(item => !!EXP_TYPES.find(x => x.name === item.name)) || [];
     // const inGameResourcesDiamond = inGameItems?.resources?.filter(item => item.name === 'DIAMOND') || [];
 
     const aggregatedGoldAmount = inGameResourcesGold.reduce((prev, curr) => prev + Number.parseFloat(curr.amount) * (GOLD_TYPES.find(x => x.name === curr.name)?.multiplier ?? 1), 0)
     const aggregatedIronAmount = inGameResourcesIron.reduce((prev, curr) => prev + Number.parseFloat(curr.amount) * (IRON_TYPES.find(x => x.name === curr.name)?.multiplier ?? 1), 0)
     const aggregatedWoodAmount = inGameResourcesWood.reduce((prev, curr) => prev + Number.parseFloat(curr.amount) * (WOOD_TYPES.find(x => x.name === curr.name)?.multiplier ?? 1), 0)
+    const aggregatedExpAmount = inGameResourcesExp.reduce((prev, curr) => prev + Number.parseFloat(curr.amount) * (EXP_TYPES.find(x => x.name === curr.name)?.multiplier ?? 1), 0)
 
     console.log('ingame items', inGameItems, inGameResourcesWood, {aggregatedGoldAmount, aggregatedIronAmount, aggregatedWoodAmount})
 
@@ -398,6 +402,23 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                                 <img src={Resource5} alt="Gold Ingot"/>
                                                             </ListItemAvatar>
                                                             <ListItemText id="gold-ingot" primary="Gold Ingot"/>
+                                                        </ListItemButton>
+                                                    </ListItem>
+                                                )}
+                                                {!!inGameResourcesExp.length && (
+                                                    <ListItem
+                                                        secondaryAction={
+                                                            <>
+                                                                {aggregatedExpAmount}
+                                                            </>
+                                                        }
+                                                        disablePadding
+                                                    >
+                                                        <ListItemButton>
+                                                            <ListItemAvatar>
+                                                                <img src={ExperienceOrb} alt="Experience Orb"/>
+                                                            </ListItemAvatar>
+                                                            <ListItemText id="experience-orb" primary="Experience Orb"/>
                                                         </ListItemButton>
                                                     </ListItem>
                                                 )}
