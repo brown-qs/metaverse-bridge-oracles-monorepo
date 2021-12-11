@@ -4,6 +4,7 @@ import {
     EthClientProvider,
     MicrosoftSetupParamsProvider,
     MetaverseContractProvider,
+    MulticallContractProvider,
     ImportableAssetsProvider,
     EnrapturableAssetsProvider
 } from '.';
@@ -14,6 +15,7 @@ import {
         EthClientProvider,
         MicrosoftSetupParamsProvider,
         MetaverseContractProvider,
+        MulticallContractProvider,
         EnrapturableAssetsProvider,
         ImportableAssetsProvider
     ],
@@ -21,6 +23,7 @@ import {
         OracleWalletProvider,
         EthClientProvider,
         MicrosoftSetupParamsProvider,
+        MulticallContractProvider,
         MetaverseContractProvider,
         EnrapturableAssetsProvider,
         ImportableAssetsProvider

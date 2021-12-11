@@ -37,6 +37,7 @@ import { PlaySessionEntity } from './playsession/playsession.entity';
 import { PlaySessionStatEntity } from './playsession/playsessionstat.entity';
 import { InventoryModule } from './inventory/inventory.module';
 import { InventoryEntity } from './inventory/inventory.entity';
+import { NftModule } from './nft/nft.module';
 
 @Module({
   imports: [
@@ -103,7 +104,8 @@ import { InventoryEntity } from './inventory/inventory.entity';
     SummonModule,
     GameModule,
     AdminModule,
-    OracleModule
+    OracleModule,
+    NftModule
   ],
   controllers: [AppController],
   providers: [AppService],
