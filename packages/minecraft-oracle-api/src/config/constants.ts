@@ -126,8 +126,13 @@ export const METAVERSE_ADDRESSES: {[key: number]: string} = {
   [ChainId.VOLTA]: '0x58df3876BcE94941DE59088c5963781984EF264b',
   [ChainId.MOONRIVER]: '0x59C481548CE7BA13f3288df9f4FCf44a10A589A0'//'0x710ddbaA47A4cCdC85A507a264865260e82c18EE'
 }
+export const MULTICALL_ADDRESSES: {[key: number]: string} = {
+  [ChainId.MOONRIVER]: '0x8B60499C8e99d1218Df15ba6e8f0937e1878b86c'//'0x710ddbaA47A4cCdC85A507a264865260e82c18EE'
+}
 export const CALLDATA_EXPIRATION_MS = 1000 * 60 * 5
 export const CALLDATA_EXPIRATION_THRESHOLD = 1000 * 60 * 1
 
 export const IMPORT_CONFIRM_CRON_INTERVAL_MS = 60 * 1000 // 1 minute
 export const CLEAN_CRON_INTERVAL_MS = 60 * 60 * 1000 // 1 hour
+
+export const IPFS_GATEWAY= 'https://moonsama.mypinata.cloud'
