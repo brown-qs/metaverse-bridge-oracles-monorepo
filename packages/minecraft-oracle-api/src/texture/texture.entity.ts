@@ -54,6 +54,10 @@ export class TextureEntity {
     @Column({nullable: true})
     textureUuid?: string;
 
+    @IsString()
+    @Column({nullable: true})
+    name?: string;
+
     @IsBoolean()
     @Column({default: false})
     auction?: boolean;
