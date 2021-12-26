@@ -2,7 +2,7 @@ import { ApiProperty } from "@nestjs/swagger"
 import { IsBoolean, IsString } from "class-validator"
 
 
-export class ProfileItemDto {
+export class AssetDto {
      
     @ApiProperty({ description: 'Asset name'})
     @IsString()
@@ -37,14 +37,45 @@ export class ProfileItemDto {
     hash?: string
 }
 
-export class ProfileItemsDto {
+export class TextureDto {
 
-    @ApiProperty({ description: 'Imported or enraptured tickets', isArray: true})
-    tickets: ProfileItemDto[]
+    @ApiProperty({ description: 'Asset address'})
+    @IsString()
+    assetAddress: string
 
-    @ApiProperty({ description: 'Imported moonsamas', isArray: true})
-    moonsamas: ProfileItemDto[]
+    @ApiProperty({ description: 'Asset id, aka token id'})
+    @IsString()
+    assetId: string
+
+    @ApiProperty({ description: 'Asset type, aka token type'})
+    @IsString()
+    assetType: string
+
+    @ApiProperty({ description: 'Texture data'})
+    @IsString()
+    textureData: string
+
+    @ApiProperty({ description: 'Texture signature'})
+    @IsString()
+    textureSignature: string
+
+    @ApiProperty({ description: 'Whether the skin can be selected.'})
+    @IsBoolean()
+    selectable: boolean
+
+    @ApiProperty({ description: 'Whether the skin is the currently equipped one.'})
+    @IsBoolean()
+    equipped: boolean
+}
+
+export class ThingsDto {
+
+    @ApiProperty({ description: 'Textures available', isArray: true})
+    assets: AssetDto[]
+    
+    @ApiProperty({ description: 'Available textures of the user', isArray: true})
+    textures: TextureDto[]
 
     @ApiProperty({ description: 'In-game resources available to summon', isArray: true })
-    resources: ProfileItemDto[]
+    resources: AssetDto[]
 }

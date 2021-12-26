@@ -108,7 +108,7 @@ export class NftService {
             return []
         }
 
-        console.log(uris)
+        //console.log(uris)
         const promises = uris.map(async (uri) => {
             //const rawmeta = await cb<TokenMeta>(uri?.tokenURI, false);
             // FIXME fucking black token

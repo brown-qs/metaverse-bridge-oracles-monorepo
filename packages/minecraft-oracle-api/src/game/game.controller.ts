@@ -17,7 +17,7 @@ import { GameService } from './game.service';
 import { UserService } from '../user/user.service';
 import { ProfileDto } from '../profile/dtos/profile.dto';
 import { SnapshotsDto } from './dtos/snapshot.dto';
-import { PlayerTextureMapDto } from './dtos/texturemap.dto';
+import { PlayerSkinDto } from './dtos/texturemap.dto';
 import { PermittedMaterials } from './dtos/permitted-material.dto';
 import { GameInProgressDto } from './dtos/gameinprogress.dto';
 import { SharedSecretGuard } from '../auth/secret.guard';
@@ -25,7 +25,7 @@ import { AreGganbusDto, GganbuDto } from './dtos/gganbu.dto';
 import { ServerIdDto } from './dtos/serverId.dto';
 import { ProfileService } from '../profile/profile.service';
 import { SkinRequestDto } from './dtos/skins.dto';
-import { TextureEntity } from 'src/texture/texture.entity';
+import { TextureEntity } from '../texture/texture.entity';
 
 @ApiTags('game')
 @Controller('game')
@@ -52,18 +52,18 @@ export class GameController {
         return this.profileService.userProfile(user)
     }
 
-    @Get('player/:uuid/textures')
+    @Get('player/:uuid/skins')
     @HttpCode(200)
-    @ApiOperation({ summary: 'Fetches player textures' })
+    @ApiOperation({ summary: 'Fetches player skins' })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
-    async textures(@Param('uuid') uuid: string): Promise<PlayerTextureMapDto> {
+    async textures(@Param('uuid') uuid: string): Promise<PlayerSkinDto[]> {
         const user = await this.userService.findByUuid(uuid)
         if (!user) {
             throw new UnprocessableEntityException('Player was not found')
         }
-        const textures = await this.gameService.getTextures(user)
-        return textures
+        const skins = await this.gameService.getUserSkins(user)
+        return skins
     }
 
     @Get('player/:uuid/allowed')
@@ -169,7 +169,7 @@ export class GameController {
     async skins(
         @Query() skinrequest: SkinRequestDto,
     ): Promise<TextureEntity[]> {
-        const skins = await this.gameService.getSkins(skinrequest)
+        const skins = await this.gameService.getTextures(skinrequest)
         return skins
     }
 

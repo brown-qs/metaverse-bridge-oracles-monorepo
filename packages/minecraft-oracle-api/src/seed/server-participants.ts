@@ -43,7 +43,7 @@ async function main () {
     const assets = await connection.manager.find<AssetEntity>(AssetEntity, { where: {pendingIn: false}, relations: ['owner']})
     const timelogs = await connection.manager.find<PlaySessionStatEntity>(PlaySessionStatEntity, {where: {id: Like(`%${serverId}%`)}})
 
-    console.log(timelogs.length, assets.length)
+    //console.log(timelogs.length, assets.length)
     
     let outcome: string = 'name,address\n'
     let missing: string = ''

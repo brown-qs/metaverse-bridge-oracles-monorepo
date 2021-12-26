@@ -1,11 +1,10 @@
 import { TextureType } from "../../texture/texturetype.enum";
 
-export type PlayerTextureMapDto = {
-    [key: string]: {
-        textureData: string
-        textureSignature: string
-        type: TextureType
-        accessories: string[] | undefined
-        assetId: string
-    }
+export type PlayerSkinDto = {
+    textureData: string
+    textureSignature: string
+    type: TextureType
+    accessories: string[] | undefined
+    assetId: string
+    equipped: boolean
 }

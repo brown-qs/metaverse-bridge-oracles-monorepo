@@ -6,12 +6,12 @@ import {
 } from 'class-validator';
 import { Column, Entity, Index, JoinColumn, OneToMany, OneToOne, PrimaryColumn } from 'typeorm';
 import { UserRole } from '../common/enums/UserRole';
-import { TextureEntity } from '../texture/texture.entity';
 import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
 import { AssetEntity } from '../asset/asset.entity';
 import { SummonEntity } from '../summon/summon.entity';
 import { PlaySessionEntity } from '../playsession/playsession.entity';
 import { InventoryEntity } from '../inventory/inventory.entity';
+import { SkinEntity } from '../skin/skin.entity';
 
 @Entity()
 @Index(['uuid'], {unique: true})
@@ -87,8 +87,8 @@ export class UserEntity {
     @OneToMany(() => InventoryEntity, (iitem) => iitem.owner)
     inventoryItems?: InventoryEntity[];
 
-    @OneToMany(() => TextureEntity, (skin) => skin.owner)
-    textures?: TextureEntity[];
+    @OneToMany(() => SkinEntity, (skin) => skin.owner)
+    skins?: SkinEntity[];
 
     @OneToMany(() => PlaySessionEntity, (session) => session.player)
     playSessions?: PlaySessionEntity[];

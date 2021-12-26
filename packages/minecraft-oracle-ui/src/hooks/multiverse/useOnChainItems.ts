@@ -35,7 +35,7 @@ export interface UserCollection {
   }[]
 }
 
-export const useOnChainItems = () => {
+export const useOnChainItems = (trigger: string | undefined = undefined) => {
   const { chainId, account } = useActiveWeb3React();
   const blocknumber = useBlockNumber()
   const staticCallback = useTokenStaticDataCallbackArray();
@@ -153,12 +153,12 @@ export const useOnChainItems = () => {
       await Promise.all(fetches)
       setOnChainItems(result)
     },
-    [chainId, blocknumber, account]
+    [chainId, blocknumber, account, trigger]
   );
 
   useEffect(() => {
     fetchUserCollection()
-  }, [chainId, blocknumber, account])
+  }, [chainId, blocknumber, account, trigger])
 
   return onChainItems;
 };

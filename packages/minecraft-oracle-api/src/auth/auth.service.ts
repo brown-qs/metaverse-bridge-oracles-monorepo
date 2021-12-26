@@ -9,6 +9,10 @@ import { MicrosoftSetupParams } from '../provider';
 import { UserEntity } from '../user/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { CacheService } from '../cache/cache.service';
+import { SkinService } from '../skin/skin.service';
+import { SkinEntity } from '../skin/skin.entity';
+import { TextureService } from '../texture/texture.service';
+import { AssetType, StringAssetType } from 'src/common/enums/AssetType';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +21,8 @@ export class AuthService {
 
     constructor(
         private userService: UserService,
+        private textureService: TextureService,
+        private skinService: SkinService,
         private configService: ConfigService,
         private cacheService: CacheService,
         private jwtService: JwtService,
@@ -49,7 +55,7 @@ export class AuthService {
 
         let account = new MicrosoftAccount();
 
-        console.log(account);
+        this.logger.log(`authLogin: ${account}`, this.context);
 
         const successfulAuthRedirect = this.configService.get<string>('app.redirect')
 
@@ -58,8 +64,8 @@ export class AuthService {
             this.microsoftSetupParams.appSecret,
             this.microsoftSetupParams.redirectUrl
         )
+        
         let accessToken: string
-
         try {
             accessToken = await account.authFlow(code)
         } catch (err: any) {
@@ -79,11 +85,11 @@ export class AuthService {
             throw new UnprocessableEntityException('User profile could not be fetched.')
         }
 
-        if (account.uuid && account.username && account.ownership) {
-            const userData = {
+        if (!!account.uuid && !!account.username) {
+            const userData: UserEntity = {
                 uuid: account.uuid,
                 userName: account.username,
-                hasGame: account.ownership ?? null
+                hasGame: account.ownership ?? false
             }
             let user: UserEntity
             try {
@@ -95,16 +101,34 @@ export class AuthService {
             this.logger.log(`Account: ${JSON.stringify(account)}`, this.context);
 
             const jwt = this.generateJwtToken(user.uuid, user.userName);
-            const redirectLink = `${successfulAuthRedirect}/${jwt}`
+            const redirectLink = `${successfulAuthRedirect}/${jwt}`;
             
-            /*
-            if(!await this.cacheService.createSession(jwt, user.uuid)) {
-                this.logger.error(`authLogin: user was created but caching was unsuccessful`, JSON.stringify({uuid: user.uuid, jwt}), this.context)
-                throw new UnprocessableEntityException(`Unsuccessful caching for ${JSON.stringify({uuid: user.uuid, jwt})}`)
-            }
-            */
+            // check default skins
+            (async () => {
+                try {
+                    const userFull = await this.userService.findOne({uuid: user.uuid}, {relations: ['skins']})
+                    if (!userFull.skins || userFull.skins.length < 2) {
+                        await this.skinService.createMultiple([
+                            {
+                                id: SkinEntity.toId(user.uuid, '0x0', '0'),
+                                owner: user,
+                                equipped: true,
+                                texture: await this.textureService.findOne({assetAddress: '0x0', assetId: '0', assetType: StringAssetType.NONE})
+                            },
+                            {
+                                id: SkinEntity.toId(user.uuid, '0x0', '1'),
+                                owner: user,
+                                equipped: false,
+                                texture: await this.textureService.findOne({assetAddress: '0x0', assetId: '1', assetType: StringAssetType.NONE})
+                            }
+                        ])
+                    }
+                } catch (error) {
+                    this.logger.warn(`authLogin:: error trying to set default skins for user ${user.uuid}`, this.context)
+                }
+            })()
 
-            this.logger.log(`authLogin:: successful login for user (${user.uuid}, ${user.userName}). Redirect link: ${redirectLink}`)
+            this.logger.log(`authLogin:: successful login for user (${user.uuid}, ${user.userName}). Redirect link: ${redirectLink}`, this.context)
 
             return {
                 jwt,
@@ -116,8 +140,5 @@ export class AuthService {
             this.logger.error('authLogin:: user uuid and userName was not received', null, this.context)
             throw new UnprocessableEntityException('User profile could not be fetched.')
         }
-    }
-
-    public async passwordLoginMicrosoft(username: string, password: string) {
     }
 }

@@ -136,5 +136,18 @@ export const useStyles = makeStyles((theme) => ({
     },
     itemImage: {
         width: '32px'
+    },
+    skinComponent: {
+        paddingLeft: '3px',
+        paddingRight: '3px',
+        '&.selected': {
+            width: '140px',
+            height: '100%',
+            border: 'solid',
+            //background: '#710021 !important',
+            borderColor: '#710021 !important',
+            alignContent: 'center',
+            justifyContent: 'center'
+        },
     }
 }));

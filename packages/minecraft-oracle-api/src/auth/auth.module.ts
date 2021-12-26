@@ -9,6 +9,8 @@ import { MicrosoftSetupParamsProvider } from '../provider';
 import { CacheModule } from '../cache/cache.module';
 import { Module } from '@nestjs/common';
 import { SecretModule } from '../secret/secret.module';
+import { SkinModule } from '../skin/skin.module';
+import { TextureModule } from '../texture/texture.module';
 
 @Module({
     imports: [
@@ -16,6 +18,8 @@ import { SecretModule } from '../secret/secret.module';
         SecretModule,
         CacheModule,
         PassportModule,
+        TextureModule,
+        SkinModule,
         JwtModule.registerAsync({
             useFactory: async (configService: ConfigService) => {
                 const expiration = configService.get<number>('jwt.expiration')

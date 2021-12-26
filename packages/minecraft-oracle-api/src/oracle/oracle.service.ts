@@ -20,6 +20,8 @@ import { Mutex, MutexInterface } from 'async-mutex';
 import { UserRole } from '../common/enums/UserRole';
 import { InventoryService } from '../inventory/inventory.service';
 import { InventoryEntity } from 'src/inventory/inventory.entity';
+import { SkinService } from 'src/skin/skin.service';
+import { SkinEntity } from 'src/skin/skin.entity';
 
 @Injectable()
 export class OracleService {
@@ -30,6 +32,7 @@ export class OracleService {
     constructor(
         private readonly userService: UserService,
         private readonly textureService: TextureService,
+        private readonly skinService: SkinService,
         private readonly gameSessionService: GameSessionService,
         private readonly assetService: AssetService,
         private readonly inventoryService: InventoryService,
@@ -318,28 +321,37 @@ export class OracleService {
         const recognizedAsset = this.importableAssets.find(x => x.address === assetEntry.assetAddress.toLowerCase())
         console.log(recognizedAsset)
         console.log(user.uuid, hash, RecognizedAssetType.MOONSAMA.valueOf(), RecognizedAssetType.TICKET.valueOf(), recognizedAsset?.id, JSON.stringify(mAsset))
+
+        // assign skin if asset unlocks one
+        const texture = await this.textureService.findOne({ assetAddress: assetEntry.assetAddress.toLowerCase(), assetId: assetEntry.assetId })
+        if (!!texture) {
+            this.logger.log('ImportConfirm: Moonsama, texture found', this.context)
+            await this.skinService.create({
+                id: SkinEntity.toId(user.uuid, texture.assetAddress, texture.assetId),
+                owner: user,
+                equipped: false,
+                texture   
+            })
+        } else {
+            this.logger.warn('ImportConfirm: Moonsama but no texture found!!!', this.context)
+        }
+
+        // if asset is moonsama, user can play
         if (!!recognizedAsset && recognizedAsset.type.valueOf() === RecognizedAssetType.MOONSAMA.valueOf() && (recognizedAsset.id === undefined || recognizedAsset.id === mAsset.asset.assetId.toString())) {
             this.logger.log(`ImportConfirm: setting moonsama for user ${user.uuid}: ${hash}`, this.context)
-            const texture = await this.textureService.findOne({ assetAddress: assetEntry.assetAddress.toLowerCase(), assetId: assetEntry.assetId }, { relations: ['owner'] })
-            if (!!texture) {
-                this.logger.log('ImportConfirm: Moonsama, texture found', this.context)
-                texture.owner = user
-                await this.textureService.create(texture)
-            } else {
-                this.logger.warn('ImportConfirm: Moonsama but no texture found!!!', this.context)
-            }
             user.allowedToPlay = true
             user.numMoonsama = (user.numMoonsama ?? 0) + 1
             user.role = user.role?.valueOf() === UserRole.NONE.valueOf() ? UserRole.PLAYER : user.role
-            await this.userService.update(user.uuid, { allowedToPlay: user.allowedToPlay, numTicket: user.numTicket, role: user.role })
+            await this.userService.update(user.uuid, { allowedToPlay: user.allowedToPlay, role: user.role, numMoonsama: user.numMoonsama })
         }
 
+        // if asset is VIP ticket, user can play
         if (!!recognizedAsset && recognizedAsset.type.valueOf() === RecognizedAssetType.TICKET.valueOf() && (recognizedAsset.id === undefined || recognizedAsset.id === mAsset.asset.assetId.toString())) {
             this.logger.log(`ImportConfirm: setting ticket for user ${user.uuid}: ${hash}`, this.context)
             user.allowedToPlay = true
             user.numTicket = (user.numTicket ?? 0) + 1
             user.role = user.role?.valueOf() === UserRole.NONE.valueOf() ? UserRole.PLAYER : user.role
-            await this.userService.update(user.uuid, { allowedToPlay: user.allowedToPlay, numTicket: user.numTicket, role: user.role })
+            await this.userService.update(user.uuid, { allowedToPlay: user.allowedToPlay, role: user.role, numTicket: user.numTicket })
         }
 
         const finalentry = await this.assetService.create({ ...assetEntry, pendingIn: false })
@@ -422,10 +434,11 @@ export class OracleService {
         const recognizedAsset = this.importableAssets.find(x => x.address === assetEntry.assetAddress.toLowerCase())
 
         if (!!recognizedAsset && recognizedAsset.type.valueOf() === RecognizedAssetType.MOONSAMA.valueOf() && (recognizedAsset.id === undefined || recognizedAsset.id === assetEntry.assetId.toString())) {
-            const texture = await this.textureService.findOne({ assetAddress: assetEntry.assetAddress, assetId: assetEntry.assetId, assetType: assetEntry.assetType })
-            if (!!texture) {
-                texture.owner = null
-                await this.textureService.create(texture)
+            
+            // if it was a moonsama we remove the skin
+            const skin = await this.skinService.findOne({id: SkinEntity.toId(user.uuid, assetEntry.assetAddress, assetEntry.assetId)})
+            if (!!skin) {
+                await this.skinService.remove(skin)
             }
             user.numMoonsama = (user.numMoonsama ?? 0) > 0 ? user.numMoonsama - 1 : 0
             user.allowedToPlay = (user.numTicket ?? 0) > 0 || (user.numMoonsama ?? 0) > 0
@@ -443,9 +456,7 @@ export class OracleService {
             }
             await this.userService.create(user)
         }
-
         await this.assetService.remove(assetEntry)
-
         return true
     }
 
