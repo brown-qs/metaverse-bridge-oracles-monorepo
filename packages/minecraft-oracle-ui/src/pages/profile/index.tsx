@@ -30,7 +30,6 @@ export type ProfilePagePropTypes = {
     authData: AuthData
 };
 
-
 const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
     const { account, chainId } = useActiveWeb3React()
@@ -116,7 +115,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                     className={`${skinComponent} ${value.equipped ? 'selected' : ''}`}
                                     gridRow='1'
                                 >
-                                    {value.coverURL && <Tooltip placement='left' title={`${skinLabel?.[value.assetId]?.label ?? skinLabel?.label ?? 'Available in-game skin'}${value.assetAddress !== '0x0' ? ` Because you imported ${skinLabel?.name} #${value.assetId}`: ''}`}>
+                                    {value.coverURL && <Tooltip placement='left' title={`${skinLabel?.[value.assetId]?.label ?? skinLabel?.label ?? 'Available in-game skin'}${value.assetAddress !== '0x0' ? ` Because you imported ${value.name} #${value.assetId}`: ''}`}>
                                         <a target='_blank' href={`${value.renderURL ? `https://minerender.org/embed/skin/?skin=${value.renderURL}` : value.coverURL}`}>
                                             <Media uri={value.coverURL} className={itemImage} style={{ marginTop: `${value.equipped ? 'none' : '15px'}` }} />
                                         </a>
