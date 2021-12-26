@@ -24,6 +24,7 @@ import { countRecognizedAssets } from 'utils';
 import { useAssetDialog } from '../../hooks/useAssetDialog/useAssetDialog';
 import { useCallbackSkinEquip } from '../../hooks/multiverse/useCallbackSkinEquip';
 import { useState } from 'react';
+import { SKIN_LABELS } from '../../constants/skins';
 
 export type ProfilePagePropTypes = {
     authData: AuthData
@@ -105,6 +106,8 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
                             console.log('SKIN', value)
 
+                            const skinLabel = SKIN_LABELS[value.assetAddress.toLowerCase()]
+
                             return (
                                 <Stack
                                     direction={{ xs: 'column', sm: 'column' }}
@@ -113,7 +116,11 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                     className={`${skinComponent} ${value.equipped ? 'selected' : ''}`}
                                     gridRow='1'
                                 >
-                                    {value.coverURL && <a target='_blank' href={`${value.renderURL ? `https://minerender.org/embed/skin/?skin=${value.renderURL}` : value.coverURL }`}><Media uri={value.coverURL} className={itemImage} style={{ marginTop: `${value.equipped ? 'none' : '15px'}` }} /></a>}
+                                    {value.coverURL && <Tooltip placement='left' title={`${skinLabel?.[value.assetId]?.label ?? skinLabel?.label ?? 'Available in-game skin'}${value.assetAddress !== '0x0' ? ` Because you imported ${skinLabel?.name} #${value.assetId}`: ''}`}>
+                                        <a target='_blank' href={`${value.renderURL ? `https://minerender.org/embed/skin/?skin=${value.renderURL}` : value.coverURL}`}>
+                                            <Media uri={value.coverURL} className={itemImage} style={{ marginTop: `${value.equipped ? 'none' : '15px'}` }} />
+                                        </a>
+                                    </Tooltip>}
                                     {!value.equipped ? <Button
                                         className={transferButtonSmall}
                                         disabled={value.equipped}
@@ -166,7 +173,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                         <Media uri={value?.meta?.image} className={itemImage} />
                                                     </ListItemAvatar>
                                                     <ListItemText primary={value?.meta?.name ?? `${value.assetAddress} ${value.assetId}`} />
-                                                    <Tooltip title={'Your exported asset will go back to the sender address you imported from.'}>
+                                                    <Tooltip title={'Your exported asset will go back to the sender address you imported from. Associated skin wil be unavailable.'}>
                                                         <Button
                                                             className={transferButtonSmall}
                                                             onClick={() => {
