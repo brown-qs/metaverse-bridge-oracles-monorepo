@@ -56,9 +56,10 @@ async function main () {
             assetId: fragments[1],
             assetAddress: fragments[2],
             type: TextureType.SKIN,
-            textureData: fragments[4],
-            textureSignature: fragments[5],
-            auction: true
+            name: fragments[4],
+            auction: fragments[5] === 'true',
+            textureData: fragments[6],
+            textureSignature: fragments[7]       
         }
         try {
             const e = connection.manager.create<TextureEntity>(TextureEntity, entity)
@@ -70,7 +71,11 @@ async function main () {
         return undefined
     })
 
+
+
     await Promise.all(jobs)
+
+    const success = await connection.manager.update<TextureEntity>(TextureEntity, {assetAddress: '0xb654611f84a8dc429ba3cb4fda9fad236c505a1a'}, {name: 'Moonsama'})
 
     //const entities = await connection.manager.find<TextureEntity>(TextureEntity, {relations: ['snapshots']})
 
