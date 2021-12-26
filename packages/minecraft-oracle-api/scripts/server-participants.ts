@@ -1,15 +1,15 @@
 import { Connection, createConnection, getConnection, Like} from 'typeorm'
 
 import {config} from 'dotenv'
-import { AssetEntity } from '../asset/asset.entity'
-import { MaterialEntity } from '../material/material.entity';
-import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
-import { SummonEntity } from '../summon/summon.entity';
-import { TextureEntity } from '../texture/texture.entity';
-import { UserEntity } from '../user/user.entity';
-import { PlaySessionEntity } from '../playsession/playsession.entity';
-import { PlaySessionStatEntity } from '../playsession/playsessionstat.entity';
-import { InventoryEntity } from '../inventory/inventory.entity';
+import { AssetEntity } from '../src/asset/asset.entity'
+import { MaterialEntity } from '../src/material/material.entity';
+import { SnapshotItemEntity } from '../src/snapshot/snapshotItem.entity';
+import { SummonEntity } from '../src/summon/summon.entity';
+import { TextureEntity } from '../src/texture/texture.entity';
+import { UserEntity } from '../src/user/user.entity';
+import { PlaySessionEntity } from '../src/playsession/playsession.entity';
+import { PlaySessionStatEntity } from '../src/playsession/playsessionstat.entity';
+import { InventoryEntity } from '../src/inventory/inventory.entity';
 import fs from 'fs'
 
 config()

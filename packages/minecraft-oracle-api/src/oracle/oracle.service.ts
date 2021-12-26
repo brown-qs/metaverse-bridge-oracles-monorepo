@@ -19,9 +19,9 @@ import { AssetEntity } from '../asset/asset.entity';
 import { Mutex, MutexInterface } from 'async-mutex';
 import { UserRole } from '../common/enums/UserRole';
 import { InventoryService } from '../inventory/inventory.service';
-import { InventoryEntity } from 'src/inventory/inventory.entity';
-import { SkinService } from 'src/skin/skin.service';
-import { SkinEntity } from 'src/skin/skin.entity';
+import { InventoryEntity } from '../inventory/inventory.entity';
+import { SkinService } from '../skin/skin.service';
+import { SkinEntity } from '../skin/skin.entity';
 
 @Injectable()
 export class OracleService {
@@ -438,7 +438,10 @@ export class OracleService {
             // if it was a moonsama we remove the skin
             const skin = await this.skinService.findOne({id: SkinEntity.toId(user.uuid, assetEntry.assetAddress, assetEntry.assetId)})
             if (!!skin) {
-                await this.skinService.remove(skin)
+                const removed = await this.skinService.remove(skin)
+                if (removed.equipped) {
+                    await this.skinService.update({id: SkinEntity.toId(user.uuid, '0x0', '0')}, {equipped: true})
+                }
             }
             user.numMoonsama = (user.numMoonsama ?? 0) > 0 ? user.numMoonsama - 1 : 0
             user.allowedToPlay = (user.numTicket ?? 0) > 0 || (user.numMoonsama ?? 0) > 0
