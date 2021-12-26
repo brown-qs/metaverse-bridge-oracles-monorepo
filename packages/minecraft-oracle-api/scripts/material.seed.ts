@@ -1,18 +1,18 @@
 import * as fs from 'fs'
 
-import { MaterialEntity } from '../material/material.entity'
+import { MaterialEntity } from '../src/material/material.entity'
 import { Connection, createConnection, getConnection} from 'typeorm'
 
 import {config} from 'dotenv'
-import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity'
-import { UserEntity } from '../user/user.entity'
-import { TextureEntity } from '../texture/texture.entity'
-import { stringToStringAssetType } from '../utils/misc'
-import { AssetEntity } from '../asset/asset.entity'
-import { SummonEntity } from '../summon/summon.entity'
-import { InventoryEntity } from '../inventory/inventory.entity'
-import { PlaySessionEntity } from '../playsession/playsession.entity'
-import { PlaySessionStatEntity } from '../playsession/playsessionstat.entity'
+import { SnapshotItemEntity } from '../src/snapshot/snapshotItem.entity'
+import { UserEntity } from '../src/user/user.entity'
+import { TextureEntity } from '../src/texture/texture.entity'
+import { stringToStringAssetType } from '../src/utils/misc'
+import { AssetEntity } from '../src/asset/asset.entity'
+import { SummonEntity } from '../src/summon/summon.entity'
+import { InventoryEntity } from '../src/inventory/inventory.entity'
+import { PlaySessionEntity } from '../src/playsession/playsession.entity'
+import { PlaySessionStatEntity } from '../src/playsession/playsessionstat.entity'
 
 config()
 

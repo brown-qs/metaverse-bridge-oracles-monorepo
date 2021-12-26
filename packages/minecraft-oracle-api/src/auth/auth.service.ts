@@ -12,7 +12,7 @@ import { CacheService } from '../cache/cache.service';
 import { SkinService } from '../skin/skin.service';
 import { SkinEntity } from '../skin/skin.entity';
 import { TextureService } from '../texture/texture.service';
-import { AssetType, StringAssetType } from 'src/common/enums/AssetType';
+import { AssetType, StringAssetType } from '../common/enums/AssetType';
 
 @Injectable()
 export class AuthService {
