@@ -26,6 +26,7 @@ import { ServerIdDto } from './dtos/serverId.dto';
 import { ProfileService } from '../profile/profile.service';
 import { SkinRequestDto } from './dtos/skins.dto';
 import { TextureEntity } from '../texture/texture.entity';
+import { SkinselectDto } from 'src/profile/dtos/skinselect.dto';
 
 @ApiTags('game')
 @Controller('game')
@@ -64,6 +65,23 @@ export class GameController {
         }
         const skins = await this.gameService.getUserSkins(user)
         return skins
+    }
+
+    @Put('player/:uuid/skin')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Sets active user skin.' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async setUserSkin(
+        @Param('uuid') uuid: string,
+        @Body() dto: SkinselectDto
+    ): Promise<boolean> {
+        const user = await this.userService.findByUuid(uuid)
+        if (!user) {
+            throw new UnprocessableEntityException('Player was not found')
+        }
+        const success = await this.profileService.skinSelect(user, dto)
+        return success
     }
 
     @Get('player/:uuid/allowed')
