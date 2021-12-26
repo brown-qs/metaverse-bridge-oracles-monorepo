@@ -7,12 +7,12 @@ import { ProviderModule } from '../provider/provider.module';
 import { SecretModule } from '../secret/secret.module';
 import { SummonModule } from '../summon/summon.module';
 import { MaterialModule } from '../material/material.module';
-import { SnapshotModule } from '../snapshot/snapshot.module';
 import { TextureModule } from '../texture/texture.module';
 import { UserModule } from '../user/user.module';
 import { ProfileController } from './profile.controller';
 import { ProfileService } from './profile.service';
-import { InventoryModule } from 'src/inventory/inventory.module';
+import { InventoryModule } from '../inventory/inventory.module';
+import { SkinModule } from '../skin/skin.module';
 
 @Module({
     imports: [
@@ -31,6 +31,7 @@ import { InventoryModule } from 'src/inventory/inventory.module';
         UserModule,
         SecretModule,
         TextureModule,
+        SkinModule,
         MaterialModule,
         InventoryModule,
         GameSessionModule,

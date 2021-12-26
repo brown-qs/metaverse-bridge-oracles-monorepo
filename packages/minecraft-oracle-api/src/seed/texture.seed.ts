@@ -30,7 +30,7 @@ async function main () {
             host: process.env.TYPEORM_HOST,
             port: Number.parseInt(process.env.TYPEORM_PORT),
             database: process.env.TYPEORM_DATABASE,
-            entities: [MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity, SkinEntity, AssetEntity, SummonEntity, InventoryEntity, PlaySessionEntity, PlaySessionStatEntity],
+            entities: [MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity, AssetEntity, SummonEntity, InventoryEntity, PlaySessionEntity, PlaySessionStatEntity, SkinEntity],
             synchronize: true
         })
     } catch (err) {
@@ -41,7 +41,7 @@ async function main () {
         connection = await connection.connect()
     }
 
-    const materials = fs.readFileSync(__dirname + '/skins.csv').toString().split("\n").slice(1);
+    const materials = fs.readFileSync(__dirname + '/textures.csv').toString().split("\n").slice(1);
 
     const jobs = materials.map(async (material) => {
         if (!material) {
@@ -53,12 +53,13 @@ async function main () {
         }
         const entity: TextureEntity = {
             assetType: stringToStringAssetType(fragments[0]),
-            assetId: fragments[1],
-            assetAddress: fragments[2],
+            assetAddress: fragments[1].slice(1).replace('"', ""),
+            assetId: fragments[2].slice(1).replace('"', ""),
+            accessories: fragments[3].slice(1).replace('"', "").slice(1).replace('}', "").split('|'),
             type: TextureType.SKIN,
-            textureData: fragments[4],
-            textureSignature: fragments[5],
-            auction: true
+            textureData: fragments[5],
+            textureSignature: fragments[6],
+            auction: fragments[8] === 'true'
         }
         try {
             const e = connection.manager.create<TextureEntity>(TextureEntity, entity)

@@ -1,9 +1,11 @@
 import {
+    Body,
     Controller,
     Get,
     HttpCode,
     Inject,
     Param,
+    Put,
     UnprocessableEntityException,
     UseGuards
 } from '@nestjs/common';
@@ -16,7 +18,8 @@ import { ProfileDto } from './dtos/profile.dto';
 import { User } from '../utils/decorators';
 import { UserEntity } from '../user/user.entity';
 import { ProfileService } from '../profile/profile.service';
-import { ProfileItemsDto } from '../profile/dtos/profileItem.dto';
+import { ThingsDto } from './dtos/things.dto';
+import { SkinselectDto } from './dtos/skinselect.dto';
 
 
 @ApiTags('user')
@@ -47,11 +50,10 @@ export class ProfileController {
     @ApiOperation({ summary: 'User resources available to summon from the Metaverse' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    async resources(@User() user: UserEntity): Promise<ProfileItemsDto> {
-        return this.profileService.getPlayerItems(user)   
+    async resources(@User() user: UserEntity): Promise<ThingsDto> {
+        return this.profileService.getPlayerItems(user)
     }
 
-    
     @Get('verifyjwt/:jwttoken')
     @HttpCode(200)
     @ApiModelProperty()
@@ -73,5 +75,15 @@ export class ProfileController {
     async getGameInProgress(): Promise<boolean> {
         const inprogress = await this.profileService.getGameInProgress()
         return inprogress
+    }
+
+    @Put('skin')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Sets active user skin.' })
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    async skinselect(@User() user: UserEntity, @Body() dto: SkinselectDto): Promise<boolean> {
+        const success = await this.profileService.skinSelect(user, dto)
+        return success
     }
 }

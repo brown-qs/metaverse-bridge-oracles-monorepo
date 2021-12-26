@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { Button, Grid } from '@material-ui/core';
 import Stack from '@mui/material/Stack';
 import { Header } from 'ui';
@@ -9,26 +8,22 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Tooltip from '@mui/material/Tooltip';
-import { ChainId, GOLD_TYPES, IRON_TYPES, WOOD_TYPES, EXP_TYPES } from '../../constants';
 
 import { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 
-import Resource1 from "../../assets/images/resource1.png";
-import Resource4 from "../../assets/images/resource4.png";
-import Resource5 from "../../assets/images/resource5.png";
-import ExperienceOrb from "../../assets/images/experience_orb.png";
-import Cobblestone from "../../assets/images/cobblestone.png";
 import { useProfile } from 'hooks/multiverse/useProfile';
 import { useOnChainItems } from 'hooks/multiverse/useOnChainItems';
-import { InGameItemWithStatic, useInGameItems } from 'hooks/multiverse/useInGameItems';
+import { InGameTexture, useInGameItems } from 'hooks/multiverse/useInGameItems';
 import { useAccountDialog, useActiveWeb3React, useImportDialog } from 'hooks';
 import { useExportDialog } from 'hooks/useExportDialog/useExportDialog';
 import { useSummonDialog } from 'hooks/useSummonDialog/useSummonDialog';
 import { stringToStringAssetType } from 'utils/subgraph';
 import { Fraction } from 'utils/Fraction';
 import { Media } from '../../components/Media/Media';
-import { getExplorerLink } from 'utils';
-import { useAssetDialog } from 'hooks/useAssetDialog/useAssetDialog';
+import { countRecognizedAssets } from 'utils';
+import { useAssetDialog } from '../../hooks/useAssetDialog/useAssetDialog';
+import { useCallbackSkinEquip } from '../../hooks/multiverse/useCallbackSkinEquip';
+import { useState } from 'react';
 
 export type ProfilePagePropTypes = {
     authData: AuthData
@@ -37,9 +32,13 @@ export type ProfilePagePropTypes = {
 
 const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
-    const {account, chainId} = useActiveWeb3React()
+    const { account, chainId } = useActiveWeb3React()
     const profile = useProfile();
     const { setAccountDialogOpen } = useAccountDialog();
+
+    const [fetchtrigger, setFetchtrigger] = useState<string | undefined>(undefined)
+
+    const callbackSkinEquip = useCallbackSkinEquip()
 
     // Dialogs
     const { setImportDialogOpen, setImportDialogData } = useImportDialog()
@@ -54,23 +53,12 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const onChainResources = onChainItems?.['Moonsama Metaverse Asset Factory'] || []; //Update with live key
 
     //In Game Items
-    // THIS IS FUCKING DISGUSTIN THAT NEEDS FIXING - Kyilkhor
-    const inGameItems = useInGameItems();
-    const inGameMoonsamas = inGameItems?.moonsamas || [];
-    const inGameGoldenTickets = inGameItems?.tickets || [];
-    const inGameResourcesWood: InGameItemWithStatic[] = inGameItems?.resources?.filter(item => !!WOOD_TYPES.find(x => x.name === item.name)) || [];
-    const inGameResourcesCobblestone: InGameItemWithStatic[] = inGameItems?.resources?.filter(item => item.name === ('COBBLESTONE')) || [];
-    const inGameResourcesGold: InGameItemWithStatic[] = inGameItems?.resources?.filter(item => !!GOLD_TYPES.find(x => x.name === item.name)) || [];
-    const inGameResourcesIron: InGameItemWithStatic[] = inGameItems?.resources?.filter(item => !!IRON_TYPES.find(x => x.name === item.name)) || [];
-    const inGameResourcesExp: InGameItemWithStatic[] = inGameItems?.resources?.filter(item => !!EXP_TYPES.find(x => x.name === item.name)) || [];
-    // const inGameResourcesDiamond = inGameItems?.resources?.filter(item => item.name === 'DIAMOND') || [];
+    const inGameItems = useInGameItems(fetchtrigger);
+    const inGameAssets = inGameItems?.assets ?? [];
+    const inGameResources = inGameItems?.resources ?? []
+    const inGameTextures: InGameTexture[] = inGameItems?.textures ?? []
 
-    const aggregatedGoldAmount = inGameResourcesGold.reduce((prev, curr) => prev + Number.parseFloat(curr.amount) * (GOLD_TYPES.find(x => x.name === curr.name)?.multiplier ?? 1), 0)
-    const aggregatedIronAmount = inGameResourcesIron.reduce((prev, curr) => prev + Number.parseFloat(curr.amount) * (IRON_TYPES.find(x => x.name === curr.name)?.multiplier ?? 1), 0)
-    const aggregatedWoodAmount = inGameResourcesWood.reduce((prev, curr) => prev + Number.parseFloat(curr.amount) * (WOOD_TYPES.find(x => x.name === curr.name)?.multiplier ?? 1), 0)
-    const aggregatedExpAmount = inGameResourcesExp.reduce((prev, curr) => prev + Number.parseFloat(curr.amount) * (EXP_TYPES.find(x => x.name === curr.name)?.multiplier ?? 1), 0)
-
-    console.log('ingame items', inGameItems, inGameResourcesWood, {aggregatedGoldAmount, aggregatedIronAmount, aggregatedWoodAmount})
+    console.log('ingame items', inGameItems, { inGameAssets, inGameResources, inGameTextures })
 
     // const { jwt, userProfile } = authData;
 
@@ -83,184 +71,140 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
         statBoxInfo,
         transferButtonSmall,
         headerImage,
-        itemImage
+        itemImage,
+        skinComponent
     } = useStyles();
 
     const canSummon = !!inGameItems?.resources && inGameItems?.resources.length > 0
-    const hasImportedMoonsama = !!inGameMoonsamas && inGameMoonsamas.length > 0
-    const hasImportedTicket = !!inGameGoldenTickets && inGameGoldenTickets.length > 0
+    const assetCounter = countRecognizedAssets(inGameAssets)
+    const hasImportedMoonsama = assetCounter.moonsamaNum > 0
+    const hasImportedTicket = assetCounter.ticketNum > 0
 
     return (
         <Grid className={profileContainer}>
             <Header />
-                <Grid container justifyContent="center" spacing={4}>
-                    <div style={{ width: '50%', textAlign: 'left' }}>
-                        <span style={{fontSize: '38px', fontFamily: `VT323, 'arial'`,}}>Multiverse Bridge: Minecraft meta</span> <br />
-                    </div>
-                    <div style={{ width: '50%', textAlign: 'right' }}>
-                        <span style={{fontSize: '22px',}}>Welcome back {authData?.userProfile?.userName},</span> <br />
-                        {profile?.allowedToPlay ? (<span style={{ color:'#12753A', fontSize: '16px', fontWeight: 'bold' }}>You are eligible to play!</span>):
+            <Grid container justifyContent="center" spacing={4}>
+                <div style={{ width: '50%', textAlign: 'left' }}>
+                    <span style={{ fontSize: '38px', fontFamily: `VT323, 'arial'`, }}>Available skins</span> <br />
+                </div>
+                <div style={{ width: '50%', textAlign: 'right' }}>
+                    <span style={{ fontSize: '22px', }}>Welcome back {authData?.userProfile?.userName},</span> <br />
+                    {profile?.allowedToPlay ? (<span style={{ color: '#12753A', fontSize: '16px', fontWeight: 'bold' }}>You are eligible to play!</span>) :
                         (
-                        <p style={{ color:'#DB3B21'}}>To be eligible to play, bridge a VIP ticket/Moonsama, <br /> or <a href="https://moonsama.com/freshoffers" target="_blank">visit the Marketplace to get one</a></p>)}
-                    </div>
-
-                    {/*<Grid container justifyContent="center" spacing={4} style={{ margin: '56px 0 0 0' }}>*/}
-                    {/*    <Grid item md={2} xs={12} justifyContent="center">*/}
-                    {/*        <div className={statBox}>*/}
-                    {/*            MSAMA*/}
-                    {/*            <img className={headerImage} src={MsamaImage} alt="Moonsama bird" />*/}
-
-                    {/*            <div className={statBoxInfo}>*/}
-                    {/*                <div>{onChainMoonsamas.length + inGameMoonsamas.length}</div>*/}
-                    {/*            </div>*/}
-                    {/*        </div>*/}
-                    {/*    </Grid>*/}
-                    {/*    <Grid item md={2} xs={12} justifyContent="center">*/}
-                    {/*        <div className={statBox}>*/}
-                    {/*            Tickets*/}
-                    {/*            <img className={headerImage} src={TicketImage} alt="Moonsama VIP ticket" />*/}
-
-                    {/*            <div className={statBoxInfo}>*/}
-                    {/*                <div>{onChainGoldenTickets.length + inGameGoldenTickets.length}</div>*/}
-                    {/*            </div>*/}
-                    {/*        </div>*/}
-                    {/*    </Grid>*/}
-                    {/*    <Grid item md={2} xs={12} justifyContent="center">*/}
-                    {/*        <div className={statBox}>*/}
-                    {/*            Wood*/}
-                    {/*            <img className={headerImage} src={Resource1} alt="Moonsama Wood" />*/}
-
-                    {/*            <div className={statBoxInfo}>*/}
-                    {/*                /!*<div><GameIcon /> 1</div>*!/*/}
-                    {/*                <div>{inGameResourcesWood[0]?.amount || 0}</div>*/}
-                    {/*                /!*<div><WalletIcon /> 3</div>*!/*/}
-                    {/*            </div>*/}
-                    {/*        </div>*/}
-                    {/*    </Grid>*/}
-                    {/*    <Grid item md={2} xs={12} justifyContent="center">*/}
-                    {/*        <div className={statBox}>*/}
-                    {/*            Cobblestone*/}
-                    {/*            <img className={headerImage} src={Cobblestone} alt="Moonsama Cobblestone" />*/}
-
-                    {/*            <div className={statBoxInfo}>*/}
-                    {/*                <div>{inGameResourcesCobblestone[0]?.amount || 0}</div>*/}
-                    {/*            </div>*/}
-                    {/*        </div>*/}
-                    {/*    </Grid>*/}
-                    {/*    <Grid item md={2} xs={12} justifyContent="center">*/}
-                    {/*        <div className={statBox}>*/}
-                    {/*            Iron Ingot*/}
-                    {/*            <img className={headerImage} src={Resource4} alt="Moonsama Iron Ingot" />*/}
-
-                    {/*            <div className={statBoxInfo}>*/}
-                    {/*                /!*<div><GameIcon /> 1</div>*!/*/}
-                    {/*                <div>{inGameResourcesIron[0]?.amount || 0}</div>*/}
-                    {/*                /!*<div><WalletIcon /> 3</div>*!/*/}
-                    {/*            </div>*/}
-                    {/*        </div>*/}
-                    {/*    </Grid>*/}
-                    {/*    <Grid item md={2} xs={12} justifyContent="center">*/}
-                    {/*        <div className={statBox}>*/}
-                    {/*            Gold Ingot*/}
-                    {/*            <img className={headerImage} src={Resource5} alt="Moonsama Gold Ingot" />*/}
-
-                    {/*            <div className={statBoxInfo}>*/}
-                    {/*                /!*<div><GameIcon /> 1</div>*!/*/}
-                    {/*                <div>{inGameResourcesGold[0]?.amount || 0}</div>*/}
-                    {/*                /!*<div><WalletIcon /> 3</div>*!/*/}
-                    {/*            </div>*/}
-                    {/*        </div>*/}
-                    {/*    </Grid>*/}
-                    {/*</Grid>*/}
-
-                 <Grid container justifyContent="center" style={{ marginTop: '20px' }} spacing={4}>
-                    <Grid item md={12} xs={12} justifyContent="center" style={{ textAlign: 'center' }}>
+                            <p style={{ color: '#DB3B21' }}>To be eligible to play, bridge a VIP ticket/Moonsama, <br /> or <a href="https://moonsama.com/freshoffers" target="_blank">visit the Marketplace to get one</a></p>)}
+                </div>
+                <Grid container justifyContent="center" style={{ marginTop: '20px', background: '#111' }} spacing={4}>
                     <Stack
-                        direction={{ xs: 'column', sm: 'row' }}
+                        direction={{ xs: 'row', sm: 'row' }}
                         justifyContent="space-between"
                         alignItems="flex-start"
                         spacing={4}
+                        overflow='auto'
                     >
-                        <div style={{ width: '50%' }}>
-                            <div className={columnTitle}><span className={columnTitleText}>In-game items: Metaverse</span></div>
-                            <List dense sx={{ width: '100%', bgcolor: '#111' }}>
-                                {!!inGameMoonsamas.length || !!inGameGoldenTickets.length ? [...inGameMoonsamas, ...inGameGoldenTickets].map((value, ind) => {
-                                    const labelId = `checkbox-list-secondary-label-${ind}`;
-                                    return (
-                                        <ListItem
-                                            key={`${value?.assetAddress}-${value?.assetId}-${ind}`} //update key
-                                            disablePadding
-                                        >
-                                            <ListItemButton>
-                                                <ListItemAvatar>
-                                                    {/*<img className={itemImage} src={value?.meta?.image} alt="" />*/}
-                                                    <Media uri={value?.meta?.image} className={itemImage} />
-                                                </ListItemAvatar>
-                                                <ListItemText primary={value?.meta?.name ?? `${value.assetAddress} ${value.assetId}`} />
+                        {!!inGameTextures.length ? inGameTextures.sort((t1, t2) => t1.assetAddress.localeCompare(t2.assetAddress)).map((value, ind) => {
 
-                                                <Button
-                                                    className={transferButtonSmall}
-                                                    onClick={() => {
-                                                        if (!!account) {
-                                                            setExportDialogOpen(true);
-                                                            setExportDialogData(
-                                                                {
-                                                                    hash: value.hash,
-                                                                    asset: {
-                                                                        assetAddress: value.assetAddress,
-                                                                        assetId: value.assetId,
-                                                                        assetType: stringToStringAssetType(value.assetType),
-                                                                        id: 'x'
-                                                                    }
-                                                                }
-                                                            );
-                                                        } else {
-                                                            setAccountDialogOpen(true)
-                                                        }
-                                                    }}
-                                                >Export to wallet</Button>
-                                            </ListItemButton>
-                                        </ListItem>
-                                    );
-                                }) : (
-                                    <ListItem>
-                                        No items found in game.
-                                    </ListItem>
-                                )}
-                            </List>
-                        </div>
-                        <div style={{ width: '50%' }}>
-                            <div className={columnTitle}><span className={columnTitleText}>On-chain items: Moonriver account</span></div>
-                            <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
-                                {!!onChainMoonsamas.length || !!onChainGoldenTickets.length ? (onChainGoldenTickets ?? []).map((item, ind) => {
-                                    return (
-                                        <ListItem
-                                            key={`${item?.asset?.assetAddress}-${item?.asset?.assetId}-${ind}`} //update key
-                                            disablePadding
-                                        >
-                                            <ListItemButton>
-                                                <ListItemAvatar>
-                                                    {/*<img className={itemImage} src={item?.meta?.image} alt="" />*/}
-                                                    <Media uri={item?.meta?.image} className={itemImage} />
-                                                </ListItemAvatar>
-                                                <ListItemText primary={item?.meta?.name} />
-                                                <Tooltip title={'You can have 1 VIP ticket imported at a time.'}>
-                                                    <span>
+                            console.log('SKIN', value)
+
+                            return (
+                                <Stack
+                                    direction={{ xs: 'column', sm: 'column' }}
+                                    alignItems="center"
+                                    key={`${value?.assetAddress}-${value?.assetId}-${ind}`} //update key
+                                    className={`${skinComponent} ${value.equipped ? 'selected' : ''}`}
+                                    gridRow='1'
+                                >
+                                    {value.coverURL && <a target='_blank' href={`${value.renderURL ? `https://minerender.org/embed/skin/?skin=${value.renderURL}` : value.coverURL }`}><Media uri={value.coverURL} className={itemImage} style={{ marginTop: `${value.equipped ? 'none' : '15px'}` }} /></a>}
+                                    {!value.equipped ? <Button
+                                        className={transferButtonSmall}
+                                        disabled={value.equipped}
+                                        onClick={async () => {
+                                            const success = await callbackSkinEquip({
+                                                assetAddress: value.assetAddress,
+                                                assetId: value.assetId,
+                                                assetType: value.assetType
+                                            })
+                                            if (success) {
+                                                setFetchtrigger(Date.now().toString())
+                                            }
+                                        }}
+                                    >Equip
+                                    </Button> : <>Equipped</>
+                                    }
+                                </Stack>
+                            );
+                        }) : (
+                            <div style={{ marginTop: '10px', marginBottom: '10px' }}>
+                                No available skins found.
+                            </div>
+                        )}
+                    </Stack>
+                </Grid>
+                <div style={{ width: '100%', marginTop: '40px', textAlign: 'left' }}>
+                    <span style={{ fontSize: '38px', fontFamily: `VT323, 'arial'`, }}>Multiverse bridge</span>
+                </div>
+                <Grid container justifyContent="center" style={{ marginTop: '20px' }} spacing={4}>
+                    <Grid item md={12} xs={12} justifyContent="center" style={{ textAlign: 'center' }}>
+                        <Stack
+                            direction={{ xs: 'column', sm: 'row' }}
+                            justifyContent="space-between"
+                            alignItems="flex-start"
+                            spacing={4}
+                        >
+                            <div style={{ width: '50%' }}>
+                                <div className={columnTitle}><span className={columnTitleText}>In-game items: Metaverse</span></div>
+                                <List dense sx={{ width: '100%', bgcolor: '#111' }}>
+                                    {!!inGameAssets.length ? inGameAssets.map((value, ind) => {
+                                        const labelId = `checkbox-list-secondary-label-${ind}`;
+                                        return (
+                                            <ListItem
+                                                key={`${value?.assetAddress}-${value?.assetId}-${ind}`} //update key
+                                                disablePadding
+                                            >
+                                                <ListItemButton>
+                                                    <ListItemAvatar>
+                                                        {/*<img className={itemImage} src={value?.meta?.image} alt="" />*/}
+                                                        <Media uri={value?.meta?.image} className={itemImage} />
+                                                    </ListItemAvatar>
+                                                    <ListItemText primary={value?.meta?.name ?? `${value.assetAddress} ${value.assetId}`} />
+                                                    <Tooltip title={'Your exported asset will go back to the sender address you imported from.'}>
                                                         <Button
                                                             className={transferButtonSmall}
                                                             onClick={() => {
-                                                                setImportDialogOpen(true);
-                                                                setImportDialogData({ asset: item.asset });
+                                                                if (!!account) {
+                                                                    setExportDialogOpen(true);
+                                                                    setExportDialogData(
+                                                                        {
+                                                                            hash: value.hash,
+                                                                            asset: {
+                                                                                assetAddress: value.assetAddress,
+                                                                                assetId: value.assetId,
+                                                                                assetType: stringToStringAssetType(value.assetType),
+                                                                                id: 'x'
+                                                                            }
+                                                                        }
+                                                                    );
+                                                                } else {
+                                                                    setAccountDialogOpen(true)
+                                                                }
                                                             }}
-                                                            disabled={hasImportedTicket}
-                                                        >Import to game</Button>
-                                                    </span>
-                                                </Tooltip>
-                                            </ListItemButton>
+                                                        >
+                                                            Export to wallet
+                                                        </Button>
+                                                    </Tooltip>
+                                                </ListItemButton>
+                                            </ListItem>
+                                        );
+                                    }) : (
+                                        <ListItem>
+                                            No items found in game.
                                         </ListItem>
-                                    );
-                                }).concat(
-                                    (onChainMoonsamas ?? []).map((item, ind) => {
+                                    )}
+                                </List>
+                            </div>
+                            <div style={{ width: '50%' }}>
+                                <div className={columnTitle}><span className={columnTitleText}>On-chain items: Moonriver account</span></div>
+                                <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
+                                    {!!onChainMoonsamas.length || !!onChainGoldenTickets.length ? (onChainGoldenTickets ?? []).map((item, ind) => {
                                         return (
                                             <ListItem
                                                 key={`${item?.asset?.assetAddress}-${item?.asset?.assetId}-${ind}`} //update key
@@ -272,226 +216,164 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                         <Media uri={item?.meta?.image} className={itemImage} />
                                                     </ListItemAvatar>
                                                     <ListItemText primary={item?.meta?.name} />
-                                                    <Tooltip title={'You can have 1 Moonsama imported at a time. If you want to replace, export if first, then import a new one.'}>
+                                                    <Tooltip title={'You can have 1 VIP ticket imported at a time.'}>
                                                         <span>
-                                                        <Button
-                                                            className={transferButtonSmall}
-                                                            onClick={() => {
-                                                                setImportDialogOpen(true);
-                                                                setImportDialogData({ asset: item.asset });
-                                                            }}
-                                                            disabled={hasImportedMoonsama}
-                                                        >Import to game</Button>
+                                                            <Button
+                                                                className={transferButtonSmall}
+                                                                onClick={() => {
+                                                                    setImportDialogOpen(true);
+                                                                    setImportDialogData({ asset: item.asset });
+                                                                }}
+                                                                disabled={hasImportedTicket}
+                                                            >Import to game</Button>
                                                         </span>
                                                     </Tooltip>
                                                 </ListItemButton>
                                             </ListItem>
                                         );
-                                    })
-                                ) : (
-                                    <ListItem>
-                                        No items found in wallet.
-                                    </ListItem>
-                                )}
-                            </List>
-                        </div>
-                     </Stack>
-                     </Grid>
-                     {/*<Grid item md={3} xs={12} justifyContent="center">*/}
-                     {/*    <div className={columnTitle}><span className={columnTitleText}>GGANBU</span></div>*/}
-                     {/*    <List dense sx={{ width: '100%', maxWidth: '100%', bgcolor: '#111', marginBottom: '16px' }}>*/}
-                     {/*        {['t3rminat0r','gamer6969'].map((value) => {*/}
-                     {/*            const labelId = `checkbox-list-secondary-label-${value}`;*/}
-                     {/*            return (*/}
-                     {/*                <ListItem*/}
-                     {/*                    key={value}*/}
-                     {/*                    secondaryAction={*/}
-                     {/*                        <RemoveIcon sx={{ color: "#DB3B21" }} />*/}
-                     {/*                    }*/}
-                     {/*                    disablePadding*/}
-                     {/*                >*/}
-                     {/*                    <ListItemButton>*/}
-                     {/*                        <ListItemAvatar>*/}
-                     {/*                            <PeopleAltIcon />*/}
-                     {/*                        </ListItemAvatar>*/}
-                     {/*                        <ListItemText id={labelId} primary={value} />*/}
-                     {/*                    </ListItemButton>*/}
-                     {/*                </ListItem>*/}
-                     {/*            );*/}
-                     {/*        })}*/}
-                     {/*    </List>*/}
-                     {/*</Grid>*/}
-                </Grid>
-            </Grid>
-            <Grid container justifyContent="center" style={{ marginTop: '30px' }} spacing={4}>
-                    <Grid container justifyContent="center" style={{ marginTop: '30px' }} spacing={4}>
-                        <Grid item md={12} xs={12} justifyContent="center" style={{ textAlign: 'center' }}>
-                            <Stack
-                                direction={{ xs: 'column', sm: 'row' }}
-                                justifyContent="space-between"
-                                alignItems="flex-start"
-                                spacing={4}
-                            >
-                                <div style={{ width: '50%' }}>
-                                    <div className={columnTitle}><span className={columnTitleText}>In-game resources: Metaverse</span></div>
-                                    <List dense sx={{ width: '100%', bgcolor: '#111' }}>
-                                        {!!inGameItems?.resources.length ? (
-                                            <>
-                                                {!!inGameResourcesWood.length && (
-                                                    <ListItem
-                                                        secondaryAction={
-                                                            <>
-                                                                {aggregatedWoodAmount}
-                                                            </>
-                                                        }
-                                                        disablePadding
-                                                    >
-                                                        <ListItemButton>
-                                                            <ListItemAvatar>
-                                                                <img src={Resource1} alt="Wood" />
-                                                            </ListItemAvatar>
-                                                            <ListItemText id="wood" primary="Wood" />
-                                                        </ListItemButton>
-                                                    </ListItem>
-                                                )}
-                                                {!!inGameResourcesCobblestone.length && (
-                                                    <ListItem
-                                                        secondaryAction={
-                                                            <>
-                                                                {inGameResourcesCobblestone[0].amount}
-                                                            </>
-                                                        }
-                                                        disablePadding
-                                                    >
-                                                        <ListItemButton>
-                                                            <ListItemAvatar>
-                                                                <img src={Cobblestone} alt="Cobblestone" />
-                                                            </ListItemAvatar>
-                                                            <ListItemText id="cobblestone" primary="Cobblestone"/>
-                                                        </ListItemButton>
-                                                    </ListItem>
-                                                )}
-                                                {!!inGameResourcesIron.length && (
-                                                    <ListItem
-                                                        secondaryAction={
-                                                            <>
-                                                                {aggregatedIronAmount}
-                                                            </>
-                                                        }
-                                                        disablePadding
-                                                    >
-                                                        <ListItemButton>
-                                                            <ListItemAvatar>
-                                                                <img src={Resource4} alt="Iron Ingot"/>
-                                                            </ListItemAvatar>
-                                                            <ListItemText id="iron-ingot" primary="Iron Ingot"/>
-                                                        </ListItemButton>
-                                                    </ListItem>
-                                                )}
-                                                {!!inGameResourcesGold.length && (
-                                                    <ListItem
-                                                        secondaryAction={
-                                                            <>
-                                                                {aggregatedGoldAmount}
-                                                            </>
-                                                        }
-                                                        disablePadding
-                                                    >
-                                                        <ListItemButton>
-                                                            <ListItemAvatar>
-                                                                <img src={Resource5} alt="Gold Ingot"/>
-                                                            </ListItemAvatar>
-                                                            <ListItemText id="gold-ingot" primary="Gold Ingot"/>
-                                                        </ListItemButton>
-                                                    </ListItem>
-                                                )}
-                                                {!!inGameResourcesExp.length && (
-                                                    <ListItem
-                                                        secondaryAction={
-                                                            <>
-                                                                {aggregatedExpAmount}
-                                                            </>
-                                                        }
-                                                        disablePadding
-                                                    >
-                                                        <ListItemButton>
-                                                            <ListItemAvatar>
-                                                                <img src={ExperienceOrb} alt="Experience Orb"/>
-                                                            </ListItemAvatar>
-                                                            <ListItemText id="experience-orb" primary="Experience Orb"/>
-                                                        </ListItemButton>
-                                                    </ListItem>
-                                                )}
-                                            </>
-                                        ) : <ListItem>No in-game resources available</ListItem>}
-                                    </List>
-                                    <Button
-                                        className={transferButton}
-                                        onClick={() => {
-                                            if (!!account) {
-                                                setSummonDialogOpen(true);
-                                                setSummonDialogData({recipient: account ?? undefined});
-                                            } else {
-                                                setAccountDialogOpen(true)
-                                            }
-                                        }}
-                                        disabled={!canSummon}
-                                    >Summon resources</Button>
-                                </div>
-                                <div style={{ width: '50%' }}>
-                                    <div className={columnTitle}><span className={columnTitleText}>On-chain resources: Moonriver account</span></div>
-                                    <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
-
-                                        {!!onChainResources.length ? onChainResources.map((value) => {
-                                            const labelId = value?.asset?.assetId;
+                                    }).concat(
+                                        (onChainMoonsamas ?? []).map((item, ind) => {
                                             return (
                                                 <ListItem
-                                                    key={value?.asset.assetId}
-                                                    secondaryAction={
-                                                        <>{Fraction.from(value?.asset?.balance, 18)?.toFixed(2)}</>
-                                                    }
+                                                    key={`${item?.asset?.assetAddress}-${item?.asset?.assetId}-${ind}`} //update key
                                                     disablePadding
-                                                    onClick={() => {
-                                                        setAssetDialogOpen(true)
-                                                        setAssetDialogData({
-                                                            title: value?.staticData?.name,
-                                                            image: value?.meta?.imageRaw,
-                                                            assetERC1155: value?.asset,
-                                                            assetAddressERC20: value?.staticData?.subAssetAddress
-                                                        })
-                                                        //window.open(getExplorerLink(chainId ?? ChainId.MOONRIVER, value.asset.assetAddress,'address'))
-                                                    }}
                                                 >
                                                     <ListItemButton>
                                                         <ListItemAvatar>
-                                                            <img className={itemImage} src={value?.meta?.image} alt="" />
+                                                            {/*<img className={itemImage} src={item?.meta?.image} alt="" />*/}
+                                                            <Media uri={item?.meta?.image} className={itemImage} />
                                                         </ListItemAvatar>
-                                                        <ListItemText id={labelId} primary={value?.meta?.name} />
+                                                        <ListItemText primary={item?.meta?.name} />
+                                                        <Tooltip title={'Your imported Moonsama will bound to your Minecraft account. It will go back to the sender address when exported.'}>
+                                                            <span>
+                                                                <Button
+                                                                    className={transferButtonSmall}
+                                                                    onClick={() => {
+                                                                        setImportDialogOpen(true);
+                                                                        setImportDialogData({ asset: item.asset });
+                                                                    }}
+                                                                >Import to game</Button>
+                                                            </span>
+                                                        </Tooltip>
                                                     </ListItemButton>
                                                 </ListItem>
                                             );
-                                        }) : <ListItem>No resources found in wallet.</ListItem>}
-                                    </List>
-                                </div>
-                            </Stack>
-                        </Grid>
-                        <Grid item md={3} xs={12} justifyContent="center">
-                            {/*<div className={columnTitle}><span className={columnTitleText}>Info</span></div>*/}
-                            {/*<List dense sx={{ width: '100%', maxWidth: '100%', bgcolor: '#111', marginBottom: '16px' }}>*/}
-                            {/*    {['Server Status: Online', 'Next Event: 02/11/21 13:00 UTC'].map((value) => {*/}
-                            {/*        const labelId = `checkbox-list-secondary-label-${value}`;*/}
-                            {/*        return (*/}
-                            {/*            <ListItem*/}
-                            {/*                key={value}*/}
-                            {/*                disablePadding*/}
-                            {/*            >*/}
-                            {/*                <ListItemText id={labelId} primary={value} />*/}
-                            {/*            </ListItem>*/}
-                            {/*        );*/}
-                            {/*    })}*/}
-                            {/*</List>*/}
-                        </Grid>
+                                        })
+                                    ) : (
+                                        <ListItem>
+                                            No items found in wallet.
+                                        </ListItem>
+                                    )}
+                                </List>
+                            </div>
+                        </Stack>
                     </Grid>
+                </Grid>
+            </Grid>
+            <Grid container justifyContent="center" style={{ marginTop: '30px' }} spacing={4}>
+                <Grid container justifyContent="center" style={{ marginTop: '30px' }} spacing={4}>
+                    <Grid item md={12} xs={12} justifyContent="center" style={{ textAlign: 'center' }}>
+                        <Stack
+                            direction={{ xs: 'column', sm: 'row' }}
+                            justifyContent="space-between"
+                            alignItems="flex-start"
+                            spacing={4}
+                        >
+                            <div style={{ width: '50%' }}>
+                                <div className={columnTitle}><span className={columnTitleText}>In-game resources: Metaverse</span></div>
+                                <List dense sx={{ width: '100%', bgcolor: '#111' }}>
+                                    {!!inGameResources.length ? (
+                                        <>
+                                            {inGameResources.map(resource => {
+                                                return (
+                                                    <ListItem
+                                                        key={`${resource.assetAddress}-${resource.assetId}`}
+                                                        secondaryAction={
+                                                            <>
+                                                                {resource.amount}
+                                                            </>
+                                                        }
+                                                        disablePadding
+                                                    >
+                                                        <ListItemButton>
+                                                            <ListItemAvatar>
+                                                                <img src={resource.meta.image} alt={resource.name} className={itemImage} />
+                                                            </ListItemAvatar>
+                                                            <ListItemText id={resource.name} primary={resource.meta.name.slice(6)} />
+                                                        </ListItemButton>
+                                                    </ListItem>
+                                                )
+                                            })}
+                                        </>
+                                    ) : <ListItem>No in-game resources available</ListItem>}
+                                </List>
+                                <Button
+                                    className={transferButton}
+                                    onClick={() => {
+                                        if (!!account) {
+                                            setSummonDialogOpen(true);
+                                            setSummonDialogData({ recipient: account ?? undefined });
+                                        } else {
+                                            setAccountDialogOpen(true)
+                                        }
+                                    }}
+                                    disabled={!canSummon}
+                                >Summon resources</Button>
+                            </div>
+                            <div style={{ width: '50%' }}>
+                                <div className={columnTitle}><span className={columnTitleText}>On-chain resources: Moonriver account</span></div>
+                                <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
+
+                                    {!!onChainResources.length ? onChainResources.map((value) => {
+                                        const labelId = value?.asset?.assetId;
+                                        return (
+                                            <ListItem
+                                                key={value?.asset.assetId}
+                                                secondaryAction={
+                                                    <>{Fraction.from(value?.asset?.balance, 18)?.toFixed(2)}</>
+                                                }
+                                                disablePadding
+                                                onClick={() => {
+                                                    setAssetDialogOpen(true)
+                                                    setAssetDialogData({
+                                                        title: value?.staticData?.name,
+                                                        image: value?.meta?.imageRaw,
+                                                        assetERC1155: value?.asset,
+                                                        assetAddressERC20: value?.staticData?.subAssetAddress
+                                                    })
+                                                    //window.open(getExplorerLink(chainId ?? ChainId.MOONRIVER, value.asset.assetAddress,'address'))
+                                                }}
+                                            >
+                                                <ListItemButton>
+                                                    <ListItemAvatar>
+                                                        <img className={itemImage} src={value?.meta?.image} alt="" />
+                                                    </ListItemAvatar>
+                                                    <ListItemText id={labelId} primary={value?.meta?.name} />
+                                                </ListItemButton>
+                                            </ListItem>
+                                        );
+                                    }) : <ListItem>No resources found in wallet.</ListItem>}
+                                </List>
+                            </div>
+                        </Stack>
+                    </Grid>
+                    <Grid item md={3} xs={12} justifyContent="center">
+                        {/*<div className={columnTitle}><span className={columnTitleText}>Info</span></div>*/}
+                        {/*<List dense sx={{ width: '100%', maxWidth: '100%', bgcolor: '#111', marginBottom: '16px' }}>*/}
+                        {/*    {['Server Status: Online', 'Next Event: 02/11/21 13:00 UTC'].map((value) => {*/}
+                        {/*        const labelId = `checkbox-list-secondary-label-${value}`;*/}
+                        {/*        return (*/}
+                        {/*            <ListItem*/}
+                        {/*                key={value}*/}
+                        {/*                disablePadding*/}
+                        {/*            >*/}
+                        {/*                <ListItemText id={labelId} primary={value} />*/}
+                        {/*            </ListItem>*/}
+                        {/*        );*/}
+                        {/*    })}*/}
+                        {/*</List>*/}
+                    </Grid>
+                </Grid>
             </Grid>
         </Grid>
     );

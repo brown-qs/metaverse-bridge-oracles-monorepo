@@ -10,6 +10,7 @@ import { UserModule } from '../user/user.module';
 import { GameController } from './game.controller';
 import { GameService } from './game.service';
 import { InventoryModule } from '../inventory/inventory.module';
+import { SkinModule } from '../skin/skin.module';
 
 @Module({
     imports: [
@@ -17,6 +18,7 @@ import { InventoryModule } from '../inventory/inventory.module';
         ProfileModule,
         SecretModule,
         TextureModule,
+        SkinModule,
         MaterialModule,
         SnapshotModule,
         InventoryModule,

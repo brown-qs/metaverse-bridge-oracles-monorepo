@@ -19,7 +19,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { User } from '../utils/decorators';
 import { UserEntity } from '../user/user.entity';
 import { UserRole } from '../common/enums/UserRole';
-import { PlayerTextureMapDto } from '../game/dtos/texturemap.dto';
+import { PlayerSkinDto } from '../game/dtos/texturemap.dto';
 import { GameService } from '../game/game.service';
 import { MaterialsDto } from './dtos/material.dto';
 import { AdminService } from './admin.service';
@@ -68,12 +68,12 @@ export class AdminController {
         return this.profileService.userProfile(user)
     }
 
-    @Get('player/:uuid/textures')
+    @Get('player/:uuid/skins')
     @HttpCode(200)
-    @ApiOperation({ summary: 'Fetches player textures' })
+    @ApiOperation({ summary: 'Fetches player skins' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    async textures(@User() caller: UserEntity, @Param('uuid') uuid: string): Promise<PlayerTextureMapDto> {
+    async textures(@User() caller: UserEntity, @Param('uuid') uuid: string): Promise<PlayerSkinDto[]> {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
         }
@@ -81,8 +81,8 @@ export class AdminController {
         if (!user) {
             throw new UnprocessableEntityException('Player was not found')
         }
-        const textures = await this.gameService.getTextures(user)
-        return textures
+        const skins = await this.gameService.getUserSkins(user)
+        return skins
     }
 
     @Put('player/:uuid/snapshot')
@@ -338,7 +338,7 @@ export class AdminController {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
         }
-        await this.gameService.communism(dto.minTimePlayed, dto.averageMultiplier, dto.serverId)
+        await this.gameService.communism(dto.minTimePlayed, dto.gganbuAmount, dto.averageMultiplier, dto.serverId)
         return true
     }
 

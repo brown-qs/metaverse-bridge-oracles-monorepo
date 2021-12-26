@@ -8,7 +8,8 @@ import { TextureModule } from '../texture/texture.module';
 import { UserModule } from '../user/user.module';
 import { OracleController } from './oracle.controller';
 import { OracleService } from './oracle.service';
-import { InventoryModule } from 'src/inventory/inventory.module';
+import { InventoryModule } from '../inventory/inventory.module';
+import { SkinModule } from '../skin/skin.module';
 
 @Module({
     imports: [
@@ -16,6 +17,7 @@ import { InventoryModule } from 'src/inventory/inventory.module';
         UserModule,
         SecretModule,
         TextureModule,
+        SkinModule,
         InventoryModule,
         GameSessionModule,
         SummonModule,

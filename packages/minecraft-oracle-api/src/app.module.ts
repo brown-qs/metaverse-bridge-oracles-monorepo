@@ -1,7 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { envValidationSchema, loadAll } from './config';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
@@ -38,6 +36,8 @@ import { PlaySessionStatEntity } from './playsession/playsessionstat.entity';
 import { InventoryModule } from './inventory/inventory.module';
 import { InventoryEntity } from './inventory/inventory.entity';
 import { NftModule } from './nft/nft.module';
+import { SkinEntity } from './skin/skin.entity';
+import { SkinModule } from './skin/skin.module';
 
 @Module({
   imports: [
@@ -49,7 +49,7 @@ import { NftModule } from './nft/nft.module';
     }),
     WinstonModule.forRootAsync({
         useFactory: async (configService: ConfigService) => {
-            console.log(configService.get<string>('typeorm'))
+            //console.log(configService.get<string>('typeorm'))
             return {
                 level: configService.get<string>('log.level'),
                 format: winston.format.combine(
@@ -69,7 +69,7 @@ import { NftModule } from './nft/nft.module';
             username: configService.get<string>('typeorm.username'),
             password: configService.get<string>('typeorm.password'),
             database: configService.get<string>('typeorm.database'),
-            entities: [UserEntity, SnapshotItemEntity, InventoryEntity, TextureEntity, MaterialEntity, GameSessionEntity, SecretEntity, AssetEntity, SummonEntity, PlaySessionEntity, PlaySessionStatEntity],
+            entities: [UserEntity, SnapshotItemEntity, InventoryEntity, TextureEntity, SkinEntity, MaterialEntity, GameSessionEntity, SecretEntity, AssetEntity, SummonEntity, PlaySessionEntity, PlaySessionStatEntity],
             synchronize: configService.get<boolean>('typeorm.synchronize'),
             logging: configService.get<boolean>('typeorm.logging'),
         }),
@@ -97,6 +97,7 @@ import { NftModule } from './nft/nft.module';
     ProfileModule,
     AuthModule,
     TextureModule,
+    SkinModule,
     MaterialModule,
     SnapshotModule,
     InventoryModule,
@@ -106,8 +107,6 @@ import { NftModule } from './nft/nft.module';
     AdminModule,
     OracleModule,
     NftModule
-  ],
-  controllers: [AppController],
-  providers: [AppService],
+  ]
 })
 export class AppModule {}

@@ -6,7 +6,7 @@ import { TextureService } from '../texture/texture.service';
 import { UserEntity } from '../user/user.entity';
 import { TextureType } from '../texture/texturetype.enum';
 import { DEFAULT_SKIN } from '../config/constants';
-import { PlayerTextureMapDto } from './dtos/texturemap.dto';
+import { PlayerSkinDto } from './dtos/texturemap.dto';
 import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
 import { MaterialService } from '../material/material.service';
 import { SnapshotService } from '../snapshot/snapshot.service';
@@ -19,19 +19,20 @@ import { PlaySesionService } from '../playsession/playsession.service';
 import { PlaySessionStatService } from '../playsession/playsessionstat.service';
 import { InventoryEntity } from '../inventory/inventory.entity';
 import { InventoryService } from '../inventory/inventory.service';
-import { boolean } from 'fp-ts';
-import { TextureEntity } from 'src/texture/texture.entity';
+import { TextureEntity } from '../texture/texture.entity';
+import { SkinService } from '../skin/skin.service';
 
 @Injectable()
 export class GameService {
 
     private readonly context: string;
 
-    private locks : Map<string, MutexInterface>;
+    private locks: Map<string, MutexInterface>;
 
     constructor(
         private readonly userService: UserService,
         private readonly textureService: TextureService,
+        private readonly skinService: SkinService,
         private readonly materialService: MaterialService,
         private readonly snapshotService: SnapshotService,
         private readonly inventoryService: InventoryService,
@@ -45,33 +46,27 @@ export class GameService {
         this.locks = new Map();
     }
 
-    public async getTextures(user: UserEntity): Promise<PlayerTextureMapDto> {
-        const richUser = await this.userService.findOne(user, {relations: ['textures']})
-        const textures = await richUser.textures
+    public async getUserSkins(user: UserEntity): Promise<PlayerSkinDto[]> {
+        const skins = await this.skinService.findMany({where: {owner: {uuid: user.uuid}}, relations: ['texture']})
 
-        const textureMap: PlayerTextureMapDto = {}
-
-        textures.map(texture => {
-            textureMap[texture.type] = {
-                textureData: texture.textureData,
-                textureSignature: texture.textureSignature,
-                type: texture.type,
-                accessories: texture.accessories ?? undefined,
-                assetId: texture.assetId
+        const results: PlayerSkinDto[] = skins.map(skin => {
+                return {
+                    textureData: skin.texture.textureData,
+                    textureSignature: skin.texture.textureSignature,
+                    type: skin.texture.type,
+                    accessories: skin.texture.accessories ?? undefined,
+                    assetId: skin.texture.assetId,
+                    equipped: skin.texture.type.valueOf() === TextureType.SKIN.valueOf() && skin.equipped
+                }
             }
-        })
+        )
 
-        // at least we need to get the default skin
-        if (!textureMap[TextureType.SKIN]) {
-            textureMap[TextureType.SKIN] = DEFAULT_SKIN
-        }
-
-        return textureMap
+        return results
     }
 
     private ensureLock(key: string) {
         if (!this.locks.has(key)) {
-          this.locks.set(key, new Mutex());
+            this.locks.set(key, new Mutex());
         }
     }
 
@@ -102,7 +97,7 @@ export class GameService {
         //let promises: Promise<SnapshotItemEntity | undefined>[]
 
         this.ensureLock(userAll.uuid)
-        
+
         const userlock = this.locks.get(userAll.uuid)
 
         const promises = await userlock.runExclusive(async () => {
@@ -134,7 +129,7 @@ export class GameService {
                 return promises
             }
         })
-            
+
         const snapshotItems = await Promise.all(promises)
         //console.log([snapshotItems, snapshotSuccessArray, received, saved])
         return [snapshotItems, snapshotSuccessArray, received, saved]
@@ -171,10 +166,9 @@ export class GameService {
         return !!(await this.gameSessionService.getOngoing())
     }
 
-    public async getSkins(skinrequest: {auctionOnly: boolean}): Promise<TextureEntity[]> {
-        const skins = skinrequest.auctionOnly ? await this.textureService.findMany({where: {auction: true}}) : await this.textureService.findMany({})
-        console.log(skins, skinrequest.auctionOnly)
-        return skins
+    public async getTextures(skinrequest: { auctionOnly: boolean }): Promise<TextureEntity[]> {
+        const textures = skinrequest.auctionOnly ? await this.textureService.findMany({ where: { auction: true } }) : await this.textureService.findMany({})
+        return textures
     }
 
     public async setGameInProgress(inprogress: boolean): Promise<boolean> {
@@ -334,7 +328,7 @@ export class GameService {
             return undefined
         }
 
-        const amount = half ? snapshot.amount / 2: snapshot.amount
+        const amount = half ? snapshot.amount / 2 : snapshot.amount
 
         const itemId = `${user.uuid}-${material.name}`
         this.ensureLock(itemId)
@@ -342,7 +336,7 @@ export class GameService {
         const itemlock = this.locks.get(itemId)
 
         const savedS = await itemlock.runExclusive(async () => {
-            const foundItem = await this.snapshotService.findOne({id: itemId})
+            const foundItem = await this.snapshotService.findOne({ id: itemId })
 
             if (!!foundItem) {
                 //console.log('founditem')
@@ -368,8 +362,8 @@ export class GameService {
 
     public async setPlayerGameSession(uuid: string, identifier: string, ended: boolean): Promise<boolean> {
 
-        const sess = await this.playSessionService.getOngoing({uuid})
-        
+        const sess = await this.playSessionService.getOngoing({ uuid })
+
         if (ended) {
             if (!sess) {
                 this.logger.warn(`setPlayerGameSession:: end session: no ongoing player sessions to end for user ${uuid}`, this.context)
@@ -377,9 +371,9 @@ export class GameService {
             }
             const now = Date.now()
             sess.endedAt = now.toString()
-            const success = await this.playSessionService.update(sess.id, {endedAt: sess.endedAt})
+            const success = await this.playSessionService.update(sess.id, { endedAt: sess.endedAt })
             const delta = now - Number.parseFloat(sess.startedAt)
-            await this.playSessionStatService.update(sess.stat.id, {timePlayed: (Number.parseFloat(sess.stat.timePlayed) +  delta).toString()})
+            await this.playSessionStatService.update(sess.stat.id, { timePlayed: (Number.parseFloat(sess.stat.timePlayed) + delta).toString() })
             //await this.userService.update(user.uuid, {timePlayedEvent: (Number.parseInt(user.timePlayedEvent ?? '0') + now).toString() })
             return success
         }
@@ -387,9 +381,9 @@ export class GameService {
         if (!!sess) {
             const now = Date.now()
             sess.endedAt = now.toString()
-            const success = await this.playSessionService.update(sess.id, {endedAt: sess.endedAt})
+            const success = await this.playSessionService.update(sess.id, { endedAt: sess.endedAt })
             const delta = now - Number.parseFloat(sess.startedAt)
-            await this.playSessionStatService.update(sess.stat.id, {timePlayed: (Number.parseFloat(sess.stat.timePlayed) +  delta).toString()})
+            await this.playSessionStatService.update(sess.stat.id, { timePlayed: (Number.parseFloat(sess.stat.timePlayed) + delta).toString() })
             if (success) {
                 this.logger.warn(`setPlayerGameSession:: start session: found previous ongoing play session, ended successfully for user ${uuid}`, this.context)
                 //await this.userService.update(user.uuid, {timePlayedEvent: (Number.parseInt(user.timePlayedEvent ?? '0') + now).toString() })
@@ -398,37 +392,38 @@ export class GameService {
             }
         }
 
-        if(! (await this.userService.exists({uuid}))) {
+        if (!(await this.userService.exists({ uuid }))) {
             this.logger.error(`setPlayerGameSession:: user ${uuid} does not exists`, null, this.context)
             return false
         }
 
         const stat = await this.playSessionStatService.create({
-            id: this.playSessionStatService.calculateId({uuid}, {identifier})
+            id: this.playSessionStatService.calculateId({ uuid }, { identifier })
         })
         await this.playSessionService.create({
             identifier,
             startedAt: Date.now().toString(),
-            player: await this.userService.findOne({uuid}),
+            player: await this.userService.findOne({ uuid }),
             stat
         })
 
         return true
     }
 
-    public async communism(minTimePlayed?: number, averageMultiplier?: number, serverId='production') {
+    public async communism(minTimePlayed?: number, gganbu?: number, averageMultiplier?: number, serverId = 'production') {
 
         const mintT = minTimePlayed ?? 2700000
         const averageM = averageMultiplier ?? 1
-        
+        const finalGganbu = gganbu ?? 0.5
+
         let items: SnapshotItemEntity[] = []
         let batch: SnapshotItemEntity[] = []
         let skip = 0
         let take = 100
         do {
-            batch = await this.snapshotService.findMany({take, skip, relations: ['material', 'owner']})
+            batch = await this.snapshotService.findMany({ take, skip, relations: ['material', 'owner'] })
             //console.log(batch)
-            
+
             if (!!batch && batch.length > 0) {
                 items = items.concat(batch)
             }
@@ -437,11 +432,11 @@ export class GameService {
 
         } while (!!batch && batch.length > 0)
 
-        let counter: {[key: string]: number} = {}
-        let users: {[key: string]: boolean} = {}
+        let counter: { [key: string]: number } = {}
+        let users: { [key: string]: boolean } = {}
         let distinct = 0
         items.map(x => {
-            counter[x.material.name] = typeof counter[x.material.name] === 'undefined' ? Number.parseFloat(x.amount) : counter[x.material.name] + Number.parseFloat(x.amount) 
+            counter[x.material.name] = typeof counter[x.material.name] === 'undefined' ? Number.parseFloat(x.amount) : counter[x.material.name] + Number.parseFloat(x.amount)
         })
 
         const allUsers = await this.userService.findMany({})
@@ -449,28 +444,28 @@ export class GameService {
         allUsers.map(user => {
             if (!users[user.uuid]) {
                 users[user.uuid] = true
-                distinct+=1
+                distinct += 1
             }
         })
 
         //console.log({distinct, users, counter})
-        
+
         const materials = Object.keys(counter)
         materials.map(key => {
-            counter[key] = averageM * counter[key] / distinct 
+            counter[key] = averageM * counter[key] / distinct
         })
 
         this.logger.debug(`Communism:: final gganbu amounts: ${counter}`, this.context)
 
         const userUuids = Object.keys(users)
-        
-        for(let i = 0; i< userUuids.length; i++) {
+
+        for (let i = 0; i < userUuids.length; i++) {
             const uuid = userUuids[i]
-            const user = await this.userService.findOne({uuid})
-            const playStats = await this.playSessionStatService.findOne({id: `${uuid}-${serverId}`})
+            const user = await this.userService.findOne({ uuid })
+            const playStats = await this.playSessionStatService.findOne({ id: `${uuid}-${serverId}` })
             this.logger.debug(`Communism:: ${uuid} played ${playStats?.timePlayed}`, this.context)
 
-            const tPlayed = playStats?.timePlayed ? Number.parseFloat(playStats?.timePlayed) :  0
+            const tPlayed = playStats?.timePlayed ? Number.parseFloat(playStats?.timePlayed) : 0
             if (tPlayed < mintT) {
                 this.logger.warn(`Communism:: ${uuid} not eligible for gganbu`, this.context)
                 continue
@@ -481,12 +476,12 @@ export class GameService {
                 const existingSnap = snaps.find(x => x.material.name === materialName)
                 if (!!existingSnap) {
                     this.logger.debug(`Communism:: ${uuid} snap for ${materialName} existed. Adding..`, this.context)
-                    const amount = (Number.parseFloat(existingSnap.amount) + counter[existingSnap.material.name]).toString()
-                    await this.snapshotService.update(existingSnap.id, {amount})
+                    const amount = ((Number.parseFloat(existingSnap.amount) * finalGganbu) + counter[existingSnap.material.name]).toString()
+                    await this.snapshotService.update(existingSnap.id, { amount })
                 } else {
                     this.logger.debug(`Communism:: ${uuid} snap for ${materialName} not found. Creating..`, this.context)
                     const amount = counter[materialName]
-                    await this.assignSnapshot(user, {amount, materialName}, false, false)
+                    await this.assignSnapshot(user, { amount, materialName }, false, false)
                 }
             })
             await Promise.all(x)
@@ -505,9 +500,9 @@ export class GameService {
             let skip = 0
             let take = 100
             do {
-                batch = await this.snapshotService.findMany({take, skip, relations: ['material', 'owner']})
+                batch = await this.snapshotService.findMany({ take, skip, relations: ['material', 'owner'] })
                 //console.log(batch)
-                
+
                 if (!!batch && batch.length > 0) {
                     items = items.concat(batch)
                 }
@@ -516,11 +511,11 @@ export class GameService {
 
             } while (!!batch && batch.length > 0)
 
-            let counter: {[key: string]: number} = {}
+            let counter: { [key: string]: number } = {}
             //let users: {[key: string]: boolean} = {}
             //let distinct = 0
             items.map(x => {
-                counter[x.material.name] = typeof counter[x.material.name] === 'undefined' ? Number.parseFloat(x.amount) : counter[x.material.name] + Number.parseFloat(x.amount) 
+                counter[x.material.name] = typeof counter[x.material.name] === 'undefined' ? Number.parseFloat(x.amount) : counter[x.material.name] + Number.parseFloat(x.amount)
             })
 
             const allUsers = await this.userService.findMany({})
@@ -544,11 +539,11 @@ export class GameService {
             const userTasks = allUsers.map(async (user) => {
                 const userSnapshots = items.filter(item => item.owner.uuid === user.uuid)
 
-                if(!userSnapshots || userSnapshots.length === 0) {
+                if (!userSnapshots || userSnapshots.length === 0) {
                     return true
                 }
 
-                const inventoryMap: {[key: string]: {inv: InventoryEntity, snaps: SnapshotItemEntity[]}} = {}
+                const inventoryMap: { [key: string]: { inv: InventoryEntity, snaps: SnapshotItemEntity[] } } = {}
 
                 this.ensureLock(`snaplock-${user.uuid}`)
                 const slock = this.locks.get(`snaplock-${user.uuid}`)
@@ -575,26 +570,26 @@ export class GameService {
                     }
                 })))
 
-                const existingInvItems = await this.inventoryService.findMany({where: {owner: user.uuid}, relations: ['owner', 'material']})
+                const existingInvItems = await this.inventoryService.findMany({ where: { owner: user.uuid }, relations: ['owner', 'material'] })
 
                 // update inventory item and delete snapshot item on success
                 await Promise.all(Object.keys(inventoryMap).map(async (id: string) => {
                     const newItem = inventoryMap[id]
                     const existingItem = existingInvItems.find((x) => x.id === id)
                     try {
-                        if(!existingItem) {
+                        if (!existingItem) {
                             await this.inventoryService.create(newItem.inv)
                         } else {
-                            await this.inventoryService.update(existingItem.id, {amount: (Number.parseFloat(existingItem.amount) + Number.parseFloat(newItem.inv.amount)).toString()})
+                            await this.inventoryService.update(existingItem.id, { amount: (Number.parseFloat(existingItem.amount) + Number.parseFloat(newItem.inv.amount)).toString() })
                         }
 
                         try {
                             await this.snapshotService.removeAll(newItem.snaps)
-                        } catch(e) {
+                        } catch (e) {
                             this.logger.error(`Bank:: error deleting snapshot while banking ${newItem.inv}`, null, this.context)
                             this.logger.error(e, null, this.context)
                         }
-                    } catch(e) {
+                    } catch (e) {
                         this.logger.error(`Bank:: error updating user inventory ${newItem.inv}`, null, this.context)
                         this.logger.error(e, null, this.context)
                     }

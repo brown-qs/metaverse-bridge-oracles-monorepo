@@ -1,8 +1,9 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import {Injectable} from '@nestjs/common';
-import { FindConditions, FindManyOptions, FindOneOptions, Repository } from 'typeorm';
+import { FindConditions, FindManyOptions, FindOneOptions, ObjectID, Repository } from 'typeorm';
 import { TextureEntity } from './texture.entity';
 import { AssetType, StringAssetType } from '../common/enums/AssetType';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 @Injectable()
 export class TextureService {
@@ -31,9 +32,9 @@ export class TextureService {
         return u;
     }
 
-    public async update(texture: TextureEntity): Promise<TextureEntity> {
-        const u = await this.repository.save(texture)
-        return u
+    public async update(criteria: string | number | string[] | Date | ObjectID | number[] | Date[] | ObjectID[] | FindConditions<TextureEntity>, partialEntity: QueryDeepPartialEntity<TextureEntity>): Promise<number> {
+        const u = await this.repository.update(criteria, partialEntity)
+        return u.affected ?? 0
     }
 
     public async exists(conditions: FindConditions<TextureEntity>): Promise<boolean> {

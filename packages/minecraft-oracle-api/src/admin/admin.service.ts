@@ -110,9 +110,9 @@ export class AdminService {
 
     public async setVIP(user: {uuid: string}, vip: boolean) {
 
-        console.log(user, vip, typeof vip)
+        //console.log(user, vip, typeof vip)
         const res = await this.userService.update(user.uuid, {vip})
-        console.log(res)
+        //console.log(res)
 
         return (res.affected ?? 1) > 0
     }

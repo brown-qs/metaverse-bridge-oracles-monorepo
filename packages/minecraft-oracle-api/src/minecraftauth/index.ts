@@ -646,7 +646,7 @@ export class MicrosoftAccount extends Account {
     }
 
     async authFlow(authCode: string) {
-        console.log(authCode)
+        //console.log(authCode)
         this.authCode = authCode;
         let resp = await MicrosoftAuth.authFlow(this.authCode);
         this.refreshToken = resp.refresh_token;

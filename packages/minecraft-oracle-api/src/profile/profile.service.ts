@@ -1,16 +1,18 @@
 
 
-import {Inject, Injectable} from '@nestjs/common';
+import { Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { ProfileDto } from './dtos/profile.dto';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { AssetService } from '../asset/asset.service';
-import { SnapshotService } from '../snapshot/snapshot.service';
 import { UserEntity } from '../user/user.entity';
 import { RecognizedAsset, RecognizedAssetType } from '../config/constants';
 import { ProviderToken } from '../provider/token';
-import { ProfileItemDto, ProfileItemsDto } from './dtos/profileItem.dto';
+import { AssetDto, TextureDto, ThingsDto } from './dtos/things.dto';
 import { GameSessionService } from '../gamesession/gamesession.service';
-import { InventoryService } from 'src/inventory/inventory.service';
+import { InventoryService } from '../inventory/inventory.service';
+import { UserService } from '../user/user.service';
+import { SkinselectDto } from './dtos/skinselect.dto';
+import { SkinService } from '../skin/skin.service';
 
 @Injectable()
 export class ProfileService {
@@ -18,15 +20,17 @@ export class ProfileService {
         private readonly inventoryService: InventoryService,
         private readonly assetService: AssetService,
         private readonly gameSessionService: GameSessionService,
+        private readonly skinService: SkinService,
+        private readonly userService: UserService,
         @Inject(ProviderToken.IMPORTABLE_ASSETS) private importableAssets: RecognizedAsset[],
         @Inject(ProviderToken.ENRAPTURABLE_ASSETS) private enrapturableAssets: RecognizedAsset[],
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
-    ) {}
+    ) { }
 
-    async getPlayerItems(user: UserEntity): Promise<ProfileItemsDto> {
-        const snapshots = await this.inventoryService.findMany({relations:['material', 'owner'], where: {owner: {uuid: user.uuid}}})
-        
-        const resources: ProfileItemDto[] = snapshots.map(snapshot => {
+    async getPlayerItems(user: UserEntity): Promise<ThingsDto> {
+        const snapshots = await this.inventoryService.findMany({ relations: ['material', 'owner'], where: { owner: { uuid: user.uuid } } })
+
+        const resources: AssetDto[] = snapshots.map(snapshot => {
             return {
                 amount: snapshot.amount,
                 assetAddress: snapshot.material.assetAddress,
@@ -38,16 +42,18 @@ export class ProfileService {
             }
         })
 
-        const userAssets = await this.assetService.findMany({where: {owner: user.uuid, pendingIn: false}})
+        const userAssets = await this.assetService.findMany({ where: { owner: user.uuid, pendingIn: false } })
+        const userSkins = await this.skinService.findMany({ where: { owner: user.uuid }, relations: ['texture'] })
 
-        const tickets: ProfileItemDto[] = []
-        const moonsamas: ProfileItemDto[] = []
+        //console.log(userSkins)
+
+        const assets: AssetDto[] = []
 
         userAssets.map(asset => {
             const recongizedEnraptureAsset = this.enrapturableAssets.find(x => x.address.toLowerCase() === asset.assetAddress.toLowerCase())
-            
+
             if (!!recongizedEnraptureAsset && recongizedEnraptureAsset.type.valueOf() === RecognizedAssetType.MOONSAMA.valueOf()) {
-                moonsamas.push({
+                assets.push({
                     amount: asset.amount,
                     assetAddress: asset.assetAddress.toLowerCase(),
                     assetType: asset.assetType,
@@ -61,7 +67,7 @@ export class ProfileService {
             }
 
             if (!!recongizedEnraptureAsset && recongizedEnraptureAsset.type.valueOf() === RecognizedAssetType.TICKET.valueOf() && asset.assetId === recongizedEnraptureAsset.id) {
-                tickets.push({
+                assets.push({
                     amount: asset.amount,
                     assetAddress: asset.assetAddress.toLowerCase(),
                     assetType: asset.assetType,
@@ -75,9 +81,9 @@ export class ProfileService {
             }
 
             const recongizedImportAsset = this.importableAssets.find(x => x.address.toLowerCase() === asset.assetAddress.toLowerCase())
-            
+
             if (!!recongizedImportAsset && recongizedImportAsset.type.valueOf() === RecognizedAssetType.MOONSAMA.valueOf()) {
-                moonsamas.push({
+                assets.push({
                     amount: asset.amount,
                     assetAddress: asset.assetAddress.toLowerCase(),
                     assetType: asset.assetType,
@@ -91,7 +97,7 @@ export class ProfileService {
             }
 
             if (!!recongizedImportAsset && recongizedImportAsset.type.valueOf() === RecognizedAssetType.TICKET.valueOf() && asset.assetId === recongizedImportAsset.id) {
-                tickets.push({
+                assets.push({
                     amount: asset.amount,
                     assetAddress: asset.assetAddress.toLowerCase(),
                     assetType: asset.assetType,
@@ -105,10 +111,22 @@ export class ProfileService {
             }
         })
 
+        const textures: TextureDto[] = userSkins.map(skin => {
+            return {
+                assetAddress: skin.texture.assetAddress,
+                assetId: skin.texture.assetId,
+                assetType: skin.texture.assetType,
+                equipped: skin.equipped,
+                selectable: true,
+                textureData: skin.texture.textureData,
+                textureSignature: skin.texture.textureSignature
+            }
+        })
+
         return {
             resources,
-            tickets,
-            moonsamas
+            assets,
+            textures
         }
     }
 
@@ -128,8 +146,44 @@ export class ProfileService {
         }
     }
 
+    public async userThings(user: UserEntity) {
+        const userfull = await this.userService.findOne({ uuid: user.uuid }, { relations: ['skins', 'assets'] })
+        return {
+            assets: userfull.assets ?? [],
+            skins: userfull.skins ?? []
+        }
+
+    }
+
     public async getGameInProgress(): Promise<boolean> {
         return !!(await this.gameSessionService.getOngoing())
+    }
+
+    public async skinSelect(user: UserEntity, dto: SkinselectDto): Promise<boolean> {
+        const skins = await this.skinService.findMany({ where: { owner: { uuid: user.uuid } }, relations: ['texture'] })
+
+        const selectedIndex = skins.findIndex(skin => {
+            return skin.texture.assetAddress.toLowerCase() === dto.assetAddress.toLowerCase() && skin.texture.assetId === dto.assetId && skin.texture.assetType.valueOf() === dto.assetType
+        })
+
+        if (selectedIndex < 0) {
+            throw new UnprocessableEntityException('Invalid skin select request params')
+        }
+
+        await Promise.all(skins.map(async (skin, i) => {
+            if (i === selectedIndex) {
+                //console.log('selected')
+                await this.skinService.update(skin.id, {equipped: true})
+            } else {
+                //console.log('not selected', skin.equipped)
+                if (skin.equipped) {
+                    //console.log('equipped')
+                    await this.skinService.update(skin.id, {equipped: false})
+                }
+            }
+        }))
+
+        return true
     }
 
 }

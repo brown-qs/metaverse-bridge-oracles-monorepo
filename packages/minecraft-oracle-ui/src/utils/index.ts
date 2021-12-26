@@ -5,6 +5,8 @@ import { Contract } from '@ethersproject/contracts';
 import { BigNumber } from '@ethersproject/bignumber';
 import { ChainId } from '../constants';
 import { hexZeroPad, hexlify, hexValue } from '@ethersproject/bytes';
+import { InGameItem } from '../hooks/multiverse/useInGameItems';
+import { RecognizedAssetType, RECOGNIZED_ASSETS } from '../assets/data/recognized';
 
 export * as marketplace from './marketplace';
 export * as subgraph from './subgraph';
@@ -158,3 +160,26 @@ export const parseTokenUri = (uri?: string, tokenID?: string | number) => {
 
   return uri;
 };
+
+export const countRecognizedAssets = (assets: InGameItem[]) => {
+  
+  let assetCounter = {
+    moonsamaNum: 0,
+    ticketNum: 0
+  }
+
+  assets.map(asset => {
+    const recasset = RECOGNIZED_ASSETS[asset.assetAddress.toLowerCase()]
+    if (!!recasset && recasset.type.valueOf() === RecognizedAssetType.MOONSAMA) {
+      assetCounter.moonsamaNum += 1
+      return
+    }
+
+    if (!!recasset && recasset.type.valueOf() === RecognizedAssetType.TICKET) {
+      assetCounter.ticketNum += 1
+      return
+    }
+  })
+
+  return assetCounter
+}

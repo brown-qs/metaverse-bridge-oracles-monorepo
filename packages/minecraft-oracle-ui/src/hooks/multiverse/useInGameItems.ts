@@ -5,6 +5,12 @@ import { useAuth } from 'hooks';
 import { StaticTokenData, useTokenStaticDataCallbackArray } from 'hooks/useTokenStaticDataCallback/useTokenStaticDataCallback';
 import { stringToStringAssetType } from 'utils/subgraph';
 
+import IronLogo from "../../assets/images/resource/iron.png";
+import GoldLogo from "../../assets/images/resource/gold.png";
+import LogLogo from "../../assets/images/resource/log.png";
+import ExperienceOrb from "../../assets/images/resource/experience_orb.png";
+import Cobblestone from "../../assets/images/resource/cobblestone.png";
+
 export interface InGameItem {
     name: string
     assetAddress: string
@@ -18,21 +24,36 @@ export interface InGameItem {
     meta: any
 }
 
+export interface InGameTexture {
+    assetAddress: string
+    assetId: string
+    assetType: string
+    selectable: boolean
+    equipped: boolean
+    hash?: string
+    textureData: string
+    textureSignature: string,
+    decodedData?: any,
+    textureURL?: string,
+    coverURL?: string,
+    renderURL?: string
+}
+
 export type InGameItemWithStatic = InGameItem & {staticData: StaticTokenData} 
 
 export interface ProfileInGameItems {
-    moonsamas: InGameItem[],
-    tickets: InGameItem[],
+    assets: InGameItem[],
+    textures: InGameTexture[],
     resources: InGameItem[]
 }
 
 export interface ProfileInGameItemsWithStatic {
-    moonsamas: InGameItemWithStatic[],
-    tickets: InGameItemWithStatic[],
+    assets: InGameItemWithStatic[],
+    textures: InGameTexture[],
     resources: InGameItemWithStatic[]
 }
 
-export function useInGameItems() {
+export function useInGameItems(trigger: string | undefined = undefined) {
     const { authData, setAuthData } =  useAuth();
     const blocknumber = useBlockNumber();
     const staticCallback = useTokenStaticDataCallbackArray();
@@ -61,7 +82,7 @@ export function useInGameItems() {
             setItems(undefined)
             return
         }
-        const melange = [...rawData.moonsamas, ...rawData.tickets, ...rawData.resources]
+        const melange = [...rawData.assets, ...rawData.resources]
         let staticDatas = await staticCallback(
             melange.map(x => {
                 return {
@@ -72,28 +93,17 @@ export function useInGameItems() {
                 }
             })
         );
-        let resultSet: ProfileInGameItemsWithStatic = { moonsamas: [], resources: [], tickets: []}
+        let resultSet: ProfileInGameItemsWithStatic = { assets: [], resources: [], textures: []}
         
-        if (rawData.moonsamas.length > 0) {
-            staticDatas.slice(0, rawData.moonsamas.length).map((sd, i) => {
-                resultSet.moonsamas.push({
-                    ...rawData.moonsamas[i],
+        if (rawData.assets.length > 0) {
+            staticDatas.slice(0, rawData.assets.length).map((sd, i) => {
+                resultSet.assets.push({
+                    ...rawData.assets[i],
                     staticData: sd.staticData,
                     meta: sd.meta
                 })
             });
-            staticDatas = staticDatas.slice(rawData.moonsamas.length)
-        }
-
-        if (rawData.tickets.length > 0) {
-            staticDatas.slice(0, rawData.tickets.length).map((sd, i) => {
-                resultSet.moonsamas.push({
-                    ...rawData.tickets[i],
-                    staticData: sd.staticData,
-                    meta: sd.meta
-                })
-            });
-            staticDatas = staticDatas.slice(rawData.tickets.length)
+            staticDatas = staticDatas.slice(rawData.assets.length)
         }
 
         if (rawData.resources.length > 0) {
@@ -106,13 +116,38 @@ export function useInGameItems() {
             });
         }
 
+        resultSet.textures = await Promise.all(rawData.textures.map(async (texture) => {
+            const decoded = Buffer.from(texture.textureData, 'base64').toString()
+            const textureURL = !!decoded ? JSON.parse(decoded)?.textures?.SKIN?.url : undefined
+            const coverURL = !!textureURL ? `https://api.mineskin.org/render/skin?url=${textureURL}` : undefined
+
+            /*
+            const resp = await axios.post<{uuid: string}>(
+                `https://api.mineskin.org/generate/url`,
+                {
+                    name: 'string',
+                    visibility: 1,
+                    url: textureURL
+                });
+
+            const renderURL = `https://api.mineskin.org/render/texture/${resp.data.uuid}`
+            */
+
+            texture['decodedData'] = decoded
+            texture['textureURL'] = textureURL
+            texture['coverURL'] = coverURL
+            //texture['renderURL'] = renderURL
+
+            return texture
+        }))
+
         setItems(resultSet)
         
-    }, [blocknumber, jwt])
+    }, [blocknumber, jwt, trigger])
 
     useEffect(() => {
         getUserItems()
-    }, [blocknumber, jwt])
+    }, [blocknumber, jwt, trigger])
 
     return items
 }

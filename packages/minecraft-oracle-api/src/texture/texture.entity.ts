@@ -1,14 +1,12 @@
 import {
     IsBoolean,
     IsEnum,
-    IsNotEmpty,
     IsString
 } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Column, Entity, Index, ManyToOne, OneToOne, PrimaryColumn } from 'typeorm';
-import { UserEntity } from '../user/user.entity';
+import { Column, Entity, Index, OneToMany, PrimaryColumn } from 'typeorm';
 import { StringAssetType } from '../common/enums/AssetType';
 import { TextureType } from './texturetype.enum';
+import { SkinEntity } from '../skin/skin.entity';
 
 @Entity()
 @Index(['assetType', 'assetAddress', 'assetId'])
@@ -52,10 +50,14 @@ export class TextureEntity {
     @Column()
     textureSignature: string;
 
+    @IsString()
+    @Column({nullable: true})
+    textureUuid?: string;
+
     @IsBoolean()
     @Column({default: false})
     auction?: boolean;
 
-    @ManyToOne(() => UserEntity, (user: UserEntity) => user.textures)
-    owner?: UserEntity;
+    @OneToMany(() => SkinEntity, (skin: SkinEntity) => skin.texture)
+    skins?: SkinEntity[];
 }
