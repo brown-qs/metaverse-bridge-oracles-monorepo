@@ -63,6 +63,10 @@ export class TextureDto {
     @IsBoolean()
     selectable: boolean
 
+    @ApiProperty({ description: 'Name for the skin'})
+    @IsString()
+    name?: string
+
     @ApiProperty({ description: 'Whether the skin is the currently equipped one.'})
     @IsBoolean()
     equipped: boolean

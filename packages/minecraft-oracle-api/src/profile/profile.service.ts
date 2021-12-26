@@ -119,7 +119,8 @@ export class ProfileService {
                 equipped: skin.equipped,
                 selectable: true,
                 textureData: skin.texture.textureData,
-                textureSignature: skin.texture.textureSignature
+                textureSignature: skin.texture.textureSignature,
+                name: skin.texture.name
             }
         })
 

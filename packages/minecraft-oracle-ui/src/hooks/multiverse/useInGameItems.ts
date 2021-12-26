@@ -36,7 +36,8 @@ export interface InGameTexture {
     decodedData?: any,
     textureURL?: string,
     coverURL?: string,
-    renderURL?: string
+    renderURL?: string,
+    name?: string
 }
 
 export type InGameItemWithStatic = InGameItem & {staticData: StaticTokenData} 
