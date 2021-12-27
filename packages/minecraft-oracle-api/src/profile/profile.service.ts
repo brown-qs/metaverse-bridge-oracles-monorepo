@@ -13,7 +13,6 @@ import { InventoryService } from '../inventory/inventory.service';
 import { UserService } from '../user/user.service';
 import { SkinselectDto } from './dtos/skinselect.dto';
 import { SkinService } from '../skin/skin.service';
-import { string } from 'fp-ts';
 
 @Injectable()
 export class ProfileService {
@@ -146,8 +145,7 @@ export class ProfileService {
             allowedToPlay: user.allowedToPlay,
             serverId: user.serverId,
             preferredServer: user.preferredServer,
-            numTicket: user.numTicket,
-            numMoonsama: user.numMoonsama,
+            numGamePassAsset: user.numGamePassAsset,
             vip: user.vip ?? false,
             blacklisted: user.blacklisted
         }

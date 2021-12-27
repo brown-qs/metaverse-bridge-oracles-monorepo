@@ -21,11 +21,8 @@ export class ProfileDto {
     @ApiProperty({ description: 'Is the user allowed to play'})
     allowedToPlay: boolean
 
-    @ApiProperty({ description: 'Number of tickets the user has imported/burned'})
-    numTicket: number
-
-    @ApiProperty({ description: 'Number of moonsamas the user has imported'})
-    numMoonsama: number
+    @ApiProperty({ description: 'Number of game pass eligible assets the user owns'})
+    numGamePassAsset: number
 
     @ApiProperty({ description: 'Perferred server of user'})
     preferredServer: string

@@ -14,6 +14,7 @@ import { PlaySessionEntity } from '../src/playsession/playsession.entity'
 import { PlaySessionStatEntity } from '../src/playsession/playsessionstat.entity'
 import { SkinEntity } from '../src/skin/skin.entity'
 import { StringAssetType } from '../src/common/enums/AssetType'
+import { IMPORTABLE_ASSETS } from '../src/config/constants'
 
 config()
 
@@ -40,6 +41,8 @@ async function main() {
         connection = await connection.connect()
     }
 
+    const IMPORTABLEASSETS = IMPORTABLE_ASSETS.filter(x => x.chainId.valueOf() === 1285)
+
     try {
         const users = await connection.manager.find<UserEntity>(UserEntity, { relations: ['assets'] })
         const defaultFemale = await connection.manager.findOne<TextureEntity>(TextureEntity, { where: { assetAddress: '0x0', assetId: '0', assetType: StringAssetType.NONE } })
@@ -48,7 +51,8 @@ async function main() {
         for (let i = 0; i < users.length; i++) {
             const user = users[i]
             console.log('processing user', user.uuid)
-            await Promise.all(user.assets.map(async (asset) => {
+            for (let j = 0; j < user.assets.length; j++) {
+                const asset = user.assets[j]
                 const texture = await connection.manager.findOne<TextureEntity>(TextureEntity, { where: { assetId: asset.assetId, assetAddress: asset.assetAddress, assetType: asset.assetType } })
                 if (!!texture) {
                     console.log('    found texture', `${asset.assetAddress}`, `${asset.assetId}`)
@@ -56,37 +60,44 @@ async function main() {
                     await connection.manager.save<SkinEntity>(entity)
                     console.log('        added')
                 }
-            }))
-            console.log('    default textures')
-            const x = await connection.manager.create<SkinEntity>(SkinEntity, {
-                id: SkinEntity.toId(user.uuid, '0x0', '0'),
-                owner: user,
-                texture: defaultFemale
-            })
-            const y = await connection.manager.create<SkinEntity>(SkinEntity, {
-                id: SkinEntity.toId(user.uuid, '0x0', '1'),
-                owner: user,
-                texture: defaultMale
-            })
-            await connection.manager.save<SkinEntity[]>([x, y])
-            console.log('        added')
+                const found = IMPORTABLEASSETS.find(x => x.address.toLowerCase() == asset.assetAddress.toLowerCase())
+                if (!!found && found.gamepass) {
+                    user.numGamePassAsset = (user.numGamePassAsset ?? 0) + 1
+                }
+            }
+            if (user.numGamePassAsset > 0) {
+                console.log('    default textures')
+                const x = await connection.manager.create<SkinEntity>(SkinEntity, {
+                    id: SkinEntity.toId(user.uuid, '0x0', '0'),
+                    owner: user,
+                    texture: defaultFemale
+                })
+                const y = await connection.manager.create<SkinEntity>(SkinEntity, {
+                    id: SkinEntity.toId(user.uuid, '0x0', '1'),
+                    owner: user,
+                    texture: defaultMale
+                })
+                await connection.manager.save<SkinEntity[]>([x, y])
+                console.log('        added')
+            }
 
-           const skinentities =  await connection.manager.find<SkinEntity>(SkinEntity, {where: {owner: {uuid: user.uuid}}, relations: ['owner', 'texture']})
+            const skinentities = await connection.manager.find<SkinEntity>(SkinEntity, { where: { owner: { uuid: user.uuid } }, relations: ['owner', 'texture'] })
 
-           const equipped = skinentities.find(x => x.equipped)
+            const equipped = skinentities.find(x => x.equipped)
 
-           if (!equipped) {
-               const foundmoonsama = skinentities.find(x => x.texture.assetAddress === '0xb654611f84a8dc429ba3cb4fda9fad236c505a1a')
-               if (!!foundmoonsama) {
-                   await connection.manager.update<SkinEntity>(SkinEntity, {id: foundmoonsama.id}, {equipped: true})
-                   console.log('    default set to', foundmoonsama.id)
-               } else {
-                   await connection.manager.update<SkinEntity>(SkinEntity, {id: SkinEntity.toId(user.uuid, '0x0', '0')}, {equipped: true})
-                   console.log('    default set to', SkinEntity.toId(user.uuid, '0x0', '0'))
-               }
-           }
-
+            if (skinentities.length > 0 && !equipped) {
+                const foundmoonsama = skinentities.find(x => x.texture.assetAddress === '0xb654611f84a8dc429ba3cb4fda9fad236c505a1a')
+                if (!!foundmoonsama) {
+                    await connection.manager.update<SkinEntity>(SkinEntity, { id: foundmoonsama.id }, { equipped: true })
+                    console.log('    default set to', foundmoonsama.id)
+                } else {
+                    await connection.manager.update<SkinEntity>(SkinEntity, { id: SkinEntity.toId(user.uuid, '0x0', '0') }, { equipped: true })
+                    console.log('    default set to', SkinEntity.toId(user.uuid, '0x0', '0'))
+                }
+            }
+            await connection.manager.update<UserEntity>(UserEntity, { uuid: user.uuid}, { numGamePassAsset: user.numGamePassAsset })
         }
+
     } catch (err) {
         console.log(err)
     }

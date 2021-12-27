@@ -26,7 +26,7 @@ import { ServerIdDto } from './dtos/serverId.dto';
 import { ProfileService } from '../profile/profile.service';
 import { SkinRequestDto } from './dtos/skins.dto';
 import { TextureEntity } from '../texture/texture.entity';
-import { SkinselectDto } from 'src/profile/dtos/skinselect.dto';
+import { SkinselectDto } from '../profile/dtos/skinselect.dto';
 
 @ApiTags('game')
 @Controller('game')

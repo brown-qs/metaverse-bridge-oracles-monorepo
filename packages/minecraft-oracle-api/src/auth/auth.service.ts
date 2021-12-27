@@ -104,6 +104,7 @@ export class AuthService {
             const redirectLink = `${successfulAuthRedirect}/${jwt}`;
             
             // check default skins
+            /*
             (async () => {
                 try {
                     const userFull = await this.userService.findOne({uuid: user.uuid}, {relations: ['skins']})
@@ -127,6 +128,7 @@ export class AuthService {
                     this.logger.warn(`authLogin:: error trying to set default skins for user ${user.uuid}`, this.context)
                 }
             })()
+            */
 
             this.logger.log(`authLogin:: successful login for user (${user.uuid}, ${user.userName}). Redirect link: ${redirectLink}`, this.context)
 
