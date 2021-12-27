@@ -13,9 +13,13 @@ import { InventoryService } from '../inventory/inventory.service';
 import { UserService } from '../user/user.service';
 import { SkinselectDto } from './dtos/skinselect.dto';
 import { SkinService } from '../skin/skin.service';
+import { string } from 'fp-ts';
 
 @Injectable()
 export class ProfileService {
+
+    private readonly context: string;
+
     constructor(
         private readonly inventoryService: InventoryService,
         private readonly assetService: AssetService,
@@ -25,7 +29,9 @@ export class ProfileService {
         @Inject(ProviderToken.IMPORTABLE_ASSETS) private importableAssets: RecognizedAsset[],
         @Inject(ProviderToken.ENRAPTURABLE_ASSETS) private enrapturableAssets: RecognizedAsset[],
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
-    ) { }
+    ) {
+        this.context = ProfileService.name
+    }
 
     async getPlayerItems(user: UserEntity): Promise<ThingsDto> {
         const snapshots = await this.inventoryService.findMany({ relations: ['material', 'owner'], where: { owner: { uuid: user.uuid } } })
@@ -168,18 +174,19 @@ export class ProfileService {
         })
 
         if (selectedIndex < 0) {
+            this.logger.error('skinSelect:: skin select request params', null, this.context)
             throw new UnprocessableEntityException('Invalid skin select request params')
         }
 
         await Promise.all(skins.map(async (skin, i) => {
             if (i === selectedIndex) {
                 //console.log('selected')
-                await this.skinService.update(skin.id, {equipped: true})
+                await this.skinService.update(skin.id, { equipped: true })
             } else {
                 //console.log('not selected', skin.equipped)
                 if (skin.equipped) {
                     //console.log('equipped')
-                    await this.skinService.update(skin.id, {equipped: false})
+                    await this.skinService.update(skin.id, { equipped: false })
                 }
             }
         }))
