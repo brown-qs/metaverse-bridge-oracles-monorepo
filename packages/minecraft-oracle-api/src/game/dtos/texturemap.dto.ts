@@ -1,4 +1,4 @@
-import { StringAssetType } from "src/common/enums/AssetType";
+import { StringAssetType } from "../../common/enums/AssetType";
 import { TextureType } from "../../texture/texturetype.enum";
 
 export type PlayerSkinDto = {

@@ -38,7 +38,8 @@ export type RecognizedAsset = {
     address: string,
     type: RecognizedAssetType,
     id: string | undefined,
-    name: string
+    name: string,
+    gamepass: boolean,
 }
 // lwoercase
 export const IMPORTABLE_ASSETS: RecognizedAsset[] = [
@@ -47,14 +48,16 @@ export const IMPORTABLE_ASSETS: RecognizedAsset[] = [
       address: '0xb654611F84A8dc429BA3cb4FDA9Fad236C505a1a'.toLowerCase(),
       type: RecognizedAssetType.MOONSAMA,
       id: undefined,
-      name: 'Moonsama'
+      name: 'Moonsama',
+      gamepass: true
     }, /* moonsama */
     {
       address: '0x1974eEAF317Ecf792ff307F25A3521C35eECde86'.toLowerCase(),
       id: '1',
       type: RecognizedAssetType.TICKET,
       chainId: ChainId.MOONRIVER,
-      name: 'VIP ticket'
+      name: 'VIP ticket',
+      gamepass: true
     }, /* tickets */
     /*
     {

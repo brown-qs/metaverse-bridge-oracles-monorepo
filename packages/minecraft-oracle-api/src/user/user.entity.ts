@@ -54,11 +54,7 @@ export class UserEntity {
 
     @IsNumber()
     @Column({ default: 0 })
-    numTicket?: number;
-
-    @IsBoolean()
-    @Column({ default: 0 })
-    numMoonsama?: number;
+    numGamePassAsset?: number;
 
     @Column({nullable: true})
     @IsString()

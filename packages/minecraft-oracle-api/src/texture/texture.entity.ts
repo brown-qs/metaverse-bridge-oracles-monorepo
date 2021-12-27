@@ -60,6 +60,10 @@ export class TextureEntity {
 
     @IsBoolean()
     @Column({default: false})
+    gamepass?: boolean;
+
+    @IsBoolean()
+    @Column({default: false})
     auction?: boolean;
 
     @OneToMany(() => SkinEntity, (skin: SkinEntity) => skin.texture)

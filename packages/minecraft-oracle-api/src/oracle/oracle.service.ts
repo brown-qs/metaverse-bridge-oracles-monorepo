@@ -22,6 +22,7 @@ import { InventoryService } from '../inventory/inventory.service';
 import { InventoryEntity } from '../inventory/inventory.entity';
 import { SkinService } from '../skin/skin.service';
 import { SkinEntity } from '../skin/skin.entity';
+import { StringAssetType } from '../common/enums/AssetType';
 
 @Injectable()
 export class OracleService {
@@ -319,8 +320,8 @@ export class OracleService {
         }
 
         const recognizedAsset = this.importableAssets.find(x => x.address === assetEntry.assetAddress.toLowerCase())
-        console.log(recognizedAsset)
-        console.log(user.uuid, hash, RecognizedAssetType.MOONSAMA.valueOf(), RecognizedAssetType.TICKET.valueOf(), recognizedAsset?.id, JSON.stringify(mAsset))
+        //console.log(recognizedAsset)
+        //console.log(user.uuid, hash, RecognizedAssetType.MOONSAMA.valueOf(), RecognizedAssetType.TICKET.valueOf(), recognizedAsset?.id, JSON.stringify(mAsset))
 
         // assign skin if asset unlocks one
         const texture = await this.textureService.findOne({ assetAddress: assetEntry.assetAddress.toLowerCase(), assetId: assetEntry.assetId })
@@ -330,28 +331,40 @@ export class OracleService {
                 id: SkinEntity.toId(user.uuid, texture.assetAddress, texture.assetId),
                 owner: user,
                 equipped: false,
-                texture   
+                texture
             })
         } else {
             this.logger.warn('ImportConfirm: Moonsama but no texture found!!!', this.context)
         }
 
-        // if asset is moonsama, user can play
-        if (!!recognizedAsset && recognizedAsset.type.valueOf() === RecognizedAssetType.MOONSAMA.valueOf() && (recognizedAsset.id === undefined || recognizedAsset.id === mAsset.asset.assetId.toString())) {
-            this.logger.log(`ImportConfirm: setting moonsama for user ${user.uuid}: ${hash}`, this.context)
+        if (!!recognizedAsset && recognizedAsset.gamepass) {
             user.allowedToPlay = true
-            user.numMoonsama = (user.numMoonsama ?? 0) + 1
             user.role = user.role?.valueOf() === UserRole.NONE.valueOf() ? UserRole.PLAYER : user.role
-            await this.userService.update(user.uuid, { allowedToPlay: user.allowedToPlay, role: user.role, numMoonsama: user.numMoonsama })
-        }
+            user.numGamePassAsset = (user.numGamePassAsset ?? 0) + 1
 
-        // if asset is VIP ticket, user can play
-        if (!!recognizedAsset && recognizedAsset.type.valueOf() === RecognizedAssetType.TICKET.valueOf() && (recognizedAsset.id === undefined || recognizedAsset.id === mAsset.asset.assetId.toString())) {
-            this.logger.log(`ImportConfirm: setting ticket for user ${user.uuid}: ${hash}`, this.context)
-            user.allowedToPlay = true
-            user.numTicket = (user.numTicket ?? 0) + 1
-            user.role = user.role?.valueOf() === UserRole.NONE.valueOf() ? UserRole.PLAYER : user.role
-            await this.userService.update(user.uuid, { allowedToPlay: user.allowedToPlay, role: user.role, numTicket: user.numTicket })
+            // this means user had no skins/in game eligible assets imported before
+            if (user.numGamePassAsset === 1) {
+                try {
+                    await this.skinService.createMultiple([
+                        {
+                            id: SkinEntity.toId(user.uuid, '0x0', '0'),
+                            owner: user,
+                            equipped: true,
+                            texture: await this.textureService.findOne({ assetAddress: '0x0', assetId: '0', assetType: StringAssetType.NONE })
+                        },
+                        {
+                            id: SkinEntity.toId(user.uuid, '0x0', '1'),
+                            owner: user,
+                            equipped: false,
+                            texture: await this.textureService.findOne({ assetAddress: '0x0', assetId: '1', assetType: StringAssetType.NONE })
+                        }
+                    ])
+                } catch (error) {
+                    this.logger.warn(`ImportConfirm: error trying to set default skins for user ${user.uuid}`, this.context)
+                }
+            }
+
+            await this.userService.update(user.uuid, { allowedToPlay: user.allowedToPlay, role: user.role })
         }
 
         const finalentry = await this.assetService.create({ ...assetEntry, pendingIn: false })
@@ -433,32 +446,44 @@ export class OracleService {
 
         const recognizedAsset = this.importableAssets.find(x => x.address === assetEntry.assetAddress.toLowerCase())
 
-        if (!!recognizedAsset && recognizedAsset.type.valueOf() === RecognizedAssetType.MOONSAMA.valueOf() && (recognizedAsset.id === undefined || recognizedAsset.id === assetEntry.assetId.toString())) {
-            
-            // if it was a moonsama we remove the skin
-            const skin = await this.skinService.findOne({id: SkinEntity.toId(user.uuid, assetEntry.assetAddress, assetEntry.assetId)})
-            if (!!skin) {
-                const removed = await this.skinService.remove(skin)
-                if (removed.equipped) {
-                    await this.skinService.update({id: SkinEntity.toId(user.uuid, '0x0', '0')}, {equipped: true})
-                }
-            }
-            user.numMoonsama = (user.numMoonsama ?? 0) > 0 ? user.numMoonsama - 1 : 0
-            user.allowedToPlay = (user.numTicket ?? 0) > 0 || (user.numMoonsama ?? 0) > 0
+        if (!!recognizedAsset && recognizedAsset.gamepass) {
+            user.numGamePassAsset = (user.numGamePassAsset ?? 0) > 0 ? user.numGamePassAsset - 1 : 0
+
+            user.allowedToPlay = (user.numGamePassAsset ?? 0) > 0
             if (!user.role || user.role?.valueOf() !== UserRole.ADMIN.valueOf()) {
                 user.role = user.allowedToPlay ? UserRole.PLAYER : UserRole.NONE
             }
-            await this.userService.create(user)
+            await this.userService.update(user.uuid, { numGamePassAsset: user.numGamePassAsset, allowedToPlay: user.allowedToPlay, role: user.role })
         }
 
-        if (!!recognizedAsset && recognizedAsset.type.valueOf() === RecognizedAssetType.TICKET.valueOf() && (recognizedAsset.id === undefined || recognizedAsset.id === assetEntry.assetId.toString())) {
-            user.numTicket = (user.numTicket ?? 0) > 0 ? user.numTicket - 1 : 0
-            user.allowedToPlay = (user.numTicket ?? 0) > 0 || (user.numMoonsama ?? 0) > 0
-            if (!user.role || user.role?.valueOf() !== UserRole.ADMIN.valueOf()) {
-                user.role = user.allowedToPlay ? UserRole.PLAYER : UserRole.NONE
+        const skin = await this.skinService.findOne({ id: SkinEntity.toId(user.uuid, assetEntry.assetAddress, assetEntry.assetId) })
+
+        if (!!skin) {
+            const removed = await this.skinService.remove(skin)
+            if (removed.equipped && user.allowedToPlay) {
+                await this.skinService.update({ id: SkinEntity.toId(user.uuid, '0x0', '0') }, { equipped: true })
             }
-            await this.userService.create(user)
         }
+
+        if (!user.allowedToPlay) {
+            await this.skinService.removeMultiple(
+                [
+                    {
+                        id: SkinEntity.toId(user.uuid, '0x0', '0'),
+                        owner: user,
+                        equipped: true,
+                        texture: await this.textureService.findOne({ assetAddress: '0x0', assetId: '0', assetType: StringAssetType.NONE })
+                    },
+                    {
+                        id: SkinEntity.toId(user.uuid, '0x0', '1'),
+                        owner: user,
+                        equipped: false,
+                        texture: await this.textureService.findOne({ assetAddress: '0x0', assetId: '1', assetType: StringAssetType.NONE })
+                    }
+                ]
+            )
+        }
+
         await this.assetService.remove(assetEntry)
         return true
     }
