@@ -1,3 +1,4 @@
+import { StringAssetType } from "src/common/enums/AssetType";
 import { TextureType } from "../../texture/texturetype.enum";
 
 export type PlayerSkinDto = {
@@ -6,5 +7,7 @@ export type PlayerSkinDto = {
     type: TextureType
     accessories: string[] | undefined
     assetId: string
+    assetAddress: string
+    assetType: StringAssetType
     equipped: boolean
 }
