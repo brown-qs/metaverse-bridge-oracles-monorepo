@@ -56,6 +56,8 @@ export class GameService {
                     type: skin.texture.type,
                     accessories: skin.texture.accessories ?? undefined,
                     assetId: skin.texture.assetId,
+                    assetAddress: skin.texture.assetAddress,
+                    assetType: skin.texture.assetType,
                     equipped: skin.texture.type.valueOf() === TextureType.SKIN.valueOf() && skin.equipped
                 }
             }
