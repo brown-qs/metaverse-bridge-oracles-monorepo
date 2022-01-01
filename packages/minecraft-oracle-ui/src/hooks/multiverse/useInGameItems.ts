@@ -5,12 +5,6 @@ import { useAuth } from 'hooks';
 import { StaticTokenData, useTokenStaticDataCallbackArray } from 'hooks/useTokenStaticDataCallback/useTokenStaticDataCallback';
 import { stringToStringAssetType } from 'utils/subgraph';
 
-import IronLogo from "../../assets/images/resource/iron.png";
-import GoldLogo from "../../assets/images/resource/gold.png";
-import LogLogo from "../../assets/images/resource/log.png";
-import ExperienceOrb from "../../assets/images/resource/experience_orb.png";
-import Cobblestone from "../../assets/images/resource/cobblestone.png";
-
 export interface InGameItem {
     name: string
     assetAddress: string

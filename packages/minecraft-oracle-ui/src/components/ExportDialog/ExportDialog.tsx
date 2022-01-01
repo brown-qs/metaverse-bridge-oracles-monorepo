@@ -219,6 +219,7 @@ export const ExportDialog = () => {
       <>
         <Grid container spacing={1} justifyContent="center">
           <Typography className="form-subheader">Entry hash {exportDialogData?.hash}</Typography>
+          {exportDialogData?.address && <Typography className="form-subheader">Exported to owner {exportDialogData?.address}</Typography>}
           <Grid item md={12} xs={12}>
             <Box className={formBox}>
               <Typography className="form-subheader">Token Details</Typography>
