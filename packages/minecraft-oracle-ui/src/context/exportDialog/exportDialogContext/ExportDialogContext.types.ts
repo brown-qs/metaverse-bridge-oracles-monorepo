@@ -2,6 +2,7 @@ import { Asset } from 'hooks/marketplace/types';
 
 export type ExportDialogData = {
   asset?: Asset;
+  address?: string;
   hash?: string
 } | undefined;
 
