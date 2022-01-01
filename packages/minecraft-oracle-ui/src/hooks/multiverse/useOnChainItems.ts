@@ -60,6 +60,8 @@ export const useOnChainItems = (trigger: string | undefined = undefined) => {
 
         let assets: (AssetWithBalance | undefined)[] = []
 
+        console.log('collection', collection.display_name)
+
         if(collection.type === 'ERC721') {
           const query = QUERY_USER_ERC721(account)
           const response = await request(collection.subgraph, query);

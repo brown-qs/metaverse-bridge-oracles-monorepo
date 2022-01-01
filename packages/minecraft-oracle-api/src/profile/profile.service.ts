@@ -87,21 +87,11 @@ export class ProfileService {
 
             const recongizedImportAsset = this.importableAssets.find(x => x.address.toLowerCase() === asset.assetAddress.toLowerCase())
 
-            if (!!recongizedImportAsset && recongizedImportAsset.type.valueOf() === RecognizedAssetType.MOONSAMA.valueOf()) {
-                assets.push({
-                    amount: asset.amount,
-                    assetAddress: asset.assetAddress.toLowerCase(),
-                    assetType: asset.assetType,
-                    assetId: asset.assetId,
-                    name: recongizedImportAsset.name,
-                    exportable: !asset.enraptured,
-                    hash: asset.hash,
-                    summonable: false
-                })
-                return
-            }
-
-            if (!!recongizedImportAsset && recongizedImportAsset.type.valueOf() === RecognizedAssetType.TICKET.valueOf() && asset.assetId === recongizedImportAsset.id) {
+            if (
+                !!recongizedImportAsset
+                && (recongizedImportAsset.type.valueOf() === RecognizedAssetType.MOONSAMA.valueOf() || recongizedImportAsset.type.valueOf() === RecognizedAssetType.TICKET.valueOf())
+                && ((recongizedImportAsset.id !== undefined && recongizedImportAsset.id === asset.assetId) || (recongizedImportAsset.id === undefined))
+            ) {
                 assets.push({
                     amount: asset.amount,
                     assetAddress: asset.assetAddress.toLowerCase(),

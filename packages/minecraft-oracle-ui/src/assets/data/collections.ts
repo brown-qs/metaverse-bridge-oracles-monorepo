@@ -111,6 +111,18 @@ export const collections = {
       enrapturable: false,
       contractURI: 'ipfs://QmSN98qwiFYy3yGUWznm43E5ex3c5RoozkmQqpZBu69fDS',
       subgraph: 'https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/nft-1155-factory'
+    },
+    {
+      chainId: 1285,
+      address: '0xdea45e7c6944cb86a268661349e9c013836c79a2',
+      display_name: 'Multiverse Art',
+      symbol: 'MMA',
+      type: 'ERC1155',
+      ids: undefined,
+      importable: true,
+      enrapturable: false,
+      contractURI: 'ipfs://QmUCMVkJa849UQYN728hyiYm3ZJVPk8yGyiJQ6wwHfLcgz',
+      subgraph: 'https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/nft-1155-multiverseart'
     }
   ]
 };
