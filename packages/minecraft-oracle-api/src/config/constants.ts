@@ -59,6 +59,14 @@ export const IMPORTABLE_ASSETS: RecognizedAsset[] = [
       name: 'VIP ticket',
       gamepass: true
     }, /* tickets */
+    {
+      address: '0xdea45e7c6944cb86a268661349e9c013836c79a2'.toLowerCase(),
+      id: undefined,
+      type: RecognizedAssetType.TICKET,
+      chainId: ChainId.MOONRIVER,
+      name: 'Multiverse Art',
+      gamepass: true
+    }, /* tickets */
     /*
     {
       address: '0x6E9F41ec2a43ECAe0Ada29587D4D40a3e83e4bEB'.toLowerCase(),

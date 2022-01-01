@@ -48,9 +48,15 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
     //On chain Items
     const onChainItems = useOnChainItems();
-    const onChainMoonsamas = onChainItems?.['Moonsama'] || []; //Update with live key
-    const onChainGoldenTickets = onChainItems?.['VIP Ticket'] || []; //Update with live key
-    const onChainResources = onChainItems?.['Moonsama Metaverse Asset Factory'] || []; //Update with live key
+    const onChainMoonsamas = onChainItems?.['Moonsama'] ?? [];
+    const onChainGoldenTickets = onChainItems?.['VIP Ticket'] ?? [];
+    const onChainResources = onChainItems?.['Moonsama Metaverse Asset Factory'] ?? [];
+    const onChainArt = onChainItems?.['Multiverse Art'] ?? [];
+
+    const onChainImportables = [...onChainGoldenTickets, ...onChainMoonsamas, ...onChainArt]
+
+    console.log('onchainart', onChainArt)
+    console.log('onchainmoosamas', onChainMoonsamas)
 
     //In Game Items
     const inGameItems = useInGameItems(fetchtrigger);
@@ -210,7 +216,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                             <div style={{ width: '50%' }}>
                                 <div className={columnTitle}><span className={columnTitleText}>On-chain items: Moonriver account</span></div>
                                 <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
-                                    {!!onChainMoonsamas.length || !!onChainGoldenTickets.length ? (onChainGoldenTickets ?? []).map((item, ind) => {
+                                    {!!onChainImportables.length ? (onChainGoldenTickets ?? []).map((item, ind) => {
                                         return (
                                             <ListItem
                                                 key={`${item?.asset?.assetAddress}-${item?.asset?.assetId}-${ind}`} //update key
@@ -238,7 +244,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                             </ListItem>
                                         );
                                     }).concat(
-                                        (onChainMoonsamas ?? []).map((item, ind) => {
+                                        [...(onChainMoonsamas ?? []), ...(onChainArt ?? [])].map((item, ind) => {
                                             return (
                                                 <ListItem
                                                     key={`${item?.asset?.assetAddress}-${item?.asset?.assetId}-${ind}`} //update key
@@ -250,7 +256,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                             <Media uri={item?.meta?.image} className={itemImage} />
                                                         </ListItemAvatar>
                                                         <ListItemText primary={item?.meta?.name} />
-                                                        <Tooltip title={'Your imported Moonsama will bound to your Minecraft account. It will go back to the sender address when exported.'}>
+                                                        <Tooltip title={`Your imported ${item?.meta?.name} will bound to your Minecraft account. It will go back to the sender address when exported.`}>
                                                             <span>
                                                                 <Button
                                                                     className={transferButtonSmall}

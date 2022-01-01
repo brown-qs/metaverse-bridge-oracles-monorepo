@@ -364,7 +364,7 @@ export class OracleService {
                 }
             }
 
-            await this.userService.update(user.uuid, { allowedToPlay: user.allowedToPlay, role: user.role })
+            await this.userService.update(user.uuid, { allowedToPlay: user.allowedToPlay, role: user.role, numGamePassAsset: user.numGamePassAsset })
         }
 
         const finalentry = await this.assetService.create({ ...assetEntry, pendingIn: false })
@@ -378,7 +378,7 @@ export class OracleService {
         if (!user.usedAddresses.includes(user.lastUsedAddress)) {
             user.usedAddresses.push(user.lastUsedAddress)
         }
-        await this.userService.update(user.uuid, { usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress })
+        await this.userService.update(user.uuid, { usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress, numGamePassAsset: user.numGamePassAsset })
 
         return true
     }
