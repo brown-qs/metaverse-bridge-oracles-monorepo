@@ -10,6 +10,7 @@ import { OracleController } from './oracle.controller';
 import { OracleService } from './oracle.service';
 import { InventoryModule } from '../inventory/inventory.module';
 import { SkinModule } from '../skin/skin.module';
+import { NftModule } from '../nft/nft.module';
 
 @Module({
     imports: [
@@ -21,7 +22,8 @@ import { SkinModule } from '../skin/skin.module';
         InventoryModule,
         GameSessionModule,
         SummonModule,
-        ProviderModule
+        ProviderModule,
+        NftModule
     ],
     providers: [OracleService],
     exports: [OracleService],

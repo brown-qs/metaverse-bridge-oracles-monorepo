@@ -5,7 +5,7 @@ import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { TextureService } from '../texture/texture.service';
 import { UserEntity } from '../user/user.entity';
 import { TextureType } from '../texture/texturetype.enum';
-import { DEFAULT_SKIN } from '../config/constants';
+import { DEFAULT_SKIN, RecognizedAssetType } from '../config/constants';
 import { PlayerSkinDto } from './dtos/texturemap.dto';
 import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
 import { MaterialService } from '../material/material.service';
@@ -21,10 +21,11 @@ import { InventoryEntity } from '../inventory/inventory.entity';
 import { InventoryService } from '../inventory/inventory.service';
 import { TextureEntity } from '../texture/texture.entity';
 import { SkinService } from '../skin/skin.service';
+import { AssetService } from '../asset/asset.service';
+import { AssetEntity } from 'src/asset/asset.entity';
 
 @Injectable()
 export class GameService {
-
     private readonly context: string;
 
     private locks: Map<string, MutexInterface>;
@@ -39,6 +40,7 @@ export class GameService {
         private readonly gameSessionService: GameSessionService,
         private readonly playSessionService: PlaySesionService,
         private readonly playSessionStatService: PlaySessionStatService,
+        private readonly assetService: AssetService,
         private configService: ConfigService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
@@ -604,5 +606,10 @@ export class GameService {
         })
 
         return res
+    }
+
+    async getWorldPlots(world: string): Promise<AssetEntity[]> {
+        const assets = await this.assetService.findMany({where: {world, recognizedAssetType: RecognizedAssetType.PLOT}})
+        return assets
     }
 }

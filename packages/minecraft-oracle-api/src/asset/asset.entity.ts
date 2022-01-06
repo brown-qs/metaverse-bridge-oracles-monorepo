@@ -2,11 +2,13 @@ import {
     IsBoolean,
     IsEnum,
     IsInt,
+    IsJSON,
     IsString
 } from 'class-validator';
 import { UserEntity } from '../user/user.entity';
 import { Column, Entity, Index, ManyToOne, PrimaryColumn } from 'typeorm';
 import { StringAssetType } from '../common/enums/AssetType';
+import { RecognizedAssetType } from '../config/constants';
 
 @Entity()
 @Index(['hash'], {unique: true})
@@ -20,7 +22,6 @@ export class AssetEntity {
     @IsString()
     hash: string;
 
-    @Column()
     @IsEnum(StringAssetType)
     @Column({
         type: 'enum',
@@ -64,6 +65,22 @@ export class AssetEntity {
     @IsString()
     @Column({ nullable: true })
     salt?: string;
+
+    @IsString()
+    @Column({ nullable: true, default: null })
+    world?: string;
+
+    @IsEnum(RecognizedAssetType)
+    @Column({
+        type: 'enum',
+        enum: RecognizedAssetType,
+        default: RecognizedAssetType.NONE
+    })
+    recognizedAssetType?: RecognizedAssetType
+
+    @IsJSON()
+    @Column({ type: 'json', nullable: true })
+    metadata?: unknown;
 
     @ManyToOne(() => UserEntity, (user) => user.assets)
     owner?: UserEntity

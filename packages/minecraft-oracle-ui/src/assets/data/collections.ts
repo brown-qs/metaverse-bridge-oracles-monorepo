@@ -123,6 +123,18 @@ export const collections = {
       enrapturable: false,
       contractURI: 'ipfs://QmUCMVkJa849UQYN728hyiYm3ZJVPk8yGyiJQ6wwHfLcgz',
       subgraph: 'https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/nft-1155-multiverseart'
+    },
+    {
+      chainId: 1285,
+      address: '0xa17A550871E5F5F692a69a3ABE26e8DBd5991B75'.toLowerCase(),
+      display_name: 'Moonsama Minecraft Plots Season 1',
+      symbol: 'MMPLOTS1',
+      ids: undefined,
+      importable: true,
+      enrapturable: false,
+      type: 'ERC721',
+      contractURI: 'ipfs://QmR8K7eLZnhFqC5qUStMyFAgawSJcpRfSvMDMffQVQFn38',
+      subgraph: 'https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/nft-721-mmplots1'
     }
   ]
 };

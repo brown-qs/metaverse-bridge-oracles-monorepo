@@ -30,6 +30,7 @@ export enum RecognizedAssetType {
   MOONSAMA='MSAMA',
   TICKET='TICKET',
   TEST='TEST',
+  PLOT='PLOT'
 }
 
 
@@ -67,6 +68,14 @@ export const IMPORTABLE_ASSETS: RecognizedAsset[] = [
       name: 'Multiverse Art',
       gamepass: true
     }, /* tickets */
+    {
+      address: '0xa17A550871E5F5F692a69a3ABE26e8DBd5991B75'.toLowerCase(),
+      id: undefined,
+      type: RecognizedAssetType.PLOT,
+      chainId: ChainId.MOONRIVER,
+      name: 'Moonsama Minecraft Plots Season 1',
+      gamepass: false
+    }
     /*
     {
       address: '0x6E9F41ec2a43ECAe0Ada29587D4D40a3e83e4bEB'.toLowerCase(),

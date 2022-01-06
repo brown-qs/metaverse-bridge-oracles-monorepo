@@ -51,9 +51,10 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const onChainMoonsamas = onChainItems?.['Moonsama'] ?? [];
     const onChainGoldenTickets = onChainItems?.['VIP Ticket'] ?? [];
     const onChainResources = onChainItems?.['Moonsama Metaverse Asset Factory'] ?? [];
+    const onChainPlot = onChainItems?.['Moonsama Minecraft Plots Season 1'] ?? [];
     const onChainArt = onChainItems?.['Multiverse Art'] ?? [];
 
-    const onChainImportables = [...onChainGoldenTickets, ...onChainMoonsamas, ...onChainArt]
+    const onChainImportables = [...onChainGoldenTickets, ...onChainMoonsamas, ...onChainArt, ...onChainPlot]
 
     console.log('onchainart', onChainArt)
     console.log('onchainmoosamas', onChainMoonsamas)
@@ -244,7 +245,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                             </ListItem>
                                         );
                                     }).concat(
-                                        [...(onChainMoonsamas ?? []), ...(onChainArt ?? [])].map((item, ind) => {
+                                        [...(onChainMoonsamas ?? []), ...(onChainArt ?? []), ...(onChainPlot ?? [])].map((item, ind) => {
                                             return (
                                                 <ListItem
                                                     key={`${item?.asset?.assetAddress}-${item?.asset?.assetId}-${ind}`} //update key

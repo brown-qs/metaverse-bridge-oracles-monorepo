@@ -32,6 +32,11 @@ export class ProfileService {
         this.context = ProfileService.name
     }
 
+    async userAssets(user: UserEntity) {
+        let userAssets = await this.assetService.findMany({ where: { owner: user.uuid, pendingIn: false } })
+        return userAssets
+    }
+
     async getPlayerItems(user: UserEntity): Promise<ThingsDto> {
         const snapshots = await this.inventoryService.findMany({ relations: ['material', 'owner'], where: { owner: { uuid: user.uuid } } })
 
@@ -89,7 +94,11 @@ export class ProfileService {
 
             if (
                 !!recongizedImportAsset
-                && (recongizedImportAsset.type.valueOf() === RecognizedAssetType.MOONSAMA.valueOf() || recongizedImportAsset.type.valueOf() === RecognizedAssetType.TICKET.valueOf())
+                && (
+                    recongizedImportAsset.type.valueOf() === RecognizedAssetType.MOONSAMA.valueOf()
+                    || recongizedImportAsset.type.valueOf() === RecognizedAssetType.TICKET.valueOf()
+                    || recongizedImportAsset.type.valueOf() === RecognizedAssetType.PLOT.valueOf()
+                )
                 && ((recongizedImportAsset.id !== undefined && recongizedImportAsset.id === asset.assetId) || (recongizedImportAsset.id === undefined))
             ) {
                 assets.push({

@@ -11,6 +11,7 @@ import { GameController } from './game.controller';
 import { GameService } from './game.service';
 import { InventoryModule } from '../inventory/inventory.module';
 import { SkinModule } from '../skin/skin.module';
+import { AssetModule } from '../asset/asset.module';
 
 @Module({
     imports: [
@@ -23,7 +24,8 @@ import { SkinModule } from '../skin/skin.module';
         SnapshotModule,
         InventoryModule,
         GameSessionModule,
-        PlaySessionModule
+        PlaySessionModule,
+        AssetModule
     ],
     providers: [GameService],
     exports: [GameService],

@@ -27,6 +27,7 @@ import { ProfileService } from '../profile/profile.service';
 import { SkinRequestDto } from './dtos/skins.dto';
 import { TextureEntity } from '../texture/texture.entity';
 import { SkinselectDto } from '../profile/dtos/skinselect.dto';
+import { AssetEntity } from '../asset/asset.entity';
 
 @ApiTags('game')
 @Controller('game')
@@ -92,6 +93,27 @@ export class GameController {
     async allowed(@Param('uuid') uuid: string): Promise<boolean> {
         const user = await this.userService.findByUuid(uuid)
         return user?.allowedToPlay ?? false
+    }
+
+    @Get('world/:world/plots')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Fetches world plots' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async getWorldPlots(@Param('world') world: string): Promise<AssetEntity[]> {
+        const plots = await this.gameService.getWorldPlots(world)
+        return plots
+    }
+
+    @Get('player/:uuid/assets')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Fetches user assets' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async userAssets(@Param('uuid') uuid: string): Promise<AssetEntity[]> {
+        const user = await this.userService.findByUuid(uuid)
+        const res = await this.profileService.userAssets(user)
+        return res
     }
 
     @Put('player/:uuid/snapshot')
