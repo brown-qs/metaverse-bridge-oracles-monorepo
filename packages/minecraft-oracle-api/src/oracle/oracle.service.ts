@@ -23,6 +23,7 @@ import { InventoryEntity } from '../inventory/inventory.entity';
 import { SkinService } from '../skin/skin.service';
 import { SkinEntity } from '../skin/skin.entity';
 import { StringAssetType } from '../common/enums/AssetType';
+import { NftService } from '../nft/nft.service';
 
 @Injectable()
 export class OracleService {
@@ -37,6 +38,7 @@ export class OracleService {
         private readonly gameSessionService: GameSessionService,
         private readonly assetService: AssetService,
         private readonly inventoryService: InventoryService,
+        private readonly nftService: NftService,
         private configService: ConfigService,
         @Inject(ProviderToken.ORACLE_WALLET) private oracle: Signer,
         @Inject(ProviderToken.METAVERSE_CONTRACT) private metaverse: Contract,
@@ -337,40 +339,57 @@ export class OracleService {
             this.logger.warn('ImportConfirm: Moonsama but no texture found!!!', this.context)
         }
 
-        if (!!recognizedAsset && recognizedAsset.gamepass) {
-            user.allowedToPlay = true
-            user.role = user.role?.valueOf() === UserRole.NONE.valueOf() ? UserRole.PLAYER : user.role
-            user.numGamePassAsset = (user.numGamePassAsset ?? 0) + 1
+        if (!!recognizedAsset) {
+            if (recognizedAsset.gamepass) {
+                user.allowedToPlay = true
+                user.role = user.role?.valueOf() === UserRole.NONE.valueOf() ? UserRole.PLAYER : user.role
+                user.numGamePassAsset = (user.numGamePassAsset ?? 0) + 1
 
-            // this means user had no skins/in game eligible assets imported before
-            if (user.numGamePassAsset === 1) {
-                try {
-                    await this.skinService.createMultiple([
-                        {
-                            id: SkinEntity.toId(user.uuid, '0x0', '0'),
-                            owner: user,
-                            equipped: true,
-                            texture: await this.textureService.findOne({ assetAddress: '0x0', assetId: '0', assetType: StringAssetType.NONE })
-                        },
-                        {
-                            id: SkinEntity.toId(user.uuid, '0x0', '1'),
-                            owner: user,
-                            equipped: false,
-                            texture: await this.textureService.findOne({ assetAddress: '0x0', assetId: '1', assetType: StringAssetType.NONE })
-                        }
-                    ])
-                } catch (error) {
-                    this.logger.warn(`ImportConfirm: error trying to set default skins for user ${user.uuid}`, this.context)
+                // this means user had no skins/in game eligible assets imported before
+                if (user.numGamePassAsset === 1) {
+                    try {
+                        await this.skinService.createMultiple([
+                            {
+                                id: SkinEntity.toId(user.uuid, '0x0', '0'),
+                                owner: user,
+                                equipped: true,
+                                texture: await this.textureService.findOne({ assetAddress: '0x0', assetId: '0', assetType: StringAssetType.NONE })
+                            },
+                            {
+                                id: SkinEntity.toId(user.uuid, '0x0', '1'),
+                                owner: user,
+                                equipped: false,
+                                texture: await this.textureService.findOne({ assetAddress: '0x0', assetId: '1', assetType: StringAssetType.NONE })
+                            }
+                        ])
+                    } catch (error) {
+                        this.logger.warn(`ImportConfirm: error trying to set default skins for user ${user.uuid}`, this.context)
+                    }
                 }
+
+                await this.userService.update(user.uuid, { allowedToPlay: user.allowedToPlay, role: user.role, numGamePassAsset: user.numGamePassAsset })
             }
+        }        
 
-            await this.userService.update(user.uuid, { allowedToPlay: user.allowedToPlay, role: user.role, numGamePassAsset: user.numGamePassAsset })
-        }
+        assetEntry.recognizedAssetType = recognizedAsset?.type ?? RecognizedAssetType.NONE;
+        const finalentry = await this.assetService.create({ ...assetEntry, pendingIn: false });
 
-        const finalentry = await this.assetService.create({ ...assetEntry, pendingIn: false })
+        (async () => {
+            let metadata = null
+            let world = null
+            try {
+                metadata = await this.nftService.getNFT('1285', assetEntry.assetType, assetEntry.assetAddress, assetEntry.assetId) as any ?? null
+                world = metadata?.tokenURI?.plot?.world ?? null
+            } catch {
+                this.logger.error(`ImportConfirm: couldn't fetch asset metadata: ${hash}`, undefined, this.context)
+            }
+            if (!!metadata) {
+                await this.assetService.update({ hash: assetEntry.hash }, { metadata, world })
+            }
+        })()
 
         if (!finalentry) {
-            this.logger.error(`ImportConfirm: couldn't change pending flag: ${hash}`)
+            this.logger.error(`ImportConfirm: couldn't change pending flag: ${hash}`, undefined, this.context)
             throw new UnprocessableEntityException(`Database error`)
         }
 
