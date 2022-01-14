@@ -5,7 +5,7 @@ import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { TextureService } from '../texture/texture.service';
 import { UserEntity } from '../user/user.entity';
 import { TextureType } from '../texture/texturetype.enum';
-import { DEFAULT_SKIN, RecognizedAssetType } from '../config/constants';
+import { DEFAULT_SKIN, RecognizedAsset, RecognizedAssetType } from '../config/constants';
 import { PlayerSkinDto } from './dtos/texturemap.dto';
 import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
 import { MaterialService } from '../material/material.service';
@@ -22,7 +22,9 @@ import { InventoryService } from '../inventory/inventory.service';
 import { TextureEntity } from '../texture/texture.entity';
 import { SkinService } from '../skin/skin.service';
 import { AssetService } from '../asset/asset.service';
-import { AssetEntity } from 'src/asset/asset.entity';
+import { AssetEntity } from '../asset/asset.entity';
+import { CommunismSettings } from './game.type';
+import { ProviderToken } from '../provider/token';
 
 @Injectable()
 export class GameService {
@@ -41,6 +43,7 @@ export class GameService {
         private readonly playSessionService: PlaySesionService,
         private readonly playSessionStatService: PlaySessionStatService,
         private readonly assetService: AssetService,
+        @Inject(ProviderToken.IMPORTABLE_ASSETS) private importableAssets: RecognizedAsset[],
         private configService: ConfigService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
@@ -414,11 +417,14 @@ export class GameService {
         return true
     }
 
-    public async communism(minTimePlayed?: number, gganbu?: number, averageMultiplier?: number, serverId = 'production') {
+    public async communism(settings: CommunismSettings) {
 
-        const mintT = minTimePlayed ?? 2700000
-        const averageM = averageMultiplier ?? 1
-        const finalGganbu = gganbu ?? 0.5
+        const mintT = settings.minTimePlayed ?? 2700000
+        const averageM = settings.averageMultiplier ?? 1
+        const finalDeduction = settings.deduction ?? 0.5
+        const msamasOnly = settings.moonsamasOnly ?? true
+        const punishAll = settings.deductFromEveryone ?? true
+        const serverId = settings.serverId ?? 'production'
 
         let items: SnapshotItemEntity[] = []
         let batch: SnapshotItemEntity[] = []
@@ -437,55 +443,93 @@ export class GameService {
         } while (!!batch && batch.length > 0)
 
         let counter: { [key: string]: number } = {}
-        let users: { [key: string]: boolean } = {}
-        let distinct = 0
+        let users: { [key: string]: {exists: boolean, eligible: boolean  } } = {}
+        let allDistinct = 0
+        let gganbuDistinct = 0
+
+        // we sum ap all the materials for all users
         items.map(x => {
             counter[x.material.name] = typeof counter[x.material.name] === 'undefined' ? Number.parseFloat(x.amount) : counter[x.material.name] + Number.parseFloat(x.amount)
         })
 
+        // we fetch all users
         const allUsers = await this.userService.findMany({})
         this.logger.warn(`Communism:: ${allUsers.length} users found`, this.context)
-        allUsers.map(user => {
-            if (!users[user.uuid]) {
-                users[user.uuid] = true
-                distinct += 1
+
+        const msamaAsset = this.importableAssets.find(x => x.type.valueOf() === RecognizedAssetType.MOONSAMA)
+
+        for (let i = 0; i < allUsers.length; i++) {
+            const user = allUsers[i]
+            
+            const playStats = await this.playSessionStatService.findOne({ id: `${user.uuid}-${serverId}` })
+
+            this.logger.debug(`Communism:: ${user.uuid} played ${playStats?.timePlayed}`, this.context)
+
+            const tPlayed = playStats?.timePlayed ? Number.parseFloat(playStats?.timePlayed) : 0
+
+            let playedEnough = false
+            if (tPlayed >= mintT) {
+                playedEnough = true
+            } else {
+                this.logger.warn(`Communism:: ${user.uuid} not eligible for gganbu`, this.context)
             }
-        })
 
-        //console.log({distinct, users, counter})
+            if (!users[user.uuid]) {
+                allDistinct += 1
+                const hasMoonsama = !!(await this.assetService.find({assetAddress: msamaAsset.address, owner: {uuid: user.uuid}, pendingIn: false, pendingOut: false}))
+                users[user.uuid] = {
+                    exists: true,
+                    eligible: false
+                }
+                
+                if (
+                    playedEnough &&
+                    (
+                        (msamasOnly && hasMoonsama)
+                        || !msamasOnly
+                    )
+                ) {
+                    users[user.uuid].eligible = true
+                    gganbuDistinct += 1
+                }
+            }
+        }
 
+        // we only divide the average by the gganbu eligible user numbers
         const materials = Object.keys(counter)
         materials.map(key => {
-            counter[key] = averageM * counter[key] / distinct
+            counter[key] = (averageM * counter[key]) / gganbuDistinct
         })
 
         this.logger.debug(`Communism:: final gganbu amounts: ${counter}`, this.context)
 
         const userUuids = Object.keys(users)
 
+        // we iterate on all users
         for (let i = 0; i < userUuids.length; i++) {
             const uuid = userUuids[i]
             const user = await this.userService.findOne({ uuid })
-            const playStats = await this.playSessionStatService.findOne({ id: `${uuid}-${serverId}` })
-            this.logger.debug(`Communism:: ${uuid} played ${playStats?.timePlayed}`, this.context)
-
-            const tPlayed = playStats?.timePlayed ? Number.parseFloat(playStats?.timePlayed) : 0
-            if (tPlayed < mintT) {
-                this.logger.warn(`Communism:: ${uuid} not eligible for gganbu`, this.context)
-                continue
-            }
+            
+            // get user's snapshot items
             const snaps = items.filter(snap => snap.owner.uuid === uuid)
 
+            // we iterate in material names
             const x = materials.map(async (materialName) => {
+
+                // check if user had a snasphot item with that material
                 const existingSnap = snaps.find(x => x.material.name === materialName)
                 if (!!existingSnap) {
+                    // if yes, we reduce the original amount for gganbu and add the average if eligible
                     this.logger.debug(`Communism:: ${uuid} snap for ${materialName} existed. Adding..`, this.context)
-                    const amount = ((Number.parseFloat(existingSnap.amount) * finalGganbu) + counter[existingSnap.material.name]).toString()
+                    const amount = ((Number.parseFloat(existingSnap.amount) * finalDeduction) + (users[uuid]?.eligible ? counter[existingSnap.material.name] : 0 )).toString()
                     await this.snapshotService.update(existingSnap.id, { amount })
                 } else {
                     this.logger.debug(`Communism:: ${uuid} snap for ${materialName} not found. Creating..`, this.context)
                     const amount = counter[materialName]
-                    await this.assignSnapshot(user, { amount, materialName }, false, false)
+                    
+                    if (users[uuid]?.eligible) {
+                        await this.assignSnapshot(user, { amount, materialName }, false, false)
+                    }
                 }
             })
             await Promise.all(x)

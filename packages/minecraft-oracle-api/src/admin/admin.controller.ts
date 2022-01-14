@@ -338,7 +338,7 @@ export class AdminController {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
         }
-        await this.gameService.communism(dto.minTimePlayed, dto.gganbuAmount, dto.averageMultiplier, dto.serverId)
+        await this.gameService.communism(dto)
         return true
     }
 
