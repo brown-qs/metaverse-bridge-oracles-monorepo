@@ -12,6 +12,7 @@ import { GameService } from './game.service';
 import { InventoryModule } from '../inventory/inventory.module';
 import { SkinModule } from '../skin/skin.module';
 import { AssetModule } from '../asset/asset.module';
+import { ProviderModule } from '../provider/provider.module';
 
 @Module({
     imports: [
@@ -25,7 +26,8 @@ import { AssetModule } from '../asset/asset.module';
         InventoryModule,
         GameSessionModule,
         PlaySessionModule,
-        AssetModule
+        AssetModule,
+        ProviderModule
     ],
     providers: [GameService],
     exports: [GameService],

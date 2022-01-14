@@ -11,6 +11,7 @@ import { UserEntity } from '../src/user/user.entity';
 import { PlaySessionEntity } from '../src/playsession/playsession.entity';
 import { PlaySessionStatEntity } from '../src/playsession/playsessionstat.entity';
 import { InventoryEntity } from '../src/inventory/inventory.entity';
+import { SkinEntity } from '../src/skin/skin.entity';
 
 config()
 
@@ -50,7 +51,7 @@ async function main () {
             host: process.env.TYPEORM_HOST,
             port: Number.parseInt(process.env.TYPEORM_PORT),
             database: process.env.TYPEORM_DATABASE,
-            entities: [MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity, AssetEntity, SummonEntity, PlaySessionEntity, PlaySessionStatEntity, InventoryEntity],
+            entities: [MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity, SkinEntity, AssetEntity, SummonEntity, InventoryEntity, PlaySessionEntity, PlaySessionStatEntity],
             synchronize: false
         })
     } catch (err) {
