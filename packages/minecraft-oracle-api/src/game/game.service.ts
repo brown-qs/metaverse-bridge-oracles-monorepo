@@ -5,7 +5,7 @@ import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { TextureService } from '../texture/texture.service';
 import { UserEntity } from '../user/user.entity';
 import { TextureType } from '../texture/texturetype.enum';
-import { DEFAULT_SKIN, RecognizedAsset, RecognizedAssetType } from '../config/constants';
+import { RecognizedAsset, RecognizedAssetType } from '../config/constants';
 import { PlayerSkinDto } from './dtos/texturemap.dto';
 import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
 import { MaterialService } from '../material/material.service';
@@ -23,8 +23,8 @@ import { TextureEntity } from '../texture/texture.entity';
 import { SkinService } from '../skin/skin.service';
 import { AssetService } from '../asset/asset.service';
 import { AssetEntity } from '../asset/asset.entity';
-import { CommunismSettings } from './game.type';
 import { ProviderToken } from '../provider/token';
+import { CommunismDto } from '../admin/dtos/communism.dto';
 
 @Injectable()
 export class GameService {
@@ -417,7 +417,7 @@ export class GameService {
         return true
     }
 
-    public async communism(settings: CommunismSettings) {
+    public async communism(settings: CommunismDto) {
 
         const mintT = settings.minTimePlayed ?? 2700000
         const averageM = settings.averageMultiplier ?? 1
@@ -476,7 +476,7 @@ export class GameService {
 
             if (!users[user.uuid]) {
                 allDistinct += 1
-                const hasMoonsama = !!(await this.assetService.find({assetAddress: msamaAsset.address, owner: {uuid: user.uuid}, pendingIn: false, pendingOut: false}))
+                const hasMoonsama = !!(await this.assetService.findOne({assetAddress: msamaAsset.address, owner: {uuid: user.uuid}, pendingIn: false, pendingOut: false}))
                 users[user.uuid] = {
                     exists: true,
                     eligible: false
@@ -521,7 +521,9 @@ export class GameService {
                 if (!!existingSnap) {
                     // if yes, we reduce the original amount for gganbu and add the average if eligible
                     this.logger.debug(`Communism:: ${uuid} snap for ${materialName} existed. Adding..`, this.context)
-                    const amount = ((Number.parseFloat(existingSnap.amount) * finalDeduction) + (users[uuid]?.eligible ? counter[existingSnap.material.name] : 0 )).toString()
+
+                    const finalfinaldeduction = punishAll ? finalDeduction : (users[uuid]?.eligible ? finalDeduction : 1)
+                    const amount = ((Number.parseFloat(existingSnap.amount) * finalfinaldeduction) + (users[uuid]?.eligible ? counter[existingSnap.material.name] : 0 )).toString()
                     await this.snapshotService.update(existingSnap.id, { amount })
                 } else {
                     this.logger.debug(`Communism:: ${uuid} snap for ${materialName} not found. Creating..`, this.context)

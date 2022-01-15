@@ -102,6 +102,18 @@ export const collections = {
     },
     {
       chainId: 1285,
+      address: '0x1974eEAF317Ecf792ff307F25A3521C35eECde86',
+      display_name: 'Moonbrella',
+      ids: ['2','3','4','5','6'],
+      enrapturable: false,
+      importable: true,
+      symbol: 'Moonbrella',
+      type: 'ERC1155',
+      contractURI: 'ipfs://QmWox8YqUaYVxSSB7GRhPAuczv6auL8QrkDrkMTcqGEGKA',
+      subgraph: 'https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/nft-1155-mx'
+    },
+    {
+      chainId: 1285,
       address: '0x1B30A3b5744e733D8D2f19F0812E3f79152A8777',
       display_name: 'Moonsama Metaverse Asset Factory',
       symbol: 'MMAF',

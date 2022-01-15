@@ -11,7 +11,7 @@ import { calculateMetaAssetHash, encodeEnraptureWithSigData, encodeExportWithSig
 import { Contract, ethers, Signer } from 'ethers';
 import { ProviderToken } from '../provider/token';
 import { AssetService } from '../asset/asset.service';
-import { assetTypeToStringAssetType } from '../utils';
+import { assetTypeToStringAssetType, findRecognizedAsset } from '../utils';
 import { MetaAsset } from './oracle.types';
 import { ExportDto } from './dtos/export.dto';
 import { SummonDto } from './dtos/summon.dto';
@@ -53,7 +53,7 @@ export class OracleService {
 
     public async userInRequest(user: UserEntity, data: ImportDto, enraptured: boolean): Promise<[string, string, string, boolean]> {
         this.logger.debug(`userInRequest: ${JSON.stringify(data)}`, this.context)
-        const inAsset = enraptured ? this.enrapturableAssets.find(x => x.address.toLowerCase() === data.asset.assetAddress.toLowerCase()) : this.importableAssets.find(x => x.address.toLowerCase() === data.asset.assetAddress.toLowerCase())
+        const inAsset = enraptured ? findRecognizedAsset(this.enrapturableAssets, data.asset) : findRecognizedAsset(this.importableAssets, data.asset)
 
         if (!inAsset) {
             this.logger.error(`userInRequest: not an permissioned asset`, null, this.context)
@@ -321,7 +321,7 @@ export class OracleService {
             throw new UnprocessableEntityException(`On-chain data didn't match`)
         }
 
-        const recognizedAsset = this.importableAssets.find(x => x.address === assetEntry.assetAddress.toLowerCase())
+        const recognizedAsset = findRecognizedAsset(this.importableAssets, assetEntry)
         //console.log(recognizedAsset)
         //console.log(user.uuid, hash, RecognizedAssetType.MOONSAMA.valueOf(), RecognizedAssetType.TICKET.valueOf(), recognizedAsset?.id, JSON.stringify(mAsset))
 
