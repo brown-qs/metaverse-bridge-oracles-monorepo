@@ -30,7 +30,8 @@ export enum RecognizedAssetType {
   MOONSAMA='MSAMA',
   TICKET='TICKET',
   TEST='TEST',
-  PLOT='PLOT'
+  PLOT='PLOT',
+  OFFHAND='OFFHAND'
 }
 
 
@@ -38,7 +39,7 @@ export type RecognizedAsset = {
     chainId: ChainId,
     address: string,
     type: RecognizedAssetType,
-    id: string | undefined,
+    id: string | undefined | string[],
     name: string,
     gamepass: boolean,
 }
@@ -59,6 +60,14 @@ export const IMPORTABLE_ASSETS: RecognizedAsset[] = [
       chainId: ChainId.MOONRIVER,
       name: 'VIP ticket',
       gamepass: true
+    }, /* tickets */
+    {
+      address: '0x1974eEAF317Ecf792ff307F25A3521C35eECde86'.toLowerCase(),
+      id: ['2', '6'],
+      type: RecognizedAssetType.OFFHAND,
+      chainId: ChainId.MOONRIVER,
+      name: 'Moonbrella',
+      gamepass: false
     }, /* tickets */
     {
       address: '0xdea45e7c6944cb86a268661349e9c013836c79a2'.toLowerCase(),

@@ -9,8 +9,14 @@ export class CommunismDto {
     averageMultiplier?: number
 
     @ApiProperty({ description: 'Multiplier [0,1] on how much of the user resources are taken away. Default: 0.5'})
-    gganbuAmount?: number
+    deduction?: number
 
     @ApiProperty({ description: 'server ID to check time played for. Default: production'})
     serverId?: string
+
+    @ApiProperty({ description: 'Redistribution only for Moonsamas. Default: true'})
+    moonsamasOnly?: boolean
+
+    @ApiProperty({ description: 'Deduction from everyone for gganbu. Default: true'})
+    deductFromEveryone?: boolean
 }

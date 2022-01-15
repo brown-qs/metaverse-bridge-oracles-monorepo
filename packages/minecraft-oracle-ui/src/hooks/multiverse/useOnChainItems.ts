@@ -134,10 +134,11 @@ export const useOnChainItems = (trigger: string | undefined = undefined) => {
               assetAddress: x.token.contract.id,
               balance: x.balance
             };
-          });
+          })
+          .filter(x => !!x)
         }
 
-        const staticDatas = await staticCallback(assets.filter(x => !!x) as Asset[]);
+        const staticDatas =  await staticCallback(assets as AssetWithBalance[]);
 
         const datas = staticDatas.map((sd, i) => {
           return {

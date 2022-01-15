@@ -42,7 +42,7 @@ async function tryMultiCallCore (
                 calls.map((call, i: number) => {
                     const itf = new Interface(call[0]);
                     return [
-                        call[1].toLowerCase(),
+                        call[1]?.toLowerCase(),
                         itf.encodeFunctionData(call[2], call[3]),
                     ];
                 }),

@@ -5,6 +5,9 @@ import { format } from 'winston';
 import safeStringify from 'fast-safe-stringify';
 import * as ioTs from 'io-ts';
 import { AssetType, StringAssetType } from '../common/enums/AssetType';
+import { RecognizedAsset } from '../config/constants';
+import { AssetEntity } from '../asset/asset.entity';
+import { string } from 'fp-ts';
 
 export type ParsedErrors = {
     actual: any;
@@ -114,4 +117,17 @@ export function stringToStringAssetType(
     return StringAssetType.ERC1155;
   }
   return StringAssetType.NONE;
+}
+
+export function findRecognizedAsset(recassets: RecognizedAsset[], asset: {assetAddress: string, assetId: string}) {
+  return recassets.find(x => {
+    return (
+      (x.address.toLowerCase() === asset.assetAddress.toLowerCase())
+      && (
+        (x.id === undefined)
+        || (x.id !== undefined && typeof x.id === 'string' && x.id === asset.assetId)
+        || (x.id !== undefined && Number.parseInt(asset.assetId) >= Number.parseInt(x.id[0]) && Number.parseInt(asset.assetId) <= Number.parseInt(x.id[1]))
+      )
+    )
+  })
 }

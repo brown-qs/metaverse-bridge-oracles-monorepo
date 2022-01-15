@@ -53,11 +53,12 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const onChainResources = onChainItems?.['Moonsama Metaverse Asset Factory'] ?? [];
     const onChainPlot = onChainItems?.['Moonsama Minecraft Plots Season 1'] ?? [];
     const onChainArt = onChainItems?.['Multiverse Art'] ?? [];
+    const onChainMoonbrella = onChainItems?.['Moonbrella'] ?? [];
 
-    const onChainImportables = [...onChainGoldenTickets, ...onChainMoonsamas, ...onChainArt, ...onChainPlot]
+    const onChainImportables = [...onChainGoldenTickets, ...onChainMoonbrella, ...onChainMoonsamas, ...onChainArt, ...onChainPlot]
 
-    console.log('onchainart', onChainArt)
-    console.log('onchainmoosamas', onChainMoonsamas)
+    console.log('VIP Ticket', onChainGoldenTickets)
+    console.log('onChainMoonbrella', onChainMoonbrella)
 
     //In Game Items
     const inGameItems = useInGameItems(fetchtrigger);
@@ -65,7 +66,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const inGameResources = inGameItems?.resources ?? []
     const inGameTextures: InGameTexture[] = inGameItems?.textures ?? []
 
-    console.log('ingame items', inGameItems, { inGameAssets, inGameResources, inGameTextures })
+    //console.log('ingame items', inGameItems, { inGameAssets, inGameResources, inGameTextures })
 
     // const { jwt, userProfile } = authData;
 
@@ -245,7 +246,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                             </ListItem>
                                         );
                                     }).concat(
-                                        [...(onChainMoonsamas ?? []), ...(onChainArt ?? []), ...(onChainPlot ?? [])].map((item, ind) => {
+                                        [...(onChainMoonsamas ?? []), ...(onChainArt ?? []), ...(onChainPlot ?? []), ...(onChainMoonbrella ?? [])].map((item, ind) => {
                                             return (
                                                 <ListItem
                                                     key={`${item?.asset?.assetAddress}-${item?.asset?.assetId}-${ind}`} //update key

@@ -13,6 +13,7 @@ import { InventoryService } from '../inventory/inventory.service';
 import { UserService } from '../user/user.service';
 import { SkinselectDto } from './dtos/skinselect.dto';
 import { SkinService } from '../skin/skin.service';
+import { findRecognizedAsset } from '../utils';
 
 @Injectable()
 export class ProfileService {
@@ -90,17 +91,9 @@ export class ProfileService {
                 return
             }
 
-            const recongizedImportAsset = this.importableAssets.find(x => x.address.toLowerCase() === asset.assetAddress.toLowerCase())
+            const recongizedImportAsset = findRecognizedAsset(this.importableAssets, asset)
 
-            if (
-                !!recongizedImportAsset
-                && (
-                    recongizedImportAsset.type.valueOf() === RecognizedAssetType.MOONSAMA.valueOf()
-                    || recongizedImportAsset.type.valueOf() === RecognizedAssetType.TICKET.valueOf()
-                    || recongizedImportAsset.type.valueOf() === RecognizedAssetType.PLOT.valueOf()
-                )
-                && ((recongizedImportAsset.id !== undefined && recongizedImportAsset.id === asset.assetId) || (recongizedImportAsset.id === undefined))
-            ) {
+            if (!!recongizedImportAsset) {
                 assets.push({
                     amount: asset.amount,
                     assetAddress: asset.assetAddress.toLowerCase(),
