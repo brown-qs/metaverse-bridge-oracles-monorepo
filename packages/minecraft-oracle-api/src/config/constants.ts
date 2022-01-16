@@ -63,7 +63,7 @@ export const IMPORTABLE_ASSETS: RecognizedAsset[] = [
     }, /* tickets */
     {
       address: '0x1974eEAF317Ecf792ff307F25A3521C35eECde86'.toLowerCase(),
-      id: ['2', '6'],
+      id: ['2', '9'],
       type: RecognizedAssetType.OFFHAND,
       chainId: ChainId.MOONRIVER,
       name: 'Moonbrella',
