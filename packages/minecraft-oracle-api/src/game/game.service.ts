@@ -420,7 +420,7 @@ export class GameService {
     public async communism(settings: CommunismDto) {
 
         const mintT = settings.minTimePlayed ?? 2700000
-        const averageM = settings.averageMultiplier ?? 1
+        const averageM = settings.averageMultiplier ?? 0.5
         const finalDeduction = settings.deduction ?? 0.5
         const msamasOnly = settings.moonsamasOnly ?? true
         const punishAll = settings.deductFromEveryone ?? true
@@ -456,8 +456,6 @@ export class GameService {
         const allUsers = await this.userService.findMany({})
         this.logger.warn(`Communism:: ${allUsers.length} users found`, this.context)
 
-        const msamaAsset = this.importableAssets.find(x => x.type.valueOf() === RecognizedAssetType.MOONSAMA)
-
         for (let i = 0; i < allUsers.length; i++) {
             const user = allUsers[i]
             
@@ -476,7 +474,7 @@ export class GameService {
 
             if (!users[user.uuid]) {
                 allDistinct += 1
-                const hasMoonsama = !!(await this.assetService.findOne({assetAddress: msamaAsset.address, owner: {uuid: user.uuid}, pendingIn: false, pendingOut: false}))
+                const hasMoonsama = !!(await this.assetService.findOne({recognizedAssetType: RecognizedAssetType.MOONSAMA, owner: {uuid: user.uuid}, pendingIn: false, pendingOut: false}))
                 users[user.uuid] = {
                     exists: true,
                     eligible: false
@@ -524,6 +522,8 @@ export class GameService {
 
                     const finalfinaldeduction = punishAll ? finalDeduction : (users[uuid]?.eligible ? finalDeduction : 1)
                     const amount = ((Number.parseFloat(existingSnap.amount) * finalfinaldeduction) + (users[uuid]?.eligible ? counter[existingSnap.material.name] : 0 )).toString()
+
+                    this.logger.debug(`Communism:: ${uuid} snap for ${materialName} deduction multiplier: ${finalDeduction}, amount: ${amount}, eligible: ${users[uuid]?.eligible}`, this.context)
                     await this.snapshotService.update(existingSnap.id, { amount })
                 } else {
                     this.logger.debug(`Communism:: ${uuid} snap for ${materialName} not found. Creating..`, this.context)
@@ -531,6 +531,8 @@ export class GameService {
                     
                     if (users[uuid]?.eligible) {
                         await this.assignSnapshot(user, { amount, materialName }, false, false)
+                    } else {
+                        this.logger.debug(`Communism:: ${uuid} snap for ${materialName} not eligible`, this.context)
                     }
                 }
             })

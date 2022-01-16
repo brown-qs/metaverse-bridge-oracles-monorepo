@@ -72,7 +72,7 @@ export const IMPORTABLE_ASSETS: RecognizedAsset[] = [
     {
       address: '0xdea45e7c6944cb86a268661349e9c013836c79a2'.toLowerCase(),
       id: undefined,
-      type: RecognizedAssetType.TICKET,
+      type: RecognizedAssetType.MOONSAMA,
       chainId: ChainId.MOONRIVER,
       name: 'Multiverse Art',
       gamepass: true
