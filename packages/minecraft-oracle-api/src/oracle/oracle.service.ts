@@ -463,7 +463,7 @@ export class OracleService {
             throw new UnprocessableEntityException(`Not exported yet`)
         }
 
-        const recognizedAsset = this.importableAssets.find(x => x.address === assetEntry.assetAddress.toLowerCase())
+        const recognizedAsset = findRecognizedAsset(this.importableAssets, assetEntry)
 
         if (!!recognizedAsset && recognizedAsset.gamepass) {
             user.numGamePassAsset = (user.numGamePassAsset ?? 0) > 0 ? user.numGamePassAsset - 1 : 0
