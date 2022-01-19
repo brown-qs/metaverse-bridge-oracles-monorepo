@@ -13,8 +13,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Login to Docker Hub
-        shell: bash
-        run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
 
       - name: Build Image
         run: docker build -t moonsama/bridge:$(git rev-parse --short HEAD)-$(date +%F-%H-%M) .
