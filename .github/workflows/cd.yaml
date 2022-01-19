@@ -19,7 +19,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Image
-        run: docker build -t moonsama/bridge:$(git rev-parse --short HEAD)-$(date +%F-%H-%M) .
+        run: docker build -t moonsama/bridge:$(git rev-parse --short HEAD) .
 
       - name: Push Image
-        run: docker push moonsama/bridge:$(git rev-parse --short HEAD)-$(date +%F-%H-%M)
+        run: docker push moonsama/bridge:$(git rev-parse --short HEAD)
