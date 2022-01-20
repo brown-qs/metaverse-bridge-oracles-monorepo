@@ -10,8 +10,9 @@ import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
 import { AssetEntity } from '../asset/asset.entity';
 import { SummonEntity } from '../summon/summon.entity';
 import { PlaySessionEntity } from '../playsession/playsession.entity';
-import { InventoryEntity } from '../inventory/inventory.entity';
+import { InventoryEntity } from '../playerinventory/inventory.entity';
 import { SkinEntity } from '../skin/skin.entity';
+import { PlayerAchievementEntity } from 'src/playerachievement/playerachievement.entity';
 
 @Entity()
 @Index(['uuid'], {unique: true})
@@ -88,6 +89,9 @@ export class UserEntity {
 
     @OneToMany(() => PlaySessionEntity, (session) => session.player)
     playSessions?: PlaySessionEntity[];
+
+    @OneToMany(() => PlayerAchievementEntity, (achievement) => achievement.player)
+    achievements?: PlayerAchievementEntity[];
 
     @OneToOne(() => UserEntity, (user) => user.gganbu)
     @JoinColumn()

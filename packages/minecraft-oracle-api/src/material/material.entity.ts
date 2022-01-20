@@ -4,7 +4,7 @@ import {
     IsNumber,
     IsString
 } from 'class-validator';
-import { InventoryEntity } from '../inventory/inventory.entity';
+import { InventoryEntity } from '../playerinventory/inventory.entity';
 import { Column, Entity, Index, JoinColumn, OneToMany, PrimaryColumn } from 'typeorm';
 import { StringAssetType } from '../common/enums/AssetType';
 import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';

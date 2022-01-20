@@ -6,7 +6,7 @@ import { AssetService } from '../asset/asset.service';
 import { Interval } from '@nestjs/schedule';
 import { CLEAN_CRON_INTERVAL_MS, IMPORT_CONFIRM_CRON_INTERVAL_MS } from '../config/constants';
 import { LessThan, MoreThanOrEqual } from 'typeorm';
-import { OracleService } from '../oracle/oracle.service';
+import { OracleApiService } from '../oracleapi/oracleapi.service';
 
 
 @Injectable()
@@ -18,7 +18,7 @@ export class AssetWatchService {
 
   constructor(
     private readonly assetService: AssetService,
-    private readonly oracleService: OracleService,
+    private readonly oracleApiService: OracleApiService,
     @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
       this.context = ConfigService.name
@@ -42,15 +42,15 @@ export class AssetWatchService {
           if (assets[i].pendingIn) {
             if (assets[i].enraptured) {
               this.logger.debug(`handleConfirmPatrol: enrapture confirm of ${assets[i].hash}`, this.context);
-              await this.oracleService.userEnraptureConfirm(assets[i].owner, {hash: assets[i].hash}, assets[i])
+              await this.oracleApiService.userEnraptureConfirm(assets[i].owner, {hash: assets[i].hash}, assets[i])
             } else {
               this.logger.debug(`handleConfirmPatrol: import confirm of ${assets[i].hash}`, this.context);
-              await this.oracleService.userImportConfirm(assets[i].owner, {hash: assets[i].hash}, assets[i])
+              await this.oracleApiService.userImportConfirm(assets[i].owner, {hash: assets[i].hash}, assets[i])
             }
           }
           if (assets[i].pendingOut) {
             this.logger.debug(`handleConfirmPatrol: export confirm of ${assets[i].hash}`, this.context);
-            await this.oracleService.userExportConfirm(assets[i].owner, {hash: assets[i].hash}, assets[i])
+            await this.oracleApiService.userExportConfirm(assets[i].owner, {hash: assets[i].hash}, assets[i])
           }
         } catch (e) {
           this.logger.warn(`handleConfirmPatrol: error confirming ${assets[i].hash}`, this.context);
@@ -84,16 +84,16 @@ export class AssetWatchService {
           if (asset.pendingIn) {
             if (asset.enraptured) {
                 this.logger.debug(`handleCleanPatrol: enrapture confirm of ${asset.hash}`, this.context);
-                success = await this.oracleService.userEnraptureConfirm(asset.owner, {hash: asset.hash}, asset)
+                success = await this.oracleApiService.userEnraptureConfirm(asset.owner, {hash: asset.hash}, asset)
               } else {
                 this.logger.debug(`handleCleanPatrol: import confirm of ${asset.hash}`, this.context);
-                success = await this.oracleService.userImportConfirm(asset.owner, {hash: asset.hash}, asset)
+                success = await this.oracleApiService.userImportConfirm(asset.owner, {hash: asset.hash}, asset)
               }
           }
 
           if (asset.pendingOut) {
             this.logger.debug(`handleCleanPatrol: export confirm of ${asset.hash}`, this.context);
-            success = await this.oracleService.userExportConfirm(asset.owner, {hash: asset.hash}, asset)
+            success = await this.oracleApiService.userExportConfirm(asset.owner, {hash: asset.hash}, asset)
             continue
           }
         } catch (e) {

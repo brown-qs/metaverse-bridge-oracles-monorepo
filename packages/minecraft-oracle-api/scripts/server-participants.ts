@@ -9,7 +9,7 @@ import { TextureEntity } from '../src/texture/texture.entity';
 import { UserEntity } from '../src/user/user.entity';
 import { PlaySessionEntity } from '../src/playsession/playsession.entity';
 import { PlaySessionStatEntity } from '../src/playsession/playsessionstat.entity';
-import { InventoryEntity } from '../src/inventory/inventory.entity';
+import { InventoryEntity } from '../src/playerinventory/inventory.entity';
 import fs from 'fs'
 
 config()
