@@ -8,29 +8,28 @@ import { UserEntity } from '../user/user.entity';
 import { RecognizedAsset, RecognizedAssetType } from '../config/constants';
 import { ProviderToken } from '../provider/token';
 import { AssetDto, TextureDto, ThingsDto } from './dtos/things.dto';
-import { GameSessionService } from '../gamesession/gamesession.service';
-import { InventoryService } from '../inventory/inventory.service';
+import { GameService } from '../game/game.service';
+import { InventoryService } from '../playerinventory/inventory.service';
 import { UserService } from '../user/user.service';
 import { SkinselectDto } from './dtos/skinselect.dto';
 import { SkinService } from '../skin/skin.service';
 import { findRecognizedAsset } from '../utils';
 
 @Injectable()
-export class ProfileService {
+export class ProfileApiService {
 
     private readonly context: string;
 
     constructor(
         private readonly inventoryService: InventoryService,
         private readonly assetService: AssetService,
-        private readonly gameSessionService: GameSessionService,
         private readonly skinService: SkinService,
         private readonly userService: UserService,
         @Inject(ProviderToken.IMPORTABLE_ASSETS) private importableAssets: RecognizedAsset[],
         @Inject(ProviderToken.ENRAPTURABLE_ASSETS) private enrapturableAssets: RecognizedAsset[],
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
-        this.context = ProfileService.name
+        this.context = ProfileApiService.name
     }
 
     async userAssets(user: UserEntity) {
@@ -150,10 +149,6 @@ export class ProfileService {
             skins: userfull.skins ?? []
         }
 
-    }
-
-    public async getGameInProgress(): Promise<boolean> {
-        return !!(await this.gameSessionService.getOngoing())
     }
 
     public async skinSelect(user: UserEntity, dto: SkinselectDto): Promise<boolean> {

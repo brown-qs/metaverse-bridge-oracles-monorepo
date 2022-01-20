@@ -1,6 +1,7 @@
 import {
     Body,
     Controller,
+    forwardRef,
     Get,
     HttpCode,
     Inject,
@@ -17,23 +18,26 @@ import { JwtService } from '@nestjs/jwt';
 import { ProfileDto } from './dtos/profile.dto';
 import { User } from '../utils/decorators';
 import { UserEntity } from '../user/user.entity';
-import { ProfileService } from '../profile/profile.service';
+import { ProfileApiService } from './profileapi.service';
 import { ThingsDto } from './dtos/things.dto';
 import { SkinselectDto } from './dtos/skinselect.dto';
+import { GameKindInProgressDto } from '../gameapi/dtos/gamekndinprogress.dto';
+import { GameApiService } from '../gameapi/gameapi.service';
 
 
 @ApiTags('user')
 @Controller('user')
-export class ProfileController {
+export class ProfileApiController {
 
     private readonly context: string;
 
     constructor(
-        private readonly profileService: ProfileService,
+        private readonly profileService: ProfileApiService,
+        private readonly gameApiService: GameApiService,
         private readonly jwtService: JwtService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
-    ) { 
-        this.context = ProfileController.name;
+    ) {
+        this.context = ProfileApiController.name;
     }
 
     @Get('profile')
@@ -60,7 +64,7 @@ export class ProfileController {
     @ApiOperation({ summary: 'Verifies jwt token' })
     async verify(@Param('jwttoken') jwt: string) {
         try {
-            return this.jwtService.verify(jwt, {ignoreExpiration: false})
+            return this.jwtService.verify(jwt, { ignoreExpiration: false })
         } catch (err) {
             this.logger.error(`verifyjwt:: error`, err, this.context)
             throw new UnprocessableEntityException(err?.message ?? 'JWT verification error')
@@ -72,8 +76,8 @@ export class ProfileController {
     @ApiOperation({ summary: 'Returns whether there is an active game in progress or not' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    async getGameInProgress(): Promise<boolean> {
-        const inprogress = await this.profileService.getGameInProgress()
+    async getGameInProgress(dto: GameKindInProgressDto): Promise<boolean> {
+        const inprogress = await this.gameApiService.getGameKindInProgress(dto)
         return inprogress
     }
 

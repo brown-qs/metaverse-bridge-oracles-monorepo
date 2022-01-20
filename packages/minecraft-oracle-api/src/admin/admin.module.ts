@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { GameModule } from '../game/game.module';
+import { GameApiModule } from '../gameapi/gameapi.module';
 import { MaterialModule } from '../material/material.module';
 import { OracleModule } from '../oracle/oracle.module';
-import { ProfileModule } from '../profile/profile.module';
+import { ProfileApiModule } from '../profileapi/profileapi.module';
 import { SecretModule } from '../secret/secret.module';
 import { SnapshotModule } from '../snapshot/snapshot.module';
 import { TextureModule } from '../texture/texture.module';
@@ -15,8 +15,8 @@ import { AdminService } from './admin.service';
         MaterialModule,
         SecretModule,
         UserModule,
-        ProfileModule,
-        GameModule,
+        ProfileApiModule,
+        GameApiModule,
         TextureModule,
         SnapshotModule,
         OracleModule
