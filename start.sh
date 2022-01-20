@@ -10,4 +10,4 @@ fi
 
 cd packages/$APP
 
-exec rushx start
+yarn start

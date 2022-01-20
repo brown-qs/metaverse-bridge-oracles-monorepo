@@ -1,5 +1,5 @@
 name: metaverse-bridge-oracles-monorepo-ci
-on: [push,workflow_dispatch]
+on: pull_request
 jobs:
   buid-image:
     runs-on: ubuntu-20.04
@@ -8,4 +8,4 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build Image
-        run: docker build -t bridge:$(git rev-parse --short HEAD)-$(date +%F-%H-%M) .
+        run: docker build -t moonsama/bridge:$(git rev-parse --short HEAD)-$(date +%F-%H-%M) .
