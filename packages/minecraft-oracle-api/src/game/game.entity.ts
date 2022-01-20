@@ -6,6 +6,7 @@ import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 import { GameTypeEntity } from 'src/gametype/gametype.entity';
 import { GameKind } from './game.enum';
 import { PlayerScoreEntity } from 'src/playerscore/playerscore.entity';
+import { PlaySessionEntity } from 'src/playsession/playsession.entity';
 
 
 @Entity()
@@ -55,6 +56,9 @@ export class GameEntity {
 
     @OneToMany(() => PlayerScoreEntity, (playerScore) => playerScore.game)
     playerScores?: PlayerScoreEntity[];
+
+    @OneToMany(() => PlaySessionEntity, (playSession) => playSession.game)
+    playSessions?: PlaySessionEntity[];
 
     @ManyToOne(() => GameTypeEntity, (gameType) => gameType.games)
     gameType: GameTypeEntity;

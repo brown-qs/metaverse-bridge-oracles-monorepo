@@ -375,7 +375,7 @@ export class GameApiService {
         return savedS
     }
 
-    public async setPlayerGameSession(uuid: string, identifier: string, ended: boolean): Promise<boolean> {
+    public async setPlayerGameSession(uuid: string, gameId: string, ended: boolean): Promise<boolean> {
 
         const sess = await this.playSessionService.getOngoing({ uuid })
 
@@ -413,13 +413,21 @@ export class GameApiService {
         }
 
         const stat = await this.playSessionStatService.create({
-            id: this.playSessionStatService.calculateId({ uuid }, { identifier })
+            id: this.playSessionStatService.calculateId({ uuid, gameId })
         })
+
+        const game = await this.gameService.findOne({id: gameId})
+
+        if (!game) {
+            this.logger.error(`setPlayerGameSession:: game ${gameId} does not exists`, null, this.context)
+            return false
+        }
+
         await this.playSessionService.create({
-            identifier,
             startedAt: Date.now().toString(),
             player: await this.userService.findOne({ uuid }),
-            stat
+            stat,
+            game
         })
 
         return true
@@ -765,7 +773,12 @@ export class GameApiService {
                     ...pa,
                     player,
                     game,
-                    achievement
+                    achievement,
+                    id: this.playerAchievementService.calculateId({
+                        gameId: dto.gameId,
+                        uuid: dto.uuid,
+                        achievementId: dto.achievementId
+                    })
                 }
             })
         )

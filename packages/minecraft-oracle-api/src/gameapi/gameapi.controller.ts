@@ -2,12 +2,10 @@ import {
     Body,
     Controller,
     Delete,
-    forwardRef,
     Get,
     HttpCode,
     Inject,
     Param,
-    Post,
     Put,
     Query,
     UnprocessableEntityException,
@@ -33,7 +31,6 @@ import { SetGameOngoingDto } from './dtos/setgameongoing.dto';
 import { GameKindInProgressDto } from './dtos/gamekndinprogress.dto';
 import { SetGameTypeDto } from '../gametype/dtos/gametype.dto';
 import { GameTypeService } from '../gametype/gametype.service';
-import { GameService } from '../game/game.service';
 import { SetGameDto } from '../game/dto/game.dto';
 import { SetPlayerScoreDto } from '../playerscore/dtos/setplayerscore.dto';
 import { SetAchievementsDto } from '../achievement/dtos/achievement.dto';

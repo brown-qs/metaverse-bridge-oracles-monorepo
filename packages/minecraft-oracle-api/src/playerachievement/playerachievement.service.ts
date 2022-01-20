@@ -11,6 +11,10 @@ export class PlayerAchievementService {
         private readonly repository: Repository<PlayerAchievementEntity>
     ) {}
 
+    public calculateId(dto: {uuid: string, gameId: string, achievementId: string}): string {
+        return `${dto.uuid}-${dto.gameId}-${dto.achievementId}`
+    }
+
     public async create(entity: PlayerAchievementEntity): Promise<PlayerAchievementEntity> {
         const u = await this.repository.save(entity);
         return u;
