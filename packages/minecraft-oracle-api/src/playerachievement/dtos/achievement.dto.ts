@@ -1,11 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
 
 export class PlayerAchievementDto {
-    @ApiProperty({ description: 'Name of the leaderboard'})
+    @ApiProperty({ description: 'Name of the achievement'})
     name: string
-
-    @ApiProperty({ description: 'Unique ID of the leaderboard'})
-    id: string
 
     @ApiProperty({ description: 'When the acheivement was awarded. Unix timestamp'})
     awardedAt: string
