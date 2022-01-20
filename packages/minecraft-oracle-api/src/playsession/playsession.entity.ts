@@ -1,11 +1,11 @@
 import {
-    IsBoolean,
     IsNumber,
     IsString,
 } from 'class-validator';
 import { UserEntity } from '../user/user.entity';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { PlaySessionStatEntity } from './playsessionstat.entity';
+import { GameEntity } from 'src/game/game.entity';
 
 @Entity()
 export class PlaySessionEntity {
@@ -26,7 +26,7 @@ export class PlaySessionEntity {
     @IsString()
     endedAt?: string;
 
-    @Column()
+    @Column({nullable: true, default: null})
     @IsString()
     identifier?: string;
 
@@ -35,4 +35,7 @@ export class PlaySessionEntity {
 
     @ManyToOne(() => PlaySessionStatEntity, (stat) => stat.sessions)
     stat?: PlaySessionStatEntity
+
+    @ManyToOne(() => GameEntity, (game) => game.playSessions)
+    game: GameEntity
 }

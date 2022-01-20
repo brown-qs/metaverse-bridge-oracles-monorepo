@@ -11,8 +11,8 @@ export class PlaySessionStatService {
         private readonly repository: Repository<PlaySessionStatEntity>
     ) {}
 
-    public calculateId({uuid}: {uuid: string}, {identifier}: {identifier: string}): string {
-        return `${uuid}-${identifier}`
+    public calculateId(data: {uuid: string, gameId: string}): string {
+        return `${data.uuid}-${data.gameId}`
     }
     
     public async create(playSessionStatEntity: PlaySessionStatEntity): Promise<PlaySessionStatEntity> {
