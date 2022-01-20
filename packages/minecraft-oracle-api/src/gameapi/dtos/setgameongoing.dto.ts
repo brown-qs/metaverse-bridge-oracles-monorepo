@@ -5,5 +5,5 @@ export class SetGameOngoingDto {
     ongoing: boolean
 
     @ApiProperty({ description: 'Game identifier'})
-    id: string
+    gameId: string
 }

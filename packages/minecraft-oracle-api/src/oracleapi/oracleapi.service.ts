@@ -7,12 +7,12 @@ import { UserEntity } from '../user/user.entity';
 import { GameService } from '../game/game.service';
 import { ImportDto } from './dtos/import.dto';
 import { CALLDATA_EXPIRATION_MS, CALLDATA_EXPIRATION_THRESHOLD, METAVERSE, RecognizedAsset, RecognizedAssetType } from '../config/constants';
-import { calculateMetaAssetHash, encodeEnraptureWithSigData, encodeExportWithSigData, encodeImportWithSigData, getSalt, getSignature, utf8ToKeccak } from './oracle';
+import { calculateMetaAssetHash, encodeEnraptureWithSigData, encodeExportWithSigData, encodeImportWithSigData, getSalt, getSignature, utf8ToKeccak } from './oracleapi.utils';
 import { Contract, ethers, Signer } from 'ethers';
 import { ProviderToken } from '../provider/token';
 import { AssetService } from '../asset/asset.service';
 import { assetTypeToStringAssetType, findRecognizedAsset } from '../utils';
-import { MetaAsset } from './oracle.types';
+import { MetaAsset } from './oracleapi.types';
 import { ExportDto } from './dtos/export.dto';
 import { SummonDto } from './dtos/summon.dto';
 import { AssetEntity } from '../asset/asset.entity';
@@ -23,11 +23,11 @@ import { InventoryEntity } from '../playerinventory/inventory.entity';
 import { SkinService } from '../skin/skin.service';
 import { SkinEntity } from '../skin/skin.entity';
 import { StringAssetType } from '../common/enums/AssetType';
-import { NftService } from '../nft/nft.service';
+import { NftApiService } from '../nftapi/nftapi.service';
 import { GameKind } from 'src/game/game.enum';
 
 @Injectable()
-export class OracleService {
+export class OracleApiService {
 
     private locks: Map<string, MutexInterface>;
 
@@ -39,7 +39,7 @@ export class OracleService {
         private readonly gameService: GameService,
         private readonly assetService: AssetService,
         private readonly inventoryService: InventoryService,
-        private readonly nftService: NftService,
+        private readonly nftApiService: NftApiService,
         private configService: ConfigService,
         @Inject(ProviderToken.ORACLE_WALLET) private oracle: Signer,
         @Inject(ProviderToken.METAVERSE_CONTRACT) private metaverse: Contract,
@@ -47,7 +47,7 @@ export class OracleService {
         @Inject(ProviderToken.ENRAPTURABLE_ASSETS) private enrapturableAssets: RecognizedAsset[],
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
-        this.context = OracleService.name
+        this.context = OracleApiService.name
         this.locks = new Map();
 
     }
@@ -379,7 +379,7 @@ export class OracleService {
             let metadata = null
             let world = null
             try {
-                metadata = await this.nftService.getNFT('1285', assetEntry.assetType, assetEntry.assetAddress, assetEntry.assetId) as any ?? null
+                metadata = await this.nftApiService.getNFT('1285', assetEntry.assetType, assetEntry.assetAddress, assetEntry.assetId) as any ?? null
                 world = metadata?.tokenURI?.plot?.world ?? null
             } catch {
                 this.logger.error(`ImportConfirm: couldn't fetch asset metadata: ${hash}`, undefined, this.context)

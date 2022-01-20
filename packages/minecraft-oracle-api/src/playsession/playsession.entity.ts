@@ -26,7 +26,7 @@ export class PlaySessionEntity {
     @IsString()
     endedAt?: string;
 
-    @Column()
+    @Column({nullable: true, default: null})
     @IsString()
     identifier?: string;
 

@@ -16,6 +16,6 @@ export class SnapshotDto {
 }
 
 export class SnapshotsDto {
-    @ApiProperty({ description: 'Snapshot array', default: [], isArray: true})
+    @ApiProperty({ description: 'Snapshot array', type: [SnapshotDto]})
     snapshots: SnapshotDto[]
 }

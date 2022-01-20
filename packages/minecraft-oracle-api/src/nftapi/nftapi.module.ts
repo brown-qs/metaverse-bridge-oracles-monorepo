@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { NftService } from './nft.service';
-import { NftController } from './nft.controller';
+import { NftApiService } from './nftapi.service';
+import { NftApiController } from './nftapi.controller';
 import { ProviderModule } from '../provider/provider.module';
 import { SecretModule } from '../secret/secret.module';
 
@@ -9,8 +9,8 @@ import { SecretModule } from '../secret/secret.module';
         ProviderModule,
         SecretModule
     ],
-    providers: [NftService],
-    exports: [NftService],
-    controllers: [NftController]
+    providers: [NftApiService],
+    exports: [NftApiService],
+    controllers: [NftApiController]
 })
-export class NftModule {}
+export class NftApiModule {}

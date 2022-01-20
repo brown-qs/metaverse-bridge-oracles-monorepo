@@ -12,6 +12,6 @@ export class AssetDto {
     @IsString()
     assetId: string
 
-    @ApiProperty({ description: 'Asset type integer. 0: none, 1: native, 2: erc20, 3: erc721, 4: erc1155'})
+    @ApiProperty({ description: 'Asset type integer. 0: none, 1: native, 2: erc20, 3: erc721, 4: erc1155', enum: AssetType})
     assetType: AssetType
 }

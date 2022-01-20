@@ -4,7 +4,7 @@ import { TextureType } from "../../texture/texturetype.enum";
 
 export class TextureDto {
 
-    @ApiProperty({ description: 'Texture asset type'})
+    @ApiProperty({ description: 'Texture asset type', enum: StringAssetType})
     assetType: StringAssetType;
 
     @ApiProperty({ description: 'Texture asset address'})
@@ -13,7 +13,7 @@ export class TextureDto {
     @ApiProperty({ description: 'Texture asset id'})
     assetId: string;
 
-    @ApiProperty({ description: 'Texture type'})
+    @ApiProperty({ description: 'Texture type', enum: TextureType})
     type: TextureType;
     
     @ApiProperty({ description: 'Texture data'})
@@ -25,6 +25,6 @@ export class TextureDto {
 
 export class TexturesDto {
 
-    @ApiProperty({ description: 'List of textures', default: [], isArray: true})
+    @ApiProperty({ description: 'List of textures', type: [TextureDto]})
     textures: TextureDto[]
 }

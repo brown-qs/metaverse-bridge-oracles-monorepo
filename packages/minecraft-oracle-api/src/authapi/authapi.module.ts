@@ -1,8 +1,8 @@
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
+import { AuthApiService } from './authapi.service';
+import { AuthApiController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
 import { UserModule } from '../user/user.module';
 import { MicrosoftSetupParamsProvider } from '../provider';
@@ -32,8 +32,8 @@ import { TextureModule } from '../texture/texture.module';
             inject: [ConfigService]
         })
     ],
-    providers: [MicrosoftSetupParamsProvider, AuthService, JwtStrategy],
-    controllers: [AuthController],
-    exports: [AuthService]
+    providers: [MicrosoftSetupParamsProvider, AuthApiService, JwtStrategy],
+    controllers: [AuthApiController],
+    exports: [AuthApiService]
 })
 export class AuthModule {}

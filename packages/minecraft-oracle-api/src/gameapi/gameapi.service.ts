@@ -24,7 +24,7 @@ import { SkinService } from '../skin/skin.service';
 import { AssetService } from '../asset/asset.service';
 import { AssetEntity } from '../asset/asset.entity';
 import { ProviderToken } from '../provider/token';
-import { CommunismDto } from '../admin/dtos/communism.dto';
+import { CommunismDto } from '../adminapi/dtos/communism.dto';
 import { GameKind } from '../game/game.enum';
 import { SetGameOngoingDto } from './dtos/setgameongoing.dto';
 import { GameKindInProgressDto } from './dtos/gamekndinprogress.dto';
@@ -35,7 +35,7 @@ import { SetPlayerScoreDto } from '../playerscore/dtos/setplayerscore.dto';
 import { PlayerScoreService } from '../playerscore/playerscore.service';
 import { SetAchievementsDto } from '../achievement/dtos/achievement.dto';
 import { AchievementService } from '../achievement/achievement.service';
-import { GetPlayerAchievementDto, SetPlayerAchievementsDto } from '../playerachievement/dtos/achievement.dto';
+import { GetPlayerAchievementDto, SetPlayerAchievementsDto } from '../playerachievement/dtos/playerachievement.dto';
 import { PlayerAchievementService } from '../playerachievement/playerachievement.service';
 
 @Injectable()
@@ -196,7 +196,7 @@ export class GameApiService {
     }
 
     public async setGameOngoing(dto: SetGameOngoingDto): Promise<boolean> {
-        const game = await this.gameService.findOne({id: dto.id})
+        const game = await this.gameService.findOne({id: dto.gameId})
 
         if (!game) {
             throw new UnprocessableEntityException("Game not found")
@@ -711,7 +711,7 @@ export class GameApiService {
             game,
             score: dto.score.toString(),
             updatedAt: dto.updatedAt,
-            key: dto.key
+            id: this.playerScoreService.calculateId(dto)
         })
 
         return entity

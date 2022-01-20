@@ -4,7 +4,7 @@ import { hexZeroPad } from '@ethersproject/bytes';
 import { HashZero } from '@ethersproject/constants';
 import { IPFS_GATEWAY } from '../config/constants';
 import { StringAssetType } from '../common/enums/AssetType';
-import { Asset, StaticTokenData } from './nft.types';
+import { Asset, StaticTokenData } from './nftapi.types';
 import axios from 'axios';
 
 export function stringToStringAssetType(

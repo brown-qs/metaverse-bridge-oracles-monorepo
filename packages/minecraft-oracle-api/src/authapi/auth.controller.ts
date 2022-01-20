@@ -1,38 +1,28 @@
 import {
-    Body,
     Controller,
-    Delete,
     Get,
     HttpCode,
     HttpStatus,
     Inject,
-    Param,
-    Post,
-    Put,
     Query,
     Redirect,
-    Req,
-    Request,
-    Res,
     UnauthorizedException,
-    UseGuards
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
-import { AuthService } from './auth.service';
-import { Response } from 'express';
+import { AuthApiService } from './authapi.service';
 
 @ApiTags('auth')
 @Controller('auth')
-export class AuthController {
+export class AuthApiController {
 
     private readonly context: string;
 
     constructor(
-        private readonly authService: AuthService,
+        private readonly authApiService: AuthApiService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) { 
-        this.context = AuthController.name;
+        this.context = AuthApiController.name;
     }
 
     @Get('login')
@@ -40,7 +30,7 @@ export class AuthController {
     @ApiOperation({ summary: 'Redirects user to Minecraft authentication' })
     @Redirect()
     async login() {
-        const { redirectUrl } = await this.authService.getMicrosoftAuthUrl();
+        const { redirectUrl } = await this.authApiService.getMicrosoftAuthUrl();
         
         if (!redirectUrl) {
             throw new UnauthorizedException();
@@ -58,7 +48,7 @@ export class AuthController {
             this.logger.error(`Response query:: ${query?.error}: ${query?.error_description}`, null, this.context)
         }
         this.logger.debug(`Response query: ${query?.code}`, this.context)
-        const result = await this.authService.authLogin(query.code);
+        const result = await this.authApiService.authLogin(query.code);
         this.logger.debug(`Response result: ${JSON.stringify(result)}`, this.context)
         return {statusCode: HttpStatus.PERMANENT_REDIRECT,  url: result.redirectUrl}
     }

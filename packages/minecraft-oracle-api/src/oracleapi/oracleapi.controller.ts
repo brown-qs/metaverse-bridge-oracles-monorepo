@@ -8,12 +8,11 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
-import { UserService } from '../user/user.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../authapi/jwt-auth.guard';
 import { UserEntity } from '../user/user.entity';
 import { User } from '../utils/decorators';
-import { CallparamDto, CallParamsDto } from './dtos/callparams.dto';
-import { OracleService } from './oracle.service';
+import { CallparamDto } from './dtos/callparams.dto';
+import { OracleApiService } from './oracleapi.service';
 import { ImportDto } from './dtos/import.dto';
 import { ConfirmDto } from './dtos/confirm.dto';
 import { ExportDto } from './dtos/export.dto';
@@ -21,16 +20,15 @@ import { SummonDto } from './dtos/summon.dto';
 
 @ApiTags('oracle')
 @Controller('oracle')
-export class OracleController {
+export class OracleApiController {
 
     private readonly context: string;
 
     constructor(
-        private readonly userService: UserService,
-        private readonly oracleService: OracleService,
+        private readonly oracleApiService: OracleApiService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) { 
-        this.context = OracleController.name;
+        this.context = OracleApiController.name;
     }
 
     @Put('import')
@@ -42,7 +40,7 @@ export class OracleController {
         @User() user: UserEntity,
         @Body() data: ImportDto
     ): Promise<CallparamDto> {
-        const params = await this.oracleService.userInRequest(user, data, false)
+        const params = await this.oracleApiService.userInRequest(user, data, false)
 
         return {
             hash: params[0],
@@ -61,7 +59,7 @@ export class OracleController {
         @User() user: UserEntity,
         @Body() data: ConfirmDto
     ): Promise<boolean> {
-        const success = await this.oracleService.userImportConfirm(user, data)
+        const success = await this.oracleApiService.userImportConfirm(user, data)
         return success
     }
 
@@ -74,7 +72,7 @@ export class OracleController {
         @User() user: UserEntity,
         @Body() data: ImportDto
     ): Promise<CallparamDto> {
-        const params = await this.oracleService.userInRequest(user, data, true)
+        const params = await this.oracleApiService.userInRequest(user, data, true)
         return {
             hash: params[0],
             data: params[1],
@@ -92,7 +90,7 @@ export class OracleController {
         @User() user: UserEntity,
         @Body() data: ConfirmDto
     ): Promise<boolean> {
-        const success = await this.oracleService.userEnraptureConfirm(user, data)
+        const success = await this.oracleApiService.userEnraptureConfirm(user, data)
         return success
     }
 
@@ -105,7 +103,7 @@ export class OracleController {
         @User() user: UserEntity,
         @Body() data: ExportDto
     ): Promise<CallparamDto> {
-        const params = await this.oracleService.userOutRequest(user, data)
+        const params = await this.oracleApiService.userOutRequest(user, data)
         return {
             hash: params[0],
             data: params[1],
@@ -123,7 +121,7 @@ export class OracleController {
         @User() user: UserEntity,
         @Body() data: ConfirmDto
     ): Promise<boolean> {
-        const success = await this.oracleService.userExportConfirm(user, data)
+        const success = await this.oracleApiService.userExportConfirm(user, data)
         return success
     }
 
@@ -136,7 +134,7 @@ export class OracleController {
         @User() user: UserEntity,
         @Body() data: SummonDto
     ): Promise<boolean> {
-        const success = await this.oracleService.userSummonRequest(user, data)
+        const success = await this.oracleApiService.userSummonRequest(user, data)
         return success
     }
 }

@@ -19,7 +19,7 @@ import { ProfileDto } from '../profileapi/dtos/profile.dto';
 import { SnapshotsDto } from './dtos/snapshot.dto';
 import { PlayerSkinDto } from './dtos/texturemap.dto';
 import { PermittedMaterials } from './dtos/permitted-material.dto';
-import { SharedSecretGuard } from '../auth/secret.guard';
+import { SharedSecretGuard } from '../authapi/secret.guard';
 import { AreGganbusDto, GganbuDto } from './dtos/gganbu.dto';
 import { ServerIdDto } from './dtos/serverId.dto';
 import { ProfileApiService } from '../profileapi/profileapi.service';
@@ -33,10 +33,10 @@ import { SetGameTypeDto } from '../gametype/dtos/gametype.dto';
 import { GameTypeService } from '../gametype/gametype.service';
 import { SetGameDto } from '../game/dto/game.dto';
 import { SetPlayerScoreDto } from '../playerscore/dtos/setplayerscore.dto';
-import { SetAchievementsDto } from '../achievement/dtos/achievement.dto';
+import { GetAchievementsDto, SetAchievementsDto } from '../achievement/dtos/achievement.dto';
 import { AchievementService } from '../achievement/achievement.service';
 import { AchievementEntity } from '../achievement/achievement.entity';
-import { GetPlayerAchievementDto, SetPlayerAchievementsDto } from '../playerachievement/dtos/achievement.dto';
+import { GetPlayerAchievementDto, SetPlayerAchievementsDto } from '../playerachievement/dtos/playerachievement.dto';
 import { PlayerAchievementEntity } from '../playerachievement/playerachievement.entity';
 
 @ApiTags('game')
@@ -261,29 +261,29 @@ export class GameApiController {
         return success
     }
 
-    @Put('player/:uuid/session/:identifier/end')
+    @Put('player/:uuid/session/:gameId/end')
     @HttpCode(200)
     @ApiOperation({ summary: 'Logs an ongoing game session end' })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
     async endPlayerGameSession(
         @Param('uuid') uuid: string,
-        @Param('identifier') identifier: string
+        @Param('gameId') gameId: string
     ): Promise<boolean> {
-        const success = await this.gameApiService.setPlayerGameSession(uuid, identifier,true)
+        const success = await this.gameApiService.setPlayerGameSession(uuid, gameId,true)
         return success
     }
 
-    @Put('player/:uuid/session/:identifier/start')
+    @Put('player/:uuid/session/:gameId/start')
     @HttpCode(200)
     @ApiOperation({ summary: 'Logs an ongoing game session start' })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
     async startPlayerGameSession(
         @Param('uuid') uuid: string,
-        @Param('identifier') identifier: string
+        @Param('gameId') gameId: string
     ): Promise<boolean> {
-        const success = await this.gameApiService.setPlayerGameSession(uuid, identifier, false)
+        const success = await this.gameApiService.setPlayerGameSession(uuid, gameId, false)
         return success
     }
 
@@ -341,9 +341,9 @@ export class GameApiController {
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
     async getAchievements(
-        @Param('gameId') gameId: string
+         @Query() {gameId}: GetAchievementsDto,
     ): Promise<AchievementEntity[]> {
-        const entities = await this.achievementService.find({game: {id: gameId}})
+        const entities = await this.achievementService.findMany({where: {game: {id: gameId}}, relations: ['game']})
         return entities
     }
 
@@ -366,8 +366,8 @@ export class GameApiController {
     @UseGuards(SharedSecretGuard)
     async setPlayerAchievements(
         @Body() dto: SetPlayerAchievementsDto,
-    ): Promise<PlayerAchievementEntity[]> {
+    ): Promise<boolean> {
         const entities = await this.gameApiService.updatePlayerAchievements(dto)
-        return entities
+        return !!entities
     }
 }

@@ -11,6 +11,10 @@ export class PlayerScoreService {
         private readonly repository: Repository<PlayerScoreEntity>
     ) {}
 
+    public calculateId(dto: {uuid: string, gameId: string}): string {
+        return `${dto.uuid}-${dto.gameId}`
+    }
+
     public async create(entity: PlayerScoreEntity): Promise<PlayerScoreEntity> {
         const u = await this.repository.save(entity);
         return u;

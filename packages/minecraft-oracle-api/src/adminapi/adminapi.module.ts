@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
 import { GameApiModule } from '../gameapi/gameapi.module';
 import { MaterialModule } from '../material/material.module';
-import { OracleModule } from '../oracle/oracle.module';
+import { OracleApiModule } from '../oracleapi/oracleapi.module';
 import { ProfileApiModule } from '../profileapi/profileapi.module';
 import { SecretModule } from '../secret/secret.module';
 import { SnapshotModule } from '../snapshot/snapshot.module';
 import { TextureModule } from '../texture/texture.module';
 import { UserModule } from '../user/user.module';
-import { AdminController } from './admin.controller';
-import { AdminService } from './admin.service';
+import { AdminApiController } from './adminapi.controller';
+import { AdminApiService } from './adminapi.service';
 
 @Module({
     imports: [
@@ -19,10 +19,10 @@ import { AdminService } from './admin.service';
         GameApiModule,
         TextureModule,
         SnapshotModule,
-        OracleModule
+        OracleApiModule
     ],
-    providers: [AdminService],
-    exports: [AdminService],
-    controllers: [AdminController]
+    providers: [AdminApiService],
+    exports: [AdminApiService],
+    controllers: [AdminApiController]
 })
-export class AdminModule {}
+export class AdminApiModule {}

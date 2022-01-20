@@ -6,11 +6,11 @@ import { SecretModule } from '../secret/secret.module';
 import { SummonModule } from '../summon/summon.module';
 import { TextureModule } from '../texture/texture.module';
 import { UserModule } from '../user/user.module';
-import { OracleController } from './oracle.controller';
-import { OracleService } from './oracle.service';
+import { OracleApiController } from './oracleapi.controller';
+import { OracleApiService } from './oracleapi.service';
 import { InventoryModule } from '../playerinventory/inventory.module';
 import { SkinModule } from '../skin/skin.module';
-import { NftModule } from '../nft/nft.module';
+import { NftApiModule } from '../nftapi/nftapi.module';
 
 @Module({
     imports: [
@@ -23,10 +23,10 @@ import { NftModule } from '../nft/nft.module';
         GameModule,
         SummonModule,
         ProviderModule,
-        NftModule
+        NftApiModule
     ],
-    providers: [OracleService],
-    exports: [OracleService],
-    controllers: [OracleController]
+    providers: [OracleApiService],
+    exports: [OracleApiService],
+    controllers: [OracleApiController]
 })
-export class OracleModule {}
+export class OracleApiModule {}

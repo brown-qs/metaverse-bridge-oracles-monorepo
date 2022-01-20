@@ -2,9 +2,6 @@ import { ApiProperty } from "@nestjs/swagger";
 
 export class SetPlayerScoreDto {
 
-    @ApiProperty({ description: 'Unique key of the score'})
-    key: string;
-
     @ApiProperty({ description: 'Updated at UNIX timestamp'})
     updatedAt: string;
 

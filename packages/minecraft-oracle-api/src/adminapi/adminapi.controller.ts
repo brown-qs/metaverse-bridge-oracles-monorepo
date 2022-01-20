@@ -15,32 +15,32 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { UserService } from '../user/user.service';
 import { ProfileDto } from '../profileapi/dtos/profile.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../authapi/jwt-auth.guard';
 import { User } from '../utils/decorators';
 import { UserEntity } from '../user/user.entity';
 import { UserRole } from '../common/enums/UserRole';
 import { PlayerSkinDto } from '../gameapi/dtos/texturemap.dto';
 import { GameApiService } from '../gameapi/gameapi.service';
 import { MaterialsDto } from './dtos/material.dto';
-import { AdminService } from './admin.service';
+import { AdminApiService } from './adminapi.service';
 import { TexturesDto } from './dtos/textures.dto';
 import { SecretDto, SecretsDto } from './dtos/secret.dto';
 import { SnapshotsDto } from '../gameapi/dtos/snapshot.dto';
 import { PreferredServersDto } from './dtos/preferredServer.dto';
 import { ProfileApiService } from '../profileapi/profileapi.service';
 import { AdminConfirmDto, OracleActionTypeDto } from './dtos/confirm.dto';
-import { OracleService } from '../oracle/oracle.service';
+import { OracleApiService } from '../oracleapi/oracleapi.service';
 import { OracleRequestDto } from './dtos/oraclerequest.dto';
-import { ExportDto } from '../oracle/dtos/export.dto';
-import { ImportDto } from '../oracle/dtos/import.dto';
-import { SummonDto } from '../oracle/dtos/summon.dto';
-import { CallparamDto } from '../oracle/dtos/callparams.dto';
+import { ExportDto } from '../oracleapi/dtos/export.dto';
+import { ImportDto } from '../oracleapi/dtos/import.dto';
+import { SummonDto } from '../oracleapi/dtos/summon.dto';
+import { CallparamDto } from '../oracleapi/dtos/callparams.dto';
 import { CommunismDto } from './dtos/communism.dto';
 import { BlacklistDto } from './dtos/blacklist.dto';
 
 @ApiTags('admin')
 @Controller('admin')
-export class AdminController {
+export class AdminApiController {
 
     private readonly context: string;
 
@@ -48,11 +48,11 @@ export class AdminController {
         private readonly userService: UserService,
         private readonly profileService: ProfileApiService,
         private readonly gameApiService: GameApiService,
-        private readonly adminService: AdminService,
-        private readonly oracleService: OracleService,
+        private readonly adminApiService: AdminApiService,
+        private readonly oracleService: OracleApiService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) { 
-        this.context = AdminController.name;
+        this.context = AdminApiController.name;
     }
 
     @Get('player/:uuid/profile')
@@ -123,7 +123,7 @@ export class AdminController {
             throw new ForbiddenException('Not admin')
         }
 
-        const success = await this.adminService.setVIP({uuid}, typeof vip === 'string' ? vip === 'true' : vip)
+        const success = await this.adminApiService.setVIP({uuid}, typeof vip === 'string' ? vip === 'true' : vip)
         return success
     }
 
@@ -139,7 +139,7 @@ export class AdminController {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
         }
-        const success = await this.adminService.saveMaterials(materials.materials)
+        const success = await this.adminApiService.saveMaterials(materials.materials)
         return success
     }
 
@@ -155,7 +155,7 @@ export class AdminController {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
         }
-        const success = await this.adminService.deleteMaterials(materials.materials)
+        const success = await this.adminApiService.deleteMaterials(materials.materials)
         return success
     }
 
@@ -171,7 +171,7 @@ export class AdminController {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
         }
-        const success = await this.adminService.saveTextures(textures.textures)
+        const success = await this.adminApiService.saveTextures(textures.textures)
         return success
     }
 
@@ -187,7 +187,7 @@ export class AdminController {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
         }
-        const success = await this.adminService.deleteTextures(textures.textures)
+        const success = await this.adminApiService.deleteTextures(textures.textures)
         return success
     }
 
@@ -203,7 +203,7 @@ export class AdminController {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
         }
-        const success = await this.adminService.setSharedSecret(sdto.name, sdto.secret)
+        const success = await this.adminApiService.setSharedSecret(sdto.name, sdto.secret)
         return success
     }
 
@@ -219,7 +219,7 @@ export class AdminController {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
         }
-        const s = await this.adminService.getSharedSecret(name)
+        const s = await this.adminApiService.getSharedSecret(name)
         if (!s) {
             throw new UnprocessableEntityException("Shared secret not found")
         }
@@ -237,7 +237,7 @@ export class AdminController {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
         }
-        const secrets = await this.adminService.getSharedSecrets()
+        const secrets = await this.adminApiService.getSharedSecrets()
         return {secrets}
     }
 
@@ -370,7 +370,7 @@ export class AdminController {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
         }
-        const res = await this.adminService.blacklist({uuid}, dto.blacklist)
+        const res = await this.adminApiService.blacklist({uuid}, dto.blacklist)
         return res
     }
 }

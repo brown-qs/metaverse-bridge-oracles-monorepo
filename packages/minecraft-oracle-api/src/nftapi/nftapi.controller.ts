@@ -8,21 +8,21 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
-import { SharedSecretGuard } from '../auth/secret.guard';
-import { NftService } from './nft.service';
-import { ProcessedStaticTokenData, StaticTokenData } from './nft.types';
+import { SharedSecretGuard } from '../authapi/secret.guard';
+import { NftApiService } from './nftapi.service';
+import { ProcessedStaticTokenData, StaticTokenData } from './nftapi.types';
 
 @ApiTags('game')
 @Controller('game')
-export class NftController {
+export class NftApiController {
 
     private readonly context: string;
 
     constructor(
-        private readonly nftService: NftService,
+        private readonly nftService: NftApiService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) { 
-        this.context = NftController.name;
+        this.context = NftApiController.name;
     }
 
     @Get('nft/:chainId/:tokenType/:address/:tokenId')

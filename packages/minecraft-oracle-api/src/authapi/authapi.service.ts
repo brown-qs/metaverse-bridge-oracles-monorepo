@@ -8,28 +8,20 @@ import { ProviderToken } from '../provider/token';
 import { MicrosoftSetupParams } from '../provider';
 import { UserEntity } from '../user/user.entity';
 import { JwtService } from '@nestjs/jwt';
-import { CacheService } from '../cache/cache.service';
-import { SkinService } from '../skin/skin.service';
-import { SkinEntity } from '../skin/skin.entity';
-import { TextureService } from '../texture/texture.service';
-import { AssetType, StringAssetType } from '../common/enums/AssetType';
 
 @Injectable()
-export class AuthService {
+export class AuthApiService {
 
     private readonly context: string;
 
     constructor(
         private userService: UserService,
-        private textureService: TextureService,
-        private skinService: SkinService,
         private configService: ConfigService,
-        private cacheService: CacheService,
         private jwtService: JwtService,
         @Inject(ProviderToken.MICROSOFT_SETUP) private readonly microsoftSetupParams: MicrosoftSetupParams,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
-        this.context = AuthService.name;
+        this.context = AuthApiService.name;
     }
 
     public generateJwtToken(uuid: string, userName: string): string {
