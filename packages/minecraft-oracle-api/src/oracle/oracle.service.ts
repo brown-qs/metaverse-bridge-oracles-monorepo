@@ -1,10 +1,10 @@
-import { Inject, Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
+import { Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '../user/user.service';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { TextureService } from '../texture/texture.service';
 import { UserEntity } from '../user/user.entity';
-import { GameSessionService } from '../gamesession/gamesession.service';
+import { GameService } from '../game/game.service';
 import { ImportDto } from './dtos/import.dto';
 import { CALLDATA_EXPIRATION_MS, CALLDATA_EXPIRATION_THRESHOLD, METAVERSE, RecognizedAsset, RecognizedAssetType } from '../config/constants';
 import { calculateMetaAssetHash, encodeEnraptureWithSigData, encodeExportWithSigData, encodeImportWithSigData, getSalt, getSignature, utf8ToKeccak } from './oracle';
@@ -18,12 +18,13 @@ import { SummonDto } from './dtos/summon.dto';
 import { AssetEntity } from '../asset/asset.entity';
 import { Mutex, MutexInterface } from 'async-mutex';
 import { UserRole } from '../common/enums/UserRole';
-import { InventoryService } from '../inventory/inventory.service';
-import { InventoryEntity } from '../inventory/inventory.entity';
+import { InventoryService } from '../playerinventory/inventory.service';
+import { InventoryEntity } from '../playerinventory/inventory.entity';
 import { SkinService } from '../skin/skin.service';
 import { SkinEntity } from '../skin/skin.entity';
 import { StringAssetType } from '../common/enums/AssetType';
 import { NftService } from '../nft/nft.service';
+import { GameKind } from 'src/game/game.enum';
 
 @Injectable()
 export class OracleService {
@@ -35,7 +36,7 @@ export class OracleService {
         private readonly userService: UserService,
         private readonly textureService: TextureService,
         private readonly skinService: SkinService,
-        private readonly gameSessionService: GameSessionService,
+        private readonly gameService: GameService,
         private readonly assetService: AssetService,
         private readonly inventoryService: InventoryService,
         private readonly nftService: NftService,
@@ -155,7 +156,7 @@ export class OracleService {
             throw new UnprocessableEntityException(`No hash was received.`)
         }
 
-        const ongoingGame = await this.gameSessionService.findOne({ ongoing: true })
+        const ongoingGame = await this.gameService.findOne({ ongoing: true, type: GameKind.CARNAGE })
         if (!!ongoingGame) {
             this.logger.error(`userOutRequest: forbidden during ongoing game`, null, this.context)
             throw new UnprocessableEntityException(`Forbidden during ongoing game`)
@@ -369,7 +370,7 @@ export class OracleService {
 
                 await this.userService.update(user.uuid, { allowedToPlay: user.allowedToPlay, role: user.role, numGamePassAsset: user.numGamePassAsset })
             }
-        }        
+        }
 
         assetEntry.recognizedAssetType = recognizedAsset?.type ?? RecognizedAssetType.NONE;
         const finalentry = await this.assetService.create({ ...assetEntry, pendingIn: false });

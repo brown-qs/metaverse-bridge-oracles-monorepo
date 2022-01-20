@@ -2,10 +2,12 @@ import {
     Body,
     Controller,
     Delete,
+    forwardRef,
     Get,
     HttpCode,
     Inject,
     Param,
+    Post,
     Put,
     Query,
     UnprocessableEntityException,
@@ -13,35 +15,48 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
-import { GameService } from './game.service';
+import { GameApiService } from './gameapi.service';
 import { UserService } from '../user/user.service';
-import { ProfileDto } from '../profile/dtos/profile.dto';
+import { ProfileDto } from '../profileapi/dtos/profile.dto';
 import { SnapshotsDto } from './dtos/snapshot.dto';
 import { PlayerSkinDto } from './dtos/texturemap.dto';
 import { PermittedMaterials } from './dtos/permitted-material.dto';
-import { GameInProgressDto } from './dtos/gameinprogress.dto';
 import { SharedSecretGuard } from '../auth/secret.guard';
 import { AreGganbusDto, GganbuDto } from './dtos/gganbu.dto';
 import { ServerIdDto } from './dtos/serverId.dto';
-import { ProfileService } from '../profile/profile.service';
+import { ProfileApiService } from '../profileapi/profileapi.service';
 import { SkinRequestDto } from './dtos/skins.dto';
 import { TextureEntity } from '../texture/texture.entity';
-import { SkinselectDto } from '../profile/dtos/skinselect.dto';
+import { SkinselectDto } from '../profileapi/dtos/skinselect.dto';
 import { AssetEntity } from '../asset/asset.entity';
+import { SetGameOngoingDto } from './dtos/setgameongoing.dto';
+import { GameKindInProgressDto } from './dtos/gamekndinprogress.dto';
+import { SetGameTypeDto } from '../gametype/dtos/gametype.dto';
+import { GameTypeService } from '../gametype/gametype.service';
+import { GameService } from '../game/game.service';
+import { SetGameDto } from '../game/dto/game.dto';
+import { SetPlayerScoreDto } from '../playerscore/dtos/setplayerscore.dto';
+import { SetAchievementsDto } from '../achievement/dtos/achievement.dto';
+import { AchievementService } from '../achievement/achievement.service';
+import { AchievementEntity } from '../achievement/achievement.entity';
+import { GetPlayerAchievementDto, SetPlayerAchievementsDto } from '../playerachievement/dtos/achievement.dto';
+import { PlayerAchievementEntity } from '../playerachievement/playerachievement.entity';
 
 @ApiTags('game')
 @Controller('game')
-export class GameController {
+export class GameApiController {
 
     private readonly context: string;
 
     constructor(
         private readonly userService: UserService,
-        private readonly gameService: GameService,
-        private readonly profileService: ProfileService,
+        private readonly achievementService: AchievementService,
+        private readonly gameApiService: GameApiService,
+        private readonly gameTypeService: GameTypeService,
+        private readonly profileService: ProfileApiService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) { 
-        this.context = GameController.name;
+        this.context = GameApiController.name;
     }
 
     @Get('player/:uuid/profile')
@@ -64,7 +79,7 @@ export class GameController {
         if (!user) {
             throw new UnprocessableEntityException('Player was not found')
         }
-        const skins = await this.gameService.getUserSkins(user)
+        const skins = await this.gameApiService.getUserSkins(user)
         return skins
     }
 
@@ -101,7 +116,7 @@ export class GameController {
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
     async getWorldPlots(@Param('world') world: string): Promise<AssetEntity[]> {
-        const plots = await this.gameService.getWorldPlots(world)
+        const plots = await this.gameApiService.getWorldPlots(world)
         return plots
     }
 
@@ -131,7 +146,7 @@ export class GameController {
             throw new UnprocessableEntityException('No player found')
         }
 
-        const [snapshottedItems, successArray, receivedNum, savedNum] = await this.gameService.processSnapshots(user, snapshots)
+        const [snapshottedItems, successArray, receivedNum, savedNum] = await this.gameApiService.processSnapshots(user, snapshots)
         return successArray
     }
 
@@ -175,29 +190,31 @@ export class GameController {
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
     async getSnapshottableMaterials(): Promise<PermittedMaterials> {
-        const permittedMaterials = await this.gameService.getSnapshottableMaterialsList()
+        const permittedMaterials = await this.gameApiService.getSnapshottableMaterialsList()
         return permittedMaterials
     }
 
-    @Put('inprogress')
+    @Put('ongoing')
     @HttpCode(200)
     @ApiOperation({ summary: 'Sets whether there is an active game going on or not' })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
     async setGameInProgress(
-        @Body() progress: GameInProgressDto,
+        @Body() dto: SetGameOngoingDto,
     ): Promise<boolean> {
-        const success = await this.gameService.setGameInProgress(progress.gameInProgress)
+        const success = await this.gameApiService.setGameOngoing(dto)
         return success
     }
 
-    @Get('inprogress')
+    @Get('ongoing')
     @HttpCode(200)
     @ApiOperation({ summary: 'Returns whether there is an active game in progress or not' })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
-    async getGameInProgress(): Promise<boolean> {
-        const inprogress = await this.gameService.getGameInProgress()
+    async getGameInProgress(
+        @Query() dto: GameKindInProgressDto,
+    ): Promise<boolean> {
+        const inprogress = await this.gameApiService.getGameKindInProgress(dto)
         return inprogress
     }
 
@@ -209,7 +226,7 @@ export class GameController {
     async skins(
         @Query() skinrequest: SkinRequestDto,
     ): Promise<TextureEntity[]> {
-        const skins = await this.gameService.getTextures(skinrequest)
+        const skins = await this.gameApiService.getTextures(skinrequest)
         return skins
     }
 
@@ -221,7 +238,7 @@ export class GameController {
     async setGganbu(
         @Body() gganbus: GganbuDto,
     ): Promise<boolean> {
-        const success = await this.gameService.setGganbu(gganbus.player1, gganbus.player2)
+        const success = await this.gameApiService.setGganbu(gganbus.player1, gganbus.player2)
         return success
     }
 
@@ -233,7 +250,7 @@ export class GameController {
     async getGganbu(
         @Query() gganbus: GganbuDto,
     ): Promise<AreGganbusDto> {
-        const success = await this.gameService.getGganbu(gganbus.player1, gganbus.player2)
+        const success = await this.gameApiService.getGganbu(gganbus.player1, gganbus.player2)
         return {areGganbus:success}
     }
 
@@ -243,7 +260,7 @@ export class GameController {
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
     async clearGganbus(): Promise<boolean> {
-        const success = await this.gameService.clearGganbus()
+        const success = await this.gameApiService.clearGganbus()
         return success
     }
 
@@ -256,7 +273,7 @@ export class GameController {
         @Param('uuid') uuid: string,
         @Param('identifier') identifier: string
     ): Promise<boolean> {
-        const success = await this.gameService.setPlayerGameSession(uuid, identifier,true)
+        const success = await this.gameApiService.setPlayerGameSession(uuid, identifier,true)
         return success
     }
 
@@ -269,7 +286,91 @@ export class GameController {
         @Param('uuid') uuid: string,
         @Param('identifier') identifier: string
     ): Promise<boolean> {
-        const success = await this.gameService.setPlayerGameSession(uuid, identifier, false)
+        const success = await this.gameApiService.setPlayerGameSession(uuid, identifier, false)
         return success
+    }
+
+    @Put('gametype')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Upserts a game type entry' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async setGameType(
+        @Body() dto: SetGameTypeDto,
+    ): Promise<boolean> {
+        const entity = await this.gameTypeService.create(dto)
+        return !!entity
+    }
+
+    @Put('game')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Upsers a game entry' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async setGame(
+        @Body() dto: SetGameDto,
+    ): Promise<boolean> {
+        const entity = await this.gameApiService.createGame(dto)
+        return !!entity
+    }
+
+    @Put('player/score')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Updates player score' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async setUserScore(
+        @Body() dto: SetPlayerScoreDto,
+    ): Promise<boolean> {
+        const entity = await this.gameApiService.updatePlayerScore(dto)
+        return !!entity
+    }
+
+    @Put('achievements')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Saves achievemenets for a game' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async setAchievements(
+        @Body() dto: SetAchievementsDto,
+    ): Promise<boolean> {
+        const entity = await this.gameApiService.updateAchievements(dto)
+        return !!entity
+    }
+
+    @Get('achievements')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Queries available achievemenets for a game' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async getAchievements(
+        @Param('gameId') gameId: string
+    ): Promise<AchievementEntity[]> {
+        const entities = await this.achievementService.find({game: {id: gameId}})
+        return entities
+    }
+
+    @Get('player/achievements')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Queries all player achievements for a game.' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async getPlayerAchievements(
+        @Query() dto: GetPlayerAchievementDto
+    ): Promise<PlayerAchievementEntity[]> {
+        const entities = await this.gameApiService.getPlayerAchievements(dto)
+        return entities
+    }
+
+    @Put('player/achievements')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Updates player achievements for a game.' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async setPlayerAchievements(
+        @Body() dto: SetPlayerAchievementsDto,
+    ): Promise<PlayerAchievementEntity[]> {
+        const entities = await this.gameApiService.updatePlayerAchievements(dto)
+        return entities
     }
 }

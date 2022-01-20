@@ -14,20 +14,20 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { UserService } from '../user/user.service';
-import { ProfileDto } from '../profile/dtos/profile.dto';
+import { ProfileDto } from '../profileapi/dtos/profile.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { User } from '../utils/decorators';
 import { UserEntity } from '../user/user.entity';
 import { UserRole } from '../common/enums/UserRole';
-import { PlayerSkinDto } from '../game/dtos/texturemap.dto';
-import { GameService } from '../game/game.service';
+import { PlayerSkinDto } from '../gameapi/dtos/texturemap.dto';
+import { GameApiService } from '../gameapi/gameapi.service';
 import { MaterialsDto } from './dtos/material.dto';
 import { AdminService } from './admin.service';
 import { TexturesDto } from './dtos/textures.dto';
 import { SecretDto, SecretsDto } from './dtos/secret.dto';
-import { SnapshotsDto } from '../game/dtos/snapshot.dto';
+import { SnapshotsDto } from '../gameapi/dtos/snapshot.dto';
 import { PreferredServersDto } from './dtos/preferredServer.dto';
-import { ProfileService } from '../profile/profile.service';
+import { ProfileApiService } from '../profileapi/profileapi.service';
 import { AdminConfirmDto, OracleActionTypeDto } from './dtos/confirm.dto';
 import { OracleService } from '../oracle/oracle.service';
 import { OracleRequestDto } from './dtos/oraclerequest.dto';
@@ -46,8 +46,8 @@ export class AdminController {
 
     constructor(
         private readonly userService: UserService,
-        private readonly profileService: ProfileService,
-        private readonly gameService: GameService,
+        private readonly profileService: ProfileApiService,
+        private readonly gameApiService: GameApiService,
         private readonly adminService: AdminService,
         private readonly oracleService: OracleService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
@@ -81,7 +81,7 @@ export class AdminController {
         if (!user) {
             throw new UnprocessableEntityException('Player was not found')
         }
-        const skins = await this.gameService.getUserSkins(user)
+        const skins = await this.gameApiService.getUserSkins(user)
         return skins
     }
 
@@ -105,7 +105,7 @@ export class AdminController {
             throw new UnprocessableEntityException('No player found')
         }
 
-        const [snapshottedItems, successArray, receivedNum, savedNum] = await this.gameService.processSnapshots(user, snapshots)
+        const [snapshottedItems, successArray, receivedNum, savedNum] = await this.gameApiService.processSnapshots(user, snapshots)
         return successArray
     }
 
@@ -338,7 +338,7 @@ export class AdminController {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
         }
-        await this.gameService.communism(dto)
+        await this.gameApiService.communism(dto)
         return true
     }
 
@@ -353,7 +353,7 @@ export class AdminController {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
         }
-        const res = await this.gameService.bank()
+        const res = await this.gameApiService.bank()
         return res
     }
 

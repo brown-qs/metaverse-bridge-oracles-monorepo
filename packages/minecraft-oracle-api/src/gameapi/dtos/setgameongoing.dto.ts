@@ -1,6 +1,9 @@
 import { ApiProperty } from "@nestjs/swagger";
 
-export class GameInProgressDto {
+export class SetGameOngoingDto {
     @ApiProperty({ description: 'Sets whether there is an active game in progress.'})
-    gameInProgress: boolean
+    ongoing: boolean
+
+    @ApiProperty({ description: 'Game identifier'})
+    id: string
 }

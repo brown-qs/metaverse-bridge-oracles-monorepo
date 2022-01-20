@@ -1,17 +1,17 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { AssetModule } from '../asset/asset.module';
-import { GameSessionModule } from '../gamesession/gamesession.module';
+import { GameApiModule } from '../gameapi/gameapi.module';
 import { ProviderModule } from '../provider/provider.module';
 import { SecretModule } from '../secret/secret.module';
 import { SummonModule } from '../summon/summon.module';
 import { MaterialModule } from '../material/material.module';
 import { TextureModule } from '../texture/texture.module';
 import { UserModule } from '../user/user.module';
-import { ProfileController } from './profile.controller';
-import { ProfileService } from './profile.service';
-import { InventoryModule } from '../inventory/inventory.module';
+import { ProfileApiController } from './profileapi.controller';
+import { ProfileApiService } from './profileapi.service';
+import { InventoryModule } from '../playerinventory/inventory.module';
 import { SkinModule } from '../skin/skin.module';
 
 @Module({
@@ -34,12 +34,12 @@ import { SkinModule } from '../skin/skin.module';
         SkinModule,
         MaterialModule,
         InventoryModule,
-        GameSessionModule,
+        forwardRef(() => GameApiModule),
         SummonModule,
         ProviderModule
     ],
-    providers: [ProfileService],
-    exports: [ProfileService],
-    controllers: [ProfileController]
+    providers: [ProfileApiService],
+    exports: [ProfileApiService],
+    controllers: [ProfileApiController]
 })
-export class ProfileModule {}
+export class ProfileApiModule {}

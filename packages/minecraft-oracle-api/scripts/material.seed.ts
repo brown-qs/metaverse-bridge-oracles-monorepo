@@ -10,7 +10,7 @@ import { TextureEntity } from '../src/texture/texture.entity'
 import { stringToStringAssetType } from '../src/utils/misc'
 import { AssetEntity } from '../src/asset/asset.entity'
 import { SummonEntity } from '../src/summon/summon.entity'
-import { InventoryEntity } from '../src/inventory/inventory.entity'
+import { InventoryEntity } from '../src/playerinventory/inventory.entity'
 import { PlaySessionEntity } from '../src/playsession/playsession.entity'
 import { PlaySessionStatEntity } from '../src/playsession/playsessionstat.entity'
 
