@@ -10,7 +10,7 @@ import { TextureEntity } from '../texture/texture.entity';
 import { SecretService } from '../secret/secret.service';
 
 @Injectable()
-export class AdminService {
+export class AdminApiService {
 
     private readonly context: string;
     constructor(
@@ -22,7 +22,7 @@ export class AdminService {
         private configService: ConfigService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
-        this.context = AdminService.name
+        this.context = AdminApiService.name
     }
 
     public async saveMaterials(materials: MaterialEntity[]): Promise<boolean> {

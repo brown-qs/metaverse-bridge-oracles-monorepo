@@ -34,7 +34,7 @@ export class PlayerAchievementEntity {
 
     @Column({ type: 'bigint' })
     @IsString()
-    awardedAt: string;
+    updatedAt: string;
 
     @Column({default: 0})
     @IsNumber()

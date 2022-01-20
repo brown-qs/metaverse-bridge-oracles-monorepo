@@ -4,14 +4,8 @@ import { AssetDto } from "./asset.dto"
 
 export class ImportDto {
 
-    @ApiProperty({ description: 'Asset to import'})
+    @ApiProperty({ description: 'Asset to import', type: AssetDto})
     asset: AssetDto
-
-    /*
-    @ApiProperty({ description: 'Metaverse hash'})
-    @IsString()
-    metaverse: string
-    */
 
     @ApiProperty({ description: 'Owner of the asset'})
     @IsString()

@@ -14,7 +14,7 @@ export class PlayerScoreEntity {
 
     @PrimaryColumn({unique: true})
     @IsString()
-    key: string;
+    id: string;
 
     @ManyToOne(() => GameEntity, (game) => game.achievements)
     game: GameEntity;

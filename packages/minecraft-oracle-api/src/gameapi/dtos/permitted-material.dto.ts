@@ -14,6 +14,6 @@ export class PermittedMaterial {
 
 export class PermittedMaterials {
 
-    @ApiProperty({ description: 'List of permitted materials', default: [], isArray: true})
+    @ApiProperty({ description: 'List of permitted materials', type: [PermittedMaterial]})
     materials: PermittedMaterial[]
 }

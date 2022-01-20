@@ -17,6 +17,6 @@ export class SecretNameDto {
 
 export class SecretsDto {
 
-    @ApiProperty({ description: 'List of secrets'})
+    @ApiProperty({ description: 'List of secrets', type: [SecretDto]})
     secrets: SecretDto[]
 }

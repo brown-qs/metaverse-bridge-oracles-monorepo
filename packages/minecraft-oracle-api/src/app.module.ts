@@ -10,19 +10,19 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TextureEntity } from './texture/texture.entity';
 import { UserEntity } from './user/user.entity';
 import { SnapshotItemEntity } from './snapshot/snapshotItem.entity';
-import { AuthModule } from './auth/auth.module';
+import { AuthModule } from './authapi/authapi.module';
 import { CacheModule } from './cache/cache.module';
 import { GameApiModule } from './gameapi/gameapi.module';
 import { TextureModule } from './texture/texture.module';
 import { MaterialEntity } from './material/material.entity';
 import { SnapshotModule } from './snapshot/snapshot.module';
 import { MaterialModule } from './material/material.module';
-import { AdminModule } from './admin/admin.module';
+import { AdminApiModule } from './adminapi/adminapi.module';
 import { GameModule } from './game/game.module';
 import { GameEntity } from './game/game.entity';
 import { SecretEntity } from './secret/secret.entity';
 import { SecretModule } from './secret/secret.module';
-import { OracleModule } from './oracle/oracle.module';
+import { OracleApiModule } from './oracleapi/oracleapi.module';
 import { AssetModule } from './asset/asset.module';
 import { AssetEntity } from './asset/asset.entity';
 import { SummonEntity } from './summon/summon.entity';
@@ -35,7 +35,7 @@ import { PlaySessionEntity } from './playsession/playsession.entity';
 import { PlaySessionStatEntity } from './playsession/playsessionstat.entity';
 import { InventoryModule } from './playerinventory/inventory.module';
 import { InventoryEntity } from './playerinventory/inventory.entity';
-import { NftModule } from './nft/nft.module';
+import { NftApiModule } from './nftapi/nftapi.module';
 import { SkinEntity } from './skin/skin.entity';
 import { SkinModule } from './skin/skin.module';
 import { AchievementEntity } from './achievement/achievement.entity';
@@ -116,9 +116,9 @@ import { PlayerScoreModule } from './playerscore/playerscore.module';
     GameModule,
     GameTypeModule,
     GameApiModule,
-    AdminModule,
-    OracleModule,
-    NftModule
+    AdminApiModule,
+    OracleApiModule,
+    NftApiModule
   ]
 })
 export class AppModule {}

@@ -3,7 +3,7 @@ import { IsArray, IsString } from "class-validator"
 
 export class PreferredServerDto {
 
-    @ApiProperty({ description: 'Preferred server for the user', isArray: true})
+    @ApiProperty({ description: 'Preferred server for the user'})
     @IsString()
     preferredServer: string
 
@@ -14,7 +14,7 @@ export class PreferredServerDto {
 
 export class PreferredServersDto {
 
-    @ApiProperty({ description: 'Preferred server for the user', isArray: true})
+    @ApiProperty({ description: 'Preferred server for the user', type: PreferredServerDto })
     @IsArray()
     preferredServers: PreferredServerDto[]
 }

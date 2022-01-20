@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
-import uriToHttp, { fetchUrlCallback, getTokenStaticCalldata, processTokenStaticCallResults, stringToStringAssetType } from './nft.utils';
-import { Asset, ProcessedStaticTokenData, StaticTokenData, TokenMeta } from './nft.types';
+import uriToHttp, { fetchUrlCallback, getTokenStaticCalldata, processTokenStaticCallResults, stringToStringAssetType } from './nftapi.utils';
+import { Asset, ProcessedStaticTokenData, StaticTokenData, TokenMeta } from './nftapi.types';
 import { ProviderToken } from '../provider/token';
 import { Interface } from 'ethers/lib/utils';
 import { Contract } from '@ethersproject/contracts';
@@ -11,7 +11,7 @@ import fetch from 'node-fetch'
 
 
 @Injectable()
-export class NftService {
+export class NftApiService {
 
     private readonly context: string;
 
@@ -20,7 +20,7 @@ export class NftService {
         private configService: ConfigService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
-        this.context = NftService.name
+        this.context = NftApiService.name
     }
 
     public async getNFT(chainId: string, tokenType: string, address: string, tokenId: string): Promise<ProcessedStaticTokenData | StaticTokenData> {

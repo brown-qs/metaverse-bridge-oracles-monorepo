@@ -17,7 +17,7 @@ export class MaterialDto {
     @ApiProperty({ description: 'Material max stack size'})
     maxStackSize: number;
 
-    @ApiProperty({ description: 'Material asset type'})
+    @ApiProperty({ description: 'Material asset type', enum: [StringAssetType]})
     assetType: StringAssetType;
 
     @ApiProperty({ description: 'Material asset address'})
@@ -41,6 +41,6 @@ export class MaterialDto {
 
 export class MaterialsDto {
 
-    @ApiProperty({ description: 'List of materials', default: [], isArray: true})
+    @ApiProperty({ description: 'List of materials', type: [MaterialDto]})
     materials: MaterialDto[]
 }

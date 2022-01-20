@@ -22,6 +22,6 @@ export class CallparamDto {
 
 export class CallParamsDto {
 
-    @ApiProperty({ description: 'List of call parameters'})
+    @ApiProperty({ description: 'List of call parameters', type: [CallparamDto]})
     params: CallparamDto[]
 }

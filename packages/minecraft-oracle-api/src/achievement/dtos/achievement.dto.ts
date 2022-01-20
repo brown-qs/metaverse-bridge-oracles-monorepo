@@ -3,11 +3,8 @@ import { AchievementType } from "../achievementType.enum";
 
 export class AchievementDto {
 
-    @ApiProperty({ description: 'Unique ID of the leaderboard'})
+    @ApiProperty({ description: 'Unique ID of the achievement'})
     id: string
-
-    @ApiProperty({ description: 'Unique key of the achievement'})
-    key: string;
 
     @ApiProperty({ description: 'Title of the achievement'})
     title: string;
@@ -15,7 +12,7 @@ export class AchievementDto {
     @ApiProperty({ description: 'Description of the achievement'})
     description: string;
 
-    @ApiProperty({ description: 'Type of the achievement'})
+    @ApiProperty({ description: 'Type of the achievement', enum: AchievementType})
     type: AchievementType;
 
     @ApiProperty({ description: 'Icon of the achievement'})
@@ -27,9 +24,15 @@ export class AchievementDto {
 
 export class SetAchievementsDto {
 
-    @ApiProperty({ description: 'Achievements '})
+    @ApiProperty({ description: 'Achievements ', type: [AchievementDto]})
     achievements: AchievementDto[]
 
     @ApiProperty({ description: 'Game ID the achievement belongs to'})
+    gameId: string;
+}
+
+export class GetAchievementsDto {
+
+    @ApiProperty({ description: 'Game ID the achievements'})
     gameId: string;
 }

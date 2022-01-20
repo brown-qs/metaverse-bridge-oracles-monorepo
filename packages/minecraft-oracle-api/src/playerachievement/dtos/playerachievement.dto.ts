@@ -1,13 +1,11 @@
 import { ApiProperty } from "@nestjs/swagger";
 
 export class PlayerAchievementDto {
-    @ApiProperty({ description: 'Name of the achievement'})
-    name: string
 
     @ApiProperty({ description: 'When the acheivement was awarded. Unix timestamp'})
-    awardedAt: string
+    updatedAt: string
 
-    @ApiProperty({ description: 'When the acheivement was awarded. Unix timestamp'})
+    @ApiProperty({ description: 'Progress, relates to step field of the achievement.'})
     progress: number
 
     @ApiProperty({ description: 'Is the achievement completed or not'})
@@ -34,6 +32,6 @@ export class SetPlayerAchievementsDto {
     @ApiProperty({ description: 'Uuid of the player'})
     uuid: string
 
-    @ApiProperty({ description: 'Player achievements'})
+    @ApiProperty({ description: 'Player achievements', type: [PlayerAchievementDto]})
     playerAchievements: PlayerAchievementDto[]
 }
