@@ -490,7 +490,7 @@ export class GameApiService {
 
             if (!users[user.uuid]) {
                 allDistinct += 1
-                const hasMoonsama = !!(await this.assetService.findOne({recognizedAssetType: RecognizedAssetType.MOONSAMA, owner: {uuid: user.uuid}, pendingIn: false, pendingOut: false}))
+                const hasMoonsama = !!(await this.assetService.findOne({recognizedAssetType: RecognizedAssetType.MOONSAMA, owner: {uuid: user.uuid}, pendingIn: false}))
                 users[user.uuid] = {
                     exists: true,
                     eligible: false
