@@ -38,6 +38,7 @@ import { AchievementService } from '../achievement/achievement.service';
 import { AchievementEntity } from '../achievement/achievement.entity';
 import { GetPlayerAchievementDto, SetPlayerAchievementsDto } from '../playerachievement/dtos/playerachievement.dto';
 import { PlayerAchievementEntity } from '../playerachievement/playerachievement.entity';
+import { UserEntity } from '../user/user.entity';
 
 @ApiTags('game')
 @Controller('game')
@@ -62,7 +63,21 @@ export class GameApiController {
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
     async profile(@Param('uuid') uuid: string): Promise<ProfileDto> {
-        const user = await this.userService.findByUuid(uuid)
+        let user = await this.userService.findByUuid(uuid)
+        if ( !user ){
+            const userData: UserEntity = {
+                uuid: uuid,
+                hasGame: false
+            }
+            let newUser: UserEntity
+            try {
+                newUser = await this.userService.create(userData)
+                user = await this.userService.findByUuid(uuid)
+            } catch (err) {
+                this.logger.error(`authLogin: error upserting user into database: ${JSON.stringify(userData)}`, err, this.context)
+                throw new UnprocessableEntityException(`Error upserting user into database: ${JSON.stringify(userData)}`)
+            }
+        }
         return this.profileService.userProfile(user)
     }
 
