@@ -338,8 +338,6 @@ export class GameApiController {
     @Get('achievements')
     @HttpCode(200)
     @ApiOperation({ summary: 'Queries available achievemenets for a game' })
-    @ApiBearerAuth('AuthenticationHeader')
-    @UseGuards(SharedSecretGuard)
     async getAchievements(
          @Query() {gameId}: GetAchievementsDto,
     ): Promise<AchievementEntity[]> {

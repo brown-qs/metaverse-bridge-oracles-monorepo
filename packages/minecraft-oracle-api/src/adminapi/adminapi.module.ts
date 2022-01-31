@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { GameModule } from '../game/game.module';
+import { GameTypeModule } from '../gametype/gametype.module';
 import { GameApiModule } from '../gameapi/gameapi.module';
 import { MaterialModule } from '../material/material.module';
 import { OracleApiModule } from '../oracleapi/oracleapi.module';
@@ -17,6 +19,8 @@ import { AdminApiService } from './adminapi.service';
         UserModule,
         ProfileApiModule,
         GameApiModule,
+        GameTypeModule,
+        GameModule,
         TextureModule,
         SnapshotModule,
         OracleApiModule

@@ -33,6 +33,6 @@ export class SetAchievementsDto {
 
 export class GetAchievementsDto {
 
-    @ApiProperty({ description: 'Game ID the achievements'})
+    @ApiProperty({ description: 'Game ID the achievements belong to'})
     gameId: string;
 }
