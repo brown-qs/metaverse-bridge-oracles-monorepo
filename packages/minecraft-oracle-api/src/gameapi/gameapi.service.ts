@@ -37,6 +37,7 @@ import { SetAchievementsDto } from '../achievement/dtos/achievement.dto';
 import { AchievementService } from '../achievement/achievement.service';
 import { GetPlayerAchievementDto, SetPlayerAchievementsDto } from '../playerachievement/dtos/playerachievement.dto';
 import { PlayerAchievementService } from '../playerachievement/playerachievement.service';
+import { GetPlayerScoreDto } from '../playerscore/dtos/getplayerscore.dto';
 
 @Injectable()
 export class GameApiService {
@@ -746,6 +747,22 @@ export class GameApiService {
         const entities = await this.playerAchievementService.findMany({where: {player: {uuid: dto.uuid}, game: {id: dto.gameId}}})
 
         return entities
+    }
+
+    async getPlayerScore(dto: GetPlayerScoreDto) {
+        const game = await this.gameService.findOne({id: dto.gameId})
+
+        if (!game) {
+            throw new UnprocessableEntityException("Game not found")
+        }
+
+        const entity = await this.playerScoreService.findOne({player: {uuid: dto.uuid}, game: {id: dto.gameId}})
+
+        if (!entity) {
+            throw new UnprocessableEntityException("Score not found")
+        }
+
+        return entity.score
     }
 
     async updatePlayerAchievements(dto: SetPlayerAchievementsDto) {

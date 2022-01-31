@@ -7,6 +7,7 @@ import {
     Inject,
     Param,
     Put,
+    Query,
     UnprocessableEntityException,
     UseGuards
 } from '@nestjs/common';
@@ -23,6 +24,9 @@ import { ThingsDto } from './dtos/things.dto';
 import { SkinselectDto } from './dtos/skinselect.dto';
 import { GameKindInProgressDto } from '../gameapi/dtos/gamekndinprogress.dto';
 import { GameApiService } from '../gameapi/gameapi.service';
+import { GetPlayerAchievementDto } from '../playerachievement/dtos/playerachievement.dto';
+import { PlayerAchievementEntity } from '../playerachievement/playerachievement.entity';
+import { GetPlayerScoreDto } from '../playerscore/dtos/getplayerscore.dto';
 
 
 @ApiTags('user')
@@ -89,5 +93,29 @@ export class ProfileApiController {
     async skinselect(@User() user: UserEntity, @Body() dto: SkinselectDto): Promise<boolean> {
         const success = await this.profileService.skinSelect(user, dto)
         return success
+    }
+
+    @Get('achievements')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Queries all player achievements for a game.' })
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    async getPlayerAchievements(
+        @Query() dto: GetPlayerAchievementDto
+    ): Promise<PlayerAchievementEntity[]> {
+        const entities = await this.gameApiService.getPlayerAchievements(dto)
+        return entities
+    }
+
+    @Get('score')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Gets player score for a game' })
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    async setUserScore(
+        @Query() dto: GetPlayerScoreDto,
+    ): Promise<string> {
+        const score = await this.gameApiService.getPlayerScore(dto)
+        return score
     }
 }
