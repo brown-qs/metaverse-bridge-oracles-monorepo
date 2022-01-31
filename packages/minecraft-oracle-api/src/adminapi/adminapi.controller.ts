@@ -378,7 +378,7 @@ export class AdminApiController {
         return res
     }
 
-    @Put('gametypes')
+    @Get('gametypes')
     @HttpCode(200)
     @ApiOperation({ summary: 'fetches game types' })
     @ApiBearerAuth()
@@ -393,7 +393,7 @@ export class AdminApiController {
         return (entities ?? [])
     }
 
-    @Put('games')
+    @Get('games')
     @HttpCode(200)
     @ApiOperation({ summary: 'Upsers a game entry' })
     @ApiBearerAuth()
