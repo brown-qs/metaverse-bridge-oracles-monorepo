@@ -37,6 +37,8 @@ import { SummonDto } from '../oracleapi/dtos/summon.dto';
 import { CallparamDto } from '../oracleapi/dtos/callparams.dto';
 import { CommunismDto } from './dtos/communism.dto';
 import { BlacklistDto } from './dtos/blacklist.dto';
+import { GameTypeService } from '../gametype/gametype.service';
+import { GameService } from '../game/game.service';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -48,6 +50,8 @@ export class AdminApiController {
         private readonly userService: UserService,
         private readonly profileService: ProfileApiService,
         private readonly gameApiService: GameApiService,
+        private readonly gameTypeService: GameTypeService,
+        private readonly gameService: GameService,
         private readonly adminApiService: AdminApiService,
         private readonly oracleService: OracleApiService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
@@ -372,5 +376,35 @@ export class AdminApiController {
         }
         const res = await this.adminApiService.blacklist({uuid}, dto.blacklist)
         return res
+    }
+
+    @Put('gametypes')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'fetches game types' })
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    async gameTypes(
+        @User() caller: UserEntity,
+    ) {
+        if (caller.role !== UserRole.ADMIN) {
+            throw new ForbiddenException('Not admin')
+        }
+        const entities = await this.gameTypeService.find({})
+        return (entities ?? [])
+    }
+
+    @Put('games')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Upsers a game entry' })
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    async setGame(
+        @User() caller: UserEntity,
+    ) {
+        if (caller.role !== UserRole.ADMIN) {
+            throw new ForbiddenException('Not admin')
+        }
+        const entities = await this.gameService.find({})
+        return (entities ?? [])
     }
 }
