@@ -8,7 +8,7 @@ export class SetPlayerScoreDto {
     @ApiProperty({ description: 'The score as a number string'})
     score: number;
 
-    @ApiProperty({ description: 'The score as a number string'})
+    @ApiProperty({ description: 'User uuid'})
     uuid: string;
 
     @ApiProperty({ description: 'The game id of the score'})
