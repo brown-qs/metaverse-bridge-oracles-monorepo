@@ -11,7 +11,7 @@ export class CommunismDto {
     @ApiProperty({ description: 'Multiplier [0,1] on how much of the user resources are taken away. Default: 0.5'})
     deduction?: number
 
-    @ApiProperty({ description: 'server ID to check time played for. Default: production'})
+    @ApiProperty({ description: 'server ID aka game ID to check time played for. Default: null'})
     serverId?: string
 
     @ApiProperty({ description: 'Redistribution only for Moonsamas. Default: true'})

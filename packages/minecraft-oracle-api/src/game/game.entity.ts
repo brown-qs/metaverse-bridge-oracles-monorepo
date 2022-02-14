@@ -7,6 +7,9 @@ import { GameTypeEntity } from '../gametype/gametype.entity';
 import { GameKind } from './game.enum';
 import { PlayerScoreEntity } from '../playerscore/playerscore.entity';
 import { PlaySessionEntity } from '../playsession/playsession.entity';
+import { GganbuEntity } from 'src/gganbu/gganbu.entity';
+import { SnapshotItemEntity } from 'src/snapshot/snapshotItem.entity';
+import { SnaplogEntity } from 'src/snaplog/snaplog.entity';
 
 
 @Entity()
@@ -62,4 +65,13 @@ export class GameEntity {
 
     @ManyToOne(() => GameTypeEntity, (gameType) => gameType.games)
     gameType: GameTypeEntity;
+
+    @OneToMany(() => GganbuEntity, (gganbu) => gganbu.game)
+    gganbus?: GganbuEntity[];
+
+    @OneToMany(() => SnapshotItemEntity, (snapshot) => snapshot.game)
+    snapshots?: SnapshotItemEntity[];
+
+    @OneToMany(() => SnaplogEntity, (snaplog) => snaplog.game)
+    snaplogs?: SnaplogEntity[];
 }

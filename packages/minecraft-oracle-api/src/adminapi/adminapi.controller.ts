@@ -39,6 +39,7 @@ import { CommunismDto } from './dtos/communism.dto';
 import { BlacklistDto } from './dtos/blacklist.dto';
 import { GameTypeService } from '../gametype/gametype.service';
 import { GameService } from '../game/game.service';
+import { BankDto } from 'src/gameapi/dtos/bank.dto';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -352,12 +353,13 @@ export class AdminApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async bank(
-        @User() caller: UserEntity
+        @User() caller: UserEntity,
+        @Body() dto: BankDto
     ): Promise<boolean> {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
         }
-        const res = await this.gameApiService.bank()
+        const res = await this.gameApiService.bank(dto)
         return res
     }
 

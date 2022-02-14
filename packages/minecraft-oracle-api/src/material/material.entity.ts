@@ -8,6 +8,7 @@ import { InventoryEntity } from '../playerinventory/inventory.entity';
 import { Column, Entity, Index, JoinColumn, OneToMany, PrimaryColumn } from 'typeorm';
 import { StringAssetType } from '../common/enums/AssetType';
 import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
+import { SnaplogEntity } from 'src/snaplog/snaplog.entity';
 
 @Entity()
 @Index(['name'], {unique: true})
@@ -80,6 +81,9 @@ export class MaterialEntity {
 
     @OneToMany(() => SnapshotItemEntity, (snapshotItem) => snapshotItem.material )
     snapshots?: SnapshotItemEntity[];
+
+    @OneToMany(() => SnaplogEntity, (snaplog) => snaplog.material )
+    snaplogs?: SnaplogEntity[];
 
     @OneToMany(() => InventoryEntity, (iitem) => iitem.material )
     inventoryItems?: InventoryEntity[];
