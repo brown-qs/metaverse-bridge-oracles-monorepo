@@ -530,7 +530,7 @@ export class GameApiService {
         await Promise.all(materials.map(async (key) => {
             counter[key] = (averageM * counter[key]) / gganbuDistinct
             gganbuEntities.push({
-                id: key,
+                id: GganbuService.calculateId({materialName: key, gameId: game?.id}),
                 amount: counter[key].toString(),
                 game,
                 material: await this.materialService.findOne({name: key})
