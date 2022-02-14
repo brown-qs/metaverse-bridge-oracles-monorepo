@@ -4,9 +4,10 @@ import {
     IsNumber,
     IsString
 } from 'class-validator';
-import { Column, Entity, Index, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { UserEntity } from '../user/user.entity';
 import { MaterialEntity } from '../material/material.entity';
+import { GameEntity } from 'src/game/game.entity';
 
 @Entity()
 @Index(['id'], {unique: true})
@@ -29,4 +30,7 @@ export class SnapshotItemEntity {
 
     @ManyToOne(() => UserEntity, (user) => user.snapshotItems)
     owner: UserEntity;
+
+    @ManyToOne(() => GameEntity, (game) => game.snapshots)
+    game?: GameEntity;
 }

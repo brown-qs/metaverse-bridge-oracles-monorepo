@@ -38,6 +38,11 @@ import { AchievementService } from '../achievement/achievement.service';
 import { GetPlayerAchievementDto, SetPlayerAchievementsDto } from '../playerachievement/dtos/playerachievement.dto';
 import { PlayerAchievementService } from '../playerachievement/playerachievement.service';
 import { GetPlayerScoreDto } from '../playerscore/dtos/getplayerscore.dto';
+import { GganbuEntity } from '../gganbu/gganbu.entity';
+import { SnaplogEntity } from '../snaplog/snaplog.entity';
+import { SnaplogService } from '../snaplog/snaplog.service';
+import { GganbuService } from '../gganbu/gganbu.service';
+import { BankDto } from './dtos/bank.dto';
 
 @Injectable()
 export class GameApiService {
@@ -52,6 +57,8 @@ export class GameApiService {
         private readonly skinService: SkinService,
         private readonly materialService: MaterialService,
         private readonly snapshotService: SnapshotService,
+        private readonly snaplogService: SnaplogService,
+        private readonly gganbuService: GganbuService,
         private readonly inventoryService: InventoryService,
         private readonly gameTypeService: GameTypeService,
         private readonly gameService: GameService,
@@ -105,7 +112,6 @@ export class GameApiService {
         // if user is alone, add all the items to user
         // if user is gganbu, write half to user, half to gganbu
 
-
         const userAll = await this.userService.findOne({ uuid: user.uuid }, { relations: ['gganbu'] })
 
         //console.log(userAll)
@@ -121,6 +127,8 @@ export class GameApiService {
 
         //let promises: Promise<SnapshotItemEntity | undefined>[]
 
+        const game = !!snapshots.gameId ? (await this.gameService.findOne({id: snapshots.gameId}) ?? null) : null
+
         this.ensureLock(userAll.uuid)
 
         const userlock = this.locks.get(userAll.uuid)
@@ -128,7 +136,7 @@ export class GameApiService {
         const promises = await userlock.runExclusive(async () => {
             if (!userAll.gganbu) {
                 const promises = await snapshots.snapshots.map(async (snapshot: SnapshotDto, i) => {
-                    const savedS = await this.assignSnapshot(userAll, snapshot)
+                    const savedS = await this.assignSnapshot(userAll, game, snapshot)
 
                     if (!!savedS) {
                         saved += 1
@@ -142,8 +150,8 @@ export class GameApiService {
                 const promises = await snapshots.snapshots.map(async (snapshot: SnapshotDto, i) => {
                     const gganbu = await this.userService.findOne({ uuid: userAll.gganbu.uuid }, { relations: ['snapshotItems'] })
 
-                    const savedU = await this.assignSnapshot(userAll, snapshot, true, true)
-                    const savedG = await this.assignSnapshot(gganbu, snapshot, true, false)
+                    const savedU = await this.assignSnapshot(userAll, game, snapshot, true, true)
+                    const savedG = await this.assignSnapshot(gganbu, game, snapshot, true, false)
 
                     if (!!savedU && !!savedG) {
                         saved += 1
@@ -326,7 +334,7 @@ export class GameApiService {
     }
 
 
-    private async assignSnapshot(user: UserEntity, snapshot: SnapshotDto, half = false, validate = true): Promise<SnapshotItemEntity> {
+    private async assignSnapshot(user: UserEntity, game: GameEntity | null, snapshot: SnapshotDto, half = false, validate = true): Promise<SnapshotItemEntity> {
         if (!snapshot.materialName) {
             this.logger.error(`processSnapshots-${user.uuid}:: materialName was not received. Got: ${snapshot.materialName}.`, null, this.context)
             return undefined
@@ -346,13 +354,13 @@ export class GameApiService {
 
         const amount = half ? snapshot.amount / 2 : snapshot.amount
 
-        const itemId = `${user.uuid}-${material.name}`
+        const itemId = SnapshotService.calculateId({uuid: user.uuid, materialName: material.name, gameId: game?.id})
         this.ensureLock(itemId)
 
         const itemlock = this.locks.get(itemId)
 
         const savedS = await itemlock.runExclusive(async () => {
-            const foundItem = await this.snapshotService.findOne({ id: itemId })
+            const foundItem = await this.snapshotService.findOneNested({ where: { id: itemId }, relations: ['game']})
 
             if (!!foundItem) {
                 //console.log('founditem')
@@ -363,10 +371,11 @@ export class GameApiService {
             } else {
                 //console.log('newitem')
                 const entity = new SnapshotItemEntity({
-                    id: `${user.uuid}-${material.name}`,
+                    id: itemId,
                     amount: amount.toString(),
                     owner: user,
-                    material
+                    material,
+                    game
                 })
                 const r = await this.snapshotService.create(entity)
                 return r
@@ -414,7 +423,7 @@ export class GameApiService {
         }
 
         const stat = await this.playSessionStatService.create({
-            id: this.playSessionStatService.calculateId({ uuid, gameId })
+            id: PlaySessionStatService.calculateId({ uuid, gameId })
         })
 
         const game = await this.gameService.findOne({id: gameId})
@@ -441,14 +450,19 @@ export class GameApiService {
         const finalDeduction = settings.deduction ?? 0.5
         const msamasOnly = settings.moonsamasOnly ?? true
         const punishAll = settings.deductFromEveryone ?? true
-        const serverId = settings.serverId ?? 'production'
+        const gameId = settings.serverId
+
+        const game = !!gameId ? (await this.gameService.findOne({id: gameId}) ?? null) : null
 
         let items: SnapshotItemEntity[] = []
         let batch: SnapshotItemEntity[] = []
         let skip = 0
         let take = 100
+
+        const gameFindCondition = game?.id ? {id: game.id} : null
+
         do {
-            batch = await this.snapshotService.findMany({ take, skip, relations: ['material', 'owner'] })
+            batch = await this.snapshotService.findMany({ where: {game: gameFindCondition},take, skip, relations: ['material', 'owner', 'game'] })
             //console.log(batch)
 
             if (!!batch && batch.length > 0) {
@@ -476,7 +490,7 @@ export class GameApiService {
         for (let i = 0; i < allUsers.length; i++) {
             const user = allUsers[i]
             
-            const playStats = await this.playSessionStatService.findOne({ id: `${user.uuid}-${serverId}` })
+            const playStats = await this.playSessionStatService.findOne({ id: PlaySessionStatService.calculateId({uuid: user.uuid, gameId})})
 
             this.logger.debug(`Communism:: ${user.uuid} played ${playStats?.timePlayed}`, this.context)
 
@@ -512,11 +526,20 @@ export class GameApiService {
 
         // we only divide the average by the gganbu eligible user numbers
         const materials = Object.keys(counter)
-        materials.map(key => {
+        let gganbuEntities: GganbuEntity[] = []
+        await Promise.all(materials.map(async (key) => {
             counter[key] = (averageM * counter[key]) / gganbuDistinct
-        })
+            gganbuEntities.push({
+                id: key,
+                amount: counter[key].toString(),
+                game,
+                material: await this.materialService.findOne({name: key})
+            })
+        }))
 
         this.logger.debug(`Communism:: final gganbu amounts: ${counter}`, this.context)
+
+        this.gganbuService.createAll(gganbuEntities)
 
         const userUuids = Object.keys(users)
 
@@ -547,7 +570,7 @@ export class GameApiService {
                     const amount = counter[materialName]
                     
                     if (users[uuid]?.eligible) {
-                        await this.assignSnapshot(user, { amount, materialName }, false, false)
+                        await this.assignSnapshot(user, game, { amount, materialName }, false, false)
                     } else {
                         this.logger.debug(`Communism:: ${uuid} snap for ${materialName} not eligible`, this.context)
                     }
@@ -557,7 +580,7 @@ export class GameApiService {
         }
     }
 
-    public async bank(): Promise<boolean> {
+    public async bank(dto: BankDto): Promise<boolean> {
 
         this.ensureLock('bank')
         const banklock = this.locks.get('bank')
@@ -568,8 +591,10 @@ export class GameApiService {
             let batch: SnapshotItemEntity[] = []
             let skip = 0
             let take = 100
+
+            const gameFindCondition = dto?.gameId ? {id: dto.gameId} : null
             do {
-                batch = await this.snapshotService.findMany({ take, skip, relations: ['material', 'owner'] })
+                batch = await this.snapshotService.findMany({ where: {game: gameFindCondition}, take, skip, relations: ['material', 'owner', 'game'] })
                 //console.log(batch)
 
                 if (!!batch && batch.length > 0) {
@@ -622,7 +647,7 @@ export class GameApiService {
                     const materialName = snapshot.material.mapsTo ?? snapshot.material.name
                     const id = `${user.uuid}-${materialName}`
                     if (!inventoryMap[id]) {
-                        const material = snapshot.material.mapsTo ? (await this.materialService.findOne(materialName)) : snapshot.material
+                        const material = snapshot.material.mapsTo ? (await this.materialService.findOne({name: materialName})) : snapshot.material
                         inventoryMap[id] = {
                             inv: {
                                 amount: amount.toString(),
@@ -653,6 +678,13 @@ export class GameApiService {
                         }
 
                         try {
+                            const logs: SnaplogEntity[] = newItem.snaps.map(snap => {
+                                return {
+                                    ...snap,
+                                    processedAt: Date.now().toString()
+                                }
+                            })
+                            await this.snaplogService.createAll(logs)
                             await this.snapshotService.removeAll(newItem.snaps)
                         } catch (e) {
                             this.logger.error(`Bank:: error deleting snapshot while banking ${newItem.inv}`, null, this.context)

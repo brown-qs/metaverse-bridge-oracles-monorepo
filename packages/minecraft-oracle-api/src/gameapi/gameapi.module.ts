@@ -16,7 +16,9 @@ import { ProfileApiModule } from '../profileapi/profileapi.module';
 import { GameTypeModule } from '../gametype/gametype.module';
 import { AchievementModule } from '../achievement/achievement.module';
 import { PlayerAchievementModule } from '../playerachievement/playerachievement.module';
-import { PlayerScoreModule } from 'src/playerscore/playerscore.module';
+import { PlayerScoreModule } from '../playerscore/playerscore.module';
+import { SnaplogModule } from '../snaplog/snaplog.module';
+import { GganbuModule } from '../gganbu/gganbu.module';
 
 
 @Module({
@@ -27,6 +29,8 @@ import { PlayerScoreModule } from 'src/playerscore/playerscore.module';
         SkinModule,
         MaterialModule,
         SnapshotModule,
+        SnaplogModule,
+        GganbuModule,
         InventoryModule,
         GameModule,
         GameTypeModule,
