@@ -1,13 +1,7 @@
-import {
-    IsBoolean,
-    IsInt,
-    IsNumber,
-    IsString
-} from 'class-validator';
-import { Column, Entity, Index, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, ManyToOne, PrimaryColumn } from 'typeorm';
 import { UserEntity } from '../user/user.entity';
 import { MaterialEntity } from '../material/material.entity';
-import { GameEntity } from 'src/game/game.entity';
+import { GameEntity } from '../game/game.entity';
 
 @Entity()
 @Index(['id'], {unique: true})
@@ -18,11 +12,9 @@ export class SnapshotItemEntity {
     }
 
     @PrimaryColumn()
-    @IsString()
     id: string; // convention:: {user uuid}-{materialName}
 
     @Column()
-    @IsString()
     amount: string;
     
     @ManyToOne(() => MaterialEntity, (material) => material.snapshots)

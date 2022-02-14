@@ -11,6 +11,10 @@ export class GganbuService {
         private readonly repository: Repository<GganbuEntity>
     ) {}
 
+    public static calculateId(dto: {materialName: string, gameId: null | undefined | string }) {
+        return `${dto.materialName}-${dto.gameId ?? 'NULL'}`
+    }
+
     public async create(entity: GganbuEntity): Promise<GganbuEntity> {
         const u = await this.repository.save(entity);
         return u;

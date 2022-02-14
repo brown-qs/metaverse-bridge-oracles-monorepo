@@ -7,9 +7,9 @@ import { GameTypeEntity } from '../gametype/gametype.entity';
 import { GameKind } from './game.enum';
 import { PlayerScoreEntity } from '../playerscore/playerscore.entity';
 import { PlaySessionEntity } from '../playsession/playsession.entity';
-import { GganbuEntity } from 'src/gganbu/gganbu.entity';
-import { SnapshotItemEntity } from 'src/snapshot/snapshotItem.entity';
-import { SnaplogEntity } from 'src/snaplog/snaplog.entity';
+import { GganbuEntity } from '../gganbu/gganbu.entity';
+import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
+import { SnaplogEntity } from '../snaplog/snaplog.entity';
 
 
 @Entity()

@@ -14,7 +14,7 @@ export class GganbuEntity {
 
     @PrimaryColumn({unique: true})
     @IsString()
-    id: string; // convention:: materialName
+    id: string; // convention:: materialName-gameId
 
     @Column()
     @IsString()

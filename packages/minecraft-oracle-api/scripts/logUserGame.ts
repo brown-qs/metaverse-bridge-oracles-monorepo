@@ -17,6 +17,8 @@ import { GameTypeEntity } from '../src/gametype/gametype.entity'
 import { AchievementEntity } from '../src/achievement/achievement.entity'
 import { PlayerAchievementEntity } from '../src/playerachievement/playerachievement.entity'
 import { PlayerScoreEntity } from '../src/playerscore/playerscore.entity'
+import { GganbuEntity } from '../src/gganbu/gganbu.entity'
+import { SnaplogEntity } from '../src/snaplog/snaplog.entity'
 
 config()
 
@@ -108,7 +110,9 @@ const list = [
     'HalogenMoonsama',
     'Donniebigbags',
     'CryptasNFT',
-    'Somsin_'
+    'Somsin_',
+    'MrCandymaaan',
+    'YumiArts',
 ]
 
 const gameId = 'carnage-2022-02-13'
@@ -126,7 +130,7 @@ async function main() {
             host: process.env.TYPEORM_HOST,
             port: Number.parseInt(process.env.TYPEORM_PORT),
             database: process.env.TYPEORM_DATABASE,
-            entities: [MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity, AssetEntity, SummonEntity, InventoryEntity, PlaySessionEntity, PlaySessionStatEntity, SkinEntity, GameEntity, GameTypeEntity, AchievementEntity, PlayerAchievementEntity, PlayerScoreEntity],
+            entities: [MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity, AssetEntity, SummonEntity, InventoryEntity, PlaySessionEntity, PlaySessionStatEntity, SkinEntity, GameEntity, GameTypeEntity, AchievementEntity, PlayerAchievementEntity, PlayerScoreEntity, GganbuEntity, SnaplogEntity],
             synchronize: true
         })
     } catch (err) {
