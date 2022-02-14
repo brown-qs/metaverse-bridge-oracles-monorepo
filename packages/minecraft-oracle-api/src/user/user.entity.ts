@@ -12,7 +12,7 @@ import { SummonEntity } from '../summon/summon.entity';
 import { PlaySessionEntity } from '../playsession/playsession.entity';
 import { InventoryEntity } from '../playerinventory/inventory.entity';
 import { SkinEntity } from '../skin/skin.entity';
-import { PlayerAchievementEntity } from 'src/playerachievement/playerachievement.entity';
+import { PlayerAchievementEntity } from '../playerachievement/playerachievement.entity';
 
 @Entity()
 @Index(['uuid'], {unique: true})

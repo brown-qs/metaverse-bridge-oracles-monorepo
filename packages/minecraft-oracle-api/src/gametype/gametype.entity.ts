@@ -1,7 +1,7 @@
 import {
     IsString,
 } from 'class-validator';
-import { GameEntity } from 'src/game/game.entity';
+import { GameEntity } from '../game/game.entity';
 import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 
 @Entity()

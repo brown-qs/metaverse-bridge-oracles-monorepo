@@ -5,7 +5,7 @@ import {
 import { UserEntity } from '../user/user.entity';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { PlaySessionStatEntity } from './playsessionstat.entity';
-import { GameEntity } from 'src/game/game.entity';
+import { GameEntity } from '../game/game.entity';
 
 @Entity()
 export class PlaySessionEntity {

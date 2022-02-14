@@ -3,10 +3,10 @@ import {
 } from 'class-validator';
 import { AchievementEntity } from '../achievement/achievement.entity';
 import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
-import { GameTypeEntity } from 'src/gametype/gametype.entity';
+import { GameTypeEntity } from '../gametype/gametype.entity';
 import { GameKind } from './game.enum';
-import { PlayerScoreEntity } from 'src/playerscore/playerscore.entity';
-import { PlaySessionEntity } from 'src/playsession/playsession.entity';
+import { PlayerScoreEntity } from '../playerscore/playerscore.entity';
+import { PlaySessionEntity } from '../playsession/playsession.entity';
 
 
 @Entity()
