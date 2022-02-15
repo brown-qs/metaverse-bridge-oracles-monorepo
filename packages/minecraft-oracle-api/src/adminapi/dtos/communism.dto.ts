@@ -9,7 +9,7 @@ export class CommunismDto {
     averageMultiplier?: number
 
     @ApiProperty({ description: 'Multiplier [0,1] on how much of the user resources are taken away. Default: 0.5'})
-    deduction?: number
+    deductionMultiplier?: number
 
     @ApiProperty({ description: 'server ID aka game ID to check time played for. Default: null'})
     serverId?: string
