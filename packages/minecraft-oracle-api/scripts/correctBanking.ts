@@ -1,5 +1,5 @@
 import { MaterialEntity } from '../src/material/material.entity'
-import { Connection, createConnection, getConnection, In } from 'typeorm'
+import { Connection, createConnection, getConnection } from 'typeorm'
 
 import { config } from 'dotenv'
 import { SnapshotItemEntity } from '../src/snapshot/snapshotItem.entity'
@@ -22,21 +22,7 @@ import { SnaplogEntity } from '../src/snaplog/snaplog.entity'
 
 config()
 
-const list = [
-    'D0tSama',
-    'Onizuka171',
-    'lasereyecharlie',
-    'MerlinHermes',
-    'Onizuka171',
-    'Donny_Dukes',
-    'Gganbu_Movr',
-    'BiggwormSama',
-    'kokonutx',
-    'Kartus',
-]
-
-const gameId = 'carnage-2022-02-06'
-const targetTime = 2700001
+const gameId = 'carnage-2022-02-13'
 
 async function main() {
     let connection: Connection
@@ -61,53 +47,36 @@ async function main() {
         connection = await connection.connect()
     }
 
-    // Check user exists
-    // 
+    // check user valid
+    // get playtime if any
+    // yes playtime, make sure it has enough
+    // no playtime, add new entry
 
+    const snaplogs = await connection.manager.getRepository(SnaplogEntity).find({ where: { game: { id: gameId } }, relations: ['game', 'owner', 'material'] })
 
-    const gganbus = await connection.manager.getRepository(GganbuEntity).find({ where: {game: {id: gameId}}, relations: ['material']})
-    //console.log(gganbus)
-    for(let i = 0; i< list.length; i++) {
-        const user = await connection.manager.getRepository(UserEntity).findOne({ userName: list[i] })
-
-        
-        if (!user) {
-            console.error(`Non existant user: ${list[i]}`)
-            continue
-        } else {
-            console.log(user?.userName)
+    await Promise.all(snaplogs.map(async (snap) => {
+        if (!snap.owner) {
+            return
         }
 
-        const statId = PlaySessionStatService.calculateId({uuid: user.uuid, gameId})
-        const playSessionStat = await connection.manager.getRepository(PlaySessionStatEntity).findOne({where: {id: statId}})
+        const inv = await connection.manager.getRepository(InventoryEntity).findOne({ where: { owner: { uuid: snap.owner.uuid }, material: { name: snap.material.mapsTo } }, relations: ['owner', 'material'] })
 
-        if(!!playSessionStat) {
-            if (Number.parseInt(playSessionStat.timePlayed) < targetTime) {
-                console.log('skip', user.userName)
-                continue
+        if (!!inv) {
+
+            const invNum = Number.parseFloat(inv.amount)
+            const snapNum = Number.parseFloat(snap.amount)
+
+            const newNum = Math.max(invNum-(snapNum * snap.material.multiplier * 0.8), 0).toString()
+
+            console.log(snap.owner.userName, snap.material.name, inv.material.name, inv.amount, snap.amount, invNum, snapNum, newNum)
+
+            if (newNum === '0') {
+                console.log('ZEROOOOOOOOOOOOOOOOOOOOo')
             }
 
-
-
-            await Promise.all(gganbus.map(async (gganbu) => {
-                const inv = await connection.manager.getRepository(InventoryEntity).findOne({where: {owner: {uuid: user.uuid}, material: {name: gganbu.material.mapsTo}}, relations: ['owner']})
-                if (!inv) {
-                    await connection.manager.getRepository(InventoryEntity).create({
-                        amount: gganbu.amount,
-                        material: gganbu.material,
-                        owner: user,
-                        summonInProgress: false,
-                        summonable: true
-                    })
-                    console.log('new num', gganbu.amount)
-                } else {
-                    const newNum = (Number.parseFloat(inv.amount) + (Number.parseFloat(gganbu.amount) * gganbu.material.multiplier )).toString()
-                    console.log(`   old nums`, inv.amount, newNum)
-                    await connection.manager.getRepository(InventoryEntity).update(inv.id, {amount: newNum})
-                }
-            }))
+            await connection.manager.getRepository(InventoryEntity).update({ id: inv.id }, { amount: newNum})
         }
-    }
+    }))
     await connection.close()
 }
 

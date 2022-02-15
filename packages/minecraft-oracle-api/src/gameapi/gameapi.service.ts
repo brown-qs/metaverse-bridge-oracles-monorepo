@@ -447,7 +447,7 @@ export class GameApiService {
 
         const mintT = settings.minTimePlayed ?? 2700000
         const averageM = settings.averageMultiplier ?? 0.5
-        const finalDeduction = settings.deduction ?? 0.5
+        const finalDeduction = settings.deductionMultiplier ?? 0.5
         const msamasOnly = settings.moonsamasOnly ?? true
         const punishAll = settings.deductFromEveryone ?? true
         const gameId = settings.serverId
