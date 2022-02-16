@@ -3,10 +3,13 @@ import {
 } from 'class-validator';
 import { AchievementEntity } from '../achievement/achievement.entity';
 import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
-import { GameTypeEntity } from 'src/gametype/gametype.entity';
+import { GameTypeEntity } from '../gametype/gametype.entity';
 import { GameKind } from './game.enum';
-import { PlayerScoreEntity } from 'src/playerscore/playerscore.entity';
-import { PlaySessionEntity } from 'src/playsession/playsession.entity';
+import { PlayerScoreEntity } from '../playerscore/playerscore.entity';
+import { PlaySessionEntity } from '../playsession/playsession.entity';
+import { GganbuEntity } from '../gganbu/gganbu.entity';
+import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
+import { SnaplogEntity } from '../snaplog/snaplog.entity';
 
 
 @Entity()
@@ -62,4 +65,13 @@ export class GameEntity {
 
     @ManyToOne(() => GameTypeEntity, (gameType) => gameType.games)
     gameType: GameTypeEntity;
+
+    @OneToMany(() => GganbuEntity, (gganbu) => gganbu.game)
+    gganbus?: GganbuEntity[];
+
+    @OneToMany(() => SnapshotItemEntity, (snapshot) => snapshot.game)
+    snapshots?: SnapshotItemEntity[];
+
+    @OneToMany(() => SnaplogEntity, (snaplog) => snaplog.game)
+    snaplogs?: SnaplogEntity[];
 }

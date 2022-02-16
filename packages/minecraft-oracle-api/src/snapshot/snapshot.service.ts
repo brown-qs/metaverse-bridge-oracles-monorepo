@@ -13,6 +13,10 @@ export class SnapshotService {
         private configService: ConfigService
     ) {}
 
+    public static calculateId(dto: {uuid: string, materialName: string, gameId: string | null}): string {
+        return `${dto.uuid}-${dto.materialName}-${dto.gameId ?? 'NULL'}`
+    }
+
     public async create(snapshotItem: SnapshotItemEntity): Promise<SnapshotItemEntity> {
         const u = await this.repository.save(snapshotItem);
         return u;
@@ -59,6 +63,11 @@ export class SnapshotService {
     
     public async findOne(params: FindConditions<SnapshotItemEntity>, options?: FindOneOptions<SnapshotItemEntity>): Promise<SnapshotItemEntity> {
         const result: SnapshotItemEntity = await this.repository.findOne(params, options);
+        return result;
+    }
+
+    public async findOneNested(options: FindOneOptions<SnapshotItemEntity>): Promise<SnapshotItemEntity> {
+        const result: SnapshotItemEntity = await this.repository.findOne(options);
         return result;
     }
 }
