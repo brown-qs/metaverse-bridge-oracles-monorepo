@@ -1,17 +1,18 @@
 import { useCallback, useState } from 'react';
 import { useMediaQuery } from 'beautiful-react-hooks';
-import Toolbar from '@material-ui/core/Toolbar';
-import AppBar from '@material-ui/core/AppBar';
-import Container from '@material-ui/core/Container';
-import Grid from '@material-ui/core/Grid';
-import Box from '@material-ui/core/Box';
-import { useStyles } from './Header.styles';
+import Toolbar from '@mui/material/Toolbar';
+import AppBar from '@mui/material/AppBar';
+import Container from '@mui/material/Container';
+import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box';
+import { styles as headerStyles } from './Header.styles';
+import { useClasses } from 'hooks';
 import { NavLink, Drawer } from 'ui';
 import { useActiveGame } from 'hooks/multiverse/useActiveGame';
 import MenuIcon from '@mui/icons-material/Menu';
 import VideogameAssetIcon from '@mui/icons-material/VideogameAsset';
 import VideogameAssetOffIcon from '@mui/icons-material/VideogameAssetOff';
-import IconButton from '@material-ui/core/IconButton';
+import IconButton from '@mui/material/IconButton';
 
 import WhiteLogo from 'assets/images/logo-white.svg';
 import { Account } from 'components';
@@ -19,7 +20,7 @@ import { MAX_WIDTH_TO_SHOW_NAVIGATION } from '../../constants';
 
 export const Header = () => {
   const isGameActive = useActiveGame();
-  const { appBar, logo, nav, navItem, buttonContainer, navItemDrawer, eventStatusWrapper, eventIconActive, eventIconInactive } = useStyles();
+  const { appBar, logo, nav, navItem, buttonContainer, navItemDrawer, eventStatusWrapper, eventIconActive, eventIconInactive } = useClasses(headerStyles);
 
   const showRegularMenu = useMediaQuery(
       `(max-width: ${MAX_WIDTH_TO_SHOW_NAVIGATION}px)`
