@@ -1,5 +1,5 @@
-import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
 import { Media } from 'components';
 import { useActiveWeb3React } from 'hooks';
 import { Asset } from 'hooks/marketplace/types';
@@ -9,7 +9,8 @@ import { useHistory } from 'react-router-dom';
 import { GlitchText } from 'ui';
 import { truncateHexString } from 'utils';
 import { StringAssetType } from 'utils/subgraph';
-import { useStyles } from './TokenOwned.styles';
+import { useClasses } from 'hooks';
+import { styles } from './TokenOwned.styles';
 import LootBox from '../../assets/images/loot-box.png';
 
 export const TokenOwned = ({
@@ -30,7 +31,7 @@ export const TokenOwned = ({
     tokenName,
     mr,
     lastPriceContainer,
-  } = useStyles();
+  } = useClasses(styles);
   const { push } = useHistory();
 
   const { chainId } = useActiveWeb3React();

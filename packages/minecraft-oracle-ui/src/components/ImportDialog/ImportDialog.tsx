@@ -10,16 +10,12 @@ import {
   IconButton,
   OutlinedInput,
   Switch,
-} from '@material-ui/core';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Divider from '@material-ui/core/Divider';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
+} from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
+import Divider from '@mui/material/Divider';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import {
-  KeyboardDatePicker,
-  MuiPickersUtilsProvider,
-} from '@material-ui/pickers';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 import { AddressDisplayComponent } from 'components/form/AddressDisplayComponent';
 import { CoinQuantityField, UNIT } from 'components/form/CoinQuantityField';
@@ -55,8 +51,9 @@ import { SuccessIcon } from 'icons';
 import { useEffect, useMemo, useState } from 'react';
 import { Button, Dialog } from 'ui';
 import * as yup from 'yup';
-import { appStyles } from '../../app.styles';
-import { useStyles } from './ImportDialog.styles';
+import { styles as appStyles } from '../../app.styles';
+import { useClasses } from 'hooks';
+import { styles } from './ImportDialog.styles';
 import { Fraction } from 'utils/Fraction';
 import { useIsTransactionPending, useSubmittedImportTx } from 'state/transactions/hooks';
 import { CreateImportAssetCallbackState, useImportAssetCallback } from 'hooks/multiverse/useImportAsset';
@@ -106,7 +103,7 @@ export const ImportDialog = () => {
     formButton,
     expand,
     expandOpen,
-  } = appStyles();
+  } = useClasses(appStyles);
 
   const [UIAdvancedSectionExpanded, setExpanded] = useState(false);
 
@@ -116,7 +113,7 @@ export const ImportDialog = () => {
     successContainer,
     successIcon,
     inputContainer,
-  } = useStyles();
+  } = useClasses(styles);
 
   const { chainId, account } = useActiveWeb3React();
 

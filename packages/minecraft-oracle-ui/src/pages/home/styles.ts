@@ -1,6 +1,6 @@
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import { Theme } from '@mui/material';
 
-export const useStyles = makeStyles((theme) => ({
+export const styles = (theme: Theme) => ({
   homeContainer: {
     display: 'flex',
     alignItems: 'center',
@@ -70,4 +70,4 @@ export const useStyles = makeStyles((theme) => ({
     bottom: 0,
     width: '43%',
   }
-}));
+});

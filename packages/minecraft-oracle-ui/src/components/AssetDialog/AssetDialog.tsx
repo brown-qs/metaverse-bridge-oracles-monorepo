@@ -3,11 +3,11 @@ import {
   Avatar,
   Box,
   Grid,
-} from '@material-ui/core';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Divider from '@material-ui/core/Divider';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
+} from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
+import Divider from '@mui/material/Divider';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 import { AddressDisplayComponent } from 'components/form/AddressDisplayComponent';
 import 'date-fns';
@@ -19,8 +19,9 @@ import { getExplorerLink } from 'utils';
 import { SuccessIcon } from 'icons';
 import { useEffect, useMemo, useState } from 'react';
 import { Button, Dialog } from 'ui';
-import { appStyles } from '../../app.styles';
-import { useStyles } from './AssetDialog.styles';
+import { useClasses } from 'hooks';
+import { styles as appStyles } from '../../app.styles';
+import { styles as assetDialogStyles } from './AssetDialog.styles';
 import { useIsTransactionPending, useSubmittedExportTx } from 'state/transactions/hooks';
 import { ExportAssetCallbackState, useExportAssetCallback } from 'hooks/multiverse/useExportAsset';
 import { useAssetDialog } from 'hooks/useAssetDialog/useAssetDialog';
@@ -58,7 +59,7 @@ export const AssetDialog = () => {
     formButton,
     expand,
     expandOpen,
-  } = appStyles();
+  } = useClasses(appStyles);
 
   const [UIAdvancedSectionExpanded, setExpanded] = useState(false);
 
@@ -68,7 +69,7 @@ export const AssetDialog = () => {
     successContainer,
     successIcon,
     inputContainer,
-  } = useStyles();
+  } = useClasses(assetDialogStyles);
 
   const { chainId, account } = useActiveWeb3React();
 

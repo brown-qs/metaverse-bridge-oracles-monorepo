@@ -1,5 +1,5 @@
-import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
 import { Media } from 'components';
 import { useLastTradedPriceOnce } from 'hooks/marketplace/useLastTradedPrice';
 import { useHistory } from 'react-router-dom';
@@ -7,7 +7,8 @@ import { GlitchText, PriceBox } from 'ui';
 import { truncateHexString } from 'utils';
 import { Fraction } from 'utils/Fraction';
 import { OrderType, StringAssetType, StringOrderType, stringToOrderType } from 'utils/subgraph';
-import { useStyles } from './Token.styles';
+import { useClasses } from 'hooks';
+import { styles } from './Token.styles';
 import LootBox from '../../assets/images/loot-box.png';
 import { width } from '@mui/system';
 import { TokenMeta } from 'hooks/useFetchTokenUri.ts/useFetchTokenUri.types';
@@ -33,7 +34,7 @@ export const Token = ({ meta, staticData, order }: TokenData) => {
     tokenName,
     mr,
     lastPriceContainer,
-  } = useStyles();
+  } = useClasses(styles);
   const { push } = useHistory();
   const [fetchedOrder, setFetchedOrer] = useState<Order | undefined>(undefined)
 
