@@ -54,7 +54,7 @@ export class MaterialService {
         return result;
     }
 
-    public async findOne(conditions: string | number | Date | ObjectID, options?: FindOneOptions<MaterialEntity>): Promise<MaterialEntity> {
+    public async findOne(conditions?: FindConditions<MaterialEntity>, options?: FindOneOptions<MaterialEntity>): Promise<MaterialEntity> {
         const result: MaterialEntity = await this.repository.findOne(conditions, options);
         return result;
     }

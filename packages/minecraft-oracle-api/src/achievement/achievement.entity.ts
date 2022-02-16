@@ -6,7 +6,7 @@ import {
 import { GameEntity } from '../game/game.entity';
 import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 import { AchievementType } from './achievementType.enum';
-import { PlayerAchievementEntity } from 'src/playerachievement/playerachievement.entity';
+import { PlayerAchievementEntity } from '../playerachievement/playerachievement.entity';
 
 @Entity()
 export class AchievementEntity {

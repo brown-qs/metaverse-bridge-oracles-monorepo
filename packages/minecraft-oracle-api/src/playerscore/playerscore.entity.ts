@@ -3,7 +3,7 @@ import {
 } from 'class-validator';
 import { GameEntity } from '../game/game.entity';
 import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
-import { UserEntity } from 'src/user/user.entity';
+import { UserEntity } from '../user/user.entity';
 
 @Entity()
 export class PlayerScoreEntity {

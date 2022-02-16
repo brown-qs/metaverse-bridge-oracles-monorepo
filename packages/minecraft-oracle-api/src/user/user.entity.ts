@@ -12,7 +12,8 @@ import { SummonEntity } from '../summon/summon.entity';
 import { PlaySessionEntity } from '../playsession/playsession.entity';
 import { InventoryEntity } from '../playerinventory/inventory.entity';
 import { SkinEntity } from '../skin/skin.entity';
-import { PlayerAchievementEntity } from 'src/playerachievement/playerachievement.entity';
+import { PlayerAchievementEntity } from '../playerachievement/playerachievement.entity';
+import { SnaplogEntity } from '../snaplog/snaplog.entity';
 
 @Entity()
 @Index(['uuid'], {unique: true})
@@ -78,8 +79,11 @@ export class UserEntity {
     @OneToMany(() => SummonEntity, (se) => se.owner)
     summons?: SummonEntity[];
 
-    @OneToMany(() => SnapshotItemEntity, (sitem) => sitem.owner)
+    @OneToMany(() => SnapshotItemEntity, (snapshotItem) => snapshotItem.owner)
     snapshotItems?: SnapshotItemEntity[];
+
+    @OneToMany(() => SnaplogEntity, (snaplog) => snaplog.owner)
+    snaplogs?: SnaplogEntity[];
 
     @OneToMany(() => InventoryEntity, (iitem) => iitem.owner)
     inventoryItems?: InventoryEntity[];

@@ -5,8 +5,8 @@ import {
 } from 'class-validator';
 import { GameEntity } from '../game/game.entity';
 import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
-import { AchievementEntity } from 'src/achievement/achievement.entity';
-import { UserEntity } from 'src/user/user.entity';
+import { AchievementEntity } from '../achievement/achievement.entity';
+import { UserEntity } from '../user/user.entity';
 
 @Entity()
 export class PlayerAchievementEntity {
