@@ -1,8 +1,9 @@
-import { useStyles } from './AssetLink.styles';
+import { styles as assetLinkStyles } from './AssetLink.styles';
+import { useClasses } from 'hooks';
 
 export const AssetLink = (data: any) => {
   let { href, children, asset } = data;
-  const styles = useStyles();
+  const styles = useClasses(assetLinkStyles);
 
   const _onClick = (): boolean | undefined => {
     if (
