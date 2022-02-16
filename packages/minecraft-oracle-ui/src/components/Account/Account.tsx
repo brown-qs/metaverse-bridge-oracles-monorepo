@@ -13,7 +13,8 @@ import PersonSharpIcon from '@mui/icons-material/PersonSharp';
 import { Activity, Key } from 'react-feather';
 import { useMediaQuery } from 'beautiful-react-hooks';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWalletSharp';
-import { useStyles } from './Account.styles';
+import { styles as accountStyles } from './Account.styles';
+import { useClasses } from 'hooks';
 
 export const Account = () => {
   const [ accountButton, setAccountButton ] = useState<HTMLButtonElement | null>(null);
@@ -25,7 +26,7 @@ export const Account = () => {
   const errMessage =
     error instanceof UnsupportedChainIdError ? 'Wrong Network' : 'Error';
 
-  const { button, popoverListItem } = useStyles();
+  const { button, popoverListItem } = useClasses(accountStyles);
 
   const { authData, setAuthData } = useAuth()
 
