@@ -1,8 +1,9 @@
-import { Button, Grid } from '@material-ui/core';
+import { Button } from 'ui';
 import Stack from '@mui/material/Stack';
 import { Header } from 'ui';
 import { useStyles } from './styles';
 import List from '@mui/material/List';
+import Grid from '@mui/material/Grid';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
