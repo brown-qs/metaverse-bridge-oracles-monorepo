@@ -54,11 +54,11 @@ export class GameEntity {
     @IsString()
     endedAt?: string;
 
-    @Column({ type: "string", nullable: true })
+    @Column({ nullable: true })
     @IsString()
     serverAddress?: string;
 
-    @Column({ type: "string", nullable: true })
+    @Column({ nullable: true })
     @IsString()
     state?: string;
   
