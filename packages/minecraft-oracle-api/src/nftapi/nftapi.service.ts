@@ -8,6 +8,7 @@ import { Interface } from 'ethers/lib/utils';
 import { Contract } from '@ethersproject/contracts';
 import { fromStream } from 'file-type/core';
 import fetch from 'node-fetch'
+import { collections } from '../common/collections';
 
 
 @Injectable()
@@ -21,6 +22,50 @@ export class NftApiService {
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
         this.context = NftApiService.name
+    }
+
+    public async getNFTCollection(chainId: string, tokenType: string, address: string): Promise<ProcessedStaticTokenData[] | StaticTokenData[]> {
+        const recognizedCollection = (collections.collections.filter((x) => x.chainId === Number(chainId)) ?? []).find(coll => coll.address.toLowerCase() === address.toLowerCase());
+        let assets: Asset[] = [];
+        for (let i=recognizedCollection.minId; i<recognizedCollection.maxId; i++) {
+            assets.push({
+                assetAddress: address,
+                assetId: i.toString(),
+                assetType: stringToStringAssetType(tokenType),
+                id: '1',
+            })
+        }
+
+        let calls: any[] = [];
+        assets.map((asset, i) => {
+            calls = [...calls, ...getTokenStaticCalldata(asset)];
+        });
+
+        const call_results = await this.tryMultiCallCore(this.multicall, calls, false);
+
+        if (!call_results) {
+            return undefined
+        }
+        //console.log('yolo tryMultiCallCore res', results);
+        let x = processTokenStaticCallResults(assets, call_results);
+        const tokenUris = await this.useFetchTokenUri(x)
+        let results: any[] = [];
+        if(!!tokenUris) { 
+            results = await Promise.all(x.map(async (xi, ind) => {
+                let result: any = xi;
+                result['tokenURI'] = tokenUris[ind] as TokenMeta
+            
+                const imageurl = uriToHttp(result.tokenURI.image, false)
+                result.tokenURI.image = {
+                    url: imageurl,
+                    ...await this.fetchMediaType(imageurl)
+                }
+                console.log('hmm', result);
+                return result;
+            }))
+        }
+        return results;
+
     }
 
     public async getNFT(chainId: string, tokenType: string, address: string, tokenId: string): Promise<ProcessedStaticTokenData | StaticTokenData> {
