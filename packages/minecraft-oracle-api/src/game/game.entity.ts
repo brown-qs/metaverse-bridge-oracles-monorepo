@@ -34,17 +34,17 @@ export class GameEntity {
     })
     type: GameKind;
 
-    @Column()
+    @Column({ nullable: true })
     @IsString()
-    name: string;
+    name?: string;
 
-    @Column()
+    @Column({ nullable: true })
     @IsString()
-    description: string;
+    description?: string;
 
-    @Column()
+    @Column({ nullable: true })
     @IsString()
-    image: string;
+    image?: string;
 
     @Column({type: "bigint"})
     @IsString()
@@ -53,6 +53,15 @@ export class GameEntity {
     @Column({ type: "bigint", nullable: true })
     @IsString()
     endedAt?: string;
+
+    @Column({ type: "string", nullable: true })
+    @IsString()
+    serverAddress?: string;
+
+    @Column({ type: "string", nullable: true })
+    @IsString()
+    state?: string;
+  
 
     @OneToMany(() => AchievementEntity, (achievement) => achievement.game)
     achievements?: AchievementEntity[];
