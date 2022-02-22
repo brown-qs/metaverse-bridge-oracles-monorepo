@@ -814,11 +814,6 @@ export class GameApiService {
             throw new UnprocessableEntityException("Game not found")
         }
 
-
-        if (!game) {
-            throw new UnprocessableEntityException("Game not found")
-        }
-
         const entity = await this.playerAchievementService.createMultiple(
             await Promise.all(dto.playerAchievements.map(async pa => {
 
