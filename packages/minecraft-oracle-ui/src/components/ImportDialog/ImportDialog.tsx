@@ -24,20 +24,12 @@ import { getExplorerLink } from 'utils';
 import { SuccessIcon } from 'icons';
 import { useEffect, useState } from 'react';
 import { Button, Dialog } from 'ui';
-import * as yup from 'yup';
 import { appStyles } from '../../app.styles';
 import { useStyles } from './ImportDialog.styles';
 import { useIsTransactionPending, useSubmittedImportTx } from 'state/transactions/hooks';
 import { CreateImportAssetCallbackState, useImportAssetCallback } from 'hooks/multiverse/useImportAsset';
 import { useImportConfirmCallback } from 'hooks/multiverse/useConfirm';
 
-// type TransferFormData = yup.TypeOf<
-//   ReturnType<typeof makeTransferFormDataSchema>
-// >;
-type BidFormData = {
-  quantity?: string;
-  pricePerUnit?: string;
-};
 
 export const ImportDialog = () => {
   const [finalTxSubmitted, setFinalTxSubmitted] = useState<boolean>(false);
@@ -63,8 +55,6 @@ export const ImportDialog = () => {
     expand,
     expandOpen,
   } = appStyles();
-
-  const [UIAdvancedSectionExpanded, setExpanded] = useState(false);
 
   const {
     dialogContainer,

@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { calculateGasMargin, getSigner } from '../../utils';
+import { calculateGasMargin } from '../../utils';
 import { useMarketplaceV1Contract } from '../../hooks/useContracts/useContracts';
-import { useActiveWeb3React } from '../../hooks';
+import { useActiveWeb3React, useAuth } from '../../hooks';
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import axios from 'axios'
-import { StringAssetType } from 'utils/subgraph';
 import { AssetType } from 'utils/marketplace';
 
 export enum EnraptureAssetCallbackState {
@@ -18,7 +17,7 @@ export interface EnraptureRequest {
     asset?: {
         assetAddress?: string,
         assetId?: string,
-        assetType?: string
+        assetType?: AssetType
     },
     owner: string | undefined | null,
     beneficiary: string| undefined | null,
@@ -29,7 +28,7 @@ export interface AssetRequest {
     asset?: {
         assetAddress?: string,
         assetId?: string,
-        assetType?: string,
+        assetType?: AssetType,
     },
     amount: string
 }
@@ -45,32 +44,38 @@ export function useFetchEnraptureAssetArgumentsCallback(enraptureRequest: Enrapt
     const { library, account } = useActiveWeb3React();
 
     const [params, setParams] = useState<EnraptureRequestParams | undefined>(undefined)
+    const { authData } =  useAuth();
+
+    const {jwt} = authData ?? {}
 
     const stringedRequest = JSON.stringify(enraptureRequest)
 
+    console.log('enrapture request', enraptureRequest)
+
     const cb = useCallback(async () => {
-        if (!library || !account || !enraptureRequest.owner || !enraptureRequest.beneficiary || !enraptureRequest.asset) {
+        if (!library || !account || !enraptureRequest.owner || !enraptureRequest.beneficiary || !enraptureRequest.asset || !enraptureRequest.asset.assetAddress || !enraptureRequest.asset.assetId) {
             setParams(undefined);
         }
         try {
             const resp = await axios.request<EnraptureRequestParams>({
                 method: 'put',
                 url: `${process.env.REACT_APP_BACKEND_API_URL}/oracle/enrapture`,
-                data: enraptureRequest
+                data: enraptureRequest,
+                headers: { Authorization: `Bearer ${jwt}` }
             });
             setParams(resp.data)
         } catch(e) {
             console.error('Error fetching import params.')
             setParams(undefined)
         }
-    }, [library, account, stringedRequest])
+    }, [library, account, stringedRequest, jwt])
 
 
     useEffect(() => {
         if (library && account && enraptureRequest) {
             cb()
         }
-    }, [library, account, stringedRequest])
+    }, [library, account, stringedRequest, jwt])
 
     return params
 }
@@ -101,7 +106,7 @@ export function useEnraptureAssetCallback(
 
     //console.warn('YOLO ORDER', { inputParams, inputOptions });
     const inputOptions = {
-        value: assetRequest?.asset?.assetType?.valueOf() == StringAssetType.NATIVE.valueOf() ? (assetRequest?.amount ?? '0') : '0'
+        value: assetRequest?.asset?.assetType?.valueOf() == AssetType.NATIVE.valueOf() ? (assetRequest?.amount ?? '0') : '0'
     }
 
     return useMemo(() => {
@@ -137,6 +142,7 @@ export function useEnraptureAssetCallback(
 
         return {
             state: EnraptureAssetCallbackState.VALID,
+            hash,
             callback: async function onEnraptureAsset(): Promise<string> {
                 const args = inputParams;
                 const methodName = 'enraptureToMetaverseSig';
@@ -189,7 +195,7 @@ export function useEnraptureAssetCallback(
                     ...inputOptions,
                 })
                     .then((response: any) => {
-                        const sum = `Enraptureing asset with hash ${hash}`;
+                        const sum = `Enrapturing asset with hash ${hash}`;
                         addTransaction(response, {
                             summary: sum,
                             enraptureResult: {
@@ -209,8 +215,7 @@ export function useEnraptureAssetCallback(
                         }
                     });
             },
-            error: null,
-            hash
+            error: null
         };
     }, [
         library,

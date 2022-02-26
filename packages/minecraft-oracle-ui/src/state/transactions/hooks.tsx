@@ -202,6 +202,27 @@ export function useHasPendingApproval(
   );
 }
 
+export function useSubmittedEnraptureTx(entryHash?: string): {
+  enraptureSubmitted: boolean;
+  enraptureTx: TransactionDetails | undefined;
+} {
+  const allTransactions = useAllTransactions();
+
+  // get the txn if it has been submitted
+  const enraptureTx = useMemo(() => {
+    const txIndex = Object.keys(allTransactions).find((hash) => {
+      const tx = allTransactions[hash];
+      console.log(tx?.enraptureResult?.hash, entryHash, tx?.enraptureResult?.hash === entryHash)
+      return tx.enraptureResult && entryHash && tx.enraptureResult.hash === entryHash;
+    });
+    return txIndex && allTransactions[txIndex]
+      ? allTransactions[txIndex]
+      : undefined;
+  }, [allTransactions]);
+
+  return { enraptureSubmitted: Boolean(enraptureTx), enraptureTx };
+}
+
 export function useSubmittedImportTx(entryHash?: string): {
   importSubmitted: boolean;
   importTx: TransactionDetails | undefined;
