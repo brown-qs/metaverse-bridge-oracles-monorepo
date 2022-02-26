@@ -36,7 +36,7 @@ export enum RecognizedAssetType {
   TEMPORARY_TICKET='TEMPORARY_TICKET'
 }
 
-export enum EligibleToPlayReason {
+export enum PlayEligibilityReason {
   NONE='NONE',
   MOONSAMA='MSAMA',
   TICKET='TICKET',

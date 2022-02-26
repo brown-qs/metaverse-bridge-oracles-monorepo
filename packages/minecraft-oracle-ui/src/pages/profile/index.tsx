@@ -4,13 +4,18 @@ import { Header } from 'ui';
 import { useStyles } from './styles';
 import List from '@mui/material/List';
 import Grid from '@mui/material/Grid';
+import { Typography, Box, Divider } from '@material-ui/core';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Tooltip from '@mui/material/Tooltip';
 
+import { Dialog } from 'ui';
+
 import { AuthData } from 'context/auth/AuthContext/AuthContext.types';
+
+import { AddressDisplayComponent } from 'components/form/AddressDisplayComponent';
 
 import { useProfile } from 'hooks/multiverse/useProfile';
 import { useOnChainItems } from 'hooks/multiverse/useOnChainItems';
@@ -24,8 +29,9 @@ import { Media } from '../../components/Media/Media';
 import { countRecognizedAssets } from 'utils';
 import { useAssetDialog } from '../../hooks/useAssetDialog/useAssetDialog';
 import { useCallbackSkinEquip } from '../../hooks/multiverse/useCallbackSkinEquip';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { SKIN_LABELS } from '../../constants/skins';
+import { InGameItemWithStatic } from 'hooks/multiverse/useInGameItems';
 
 export type ProfilePagePropTypes = {
     authData: AuthData
@@ -43,6 +49,9 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const { setAccountDialogOpen } = useAccountDialog();
 
     const [fetchtrigger, setFetchtrigger] = useState<string | undefined>(undefined)
+
+    const [itemDetailDialogOpen, setItemDetailDialogOpen] = useState<boolean>(false);
+    const [itemDetailDialogData, setItemDetailDialogData] = useState({} as InGameItemWithStatic);
 
     const callbackSkinEquip = useCallbackSkinEquip()
 
@@ -80,15 +89,24 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
     const {
         profileContainer,
+        divider,
+        dialogContainer,
         transferButton,
         statBox,
         columnTitle,
         columnTitleText,
         statBoxInfo,
+        transferButtonMid,
         transferButtonSmall,
         headerImage,
         itemImage,
-        skinComponent
+        skinComponent,
+        formBox,
+        formLabel,
+        formValue,
+        formValueTokenDetails,
+        row,
+        col,
     } = useStyles();
 
     const canSummon = !!inGameItems?.resources && inGameItems?.resources.length > 0
@@ -141,7 +159,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                         </a>
                                     </Tooltip>}
                                     {!value.equipped ? <Button
-                                        className={transferButtonSmall}
+                                        className={transferButtonMid}
                                         disabled={value.equipped}
                                         onClick={async () => {
                                             const success = await callbackSkinEquip({
@@ -187,6 +205,8 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                 disablePadding
                                             >
                                                 <ListItemButton onClick={() => {
+                                                    setItemDetailDialogData(value);
+                                                    setItemDetailDialogOpen(true);
                                                 }}>
                                                     <ListItemAvatar>
                                                         {/*<img className={itemImage} src={value?.meta?.image} alt="" />*/}
@@ -196,7 +216,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     {value?.exportable && (
                                                     <Tooltip title={'Your exported asset will go back to the sender address you imported from. Associated skin wil be unavailable.'}>
                                                         <Button
-                                                            className={transferButtonSmall}
+                                                            className={transferButtonMid}
                                                             onClick={() => {
                                                                 if (!!account) {
                                                                     setExportDialogOpen(true);
@@ -229,6 +249,56 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                         </ListItem>
                                     )}
                                 </List>
+                                <Dialog
+                                    open={itemDetailDialogOpen}
+                                    onClose={() => {
+                                        setItemDetailDialogOpen(false)
+                                    }}
+                                    title={'Item Detail'}
+                                    maxWidth="md"
+                                    >
+                                    <div className={dialogContainer}>
+                                        <Grid container spacing={1} justifyContent="center">
+                                        <Grid item md={12} xs={12}>
+                                            <Box className={formBox}>
+                                                <div className={row}>
+                                                    <div className={formLabel}>Item Type</div>
+                                                    <div className={`${formValue} ${formValueTokenDetails}`}>
+                                                    {itemDetailDialogData.recognizedAssetType}
+                                                    </div>
+                                                </div>
+                                                <div className={row}>
+                                                    <div className={`${formValue} ${formValueTokenDetails}`}>
+                                                    {itemDetailDialogData.enraptured ? 'This item is enraptured.' : 'This item is imported.'}
+                                                    </div>
+                                                </div>
+                                                <div className={row}>
+                                                    <div className={`${formValue} ${formValueTokenDetails}`}>
+                                                    {itemDetailDialogData.exportable ? 'This item is exportable.' : 'This item is not exportable.'}
+                                                    </div>
+                                                </div>
+                                                {itemDetailDialogData.exportable ? (
+                                                    <React.Fragment>
+                                                        <div className={row}>
+                                                        <div className={formLabel}>Export Chain Name: </div>
+                                                        <div className={`${formValue} ${formValueTokenDetails}`}>
+                                                            {itemDetailDialogData.exportChainName}
+                                                        </div>
+                                                        </div>
+                                                        <div className={row}>
+                                                        <div className={formLabel}>Export Address:</div>
+                                                        <div className={`${formValue} ${formValueTokenDetails}`}>
+                                                        {itemDetailDialogData.exportAddress}
+                                                        </div>
+                                                        </div>
+                                                    </React.Fragment>
+                                                ) : null}
+                                            <Divider variant="fullWidth" className={divider} />
+                                            </Box>
+                                        </Grid>
+                                        </Grid>
+                                    </div>
+                                </Dialog>
                             </div>
                             <div style={{ width: '50%' }}>
                                 <div className={columnTitle}><span className={columnTitleText}>On-chain items: Moonriver account</span></div>
@@ -248,7 +318,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     <Tooltip title={'You can have 1 VIP ticket imported at a time.'}>
                                                         <span>
                                                             <Button
-                                                                className={transferButtonSmall}
+                                                                className={transferButtonMid}
                                                                 onClick={() => {
                                                                     setImportDialogOpen(true);
                                                                     setImportDialogData({ asset: item.asset });
@@ -303,7 +373,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     <Tooltip title={`Your imported ${item?.meta?.name} will bound to your Minecraft account. It will go back to the sender address when exported.`}>
                                                         <span>
                                                             <Button
-                                                                className={transferButtonSmall}
+                                                                className={transferButtonMid}
                                                                 onClick={() => {
                                                                     setEnraptureDialogOpen(true);
                                                                     setEnraptureDialogData({ asset: item.asset });

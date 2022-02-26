@@ -1,11 +1,9 @@
-
-
 import { Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { ProfileDto } from './dtos/profile.dto';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { AssetService } from '../asset/asset.service';
 import { UserEntity } from '../user/user.entity';
-import { RecognizedAsset, RecognizedAssetType, EligibleToPlayReason } from '../config/constants';
+import { RecognizedAsset, RecognizedAssetType, PlayEligibilityReason } from '../config/constants';
 import { ProviderToken } from '../provider/token';
 import { AssetDto, TextureDto, ThingsDto } from './dtos/things.dto';
 import { GameService } from '../game/game.service';
@@ -114,7 +112,7 @@ export class ProfileApiService {
                     exportable: !asset.enraptured,
                     hash: asset.hash,
                     summonable: false,
-                    recognizedAssetType: recongizedEnraptureAsset.type.valueOf(),
+                    recognizedAssetType: recongizedImportAsset.type.valueOf(),
                     enraptured: asset.enraptured,
                     exportChainName: 'Moonriver',
                     exportAddress: user.lastUsedAddress,
@@ -144,12 +142,12 @@ export class ProfileApiService {
     }
 
     async userProfile(user: UserEntity): Promise<ProfileDto> {
-        let allowedToPlayReason: EligibleToPlayReason = EligibleToPlayReason.NONE;
+        let allowedToPlayReason: PlayEligibilityReason = PlayEligibilityReason.NONE;
         if (user.allowedToPlay) {
             const userAssets = await this.assetService.findMany({ where: { owner: user.uuid, pendingIn: false } })
-            if (userAssets.find(asset => asset.recognizedAssetType == RecognizedAssetType.MOONSAMA)) allowedToPlayReason = EligibleToPlayReason.MOONSAMA;
-            else if (userAssets.find(asset => asset.recognizedAssetType == RecognizedAssetType.TICKET)) allowedToPlayReason = EligibleToPlayReason.TICKET;
-            else if (userAssets.find(asset => asset.recognizedAssetType == RecognizedAssetType.TEMPORARY_TICKET)) allowedToPlayReason = EligibleToPlayReason.TEMPORARY_TICKET;
+            if (userAssets.find(asset => asset.recognizedAssetType == RecognizedAssetType.MOONSAMA)) allowedToPlayReason = PlayEligibilityReason.MOONSAMA;
+            else if (userAssets.find(asset => asset.recognizedAssetType == RecognizedAssetType.TICKET)) allowedToPlayReason = PlayEligibilityReason.TICKET;
+            else if (userAssets.find(asset => asset.recognizedAssetType == RecognizedAssetType.TEMPORARY_TICKET)) allowedToPlayReason = PlayEligibilityReason.TEMPORARY_TICKET;
         }
         return {
             uuid: user.uuid,
