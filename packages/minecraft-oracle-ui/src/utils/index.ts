@@ -175,7 +175,12 @@ export const countRecognizedAssets = (assets: InGameItem[]) => {
       return
     }
 
-    if (!!recasset && recasset.type.valueOf() === RecognizedAssetType.TICKET) {
+    if (!!recasset && recasset.type.valueOf() === RecognizedAssetType.TICKET && recasset.id === asset.assetId) {
+      assetCounter.ticketNum += 1
+      return
+    }
+
+    if (!!recasset && recasset.type.valueOf() === RecognizedAssetType.TEMPORARY_TICKET) {
       assetCounter.ticketNum += 1
       return
     }
