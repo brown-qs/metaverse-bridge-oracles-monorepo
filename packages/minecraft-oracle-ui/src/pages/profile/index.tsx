@@ -42,8 +42,8 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const { account, chainId } = useActiveWeb3React()
     const profile = useProfile();
     const playAllowedReasonTexts: any = {
-        'MSAMA': 'You are eligible to play because you imported a moonsama.',
-        'TICKET': 'You are eligible to play because you imported a XYZ NFT.',
+        'MSAMA': 'You are eligible to play because you imported a Moonsama.',
+        'TICKET': 'You are eligible to play because you imported a VIP ticket.',
         'TEMPORARY_TICKET': 'You are eligible to play because you were given permanent access.',
     }
     const { setAccountDialogOpen } = useAccountDialog();
@@ -70,12 +70,13 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const onChainPlot = onChainItems?.['Moonsama Minecraft Plots Season 1'] ?? [];
     const onChainArt = onChainItems?.['Multiverse Art'] ?? [];
     const onChainMoonbrella = onChainItems?.['Moonbrella'] ?? [];
-    const onChainEnrapture = onChainItems?.['Enrapture'] ?? [];
+    const onChainEmbassy = onChainItems?.['Moonsama Embassy'] ?? [];
 
-    const onChainImportables = [...onChainGoldenTickets, ...onChainMoonbrella, ...onChainMoonsamas, ...onChainArt, ...onChainPlot, ...onChainEnrapture];
+    const onChainImportables = [...onChainGoldenTickets, ...onChainMoonbrella, ...onChainMoonsamas, ...onChainArt, ...onChainPlot, ...onChainEmbassy];
 
     console.log('VIP Ticket', onChainGoldenTickets)
     console.log('onChainMoonbrella', onChainMoonbrella)
+    console.log('onChainEmbassy', onChainEmbassy)
 
     //In Game Items
     const inGameItems = useInGameItems(fetchtrigger);
@@ -318,7 +319,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     <Tooltip title={'You can have 1 VIP ticket imported at a time.'}>
                                                         <span>
                                                             <Button
-                                                                className={transferButtonMid}
+                                                                className={transferButtonSmall}
                                                                 onClick={() => {
                                                                     setImportDialogOpen(true);
                                                                     setImportDialogData({ asset: item.asset });
@@ -331,7 +332,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                             </ListItem>
                                         );
                                     }).concat(
-                                        [...(onChainMoonsamas ?? []), ...(onChainArt ?? []), ...(onChainPlot ?? []), ...(onChainMoonbrella ?? [])].map((item, ind) => {
+                                        [...(onChainArt ?? []), ...(onChainPlot ?? []), ...(onChainMoonbrella ?? []), ...(onChainEmbassy ?? []), ...(onChainMoonsamas ?? [])].map((item, ind) => {
                                             return (
                                                 <ListItem
                                                     key={`${item?.asset?.assetAddress}-${item?.asset?.assetId}-${ind}`} //update key
@@ -343,7 +344,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                             <Media uri={item?.meta?.image} className={itemImage} />
                                                         </ListItemAvatar>
                                                         <ListItemText primary={item?.meta?.name} />
-                                                        <Tooltip title={`Your imported ${item?.meta?.name} will bound to your Minecraft account. It will go back to the sender address when exported.`}>
+                                                        {item.importable && <Tooltip title={`Your imported ${item?.meta?.name} will bound to your Minecraft account. It will go back to the sender address when exported.`}>
                                                             <span>
                                                                 <Button
                                                                     className={transferButtonSmall}
@@ -353,38 +354,23 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                                     }}
                                                                 >Import to game</Button>
                                                             </span>
-                                                        </Tooltip>
+                                                        </Tooltip>}
+                                                        {item.enrapturable && <Tooltip title={`Your ${item?.meta?.name} will be enraptured (burned) and bound to your Minecraft account forever.`}>
+                                                            <span>
+                                                                <Button
+                                                                    className={transferButtonMid}
+                                                                    onClick={() => {
+                                                                        setEnraptureDialogOpen(true);
+                                                                        setEnraptureDialogData({ asset: item.asset });
+                                                                    }}
+                                                                >Burn into game</Button>
+                                                            </span>
+                                                        </Tooltip>}
                                                     </ListItemButton>
                                                 </ListItem>
                                             );
                                         })
-                                    ).concat(onChainEnrapture.map((item, ind) => {
-                                        return (
-                                            <ListItem
-                                                key={`${item?.asset?.assetAddress}-${item?.asset?.assetId}-${ind}`} //update key
-                                                disablePadding
-                                            >
-                                                <ListItemButton>
-                                                    <ListItemAvatar>
-                                                        {/*<img className={itemImage} src={item?.meta?.image} alt="" />*/}
-                                                        <Media uri={item?.meta?.image} className={itemImage} />
-                                                    </ListItemAvatar>
-                                                    <ListItemText primary={item?.meta?.name} />
-                                                    <Tooltip title={`Your imported ${item?.meta?.name} will bound to your Minecraft account. It will go back to the sender address when exported.`}>
-                                                        <span>
-                                                            <Button
-                                                                className={transferButtonMid}
-                                                                onClick={() => {
-                                                                    setEnraptureDialogOpen(true);
-                                                                    setEnraptureDialogData({ asset: item.asset });
-                                                                }}
-                                                            >Enrapture to game</Button>
-                                                        </span>
-                                                    </Tooltip>
-                                                </ListItemButton>
-                                            </ListItem>
-                                        );
-                                    })) : (
+                                    ) : (
                                         <ListItem>
                                             No items found in wallet.
                                         </ListItem>
