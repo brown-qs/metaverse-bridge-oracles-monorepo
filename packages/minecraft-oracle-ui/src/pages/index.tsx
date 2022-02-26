@@ -7,6 +7,7 @@ import ProfilePage from './profile';
 import { TransferDialog } from '../components/TransferDiaog/TransferDialog';
 import { ExportDialog } from '../components/ExportDialog/ExportDialog';
 import { ImportDialog } from '../components/ImportDialog/ImportDialog';
+import { EnraptureDialog } from '../components/EnraptureDialog/EnraptureDialog';
 import { SummonDialog } from '../components/SummonDialog/SummonDialog';
 import { AssetDialog } from '../components/AssetDialog/AssetDialog';
 
@@ -30,6 +31,7 @@ export const Routing = () => {
             <Route path="/profile">
                 <ImportDialog/>
                 <ExportDialog/>
+                <EnraptureDialog/>
                 <SummonDialog/>
                 <AssetDialog/>
                 {!!authData?.jwt ? <ProfilePage authData={authData} /> : <AuthPage />}

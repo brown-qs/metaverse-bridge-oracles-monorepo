@@ -31,9 +31,16 @@ export enum RecognizedAssetType {
   TICKET='TICKET',
   TEST='TEST',
   PLOT='PLOT',
-  OFFHAND='OFFHAND'
+  OFFHAND='OFFHAND',
+  TEMPORARY_TICKET='TEMPORARY_TICKET',
 }
 
+export enum EligibleToPlayReason {
+  NONE='NONE',
+  MOONSAMA='MSAMA',
+  TICKET='TICKET',
+  TEMPORARY_TICKET='TEMPORARY_TICKET',
+}
 
 export type RecognizedAsset = {
     chainId: ChainId,

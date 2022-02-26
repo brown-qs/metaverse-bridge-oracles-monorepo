@@ -5,6 +5,7 @@ import { useActiveWeb3React } from '../../hooks';
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import axios from 'axios'
 import { StringAssetType } from 'utils/subgraph';
+import { AssetType } from 'utils/marketplace';
 
 export enum EnraptureAssetCallbackState {
     INVALID,
@@ -14,10 +15,10 @@ export enum EnraptureAssetCallbackState {
 }
 
 export interface EnraptureRequest {
-    asset: {
-        assetAddress: string,
-        assetId: string,
-        assetType: string
+    asset?: {
+        assetAddress?: string,
+        assetId?: string,
+        assetType?: string
     },
     owner: string | undefined | null,
     beneficiary: string| undefined | null,
@@ -25,10 +26,10 @@ export interface EnraptureRequest {
 }
 
 export interface AssetRequest {
-    asset: {
-        assetAddress: string,
-        assetId: string,
-        assetType: string
+    asset?: {
+        assetAddress?: string,
+        assetId?: string,
+        assetType?: string,
     },
     amount: string
 }
@@ -80,6 +81,7 @@ export function useEnraptureAssetCallback(
     state: EnraptureAssetCallbackState;
     callback: null | (() => Promise<string>);
     error: string | null;
+    hash?: string;
 } {
     const { account, chainId, library } = useActiveWeb3React();
 
@@ -99,7 +101,7 @@ export function useEnraptureAssetCallback(
 
     //console.warn('YOLO ORDER', { inputParams, inputOptions });
     const inputOptions = {
-        value: assetRequest.asset.assetType.valueOf() == StringAssetType.NATIVE.valueOf() ? (assetRequest?.amount ?? '0') : '0'
+        value: assetRequest?.asset?.assetType?.valueOf() == StringAssetType.NATIVE.valueOf() ? (assetRequest?.amount ?? '0') : '0'
     }
 
     return useMemo(() => {
@@ -108,6 +110,7 @@ export function useEnraptureAssetCallback(
                 state: EnraptureAssetCallbackState.INVALID,
                 callback: null,
                 error: 'Missing dependencies',
+                hash
             };
         }
 
@@ -116,6 +119,7 @@ export function useEnraptureAssetCallback(
                 state: EnraptureAssetCallbackState.CONFIRMED,
                 callback: null,
                 error: 'Already confirmed',
+                hash
             };
         }
 
@@ -125,6 +129,7 @@ export function useEnraptureAssetCallback(
             state: EnraptureAssetCallbackState.INVALID,
             callback: null,
             error: 'Error fetching input params from oracle',
+            hash
           };
         }
 
@@ -205,6 +210,7 @@ export function useEnraptureAssetCallback(
                     });
             },
             error: null,
+            hash
         };
     }, [
         library,

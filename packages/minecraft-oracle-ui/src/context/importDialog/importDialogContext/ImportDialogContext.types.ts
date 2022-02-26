@@ -5,6 +5,8 @@ export type ImportDialogData = {
   amount?: string;
   owner?: string;
   beneficiary?: string;
+  enrapturable?: boolean,
+  importable?: boolean,
 } | undefined;
 
 export type ImportDialogContextType = {

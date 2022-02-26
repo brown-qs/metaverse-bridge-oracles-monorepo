@@ -147,7 +147,19 @@ export const collections = {
       type: 'ERC721',
       contractURI: 'ipfs://QmR8K7eLZnhFqC5qUStMyFAgawSJcpRfSvMDMffQVQFn38',
       subgraph: 'https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/nft-721-mmplots1'
-    }
+    },
+    {
+      chainId: 1285,
+      address: '0x1974eEAF317Ecf792ff307F25A3521C35eECde86',
+      display_name: 'Enrapture',
+      ids: ['1'],
+      enrapturable: true,
+      importable: false,
+      symbol: '???',
+      type: 'ERC1155',
+      contractURI: 'ipfs://QmWox8YqUaYVxSSB7GRhPAuczv6auL8QrkDrkMTcqGEGKA',
+      subgraph: 'https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/nft-1155-mx'
+    },
   ]
 };
 
