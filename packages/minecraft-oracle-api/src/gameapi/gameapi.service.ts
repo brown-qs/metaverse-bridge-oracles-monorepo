@@ -645,7 +645,7 @@ export class GameApiService {
                 await Promise.all(userSnapshots.map(async (snapshot) => slock.runExclusive(async () => {
                     const amount = (snapshot.material.multiplier ?? 1) * Number.parseFloat(snapshot.amount)
                     const materialName = snapshot.material.mapsTo ?? snapshot.material.name
-                    const id = `${user.uuid}-${materialName}`
+                    const id = InventoryService.calculateId({uuid: user.uuid, materialName: materialName})
                     if (!inventoryMap[id]) {
                         const material = snapshot.material.mapsTo ? (await this.materialService.findOne({name: materialName})) : snapshot.material
                         inventoryMap[id] = {

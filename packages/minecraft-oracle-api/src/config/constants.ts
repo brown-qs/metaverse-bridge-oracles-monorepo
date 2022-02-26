@@ -32,7 +32,8 @@ export enum RecognizedAssetType {
   TEST='TEST',
   PLOT='PLOT',
   OFFHAND='OFFHAND',
-  TEMPORARY_TICKET='TEMPORARY_TICKET',
+  WEAPON_SKIN='WEAPON_SKIN',
+  TEMPORARY_TICKET='TEMPORARY_TICKET'
 }
 
 export enum EligibleToPlayReason {
@@ -49,6 +50,7 @@ export type RecognizedAsset = {
     id: string | undefined | string[],
     name: string,
     gamepass: boolean,
+    expiration?: number | undefined //undefined means forever for gamepass eligibility, otherwise milisecond unix timestamp
 }
 // lwoercase
 export const IMPORTABLE_ASSETS: RecognizedAsset[] = [
@@ -58,7 +60,8 @@ export const IMPORTABLE_ASSETS: RecognizedAsset[] = [
       type: RecognizedAssetType.MOONSAMA,
       id: undefined,
       name: 'Moonsama',
-      gamepass: true
+      gamepass: true,
+      expiration: undefined
     }, /* moonsama */
     {
       address: '0x1974eEAF317Ecf792ff307F25A3521C35eECde86'.toLowerCase(),
@@ -66,24 +69,42 @@ export const IMPORTABLE_ASSETS: RecognizedAsset[] = [
       type: RecognizedAssetType.TICKET,
       chainId: ChainId.MOONRIVER,
       name: 'VIP ticket',
-      gamepass: true
+      gamepass: true,
+      expiration: undefined
     }, /* tickets */
     {
       address: '0x1974eEAF317Ecf792ff307F25A3521C35eECde86'.toLowerCase(),
-      id: ['2', '58'],
+      id: ['2', '9'],
       type: RecognizedAssetType.OFFHAND,
       chainId: ChainId.MOONRIVER,
       name: 'Moonbrella',
       gamepass: false
-    }, /* tickets */
+    }, /* moonrella offhands */
+    {
+      address: '0x1974eEAF317Ecf792ff307F25A3521C35eECde86'.toLowerCase(),
+      id: ['10', '58'],
+      type: RecognizedAssetType.WEAPON_SKIN,
+      chainId: ChainId.MOONRIVER,
+      name: 'Sword skin',
+      gamepass: false
+    }, /* swords skins from lootbox */
+    {
+      address: '0x1974eEAF317Ecf792ff307F25A3521C35eECde86'.toLowerCase(),
+      id: ['59', '60'],
+      type: RecognizedAssetType.OFFHAND,
+      chainId: ChainId.MOONRIVER,
+      name: 'Bonobo & kings offhands',
+      gamepass: false
+    }, /* bonono, kings */
     {
       address: '0xdea45e7c6944cb86a268661349e9c013836c79a2'.toLowerCase(),
       id: undefined,
       type: RecognizedAssetType.MOONSAMA,
       chainId: ChainId.MOONRIVER,
       name: 'Multiverse Art',
-      gamepass: true
-    }, /* tickets */
+      gamepass: true,
+      expiration: undefined
+    }, /* multiverse art skins */
     {
       address: '0xa17A550871E5F5F692a69a3ABE26e8DBd5991B75'.toLowerCase(),
       id: undefined,
@@ -132,6 +153,15 @@ export const IMPORTABLE_ASSETS: RecognizedAsset[] = [
 ]
 
 export const ENRAPTURABLE_ASSETS: RecognizedAsset[] = [
+    {
+      address: '0x0a54845ac3743c96e582e03f26c3636ea9c00c8a'.toLowerCase(),
+      id: ['1', '2'],
+      type: RecognizedAssetType.TEMPORARY_TICKET,
+      chainId: ChainId.MOONRIVER,
+      name: 'Bonobo & kings game pass',
+      gamepass: true,
+      expiration: 1648418400
+    } /* embassy NFTs */
   /*
    {
       address: '0x6E9F41ec2a43ECAe0Ada29587D4D40a3e83e4bEB'.toLowerCase(),

@@ -19,6 +19,7 @@ import { PlayerAchievementEntity } from '../src/playerachievement/playerachievem
 import { PlayerScoreEntity } from '../src/playerscore/playerscore.entity'
 import { GganbuEntity } from '../src/gganbu/gganbu.entity'
 import { SnaplogEntity } from '../src/snaplog/snaplog.entity'
+import { RecognizedAssetType } from '../src/config/constants'
 
 config()
 
@@ -32,7 +33,8 @@ const list = [
 ]
 
 const gameId = 'carnage-2022-02-20'
-const targetTime = '2700001'
+const targetTime = '2700000'
+const msamasOnly = true
 
 async function main() {
     let connection: Connection
@@ -57,49 +59,61 @@ async function main() {
         connection = await connection.connect()
     }
 
-    // check user valid
-    // get playtime if any
-    // yes playtime, make sure it has enough
-    // no playtime, add new entry
+        const allUsers = await connection.manager.getRepository(UserEntity).find({})
+        console.log(`Communism:: ${allUsers.length} users found`)
 
+        let counter: { [key: string]: number } = {}
+        let users: { [key: string]: {exists: boolean, eligible: boolean  } } = {}
+        let allDistinct = 0
+        let gganbuDistinct = 0
 
-    for (let i = 0; i < list.length; i++) {
-        const user = await connection.manager.getRepository(UserEntity).findOne({ userName: list[i] })
+        for (let i = 0; i < allUsers.length; i++) {
+            const user = allUsers[i]
+            
+            const statId = PlaySessionStatService.calculateId({ uuid: user.uuid, gameId })
+            const playStats = await connection.manager.getRepository(PlaySessionStatEntity).findOne({ where: { id: statId } })
 
-        console.log(user)
-        if (!user) {
-            console.error(`Non existant user: ${list[i]}`)
-            continue
+            console.log(`Communism:: ${user.uuid} played ${playStats?.timePlayed}`)
+
+            const tPlayed = playStats?.timePlayed ? Number.parseFloat(playStats?.timePlayed) : 0
+
+            let playedEnough = false
+            if (tPlayed >= Number.parseInt(targetTime)) {
+                playedEnough = true
+            } else {
+                console.log(`Communism:: ${user.uuid} not eligible for gganbu`)
+            }
+
+            if (!users[user.uuid]) {
+                allDistinct += 1
+                const hasMoonsama = !!(await connection.manager.getRepository(AssetEntity).findOne({recognizedAssetType: RecognizedAssetType.MOONSAMA, owner: {uuid: user.uuid}, pendingIn: false}))
+                users[user.uuid] = {
+                    exists: true,
+                    eligible: false
+                }
+                
+                if (
+                    playedEnough &&
+                    (
+                        (msamasOnly && hasMoonsama)
+                        || !msamasOnly
+                    )
+                ) {
+                    users[user.uuid].eligible = true
+                    gganbuDistinct += 1
+                }
+            }
         }
 
-        const statId = PlaySessionStatService.calculateId({ uuid: user.uuid, gameId })
-        const playSessionStat = await connection.manager.getRepository(PlaySessionStatEntity).findOne({ where: { id: statId } })
-
-        if (!playSessionStat) {
-            const ptI = connection.manager.create<PlaySessionStatEntity>(PlaySessionStatEntity, {
-                id: statId,
-                timePlayed: targetTime
-            })
-            const pt = await connection.manager.save<PlaySessionStatEntity>(ptI)
-
-
-            const game = await connection.manager.getRepository(GameEntity).findOne({ where: { id: gameId } })
-
-            const ps = connection.manager.create<PlaySessionEntity>(PlaySessionEntity, {
-                player: user,
-                identifier: gameId,
-                startedAt: Date.now().toString(),
-                endedAt: (Date.now() + 2700000).toString(),
-                stat: pt,
-                game
-            })
-            await connection.manager.save<PlaySessionEntity>(ps)
-        } else {
-            await connection.manager.getRepository(PlaySessionStatEntity).update({ id: playSessionStat.id }, { timePlayed: targetTime })
-        }
-    }
+        console.log(gganbuDistinct)
     await connection.close()
 }
 
 
 main()
+
+
+
+
+
+
