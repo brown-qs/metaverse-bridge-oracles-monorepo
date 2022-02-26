@@ -33,5 +33,12 @@ export const RECOGNIZED_ASSETS: {[key: string]: RecognizedAsset} = {
     type: RecognizedAssetType.TICKET,
     chainId: ChainId.MOONRIVER,
     name: 'VIP ticket'
+  },
+  '0x0a54845ac3743c96e582e03f26c3636ea9c00c8a': {
+    address: '0x0a54845ac3743c96e582e03f26c3636ea9c00c8a',
+    id: undefined,
+    type: RecognizedAssetType.TEMPORARY_TICKET,
+    chainId: ChainId.MOONRIVER,
+    name: 'Temporary ticket'
   }
 }
