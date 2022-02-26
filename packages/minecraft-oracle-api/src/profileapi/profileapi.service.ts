@@ -5,7 +5,7 @@ import { ProfileDto } from './dtos/profile.dto';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { AssetService } from '../asset/asset.service';
 import { UserEntity } from '../user/user.entity';
-import { RecognizedAsset, RecognizedAssetType } from '../config/constants';
+import { RecognizedAsset, RecognizedAssetType, EligibleToPlayReason } from '../config/constants';
 import { ProviderToken } from '../provider/token';
 import { AssetDto, TextureDto, ThingsDto } from './dtos/things.dto';
 import { GameService } from '../game/game.service';
@@ -48,7 +48,11 @@ export class ProfileApiService {
                 assetId: snapshot.material.assetId,
                 name: snapshot.material.name,
                 exportable: false,
-                summonable: true
+                summonable: true,
+                recognizedAssetType: '',
+                enraptured: false,
+                exportChainName: 'Moonriver',
+                exportAddress: user.lastUsedAddress,
             }
         })
 
@@ -71,7 +75,11 @@ export class ProfileApiService {
                     name: recongizedEnraptureAsset.name,
                     exportable: !asset.enraptured,
                     hash: asset.hash,
-                    summonable: false
+                    summonable: false,
+                    recognizedAssetType: recongizedEnraptureAsset.type.valueOf(),
+                    enraptured: asset.enraptured,
+                    exportChainName: 'Moonriver',
+                    exportAddress: user.lastUsedAddress,
                 })
                 return
             }
@@ -85,7 +93,11 @@ export class ProfileApiService {
                     name: recongizedEnraptureAsset.name,
                     exportable: !asset.enraptured,
                     hash: asset.hash,
-                    summonable: false
+                    summonable: false,
+                    recognizedAssetType: recongizedEnraptureAsset.type.valueOf(),
+                    enraptured: asset.enraptured,
+                    exportChainName: 'Moonriver',
+                    exportAddress: user.lastUsedAddress,
                 })
                 return
             }
@@ -101,7 +113,11 @@ export class ProfileApiService {
                     name: recongizedImportAsset.name,
                     exportable: !asset.enraptured,
                     hash: asset.hash,
-                    summonable: false
+                    summonable: false,
+                    recognizedAssetType: recongizedEnraptureAsset.type.valueOf(),
+                    enraptured: asset.enraptured,
+                    exportChainName: 'Moonriver',
+                    exportAddress: user.lastUsedAddress,
                 })
                 return
             }
@@ -127,7 +143,14 @@ export class ProfileApiService {
         }
     }
 
-    public userProfile(user: UserEntity): ProfileDto {
+    async userProfile(user: UserEntity): Promise<ProfileDto> {
+        let allowedToPlayReason: EligibleToPlayReason = EligibleToPlayReason.NONE;
+        if (user.allowedToPlay) {
+            const userAssets = await this.assetService.findMany({ where: { owner: user.uuid, pendingIn: false } })
+            if (userAssets.find(asset => asset.recognizedAssetType == RecognizedAssetType.MOONSAMA)) allowedToPlayReason = EligibleToPlayReason.MOONSAMA;
+            else if (userAssets.find(asset => asset.recognizedAssetType == RecognizedAssetType.TICKET)) allowedToPlayReason = EligibleToPlayReason.TICKET;
+            else if (userAssets.find(asset => asset.recognizedAssetType == RecognizedAssetType.TEMPORARY_TICKET)) allowedToPlayReason = EligibleToPlayReason.TEMPORARY_TICKET;
+        }
         return {
             uuid: user.uuid,
             hasGame: user.hasGame,
@@ -138,7 +161,8 @@ export class ProfileApiService {
             preferredServer: user.preferredServer,
             numGamePassAsset: user.numGamePassAsset,
             vip: user.vip ?? false,
-            blacklisted: user.blacklisted
+            blacklisted: user.blacklisted,
+            allowedToPlayReason
         }
     }
 

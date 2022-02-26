@@ -15,7 +15,7 @@ import { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 import { useProfile } from 'hooks/multiverse/useProfile';
 import { useOnChainItems } from 'hooks/multiverse/useOnChainItems';
 import { InGameTexture, useInGameItems } from 'hooks/multiverse/useInGameItems';
-import { useAccountDialog, useActiveWeb3React, useImportDialog } from 'hooks';
+import { useAccountDialog, useActiveWeb3React, useImportDialog, useEnraptureDialog } from 'hooks';
 import { useExportDialog } from 'hooks/useExportDialog/useExportDialog';
 import { useSummonDialog } from 'hooks/useSummonDialog/useSummonDialog';
 import { stringToStringAssetType } from 'utils/subgraph';
@@ -35,6 +35,11 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
     const { account, chainId } = useActiveWeb3React()
     const profile = useProfile();
+    const playAllowedReasonTexts: any = {
+        'MSAMA': 'You are eligible to play because you imported a moonsama.',
+        'TICKET': 'You are eligible to play because you imported a XYZ NFT.',
+        'TEMPORARY_TICKET': 'You are eligible to play because you were given permanent access.',
+    }
     const { setAccountDialogOpen } = useAccountDialog();
 
     const [fetchtrigger, setFetchtrigger] = useState<string | undefined>(undefined)
@@ -43,6 +48,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
     // Dialogs
     const { setImportDialogOpen, setImportDialogData } = useImportDialog()
+    const { setEnraptureDialogOpen, setEnraptureDialogData } = useEnraptureDialog()
     const { setExportDialogOpen, setExportDialogData } = useExportDialog()
     const { setSummonDialogOpen, setSummonDialogData } = useSummonDialog()
     const { setAssetDialogOpen, setAssetDialogData } = useAssetDialog()
@@ -55,8 +61,9 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const onChainPlot = onChainItems?.['Moonsama Minecraft Plots Season 1'] ?? [];
     const onChainArt = onChainItems?.['Multiverse Art'] ?? [];
     const onChainMoonbrella = onChainItems?.['Moonbrella'] ?? [];
+    const onChainEnrapture = onChainItems?.['Enrapture'] ?? [];
 
-    const onChainImportables = [...onChainGoldenTickets, ...onChainMoonbrella, ...onChainMoonsamas, ...onChainArt, ...onChainPlot]
+    const onChainImportables = [...onChainGoldenTickets, ...onChainMoonbrella, ...onChainMoonsamas, ...onChainArt, ...onChainPlot, ...onChainEnrapture];
 
     console.log('VIP Ticket', onChainGoldenTickets)
     console.log('onChainMoonbrella', onChainMoonbrella)
@@ -88,7 +95,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const assetCounter = countRecognizedAssets(inGameAssets)
     const hasImportedMoonsama = assetCounter.moonsamaNum > 0
     const hasImportedTicket = assetCounter.ticketNum > 0
-
+    console.log({inGameAssets})
     return (
         <Grid className={profileContainer}>
             <Header />
@@ -98,7 +105,11 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                 </div>
                 <div style={{ width: '50%', textAlign: 'right' }}>
                     <span style={{ fontSize: '22px', }}>Welcome back {authData?.userProfile?.userName},</span> <br />
-                    {profile?.allowedToPlay ? (<span style={{ color: '#12753A', fontSize: '16px', fontWeight: 'bold' }}>You are eligible to play!</span>) :
+                    {profile?.allowedToPlay ? (
+                        <Tooltip placement='bottom' title={playAllowedReasonTexts[profile.allowedToPlayReason]}>
+                            <span style={{ color: '#12753A', fontSize: '16px', fontWeight: 'bold' }}>You are eligible to play!</span>
+                        </Tooltip>
+                        ) :
                         (
                             <p style={{ color: '#DB3B21' }}>To be eligible to play, bridge a VIP ticket/Moonsama, <br /> or <a href="https://moonsama.com/freshoffers" target="_blank">visit the Marketplace to get one</a></p>)}
                 </div>
@@ -175,12 +186,14 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                 key={`${value?.assetAddress}-${value?.assetId}-${ind}`} //update key
                                                 disablePadding
                                             >
-                                                <ListItemButton>
+                                                <ListItemButton onClick={() => {
+                                                }}>
                                                     <ListItemAvatar>
                                                         {/*<img className={itemImage} src={value?.meta?.image} alt="" />*/}
                                                         <Media uri={value?.meta?.image} className={itemImage} />
                                                     </ListItemAvatar>
                                                     <ListItemText primary={value?.meta?.name ?? `${value.assetAddress} ${value.assetId}`} />
+                                                    {value?.exportable && (
                                                     <Tooltip title={'Your exported asset will go back to the sender address you imported from. Associated skin wil be unavailable.'}>
                                                         <Button
                                                             className={transferButtonSmall}
@@ -206,6 +219,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                             Export to wallet
                                                         </Button>
                                                     </Tooltip>
+                                                    )}
                                                 </ListItemButton>
                                             </ListItem>
                                         );
@@ -274,7 +288,33 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                 </ListItem>
                                             );
                                         })
-                                    ) : (
+                                    ).concat(onChainEnrapture.map((item, ind) => {
+                                        return (
+                                            <ListItem
+                                                key={`${item?.asset?.assetAddress}-${item?.asset?.assetId}-${ind}`} //update key
+                                                disablePadding
+                                            >
+                                                <ListItemButton>
+                                                    <ListItemAvatar>
+                                                        {/*<img className={itemImage} src={item?.meta?.image} alt="" />*/}
+                                                        <Media uri={item?.meta?.image} className={itemImage} />
+                                                    </ListItemAvatar>
+                                                    <ListItemText primary={item?.meta?.name} />
+                                                    <Tooltip title={`Your imported ${item?.meta?.name} will bound to your Minecraft account. It will go back to the sender address when exported.`}>
+                                                        <span>
+                                                            <Button
+                                                                className={transferButtonSmall}
+                                                                onClick={() => {
+                                                                    setEnraptureDialogOpen(true);
+                                                                    setEnraptureDialogData({ asset: item.asset });
+                                                                }}
+                                                            >Enrapture to game</Button>
+                                                        </span>
+                                                    </Tooltip>
+                                                </ListItemButton>
+                                            </ListItem>
+                                        );
+                                    })) : (
                                         <ListItem>
                                             No items found in wallet.
                                         </ListItem>
@@ -285,6 +325,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     </Grid>
                 </Grid>
             </Grid>
+
             <Grid container justifyContent="center" style={{ marginTop: '30px' }} spacing={4}>
                 <Grid container justifyContent="center" style={{ marginTop: '30px' }} spacing={4}>
                     <Grid item md={12} xs={12} justifyContent="center" style={{ textAlign: 'center' }}>

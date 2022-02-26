@@ -108,7 +108,7 @@ export const useStyles = makeStyles((theme) => ({
         lineHeight: '20px',
         alignSelf: 'center',
         height: '25px',
-        width: '140px',
+        width: '240px',
         padding: '2px 6px',
         boxShadow: '3px 0px #133db9, -3px 0px #133db9, 0px 3px #133db9, 0px -3px #133db9, 0px 8px #2979ff, -3px 6px #2a6cda, 3px 6px #2a6cda',
         background: '#133DB9',

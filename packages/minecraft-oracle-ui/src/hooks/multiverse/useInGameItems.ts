@@ -89,7 +89,7 @@ export function useInGameItems(trigger: string | undefined = undefined) {
             })
         );
         let resultSet: ProfileInGameItemsWithStatic = { assets: [], resources: [], textures: []}
-        
+        console.log({staticDatas, rawData})
         if (rawData.assets.length > 0) {
             staticDatas.slice(0, rawData.assets.length).map((sd, i) => {
                 resultSet.assets.push({

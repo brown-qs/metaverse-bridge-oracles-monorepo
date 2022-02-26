@@ -32,6 +32,22 @@ export class AssetDto {
     @IsBoolean()
     summonable: boolean
 
+    @ApiProperty({ description: 'Whether the asset can be summoned as a token.'})
+    @IsString()
+    recognizedAssetType: string
+
+    @ApiProperty({ description: 'Whether the asset can be summoned as a token.'})
+    @IsBoolean()
+    enraptured: boolean
+
+    @ApiProperty({ description: 'Whether the asset can be summoned as a token.'})
+    @IsString()
+    exportChainName: string
+
+    @ApiProperty({ description: 'Whether the asset can be summoned as a token.'})
+    @IsString()
+    exportAddress: string
+
     @ApiProperty({ description: 'Hash of the entry. Needed for exports.'})
     @IsString()
     hash?: string

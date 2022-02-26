@@ -3,6 +3,7 @@ import Theme from '../theme/Theme';
 import { ThemeOptionsContextController } from '../context/themeOptions/themeOptionsContextController/ThemeOptionsContextController';
 import { AuthContextController } from '../context/auth/AuthContextController/AuthContextController';
 import { ImportDialogContextController } from '../context/importDialog/importDialogContextController/ImportDialogContextController';
+import { EnraptureDialogContextController } from '../context/enraptureDialog/enraptureDialogContextController/enraptureDialogContextController';
 import { AccountDialogContextController } from '../context/accountDialog/accountDialogContextController/AccountDialogContextController';
 import { AppProvidersProps } from './AppProviders.types';
 import { getLibrary } from '../connectors';
@@ -38,15 +39,17 @@ export const AppProviders = ({ children }: AppProvidersProps) => (
               <AccountDialogContextController>
                 <SummonDialogContextController>
                   <ImportDialogContextController>
-                    <ExportDialogContextController>
-                      <TransferDialogContextController>
-                        <AssetDialogContextController>
-                          <Router>
-                            <Theme>{children}</Theme>
-                          </Router>
-                        </AssetDialogContextController>
-                      </TransferDialogContextController>
-                    </ExportDialogContextController>
+                    <EnraptureDialogContextController>
+                      <ExportDialogContextController>
+                        <TransferDialogContextController>
+                          <AssetDialogContextController>
+                            <Router>
+                              <Theme>{children}</Theme>
+                            </Router>
+                          </AssetDialogContextController>
+                        </TransferDialogContextController>
+                      </ExportDialogContextController>
+                    </EnraptureDialogContextController>
                   </ImportDialogContextController>
                 </SummonDialogContextController>
               </AccountDialogContextController>
