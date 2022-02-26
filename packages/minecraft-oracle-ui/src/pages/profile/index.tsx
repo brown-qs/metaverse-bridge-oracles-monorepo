@@ -358,7 +358,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                         {item.enrapturable && <Tooltip title={`Your ${item?.meta?.name} will be enraptured (burned) and bound to your Minecraft account forever.`}>
                                                             <span>
                                                                 <Button
-                                                                    className={transferButtonMid}
+                                                                    className={transferButtonSmall}
                                                                     onClick={() => {
                                                                         setEnraptureDialogOpen(true);
                                                                         setEnraptureDialogData({ asset: item.asset });
