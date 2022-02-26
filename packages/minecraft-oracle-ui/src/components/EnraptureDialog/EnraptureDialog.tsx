@@ -1,91 +1,39 @@
-import DateFnsUtils from '@date-io/date-fns';
-import { BigNumber } from '@ethersproject/bignumber';
-import { parseEther } from '@ethersproject/units';
-import { yupResolver } from '@hookform/resolvers/yup';
 import {
   Box,
-  Collapse,
-  FormControl,
   Grid,
-  IconButton,
-  OutlinedInput,
-  Switch,
 } from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Divider from '@material-ui/core/Divider';
-import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import {
-  KeyboardDatePicker,
-  MuiPickersUtilsProvider,
-} from '@material-ui/pickers';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 import { AddressDisplayComponent } from 'components/form/AddressDisplayComponent';
-import { CoinQuantityField, UNIT } from 'components/form/CoinQuantityField';
 import 'date-fns';
 import { useActiveWeb3React, useEnraptureDialog } from 'hooks';
 import {
   ApprovalState,
   useApproveCallback,
 } from 'hooks/useApproveCallback/useApproveCallback';
-import { OrderType, StringAssetType } from 'utils/subgraph';
-import { AddressZero } from '@ethersproject/constants';
 import {
-  ChainId,
-  PROTOCOL_FEE_BPS,
-  FRACTION_TO_BPS,
-  STRATEGY_SIMPLE,
+  ChainId
 } from '../../constants';
 import { useBalances } from 'hooks/useBalances/useBalances';
-import { useFees } from 'hooks/useFees/useFees';
-import {
-  CreateOrderCallbackState,
-  useCreateOrderCallback,
-} from 'hooks/marketplace/useCreateOrderCallback';
-import {
-  Asset,
-  AssetType,
-  calculateOrderHash,
-  CreateOrderData,
-  stringAssetTypeToAssetType,
-} from 'utils/marketplace';
-import { getExplorerLink, getRandomInt, TEN_POW_18 } from 'utils';
+import { getExplorerLink } from 'utils';
 import { SuccessIcon } from 'icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Dialog } from 'ui';
-import * as yup from 'yup';
 import { appStyles } from '../../app.styles';
 import { useStyles } from './EnraptureDialog.styles';
-import { Fraction } from 'utils/Fraction';
 import { useIsTransactionPending, useSubmittedImportTx } from 'state/transactions/hooks';
 // import { CreateImportAssetCallbackState, useImportAssetCallback } from 'hooks/multiverse/useImportAsset';
 import { useEnraptureConfirmCallback } from 'hooks/multiverse/useConfirm';
 import { EnraptureAssetCallbackState, useEnraptureAssetCallback } from 'hooks/multiverse/useEnraptureAsset';
 
-const makeBidFormDataSchema = (): yup.ObjectSchema<BidFormData> =>
-  yup
-    .object({
-      quantity: yup.string().notRequired(),
-      pricePerUnit: yup.string().notRequired(),
-      allowPartialFills: yup.boolean(),
-    })
-    .required();
-
-// type TransferFormData = yup.TypeOf<
-//   ReturnType<typeof makeTransferFormDataSchema>
-// >;
-type BidFormData = {
-  quantity?: string;
-  pricePerUnit?: string;
-};
 
 export const EnraptureDialog = () => {
   const [finalTxSubmitted, setFinalTxSubmitted] = useState<boolean>(false);
   const { isEnraptureDialogOpen, enraptureDialogData, setEnraptureDialogData, setEnraptureDialogOpen } = useEnraptureDialog();
   const [importParamsLoaded, setImportParamsLoaded] = useState<boolean>(false);
   const [approvalSubmitted, setApprovalSubmitted] = useState<boolean>(false);
-  const [importConfirmed, setImportConfirmed] = useState<boolean>(false);
   const [enraptureConfirmed, setEnraptureConfirmed] = useState<boolean>(false);
   const confirmCb = useEnraptureConfirmCallback();
 
@@ -101,10 +49,6 @@ export const EnraptureDialog = () => {
     formLabel,
     formValue,
     formValueTokenDetails,
-    formValueGive,
-    formValueGet,
-    spaceOnLeft,
-    fieldError,
     formButton,
     expand,
     expandOpen,
@@ -129,7 +73,6 @@ export const EnraptureDialog = () => {
     setEnraptureDialogOpen(false);
     setImportParamsLoaded(false);
     setFinalTxSubmitted(false);
-    setImportConfirmed(false);
     setApprovalSubmitted(false)
     setEnraptureConfirmed(false)
   };
@@ -165,11 +108,11 @@ export const EnraptureDialog = () => {
     },
   ])?.[0];
 
-  const importCallbackParams = useEnraptureAssetCallback(importObject)
+  const enraptureCallbackParams = useEnraptureAssetCallback(importObject)
   
   
-  if (!!importCallbackParams.error) {
-    callbackError = importCallbackParams.error
+  if (!!enraptureCallbackParams.error) {
+    callbackError = enraptureCallbackParams.error
   }
 
   const hasEnough = bal?.gte(amount);
@@ -181,20 +124,19 @@ export const EnraptureDialog = () => {
     amountToApprove: amount,
   });
 
-  const { importSubmitted, importTx } = useSubmittedImportTx(importCallbackParams?.hash);
+  const { importSubmitted, importTx } = useSubmittedImportTx(enraptureCallbackParams?.hash);
   const isPending = useIsTransactionPending(importTx?.hash)
 
-  console.log('submission', { importSubmitted, importTx, finalTxSubmitted, importConfirmed, hash: importCallbackParams?.hash })
-  
+  console.log('enrapture submission', { importSubmitted, importTx, finalTxSubmitted, enraptureConfirmed, hash: enraptureCallbackParams?.hash })
   
   useEffect(() => {
     const x = async () => {
-      const confirmed = await confirmCb(importCallbackParams?.hash)
+      const confirmed = await confirmCb(enraptureCallbackParams?.hash)
       console.log('effect hook', confirmed)
-      setImportConfirmed(confirmed)
+      setEnraptureConfirmed(confirmed)
     }
     x()
-  }, [importCallbackParams?.hash, finalTxSubmitted, importSubmitted, isPending])
+  }, [enraptureCallbackParams?.hash, finalTxSubmitted, importSubmitted, isPending])
 
   useEffect(() => {
     if (approvalState === ApprovalState.PENDING) {
@@ -224,13 +166,13 @@ export const EnraptureDialog = () => {
       );
     }
 
-    if (importConfirmed) {
+    if (enraptureConfirmed) {
       return (
         <div className={successContainer}>
           <SuccessIcon className={successIcon} />
           <Typography>{`Import to metaverse confirmed!`}</Typography>
           <Typography color="textSecondary">
-            {`Entry hash: ${importCallbackParams?.hash}`}
+            {`Entry hash: ${enraptureCallbackParams?.hash}`}
           </Typography>
 
           {importTx && (
@@ -297,6 +239,7 @@ export const EnraptureDialog = () => {
     }
     if (!enraptureConfirmed) {
       return (
+        <Grid container spacing={1} justifyContent="center">
         <div className={successContainer}>
           <Typography>{`NFT is going to be burned and bound to the MC account forever`}</Typography>
 
@@ -311,6 +254,7 @@ export const EnraptureDialog = () => {
             Understood
           </Button>
         </div>
+        </Grid>
       );
     }
 
@@ -364,14 +308,14 @@ export const EnraptureDialog = () => {
         ) : (
           <Button
             onClick={() => {
-              importCallbackParams.callback?.();
+              enraptureCallbackParams.callback?.();
               setFinalTxSubmitted(true);
             }}
             className={formButton}
             variant="contained"
             color="primary"
             disabled={
-              importCallbackParams.state !== EnraptureAssetCallbackState.VALID || !hasEnough
+              enraptureCallbackParams.state !== EnraptureAssetCallbackState.VALID || !hasEnough
             }
           >
             Enrapture to metaverse
