@@ -314,7 +314,6 @@ export class OracleApiService {
             return true
         }
 
-        console.log(hash)
         const mAsset: MetaAsset = await this.metaverse.getImportedMetaAsset(hash)
 
         if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress.toLowerCase() !== assetEntry.assetAddress.toLowerCase()) {
@@ -337,7 +336,7 @@ export class OracleApiService {
                 texture
             })
         } else {
-            this.logger.warn('ImportConfirm: Moonsama but no texture found!!!', this.context)
+            this.logger.warn('ImportConfirm: no texture found for asset!!!', this.context)
         }
 
         if (!!recognizedAsset) {
@@ -404,10 +403,13 @@ export class OracleApiService {
     }
 
     public async userEnraptureConfirm(user: UserEntity, { hash }: { hash: string }, asset?: AssetEntity): Promise<boolean> {
+
+        this.logger.log(`EnraptureConfirm: started ${user.uuid}: ${hash}`, this.context)
+
         const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash })
 
         if (!assetEntry || assetEntry.hash !== hash || assetEntry.enraptured !== true) {
-            this.logger.error(`EnraptureConfirm: invalid conditions. exists: ${!!assetEntry}, hash: ${hash}, enraptured: ${assetEntry.enraptured}, pendingOut: ${assetEntry.pendingOut}, pendingIn: ${assetEntry.pendingIn}`)
+            this.logger.error(`EnraptureConfirm: invalid conditions. exists: ${!!assetEntry}, hash: ${hash}, enraptured: ${assetEntry?.enraptured}, pendingOut: ${assetEntry?.pendingOut}, pendingIn: ${assetEntry?.pendingIn}`)
             throw new UnprocessableEntityException('Invalid enrapture confirm conditions')
         }
 
@@ -418,14 +420,77 @@ export class OracleApiService {
         const mAsset: MetaAsset = await this.metaverse.getEnrapturedMetaAsset(hash)
 
         if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress.toLowerCase() !== assetEntry.assetAddress.toLowerCase()) {
-            this.logger.error(`EnraptureConfirm: on-chaind data didn't match for hash: ${hash}`)
+            this.logger.error(`EnraptureConfirm: on-chaind data didn't match for hash: ${hash}`, null, this.context)
             throw new UnprocessableEntityException(`On-chain data didn't match`)
         }
 
-        const finalentry = await this.assetService.create({ ...assetEntry, pendingIn: false })
+        const recognizedAsset = findRecognizedAsset(this.enrapturableAssets, assetEntry)
+
+        // assign skin if asset unlocks one
+        const texture = await this.textureService.findOne({ assetAddress: assetEntry.assetAddress.toLowerCase(), assetId: assetEntry.assetId })
+        if (!!texture) {
+            this.logger.log('EnraptureConfirm: texture found', this.context)
+            await this.skinService.create({
+                id: SkinEntity.toId(user.uuid, texture.assetAddress, texture.assetId),
+                owner: user,
+                equipped: false,
+                texture
+            })
+        } else {
+            this.logger.warn('EnraptureConfirm: no texture found for asset!!!', this.context)
+        }
+
+        if (!!recognizedAsset) {
+            if (recognizedAsset.gamepass) {
+                user.allowedToPlay = true
+                user.role = user.role?.valueOf() === UserRole.NONE.valueOf() ? UserRole.PLAYER : user.role
+                user.numGamePassAsset = (user.numGamePassAsset ?? 0) + 1
+
+                // this means user had no skins/in game eligible assets imported before
+                if (user.numGamePassAsset === 1) {
+                    try {
+                        await this.skinService.createMultiple([
+                            {
+                                id: SkinEntity.toId(user.uuid, '0x0', '0'),
+                                owner: user,
+                                equipped: true,
+                                texture: await this.textureService.findOne({ assetAddress: '0x0', assetId: '0', assetType: StringAssetType.NONE })
+                            },
+                            {
+                                id: SkinEntity.toId(user.uuid, '0x0', '1'),
+                                owner: user,
+                                equipped: false,
+                                texture: await this.textureService.findOne({ assetAddress: '0x0', assetId: '1', assetType: StringAssetType.NONE })
+                            }
+                        ])
+                    } catch (error) {
+                        this.logger.warn(`ImportConfirm: error trying to set default skins for user ${user.uuid}`, this.context)
+                    }
+                }
+
+                await this.userService.update(user.uuid, { allowedToPlay: user.allowedToPlay, role: user.role, numGamePassAsset: user.numGamePassAsset })
+            }
+        }
+
+        assetEntry.recognizedAssetType = recognizedAsset?.type ?? RecognizedAssetType.NONE;
+        const finalentry = await this.assetService.create({ ...assetEntry, pendingIn: false });
+
+        (async () => {
+            let metadata = null
+            let world = null
+            try {
+                metadata = await this.nftApiService.getNFT('1285', assetEntry.assetType, assetEntry.assetAddress, assetEntry.assetId) as any ?? null
+                world = metadata?.tokenURI?.plot?.world ?? null
+            } catch {
+                this.logger.error(`ImportConfirm: couldn't fetch asset metadata: ${hash}`, undefined, this.context)
+            }
+            if (!!metadata) {
+                await this.assetService.update({ hash: assetEntry.hash }, { metadata, world })
+            }
+        })()
 
         if (!finalentry) {
-            this.logger.error(`EnraptureConfirm: couldn't change pending flag: ${hash}`)
+            this.logger.error(`EnraptureConfirm: couldn't change pending flag: ${hash}`, undefined, this.context)
             throw new UnprocessableEntityException(`Database error`)
         }
 
@@ -433,7 +498,7 @@ export class OracleApiService {
         if (!user.usedAddresses.includes(user.lastUsedAddress)) {
             user.usedAddresses.push(user.lastUsedAddress)
         }
-        await this.userService.update(user.uuid, { usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress })
+        await this.userService.update(user.uuid, { usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress, numGamePassAsset: user.numGamePassAsset })
 
         return true
     }

@@ -1,5 +1,5 @@
 import { MaterialEntity } from '../src/material/material.entity'
-import { Connection, createConnection, getConnection } from 'typeorm'
+import { Connection, createConnection, getConnection, In } from 'typeorm'
 
 import { config } from 'dotenv'
 import { SnapshotItemEntity } from '../src/snapshot/snapshotItem.entity'
@@ -22,17 +22,8 @@ import { SnaplogEntity } from '../src/snaplog/snaplog.entity'
 
 config()
 
-const list = [
-    'SnakesNTornadoes',
-    'RoxQueenUnicorn',
-    'BirchShield',
-    'NagyKiki',
-    'OldSpiceVendor',
-    'Kyilkhor',
-]
 
 const gameId = 'carnage-2022-02-20'
-const targetTime = '2700001'
 
 async function main() {
     let connection: Connection
@@ -57,47 +48,30 @@ async function main() {
         connection = await connection.connect()
     }
 
-    // check user valid
-    // get playtime if any
-    // yes playtime, make sure it has enough
-    // no playtime, add new entry
+    const snaps = await connection.manager.getRepository(SnapshotItemEntity).find({where: {game: {id: gameId}}, relations: ['material']})
 
 
-    for (let i = 0; i < list.length; i++) {
-        const user = await connection.manager.getRepository(UserEntity).findOne({ userName: list[i] })
-
-        console.log(user)
-        if (!user) {
-            console.error(`Non existant user: ${list[i]}`)
-            continue
-        }
-
-        const statId = PlaySessionStatService.calculateId({ uuid: user.uuid, gameId })
-        const playSessionStat = await connection.manager.getRepository(PlaySessionStatEntity).findOne({ where: { id: statId } })
-
-        if (!playSessionStat) {
-            const ptI = connection.manager.create<PlaySessionStatEntity>(PlaySessionStatEntity, {
-                id: statId,
-                timePlayed: targetTime
-            })
-            const pt = await connection.manager.save<PlaySessionStatEntity>(ptI)
 
 
-            const game = await connection.manager.getRepository(GameEntity).findOne({ where: { id: gameId } })
+    const stat: {[key: string]: number} = {}
 
-            const ps = connection.manager.create<PlaySessionEntity>(PlaySessionEntity, {
-                player: user,
-                identifier: gameId,
-                startedAt: Date.now().toString(),
-                endedAt: (Date.now() + 2700000).toString(),
-                stat: pt,
-                game
-            })
-            await connection.manager.save<PlaySessionEntity>(ps)
-        } else {
-            await connection.manager.getRepository(PlaySessionStatEntity).update({ id: playSessionStat.id }, { timePlayed: targetTime })
-        }
+    //console.log(gganbus)
+
+    //const g = await connection.manager.getRepository(GameEntity).findOne({where: {id: 'carnage-2022-02-20'}, relations: ['snapshots']})
+
+    for (let i=0; i< snaps.length; i++) {
+        //await connection.manager.getRepository(SnapshotItemEntity).save({...snap, game: g})
+        const snap = snaps[i]
+
+        if (!stat[snap.material.name]) {
+            stat[snap.material.name] = Number.parseFloat(snap.amount)
+            return
+        } 
+
+        stat[snap.material.name] += Number.parseFloat(snap.amount)
     }
+
+    console.log(stat)
     await connection.close()
 }
 
