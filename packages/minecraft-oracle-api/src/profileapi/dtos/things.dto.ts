@@ -24,27 +24,27 @@ export class AssetDto {
     @IsString()
     amount: string
 
-    @ApiProperty({ description: 'Whether the asset can be exported as a token.'})
+    @ApiProperty({ description: 'Whether the asset can be exported as a token'})
     @IsBoolean()
     exportable: boolean
 
-    @ApiProperty({ description: 'Whether the asset can be summoned as a token.'})
+    @ApiProperty({ description: 'Whether the asset can be summoned as a token'})
     @IsBoolean()
     summonable: boolean
 
-    @ApiProperty({ description: 'Whether the asset can be summoned as a token.'})
+    @ApiProperty({ description: 'Recognized Asset Type, MSAMA | TICKET | TEST | PLOT | OFFHAND | WEAPON_SKIN | TEMPORARY_TICKET'})
     @IsString()
     recognizedAssetType: string
 
-    @ApiProperty({ description: 'Whether the asset can be summoned as a token.'})
+    @ApiProperty({ description: 'Whether the asset is enraptured'})
     @IsBoolean()
     enraptured: boolean
 
-    @ApiProperty({ description: 'Whether the asset can be summoned as a token.'})
+    @ApiProperty({ description: 'Name of Chain where the asset can be exported to'})
     @IsString()
     exportChainName: string
 
-    @ApiProperty({ description: 'Whether the asset can be summoned as a token.'})
+    @ApiProperty({ description: 'Address where the asset can be exported to'})
     @IsString()
     exportAddress: string
 

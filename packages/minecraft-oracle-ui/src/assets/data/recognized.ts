@@ -5,6 +5,10 @@ export enum RecognizedAssetType {
   MOONSAMA = 'MSAMA',
   TICKET = 'TICKET',
   TEST = 'TEST',
+  PLOT='PLOT',
+  OFFHAND='OFFHAND',
+  WEAPON_SKIN='WEAPON_SKIN',
+  TEMPORARY_TICKET='TEMPORARY_TICKET'
 }
 
 export type RecognizedAsset = {
