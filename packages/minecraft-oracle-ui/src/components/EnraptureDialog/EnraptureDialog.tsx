@@ -23,18 +23,19 @@ import { useEffect, useState } from 'react';
 import { Button, Dialog } from 'ui';
 import { appStyles } from '../../app.styles';
 import { useStyles } from './EnraptureDialog.styles';
-import { useIsTransactionPending, useSubmittedImportTx } from 'state/transactions/hooks';
-// import { CreateImportAssetCallbackState, useImportAssetCallback } from 'hooks/multiverse/useImportAsset';
+import { useIsTransactionPending, useSubmittedEnraptureTx, useSubmittedImportTx } from 'state/transactions/hooks';
 import { useEnraptureConfirmCallback } from 'hooks/multiverse/useConfirm';
 import { EnraptureAssetCallbackState, useEnraptureAssetCallback } from 'hooks/multiverse/useEnraptureAsset';
+import { stringAssetTypeToAssetType } from 'utils/marketplace';
 
 
 export const EnraptureDialog = () => {
   const [finalTxSubmitted, setFinalTxSubmitted] = useState<boolean>(false);
-  const { isEnraptureDialogOpen, enraptureDialogData, setEnraptureDialogData, setEnraptureDialogOpen } = useEnraptureDialog();
-  const [importParamsLoaded, setImportParamsLoaded] = useState<boolean>(false);
+  const { isEnraptureDialogOpen, enraptureDialogData, setEnraptureDialogOpen } = useEnraptureDialog();
+  const [enraptureParamsLoaded, setEnraptureParamsLoaded] = useState<boolean>(false);
   const [approvalSubmitted, setApprovalSubmitted] = useState<boolean>(false);
   const [enraptureConfirmed, setEnraptureConfirmed] = useState<boolean>(false);
+  const [userUnderstood, setUserUnderstood] = useState<boolean>(false);
   const confirmCb = useEnraptureConfirmCallback();
 
   const {
@@ -54,8 +55,6 @@ export const EnraptureDialog = () => {
     expandOpen,
   } = appStyles();
 
-  const [UIAdvancedSectionExpanded, setExpanded] = useState(false);
-
   const {
     dialogContainer,
     loadingContainer,
@@ -71,14 +70,15 @@ export const EnraptureDialog = () => {
       return
     }
     setEnraptureDialogOpen(false);
-    setImportParamsLoaded(false);
+    setEnraptureParamsLoaded(false);
     setFinalTxSubmitted(false);
-    setApprovalSubmitted(false)
     setEnraptureConfirmed(false)
+    setApprovalSubmitted(false)
+    setUserUnderstood(false)
   };
 
-  if (!importParamsLoaded && !!enraptureDialogData?.asset) {
-    setImportParamsLoaded(true);
+  if (!enraptureParamsLoaded && !!enraptureDialogData?.asset) {
+    setEnraptureParamsLoaded(true);
   }
 
   let callbackError: string | undefined;
@@ -89,14 +89,18 @@ export const EnraptureDialog = () => {
   const assetType = enraptureDialogData?.asset?.assetType;
 
   const amount = enraptureDialogData?.amount ?? '1'
+  const owner = enraptureDialogData?.owner ?? account
+  const beneficiary = enraptureDialogData?.beneficiary ?? account
 
-  const importObject = {
+  const enraptureObject = {
     asset: {
       assetAddress,
       assetId,
-      assetType,
+      assetType: stringAssetTypeToAssetType(assetType),
     },
     amount,
+    owner,
+    beneficiary
   }
 
   const bal = useBalances([
@@ -108,7 +112,7 @@ export const EnraptureDialog = () => {
     },
   ])?.[0];
 
-  const enraptureCallbackParams = useEnraptureAssetCallback(importObject)
+  const enraptureCallbackParams = useEnraptureAssetCallback(enraptureObject)
   
   
   if (!!enraptureCallbackParams.error) {
@@ -124,10 +128,10 @@ export const EnraptureDialog = () => {
     amountToApprove: amount,
   });
 
-  const { importSubmitted, importTx } = useSubmittedImportTx(enraptureCallbackParams?.hash);
-  const isPending = useIsTransactionPending(importTx?.hash)
+  const { enraptureSubmitted, enraptureTx } = useSubmittedEnraptureTx(enraptureCallbackParams?.hash);
+    const isPending = useIsTransactionPending(enraptureTx?.hash)
 
-  console.log('enrapture submission', { importSubmitted, importTx, finalTxSubmitted, enraptureConfirmed, hash: enraptureCallbackParams?.hash })
+    console.log('enrapture submission', { enraptureSubmitted, enraptureTx, finalTxSubmitted, enraptureConfirmed, hash: enraptureCallbackParams?.hash })
   
   useEffect(() => {
     const x = async () => {
@@ -136,7 +140,7 @@ export const EnraptureDialog = () => {
       setEnraptureConfirmed(confirmed)
     }
     x()
-  }, [enraptureCallbackParams?.hash, finalTxSubmitted, importSubmitted, isPending])
+  }, [enraptureCallbackParams?.hash, finalTxSubmitted, enraptureSubmitted, isPending])
 
   useEffect(() => {
     if (approvalState === ApprovalState.PENDING) {
@@ -152,7 +156,7 @@ export const EnraptureDialog = () => {
 
   const renderBody = () => {
 
-    if (!importParamsLoaded) {
+    if (!enraptureParamsLoaded) {
       return (
         <div className={loadingContainer}>
           <CircularProgress />
@@ -175,15 +179,15 @@ export const EnraptureDialog = () => {
             {`Entry hash: ${enraptureCallbackParams?.hash}`}
           </Typography>
 
-          {importTx && (
+          {enraptureTx && (
             <ExternalLink
               href={getExplorerLink(
                 chainId ?? ChainId.MOONRIVER,
-                importTx.hash,
+                enraptureTx.hash,
                 'transaction'
               )}
             >
-              {importTx.hash}
+              {enraptureTx.hash}
             </ExternalLink>
           )}
           <Button
@@ -214,30 +218,30 @@ export const EnraptureDialog = () => {
       );
     }
     
-    if (finalTxSubmitted && importSubmitted && !isPending) {
+    if (finalTxSubmitted && enraptureSubmitted && !isPending) {
       return (
         <div className={successContainer}>
           <SuccessIcon className={successIcon} />
           <Typography>{`Transaction success!`}</Typography>
           <Typography color="textSecondary" variant="h5">
-            Confirming import with the metaverse oracle...
+            Confirming enrapture with the metaverse oracle...
           </Typography>
 
-          {importTx && (
+          {enraptureTx && (
             <ExternalLink
               href={getExplorerLink(
                 chainId ?? ChainId.MOONRIVER,
-                importTx.hash,
+                enraptureTx.hash,
                 'transaction'
               )}
             >
-              {importTx.hash}
+              {enraptureTx.hash}
             </ExternalLink>
           )}
         </div>
       );
     }
-    if (!enraptureConfirmed) {
+    if (!userUnderstood) {
       return (
         <Grid container spacing={1} justifyContent="center">
         <div className={successContainer}>
@@ -245,7 +249,7 @@ export const EnraptureDialog = () => {
 
           <Button
             onClick={() => {
-              setEnraptureConfirmed(true)
+              setUserUnderstood(true)
             }}
             className={button}
             variant="contained"

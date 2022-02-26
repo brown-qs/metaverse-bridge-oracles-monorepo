@@ -158,7 +158,7 @@ export const ENRAPTURABLE_ASSETS: RecognizedAsset[] = [
       id: ['1', '2'],
       type: RecognizedAssetType.TEMPORARY_TICKET,
       chainId: ChainId.MOONRIVER,
-      name: 'Bonobo & kings game pass',
+      name: 'Bonobos & kings game pass',
       gamepass: true,
       expiration: 1648418400
     } /* embassy NFTs */
