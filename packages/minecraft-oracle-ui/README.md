@@ -3,7 +3,7 @@
 First, create a .env file
 ```bash
 REACT_APP_CHAIN_ID=1285
-REACT_APP_RPC_URL=https://rpc.moonriver.moonbeam.network
+REACT_APP_RPC_URL=https://rpc.api.moonriver.moonbeam.network
 REACT_APP_SUBGRAPH_URL=https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/marketplacev2
 REACT_APP_NFT_SUBGRAPH_URL=https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/nft
 ```
