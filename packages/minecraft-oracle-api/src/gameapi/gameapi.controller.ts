@@ -39,6 +39,7 @@ import { AchievementEntity } from '../achievement/achievement.entity';
 import { GetPlayerAchievementDto, SetPlayerAchievementsDto } from '../playerachievement/dtos/playerachievement.dto';
 import { PlayerAchievementEntity } from '../playerachievement/playerachievement.entity';
 import { UserEntity } from '../user/user.entity';
+import { GameService } from '../game/game.service';
 
 @ApiTags('game')
 @Controller('game')
@@ -52,6 +53,7 @@ export class GameApiController {
         private readonly gameApiService: GameApiService,
         private readonly gameTypeService: GameTypeService,
         private readonly profileService: ProfileApiService,
+        private readonly gameService: GameService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) { 
         this.context = GameApiController.name;
@@ -302,6 +304,26 @@ export class GameApiController {
         return success
     }
 
+    @Get('gametypes')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'fetches game types' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async gameTypes() {
+        const entities = await this.gameTypeService.find({})
+        return (entities ?? [])
+    }
+
+    @Get('games')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'fetch games' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async games() {
+        const entities = await this.gameService.find({})
+        return (entities ?? [])
+    }
+    
     @Put('gametype')
     @HttpCode(200)
     @ApiOperation({ summary: 'Upserts a game type entry' })
