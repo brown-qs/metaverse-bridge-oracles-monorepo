@@ -21,8 +21,9 @@ import { getExplorerLink } from 'utils';
 import { SuccessIcon } from 'icons';
 import { useEffect, useState } from 'react';
 import { Button, Dialog } from 'ui';
-import { appStyles } from '../../app.styles';
 import { useStyles } from './EnraptureDialog.styles';
+import { styles as appStyles } from '../../app.styles';
+import { useClasses } from 'hooks';
 import { useIsTransactionPending, useSubmittedEnraptureTx, useSubmittedImportTx } from 'state/transactions/hooks';
 import { useEnraptureConfirmCallback } from 'hooks/multiverse/useConfirm';
 import { EnraptureAssetCallbackState, useEnraptureAssetCallback } from 'hooks/multiverse/useEnraptureAsset';
@@ -53,7 +54,7 @@ export const EnraptureDialog = () => {
     formButton,
     expand,
     expandOpen,
-  } = appStyles();
+  } = useClasses(appStyles);
 
   const {
     dialogContainer,
@@ -174,7 +175,7 @@ export const EnraptureDialog = () => {
       return (
         <div className={successContainer}>
           <SuccessIcon className={successIcon} />
-          <Typography>{`Import to metaverse confirmed!`}</Typography>
+          <Typography>{`Enrapture to metaverse confirmed!`}</Typography>
           <Typography color="textSecondary">
             {`Entry hash: ${enraptureCallbackParams?.hash}`}
           </Typography>
@@ -208,7 +209,7 @@ export const EnraptureDialog = () => {
           <div className={loadingContainer}>
             <CircularProgress />
             <div>
-              <Typography>Importing asset into the metaverse...</Typography>
+              <Typography>Enrapturing asset into the metaverse...</Typography>
               <Typography color="textSecondary" variant="h5">
                 Check your wallet for potential action
               </Typography>

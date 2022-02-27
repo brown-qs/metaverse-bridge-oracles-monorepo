@@ -1,7 +1,8 @@
 import { Button } from 'ui';
 import Stack from '@mui/material/Stack';
 import { Header } from 'ui';
-import { useStyles } from './styles';
+import { useClasses } from 'hooks';
+import { styles } from './styles';
 import List from '@mui/material/List';
 import Grid from '@mui/material/Grid';
 import { Typography, Box, Divider } from '@material-ui/core';
@@ -101,14 +102,14 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
         transferButtonSmall,
         headerImage,
         itemImage,
-        skinComponent,
         formBox,
         formLabel,
         formValue,
         formValueTokenDetails,
         row,
         col,
-    } = useStyles();
+        skinComponent
+    } = useClasses(styles);
 
     const canSummon = !!inGameItems?.resources && inGameItems?.resources.length > 0
     const assetCounter = countRecognizedAssets(inGameAssets)
@@ -118,7 +119,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     return (
         <Grid className={profileContainer}>
             <Header />
-            <Grid container justifyContent="center" spacing={4}>
+            <Grid container justifyContent="center" style={{ marginTop: '30px' }} spacing={4}>
                 <div style={{ width: '50%', textAlign: 'left' }}>
                     <span style={{ fontSize: '38px', fontFamily: `VT323, 'arial'`, }}>Available skins</span> <br />
                 </div>

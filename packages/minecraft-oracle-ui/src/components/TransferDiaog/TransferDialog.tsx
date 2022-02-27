@@ -1,8 +1,8 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { yupResolver } from '@hookform/resolvers/yup';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Divider from '@material-ui/core/Divider';
-import Typography from '@material-ui/core/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
+import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
 import { AssetLink } from 'components/AssetLink/AssetLink';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 import { AddressDisplayComponent } from 'components/form/AddressDisplayComponent';
@@ -22,11 +22,12 @@ import { useSubmittedTransferTx } from 'state/transactions/hooks';
 import { Button, Dialog } from 'ui';
 import { getExplorerLink } from 'utils';
 import * as yup from 'yup';
-import { appStyles } from '../../app.styles';
+import { styles as appStyles } from '../../app.styles';
 import { ChainId } from '../../constants';
 import { useTransferDialog } from '../../hooks/useTransferDialog/useTransferDialog';
-import { useStyles } from './TransferDialog.styles';
-import { Box, FormControl, OutlinedInput } from '@material-ui/core';
+import { useClasses } from 'hooks';
+import { styles } from './TransferDialog.styles';
+import { Box, FormControl, OutlinedInput } from '@mui/material';
 import { UNIT } from 'components/form/CoinQuantityField';
 import { Fraction } from 'utils/Fraction';
 
@@ -69,10 +70,10 @@ export const TransferDialog = () => {
     formValue,
     fieldError,
     formButton,
-  } = appStyles();
-
+  } = useClasses(appStyles);
+  
   const { dialogContainer, loadingContainer, successContainer, successIcon } =
-    useStyles();
+    useClasses(styles);
 
   const { chainId } = useActiveWeb3React();
 
@@ -290,7 +291,6 @@ export const TransferDialog = () => {
                     <OutlinedInput
                       id="recipient"
                       type="text"
-                      labelWidth={0}
                       // onChange={(event: any) => setTo(event.target.value)}
                       onChange={onChange}
                       onBlur={onBlur}

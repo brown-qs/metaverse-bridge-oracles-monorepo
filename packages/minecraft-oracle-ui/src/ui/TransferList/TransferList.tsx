@@ -12,7 +12,8 @@ import Divider from '@mui/material/Divider';
 import GameIcon from '@mui/icons-material/VideogameAsset';
 import WalletIcon from '@mui/icons-material/AccountBalanceWallet';
 
-import { useStyles } from './TransferList.styles';
+import { useClasses } from 'hooks';
+import { styles } from './TransferList.styles';
 
 function not(a: readonly string[], b: readonly string[]) {
     return a.filter((value) => b.indexOf(value) === -1);
@@ -31,7 +32,7 @@ export const TransferList = () => {
     const [left, setLeft] = React.useState<readonly string[]>(['MSAMA #511', 'Resource 1', 'Resource 3']);
     const [right, setRight] = React.useState<readonly string[]>(['MSAMA #35', 'MSAMA #205', 'Resource 2', 'Resource 3']);
 
-    const { columnTitle, columnTitleText, paperStyles, listItemStyles, listItemTextStyles, listItemHeader, transferButton } = useStyles();
+    const { columnTitle, columnTitleText, paperStyles, listItemStyles, listItemTextStyles, listItemHeader, transferButton } = useClasses(styles);
 
     const leftChecked = intersection(checked, left);
     const rightChecked = intersection(checked, right);
