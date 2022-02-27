@@ -97,7 +97,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                 </div>
                 <div style={{ width: '50%', textAlign: 'right' }}>
                     <span style={{ fontSize: '22px', }}>Welcome back {authData?.userProfile?.userName},</span> <br />
-                    {profile?.allowedToPlay ? (<span style={{ color: '#12753A', fontSize: '16px', fontWeight: 'bold' }}>You are eligible to play!</span>) :
+                    {profile?.allowedToPlay ? (<span style={{ color: '#12753A', fontSize: '16px', fontWeight: 'bold' }}>{profile?.blacklisted ? `You are blacklisted but can play`: `You are eligible to play!`}</span>) :
                         (
                             <p style={{ color: '#DB3B21' }}>To be eligible to play, bridge a VIP ticket/Moonsama, <br /> or <a href="https://moonsama.com/freshoffers" target="_blank">visit the Marketplace to get one</a></p>)}
                 </div>
