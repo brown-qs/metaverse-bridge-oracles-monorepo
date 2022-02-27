@@ -83,7 +83,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
         skinComponent
     } = useStyles();
 
-    const canSummon = !!inGameItems?.resources && inGameItems?.resources.length > 0
+    const canSummon = !!inGameItems?.resources && inGameItems?.resources.length > 0 && !profile?.blacklisted
     const assetCounter = countRecognizedAssets(inGameAssets)
     const hasImportedMoonsama = assetCounter.moonsamaNum > 0
     const hasImportedTicket = assetCounter.ticketNum > 0
