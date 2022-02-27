@@ -13,7 +13,8 @@ export type ProfileContextType = {
   serverId: boolean | null,
   preferredServer: boolean | null,
   numTicket: number,
-  numMoonsama: number
+  numMoonsama: number,
+  blacklisted: boolean
 }
 
 export type AuthData = { jwt?: string, userProfile?: ProfileContextType } | undefined
