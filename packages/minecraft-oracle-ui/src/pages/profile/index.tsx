@@ -210,9 +210,9 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     setItemDetailDialogData(value);
                                                     setItemDetailDialogOpen(true);
                                                 }}>
-                                                    <ListItemAvatar>
+                                                    <ListItemAvatar className={itemImage}>
                                                         {/*<img className={itemImage} src={value?.meta?.image} alt="" />*/}
-                                                        <Media uri={value?.meta?.image} className={itemImage} />
+                                                        <Media uri={value?.meta?.image} />
                                                     </ListItemAvatar>
                                                     <ListItemText primary={value?.meta?.name ?? `${value.assetAddress} ${value.assetId}`} />
                                                     {value?.exportable && (
@@ -312,9 +312,9 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                 disablePadding
                                             >
                                                 <ListItemButton>
-                                                    <ListItemAvatar>
+                                                    <ListItemAvatar className={itemImage}>
                                                         {/*<img className={itemImage} src={item?.meta?.image} alt="" />*/}
-                                                        <Media uri={item?.meta?.image} className={itemImage} />
+                                                        <Media uri={item?.meta?.image} />
                                                     </ListItemAvatar>
                                                     <ListItemText primary={item?.meta?.name} />
                                                     <Tooltip title={'You can have 1 VIP ticket imported at a time.'}>
@@ -340,9 +340,9 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     disablePadding
                                                 >
                                                     <ListItemButton>
-                                                        <ListItemAvatar>
+                                                        <ListItemAvatar className={itemImage}>
                                                             {/*<img className={itemImage} src={item?.meta?.image} alt="" />*/}
-                                                            <Media uri={item?.meta?.image} className={itemImage} />
+                                                            <Media uri={item?.meta?.image} />
                                                         </ListItemAvatar>
                                                         <ListItemText primary={item?.meta?.name} />
                                                         {item.importable && <Tooltip title={`Your imported ${item?.meta?.name} will bound to your Minecraft account. It will go back to the sender address when exported.`}>
@@ -410,7 +410,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     >
                                                         <ListItemButton>
                                                             <ListItemAvatar>
-                                                                <img src={resource.meta.image} alt={resource.name} className={itemImage} />
+                                                                <img src={resource.meta.image} alt={resource.name} className={itemImage}/>
                                                             </ListItemAvatar>
                                                             <ListItemText id={resource.name} primary={resource.meta.name.slice(6)} />
                                                         </ListItemButton>
@@ -459,7 +459,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                             >
                                                 <ListItemButton>
                                                     <ListItemAvatar>
-                                                        <img className={itemImage} src={value?.meta?.image} alt="" />
+                                                        <img src={value?.meta?.image} alt="" className={itemImage}/>
                                                     </ListItemAvatar>
                                                     <ListItemText id={labelId} primary={value?.meta?.name} />
                                                 </ListItemButton>
