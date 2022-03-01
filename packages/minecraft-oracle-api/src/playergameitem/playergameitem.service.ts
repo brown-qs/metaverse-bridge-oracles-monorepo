@@ -6,7 +6,7 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 import { PlayerGameItemEntity } from './playergameitem.entity';
 
 @Injectable()
-export class InventoryService {
+export class PlayerGameItemService {
     constructor(
         @InjectRepository(PlayerGameItemEntity)
         private readonly repository: Repository<PlayerGameItemEntity>,
@@ -64,5 +64,9 @@ export class InventoryService {
     public async findOne(params: FindConditions<PlayerGameItemEntity>, options?: FindOneOptions<PlayerGameItemEntity>): Promise<PlayerGameItemEntity> {
         const result: PlayerGameItemEntity = await this.repository.findOne(params, options);
         return result;
+    }
+
+    public async countByGameItem(gameId: string, itemId: string) {
+        return (await this.repository.count({where: {game: {id: gameId}, itemId: itemId}}));
     }
 }

@@ -6,6 +6,7 @@ import {
 import { Column, Entity, Index, ManyToOne, PrimaryColumn } from 'typeorm';
 import { UserEntity } from '../user/user.entity';
 import { GameEntity } from 'src/game/game.entity';
+import { GameItemTypeEntity } from 'src/gameitemtype/gameitemtype.entity';
 
 @Entity()
 @Index(['id'], {unique: true})
