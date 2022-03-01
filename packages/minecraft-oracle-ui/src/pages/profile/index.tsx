@@ -5,7 +5,8 @@ import { useClasses } from 'hooks';
 import { styles } from './styles';
 import List from '@mui/material/List';
 import Grid from '@mui/material/Grid';
-import { Typography, Box, Divider } from '@material-ui/core';
+import Box from '@mui/material/Box'
+import Divider from '@mui/material/Divider';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';

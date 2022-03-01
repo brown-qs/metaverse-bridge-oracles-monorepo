@@ -1,10 +1,8 @@
-import {
-  Box,
-  Grid,
-} from '@material-ui/core';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Divider from '@material-ui/core/Divider';
-import Typography from '@material-ui/core/Typography';
+import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
+import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 import { AddressDisplayComponent } from 'components/form/AddressDisplayComponent';
 import 'date-fns';
@@ -21,7 +19,7 @@ import { getExplorerLink } from 'utils';
 import { SuccessIcon } from 'icons';
 import { useEffect, useState } from 'react';
 import { Button, Dialog } from 'ui';
-import { useStyles } from './EnraptureDialog.styles';
+import { styles } from './EnraptureDialog.styles';
 import { styles as appStyles } from '../../app.styles';
 import { useClasses } from 'hooks';
 import { useIsTransactionPending, useSubmittedEnraptureTx, useSubmittedImportTx } from 'state/transactions/hooks';
@@ -62,7 +60,7 @@ export const EnraptureDialog = () => {
     successContainer,
     successIcon,
     inputContainer,
-  } = useStyles();
+  } = useClasses(styles);
 
   const { chainId, account } = useActiveWeb3React();
 
