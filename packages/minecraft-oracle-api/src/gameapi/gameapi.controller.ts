@@ -33,6 +33,7 @@ import { SetGameTypeDto } from '../gametype/dtos/gametype.dto';
 import { GameTypeService } from '../gametype/gametype.service';
 import { SetGameDto } from '../game/dto/game.dto';
 import { SetPlayerScoreDto } from '../playerscore/dtos/setplayerscore.dto';
+import { GetPlayerScoresDto } from './dtos/score.dto';
 import { GetAchievementsDto, SetAchievementsDto } from '../achievement/dtos/achievement.dto';
 import { AchievementService } from '../achievement/achievement.service';
 import { AchievementEntity } from '../achievement/achievement.entity';
@@ -324,6 +325,18 @@ export class GameApiController {
     ): Promise<boolean> {
         const entity = await this.gameApiService.createGame(dto)
         return !!entity
+    }
+
+    @Get('score')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Fetch Scores by Game' })
+    // @ApiBearerAuth('AuthenticationHeader')
+    // @UseGuards(SharedSecretGuard)
+    async getScore(
+        @Query() dto: GetPlayerScoresDto,
+    ) {
+        const entities = await this.gameApiService.getPlayerScores(dto)
+        return entities;
     }
 
     @Put('player/score')

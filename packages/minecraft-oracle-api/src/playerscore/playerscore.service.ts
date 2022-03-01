@@ -58,4 +58,8 @@ export class PlayerScoreService {
         const result: PlayerScoreEntity = await this.repository.findOne(params, options);
         return result;
     }
+
+    public async countByGame(gameId: string): Promise<number> {
+        return (await this.repository.count({where: {game: {id: gameId}}}));
+    }
 }

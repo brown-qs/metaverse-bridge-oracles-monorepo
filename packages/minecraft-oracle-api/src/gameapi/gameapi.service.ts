@@ -38,11 +38,13 @@ import { AchievementService } from '../achievement/achievement.service';
 import { GetPlayerAchievementDto, SetPlayerAchievementsDto } from '../playerachievement/dtos/playerachievement.dto';
 import { PlayerAchievementService } from '../playerachievement/playerachievement.service';
 import { GetPlayerScoreDto } from '../playerscore/dtos/getplayerscore.dto';
+import { GetPlayerScoresDto } from './dtos/score.dto';
 import { GganbuEntity } from '../gganbu/gganbu.entity';
 import { SnaplogEntity } from '../snaplog/snaplog.entity';
 import { SnaplogService } from '../snaplog/snaplog.service';
 import { GganbuService } from '../gganbu/gganbu.service';
 import { BankDto } from './dtos/bank.dto';
+import { PlayerScoreEntity } from 'src/playerscore/playerscore.entity';
 
 @Injectable()
 export class GameApiService {
@@ -795,6 +797,51 @@ export class GameApiService {
         }
 
         return entity.score
+    }
+    async getPlayerScores(dto: GetPlayerScoresDto) {
+        const game = await this.gameService.findOne({id: dto.gameId})
+
+        if (!game) {
+            throw new UnprocessableEntityException("Game not found")
+        }
+
+        dto.limit = dto.limit ?? 50;
+        dto.page = dto.page ?? 1;
+        let order: any = {}; order[dto.sortBy ?? 'score'] = dto.sort = dto.sort ?? 'DESC';
+
+        const entities: PlayerScoreEntity[] = await this.playerScoreService.findMany({
+            where: {
+                game: {id: dto.gameId}
+            },
+            skip: dto.limit * (dto.page-1),
+            take: dto.limit,
+            order,
+            relations: ['game', 'player']
+        });
+
+        if (!entities) {
+            throw new UnprocessableEntityException("Score not found")
+        }
+
+        const results = await Promise.all(entities.map(async (entity) => {
+            const statId = PlaySessionStatService.calculateId({ uuid: entity.player.uuid, gameId: entity.game.id })
+            const playStats = await this.playSessionStatService.findOne({ id: statId })
+            return {
+                playerId: entity.player.uuid,
+                score: Number(entity.score),
+                playtime: parseInt(playStats.timePlayed) / 1000,
+                updatedAt: parseInt(entity.updatedAt),
+            }
+        }));
+
+        const total: number = await this.playerScoreService.countByGame(dto.gameId);
+        return {
+            meta: {
+                ...dto,
+                pages: Math.ceil(total / dto.limit)
+            },
+            data: results,
+        }
     }
 
     async updatePlayerAchievements(dto: SetPlayerAchievementsDto) {
