@@ -53,6 +53,8 @@ export const styles = (theme: Theme) => ({
     },
     formLabel: {
         color: theme.palette.grey[500],
+        display: 'flex',
+        alignItems: 'center',
     },
     formValue: {
         color: theme.palette.text.primary,

@@ -220,7 +220,8 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     <Tooltip title={'Your exported asset will go back to the sender address you imported from. Associated skin wil be unavailable.'}>
                                                         <Button
                                                             className={transferButtonMid}
-                                                            onClick={() => {
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
                                                                 if (!!account) {
                                                                     setExportDialogOpen(true);
                                                                     setExportDialogData(
@@ -258,7 +259,8 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                         setItemDetailDialogOpen(false)
                                     }}
                                     title={'Item Detail'}
-                                    maxWidth="md"
+                                    maxWidth="sm"
+                                    fullWidth
                                     >
                                     <div className={dialogContainer}>
                                         <Grid container spacing={1} justifyContent="center">
@@ -290,13 +292,15 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                         </div>
                                                         <div className={row}>
                                                         <div className={formLabel}>Export Address:</div>
-                                                        <div className={`${formValue} ${formValueTokenDetails}`}>
-                                                        {itemDetailDialogData.exportAddress}
-                                                        </div>
+                                                        <AddressDisplayComponent
+                                                            className={`${formValue} ${formValueTokenDetails}`}
+                                                            charsShown={5}
+                                                        >
+                                                            {itemDetailDialogData.exportAddress}
+                                                        </AddressDisplayComponent>
                                                         </div>
                                                     </React.Fragment>
                                                 ) : null}
-                                            <Divider variant="fullWidth" className={divider} />
                                             </Box>
                                         </Grid>
                                         </Grid>

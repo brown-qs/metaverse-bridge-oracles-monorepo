@@ -63,6 +63,7 @@ export class ProfileApiService {
 
         userAssets.map(asset => {
             const recongizedEnraptureAsset = this.enrapturableAssets.find(x => x.address.toLowerCase() === asset.assetAddress.toLowerCase())
+            console.log(recongizedEnraptureAsset)
 
             if (!!recongizedEnraptureAsset && recongizedEnraptureAsset.type.valueOf() === RecognizedAssetType.MOONSAMA.valueOf()) {
                 assets.push({
