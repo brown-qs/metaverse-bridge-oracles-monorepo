@@ -19,7 +19,8 @@ import { PlayerAchievementModule } from '../playerachievement/playerachievement.
 import { PlayerScoreModule } from '../playerscore/playerscore.module';
 import { SnaplogModule } from '../snaplog/snaplog.module';
 import { GganbuModule } from '../gganbu/gganbu.module';
-
+import { GameItemTypeModule } from '../gameitemtype/gameitemtype.module';
+import { PlayerGameItemModule } from 'src/playergameitem/playergameitem.module';
 
 @Module({
     imports: [
@@ -40,7 +41,9 @@ import { GganbuModule } from '../gganbu/gganbu.module';
         PlaySessionModule,
         forwardRef(() => ProfileApiModule),
         AssetModule,
-        ProviderModule
+        ProviderModule,
+        GameItemTypeModule,
+        PlayerGameItemModule,
     ],
     providers: [GameApiService],
     exports: [GameApiService],

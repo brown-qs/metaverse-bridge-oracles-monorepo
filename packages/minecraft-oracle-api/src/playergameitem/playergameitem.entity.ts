@@ -3,7 +3,7 @@ import {
     IsNumber,
     IsString
 } from 'class-validator';
-import { Column, Entity, Index, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { UserEntity } from '../user/user.entity';
 import { GameEntity } from 'src/game/game.entity';
 import { GameItemTypeEntity } from 'src/gameitemtype/gameitemtype.entity';
@@ -16,9 +16,8 @@ export class PlayerGameItemEntity {
         Object.assign(this, item);
     }
 
-    @PrimaryColumn()
-    @IsString()
-    id: string;
+    @PrimaryGeneratedColumn('uuid')
+    id?: string;
 
     @Column()
     @IsString()
