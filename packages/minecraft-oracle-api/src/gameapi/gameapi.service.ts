@@ -48,6 +48,8 @@ import { GameItemTypeService } from '../gameitemtype/gameitemtype.service';
 import { GetGameItemsDto } from './dtos/gameitem.dto';
 import { PlayerGameItemService } from 'src/playergameitem/playergameitem.service';
 import { PlayerGameItemEntity } from 'src/playergameitem/playergameitem.entity';
+import { SetGameItemTypeDto } from 'src/gameitemtype/dtos/gameitemtype.dto';
+import { SetPlayerGameItemDto } from 'src/playergameitem/dtos/playergameitem.dto';
 
 @Injectable()
 export class GameApiService {
@@ -858,6 +860,17 @@ export class GameApiService {
         return results;
     }
 
+    async getGamePlayerItems(gameId: string, uuid: string) {
+        const entities: PlayerGameItemEntity[] = await this.playerGameItemService.findMany({where: { game: {id: gameId}, player: {uuid: uuid} }});
+        return entities.map(entity => {
+            return {
+                itemId: entity.itemId,
+                amount: entity.amount,
+                updatedAt: entity.updatedAt,
+            };
+        })
+    }
+
     async getGameItems(dto: GetGameItemsDto) {
         const game = await this.gameService.findOne({id: dto.gameId})
 
@@ -873,12 +886,13 @@ export class GameApiService {
         const entities: PlayerGameItemEntity[] = await this.playerGameItemService.findMany({
             where: {
                 game: {id: dto.gameId},
-                item: { name: ILike(`%${dto.search}%`) },
+                itemId: dto.itemId,
+                player: { userName: ILike(`%${dto.search}%`) },
             },
             skip: dto.limit * (dto.page-1),
             take: dto.limit,
             order,
-            relations: ['game', 'player', 'item']
+            relations: ['game', 'player']
         });
 
         if (!entities) {
@@ -890,7 +904,7 @@ export class GameApiService {
             const playStats = await this.playSessionStatService.findOne({ id: statId })
             return {
                 playerId: entity.player.uuid,
-                itemId: entity.item.id,
+                itemId: entity.itemId,
                 amount: entity.amount,
                 playtime: parseInt(playStats.timePlayed) / 1000,
                 updatedAt: parseInt(entity.updatedAt),
@@ -905,5 +919,43 @@ export class GameApiService {
             },
             data: results,
         }
+    }
+
+    async createGameItemType(dto: SetGameItemTypeDto) {
+        const game = await this.gameService.findOne({id: dto.gameId});
+
+        if (!game) {
+            this.logger.error(`setPlayerGameSession:: game ${dto.gameId} does not exists`, null, this.context)
+            return false
+        }
+
+        const result = await this.gameItemTypeService.create({
+            ...dto,
+            game
+        })
+        return result;
+    }
+    
+    async createGameItem(dto: SetPlayerGameItemDto) {
+        const game = await this.gameService.findOne({id: dto.gameId});
+
+        if (!game) {
+            this.logger.error(`createGameItem:: game ${dto.gameId} does not exists`, null, this.context)
+            return false
+        }
+
+        const player = await this.userService.findOne({uuid: dto.playerId});
+
+        if (!player) {
+            this.logger.error(`createGameItem:: player ${dto.playerId} does not exists`, null, this.context)
+            return false
+        }
+
+        const result = await this.playerGameItemService.create({
+            ...dto,
+            game,
+            player,
+        })
+        return result;
     }
 }

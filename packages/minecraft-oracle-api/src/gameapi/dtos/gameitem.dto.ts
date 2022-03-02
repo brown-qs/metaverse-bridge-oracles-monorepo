@@ -31,3 +31,14 @@ export class GetGameItemsDto {
     @IsString()
     sort?: string;
 }
+
+export class GetGameItemDto {
+
+    @ApiProperty({ description: 'Game id' })
+    @IsString()
+    gameId: string;
+
+    @ApiProperty({ description: 'Player Id' })
+    @IsString()
+    uuid: string;
+}
