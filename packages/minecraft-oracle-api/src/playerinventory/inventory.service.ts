@@ -13,6 +13,10 @@ export class InventoryService {
         private configService: ConfigService
     ) {}
 
+    public static calculateId(dto: {uuid: string; materialName: string}): string {
+        return `${dto.uuid}-${dto.materialName}`
+    }
+    
     public async create(snapshotItem: InventoryEntity): Promise<InventoryEntity> {
         const u = await this.repository.save(snapshotItem);
         return u;
