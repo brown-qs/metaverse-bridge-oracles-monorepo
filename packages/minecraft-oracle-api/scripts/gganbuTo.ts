@@ -19,6 +19,7 @@ import { PlayerAchievementEntity } from '../src/playerachievement/playerachievem
 import { PlayerScoreEntity } from '../src/playerscore/playerscore.entity'
 import { GganbuEntity } from '../src/gganbu/gganbu.entity'
 import { SnaplogEntity } from '../src/snaplog/snaplog.entity'
+import { InventoryService } from '../src/playerinventory/inventory.service'
 
 config()
 
@@ -79,25 +80,29 @@ async function main() {
                 continue
             }
 
-
-
-            await Promise.all(gganbus.map(async (gganbu) => {
+            for(let j = 0; j<gganbus.length; j++) {
+                const gganbu = gganbus[j]
                 const inv = await connection.manager.getRepository(InventoryEntity).findOne({where: {owner: {uuid: user.uuid}, material: {name: gganbu.material.mapsTo}}, relations: ['owner']})
                 if (!inv) {
-                    await connection.manager.getRepository(InventoryEntity).create({
-                        amount: gganbu.amount,
-                        material: gganbu.material,
+                    const mat = await connection.manager.getRepository(MaterialEntity).findOne({where: {name: gganbu.material.mapsTo}})
+                    
+                    const ent = await connection.manager.getRepository(InventoryEntity).create({
+                        id: InventoryService.calculateId({uuid: user.uuid, materialName: gganbu.material.mapsTo}),
+                        amount: (Number.parseFloat(gganbu.amount) * gganbu.material.multiplier).toString(),
+                        material: mat,
                         owner: user,
                         summonInProgress: false,
                         summonable: true
                     })
+
+                    await connection.manager.getRepository(InventoryEntity).save(ent)
                     console.log('new num', gganbu.amount)
                 } else {
                     const newNum = (Number.parseFloat(inv.amount) + (Number.parseFloat(gganbu.amount) * gganbu.material.multiplier )).toString()
                     console.log(`   old nums`, inv.amount, newNum)
                     await connection.manager.getRepository(InventoryEntity).update(inv.id, {amount: newNum})
                 }
-            }))
+            }
         }
     }
     await connection.close()
