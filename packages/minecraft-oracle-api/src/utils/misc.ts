@@ -121,7 +121,7 @@ export function stringToStringAssetType(
 
 export function findRecognizedAsset(recassets: RecognizedAsset[], asset: {assetAddress: string, assetId: string}) {
   //console.log({recassets})
-  console.log({asset})
+  //console.log({asset})
   return recassets.find(x => {
     return (
       (x.address.toLowerCase() === asset?.assetAddress?.toLowerCase())
