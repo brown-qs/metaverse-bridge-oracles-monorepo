@@ -45,7 +45,8 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const playAllowedReasonTexts: any = {
         'MSAMA': 'You are eligible to play because you imported a Moonsama.',
         'TICKET': 'You are eligible to play because you imported a VIP ticket.',
-        'TEMPORARY_TICKET': 'You are eligible to play because you were given permanent access.',
+        'TEMPORARY_TICKET': 'You are eligible to play because you imported a game pass.',
+        'DEFAULT': 'You are eligible to play because you were given permanent access.',
     }
     const { setAccountDialogOpen } = useAccountDialog();
 
@@ -126,7 +127,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                 <div style={{ width: '50%', textAlign: 'right' }}>
                     <span style={{ fontSize: '22px', }}>Welcome back {authData?.userProfile?.userName},</span> <br />
                     {profile?.allowedToPlay ? (
-                        <Tooltip placement='bottom' title={playAllowedReasonTexts[profile.allowedToPlayReason]}>
+                        <Tooltip placement='bottom' title={playAllowedReasonTexts[profile.allowedToPlayReason] ?? playAllowedReasonTexts['DEFAULT']}>
                             <span style={{ color: '#12753A', fontSize: '16px', fontWeight: 'bold' }}>{profile?.blacklisted ? `You are blacklisted but can play`: `You are eligible to play!`}</span>
                         </Tooltip>
                         ) :
