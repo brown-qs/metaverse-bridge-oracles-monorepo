@@ -423,27 +423,27 @@ export class GameApiController {
         return results
     }
 
-    @Put('itemtype')
+    @Put('itemtypes')
     @HttpCode(200)
-    @ApiOperation({ summary: 'Updates player score' })
+    @ApiOperation({ summary: 'Put Game Item Types as Array' })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
-    async setItemType(
-        @Body() dto: SetGameItemTypeDto,
+    async setItemTypes(
+        @Body() dto: SetGameItemTypeDto[],
     ): Promise<boolean> {
-        const entity = await this.gameApiService.createGameItemType(dto)
+        const entity = await this.gameApiService.putGameItemTypes(dto)
         return !!entity
     }
 
-    @Put('item')
+    @Put('items')
     @HttpCode(200)
-    @ApiOperation({ summary: 'Updates player score' })
+    @ApiOperation({ summary: 'Put Player Game Items' })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
-    async setPlayerGameItem(
-        @Body() dto: SetPlayerGameItemDto,
+    async setPlayerGameItems(
+        @Body() dto: SetPlayerGameItemDto[],
     ): Promise<boolean> {
-        const entity = await this.gameApiService.createGameItem(dto)
+        const entity = await this.gameApiService.putGameItems(dto)
         return !!entity
     }
 }
