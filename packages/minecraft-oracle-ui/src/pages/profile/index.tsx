@@ -86,7 +86,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const inGameResources = inGameItems?.resources ?? []
     const inGameTextures: InGameTexture[] = inGameItems?.textures ?? []
 
-    //console.log('ingame items', inGameItems, { inGameAssets, inGameResources, inGameTextures })
+    console.log('ingame items', inGameItems, { inGameAssets, inGameResources, inGameTextures })
 
     // const { jwt, userProfile } = authData;
 
@@ -215,9 +215,9 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                         {/*<img className={itemImage} src={value?.meta?.image} alt="" />*/}
                                                         <Media uri={value?.meta?.image} />
                                                     </ListItemAvatar>
-                                                    <ListItemText primary={value?.meta?.name ?? `${value.assetAddress} ${value.assetId}`} />
+                                                    <ListItemText primary={value?.meta?.name ?? `${value.assetAddress} ${value.assetId}`} style={{paddingLeft: '10px'}} />
                                                     {value?.exportable && (
-                                                    <Tooltip title={'Your exported asset will go back to the sender address you imported from. Associated skin wil be unavailable.'}>
+                                                    <Tooltip title={'Your exported asset will go back to the sender address you imported from. Associated items or skins will be unavailable.'}>
                                                         <Button
                                                             className={transferButtonMid}
                                                             onClick={(e) => {
@@ -321,7 +321,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                         {/*<img className={itemImage} src={item?.meta?.image} alt="" />*/}
                                                         <Media uri={item?.meta?.image} />
                                                     </ListItemAvatar>
-                                                    <ListItemText primary={item?.meta?.name} />
+                                                    <ListItemText primary={item?.meta?.name} style={{paddingLeft: '10px'}}/>
                                                     <Tooltip title={'You can have 1 VIP ticket imported at a time.'}>
                                                         <span>
                                                             <Button
@@ -349,7 +349,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                             {/*<img className={itemImage} src={item?.meta?.image} alt="" />*/}
                                                             <Media uri={item?.meta?.image} />
                                                         </ListItemAvatar>
-                                                        <ListItemText primary={item?.meta?.name} />
+                                                        <ListItemText primary={item?.meta?.name} style={{paddingLeft: '10px'}}/>
                                                         {item.importable && <Tooltip title={`Your imported ${item?.meta?.name} will bound to your Minecraft account. It will go back to the sender address when exported.`}>
                                                             <span>
                                                                 <Button

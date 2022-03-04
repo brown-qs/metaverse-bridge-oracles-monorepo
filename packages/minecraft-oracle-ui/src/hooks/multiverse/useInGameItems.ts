@@ -82,6 +82,7 @@ export function useInGameItems(trigger: string | undefined = undefined) {
             setItems(undefined)
             return
         }
+        console.log({rawData})
         const melange = [...rawData.assets, ...rawData.resources]
         let staticDatas = await staticCallback(
             melange.map(x => {

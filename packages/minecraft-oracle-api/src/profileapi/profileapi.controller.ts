@@ -59,7 +59,8 @@ export class ProfileApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async resources(@User() user: UserEntity): Promise<ThingsDto> {
-        return this.profileService.getPlayerItems(user)
+        const playerItems = await this.profileService.getPlayerItems(user)
+        return playerItems
     }
 
     @Get('verifyjwt/:jwttoken')
