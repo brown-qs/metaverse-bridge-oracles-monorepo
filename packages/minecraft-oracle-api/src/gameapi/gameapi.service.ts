@@ -921,41 +921,49 @@ export class GameApiService {
         }
     }
 
-    async createGameItemType(dto: SetGameItemTypeDto) {
-        const game = await this.gameService.findOne({id: dto.gameId});
+    async putGameItemTypes(dtos: SetGameItemTypeDto[]) {
+        const gameIds: string[] = dtos.map(_dto => _dto.gameId);
+        const games = await this.gameService.findByIds(gameIds)
 
-        if (!game) {
-            this.logger.error(`setPlayerGameSession:: game ${dto.gameId} does not exists`, null, this.context)
-            return false
+        if (games.find(p => p==undefined)) {
+            throw new UnprocessableEntityException("Game not found")
         }
 
-        const result = await this.gameItemTypeService.create({
-            ...dto,
-            game
-        })
-        return result;
+        const entities = await Promise.all(dtos.map(async (dto, i) => {
+            const entity = await this.gameItemTypeService.create({
+                game: games[i],
+                ...dto,
+            })
+            return entity;
+        }))
+
+        return entities;
     }
     
-    async createGameItem(dto: SetPlayerGameItemDto) {
-        const game = await this.gameService.findOne({id: dto.gameId});
+    async putGameItems(dtos: SetPlayerGameItemDto[]) {
+        const gameIds: string[] = dtos.map(_dto => _dto.gameId);
+        const games = await this.gameService.findByIds(gameIds)
 
-        if (!game) {
-            this.logger.error(`createGameItem:: game ${dto.gameId} does not exists`, null, this.context)
-            return false
+        if (games.find(p => p==undefined)) {
+            throw new UnprocessableEntityException("Game not found")
         }
 
-        const player = await this.userService.findOne({uuid: dto.playerId});
+        const playerIds: string[] = dtos.map(_dto => _dto.playerId);
+        const players = await this.userService.findByIds(playerIds)
 
-        if (!player) {
-            this.logger.error(`createGameItem:: player ${dto.playerId} does not exists`, null, this.context)
-            return false
+        if (playerIds.find(p => p==undefined)) {
+            throw new UnprocessableEntityException("Player not found")
         }
 
-        const result = await this.playerGameItemService.create({
-            ...dto,
-            game,
-            player,
-        })
-        return result;
+        const entities = await Promise.all(dtos.map(async (dto, i) => {
+            const entity = await this.playerGameItemService.create({
+                game: games[i],
+                player: players[i],
+                ...dto,
+            })
+            return entity;
+        }))
+
+        return entities;
     }
 }
