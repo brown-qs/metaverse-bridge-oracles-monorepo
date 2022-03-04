@@ -4,7 +4,7 @@ import { getAddress } from '@ethersproject/address';
 import { Contract } from '@ethersproject/contracts';
 import { BigNumber } from '@ethersproject/bignumber';
 import { ChainId } from '../constants';
-import { hexZeroPad, hexlify, hexValue } from '@ethersproject/bytes';
+import { hexZeroPad } from '@ethersproject/bytes';
 import { InGameItem } from '../hooks/multiverse/useInGameItems';
 import { RecognizedAssetType, RECOGNIZED_ASSETS } from '../assets/data/recognized';
 
