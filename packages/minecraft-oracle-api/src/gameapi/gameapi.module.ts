@@ -19,6 +19,7 @@ import { PlayerAchievementModule } from '../playerachievement/playerachievement.
 import { PlayerScoreModule } from '../playerscore/playerscore.module';
 import { SnaplogModule } from '../snaplog/snaplog.module';
 import { GganbuModule } from '../gganbu/gganbu.module';
+import { GameScoreTypeModule } from 'src/gamescoretype/gamescoretype.module';
 
 
 @Module({
@@ -38,6 +39,7 @@ import { GganbuModule } from '../gganbu/gganbu.module';
         PlayerAchievementModule,
         PlayerScoreModule,
         PlaySessionModule,
+        GameScoreTypeModule,
         forwardRef(() => ProfileApiModule),
         AssetModule,
         ProviderModule

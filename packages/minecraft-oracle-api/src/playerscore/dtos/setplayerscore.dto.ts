@@ -13,4 +13,7 @@ export class SetPlayerScoreDto {
 
     @ApiProperty({ description: 'The game id of the score'})
     gameId: string;
+
+    @ApiProperty({ description: 'The id of this Score'})
+    scoreId: string;
 }

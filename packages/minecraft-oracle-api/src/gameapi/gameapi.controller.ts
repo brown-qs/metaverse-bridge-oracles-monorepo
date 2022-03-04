@@ -40,6 +40,7 @@ import { AchievementEntity } from '../achievement/achievement.entity';
 import { GetPlayerAchievementDto, SetPlayerAchievementsDto } from '../playerachievement/dtos/playerachievement.dto';
 import { PlayerAchievementEntity } from '../playerachievement/playerachievement.entity';
 import { UserEntity } from '../user/user.entity';
+import { GetGameScoreTypeDto, SetGameScoreTypeDto } from 'src/gamescoretype/dtos/gamescoretype.dto';
 
 @ApiTags('game')
 @Controller('game')
@@ -330,24 +331,46 @@ export class GameApiController {
     @Get('score')
     @HttpCode(200)
     @ApiOperation({ summary: 'Fetch Scores by Game' })
-    // @ApiBearerAuth('AuthenticationHeader')
-    // @UseGuards(SharedSecretGuard)
-    async getScore(
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async getScores(
         @Query() dto: GetPlayerScoresDto,
     ) {
         const entities = await this.gameApiService.getPlayerScores(dto)
         return entities;
     }
 
-    @Put('player/score')
+    @Get('scoretypes')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Fetch Score Types'})
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async getScoreTypes(@Query() { gameId }: GetGameScoreTypeDto) {
+        const entities = await this.gameApiService.getScoreTypes(gameId);
+        return entities;
+    }
+
+    @Put('player/scores')
     @HttpCode(200)
     @ApiOperation({ summary: 'Updates player score' })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
     async setUserScore(
-        @Body() dto: SetPlayerScoreDto,
+        @Body() dto: SetPlayerScoreDto[],
     ): Promise<boolean> {
-        const entity = await this.gameApiService.updatePlayerScore(dto)
+        const entity = await this.gameApiService.putPlayerScores(dto)
+        return !!entity
+    }
+
+    @Put('scoretypes')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Create player score types' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async setGameScoreTypes(
+        @Body() dto: SetGameScoreTypeDto[],
+    ): Promise<boolean> {
+        const entity = await this.gameApiService.putGameScoreTypes(dto)
         return !!entity
     }
 
