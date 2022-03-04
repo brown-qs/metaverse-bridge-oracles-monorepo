@@ -21,4 +21,8 @@ export class GetPlayerScoresDto {
   @ApiPropertyOptional({ description: 'Sort Direction. DESC | ASC' })
   @IsString()
   sort?: string;
+
+  @ApiPropertyOptional({ description: 'Search User Name' })
+  @IsString()
+  search?: string;
 }
