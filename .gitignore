@@ -66,4 +66,3 @@ common/autoinstallers/*/.npmrc
 
 # Heft
 .heft
-yarn.lock

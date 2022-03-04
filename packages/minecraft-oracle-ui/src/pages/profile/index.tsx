@@ -6,7 +6,6 @@ import { styles } from './styles';
 import List from '@mui/material/List';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box'
-import Divider from '@mui/material/Divider';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
@@ -112,7 +111,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
         skinComponent
     } = useClasses(styles);
 
-    const canSummon = !!inGameItems?.resources && inGameItems?.resources.length > 0
+    const canSummon = !!inGameItems?.resources && inGameItems?.resources.length > 0 && !profile?.blacklisted
     const assetCounter = countRecognizedAssets(inGameAssets)
     const hasImportedMoonsama = assetCounter.moonsamaNum > 0
     const hasImportedTicket = assetCounter.ticketNum > 0
@@ -128,7 +127,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     <span style={{ fontSize: '22px', }}>Welcome back {authData?.userProfile?.userName},</span> <br />
                     {profile?.allowedToPlay ? (
                         <Tooltip placement='bottom' title={playAllowedReasonTexts[profile.allowedToPlayReason]}>
-                            <span style={{ color: '#12753A', fontSize: '16px', fontWeight: 'bold' }}>You are eligible to play!</span>
+                            <span style={{ color: '#12753A', fontSize: '16px', fontWeight: 'bold' }}>{profile?.blacklisted ? `You are blacklisted but can play`: `You are eligible to play!`}</span>
                         </Tooltip>
                         ) :
                         (

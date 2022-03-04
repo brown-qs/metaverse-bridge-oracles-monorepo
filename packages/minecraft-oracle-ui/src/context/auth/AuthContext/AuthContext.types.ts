@@ -15,6 +15,7 @@ export type ProfileContextType = {
   numTicket: number,
   numMoonsama: number,
   allowedToPlayReason: string,
+  blacklisted: boolean
 }
 
 export type AuthData = { jwt?: string, userProfile?: ProfileContextType } | undefined
