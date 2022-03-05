@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Loader } from 'ui';
-import { useStyles } from './styles';
+import { useClasses } from 'hooks';
+import { styles } from './styles';
 import Tooltip from '@mui/material/Tooltip';
 
 import WhiteLogo from 'assets/images/logo-white.svg';
@@ -16,7 +17,7 @@ const HomePage = () => {
     rightBgImage,
     loginButton,
     glitchText,
-  } = useStyles();
+  } = useClasses(styles);
 
   const handleLoginWithMinecraft = () => {
       setIsLoading(true);

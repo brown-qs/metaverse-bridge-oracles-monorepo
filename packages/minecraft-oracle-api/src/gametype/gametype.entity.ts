@@ -19,17 +19,17 @@ export class GameTypeEntity {
     @IsString()
     ip: string;
 
-    @Column()
+    @Column({ nullable: true })
     @IsString()
-    name: string;
+    name?: string;
 
-    @Column()
+    @Column({ nullable: true })
     @IsString()
-    description: string;
+    description?: string;
 
-    @Column()
+    @Column({ nullable: true })
     @IsString()
-    image: string;
+    image?: string;
 
     @OneToMany(() => GameEntity, (game) => game.gameType)
     games?: GameEntity[];

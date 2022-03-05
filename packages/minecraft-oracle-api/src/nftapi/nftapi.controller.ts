@@ -39,4 +39,18 @@ export class NftApiController {
         const data = await this.nftService.getNFT(chainId, tokenType, address, tokenId)
         return data
     }
+
+    @Get('nft/:chainId/:tokenType/:address')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Fetches NFT Collection' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async collection(
+        @Param('chainId') chainId: string,
+        @Param('tokenType') tokenType: string,
+        @Param('address') address: string,
+    ): Promise<StaticTokenData[] | ProcessedStaticTokenData[]> {
+        const data = await this.nftService.getNFTCollection(chainId, tokenType, address);
+        return data
+    }
 }

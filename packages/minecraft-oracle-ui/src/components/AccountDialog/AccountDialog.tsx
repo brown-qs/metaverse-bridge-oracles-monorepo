@@ -1,13 +1,14 @@
 import { useDispatch } from 'react-redux';
 
-import { Button } from '@material-ui/core';
-import Typography from '@material-ui/core/Typography';
+import { Button } from '@mui/material';
+import Typography from '@mui/material/Typography';
 import { injected, walletconnect } from 'connectors';
 import { SUPPORTED_WALLETS } from '../../connectors';
 import { useAccountDialog } from 'hooks';
 import { useCallback, useEffect, useState } from 'react';
 import { Dialog } from 'ui';
-import { useStyles } from './AccountDialog.styles';
+import { useClasses } from 'hooks';
+import { styles as accountDialogStyles } from './AccountDialog.styles';
 import { isMobile } from 'react-device-detect';
 
 import WalletConnectIcon from '../../assets/images/walletConnectIcon.svg';
@@ -23,7 +24,7 @@ import { WalletConnectConnector } from '@web3-react/walletconnect-connector';
 import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core';
 import OptionCard from './OptionCard';
 import usePrevious from 'hooks/usePrevious/usePrevious';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import CircularProgress from '@mui/material/CircularProgress';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 
 const WALLET_VIEWS = {
@@ -34,7 +35,7 @@ const WALLET_VIEWS = {
 };
 
 export const AccountDialog = () => {
-  const styles = useStyles();
+  const styles = useClasses(accountDialogStyles);
   const dispatch = useDispatch<AppDispatch>();
 
   const [pendingWallet, setPendingWallet] = useState<
