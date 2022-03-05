@@ -4,7 +4,7 @@ import { getAddress } from '@ethersproject/address';
 import { Contract } from '@ethersproject/contracts';
 import { BigNumber } from '@ethersproject/bignumber';
 import { ChainId } from '../constants';
-import { hexZeroPad, hexlify, hexValue } from '@ethersproject/bytes';
+import { hexZeroPad } from '@ethersproject/bytes';
 import { InGameItem } from '../hooks/multiverse/useInGameItems';
 import { RecognizedAssetType, RECOGNIZED_ASSETS } from '../assets/data/recognized';
 
@@ -87,7 +87,7 @@ const EXPLORER_PREFIXES: { [chainId in ChainId]: string } = {
   56: 'bscscan.com',
   246: 'explorer.energyweb.org',
   73799: 'volta-explorer.energyweb.org',
-  1285: 'blockscout.moonriver.moonbeam.network',
+  1285: 'moonriver.moonscan.io',
 };
 
 export function getExplorerLink(
@@ -175,7 +175,12 @@ export const countRecognizedAssets = (assets: InGameItem[]) => {
       return
     }
 
-    if (!!recasset && recasset.type.valueOf() === RecognizedAssetType.TICKET) {
+    if (!!recasset && recasset.type.valueOf() === RecognizedAssetType.TICKET && recasset.id === asset.assetId) {
+      assetCounter.ticketNum += 1
+      return
+    }
+
+    if (!!recasset && recasset.type.valueOf() === RecognizedAssetType.TEMPORARY_TICKET) {
       assetCounter.ticketNum += 1
       return
     }

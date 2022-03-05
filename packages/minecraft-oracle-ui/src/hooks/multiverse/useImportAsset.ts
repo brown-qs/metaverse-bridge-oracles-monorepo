@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { calculateGasMargin, getSigner } from '../../utils';
+import { calculateGasMargin } from '../../utils';
 import { useMultiverseBridgeV1Contract } from '../../hooks/useContracts/useContracts';
 import { useActiveWeb3React, useAuth } from '../../hooks';
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import axios from 'axios'
-import { StringAssetType } from 'utils/subgraph';
 import { AssetType } from 'utils/marketplace';
 
 export enum CreateImportAssetCallbackState {

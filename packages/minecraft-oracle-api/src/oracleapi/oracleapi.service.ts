@@ -49,7 +49,6 @@ export class OracleApiService {
     ) {
         this.context = OracleApiService.name
         this.locks = new Map();
-
     }
 
     public async userInRequest(user: UserEntity, data: ImportDto, enraptured: boolean): Promise<[string, string, string, boolean]> {
