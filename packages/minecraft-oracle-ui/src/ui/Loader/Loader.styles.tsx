@@ -1,6 +1,6 @@
-import makeStyles from '@material-ui/core/styles/makeStyles';
 
-export const useStyles = makeStyles((theme) => ({
+
+export const styles = () => ({
   loader: {
     display: 'inline-block',
     width: '30px',
@@ -53,4 +53,4 @@ export const useStyles = makeStyles((theme) => ({
       height: '0%',
     },
   },
-}));
+});

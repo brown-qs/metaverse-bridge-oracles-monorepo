@@ -53,7 +53,7 @@ export function useEnraptureConfirmCallback() {
     const { authData } =  useAuth();
     const {jwt} = authData ?? {}
 
-    return useCallback(async (hash: string) => {
+    return useCallback(async (hash?: string) => {
         if (!hash) {
             return false;
         }

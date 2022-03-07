@@ -10,16 +10,17 @@ import {
   IconButton,
   OutlinedInput,
   Switch,
-} from '@material-ui/core';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Typography from '@material-ui/core/Typography';
+} from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
+import Typography from '@mui/material/Typography';
 import 'date-fns';
 import { useActiveWeb3React, useSummonDialog } from 'hooks';
 import { SuccessIcon } from 'icons';
 import { useState } from 'react';
 import { Button, Dialog } from 'ui';
-import { appStyles } from '../../app.styles';
-import { useStyles } from './SummonDialog.styles';
+import { useClasses } from 'hooks';
+import { styles as appStyles } from '../../app.styles';
+import { styles } from './SummonDialog.styles';
 import { useSummonCallback } from 'hooks/multiverse/useSummon';
 import { useActiveGame } from 'hooks/multiverse/useActiveGame';
 
@@ -50,8 +51,8 @@ export const SummonDialog = () => {
     formButton,
     expand,
     expandOpen,
-  } = appStyles();
-
+  } = useClasses(appStyles);
+  
   const [UIAdvancedSectionExpanded, setExpanded] = useState(false);
 
   const {
@@ -60,7 +61,7 @@ export const SummonDialog = () => {
     successContainer,
     successIcon,
     inputContainer,
-  } = useStyles();
+  } = useClasses(styles);
 
   const { chainId, account } = useActiveWeb3React();
 

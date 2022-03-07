@@ -1,6 +1,6 @@
-import makeStyles from '@material-ui/core/styles/makeStyles';
 
-export const CoinQuantityFieldStyles = makeStyles((theme) => ({
+
+export const styles = () => ({
   outlinedInput: {
     padding: 0,
   },
@@ -8,4 +8,4 @@ export const CoinQuantityFieldStyles = makeStyles((theme) => ({
     display: 'flex',
     alignItems: 'center',
   },
-}));
+});
