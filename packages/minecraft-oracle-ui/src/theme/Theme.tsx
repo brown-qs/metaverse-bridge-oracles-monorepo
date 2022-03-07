@@ -199,7 +199,7 @@ const themeOptions: ThemeOptions = {
   ...getDefaultOptions(palette),
 };
 
-const theme = createTheme(themeOptions);
+export const theme = createTheme(themeOptions);
 
 const lightTheme = createTheme({
   palette: lightPalette,

@@ -15,8 +15,8 @@ export class SharedSecretGuard implements CanActivate {
     }
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
-        //console.log(request)
-        //console.log(request.headers)
+        console.log(request)
+        console.log(request.headers)
         const secret: string = request.headers['AuthenticationHeader'] ?? request.headers['authenticationheader']
         
         //this.logger.debug('yolococo', this.context)

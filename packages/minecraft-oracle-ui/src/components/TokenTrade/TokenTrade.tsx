@@ -1,5 +1,5 @@
-import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
 import { Media } from 'components';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 import { useActiveWeb3React } from 'hooks';
@@ -16,7 +16,8 @@ import {
   OrderType,
   StringAssetType,
 } from 'utils/subgraph';
-import { useStyles } from './TokenTrade.styles';
+import { useClasses } from 'hooks';
+import { styles } from './TokenTrade.styles';
 import LootBox from '../../assets/images/loot-box.png';
 
 export const TokenTrade = ({
@@ -38,7 +39,7 @@ export const TokenTrade = ({
     mr,
     lastPriceContainer,
     smallText,
-  } = useStyles();
+  } = useClasses(styles);
   const { push } = useHistory();
 
   const { chainId } = useActiveWeb3React();

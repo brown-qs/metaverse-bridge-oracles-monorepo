@@ -220,6 +220,10 @@ export class GameApiService {
             throw new UnprocessableEntityException("Game not found")
         }
 
+        if (dto.ongoing && game.type === GameKind.CARNAGE) {
+            throw new UnprocessableEntityException("Prevent setting of the “ongoing” flag on game_entity entries where “type” is “CARNAGE”")
+        }
+
         if (game.ongoing && !dto.ongoing) {
             await this.gameService.update(game.id, {ongoing: dto.ongoing, endedAt: Date.now().toString()})
         } else {
@@ -819,14 +823,11 @@ export class GameApiService {
             throw new UnprocessableEntityException("Game not found")
         }
 
-        const achievement = await this.achievementService.findOne({id: dto.achievementId})
-
-        if (!game) {
-            throw new UnprocessableEntityException("Game not found")
-        }
-
         const entity = await this.playerAchievementService.createMultiple(
-            dto.playerAchievements.map(pa => {
+            await Promise.all(dto.playerAchievements.map(async pa => {
+
+                const achievement = await this.achievementService.findOne({id: pa.achievementId})
+
                 return {
                     ...pa,
                     player,
@@ -835,10 +836,10 @@ export class GameApiService {
                     id: this.playerAchievementService.calculateId({
                         gameId: dto.gameId,
                         uuid: dto.uuid,
-                        achievementId: dto.achievementId
+                        achievementId: pa.achievementId
                     })
                 }
-            })
+            }))
         )
 
         return entity

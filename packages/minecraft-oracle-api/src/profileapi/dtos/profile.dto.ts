@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { UserRole } from "../../common/enums/UserRole"
+import { PlayEligibilityReason } from '../../config/constants'
 
 export class ProfileDto {
     
@@ -32,4 +33,7 @@ export class ProfileDto {
 
     @ApiProperty({ description: 'Whether the user is blacklisted or not'})
     blacklisted: boolean
+
+    @ApiProperty({ description: 'Whether the user is blacklisted or not'})
+    allowedToPlayReason: PlayEligibilityReason
 }

@@ -6,9 +6,10 @@ import {
   MenuItem,
   OutlinedInput,
   Select,
-} from '@material-ui/core';
-import { appStyles } from '../../app.styles';
-import { CoinQuantityFieldStyles } from './CoinQuantityField.styles';
+} from '@mui/material';
+import { useClasses } from 'hooks';
+import { styles as appStyles } from '../../app.styles';
+import { styles } from './CoinQuantityField.styles';
 
 export enum UNIT {
   ETHER = 1,
@@ -24,8 +25,8 @@ export const CoinQuantityField = (props: any) => {
   const unitOptions: [number, string][] = props.unitOptions ?? [[2, 'wei']];
   const unit: UNIT | undefined = props.unit ?? UNIT.WEI;
 
-  const { formMaxButton } = appStyles();
-  const { outlinedInput, coinSelect } = CoinQuantityFieldStyles();
+  const { formMaxButton } = useClasses(appStyles);
+  const { outlinedInput, coinSelect } = useClasses(styles);
 
   const _setMaxNumber = () => {
     setMaxValue?.();
@@ -50,7 +51,6 @@ export const CoinQuantityField = (props: any) => {
           // onChange={(event: any) => inputToBigNum(event.target.value, setSendAmount)}
           onChange={onValueChange}
           value={value}
-          labelWidth={0}
           endAdornment={
             withMaxButton ? (
               <InputAdornment position="end">

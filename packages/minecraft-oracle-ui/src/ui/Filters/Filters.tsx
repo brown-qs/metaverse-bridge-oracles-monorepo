@@ -6,8 +6,9 @@ import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Slider from '@mui/material/Slider';
 import { Button, Drawer } from 'ui';
-import { useStyles } from './Filters.style';
-import { Chip } from '@material-ui/core';
+import { useClasses } from 'hooks';
+import { styles } from './Filters.style';
+import { Chip } from '@mui/material';
 import { MOONSAMA_TRAITS } from 'utils/constants';
 import FilterIcon from '@mui/icons-material/FilterListSharp';
 import { OrderType } from 'utils/subgraph';
@@ -36,7 +37,7 @@ export const Filters = ({ onFiltersUpdate }: Props) => {
     filterChip,
     priceRangeWrapper,
     filtersTitle,
-  } = useStyles();
+  } = useClasses(styles);
 
   const handleApplyFilters = () => {
     onFiltersUpdate({

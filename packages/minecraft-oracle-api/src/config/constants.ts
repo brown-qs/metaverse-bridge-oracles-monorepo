@@ -36,6 +36,12 @@ export enum RecognizedAssetType {
   TEMPORARY_TICKET='TEMPORARY_TICKET'
 }
 
+export enum PlayEligibilityReason {
+  NONE='NONE',
+  MOONSAMA='MSAMA',
+  TICKET='TICKET',
+  TEMPORARY_TICKET='TEMPORARY_TICKET',
+}
 
 export type RecognizedAsset = {
     chainId: ChainId,
@@ -152,7 +158,7 @@ export const ENRAPTURABLE_ASSETS: RecognizedAsset[] = [
       id: ['1', '2'],
       type: RecognizedAssetType.TEMPORARY_TICKET,
       chainId: ChainId.MOONRIVER,
-      name: 'Bonobo & kings game pass',
+      name: 'Bonobos & kings game pass',
       gamepass: true,
       expiration: 1648418400
     } /* embassy NFTs */

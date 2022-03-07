@@ -1,6 +1,6 @@
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import { Theme } from '@mui/material';
 
-export const useStyles = makeStyles((theme) => ({
+export const styles = (theme: Theme) => ({
   filtersTitle: {
     fontFamily: 'Space Mono, monospace !important',
   },
@@ -48,4 +48,4 @@ export const useStyles = makeStyles((theme) => ({
     justifyContent: 'space-between',
     fontSize: '12px',
   },
-}));
+});
