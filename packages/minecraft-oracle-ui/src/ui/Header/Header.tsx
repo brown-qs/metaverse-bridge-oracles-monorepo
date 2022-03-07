@@ -49,8 +49,11 @@ export const Header = () => {
                     <Grid item className={buttonContainer}>
                         {!showRegularMenu ? (
                             <Box style={{ display: 'flex ' }}>
-                                <a href="https://moonsama.com" className={navItem}>
-                                    Visit Marketplace
+                                <a href="https://moonsama.com" target='_blank' className={navItem}>
+                                    Visit Marketplace↗
+                                </a> |
+                                <a href="https://wiki.moonsama.com" target='_blank' className={navItem}>
+                                    Docs↗
                                 </a> |
                             </Box>
                         ) : (
@@ -60,8 +63,11 @@ export const Header = () => {
                                 onOpen={() => setIsDrawerOpened(true)}
                             >
                                 <Box>
-                                    <a href="https://moonsama.com" className={navItemDrawer}>
-                                        Visit Marketplace
+                                    <a href="https://moonsama.com" target='_blank' className={navItemDrawer}>
+                                        Visit Marketplace↗
+                                    </a> |
+                                    <a href="https://wiki.moonsama.com" target='_blank' className={navItemDrawer}>
+                                        Docs↗
                                     </a> |
                                 </Box>
                             </Drawer>

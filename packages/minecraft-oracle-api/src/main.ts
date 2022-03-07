@@ -14,7 +14,6 @@ async function bootstrap() {
       transports: [new winston.transports.Console()]
     })
   });
-
   app.enableCors();
   app.setGlobalPrefix('/api/v1');
   const options = new DocumentBuilder()

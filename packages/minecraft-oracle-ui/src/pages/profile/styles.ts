@@ -1,6 +1,6 @@
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import { Theme } from '@mui/material';
 
-export const useStyles = makeStyles((theme) => ({
+export const styles = (theme: Theme) => ({
     profileContainer: {
         display: 'flex',
         alignItems: 'center',
@@ -11,6 +11,60 @@ export const useStyles = makeStyles((theme) => ({
             textAlign: 'center',
         },
     },
+    dialogContainer: {
+        display: 'flex',
+        padding: theme.spacing(4),
+        flexDirection: 'column',
+        // minWidth: 500,
+    },
+    divider: {
+      background: theme.palette.text.secondary,
+      opacity: 0.5,
+      marginTop: theme.spacing(2),
+    },
+        // Column
+    col: {
+        '[class*=formValue]': {
+        'min-height': 30,
+        color: 'fucsia',
+        },
+    },
+    row: {
+        display: 'flex',
+        justifyContent: 'space-between',
+    },
+
+    formBox: {
+        border: 1,
+        borderStyle: 'solid',
+        borderColor: theme.palette.grey[900],
+        padding: 30,
+    },
+    formSubheader: {
+        fontSize: 22,
+        color: theme.palette.common.white,
+        marginBottom: '1rem',
+    },
+    formButton: {
+        marginTop: theme.spacing(2),
+        margin: '0 auto',
+        display: 'block',
+        minWidth: 240,
+    },
+    formLabel: {
+        color: theme.palette.grey[500],
+        display: 'flex',
+        alignItems: 'center',
+    },
+    formValue: {
+        color: theme.palette.text.primary,
+    },
+    formValueTokenDetails: {
+        height: 40,
+        display: 'flex',
+        alignItems: 'center',
+    },
+
     pageContent: {
         margin: '80px 0',
 
@@ -127,6 +181,34 @@ export const useStyles = makeStyles((theme) => ({
             transition: 'box-shadow 0.1s, background 0.1s, padding 0.1s',
         },
     },
+    transferButtonMid: {
+        fontFamily: `VT323, 'arial'`,
+        border: 'none',
+        outline: 'none',
+        display: 'block',
+        fontSize: '18px',
+        lineHeight: '20px',
+        alignSelf: 'center',
+        height: '25px',
+        width: '240px',
+        padding: '2px 6px',
+        boxShadow: '3px 0px #133db9, -3px 0px #133db9, 0px 3px #133db9, 0px -3px #133db9, 0px 8px #2979ff, -3px 6px #2a6cda, 3px 6px #2a6cda',
+        background: '#133DB9',
+        color: '#eee',
+        margin: '15px 0',
+        transition: 'box-shadow 0.1s, background 0.1s, padding 0.1s',
+
+        '&:hover': {
+            background: '#2353E0',
+        },
+        '&:active': {
+            boxShadow: '3px 3px #2353e0, -3px 3px #2353e0, 0px 6px #2353e0, 0px 0px #133db9, 0px 8px #2979ff, -3px 6px #2a6cda, 3px 6px #2a6cda',
+            background: '#2353E0',
+            paddingTop: '8px',
+            paddingBottom: '5px',
+            transition: 'box-shadow 0.1s, background 0.1s, padding 0.1s',
+        },
+    },
     headerImage: {
         width: '55px',
         position: 'absolute',
@@ -150,4 +232,4 @@ export const useStyles = makeStyles((theme) => ({
             justifyContent: 'center'
         },
     }
-}));
+});

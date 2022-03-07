@@ -19,10 +19,10 @@ export interface OwnedTokens {
 export interface TokenOwner {
   id: string;
   balance: string;
-  token: { id: string, contract: {id: string} };
+  token: { id: string, contract: { id: string } };
 }
 
-export type AssetWithBalance = Asset & {balance: string | BigNumber}
+export type AssetWithBalance = Asset & { balance: string | BigNumber }
 
 
 export interface UserCollection {
@@ -45,87 +45,87 @@ export const useOnChainItems = (trigger: string | undefined = undefined) => {
 
   const fetchUserCollection = useCallback(async () => {
 
-      if (!account) {
-        setOnChainItems(undefined)
-        return
+    if (!account) {
+      setOnChainItems(undefined)
+      return
+    }
+
+    const result: UserCollection = {}
+    const fetches = rawCollections.map(async (collection) => {
+
+      if (!collection.subgraph) {
+        result[collection.display_name] = []
+        return;
       }
 
-      const result: UserCollection = {}
-      const fetches = rawCollections.map(async (collection) => {
-        
-        if (!collection.subgraph) {
+      let assets: (AssetWithBalance | undefined)[] = []
+
+      console.log('collection', collection.display_name)
+
+      if (collection.type === 'ERC721') {
+        const query = QUERY_USER_ERC721(account)
+        const response = await request(collection.subgraph, query);
+
+        console.debug('YOLO fetchUserCollection', response);
+
+        if (!response) {
           result[collection.display_name] = []
-          return; 
+          return;
         }
 
-        let assets: (AssetWithBalance | undefined)[] = []
+        const ot: OwnedTokens = response.owners?.[0];
 
-        console.log('collection', collection.display_name)
+        console.log(ot)
 
-        if(collection.type === 'ERC721') {
-          const query = QUERY_USER_ERC721(account)
-          const response = await request(collection.subgraph, query);
+        if (!ot) {
+          result[collection.display_name] = []
+          return;
+        }
 
-          console.debug('YOLO fetchUserCollection', response);
+        assets = ot.ownedTokens.map((x) => {
+          const aid = BigNumber.from(x.id).toString();
 
-          if (!response) {
-            result[collection.display_name] = []
-            return;
+          if (!!collection.ids && !collection.ids.includes(aid)) {
+            console.log('fail')
+            return undefined
           }
 
-          const ot: OwnedTokens = response.owners?.[0];
+          return {
+            assetId: aid,
+            id: getAssetEntityId(x.contract.id, aid),
+            assetType: StringAssetType.ERC721,
+            assetAddress: x.contract.id,
+            balance: '1'
+          };
+        });
 
-          console.log(ot)
+        console.log(assets)
+      } else {
+        const query = QUERY_USER_ERC1155(account)
+        const response = await request(collection.subgraph, query);
 
-          if (!ot) {
-            result[collection.display_name] = []
-            return;
-          }
+        console.debug('YOLO fetchUserCollection', response);
 
-          assets = ot.ownedTokens.map((x) => {
-            const aid = BigNumber.from(x.id).toString();
-            
-            if (!!collection.ids && !collection.ids.includes(aid)) {
-                console.log('fail')
-                return undefined
-            }
+        if (!response) {
+          result[collection.display_name] = []
+          return;
+        }
 
-            return {
-              assetId: aid,
-              id: getAssetEntityId(x.contract.id, aid),
-              assetType: StringAssetType.ERC721,
-              assetAddress: x.contract.id,
-              balance: '1'
-            };
-          });
+        const to: TokenOwner[] = response.tokenOwners;
 
-          console.log(assets)
-        } else {
-          const query = QUERY_USER_ERC1155(account)
-          const response = await request(collection.subgraph, query);
+        if (!to) {
+          result[collection.display_name] = []
+          return;
+        }
 
-          console.debug('YOLO fetchUserCollection', response);
-
-          if (!response) {
-            result[collection.display_name] = []
-            return;
-          }
-
-          const to: TokenOwner[] = response.tokenOwners;
-
-          if (!to) {
-            result[collection.display_name] = []
-            return;
-          }
-
-          assets = to
+        assets = to
           .filter(x => x.balance !== '0')
           .map((x) => {
             const aid = BigNumber.from(x.token.id).toString();
 
             if (!!collection.ids && !collection.ids.includes(aid)) {
-                console.log('fail')
-                return undefined
+              console.log('fail')
+              return undefined
             }
             return {
               assetId: aid,
@@ -136,26 +136,26 @@ export const useOnChainItems = (trigger: string | undefined = undefined) => {
             };
           })
           .filter(x => !!x)
-        }
+      }
 
-        const staticDatas =  await staticCallback(assets as AssetWithBalance[]);
+      const staticDatas = await staticCallback(assets as AssetWithBalance[]);
 
-        const datas = staticDatas.map((sd, i) => {
-          return {
-            meta: sd.meta,
-            staticData: sd.staticData,
-            asset: assets[i] as AssetWithBalance,
-            enrapturable: collection.enrapturable,
-            importable: collection.importable
-          };
-        });
-        result[collection.display_name] = datas
-        return
-      })
+      const datas = staticDatas.map((sd, i) => {
+        return {
+          meta: sd.meta,
+          staticData: sd.staticData,
+          asset: assets[i] as AssetWithBalance,
+          enrapturable: collection.enrapturable,
+          importable: collection.importable
+        };
+      });
+      result[collection.display_name] = datas
+      return
+    })
 
-      await Promise.all(fetches)
-      setOnChainItems(result)
-    },
+    await Promise.all(fetches)
+    setOnChainItems(result)
+  },
     [chainId, blocknumber, account, trigger]
   );
 

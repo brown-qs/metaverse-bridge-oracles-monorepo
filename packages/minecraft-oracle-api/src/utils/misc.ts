@@ -120,9 +120,11 @@ export function stringToStringAssetType(
 }
 
 export function findRecognizedAsset(recassets: RecognizedAsset[], asset: {assetAddress: string, assetId: string}) {
+  //console.log({recassets})
+  //console.log({asset})
   return recassets.find(x => {
     return (
-      (x.address.toLowerCase() === asset.assetAddress.toLowerCase())
+      (x.address.toLowerCase() === asset?.assetAddress?.toLowerCase())
       && (
         (x.id === undefined)
         || (x.id !== undefined && typeof x.id === 'string' && x.id === asset.assetId)
