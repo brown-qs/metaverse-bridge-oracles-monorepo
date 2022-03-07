@@ -4,6 +4,7 @@ import { useBlockNumber } from 'state/application/hooks';
 import { useAuth } from 'hooks';
 import { StaticTokenData, useTokenStaticDataCallbackArray } from 'hooks/useTokenStaticDataCallback/useTokenStaticDataCallback';
 import { stringToStringAssetType } from 'utils/subgraph';
+import { RecognizedAssetType } from 'assets/data/recognized'
 
 export interface InGameItem {
     name: string
@@ -15,7 +16,11 @@ export interface InGameItem {
     hash?: string
     summonable: boolean
     staticData: StaticTokenData,
-    meta: any
+    meta: any,
+    recognizedAssetType: RecognizedAssetType,
+    enraptured: boolean,
+    exportChainName: string,
+    exportAddress: string,
 }
 
 export interface InGameTexture {
@@ -77,6 +82,7 @@ export function useInGameItems(trigger: string | undefined = undefined) {
             setItems(undefined)
             return
         }
+        console.log({rawData})
         const melange = [...rawData.assets, ...rawData.resources]
         let staticDatas = await staticCallback(
             melange.map(x => {
@@ -89,7 +95,7 @@ export function useInGameItems(trigger: string | undefined = undefined) {
             })
         );
         let resultSet: ProfileInGameItemsWithStatic = { assets: [], resources: [], textures: []}
-        
+        console.log({staticDatas, rawData})
         if (rawData.assets.length > 0) {
             staticDatas.slice(0, rawData.assets.length).map((sd, i) => {
                 resultSet.assets.push({
@@ -100,6 +106,7 @@ export function useInGameItems(trigger: string | undefined = undefined) {
             });
             staticDatas = staticDatas.slice(rawData.assets.length)
         }
+        console.log('shinshin', {resultSet})
 
         if (rawData.resources.length > 0) {
             staticDatas.slice(0, rawData.resources.length).map((sd, i) => {

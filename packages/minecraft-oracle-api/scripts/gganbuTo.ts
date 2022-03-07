@@ -1,6 +1,5 @@
 import { MaterialEntity } from '../src/material/material.entity'
-import { Connection, createConnection, getConnection, In } from 'typeorm'
-
+import { Connection, createConnection, getConnection } from 'typeorm'
 import { config } from 'dotenv'
 import { SnapshotItemEntity } from '../src/snapshot/snapshotItem.entity'
 import { UserEntity } from '../src/user/user.entity'
@@ -24,16 +23,8 @@ import { InventoryService } from '../src/playerinventory/inventory.service'
 config()
 
 const list = [
-    'D0tSama',
-    'Onizuka171',
-    'lasereyecharlie',
-    'MerlinHermes',
-    'Onizuka171',
-    'Donny_Dukes',
-    'Gganbu_Movr',
-    'BiggwormSama',
-    'kokonutx',
-    'Kartus',
+    'CapTK13',
+    'SrogiLomot'
 ]
 
 const gameId = 'carnage-2022-02-06'
@@ -88,33 +79,29 @@ async function main() {
                 continue
             }
 
-
-
-            for (let j = 0; j < gganbus.length; j++) {
+            for(let j = 0; j<gganbus.length; j++) {
                 const gganbu = gganbus[j]
-                const inv = await connection.manager.getRepository(InventoryEntity).findOne({where: {owner: {uuid: user.uuid}, material: {name: gganbu.material.mapsTo}}, relations: ['owner', 'material']})
+                const inv = await connection.manager.getRepository(InventoryEntity).findOne({where: {owner: {uuid: user.uuid}, material: {name: gganbu.material.mapsTo}}, relations: ['owner']})
                 if (!inv) {
+                    const mat = await connection.manager.getRepository(MaterialEntity).findOne({where: {name: gganbu.material.mapsTo}})
                     
-                   const ent =  await connection.manager.getRepository(InventoryEntity).create({
+                    const ent = await connection.manager.getRepository(InventoryEntity).create({
                         id: InventoryService.calculateId({uuid: user.uuid, materialName: gganbu.material.mapsTo}),
                         amount: (Number.parseFloat(gganbu.amount) * gganbu.material.multiplier).toString(),
-                        material: await connection.manager.getRepository(MaterialEntity).findOne({name: gganbu.material.mapsTo}),
+                        material: mat,
                         owner: user,
                         summonInProgress: false,
                         summonable: true
                     })
 
                     await connection.manager.getRepository(InventoryEntity).save(ent)
-                    
-                    console.log('new num', gganbu.material.mapsTo, gganbu.amount, gganbu.material.multiplier)
+                    console.log('new num', gganbu.amount)
                 } else {
                     const newNum = (Number.parseFloat(inv.amount) + (Number.parseFloat(gganbu.amount) * gganbu.material.multiplier)).toString()
                     console.log(`   old nums`, inv.material.name, inv.amount, newNum)
                     //await connection.manager.getRepository(InventoryEntity).update(inv.id, {amount: newNum})
                 }
             }
-        } else {
-            console.log(user.userName,'No stat found')
         }
     }
     await connection.close()

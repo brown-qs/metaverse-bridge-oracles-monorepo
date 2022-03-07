@@ -3,11 +3,12 @@ import { network } from 'connectors';
 import { NetworkContextName } from '../../constants';
 import { useEagerConnect, useInactiveListener } from 'hooks';
 import { useEffect, useState } from 'react';
-import { useStyles } from './Web3ReactManager.styles';
-import { CircularProgress } from '@material-ui/core';
+import { useClasses } from 'hooks';
+import { styles as web3ReactManagerStyles } from './Web3ReactManager.styles';
+import { CircularProgress } from '@mui/material';
 
 export const Web3ReactManager = ({ children }: { children: JSX.Element }) => {
-  const styles = useStyles();
+  const styles = useClasses(web3ReactManagerStyles);
   const { active } = useWeb3React();
   const {
     active: networkActive,

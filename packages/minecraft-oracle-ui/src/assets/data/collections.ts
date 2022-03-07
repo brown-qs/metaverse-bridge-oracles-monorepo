@@ -104,7 +104,7 @@ export const collections = {
       chainId: 1285,
       address: '0x1974eEAF317Ecf792ff307F25A3521C35eECde86',
       display_name: 'Moonbrella',
-      ids: Array.from({length: 58}, (_, i) => (i + 2).toString()),
+      ids: Array.from({length: 60}, (_, i) => (i + 2).toString()),
       enrapturable: false,
       importable: true,
       symbol: 'Moonbrella',
@@ -147,6 +147,19 @@ export const collections = {
       type: 'ERC721',
       contractURI: 'ipfs://QmR8K7eLZnhFqC5qUStMyFAgawSJcpRfSvMDMffQVQFn38',
       subgraph: 'https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/nft-721-mmplots1'
+    },
+    {
+      chainId: 1285,
+      address: '0x0a54845AC3743C96E582E03f26c3636ea9c00C8A'.toLowerCase(),
+      display_name: 'Moonsama Embassy',
+      floorDisplay: false,
+      symbol: 'MEMBASSY',
+      ids: ['1', '2'],
+      importable: false,
+      enrapturable: true,
+      type: 'ERC1155',
+      contractURI: 'ipfs://QmWzBDhV5nuPrud7XZo2vBLBWtTStwc6N8xSwCzuMdewd8',
+      subgraph: 'https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/nft-1155-embassy'
     }
   ]
 };

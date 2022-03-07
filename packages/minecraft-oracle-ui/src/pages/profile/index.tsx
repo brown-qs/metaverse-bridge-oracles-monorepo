@@ -1,31 +1,38 @@
 import { Button } from 'ui';
 import Stack from '@mui/material/Stack';
 import { Header } from 'ui';
-import { useStyles } from './styles';
+import { useClasses } from 'hooks';
+import { styles } from './styles';
 import List from '@mui/material/List';
 import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box'
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Tooltip from '@mui/material/Tooltip';
 
+import { Dialog } from 'ui';
+
 import { AuthData } from 'context/auth/AuthContext/AuthContext.types';
+
+import { AddressDisplayComponent } from 'components/form/AddressDisplayComponent';
 
 import { useProfile } from 'hooks/multiverse/useProfile';
 import { useOnChainItems } from 'hooks/multiverse/useOnChainItems';
 import { InGameTexture, useInGameItems } from 'hooks/multiverse/useInGameItems';
-import { useAccountDialog, useActiveWeb3React, useImportDialog } from 'hooks';
+import { useAccountDialog, useActiveWeb3React, useImportDialog, useEnraptureDialog } from 'hooks';
 import { useExportDialog } from 'hooks/useExportDialog/useExportDialog';
 import { useSummonDialog } from 'hooks/useSummonDialog/useSummonDialog';
 import { stringToStringAssetType } from 'utils/subgraph';
 import { Fraction } from 'utils/Fraction';
 import { Media } from '../../components/Media/Media';
-import { countRecognizedAssets } from 'utils';
+import { countGamePassAssets } from 'utils';
 import { useAssetDialog } from '../../hooks/useAssetDialog/useAssetDialog';
 import { useCallbackSkinEquip } from '../../hooks/multiverse/useCallbackSkinEquip';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { SKIN_LABELS } from '../../constants/skins';
+import { InGameItemWithStatic } from 'hooks/multiverse/useInGameItems';
 
 export type ProfilePagePropTypes = {
     authData: AuthData
@@ -33,16 +40,26 @@ export type ProfilePagePropTypes = {
 
 const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
-    const { account, chainId } = useActiveWeb3React()
+    const { account } = useActiveWeb3React()
     const profile = useProfile();
+    const playAllowedReasonTexts: any = {
+        'MSAMA': 'You are eligible to play because you imported a Moonsama.',
+        'TICKET': 'You are eligible to play because you imported a VIP ticket.',
+        'TEMPORARY_TICKET': 'You are eligible to play because you imported a game pass.',
+        'DEFAULT': 'You are eligible to play because you were given permanent access.',
+    }
     const { setAccountDialogOpen } = useAccountDialog();
 
     const [fetchtrigger, setFetchtrigger] = useState<string | undefined>(undefined)
+
+    const [itemDetailDialogOpen, setItemDetailDialogOpen] = useState<boolean>(false);
+    const [itemDetailDialogData, setItemDetailDialogData] = useState({} as InGameItemWithStatic);
 
     const callbackSkinEquip = useCallbackSkinEquip()
 
     // Dialogs
     const { setImportDialogOpen, setImportDialogData } = useImportDialog()
+    const { setEnraptureDialogOpen, setEnraptureDialogData } = useEnraptureDialog()
     const { setExportDialogOpen, setExportDialogData } = useExportDialog()
     const { setSummonDialogOpen, setSummonDialogData } = useSummonDialog()
     const { setAssetDialogOpen, setAssetDialogData } = useAssetDialog()
@@ -55,11 +72,13 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const onChainPlot = onChainItems?.['Moonsama Minecraft Plots Season 1'] ?? [];
     const onChainArt = onChainItems?.['Multiverse Art'] ?? [];
     const onChainMoonbrella = onChainItems?.['Moonbrella'] ?? [];
+    const onChainEmbassy = onChainItems?.['Moonsama Embassy'] ?? [];
 
-    const onChainImportables = [...onChainGoldenTickets, ...onChainMoonbrella, ...onChainMoonsamas, ...onChainArt, ...onChainPlot]
+    const onChainImportables = [...onChainGoldenTickets, ...onChainMoonbrella, ...onChainMoonsamas, ...onChainArt, ...onChainPlot, ...onChainEmbassy];
 
     console.log('VIP Ticket', onChainGoldenTickets)
     console.log('onChainMoonbrella', onChainMoonbrella)
+    console.log('onChainEmbassy', onChainEmbassy)
 
     //In Game Items
     const inGameItems = useInGameItems(fetchtrigger);
@@ -67,38 +86,45 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const inGameResources = inGameItems?.resources ?? []
     const inGameTextures: InGameTexture[] = inGameItems?.textures ?? []
 
-    //console.log('ingame items', inGameItems, { inGameAssets, inGameResources, inGameTextures })
+    console.log('ingame items', inGameItems, { inGameAssets, inGameResources, inGameTextures })
 
     // const { jwt, userProfile } = authData;
 
     const {
         profileContainer,
+        dialogContainer,
         transferButton,
-        statBox,
         columnTitle,
         columnTitleText,
-        statBoxInfo,
+        transferButtonMid,
         transferButtonSmall,
-        headerImage,
         itemImage,
+        formBox,
+        formLabel,
+        formValue,
+        formValueTokenDetails,
+        row,
         skinComponent
-    } = useStyles();
+    } = useClasses(styles);
 
-    const canSummon = !!inGameItems?.resources && inGameItems?.resources.length > 0
-    const assetCounter = countRecognizedAssets(inGameAssets)
-    const hasImportedMoonsama = assetCounter.moonsamaNum > 0
+    const canSummon = !!inGameItems?.resources && inGameItems?.resources.length > 0 && !profile?.blacklisted
+    const assetCounter = countGamePassAssets(inGameAssets)
     const hasImportedTicket = assetCounter.ticketNum > 0
-
+    console.log({inGameAssets})
     return (
         <Grid className={profileContainer}>
             <Header />
-            <Grid container justifyContent="center" spacing={4}>
+            <Grid container justifyContent="center" style={{ marginTop: '30px' }} spacing={4}>
                 <div style={{ width: '50%', textAlign: 'left' }}>
                     <span style={{ fontSize: '38px', fontFamily: `VT323, 'arial'`, }}>Available skins</span> <br />
                 </div>
                 <div style={{ width: '50%', textAlign: 'right' }}>
                     <span style={{ fontSize: '22px', }}>Welcome back {authData?.userProfile?.userName},</span> <br />
-                    {profile?.allowedToPlay ? (<span style={{ color: '#12753A', fontSize: '16px', fontWeight: 'bold' }}>You are eligible to play!</span>) :
+                    {profile?.allowedToPlay ? (
+                        <Tooltip placement='bottom' title={playAllowedReasonTexts[profile.allowedToPlayReason] ?? playAllowedReasonTexts['DEFAULT']}>
+                            <span style={{ color: '#12753A', fontSize: '16px', fontWeight: 'bold' }}>{profile?.blacklisted ? `You are blacklisted but can play`: `You are eligible to play!`}</span>
+                        </Tooltip>
+                        ) :
                         (
                             <p style={{ color: '#DB3B21' }}>To be eligible to play, bridge a VIP ticket/Moonsama, <br /> or <a href="https://moonsama.com/freshoffers" target="_blank">visit the Marketplace to get one</a></p>)}
                 </div>
@@ -125,12 +151,12 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                     gridRow='1'
                                 >
                                     {value.coverURL && <Tooltip placement='left' title={`${skinLabel?.[value.assetId]?.label ?? skinLabel?.label ?? 'Available in-game skin'}${value.assetAddress !== '0x0' ? ` Because you imported ${value.name} #${value.assetId}`: ''}`}>
-                                        <a target='_blank' href={`${value.renderURL ? `https://minerender.org/embed/skin/?skin=${value.renderURL}` : value.coverURL}`}>
-                                            <Media uri={value.coverURL} className={itemImage} style={{ marginTop: `${value.equipped ? 'none' : '15px'}` }} />
+                                        <a target='_blank' className={itemImage} href={`${value.renderURL ? `https://minerender.org/embed/skin/?skin=${value.renderURL}` : value.coverURL}`}>
+                                            <Media uri={value.coverURL} style={{ marginTop: `${value.equipped ? 'none' : '15px'}` }} />
                                         </a>
                                     </Tooltip>}
                                     {!value.equipped ? <Button
-                                        className={transferButtonSmall}
+                                        className={transferButtonMid}
                                         disabled={value.equipped}
                                         onClick={async () => {
                                             const success = await callbackSkinEquip({
@@ -175,16 +201,21 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                 key={`${value?.assetAddress}-${value?.assetId}-${ind}`} //update key
                                                 disablePadding
                                             >
-                                                <ListItemButton>
-                                                    <ListItemAvatar>
+                                                <ListItemButton onClick={() => {
+                                                    setItemDetailDialogData(value);
+                                                    setItemDetailDialogOpen(true);
+                                                }}>
+                                                    <ListItemAvatar className={itemImage}>
                                                         {/*<img className={itemImage} src={value?.meta?.image} alt="" />*/}
-                                                        <Media uri={value?.meta?.image} className={itemImage} />
+                                                        <Media uri={value?.meta?.image} />
                                                     </ListItemAvatar>
-                                                    <ListItemText primary={value?.meta?.name ?? `${value.assetAddress} ${value.assetId}`} />
-                                                    <Tooltip title={'Your exported asset will go back to the sender address you imported from. Associated skin wil be unavailable.'}>
+                                                    <ListItemText primary={value?.meta?.name ?? `${value.assetAddress} ${value.assetId}`} style={{paddingLeft: '10px'}} />
+                                                    {value?.exportable && (
+                                                    <Tooltip title={'Your exported asset will go back to the sender address you imported from. Associated items or skins will be unavailable.'}>
                                                         <Button
-                                                            className={transferButtonSmall}
-                                                            onClick={() => {
+                                                            className={transferButtonMid}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
                                                                 if (!!account) {
                                                                     setExportDialogOpen(true);
                                                                     setExportDialogData(
@@ -206,6 +237,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                             Export to wallet
                                                         </Button>
                                                     </Tooltip>
+                                                    )}
                                                 </ListItemButton>
                                             </ListItem>
                                         );
@@ -215,6 +247,59 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                         </ListItem>
                                     )}
                                 </List>
+                                <Dialog
+                                    open={itemDetailDialogOpen}
+                                    onClose={() => {
+                                        setItemDetailDialogOpen(false)
+                                    }}
+                                    title={'Item Detail'}
+                                    maxWidth="sm"
+                                    fullWidth
+                                    >
+                                    <div className={dialogContainer}>
+                                        <Grid container spacing={1} justifyContent="center">
+                                        <Grid item md={12} xs={12}>
+                                            <Box className={formBox}>
+                                                <div className={row}>
+                                                    <div className={formLabel}>Item Type</div>
+                                                    <div className={`${formValue} ${formValueTokenDetails}`}>
+                                                    {itemDetailDialogData.recognizedAssetType}
+                                                    </div>
+                                                </div>
+                                                <div className={row}>
+                                                    <div className={`${formValue} ${formValueTokenDetails}`}>
+                                                    {itemDetailDialogData.enraptured ? 'This item is enraptured.' : 'This item is imported.'}
+                                                    </div>
+                                                </div>
+                                                <div className={row}>
+                                                    <div className={`${formValue} ${formValueTokenDetails}`}>
+                                                    {itemDetailDialogData.exportable ? 'This item is exportable.' : 'This item is not exportable.'}
+                                                    </div>
+                                                </div>
+                                                {itemDetailDialogData.exportable ? (
+                                                    <React.Fragment>
+                                                        <div className={row}>
+                                                        <div className={formLabel}>Export Chain Name: </div>
+                                                        <div className={`${formValue} ${formValueTokenDetails}`}>
+                                                            {itemDetailDialogData.exportChainName}
+                                                        </div>
+                                                        </div>
+                                                        <div className={row}>
+                                                        <div className={formLabel}>Export Address:</div>
+                                                        <AddressDisplayComponent
+                                                            className={`${formValue} ${formValueTokenDetails}`}
+                                                            charsShown={5}
+                                                        >
+                                                            {itemDetailDialogData.exportAddress}
+                                                        </AddressDisplayComponent>
+                                                        </div>
+                                                    </React.Fragment>
+                                                ) : null}
+                                            </Box>
+                                        </Grid>
+                                        </Grid>
+                                    </div>
+                                </Dialog>
                             </div>
                             <div style={{ width: '50%' }}>
                                 <div className={columnTitle}><span className={columnTitleText}>On-chain items: Moonriver account</span></div>
@@ -226,11 +311,11 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                 disablePadding
                                             >
                                                 <ListItemButton>
-                                                    <ListItemAvatar>
+                                                    <ListItemAvatar className={itemImage}>
                                                         {/*<img className={itemImage} src={item?.meta?.image} alt="" />*/}
-                                                        <Media uri={item?.meta?.image} className={itemImage} />
+                                                        <Media uri={item?.meta?.image} />
                                                     </ListItemAvatar>
-                                                    <ListItemText primary={item?.meta?.name} />
+                                                    <ListItemText primary={item?.meta?.name} style={{paddingLeft: '10px'}}/>
                                                     <Tooltip title={'You can have 1 VIP ticket imported at a time.'}>
                                                         <span>
                                                             <Button
@@ -247,19 +332,19 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                             </ListItem>
                                         );
                                     }).concat(
-                                        [...(onChainMoonsamas ?? []), ...(onChainArt ?? []), ...(onChainPlot ?? []), ...(onChainMoonbrella ?? [])].map((item, ind) => {
+                                        [...(onChainArt ?? []), ...(onChainPlot ?? []), ...(onChainMoonbrella ?? []), ...(onChainEmbassy ?? []), ...(onChainMoonsamas ?? [])].map((item, ind) => {
                                             return (
                                                 <ListItem
                                                     key={`${item?.asset?.assetAddress}-${item?.asset?.assetId}-${ind}`} //update key
                                                     disablePadding
                                                 >
                                                     <ListItemButton>
-                                                        <ListItemAvatar>
+                                                        <ListItemAvatar className={itemImage}>
                                                             {/*<img className={itemImage} src={item?.meta?.image} alt="" />*/}
-                                                            <Media uri={item?.meta?.image} className={itemImage} />
+                                                            <Media uri={item?.meta?.image} />
                                                         </ListItemAvatar>
-                                                        <ListItemText primary={item?.meta?.name} />
-                                                        <Tooltip title={`Your imported ${item?.meta?.name} will bound to your Minecraft account. It will go back to the sender address when exported.`}>
+                                                        <ListItemText primary={item?.meta?.name} style={{paddingLeft: '10px'}}/>
+                                                        {item.importable && <Tooltip title={`Your imported ${item?.meta?.name} will bound to your Minecraft account. It will go back to the sender address when exported.`}>
                                                             <span>
                                                                 <Button
                                                                     className={transferButtonSmall}
@@ -269,7 +354,18 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                                     }}
                                                                 >Import to game</Button>
                                                             </span>
-                                                        </Tooltip>
+                                                        </Tooltip>}
+                                                        {item.enrapturable && <Tooltip title={`Your ${item?.meta?.name} will be enraptured (burned) and bound to your Minecraft account forever.`}>
+                                                            <span>
+                                                                <Button
+                                                                    className={transferButtonSmall}
+                                                                    onClick={() => {
+                                                                        setEnraptureDialogOpen(true);
+                                                                        setEnraptureDialogData({ asset: item.asset });
+                                                                    }}
+                                                                >Burn into game</Button>
+                                                            </span>
+                                                        </Tooltip>}
                                                     </ListItemButton>
                                                 </ListItem>
                                             );
@@ -285,6 +381,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     </Grid>
                 </Grid>
             </Grid>
+
             <Grid container justifyContent="center" style={{ marginTop: '30px' }} spacing={4}>
                 <Grid container justifyContent="center" style={{ marginTop: '30px' }} spacing={4}>
                     <Grid item md={12} xs={12} justifyContent="center" style={{ textAlign: 'center' }}>
@@ -312,7 +409,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     >
                                                         <ListItemButton>
                                                             <ListItemAvatar>
-                                                                <img src={resource.meta.image} alt={resource.name} className={itemImage} />
+                                                                <img src={resource.meta.image} alt={resource.name} className={itemImage}/>
                                                             </ListItemAvatar>
                                                             <ListItemText id={resource.name} primary={resource.meta.name.slice(6)} />
                                                         </ListItemButton>
@@ -361,7 +458,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                             >
                                                 <ListItemButton>
                                                     <ListItemAvatar>
-                                                        <img className={itemImage} src={value?.meta?.image} alt="" />
+                                                        <img src={value?.meta?.image} alt="" className={itemImage}/>
                                                     </ListItemAvatar>
                                                     <ListItemText id={labelId} primary={value?.meta?.name} />
                                                 </ListItemButton>
