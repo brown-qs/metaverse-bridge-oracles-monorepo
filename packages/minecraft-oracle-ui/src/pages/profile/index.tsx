@@ -27,7 +27,7 @@ import { useSummonDialog } from 'hooks/useSummonDialog/useSummonDialog';
 import { stringToStringAssetType } from 'utils/subgraph';
 import { Fraction } from 'utils/Fraction';
 import { Media } from '../../components/Media/Media';
-import { countRecognizedAssets } from 'utils';
+import { countGamePassAssets } from 'utils';
 import { useAssetDialog } from '../../hooks/useAssetDialog/useAssetDialog';
 import { useCallbackSkinEquip } from '../../hooks/multiverse/useCallbackSkinEquip';
 import React, { useState } from 'react';
@@ -40,7 +40,7 @@ export type ProfilePagePropTypes = {
 
 const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
-    const { account, chainId } = useActiveWeb3React()
+    const { account } = useActiveWeb3React()
     const profile = useProfile();
     const playAllowedReasonTexts: any = {
         'MSAMA': 'You are eligible to play because you imported a Moonsama.',
@@ -92,29 +92,23 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
     const {
         profileContainer,
-        divider,
         dialogContainer,
         transferButton,
-        statBox,
         columnTitle,
         columnTitleText,
-        statBoxInfo,
         transferButtonMid,
         transferButtonSmall,
-        headerImage,
         itemImage,
         formBox,
         formLabel,
         formValue,
         formValueTokenDetails,
         row,
-        col,
         skinComponent
     } = useClasses(styles);
 
     const canSummon = !!inGameItems?.resources && inGameItems?.resources.length > 0 && !profile?.blacklisted
-    const assetCounter = countRecognizedAssets(inGameAssets)
-    const hasImportedMoonsama = assetCounter.moonsamaNum > 0
+    const assetCounter = countGamePassAssets(inGameAssets)
     const hasImportedTicket = assetCounter.ticketNum > 0
     console.log({inGameAssets})
     return (
