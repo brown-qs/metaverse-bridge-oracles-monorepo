@@ -133,11 +133,10 @@ export const numberToBytes32HexString = (num?: string | number) => {
     return HashZero;
   }
 
-  const hv = `0x${
-    typeof num === 'string'
+  const hv = `0x${typeof num === 'string'
       ? Number.parseInt(num as string).toString(16)
       : num.toString(16)
-  }`;
+    }`;
   const final = hexZeroPad(hv, 32);
 
   //console.warn('HEXURI', { hv, final });
@@ -161,11 +160,12 @@ export const parseTokenUri = (uri?: string, tokenID?: string | number) => {
   return uri;
 };
 
-export const countRecognizedAssets = (assets: InGameItem[]) => {
-  
+export const countGamePassAssets = (assets: InGameItem[]) => {
+
   let assetCounter = {
     moonsamaNum: 0,
-    ticketNum: 0
+    ticketNum: 0,
+    tempTicketNum: 0
   }
 
   assets.map(asset => {
@@ -181,10 +181,25 @@ export const countRecognizedAssets = (assets: InGameItem[]) => {
     }
 
     if (!!recasset && recasset.type.valueOf() === RecognizedAssetType.TEMPORARY_TICKET) {
-      assetCounter.ticketNum += 1
+      assetCounter.tempTicketNum += 1
       return
     }
   })
 
   return assetCounter
+}
+
+export const countVIPTickets = (assets: InGameItem[]) => {
+
+  let ticketNum = 0
+
+  assets.map(asset => {
+    const recasset = RECOGNIZED_ASSETS[asset.assetAddress.toLowerCase()]
+
+    if (!!recasset && recasset.type.valueOf() === RecognizedAssetType.TICKET && recasset.id === asset.assetId) {
+      ticketNum += 1
+    }
+
+    return ticketNum
+  })
 }
