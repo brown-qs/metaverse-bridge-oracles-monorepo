@@ -1,13 +1,13 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PlayerGameItemEntity } from './playergameitem.entity';
-import { InventoryService } from './playergameitem.service';
+import { PlayerGameItemService } from './playergameitem.service';
 @Module({
     imports: [
         forwardRef(() => TypeOrmModule.forFeature([PlayerGameItemEntity])),
     ],
-    providers: [InventoryService],
-    exports: [InventoryService],
+    providers: [PlayerGameItemService],
+    exports: [PlayerGameItemService],
     controllers: []
 })
-export class InventoryModule {}
+export class PlayerGameItemModule {}

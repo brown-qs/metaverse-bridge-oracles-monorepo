@@ -24,7 +24,7 @@ import { SkinService } from '../skin/skin.service';
 import { SkinEntity } from '../skin/skin.entity';
 import { StringAssetType } from '../common/enums/AssetType';
 import { NftApiService } from '../nftapi/nftapi.service';
-import { GameKind } from 'src/game/game.enum';
+import { GameKind } from '../game/game.enum';
 
 @Injectable()
 export class OracleApiService {

@@ -15,6 +15,7 @@ import { SkinEntity } from '../skin/skin.entity';
 import { PlayerAchievementEntity } from '../playerachievement/playerachievement.entity';
 import { SnaplogEntity } from '../snaplog/snaplog.entity';
 import { PlayerScoreEntity } from 'src/playerscore/playerscore.entity';
+import { PlayerGameItemEntity } from '../playergameitem/playergameitem.entity';
 
 @Entity()
 @Index(['uuid'], {unique: true})
@@ -97,6 +98,9 @@ export class UserEntity {
 
     @OneToMany(() => PlayerAchievementEntity, (achievement) => achievement.player)
     achievements?: PlayerAchievementEntity[];
+
+    @OneToMany(() => PlayerGameItemEntity, (playerGameItemEntities) => playerGameItemEntities.player)
+    playerGameItems?: PlayerGameItemEntity[];
 
     @OneToOne(() => UserEntity, (user) => user.gganbu)
     @JoinColumn()

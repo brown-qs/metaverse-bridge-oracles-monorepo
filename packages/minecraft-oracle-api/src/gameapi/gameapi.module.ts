@@ -21,6 +21,8 @@ import { SnaplogModule } from '../snaplog/snaplog.module';
 import { GganbuModule } from '../gganbu/gganbu.module';
 import { GameScoreTypeModule } from 'src/gamescoretype/gamescoretype.module';
 
+import { GameItemTypeModule } from '../gameitemtype/gameitemtype.module';
+import { PlayerGameItemModule } from '../playergameitem/playergameitem.module';
 
 @Module({
     imports: [
@@ -42,7 +44,9 @@ import { GameScoreTypeModule } from 'src/gamescoretype/gamescoretype.module';
         GameScoreTypeModule,
         forwardRef(() => ProfileApiModule),
         AssetModule,
-        ProviderModule
+        ProviderModule,
+        GameItemTypeModule,
+        PlayerGameItemModule,
     ],
     providers: [GameApiService],
     exports: [GameApiService],

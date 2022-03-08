@@ -1,18 +1,37 @@
 import { ApiProperty } from "@nestjs/swagger";
 
-export class SetGameTypeDto {
-    @ApiProperty({ description: 'Name of the game'})
-    name?: string
+export class SetGameItemTypeDto {
+    @ApiProperty({ description: 'Game Id'})
+    gameId: string
 
-    @ApiProperty({ description: 'Unique ID of the game'})
-    id: string
+    @ApiProperty({ description: 'Item Id'})
+    itemId: string
 
-    @ApiProperty({ description: 'IP of the game'})
-    ip: string;
+    @ApiProperty({ description: 'Item Name'})
+    name: string;
 
-    @ApiProperty({ description: 'Description of the game'})
+    @ApiProperty({ description: 'Description of the Item'})
     description?: string;
 
-    @ApiProperty({ description: 'Image of the game as string'})
+    @ApiProperty({ description: 'Image of the Item as string'})
+    image?: string;
+}
+
+export class QueryGameItemTypesDto {
+
+    @ApiProperty({ description: 'Game ID the items belong to'})
+    gameId: string
+}
+
+
+export class GameItemTypeDto {
+
+    @ApiProperty({ description: 'Item name'})
+    name: string;
+
+    @ApiProperty({ description: 'Description of the item'})
+    description?: string;
+
+    @ApiProperty({ description: 'Image of the game item as string'})
     image?: string;
 }
