@@ -14,7 +14,7 @@ import { InventoryEntity } from '../playerinventory/inventory.entity';
 import { SkinEntity } from '../skin/skin.entity';
 import { PlayerAchievementEntity } from '../playerachievement/playerachievement.entity';
 import { SnaplogEntity } from '../snaplog/snaplog.entity';
-import { PlayerScoreEntity } from 'src/playerscore/playerscore.entity';
+import { PlayerScoreEntity } from '../playerscore/playerscore.entity';
 import { PlayerGameItemEntity } from '../playergameitem/playergameitem.entity';
 
 @Entity()

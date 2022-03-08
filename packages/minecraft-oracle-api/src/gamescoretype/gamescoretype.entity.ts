@@ -3,7 +3,7 @@ import {
     IsNumber
 } from 'class-validator';
 import { GameEntity } from '../game/game.entity';
-import { Column, Entity, OneToMany, PrimaryColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, PrimaryColumn, ManyToOne } from 'typeorm';
 
 @Entity()
 export class GameScoreTypeEntity {
@@ -15,9 +15,6 @@ export class GameScoreTypeEntity {
     @PrimaryColumn({unique: true})
     @IsString()
     id: string;
-
-    @ManyToOne(() => GameEntity)
-    game: GameEntity;
 
     @Column()
     @IsString()
@@ -38,4 +35,7 @@ export class GameScoreTypeEntity {
     @Column()
     @IsNumber()
     column: number;
+
+    @ManyToOne(() => GameEntity, (game) => game.gameScoreTypes)
+    game: GameEntity;
 }

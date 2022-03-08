@@ -26,7 +26,7 @@ import { GameKindInProgressDto } from '../gameapi/dtos/gamekndinprogress.dto';
 import { GameApiService } from '../gameapi/gameapi.service';
 import { GetPlayerAchievementDto } from '../playerachievement/dtos/playerachievement.dto';
 import { PlayerAchievementEntity } from '../playerachievement/playerachievement.entity';
-import { GetPlayerScoreDto } from '../playerscore/dtos/getplayerscore.dto';
+import { QueryPlayerScoreDto } from '../playerscore/dtos/playerscore.dto';
 
 
 @ApiTags('user')
@@ -114,7 +114,7 @@ export class ProfileApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async setUserScore(
-        @Query() dto: GetPlayerScoreDto,
+        @Query() dto: QueryPlayerScoreDto,
     ): Promise<string> {
         const score = await this.gameApiService.getPlayerScore(dto)
         return score
