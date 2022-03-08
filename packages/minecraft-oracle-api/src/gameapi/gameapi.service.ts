@@ -1,5 +1,6 @@
 import { Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ILike } from 'typeorm';
 import { UserService } from '../user/user.service';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { TextureService } from '../texture/texture.service';
@@ -43,6 +44,12 @@ import { SnaplogEntity } from '../snaplog/snaplog.entity';
 import { SnaplogService } from '../snaplog/snaplog.service';
 import { GganbuService } from '../gganbu/gganbu.service';
 import { BankDto } from './dtos/bank.dto';
+import { GameItemTypeService } from '../gameitemtype/gameitemtype.service';
+import { PlayerGameItemService } from '../playergameitem/playergameitem.service';
+import { PlayerGameItemEntity } from '../playergameitem/playergameitem.entity';
+import { GameItemTypeDto, SetGameItemTypeDto } from '../gameitemtype/dtos/gameitemtype.dto';
+import { SetPlayerGameItemDto, QueryGameItemsDto } from '../playergameitem/dtos/playergameitem.dto';
+import { SortDirection } from 'src/common/enums/SortDirection';
 
 @Injectable()
 export class GameApiService {
@@ -68,6 +75,8 @@ export class GameApiService {
         private readonly playerScoreService: PlayerScoreService,
         private readonly playSessionStatService: PlaySessionStatService,
         private readonly assetService: AssetService,
+        private readonly gameItemTypeService: GameItemTypeService,
+        private readonly playerGameItemService: PlayerGameItemService,
         @Inject(ProviderToken.IMPORTABLE_ASSETS) private importableAssets: RecognizedAsset[],
         private configService: ConfigService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
@@ -834,5 +843,131 @@ export class GameApiService {
         )
 
         return entity
+    }
+
+    async getGameItemTypes(gameId: string) {
+
+        const game = await this.gameService.findOne({id: gameId})
+
+        if (!game) {
+            throw new UnprocessableEntityException("Game not found")
+        }
+
+        const gameItems = await this.gameItemTypeService.findMany({ where: { game: {id: gameId}}, relations:['game'] })
+        const results: GameItemTypeDto[] = gameItems.map(item => {
+            delete item.game; delete item.id;
+            return item
+        })
+        return results;
+    }
+
+    async getPlayerGameItems(dto: {gameId: string, uuid: string}) {
+        const entities: PlayerGameItemEntity[] = await this.playerGameItemService.findMany({where: { game: {id: dto.gameId}, player: {uuid: dto.uuid} }, relations: ['game', 'player']});
+        return entities.map(entity => {
+            delete entity.game
+            delete entity.player
+            return {
+                itemId: entity.itemId,
+                amount: entity.amount,
+                updatedAt: entity.updatedAt,
+            };
+        })
+    }
+
+    async getGameItems(dto: QueryGameItemsDto) {
+        const game = await this.gameService.findOne({id: dto.gameId})
+
+        if (!game) {
+            throw new UnprocessableEntityException("Game not found")
+        }
+
+        dto.limit = dto.limit ?? 50;
+        dto.page = dto.page ?? 1;
+        dto.search = dto.search ?? '';
+        let order: any = {};
+        order[dto.sortBy ?? 'amount'] = dto.sort ?? SortDirection.DESC;
+
+        const entities: PlayerGameItemEntity[] = await this.playerGameItemService.findMany({
+            where: {
+                game: {id: dto.gameId},
+                itemId: dto.itemId,
+                player: { userName: ILike(`%${dto.search}%`) },
+            },
+            skip: dto.limit * (dto.page-1),
+            take: dto.limit,
+            order,
+            relations: ['game', 'player']
+        });
+
+        if (!entities) {
+            throw new UnprocessableEntityException("Score not found")
+        }
+
+        const results = await Promise.all(entities.map(async (entity) => {
+            const statId = PlaySessionStatService.calculateId({ uuid: entity.player.uuid, gameId: entity.game.id })
+            const playStats = await this.playSessionStatService.findOne({ id: statId })
+            return {
+                playerId: entity.player.uuid,
+                itemId: entity.itemId,
+                amount: entity.amount,
+                playtime: parseInt(playStats.timePlayed) / 1000,
+                updatedAt: parseInt(entity.updatedAt),
+            }
+        }));
+
+        const total: number = await this.playerGameItemService.countByGameItem(dto.gameId, dto.itemId);
+        return {
+            meta: {
+                ...dto,
+                pages: Math.ceil(total / dto.limit)
+            },
+            data: results,
+        }
+    }
+
+    async putGameItemTypes(dtos: SetGameItemTypeDto[]) {
+        const gameIds: string[] = dtos.map(_dto => _dto.gameId);
+        const games = await this.gameService.findByIds(gameIds)
+
+        if (games.find(p => p==undefined)) {
+            throw new UnprocessableEntityException("Game not found")
+        }
+
+        const entities = await Promise.all(dtos.map(async (dto, i) => {
+            const entity = await this.gameItemTypeService.create({
+                game: games[i],
+                ...dto,
+            })
+            return entity;
+        }))
+
+        return entities;
+    }
+    
+    async putGameItems(dtos: SetPlayerGameItemDto[]) {
+        const gameIds: string[] = dtos.map(_dto => _dto.gameId);
+        const games = await this.gameService.findByIds(gameIds)
+
+        if (games.find(p => p==undefined)) {
+            throw new UnprocessableEntityException("Game not found")
+        }
+
+        const playerIds: string[] = dtos.map(_dto => _dto.playerId);
+        const players = await this.userService.findByIds(playerIds)
+
+        if (playerIds.find(p => p==undefined)) {
+            throw new UnprocessableEntityException("Player not found")
+        }
+
+        const entities = await Promise.all(dtos.map(async (dto, i) => {
+            const entity = await this.playerGameItemService.create({
+                game: games[i],
+                player: players[i],
+                ...dto,
+            })
+            return entity;
+        }))
+
+        return entities;
     }
 }

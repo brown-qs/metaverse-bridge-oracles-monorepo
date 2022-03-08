@@ -56,4 +56,9 @@ export class UserService {
         const results: UserEntity[] = await this.repository.find(options);
         return results;
     }
+
+    public async findByIds(ids: string[]) {
+        const entities: UserEntity[] = await this.repository.findByIds(ids);
+        return entities;
+    }
 }
