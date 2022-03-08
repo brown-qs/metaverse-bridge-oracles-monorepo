@@ -2,7 +2,7 @@ import {
     IsString,
 } from 'class-validator';
 import { GameEntity } from '../game/game.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 
 @Entity()
 export class GameItemTypeEntity {
@@ -14,7 +14,7 @@ export class GameItemTypeEntity {
     @PrimaryGeneratedColumn('uuid')
     id?: string;
 
-    @ManyToOne(() => GameEntity, (game) => game.achievements)
+    @ManyToOne(() => GameEntity, (game) => game.gameItemTypes)
     game: GameEntity;
 
     @Column()

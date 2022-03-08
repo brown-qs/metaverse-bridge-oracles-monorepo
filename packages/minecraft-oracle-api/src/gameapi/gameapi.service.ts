@@ -46,10 +46,10 @@ import { GganbuService } from '../gganbu/gganbu.service';
 import { BankDto } from './dtos/bank.dto';
 import { GameItemTypeService } from '../gameitemtype/gameitemtype.service';
 import { GetGameItemsDto } from './dtos/gameitem.dto';
-import { PlayerGameItemService } from 'src/playergameitem/playergameitem.service';
-import { PlayerGameItemEntity } from 'src/playergameitem/playergameitem.entity';
-import { SetGameItemTypeDto } from 'src/gameitemtype/dtos/gameitemtype.dto';
-import { SetPlayerGameItemDto } from 'src/playergameitem/dtos/playergameitem.dto';
+import { PlayerGameItemService } from '../playergameitem/playergameitem.service';
+import { PlayerGameItemEntity } from '../playergameitem/playergameitem.entity';
+import { SetGameItemTypeDto } from '../gameitemtype/dtos/gameitemtype.dto';
+import { SetPlayerGameItemDto } from '../playergameitem/dtos/playergameitem.dto';
 
 @Injectable()
 export class GameApiService {
