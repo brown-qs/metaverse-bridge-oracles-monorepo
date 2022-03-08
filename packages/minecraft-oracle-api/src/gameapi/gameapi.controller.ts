@@ -39,9 +39,8 @@ import { AchievementEntity } from '../achievement/achievement.entity';
 import { GetPlayerAchievementDto, SetPlayerAchievementsDto } from '../playerachievement/dtos/playerachievement.dto';
 import { PlayerAchievementEntity } from '../playerachievement/playerachievement.entity';
 import { UserEntity } from '../user/user.entity';
-import { GetGameItemDto, GetGameItemsDto } from './dtos/gameitem.dto';
-import { SetGameItemTypeDto } from '../gameitemtype/dtos/gameitemtype.dto';
-import { SetPlayerGameItemDto } from '../playergameitem/dtos/playergameitem.dto';
+import { GameItemTypeDto, QueryGameItemTypesDto, SetGameItemTypeDto } from '../gameitemtype/dtos/gameitemtype.dto';
+import { QueryPlayerGameItemsDto, SetPlayerGameItemDto, PlayerGameItemsDto, QueryGameItemsDto } from '../playergameitem/dtos/playergameitem.dto';
 import { GameService } from '../game/game.service';
 
 @ApiTags('game')
@@ -415,39 +414,39 @@ export class GameApiController {
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
     async getGameItemTypes(
-        @Query() { gameId }: any,
-    ): Promise<any[]> {
+        @Query() { gameId }: QueryGameItemTypesDto,
+    ): Promise<GameItemTypeDto[]> {
         const entities = await this.gameApiService.getGameItemTypes(gameId)
         return entities
     }
     
     @Get('items')
     @HttpCode(200)
-    @ApiOperation({ summary: 'Fetch Items for game and item type.' })
+    @ApiOperation({ summary: 'Fetch all items for given game and item type.' })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
     async getGameItems(
-        @Query() dto: GetGameItemsDto,
-    ): Promise<any> {
-        const entities = await this.gameApiService.getGameItems(dto)
-        return entities
+        @Query() dto: QueryPlayerGameItemsDto,
+    ): Promise<PlayerGameItemsDto[]> {
+        const data = await this.gameApiService.getPlayerGameItems(dto)
+        return data
     }
     
     @Get('item')
     @HttpCode(200)
-    @ApiOperation({ summary: 'Fetch Items for game and player.' })
+    @ApiOperation({ summary: 'Fetches game items given game and player.' })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
     async getGameItem(
-        @Query() { gameId, uuid }: GetGameItemDto,
+        @Query() dto: QueryGameItemsDto,
     ): Promise<any> {
-        const results = await this.gameApiService.getGamePlayerItems(gameId, uuid)
+        const results = await this.gameApiService.getGameItems(dto)
         return results
     }
 
     @Put('itemtypes')
     @HttpCode(200)
-    @ApiOperation({ summary: 'Put Game Item Types as Array' })
+    @ApiOperation({ summary: 'Updates player game item types.' })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
     async setItemTypes(
@@ -459,7 +458,7 @@ export class GameApiController {
 
     @Put('items')
     @HttpCode(200)
-    @ApiOperation({ summary: 'Put Player Game Items' })
+    @ApiOperation({ summary: 'Updates player game items.' })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
     async setPlayerGameItems(

@@ -45,11 +45,11 @@ import { SnaplogService } from '../snaplog/snaplog.service';
 import { GganbuService } from '../gganbu/gganbu.service';
 import { BankDto } from './dtos/bank.dto';
 import { GameItemTypeService } from '../gameitemtype/gameitemtype.service';
-import { GetGameItemsDto } from './dtos/gameitem.dto';
 import { PlayerGameItemService } from '../playergameitem/playergameitem.service';
 import { PlayerGameItemEntity } from '../playergameitem/playergameitem.entity';
-import { SetGameItemTypeDto } from '../gameitemtype/dtos/gameitemtype.dto';
-import { SetPlayerGameItemDto } from '../playergameitem/dtos/playergameitem.dto';
+import { GameItemTypeDto, SetGameItemTypeDto } from '../gameitemtype/dtos/gameitemtype.dto';
+import { SetPlayerGameItemDto, QueryGameItemsDto } from '../playergameitem/dtos/playergameitem.dto';
+import { SortDirection } from 'src/common/enums/SortDirection';
 
 @Injectable()
 export class GameApiService {
@@ -853,17 +853,19 @@ export class GameApiService {
             throw new UnprocessableEntityException("Game not found")
         }
 
-        const gameItems = await this.gameItemTypeService.findMany({ where: { game: {id: gameId}} })
-        const results: any[] = gameItems.map(item => {
+        const gameItems = await this.gameItemTypeService.findMany({ where: { game: {id: gameId}}, relations:['game'] })
+        const results: GameItemTypeDto[] = gameItems.map(item => {
             delete item.game; delete item.id;
-            return item;
+            return item
         })
         return results;
     }
 
-    async getGamePlayerItems(gameId: string, uuid: string) {
-        const entities: PlayerGameItemEntity[] = await this.playerGameItemService.findMany({where: { game: {id: gameId}, player: {uuid: uuid} }});
+    async getPlayerGameItems(dto: {gameId: string, uuid: string}) {
+        const entities: PlayerGameItemEntity[] = await this.playerGameItemService.findMany({where: { game: {id: dto.gameId}, player: {uuid: dto.uuid} }, relations: ['game', 'player']});
         return entities.map(entity => {
+            delete entity.game
+            delete entity.player
             return {
                 itemId: entity.itemId,
                 amount: entity.amount,
@@ -872,7 +874,7 @@ export class GameApiService {
         })
     }
 
-    async getGameItems(dto: GetGameItemsDto) {
+    async getGameItems(dto: QueryGameItemsDto) {
         const game = await this.gameService.findOne({id: dto.gameId})
 
         if (!game) {
@@ -882,7 +884,8 @@ export class GameApiService {
         dto.limit = dto.limit ?? 50;
         dto.page = dto.page ?? 1;
         dto.search = dto.search ?? '';
-        let order: any = {}; order[dto.sortBy ?? 'amount'] = dto.sort = dto.sort ?? 'DESC';
+        let order: any = {};
+        order[dto.sortBy ?? 'amount'] = dto.sort ?? SortDirection.DESC;
 
         const entities: PlayerGameItemEntity[] = await this.playerGameItemService.findMany({
             where: {
