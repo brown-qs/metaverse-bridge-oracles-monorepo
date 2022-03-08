@@ -5,8 +5,7 @@ import {
 } from 'class-validator';
 import { Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { UserEntity } from '../user/user.entity';
-import { GameEntity } from 'src/game/game.entity';
-import { GameItemTypeEntity } from 'src/gameitemtype/gameitemtype.entity';
+import { GameEntity } from '../game/game.entity';
 
 @Entity()
 @Index(['id'], {unique: true})
@@ -31,10 +30,10 @@ export class PlayerGameItemEntity {
     @IsString()
     itemId: string;
 
-    @ManyToOne(() => GameEntity, (game) => game.achievements)
+    @ManyToOne(() => GameEntity, (game) => game.playerGameItems)
     game: GameEntity;
 
-    @ManyToOne(() => UserEntity, (user) => user.achievements)
+    @ManyToOne(() => UserEntity, (user) => user.playerGameItems)
     player: UserEntity;
     
 }

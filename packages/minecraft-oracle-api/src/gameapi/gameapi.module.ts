@@ -20,7 +20,7 @@ import { PlayerScoreModule } from '../playerscore/playerscore.module';
 import { SnaplogModule } from '../snaplog/snaplog.module';
 import { GganbuModule } from '../gganbu/gganbu.module';
 import { GameItemTypeModule } from '../gameitemtype/gameitemtype.module';
-import { PlayerGameItemModule } from 'src/playergameitem/playergameitem.module';
+import { PlayerGameItemModule } from '../playergameitem/playergameitem.module';
 
 @Module({
     imports: [

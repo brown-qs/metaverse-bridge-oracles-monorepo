@@ -40,8 +40,8 @@ import { GetPlayerAchievementDto, SetPlayerAchievementsDto } from '../playerachi
 import { PlayerAchievementEntity } from '../playerachievement/playerachievement.entity';
 import { UserEntity } from '../user/user.entity';
 import { GetGameItemDto, GetGameItemsDto } from './dtos/gameitem.dto';
-import { SetGameItemTypeDto } from 'src/gameitemtype/dtos/gameitemtype.dto';
-import { SetPlayerGameItemDto } from 'src/playergameitem/dtos/playergameitem.dto';
+import { SetGameItemTypeDto } from '../gameitemtype/dtos/gameitemtype.dto';
+import { SetPlayerGameItemDto } from '../playergameitem/dtos/playergameitem.dto';
 import { GameService } from '../game/game.service';
 
 @ApiTags('game')
