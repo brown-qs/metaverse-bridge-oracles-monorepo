@@ -32,15 +32,14 @@ import { GameKindInProgressDto } from './dtos/gamekndinprogress.dto';
 import { SetGameTypeDto } from '../gametype/dtos/gametype.dto';
 import { GameTypeService } from '../gametype/gametype.service';
 import { SetGameDto } from '../game/dto/game.dto';
-import { SetPlayerScoreDto } from '../playerscore/dtos/setplayerscore.dto';
-import { GetPlayerScoresDto } from './dtos/score.dto';
+import { QueryPlayerScoresDto, SetPlayerScoreDto } from '../playerscore/dtos/playerscore.dto';
 import { GetAchievementsDto, SetAchievementsDto } from '../achievement/dtos/achievement.dto';
 import { AchievementService } from '../achievement/achievement.service';
 import { AchievementEntity } from '../achievement/achievement.entity';
 import { GetPlayerAchievementDto, SetPlayerAchievementsDto } from '../playerachievement/dtos/playerachievement.dto';
 import { PlayerAchievementEntity } from '../playerachievement/playerachievement.entity';
 import { UserEntity } from '../user/user.entity';
-import { GetGameScoreTypeDto, SetGameScoreTypeDto } from 'src/gamescoretype/dtos/gamescoretype.dto';
+import { GetGameScoreTypeDto, SetGameScoreTypeDto } from '../gamescoretype/dtos/gamescoretype.dto';
 import { GameItemTypeDto, QueryGameItemTypesDto, SetGameItemTypeDto } from '../gameitemtype/dtos/gameitemtype.dto';
 import { QueryPlayerGameItemsDto, SetPlayerGameItemDto, PlayerGameItemsDto, QueryGameItemsDto } from '../playergameitem/dtos/playergameitem.dto';
 import { GameService } from '../game/game.service';
@@ -358,7 +357,7 @@ export class GameApiController {
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
     async getScores(
-        @Query() dto: GetPlayerScoresDto,
+        @Query() dto: QueryPlayerScoresDto,
     ) {
         const entities = await this.gameApiService.getPlayerScores(dto)
         return entities;

@@ -32,14 +32,12 @@ import { GameKindInProgressDto } from './dtos/gamekndinprogress.dto';
 import { SetGameDto } from '../game/dto/game.dto';
 import { GameTypeService } from '../gametype/gametype.service';
 import { GameEntity } from '../game/game.entity';
-import { SetPlayerScoreDto } from '../playerscore/dtos/setplayerscore.dto';
+import { QueryPlayerScoreDto, QueryPlayerScoresDto, SetPlayerScoreDto } from '../playerscore/dtos/playerscore.dto';
 import { PlayerScoreService } from '../playerscore/playerscore.service';
 import { SetAchievementsDto } from '../achievement/dtos/achievement.dto';
 import { AchievementService } from '../achievement/achievement.service';
 import { GetPlayerAchievementDto, SetPlayerAchievementsDto } from '../playerachievement/dtos/playerachievement.dto';
 import { PlayerAchievementService } from '../playerachievement/playerachievement.service';
-import { GetPlayerScoreDto } from '../playerscore/dtos/getplayerscore.dto';
-import { GetPlayerScoresDto } from './dtos/score.dto';
 import { GganbuEntity } from '../gganbu/gganbu.entity';
 import { SnaplogEntity } from '../snaplog/snaplog.entity';
 import { SnaplogService } from '../snaplog/snaplog.service';
@@ -827,7 +825,7 @@ export class GameApiService {
         return entities
     }
 
-    async getPlayerScore(dto: GetPlayerScoreDto) {
+    async getPlayerScore(dto: QueryPlayerScoreDto) {
         const game = await this.gameService.findOne({id: dto.gameId})
 
         if (!game) {
@@ -856,7 +854,7 @@ export class GameApiService {
         return entities;
     }
 
-    async getPlayerScores(dto: GetPlayerScoresDto) {
+    async getPlayerScores(dto: QueryPlayerScoresDto) {
         const game = await this.gameService.findOne({id: dto.gameId})
 
         if (!game) {

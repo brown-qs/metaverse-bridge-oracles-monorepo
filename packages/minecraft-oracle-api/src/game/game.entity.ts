@@ -12,6 +12,7 @@ import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
 import { SnaplogEntity } from '../snaplog/snaplog.entity';
 import { GameItemTypeEntity } from '../gameitemtype/gameitemtype.entity';
 import { PlayerGameItemEntity } from '../playergameitem/playergameitem.entity';
+import { GameScoreTypeEntity } from '../gamescoretype/gamescoretype.entity';
 
 
 @Entity()
@@ -91,4 +92,7 @@ export class GameEntity {
 
     @OneToMany(() => PlayerGameItemEntity, (playerGameItem) => playerGameItem.game)
     playerGameItems?: PlayerGameItemEntity[];
+
+    @OneToMany(() => GameScoreTypeEntity, (gameScoreType) => gameScoreType.game)
+    gameScoreTypes?: GameScoreTypeEntity[];
 }

@@ -19,7 +19,7 @@ import { PlayerAchievementModule } from '../playerachievement/playerachievement.
 import { PlayerScoreModule } from '../playerscore/playerscore.module';
 import { SnaplogModule } from '../snaplog/snaplog.module';
 import { GganbuModule } from '../gganbu/gganbu.module';
-import { GameScoreTypeModule } from 'src/gamescoretype/gamescoretype.module';
+import { GameScoreTypeModule } from '../gamescoretype/gamescoretype.module';
 
 import { GameItemTypeModule } from '../gameitemtype/gameitemtype.module';
 import { PlayerGameItemModule } from '../playergameitem/playergameitem.module';
