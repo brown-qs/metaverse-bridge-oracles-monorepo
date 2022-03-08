@@ -11,4 +11,4 @@ import { GameItemTypeService } from './gameitemtype.service';
     exports: [GameItemTypeService],
     controllers: []
 })
-export class GameTypeModule {}
+export class GameItemTypeModule {}
