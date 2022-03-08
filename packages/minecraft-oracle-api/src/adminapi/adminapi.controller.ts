@@ -39,7 +39,7 @@ import { CommunismDto } from './dtos/communism.dto';
 import { BlacklistDto } from './dtos/blacklist.dto';
 import { GameTypeService } from '../gametype/gametype.service';
 import { GameService } from '../game/game.service';
-import { BankDto } from 'src/gameapi/dtos/bank.dto';
+import { BankDto } from '../gameapi/dtos/bank.dto';
 
 @ApiTags('admin')
 @Controller('admin')
