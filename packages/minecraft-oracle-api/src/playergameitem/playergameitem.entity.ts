@@ -1,8 +1,3 @@
-import {
-    IsBoolean,
-    IsNumber,
-    IsString
-} from 'class-validator';
 import { Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { UserEntity } from '../user/user.entity';
 import { GameEntity } from '../game/game.entity';
@@ -19,15 +14,12 @@ export class PlayerGameItemEntity {
     id?: string;
 
     @Column()
-    @IsString()
     amount: string;
 
     @Column({ type: 'bigint' })
-    @IsString()
     updatedAt: string;
 
     @Column()
-    @IsString()
     itemId: string;
 
     @ManyToOne(() => GameEntity, (game) => game.playerGameItems)
