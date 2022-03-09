@@ -2,7 +2,7 @@ import {
     IsString,
 } from 'class-validator';
 import { GameEntity } from '../game/game.entity';
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class GameItemTypeEntity {
