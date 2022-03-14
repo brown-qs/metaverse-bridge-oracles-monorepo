@@ -42,11 +42,10 @@ config()
 */
 
 const list = [
-    'BirchShield',
-    //'SrogiLomot'
+    'CryptoBeliever'
 ]
 
-const gameId = 'minecraft-carnage-2022-02-27'
+const gameId = 'minecraft-carnage-2022-03-06'
 
 async function main() {
     let connection: Connection
