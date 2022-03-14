@@ -23,12 +23,11 @@ import { InventoryService } from '../src/playerinventory/inventory.service'
 config()
 
 const list = [
-    'CapTK13',
-    'SrogiLomot'
+    'CryptoBeliever',
 ]
 
-const gameId = 'carnage-2022-02-06'
-const targetTime = 2700001
+const gameId = 'minecraft-carnage-2022-03-06'
+const targetTime = 0
 
 async function main() {
     let connection: Connection
@@ -81,7 +80,7 @@ async function main() {
 
             for(let j = 0; j<gganbus.length; j++) {
                 const gganbu = gganbus[j]
-                const inv = await connection.manager.getRepository(InventoryEntity).findOne({where: {owner: {uuid: user.uuid}, material: {name: gganbu.material.mapsTo}}, relations: ['owner']})
+                const inv = await connection.manager.getRepository(InventoryEntity).findOne({where: {owner: {uuid: user.uuid}, material: {name: gganbu.material.mapsTo}}, relations: ['owner', 'material']})
                 if (!inv) {
                     const mat = await connection.manager.getRepository(MaterialEntity).findOne({where: {name: gganbu.material.mapsTo}})
                     
@@ -99,7 +98,7 @@ async function main() {
                 } else {
                     const newNum = (Number.parseFloat(inv.amount) + (Number.parseFloat(gganbu.amount) * gganbu.material.multiplier)).toString()
                     console.log(`   old nums`, inv.material.name, inv.amount, newNum)
-                    //await connection.manager.getRepository(InventoryEntity).update(inv.id, {amount: newNum})
+                    await connection.manager.getRepository(InventoryEntity).update(inv.id, {amount: newNum})
                 }
             }
         }
