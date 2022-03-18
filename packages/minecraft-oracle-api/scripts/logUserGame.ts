@@ -23,15 +23,12 @@ import { SnaplogEntity } from '../src/snaplog/snaplog.entity'
 config()
 
 const list = [
-    'SnakesNTornadoes',
-    'RoxQueenUnicorn',
-    'BirchShield',
     'NagyKiki',
     'OldSpiceVendor',
     'Kyilkhor',
 ]
 
-const gameId = 'carnage-2022-02-20'
+const gameId = 'minecraft-carnage-2022-03-13'
 const targetTime = '2700001'
 
 async function main() {

@@ -89,20 +89,20 @@ export class GameApiService {
     }
 
     public async getUserSkins(user: UserEntity): Promise<PlayerSkinDto[]> {
-        const skins = await this.skinService.findMany({where: {owner: {uuid: user.uuid}}, relations: ['texture']})
+        const skins = await this.skinService.findMany({ where: { owner: { uuid: user.uuid } }, relations: ['texture'] })
 
         const results: PlayerSkinDto[] = skins.map(skin => {
-                return {
-                    textureData: skin.texture.textureData,
-                    textureSignature: skin.texture.textureSignature,
-                    type: skin.texture.type,
-                    accessories: skin.texture.accessories ?? undefined,
-                    assetId: skin.texture.assetId,
-                    assetAddress: skin.texture.assetAddress,
-                    assetType: skin.texture.assetType,
-                    equipped: skin.texture.type.valueOf() === TextureType.SKIN.valueOf() && skin.equipped
-                }
+            return {
+                textureData: skin.texture.textureData,
+                textureSignature: skin.texture.textureSignature,
+                type: skin.texture.type,
+                accessories: skin.texture.accessories ?? undefined,
+                assetId: skin.texture.assetId,
+                assetAddress: skin.texture.assetAddress,
+                assetType: skin.texture.assetType,
+                equipped: skin.texture.type.valueOf() === TextureType.SKIN.valueOf() && skin.equipped
             }
+        }
         )
 
         return results
@@ -114,9 +114,9 @@ export class GameApiService {
         }
     }
 
-    public async processSnapshots(user: UserEntity, snapshots: SnapshotsDto): Promise<[SnapshotItemEntity[], boolean[], number, number]> {
+    public async processSnapshots(user: UserEntity, dto: SnapshotsDto): Promise<[SnapshotItemEntity[], boolean[], number, number]> {
 
-        if (!user || !snapshots || !snapshots.snapshots || snapshots.snapshots.length == 0) {
+        if (!user || !dto || !dto.snapshots || dto.snapshots.length == 0) {
             return [[], [], 0, 0]
         }
 
@@ -132,14 +132,32 @@ export class GameApiService {
             return [[], [], 0, 0]
         }
 
-        const snapshotSuccessArray = Array.from({ length: snapshots.snapshots.length }, () => false)
+        const snapshotSuccessArray = Array.from({ length: dto.snapshots.length }, () => false)
 
-        const received = snapshots.snapshots.length
+        const received = dto.snapshots.length
         let saved = 0
 
         //let promises: Promise<SnapshotItemEntity | undefined>[]
 
-        const game = !!snapshots.gameId ? (await this.gameService.findOne({id: snapshots.gameId}) ?? null) : null
+        const game = !!dto.gameId ? (await this.gameService.findOne({ id: dto.gameId }) ?? null) : null
+
+        // update or create user stats for the session
+
+        const statId = PlaySessionStatService.calculateId({ uuid: user.uuid, gameId: dto.gameId })
+        let stat = await this.playSessionStatService.findOne({ id: statId })
+
+        if (!stat || !dto.accumulatePlayTime) {
+            stat = await this.playSessionStatService.create({
+                id: PlaySessionStatService.calculateId({ uuid: user.uuid, gameId: dto.gameId }),
+                power: dto.power ?? 0,
+                timePlayed: dto.playTime.toString() ?? '0'
+            })
+        } else {
+            await this.playSessionStatService.update(statId, {
+                power: dto.power ?? 0,
+                timePlayed: (Number.parseInt(stat.timePlayed) + (dto.playTime ?? 0)).toString()
+            })
+        }
 
         this.ensureLock(userAll.uuid)
 
@@ -147,7 +165,7 @@ export class GameApiService {
 
         const promises = await userlock.runExclusive(async () => {
             if (!userAll.gganbu) {
-                const promises = await snapshots.snapshots.map(async (snapshot: SnapshotDto, i) => {
+                const promises = await dto.snapshots.map(async (snapshot: SnapshotDto, i) => {
                     const savedS = await this.assignSnapshot(userAll, game, snapshot)
 
                     if (!!savedS) {
@@ -159,7 +177,7 @@ export class GameApiService {
                 })
                 return promises
             } else {
-                const promises = await snapshots.snapshots.map(async (snapshot: SnapshotDto, i) => {
+                const promises = await dto.snapshots.map(async (snapshot: SnapshotDto, i) => {
                     const gganbu = await this.userService.findOne({ uuid: userAll.gganbu.uuid }, { relations: ['snapshotItems'] })
 
                     const savedU = await this.assignSnapshot(userAll, game, snapshot, true, true)
@@ -208,7 +226,7 @@ export class GameApiService {
     }
 
     public async getGameKindInProgress(dto?: GameKindInProgressDto): Promise<boolean> {
-        return !!(await this.gameService.findOne({ongoing: true, type: dto?.kind ?? GameKind.CARNAGE}))
+        return !!(await this.gameService.findOne({ ongoing: true, type: dto?.kind ?? GameKind.CARNAGE }))
     }
 
     public async getTextures(skinrequest: { auctionOnly: boolean }): Promise<TextureEntity[]> {
@@ -217,7 +235,7 @@ export class GameApiService {
     }
 
     public async setGameOngoing(dto: SetGameOngoingDto): Promise<boolean> {
-        const game = await this.gameService.findOne({id: dto.gameId})
+        const game = await this.gameService.findOne({ id: dto.gameId })
 
         if (!game) {
             throw new UnprocessableEntityException("Game not found")
@@ -228,9 +246,9 @@ export class GameApiService {
         }
 
         if (game.ongoing && !dto.ongoing) {
-            await this.gameService.update(game.id, {ongoing: dto.ongoing, endedAt: Date.now().toString()})
+            await this.gameService.update(game.id, { ongoing: dto.ongoing, endedAt: Date.now().toString() })
         } else {
-            await this.gameService.update(game.id, {ongoing: dto.ongoing})
+            await this.gameService.update(game.id, { ongoing: dto.ongoing })
         }
         return true
     }
@@ -370,13 +388,13 @@ export class GameApiService {
 
         const amount = half ? snapshot.amount / 2 : snapshot.amount
 
-        const itemId = SnapshotService.calculateId({uuid: user.uuid, materialName: material.name, gameId: game?.id})
+        const itemId = SnapshotService.calculateId({ uuid: user.uuid, materialName: material.name, gameId: game?.id })
         this.ensureLock(itemId)
 
         const itemlock = this.locks.get(itemId)
 
         const savedS = await itemlock.runExclusive(async () => {
-            const foundItem = await this.snapshotService.findOneNested({ where: { id: itemId }, relations: ['game']})
+            const foundItem = await this.snapshotService.findOneNested({ where: { id: itemId }, relations: ['game'] })
 
             if (!!foundItem) {
                 //console.log('founditem')
@@ -442,7 +460,7 @@ export class GameApiService {
             id: PlaySessionStatService.calculateId({ uuid, gameId })
         })
 
-        const game = await this.gameService.findOne({id: gameId})
+        const game = await this.gameService.findOne({ id: gameId })
 
         if (!game) {
             this.logger.error(`setPlayerGameSession:: game ${gameId} does not exists`, null, this.context)
@@ -468,17 +486,17 @@ export class GameApiService {
         const punishAll = settings.deductFromEveryone ?? true
         const gameId = settings.serverId
 
-        const game = !!gameId ? (await this.gameService.findOne({id: gameId}) ?? null) : null
+        const game = !!gameId ? (await this.gameService.findOne({ id: gameId }) ?? null) : null
 
         let items: SnapshotItemEntity[] = []
         let batch: SnapshotItemEntity[] = []
         let skip = 0
         let take = 100
 
-        const gameFindCondition = game?.id ? {id: game.id} : null
+        const gameFindCondition = game?.id ? { id: game.id } : null
 
         do {
-            batch = await this.snapshotService.findMany({ where: {game: gameFindCondition},take, skip, relations: ['material', 'owner', 'game'] })
+            batch = await this.snapshotService.findMany({ where: { game: gameFindCondition }, take, skip, relations: ['material', 'owner', 'game'] })
             //console.log(batch)
 
             if (!!batch && batch.length > 0) {
@@ -490,13 +508,16 @@ export class GameApiService {
         } while (!!batch && batch.length > 0)
 
         let counter: { [key: string]: number } = {}
-        let users: { [key: string]: {exists: boolean, eligible: boolean  } } = {}
+        let users: { [key: string]: { exists: boolean, eligible: boolean } } = {}
         let allDistinct = 0
         let gganbuDistinct = 0
+        let powerSum = 0
 
         // we sum ap all the materials for all users
         items.map(x => {
-            counter[x.material.name] = typeof counter[x.material.name] === 'undefined' ? Number.parseFloat(x.amount) : counter[x.material.name] + Number.parseFloat(x.amount)
+            if (!x.material.gganbuExcluded) {
+                counter[x.material.name] = typeof counter[x.material.name] === 'undefined' ? Number.parseFloat(x.amount) : counter[x.material.name] + Number.parseFloat(x.amount)
+            }
         })
 
         // we fetch all users
@@ -505,8 +526,8 @@ export class GameApiService {
 
         for (let i = 0; i < allUsers.length; i++) {
             const user = allUsers[i]
-            
-            const playStats = await this.playSessionStatService.findOne({ id: PlaySessionStatService.calculateId({uuid: user.uuid, gameId})})
+
+            const playStats = await this.playSessionStatService.findOne({ id: PlaySessionStatService.calculateId({ uuid: user.uuid, gameId }) })
 
             this.logger.debug(`Communism:: ${user.uuid} played ${playStats?.timePlayed}`, this.context)
 
@@ -521,21 +542,23 @@ export class GameApiService {
 
             if (!users[user.uuid]) {
                 allDistinct += 1
-                const hasMoonsama = !!(await this.assetService.findOne({recognizedAssetType: RecognizedAssetType.MOONSAMA, owner: {uuid: user.uuid}, pendingIn: false}))
+                //const hasMoonsama = !!(await this.assetService.findOne({recognizedAssetType: RecognizedAssetType.MOONSAMA, owner: {uuid: user.uuid}, pendingIn: false}))
+                const hasPower = (playStats.power ?? 0) > 0
                 users[user.uuid] = {
                     exists: true,
                     eligible: false
                 }
-                
+
                 if (
                     playedEnough &&
                     (
-                        (msamasOnly && hasMoonsama)
+                        (msamasOnly && hasPower)
                         || !msamasOnly
                     )
                 ) {
                     users[user.uuid].eligible = true
                     gganbuDistinct += 1
+                    powerSum += playStats.power
                 }
             }
         }
@@ -544,12 +567,13 @@ export class GameApiService {
         const materials = Object.keys(counter)
         let gganbuEntities: GganbuEntity[] = []
         await Promise.all(materials.map(async (key) => {
-            counter[key] = (averageM * counter[key]) / gganbuDistinct
+            counter[key] = averageM * counter[key]
             gganbuEntities.push({
-                id: GganbuService.calculateId({materialName: key, gameId: game?.id}),
+                id: GganbuService.calculateId({ materialName: key, gameId: game?.id }),
                 amount: counter[key].toString(),
                 game,
-                material: await this.materialService.findOne({name: key})
+                material: await this.materialService.findOne({ name: key }),
+                powerSum
             })
         }))
 
@@ -563,7 +587,8 @@ export class GameApiService {
         for (let i = 0; i < userUuids.length; i++) {
             const uuid = userUuids[i]
             const user = await this.userService.findOne({ uuid })
-            
+            const stats = await this.playSessionStatService.findOne({ id: PlaySessionStatService.calculateId({ uuid, gameId: game?.id }) })
+
             // get user's snapshot items
             const snaps = items.filter(snap => snap.owner.uuid === uuid)
 
@@ -576,15 +601,17 @@ export class GameApiService {
                     // if yes, we reduce the original amount for gganbu and add the average if eligible
                     this.logger.debug(`Communism:: ${uuid} snap for ${materialName} existed. Adding..`, this.context)
 
+                    const gganbuAmount = users[uuid]?.eligible ? counter[existingSnap.material.name] * stats.power / powerSum : 0
+
                     const finalfinaldeduction = punishAll ? finalDeduction : (users[uuid]?.eligible ? finalDeduction : 1)
-                    const amount = ((Number.parseFloat(existingSnap.amount) * finalfinaldeduction) + (users[uuid]?.eligible ? counter[existingSnap.material.name] : 0 )).toString()
+                    const amount = ((Number.parseFloat(existingSnap.amount) * finalfinaldeduction) + gganbuAmount).toString()
 
                     this.logger.debug(`Communism:: ${uuid} snap for ${materialName} deduction multiplier: ${finalDeduction}, amount: ${amount}, eligible: ${users[uuid]?.eligible}`, this.context)
                     await this.snapshotService.update(existingSnap.id, { amount })
                 } else {
                     this.logger.debug(`Communism:: ${uuid} snap for ${materialName} not found. Creating..`, this.context)
-                    const amount = counter[materialName]
-                    
+                    const amount = counter[materialName] * stats.power / powerSum 
+
                     if (users[uuid]?.eligible) {
                         await this.assignSnapshot(user, game, { amount, materialName }, false, false)
                     } else {
@@ -608,9 +635,9 @@ export class GameApiService {
             let skip = 0
             let take = 100
 
-            const gameFindCondition = dto?.gameId ? {id: dto.gameId} : null
+            const gameFindCondition = dto?.gameId ? { id: dto.gameId } : null
             do {
-                batch = await this.snapshotService.findMany({ where: {game: gameFindCondition}, take, skip, relations: ['material', 'owner', 'game'] })
+                batch = await this.snapshotService.findMany({ where: { game: gameFindCondition }, take, skip, relations: ['material', 'owner', 'game'] })
                 //console.log(batch)
 
                 if (!!batch && batch.length > 0) {
@@ -661,9 +688,9 @@ export class GameApiService {
                 await Promise.all(userSnapshots.map(async (snapshot) => slock.runExclusive(async () => {
                     const amount = (snapshot.material.multiplier ?? 1) * Number.parseFloat(snapshot.amount)
                     const materialName = snapshot.material.mapsTo ?? snapshot.material.name
-                    const id = InventoryService.calculateId({uuid: user.uuid, materialName: materialName})
+                    const id = InventoryService.calculateId({ uuid: user.uuid, materialName: materialName })
                     if (!inventoryMap[id]) {
-                        const material = snapshot.material.mapsTo ? (await this.materialService.findOne({name: materialName})) : snapshot.material
+                        const material = snapshot.material.mapsTo ? (await this.materialService.findOne({ name: materialName })) : snapshot.material
                         inventoryMap[id] = {
                             inv: {
                                 amount: amount.toString(),
@@ -722,12 +749,12 @@ export class GameApiService {
     }
 
     async getWorldPlots(world: string): Promise<AssetEntity[]> {
-        const assets = await this.assetService.findMany({where: {world, recognizedAssetType: RecognizedAssetType.PLOT}})
+        const assets = await this.assetService.findMany({ where: { world, recognizedAssetType: RecognizedAssetType.PLOT } })
         return assets
     }
 
     async createGame(dto: SetGameDto): Promise<GameEntity> {
-        const gameTypeEntity = await this.gameTypeService.findOne({id: dto. gameTypeId})
+        const gameTypeEntity = await this.gameTypeService.findOne({ id: dto.gameTypeId })
 
         if (!gameTypeEntity) {
             throw new UnprocessableEntityException('Game type was not found')
@@ -795,7 +822,7 @@ export class GameApiService {
     }
 
     async updateAchievements(dto: SetAchievementsDto) {
-        const game = await this.gameService.findOne({id: dto.gameId})
+        const game = await this.gameService.findOne({ id: dto.gameId })
 
         if (!game) {
             throw new UnprocessableEntityException("Game not found")
@@ -814,13 +841,13 @@ export class GameApiService {
     }
 
     async getPlayerAchievements(dto: GetPlayerAchievementDto) {
-        const game = await this.gameService.findOne({id: dto.gameId})
+        const game = await this.gameService.findOne({ id: dto.gameId })
 
         if (!game) {
             throw new UnprocessableEntityException("Game not found")
         }
 
-        const entities = await this.playerAchievementService.findMany({where: {player: {uuid: dto.uuid}, game: {id: dto.gameId}}})
+        const entities = await this.playerAchievementService.findMany({ where: { player: { uuid: dto.uuid }, game: { id: dto.gameId } } })
 
         return entities
     }
@@ -832,7 +859,7 @@ export class GameApiService {
             throw new UnprocessableEntityException("Game not found")
         }
 
-        const entity = await this.playerScoreService.findOne({player: {uuid: dto.uuid}, game: {id: dto.gameId}})
+        const entity = await this.playerScoreService.findOne({ player: { uuid: dto.uuid }, game: { id: dto.gameId } })
 
         if (!entity) {
             throw new UnprocessableEntityException("Score not found")
@@ -928,13 +955,13 @@ export class GameApiService {
     }
 
     async updatePlayerAchievements(dto: SetPlayerAchievementsDto) {
-        const player = await this.userService.findOne({uuid: dto.uuid})
+        const player = await this.userService.findOne({ uuid: dto.uuid })
 
         if (!player) {
             throw new UnprocessableEntityException("User not found")
         }
 
-        const game = await this.gameService.findOne({id: dto.gameId})
+        const game = await this.gameService.findOne({ id: dto.gameId })
 
         if (!game) {
             throw new UnprocessableEntityException("Game not found")
@@ -943,7 +970,7 @@ export class GameApiService {
         const entity = await this.playerAchievementService.createMultiple(
             await Promise.all(dto.playerAchievements.map(async pa => {
 
-                const achievement = await this.achievementService.findOne({id: pa.achievementId})
+                const achievement = await this.achievementService.findOne({ id: pa.achievementId })
 
                 return {
                     ...pa,
