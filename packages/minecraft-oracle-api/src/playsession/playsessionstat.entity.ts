@@ -1,7 +1,5 @@
-import {
-    IsString,
-} from 'class-validator';
-import { Column, Entity, Index, OneToMany, PrimaryColumn } from 'typeorm';
+import { GameEntity } from '../game/game.entity';
+import { Column, Entity, Index, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 import { PlaySessionEntity } from './playsession.entity';
 
 @Entity()
@@ -13,13 +11,17 @@ export class PlaySessionStatEntity {
     }
 
     @PrimaryColumn()
-    @IsString()
     id: string;
 
     @Column({type: "bigint", default: '0'})
-    @IsString()
     timePlayed?: string;
+
+    @Column({default: 0})
+    power?: number;
 
     @OneToMany(() => PlaySessionEntity, (session) => session.stat)
     sessions?: PlaySessionEntity[]
+
+    @ManyToOne(() => GameEntity, (game) => game.playSessionStats)
+    game?: GameEntity
 }

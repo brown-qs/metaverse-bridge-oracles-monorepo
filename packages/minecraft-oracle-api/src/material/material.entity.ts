@@ -75,6 +75,9 @@ export class MaterialEntity {
     @Column()
     equippable: boolean;
 
+    @Column({default: false})
+    gganbuExcluded?: boolean;
+
     @IsString()
     @Column({nullable: true})
     mapsTo?: string;
