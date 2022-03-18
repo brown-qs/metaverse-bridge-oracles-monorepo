@@ -54,4 +54,10 @@ export class GameService {
         const result: GameEntity = await this.repository.findOne(params, options);
         return result;
     }
+    
+    public async findByIds(ids: string[]) {
+        const entities: GameEntity[] = await this.repository.findByIds(ids);
+        return entities;
+    }
+
 }

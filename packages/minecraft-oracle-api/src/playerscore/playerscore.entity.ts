@@ -30,4 +30,7 @@ export class PlayerScoreEntity {
     @IsString()
     score: string;
 
+    @Column()
+    @IsString()
+    scoreId: string;
 }
