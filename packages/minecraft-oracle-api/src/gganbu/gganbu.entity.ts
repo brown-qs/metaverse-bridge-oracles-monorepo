@@ -1,6 +1,3 @@
-import {
-    IsString,
-} from 'class-validator';
 import { GameEntity } from '../game/game.entity';
 import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 import { MaterialEntity } from '../material/material.entity';
@@ -12,14 +9,15 @@ export class GganbuEntity {
         Object.assign(this, entity);
     }
 
-    @PrimaryColumn({unique: true})
-    @IsString()
+    @PrimaryColumn({ unique: true })
     id: string; // convention:: materialName-gameId
 
     @Column()
-    @IsString()
     amount: string;
-    
+
+    @Column({ default: 0 })
+    powerSum?: number;
+
     @ManyToOne(() => MaterialEntity, (material) => material.snapshots)
     material: MaterialEntity;
 
