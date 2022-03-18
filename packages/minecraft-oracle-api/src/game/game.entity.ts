@@ -10,6 +10,7 @@ import { PlaySessionEntity } from '../playsession/playsession.entity';
 import { GganbuEntity } from '../gganbu/gganbu.entity';
 import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
 import { SnaplogEntity } from '../snaplog/snaplog.entity';
+import { PlaySessionStatEntity } from '../playsession/playsessionstat.entity';
 
 
 @Entity()
@@ -83,4 +84,7 @@ export class GameEntity {
 
     @OneToMany(() => SnaplogEntity, (snaplog) => snaplog.game)
     snaplogs?: SnaplogEntity[];
+
+    @OneToMany(() => PlaySessionStatEntity, (playSessionStat) => playSessionStat.game)
+    playSessionStats?: PlaySessionStatEntity[]
 }
