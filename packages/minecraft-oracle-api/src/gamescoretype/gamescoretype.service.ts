@@ -3,7 +3,6 @@ import { GameScoreTypeEntity } from './gamescoretype.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindConditions, FindManyOptions, FindOneOptions, ObjectID, UpdateResult } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
-import { SetGameScoreTypeDto } from './dtos/gamescoretype.dto';
 
 @Injectable()
 export class GameScoreTypeService {
@@ -56,7 +55,7 @@ export class GameScoreTypeService {
         return result;
     }
 
-    public calculateId(dto: SetGameScoreTypeDto) {
+    public calculateId(dto: {gameId: string, scoreId: string}) {
         return `${dto.gameId}-${dto.scoreId}`;
     }
 }

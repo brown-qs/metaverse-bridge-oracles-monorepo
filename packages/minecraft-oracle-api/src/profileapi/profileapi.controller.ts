@@ -24,7 +24,6 @@ import { ThingsDto } from './dtos/things.dto';
 import { SkinselectDto } from './dtos/skinselect.dto';
 import { GameKindInProgressDto } from '../gameapi/dtos/gamekndinprogress.dto';
 import { GameApiService } from '../gameapi/gameapi.service';
-import { GetPlayerAchievementDto } from '../playerachievement/dtos/playerachievement.dto';
 import { PlayerAchievementEntity } from '../playerachievement/playerachievement.entity';
 import { QueryPlayerScoreDto } from '../playerscore/dtos/playerscore.dto';
 
@@ -96,15 +95,16 @@ export class ProfileApiController {
         return success
     }
 
-    @Get('achievements')
+    @Get('game/:gameId/player/:uuid/achievements')
     @HttpCode(200)
     @ApiOperation({ summary: 'Queries all player achievements for a game.' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async getPlayerAchievements(
-        @Query() dto: GetPlayerAchievementDto
+        @Param('gameId') gameId: string,
+        @Param('uuid') uuid: string
     ): Promise<PlayerAchievementEntity[]> {
-        const entities = await this.gameApiService.getPlayerAchievements(dto)
+        const entities = await this.gameApiService.getPlayerAchievements(gameId, uuid)
         return entities
     }
 

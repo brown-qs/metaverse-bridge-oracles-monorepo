@@ -1,8 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 
 export class SetGameScoreTypeDto {
-    @ApiProperty({ description: 'Unique ID of the game'})
-    gameId: string
 
     @ApiProperty({ description: 'Score ID'})
     scoreId: string
@@ -18,8 +16,4 @@ export class SetGameScoreTypeDto {
 
     @ApiProperty({ description: 'Column'})
     column: number;
-}
-export class GetGameScoreTypeDto {
-    @ApiProperty({ description: 'Unique ID of the game'})
-    gameId: string
 }
