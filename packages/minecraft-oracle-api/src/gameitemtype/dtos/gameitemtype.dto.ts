@@ -1,8 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 
 export class SetGameItemTypeDto {
-    @ApiProperty({ description: 'Game Id'})
-    gameId: string
 
     @ApiProperty({ description: 'Item Id'})
     itemId: string
@@ -10,7 +8,7 @@ export class SetGameItemTypeDto {
     @ApiProperty({ description: 'Item Name'})
     name: string;
 
-    @ApiProperty({ description: 'Description of the Item'})
+    @ApiProperty({ description: 'Description of the item'})
     description?: string;
 
     @ApiProperty({ description: 'Image of the Item as string'})
