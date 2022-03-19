@@ -4,9 +4,6 @@ export class SetGameTypeDto {
     @ApiProperty({ description: 'Name of the game'})
     name?: string
 
-    @ApiProperty({ description: 'Unique ID of the game'})
-    id: string
-
     @ApiProperty({ description: 'IP of the game'})
     ip: string;
 
