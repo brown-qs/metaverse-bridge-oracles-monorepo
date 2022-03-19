@@ -2,8 +2,6 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { SortDirection } from "../../common/enums/SortDirection";
 
 export class SetPlayerGameItemDto {
-    @ApiProperty({ description: 'Game ID'})
-    gameId: string
 
     @ApiProperty({ description: 'Item ID'})
     itemId: string
@@ -19,9 +17,6 @@ export class SetPlayerGameItemDto {
 }
 
 export class QueryGameItemsDto {
-
-    @ApiProperty({ description: 'Game id' })
-    gameId: string;
 
     @ApiProperty({ description: 'Item id' })
     itemId: string;
@@ -40,15 +35,6 @@ export class QueryGameItemsDto {
   
     @ApiPropertyOptional({ description: 'Sort Direction. DESC | ASC', enum: SortDirection })
     sort?: SortDirection;
-}
-
-export class QueryPlayerGameItemsDto {
-
-    @ApiProperty({ description: 'Game ID the item belongs to' })
-    gameId: string;
-
-    @ApiProperty({ description: 'Player ID the item belongs to' })
-    uuid: string;
 }
 
 export class PlayerGameItemsDto {

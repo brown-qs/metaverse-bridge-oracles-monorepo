@@ -15,23 +15,7 @@ export class PlayerAchievementDto {
     done: boolean
 }
 
-export class GetPlayerAchievementDto {
-
-    @ApiProperty({ description: 'Id of the player achievement'})
-    gameId: string
-
-    @ApiProperty({ description: 'Uuid of the player'})
-    uuid: string
-}
-
 export class SetPlayerAchievementsDto {
-
-    @ApiProperty({ description: 'Id of the player achievement'})
-    gameId: string
-
-
-    @ApiProperty({ description: 'Uuid of the player'})
-    uuid: string
 
     @ApiProperty({ description: 'Player achievements', type: [PlayerAchievementDto]})
     playerAchievements: PlayerAchievementDto[]

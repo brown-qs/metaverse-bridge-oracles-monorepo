@@ -12,9 +12,6 @@ export class SetPlayerScoreDto {
     @ApiProperty({ description: 'User uuid'})
     uuid: string;
 
-    @ApiProperty({ description: 'The game id of the score'})
-    gameId: string;
-
     @ApiProperty({ description: 'The id of this Score'})
     scoreId: string;
 }
@@ -29,8 +26,6 @@ export class QueryPlayerScoreDto {
 }
 
 export class QueryPlayerScoresDto {
-    @ApiProperty({ description: 'Game ID' })
-    gameId: string;
   
     @ApiPropertyOptional({ description: 'Page Number for pagination, starting at 1' })
     page?: number;
