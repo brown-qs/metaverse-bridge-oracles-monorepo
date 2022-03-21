@@ -13,8 +13,8 @@ export class PlayerGameItemService {
         private configService: ConfigService
     ) {}
 
-    public static calculateId(dto: {uuid: string, materialName: string}) {
-        return `${dto.uuid}-${dto.materialName}`
+    public static calculateId(dto: {playerId: string, itemId: string}) {
+        return `${dto.playerId}-${dto.itemId}`
     }
 
     public async create(snapshotItem: PlayerGameItemEntity): Promise<PlayerGameItemEntity> {

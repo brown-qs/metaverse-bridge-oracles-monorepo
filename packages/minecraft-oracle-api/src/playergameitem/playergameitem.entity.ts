@@ -1,4 +1,4 @@
-import { Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, ManyToOne, PrimaryColumn } from 'typeorm';
 import { UserEntity } from '../user/user.entity';
 import { GameEntity } from '../game/game.entity';
 
@@ -10,8 +10,8 @@ export class PlayerGameItemEntity {
         Object.assign(this, item);
     }
 
-    @PrimaryGeneratedColumn('uuid')
-    id?: string;
+    @PrimaryColumn()
+    id: string;
 
     @Column()
     amount: string;
