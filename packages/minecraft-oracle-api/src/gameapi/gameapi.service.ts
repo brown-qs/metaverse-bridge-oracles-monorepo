@@ -1095,20 +1095,47 @@ export class GameApiService {
         }
 
         const playerIds: string[] = dtos.map(_dto => _dto.playerId);
-        const players = await this.userService.findByIds(playerIds)
 
-        if (playerIds.find(p => p==undefined)) {
-            throw new UnprocessableEntityException("Player not found")
+        if (playerIds.find(p => !p)) {
+            throw new UnprocessableEntityException("Player id not passed")
         }
 
-        const entities = await Promise.all(dtos.map(async (dto, i) => {
-            const entity = await this.playerGameItemService.create({
-                game,
-                player: players[i],
-                ...dto,
+        let entities: PlayerGameItemEntity[] = []
+
+        for(let i = 0; i<dtos.length; i++) {
+            const player = await this.userService.findOne({uuid: playerIds[i]})
+
+            if (!player) {
+                throw new UnprocessableEntityException("Player not found.")
+            }
+
+            const id = PlayerGameItemService.calculateId({
+                playerId: player.uuid,
+                itemId: dtos[i].itemId
             })
-            return entity;
-        }))
+
+            const existingOne = await this.playerGameItemService.findOne({
+                id
+            })
+
+            if (!!existingOne) {
+                existingOne.amount = dtos[i].amount
+                existingOne.updatedAt = dtos[i].updatedAt
+                await this.playerGameItemService.update(id, {
+                    amount: existingOne.amount,
+                    updatedAt: existingOne.updatedAt
+                })
+                entities.push(existingOne)
+            } else {
+                const entity = await this.playerGameItemService.create({
+                    ...dtos[i],
+                    id,
+                    game,
+                    player,
+                })
+                entities.push(entity)
+            }
+        }
 
         return entities;
     }

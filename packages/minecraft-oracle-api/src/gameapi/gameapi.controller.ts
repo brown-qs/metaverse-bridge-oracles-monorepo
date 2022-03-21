@@ -32,7 +32,7 @@ import { GameKindInProgressDto } from './dtos/gamekndinprogress.dto';
 import { SetGameTypeDto } from '../gametype/dtos/gametype.dto';
 import { GameTypeService } from '../gametype/gametype.service';
 import { SetGameDto } from '../game/dto/game.dto';
-import { QueryPlayerScoresDto, SetPlayerScoreDto } from '../playerscore/dtos/playerscore.dto';
+import { QueryPlayerScoresDto, SetPlayerScoresDto } from '../playerscore/dtos/playerscore.dto';
 import { SetAchievementsDto } from '../achievement/dtos/achievement.dto';
 import { AchievementService } from '../achievement/achievement.service';
 import { AchievementEntity } from '../achievement/achievement.entity';
@@ -41,7 +41,7 @@ import { PlayerAchievementEntity } from '../playerachievement/playerachievement.
 import { UserEntity } from '../user/user.entity';
 import { SetGameScoreTypeDto } from '../gamescoretype/dtos/gamescoretype.dto';
 import { GameItemTypeDto, SetGameItemTypeDto } from '../gameitemtype/dtos/gameitemtype.dto';
-import { SetPlayerGameItemDto, PlayerGameItemsDto, QueryGameItemsDto } from '../playergameitem/dtos/playergameitem.dto';
+import { PlayerGameItemsDto, QueryGameItemsDto, SetPlayerGameItemsDto } from '../playergameitem/dtos/playergameitem.dto';
 import { GameService } from '../game/game.service';
 
 @ApiTags('game')
@@ -375,10 +375,10 @@ export class GameApiController {
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
     async setUserScore(
-        @Body() dto: SetPlayerScoreDto[],
+        @Body() dto: SetPlayerScoresDto,
         @Param('gameId') gameId: string
     ): Promise<boolean> {
-        const entity = await this.gameApiService.putPlayerScores(gameId, dto)
+        const entity = await this.gameApiService.putPlayerScores(gameId, dto.playerScores)
         return !!entity
     }
 
@@ -518,10 +518,10 @@ export class GameApiController {
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
     async setPlayerGameItems(
-        @Body() dto: SetPlayerGameItemDto[],
+        @Body() dto: SetPlayerGameItemsDto,
         @Param('gameId') gameId: string
     ): Promise<boolean> {
-        const entity = await this.gameApiService.putGameItems(gameId, dto)
+        const entity = await this.gameApiService.putGameItems(gameId, dto.playerGameItems)
         return !!entity
     }
 }

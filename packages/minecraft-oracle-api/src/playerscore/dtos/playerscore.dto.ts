@@ -16,6 +16,12 @@ export class SetPlayerScoreDto {
     scoreId: string;
 }
 
+export class SetPlayerScoresDto {
+
+    @ApiProperty({ description: 'Player scores'})
+    playerScores: SetPlayerScoreDto[];
+}
+
 export class QueryPlayerScoreDto {
 
     @ApiProperty({ description: 'User uuid'})

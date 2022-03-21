@@ -6,7 +6,7 @@ export class SetPlayerGameItemDto {
     @ApiProperty({ description: 'Item ID'})
     itemId: string
 
-    @ApiProperty({ description: 'Player UUID the tem belongs to'})
+    @ApiProperty({ description: 'Player UUID the player this item belongs to'})
     playerId: string
 
     @ApiProperty({ description: 'Description of the item'})
@@ -15,6 +15,13 @@ export class SetPlayerGameItemDto {
     @ApiProperty({ description: 'Timestamp the item was assigned'})
     updatedAt: string;
 }
+
+export class SetPlayerGameItemsDto {
+
+    @ApiProperty({ description: 'Player game items list to set'})
+    playerGameItems: SetPlayerGameItemDto[]
+}
+
 
 export class QueryGameItemsDto {
 
@@ -30,7 +37,7 @@ export class QueryGameItemsDto {
     @ApiPropertyOptional({ description: 'Search by user name. Defaults to all users.' })
     search?: string;
   
-    @ApiPropertyOptional({ description: 'Specify column to be sorted. Defaults to amount. Score | Name' })
+    @ApiPropertyOptional({ description: 'Specify column to be sorted. Defaults to amount. amount | name' })
     sortBy?: string;
   
     @ApiPropertyOptional({ description: 'Sort Direction. DESC | ASC', enum: SortDirection })
