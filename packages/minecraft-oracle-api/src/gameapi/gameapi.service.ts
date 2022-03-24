@@ -1,6 +1,6 @@
 import { Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ILike } from 'typeorm';
+import { getRepository, ILike } from 'typeorm';
 import { UserService } from '../user/user.service';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { TextureService } from '../texture/texture.service';
@@ -1028,9 +1028,22 @@ export class GameApiService {
         dto.limit = dto.limit ?? 50;
         dto.page = dto.page ?? 1;
         dto.search = dto.search ?? '';
-        let order: any = {};
-        order[dto.sortBy ?? 'amount'] = dto.sort ?? SortDirection.DESC;
+        //let order: {[key: string]: string} = {};
+        //order[dto.sortBy ?? 'amount'] = dto.sort ?? SortDirection.DESC.valueOf();
 
+        const sortByLabel = dto.sortBy ? dto.sortBy === 'name' ? 'player.name' : dto.sortBy : 'amount'
+        const sortDirection: any = dto.sortDirection?.valueOf() ?? SortDirection.DESC.valueOf()
+        const entities: PlayerGameItemEntity[] = await getRepository(PlayerGameItemEntity)
+            .createQueryBuilder('playerGameEntities')
+            .leftJoinAndSelect("playerGameEntities.player", "player", `player.userName ILIKE %:userNameSearch%`, {userNameSearch: dto.search})
+            .leftJoinAndSelect("playerGameEntities.game", "game", `game.id = "gameId`, { gameId})
+            .where(`playerGameEntities.itemId = :itemId`, { itemId: dto.itemId })
+            .orderBy({
+                [sortByLabel]: sortDirection
+            })
+            .getMany();
+        
+            /*
         const entities: PlayerGameItemEntity[] = await this.playerGameItemService.findMany({
             where: {
                 game: {id: gameId},
@@ -1042,6 +1055,7 @@ export class GameApiService {
             order,
             relations: ['game', 'player']
         });
+        */
 
         if (!entities) {
             throw new UnprocessableEntityException("Score not found")
