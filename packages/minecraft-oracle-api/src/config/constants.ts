@@ -155,10 +155,10 @@ export const IMPORTABLE_ASSETS: RecognizedAsset[] = [
 export const ENRAPTURABLE_ASSETS: RecognizedAsset[] = [
     {
       address: '0x0a54845ac3743c96e582e03f26c3636ea9c00c8a'.toLowerCase(),
-      id: ['1', '2'],
+      id: ['1', '2', '3', '4'],
       type: RecognizedAssetType.TEMPORARY_TICKET,
       chainId: ChainId.MOONRIVER,
-      name: 'Bonobos & kings game pass',
+      name: 'Embassy game passes',
       gamepass: true,
       expiration: 1648418400
     } /* embassy NFTs */
