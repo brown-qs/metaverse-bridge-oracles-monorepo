@@ -104,7 +104,7 @@ export const collections = {
       chainId: 1285,
       address: '0x1974eEAF317Ecf792ff307F25A3521C35eECde86',
       display_name: 'Moonbrella',
-      ids: Array.from({length: 60}, (_, i) => (i + 2).toString()),
+      ids: Array.from({length: 62}, (_, i) => (i + 2).toString()),
       enrapturable: false,
       importable: true,
       symbol: 'Moonbrella',
