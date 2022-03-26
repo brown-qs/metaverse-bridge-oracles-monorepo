@@ -90,12 +90,12 @@ export const IMPORTABLE_ASSETS: RecognizedAsset[] = [
     }, /* swords skins from lootbox */
     {
       address: '0x1974eEAF317Ecf792ff307F25A3521C35eECde86'.toLowerCase(),
-      id: ['59', '60'],
+      id: ['59', '62'],
       type: RecognizedAssetType.OFFHAND,
       chainId: ChainId.MOONRIVER,
-      name: 'Bonobo & kings offhands',
+      name: 'Embassy offhands',
       gamepass: false
-    }, /* bonono, kings */
+    }, /* embassy*/
     {
       address: '0xdea45e7c6944cb86a268661349e9c013836c79a2'.toLowerCase(),
       id: undefined,
@@ -155,7 +155,7 @@ export const IMPORTABLE_ASSETS: RecognizedAsset[] = [
 export const ENRAPTURABLE_ASSETS: RecognizedAsset[] = [
     {
       address: '0x0a54845ac3743c96e582e03f26c3636ea9c00c8a'.toLowerCase(),
-      id: ['1', '2', '3', '4'],
+      id: undefined,
       type: RecognizedAssetType.TEMPORARY_TICKET,
       chainId: ChainId.MOONRIVER,
       name: 'Embassy game passes',
