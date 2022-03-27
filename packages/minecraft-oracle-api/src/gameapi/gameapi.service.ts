@@ -1,6 +1,6 @@
 import { Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ILike } from 'typeorm';
+import { getRepository, ILike } from 'typeorm';
 import { UserService } from '../user/user.service';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { TextureService } from '../texture/texture.service';
@@ -610,7 +610,7 @@ export class GameApiService {
                     await this.snapshotService.update(existingSnap.id, { amount })
                 } else {
                     this.logger.debug(`Communism:: ${uuid} snap for ${materialName} not found. Creating..`, this.context)
-                    const amount = counter[materialName] * stats.power / powerSum 
+                    const amount = counter[materialName] * stats.power / powerSum
 
                     if (users[uuid]?.eligible) {
                         await this.assignSnapshot(user, game, { amount, materialName }, false, false)
@@ -776,13 +776,13 @@ export class GameApiService {
 
         const players = await this.userService.findByIds(uuids)
 
-        if (players.find(p => p==undefined)) {
+        if (players.find(p => p == undefined)) {
             throw new UnprocessableEntityException("User not found")
         }
 
         const games = await this.gameService.findByIds(gameIds)
 
-        if (games.find(p => p==undefined)) {
+        if (games.find(p => p == undefined)) {
             throw new UnprocessableEntityException("Game not found")
         }
 
@@ -793,7 +793,7 @@ export class GameApiService {
                 score: dto.score.toString(),
                 scoreId: dto.scoreId,
                 updatedAt: dto.updatedAt,
-                id: this.playerScoreService.calculateId({uuid: dto.uuid, gameId})
+                id: this.playerScoreService.calculateId({ uuid: dto.uuid, gameId })
             })
             return entity;
         }))
@@ -803,7 +803,7 @@ export class GameApiService {
 
     async putGameScoreTypes(gameId: string, dtos: SetGameScoreTypeDto[]) {
 
-        const game = await this.gameService.findOne({id: gameId})
+        const game = await this.gameService.findOne({ id: gameId })
 
         if (!game) {
             throw new UnprocessableEntityException("Game not found")
@@ -813,7 +813,7 @@ export class GameApiService {
             const entity = await this.gameScoreTypeService.create({
                 game,
                 ...dto,
-                id: this.gameScoreTypeService.calculateId({gameId, scoreId: dto.scoreId}),
+                id: this.gameScoreTypeService.calculateId({ gameId, scoreId: dto.scoreId }),
             })
             return entity;
         }))
@@ -853,7 +853,7 @@ export class GameApiService {
     }
 
     async getPlayerScore(dto: QueryPlayerScoreDto) {
-        const game = await this.gameService.findOne({id: dto.gameId})
+        const game = await this.gameService.findOne({ id: dto.gameId })
 
         if (!game) {
             throw new UnprocessableEntityException("Game not found")
@@ -869,20 +869,20 @@ export class GameApiService {
     }
 
     async getScoreTypes(gameId: string) {
-        const game = await this.gameService.findOne({id: gameId})
+        const game = await this.gameService.findOne({ id: gameId })
 
-        console.log({gameId, game})
+        console.log({ gameId, game })
 
         if (!game) {
             throw new UnprocessableEntityException("Game not found")
         }
 
-        const entities = await this.gameScoreTypeService.findMany({where: {game: {id: gameId}}});
+        const entities = await this.gameScoreTypeService.findMany({ where: { game: { id: gameId } } });
         return entities;
     }
 
     async getPlayerScores(gameId: string, dto: QueryPlayerScoresDto) {
-        const game = await this.gameService.findOne({id: gameId})
+        const game = await this.gameService.findOne({ id: gameId })
 
         if (!game) {
             throw new UnprocessableEntityException("Game not found")
@@ -892,19 +892,19 @@ export class GameApiService {
 
         const scores: PlayerScoreEntity[] = await this.playerScoreService.findMany({
             where: {
-                game: {id: gameId},
+                game: { id: gameId },
                 player: { userName: ILike(`%${dto.search}%`) }
             },
             relations: ['game', 'player']
         })
-        const players = scores.reduce(function(rv: any, x) {
+        const players = scores.reduce(function (rv: any, x) {
             let r = rv.find((rvo: any) => rvo.playerId == x.player.uuid);
             if (!r) {
                 r = {
                     playerId: x.player.uuid,
                     username: x.player.userName,
                     scores: [],
-                }; 
+                };
                 if (dto.sortBy === 'name') r.username = x.player.userName;
                 else { r.score = 0; r.updatedAt = 0; }
                 rv.push(r);
@@ -922,7 +922,7 @@ export class GameApiService {
 
         dto.limit = dto.limit ?? 50;
         dto.page = dto.page ?? 1;
-        const skip = dto.limit * (dto.page-1);
+        const skip = dto.limit * (dto.page - 1);
 
         const sortDirection = dto.sort == 'ASC' ? 1 : -1;
 
@@ -930,10 +930,10 @@ export class GameApiService {
             players.sort((a: any, b: any) => ((a.username < b.username) ? 1 : -1) * sortDirection);
         } else {
             players.sort((a: any, b: any) => {
-               let comp = a.score - b.score;
-               if (comp != 0) return comp * sortDirection;
-               comp = a.updatedAt - b.updatedAt;
-               return comp * sortDirection;
+                let comp = a.score - b.score;
+                if (comp != 0) return comp * sortDirection;
+                comp = a.updatedAt - b.updatedAt;
+                return comp * sortDirection;
             })
         }
         const pages = Math.ceil(players.length / dto.limit);
@@ -991,13 +991,13 @@ export class GameApiService {
 
     async getGameItemTypes(gameId: string) {
 
-        const game = await this.gameService.findOne({id: gameId})
+        const game = await this.gameService.findOne({ id: gameId })
 
         if (!game) {
             throw new UnprocessableEntityException("Game not found")
         }
 
-        const gameItems = await this.gameItemTypeService.findMany({ where: { game: {id: gameId}}, relations:['game'] })
+        const gameItems = await this.gameItemTypeService.findMany({ where: { game: { id: gameId } }, relations: ['game'] })
         const results: GameItemTypeDto[] = gameItems.map(item => {
             delete item.game; delete item.id;
             return item
@@ -1006,7 +1006,7 @@ export class GameApiService {
     }
 
     async getPlayerGameItems(gameId: string, uuid: string) {
-        const entities: PlayerGameItemEntity[] = await this.playerGameItemService.findMany({where: { game: {id: gameId}, player: {uuid: uuid} }, relations: ['game', 'player']});
+        const entities: PlayerGameItemEntity[] = await this.playerGameItemService.findMany({ where: { game: { id: gameId }, player: { uuid: uuid } }, relations: ['game', 'player'] });
         return entities.map(entity => {
             delete entity.game
             delete entity.player
@@ -1019,7 +1019,7 @@ export class GameApiService {
     }
 
     async getGameItems(gameId: string, dto: QueryGameItemsDto) {
-        const game = await this.gameService.findOne({id: gameId})
+        const game = await this.gameService.findOne({ id: gameId })
 
         if (!game) {
             throw new UnprocessableEntityException("Game not found")
@@ -1028,20 +1028,21 @@ export class GameApiService {
         dto.limit = dto.limit ?? 50;
         dto.page = dto.page ?? 1;
         dto.search = dto.search ?? '';
-        let order: any = {};
-        order[dto.sortBy ?? 'amount'] = dto.sort ?? SortDirection.DESC;
 
-        const entities: PlayerGameItemEntity[] = await this.playerGameItemService.findMany({
-            where: {
-                game: {id: gameId},
-                itemId: dto.itemId,
-                player: { userName: ILike(`%${dto.search}%`) },
-            },
-            skip: dto.limit * (dto.page-1),
-            take: dto.limit,
-            order,
-            relations: ['game', 'player']
-        });
+        const sortByLabel = dto.sortBy ? dto.sortBy === 'name' ? 'player.name' : dto.sortBy : 'pitem.amount'
+        const sortDirection: 'ASC' | 'DESC' = (dto.sortDirection?.valueOf() ?? SortDirection.DESC.valueOf()) as 'ASC' | 'DESC'
+
+        const entities: PlayerGameItemEntity[] = await getRepository(PlayerGameItemEntity)
+            .createQueryBuilder('pitem')
+            .leftJoinAndSelect(`pitem.player`, `player`)
+            .leftJoinAndSelect(`pitem.game`, `game`)
+            .where(`pitem.itemId = :itemId AND game.id = :gameId AND player.userName ILIKE :userNameSearch`, { itemId: dto.itemId, gameId, userNameSearch: `%${dto.search}%` })
+            .orderBy({
+                [sortByLabel]: sortDirection
+            })
+            .take(dto.limit)
+            .skip(dto.limit * (dto.page - 1))
+            .getMany();
 
         if (!entities) {
             throw new UnprocessableEntityException("Score not found")
@@ -1054,7 +1055,7 @@ export class GameApiService {
                 playerId: entity.player.uuid,
                 itemId: entity.itemId,
                 amount: entity.amount,
-                playtime: parseInt(playStats.timePlayed) / 1000,
+                playtime: parseInt(playStats?.timePlayed ?? '0') / 1000,
                 updatedAt: parseInt(entity.updatedAt),
             }
         }));
@@ -1070,7 +1071,7 @@ export class GameApiService {
     }
 
     async putGameItemTypes(gameId: string, dtos: SetGameItemTypeDto[]) {
-        const game = await this.gameService.findOne({id: gameId})
+        const game = await this.gameService.findOne({ id: gameId })
 
         if (!game) {
             throw new UnprocessableEntityException("Game not found")
@@ -1086,9 +1087,9 @@ export class GameApiService {
 
         return entities;
     }
-    
+
     async putGameItems(gameId: string, dtos: SetPlayerGameItemDto[]) {
-        const game = await this.gameService.findOne({id: gameId})
+        const game = await this.gameService.findOne({ id: gameId })
 
         if (!game) {
             throw new UnprocessableEntityException("Game not found")
@@ -1102,8 +1103,8 @@ export class GameApiService {
 
         let entities: PlayerGameItemEntity[] = []
 
-        for(let i = 0; i<dtos.length; i++) {
-            const player = await this.userService.findOne({uuid: playerIds[i]})
+        for (let i = 0; i < dtos.length; i++) {
+            const player = await this.userService.findOne({ uuid: playerIds[i] })
 
             if (!player) {
                 throw new UnprocessableEntityException("Player not found.")

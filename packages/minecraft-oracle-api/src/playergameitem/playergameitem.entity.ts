@@ -27,5 +27,4 @@ export class PlayerGameItemEntity {
 
     @ManyToOne(() => UserEntity, (user) => user.playerGameItems)
     player: UserEntity;
-    
 }

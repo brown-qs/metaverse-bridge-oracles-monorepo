@@ -40,8 +40,8 @@ export class QueryGameItemsDto {
     @ApiPropertyOptional({ description: 'Specify column to be sorted. Defaults to amount. amount | name' })
     sortBy?: string;
   
-    @ApiPropertyOptional({ description: 'Sort Direction. DESC | ASC', enum: SortDirection })
-    sort?: SortDirection;
+    @ApiPropertyOptional({ description: 'Sort direction. DESC | ASC', enum: SortDirection })
+    sortDirection?: SortDirection;
 }
 
 export class PlayerGameItemsDto {
