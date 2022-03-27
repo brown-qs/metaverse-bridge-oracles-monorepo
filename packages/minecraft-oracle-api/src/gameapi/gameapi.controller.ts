@@ -40,7 +40,7 @@ import { SetPlayerAchievementsDto } from '../playerachievement/dtos/playerachiev
 import { PlayerAchievementEntity } from '../playerachievement/playerachievement.entity';
 import { UserEntity } from '../user/user.entity';
 import { SetGameScoreTypeDto } from '../gamescoretype/dtos/gamescoretype.dto';
-import { GameItemTypeDto, SetGameItemTypeDto } from '../gameitemtype/dtos/gameitemtype.dto';
+import { GameItemTypeDto, SetGameItemTypesDto } from '../gameitemtype/dtos/gameitemtype.dto';
 import { PlayerGameItemsDto, QueryGameItemsDto, SetPlayerGameItemsDto } from '../playergameitem/dtos/playergameitem.dto';
 import { GameService } from '../game/game.service';
 
@@ -505,10 +505,10 @@ export class GameApiController {
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
     async setItemTypes(
-        @Body() dto: SetGameItemTypeDto[],
+        @Body() dto: SetGameItemTypesDto,
         @Param('gameId') gameId: string
     ): Promise<boolean> {
-        const entity = await this.gameApiService.putGameItemTypes(gameId, dto)
+        const entity = await this.gameApiService.putGameItemTypes(gameId, dto.gameItemTypes)
         return !!entity
     }
 

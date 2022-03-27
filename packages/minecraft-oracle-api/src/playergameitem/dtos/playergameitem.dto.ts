@@ -18,7 +18,7 @@ export class SetPlayerGameItemDto {
 
 export class SetPlayerGameItemsDto {
 
-    @ApiProperty({ description: 'Player game items list to set'})
+    @ApiProperty({ description: 'Player game items list to set', isArray: true, type: SetPlayerGameItemDto})
     playerGameItems: SetPlayerGameItemDto[]
 }
 

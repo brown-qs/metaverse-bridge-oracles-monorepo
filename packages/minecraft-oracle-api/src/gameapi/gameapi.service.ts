@@ -150,12 +150,14 @@ export class GameApiService {
             stat = await this.playSessionStatService.create({
                 id: PlaySessionStatService.calculateId({ uuid: user.uuid, gameId: dto.gameId }),
                 power: dto.power ?? 0,
-                timePlayed: dto.playTime.toString() ?? '0'
+                timePlayed: dto.playTime.toString() ?? '0',
+                game
             })
         } else {
             await this.playSessionStatService.update(statId, {
                 power: dto.power ?? 0,
-                timePlayed: (Number.parseInt(stat.timePlayed) + (dto.playTime ?? 0)).toString()
+                timePlayed: (Number.parseInt(stat.timePlayed) + (dto.playTime ?? 0)).toString(),
+                game
             })
         }
 
@@ -871,7 +873,7 @@ export class GameApiService {
     async getScoreTypes(gameId: string) {
         const game = await this.gameService.findOne({ id: gameId })
 
-        console.log({ gameId, game })
+        //console.log({ gameId, game })
 
         if (!game) {
             throw new UnprocessableEntityException("Game not found")
