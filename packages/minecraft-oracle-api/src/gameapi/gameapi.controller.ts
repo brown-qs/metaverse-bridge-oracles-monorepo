@@ -478,7 +478,7 @@ export class GameApiController {
     @ApiOperation({ summary: 'Fetches all items for given game and player' })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
-    async getGameItems(
+    async getPlayerGameItems(
         @Param('gameId') gameId: string,
         @Param('uuid') uuid: string
     ): Promise<PlayerGameItemsDto[]> {
@@ -491,7 +491,7 @@ export class GameApiController {
     @ApiOperation({ summary: 'Fetches players itmes.' })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
-    async getGameItem(
+    async getGameItems(
         @Query() dto: QueryGameItemsDto,
         @Param('gameId') gameId: string
     ): Promise<any> {
