@@ -26,9 +26,6 @@ export class SetAchievementsDto {
 
     @ApiProperty({ description: 'Achievements ', type: [AchievementDto]})
     achievements: AchievementDto[]
-
-    @ApiProperty({ description: 'Game ID the achievement belongs to'})
-    gameId: string;
 }
 
 export class GetAchievementsDto {
