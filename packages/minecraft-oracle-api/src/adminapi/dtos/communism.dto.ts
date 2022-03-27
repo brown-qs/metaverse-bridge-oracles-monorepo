@@ -12,7 +12,7 @@ export class CommunismDto {
     deductionMultiplier?: number
 
     @ApiProperty({ description: 'server ID aka game ID to check time played for. Default: null'})
-    serverId?: string
+    gameId?: string
 
     @ApiProperty({ description: 'Redistribution only for Moonsamas. Default: true'})
     moonsamasOnly?: boolean
