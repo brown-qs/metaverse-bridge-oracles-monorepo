@@ -482,11 +482,11 @@ export class GameApiService {
     public async communism(settings: CommunismDto) {
 
         const mintT = settings.minTimePlayed ?? 2700000
-        const averageM = settings.averageMultiplier ?? 0.5
+        const averageM = settings.averageMultiplier ?? 1.0
         const finalDeduction = settings.deductionMultiplier ?? 0.5
         const msamasOnly = settings.moonsamasOnly ?? true
         const punishAll = settings.deductFromEveryone ?? true
-        const gameId = settings.serverId
+        const gameId = settings.gameId
 
         const game = !!gameId ? (await this.gameService.findOne({ id: gameId }) ?? null) : null
 
@@ -499,7 +499,6 @@ export class GameApiService {
 
         do {
             batch = await this.snapshotService.findMany({ where: { game: gameFindCondition }, take, skip, relations: ['material', 'owner', 'game'] })
-            //console.log(batch)
 
             if (!!batch && batch.length > 0) {
                 items = items.concat(batch)
@@ -579,7 +578,7 @@ export class GameApiService {
             })
         }))
 
-        this.logger.debug(`Communism:: final gganbu amounts: ${counter}`, this.context)
+        this.logger.debug(`Communism:: final gganbu amounts: ${JSON.stringify(counter)}`, this.context)
 
         this.gganbuService.createAll(gganbuEntities)
 
@@ -608,7 +607,7 @@ export class GameApiService {
                     const finalfinaldeduction = punishAll ? finalDeduction : (users[uuid]?.eligible ? finalDeduction : 1)
                     const amount = ((Number.parseFloat(existingSnap.amount) * finalfinaldeduction) + gganbuAmount).toString()
 
-                    this.logger.debug(`Communism:: ${uuid} snap for ${materialName} deduction multiplier: ${finalDeduction}, amount: ${amount}, eligible: ${users[uuid]?.eligible}`, this.context)
+                    this.logger.debug(`Communism:: ${uuid} snap for ${materialName} deduction multiplier: ${finalfinaldeduction}, amount: ${amount}, eligible: ${users[uuid]?.eligible}`, this.context)
                     await this.snapshotService.update(existingSnap.id, { amount })
                 } else {
                     this.logger.debug(`Communism:: ${uuid} snap for ${materialName} not found. Creating..`, this.context)
