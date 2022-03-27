@@ -15,6 +15,12 @@ export class SetGameItemTypeDto {
     image?: string;
 }
 
+export class SetGameItemTypesDto {
+
+    @ApiProperty({ description: 'Array of game item types', isArray: true, type: SetGameItemTypeDto})
+    gameItemTypes: SetGameItemTypeDto[]
+}
+
 export class QueryGameItemTypesDto {
 
     @ApiProperty({ description: 'Game ID the items belong to'})

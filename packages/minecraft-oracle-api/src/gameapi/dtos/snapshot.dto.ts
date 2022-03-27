@@ -14,7 +14,7 @@ export class SnapshotDto {
 }
 
 export class SnapshotsDto {
-    @ApiProperty({ description: 'Snapshot array', type: [SnapshotDto]})
+    @ApiProperty({ description: 'Snapshot array', isArray: true, type: SnapshotDto})
     snapshots: SnapshotDto[]
 
     @ApiPropertyOptional({ description: 'Game this snapshot belongs to: Default: NULL.'})

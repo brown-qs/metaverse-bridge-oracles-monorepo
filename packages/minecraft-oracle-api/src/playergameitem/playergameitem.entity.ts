@@ -13,7 +13,7 @@ export class PlayerGameItemEntity {
     @PrimaryColumn()
     id: string;
 
-    @Column()
+    @Column({ type: 'bigint' })
     amount: string;
 
     @Column({ type: 'bigint' })
