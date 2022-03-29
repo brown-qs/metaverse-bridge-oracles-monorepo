@@ -54,114 +54,114 @@ export type RecognizedAsset = {
 }
 // lwoercase
 export const IMPORTABLE_ASSETS: RecognizedAsset[] = [
-  {
-    chainId: ChainId.MOONRIVER,
-    address: '0xb654611F84A8dc429BA3cb4FDA9Fad236C505a1a'.toLowerCase(),
-    type: RecognizedAssetType.MOONSAMA,
-    id: undefined,
-    name: 'Moonsama',
-    gamepass: true,
-    expiration: undefined
-  }, /* moonsama */
-  {
-    address: '0x1974eEAF317Ecf792ff307F25A3521C35eECde86'.toLowerCase(),
-    id: '1',
-    type: RecognizedAssetType.TICKET,
-    chainId: ChainId.MOONRIVER,
-    name: 'VIP ticket',
-    gamepass: true,
-    expiration: undefined
-  }, /* tickets */
-  {
-    address: '0x1974eEAF317Ecf792ff307F25A3521C35eECde86'.toLowerCase(),
-    id: ['2', '9'],
-    type: RecognizedAssetType.OFFHAND,
-    chainId: ChainId.MOONRIVER,
-    name: 'Moonbrella',
-    gamepass: false
-  }, /* moonrella offhands */
-  {
-    address: '0x1974eEAF317Ecf792ff307F25A3521C35eECde86'.toLowerCase(),
-    id: ['10', '58'],
-    type: RecognizedAssetType.WEAPON_SKIN,
-    chainId: ChainId.MOONRIVER,
-    name: 'Sword skin',
-    gamepass: false
-  }, /* swords skins from lootbox */
-  {
-    address: '0x1974eEAF317Ecf792ff307F25A3521C35eECde86'.toLowerCase(),
-    id: ['59', '60'],
-    type: RecognizedAssetType.OFFHAND,
-    chainId: ChainId.MOONRIVER,
-    name: 'Bonobo & kings offhands',
-    gamepass: false
-  }, /* bonono, kings */
-  {
-    address: '0xdea45e7c6944cb86a268661349e9c013836c79a2'.toLowerCase(),
-    id: undefined,
-    type: RecognizedAssetType.MOONSAMA,
-    chainId: ChainId.MOONRIVER,
-    name: 'Multiverse Art',
-    gamepass: true,
-    expiration: undefined
-  }, /* multiverse art skins */
-  {
-    address: '0xa17A550871E5F5F692a69a3ABE26e8DBd5991B75'.toLowerCase(),
-    id: undefined,
-    type: RecognizedAssetType.PLOT,
-    chainId: ChainId.MOONRIVER,
-    name: 'Moonsama Minecraft Plots Season 1',
-    gamepass: false
-  }
-  /*
-  {
-    address: '0x6E9F41ec2a43ECAe0Ada29587D4D40a3e83e4bEB'.toLowerCase(),
-    id: undefined,
-    type: RecognizedAssetType.TEST,
-    chainId: ChainId.VOLTA,
-    name: 'Test'
-  },
-  {
-    address: '0x564482cFeC68454f078d0CEF27cb930cBa93d05C'.toLowerCase(),
-    id: '1',
-    type: RecognizedAssetType.TICKET,
-    chainId: ChainId.VOLTA,
-    name: 'Golden ticket'
-  },
-  {
-    address: '0x6A89CafD0a25bCf92De623209f8899eA4B8E30B1'.toLowerCase(),
-    id: undefined,
-    type: RecognizedAssetType.MOONSAMA,
-    chainId: ChainId.VOLTA,
-    name: 'Moonsama'
-  },
-  {
-    address: '0x63228048121877A9e0f52020834A135074e8207C'.toLowerCase(),
-    id: '1',
-    type: RecognizedAssetType.TICKET,
-    chainId: ChainId.MOONRIVER,
-    name: 'Golden ticket'
-  },
-  {
-    address: '0xaF1F85aD24Bc45fb19f5F8B5166e1Aed41c60844'.toLowerCase(),
-    id: undefined,
-    type: RecognizedAssetType.MOONSAMA,
-    chainId: ChainId.MOONRIVER,
-    name: 'Moonsama'
-  }
-  */
+    {
+      chainId: ChainId.MOONRIVER,
+      address: '0xb654611F84A8dc429BA3cb4FDA9Fad236C505a1a'.toLowerCase(),
+      type: RecognizedAssetType.MOONSAMA,
+      id: undefined,
+      name: 'Moonsama',
+      gamepass: true,
+      expiration: undefined
+    }, /* moonsama */
+    {
+      address: '0x1974eEAF317Ecf792ff307F25A3521C35eECde86'.toLowerCase(),
+      id: '1',
+      type: RecognizedAssetType.TICKET,
+      chainId: ChainId.MOONRIVER,
+      name: 'VIP ticket',
+      gamepass: true,
+      expiration: undefined
+    }, /* tickets */
+    {
+      address: '0x1974eEAF317Ecf792ff307F25A3521C35eECde86'.toLowerCase(),
+      id: ['2', '9'],
+      type: RecognizedAssetType.OFFHAND,
+      chainId: ChainId.MOONRIVER,
+      name: 'Moonbrella',
+      gamepass: false
+    }, /* moonrella offhands */
+    {
+      address: '0x1974eEAF317Ecf792ff307F25A3521C35eECde86'.toLowerCase(),
+      id: ['10', '58'],
+      type: RecognizedAssetType.WEAPON_SKIN,
+      chainId: ChainId.MOONRIVER,
+      name: 'Sword skin',
+      gamepass: false
+    }, /* swords skins from lootbox */
+    {
+      address: '0x1974eEAF317Ecf792ff307F25A3521C35eECde86'.toLowerCase(),
+      id: ['59', '62'],
+      type: RecognizedAssetType.OFFHAND,
+      chainId: ChainId.MOONRIVER,
+      name: 'Embassy offhands',
+      gamepass: false
+    }, /* embassy*/
+    {
+      address: '0xdea45e7c6944cb86a268661349e9c013836c79a2'.toLowerCase(),
+      id: undefined,
+      type: RecognizedAssetType.MOONSAMA,
+      chainId: ChainId.MOONRIVER,
+      name: 'Multiverse Art',
+      gamepass: true,
+      expiration: undefined
+    }, /* multiverse art skins */
+    {
+      address: '0xa17A550871E5F5F692a69a3ABE26e8DBd5991B75'.toLowerCase(),
+      id: undefined,
+      type: RecognizedAssetType.PLOT,
+      chainId: ChainId.MOONRIVER,
+      name: 'Moonsama Minecraft Plots Season 1',
+      gamepass: false
+    }
+    /*
+    {
+      address: '0x6E9F41ec2a43ECAe0Ada29587D4D40a3e83e4bEB'.toLowerCase(),
+      id: undefined,
+      type: RecognizedAssetType.TEST,
+      chainId: ChainId.VOLTA,
+      name: 'Test'
+    },
+    {
+      address: '0x564482cFeC68454f078d0CEF27cb930cBa93d05C'.toLowerCase(),
+      id: '1',
+      type: RecognizedAssetType.TICKET,
+      chainId: ChainId.VOLTA,
+      name: 'Golden ticket'
+    },
+    {
+      address: '0x6A89CafD0a25bCf92De623209f8899eA4B8E30B1'.toLowerCase(),
+      id: undefined,
+      type: RecognizedAssetType.MOONSAMA,
+      chainId: ChainId.VOLTA,
+      name: 'Moonsama'
+    },
+    {
+      address: '0x63228048121877A9e0f52020834A135074e8207C'.toLowerCase(),
+      id: '1',
+      type: RecognizedAssetType.TICKET,
+      chainId: ChainId.MOONRIVER,
+      name: 'Golden ticket'
+    },
+    {
+      address: '0xaF1F85aD24Bc45fb19f5F8B5166e1Aed41c60844'.toLowerCase(),
+      id: undefined,
+      type: RecognizedAssetType.MOONSAMA,
+      chainId: ChainId.MOONRIVER,
+      name: 'Moonsama'
+    }
+    */
 ]
 
 export const ENRAPTURABLE_ASSETS: RecognizedAsset[] = [
-  {
-    address: '0x0a54845ac3743c96e582e03f26c3636ea9c00c8a'.toLowerCase(),
-    id: ['1', '2'],
-    type: RecognizedAssetType.TEMPORARY_TICKET,
-    chainId: ChainId.MOONRIVER,
-    name: 'Bonobos & kings game pass',
-    gamepass: true,
-    expiration: 1648418400
-  } /* embassy NFTs */
+    {
+      address: '0x0a54845ac3743c96e582e03f26c3636ea9c00c8a'.toLowerCase(),
+      id: undefined,
+      type: RecognizedAssetType.TEMPORARY_TICKET,
+      chainId: ChainId.MOONRIVER,
+      name: 'Embassy game passes',
+      gamepass: true,
+      expiration: 1648418400
+    } /* embassy NFTs */
   /*
    {
       address: '0x6E9F41ec2a43ECAe0Ada29587D4D40a3e83e4bEB'.toLowerCase(),
