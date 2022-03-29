@@ -11,7 +11,6 @@ import { InventoryEntity } from '../src/playerinventory/inventory.entity'
 import { PlaySessionEntity } from '../src/playsession/playsession.entity'
 import { PlaySessionStatEntity } from '../src/playsession/playsessionstat.entity'
 import { SkinEntity } from '../src/skin/skin.entity'
-import { PlaySessionStatService } from '../src/playsession/playsessionstat.service'
 import { GameEntity } from '../src/game/game.entity'
 import { GameTypeEntity } from '../src/gametype/gametype.entity'
 import { AchievementEntity } from '../src/achievement/achievement.entity'
@@ -68,10 +67,10 @@ async function main() {
 
             const newNum = Math.max(invNum-(snapNum * snap.material.multiplier * 0.8), 0).toString()
 
-            console.log(snap.owner.userName, snap.material.name, inv.material.name, inv.amount, snap.amount, invNum, snapNum, newNum)
+            //console.log(snap.owner.userName, snap.material.name, inv.material.name, inv.amount, snap.amount, invNum, snapNum, newNum)
 
             if (newNum === '0') {
-                console.log('ZEROOOOOOOOOOOOOOOOOOOOo')
+                //console.log('ZEROOOOOOOOOOOOOOOOOOOOo')
             }
 
             await connection.manager.getRepository(InventoryEntity).update({ id: inv.id }, { amount: newNum})
