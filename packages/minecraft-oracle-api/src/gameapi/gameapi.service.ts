@@ -592,7 +592,6 @@ export class GameApiService {
         for (let i = 0; i < userUuids.length; i++) {
             const uuid = userUuids[i]
             const user = await this.userService.findOne({ uuid })
-            const stats = await this.playSessionStatService.findOne({ id: PlaySessionStatService.calculateId({ uuid, gameId: game?.id }) })
 
             // get user's snapshot items
             const snaps = items.filter(snap => snap.owner.uuid === uuid)
