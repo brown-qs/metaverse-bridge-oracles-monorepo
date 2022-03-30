@@ -19,6 +19,9 @@ import { PlayerScoreEntity } from '../src/playerscore/playerscore.entity'
 import { GganbuEntity } from '../src/gganbu/gganbu.entity'
 import { SnaplogEntity } from '../src/snaplog/snaplog.entity'
 import { InventoryService } from '../src/playerinventory/inventory.service'
+import { GameItemTypeEntity } from '../src/gameitemtype/gameitemtype.entity'
+import { PlayerGameItemEntity } from '../src/playergameitem/playergameitem.entity'
+import { GameScoreTypeEntity } from '../src/gamescoretype/gamescoretype.entity'
 
 config()
 /*
@@ -42,10 +45,10 @@ config()
 */
 
 const list = [
-    'CryptoBeliever'
+    'UnicFb910'
 ]
 
-const gameId = 'minecraft-carnage-2022-03-06'
+const gameId = 'minecraft-carnage-2022-03-20'
 
 async function main() {
     let connection: Connection
@@ -59,7 +62,7 @@ async function main() {
             host: process.env.TYPEORM_HOST,
             port: Number.parseInt(process.env.TYPEORM_PORT),
             database: process.env.TYPEORM_DATABASE,
-            entities: [MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity, AssetEntity, SummonEntity, InventoryEntity, PlaySessionEntity, PlaySessionStatEntity, SkinEntity, GameEntity, GameTypeEntity, AchievementEntity, PlayerAchievementEntity, PlayerScoreEntity, GganbuEntity, SnaplogEntity],
+            entities: [GameScoreTypeEntity, GameItemTypeEntity, PlayerGameItemEntity, MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity, AssetEntity, SummonEntity, InventoryEntity, PlaySessionEntity, PlaySessionStatEntity, SkinEntity, GameEntity, GameTypeEntity, AchievementEntity, PlayerAchievementEntity, PlayerScoreEntity, GganbuEntity, SnaplogEntity],
             synchronize: true
         })
     } catch (err) {
