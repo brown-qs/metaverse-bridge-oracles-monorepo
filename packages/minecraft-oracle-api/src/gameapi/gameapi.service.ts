@@ -544,7 +544,7 @@ export class GameApiService {
             if (!users[user.uuid]) {
                 allDistinct += 1
                 //const hasMoonsama = !!(await this.assetService.findOne({recognizedAssetType: RecognizedAssetType.MOONSAMA, owner: {uuid: user.uuid}, pendingIn: false}))
-                const power = (playStats.power ?? 0)
+                const power = (playStats?.power ?? 0)
                 const hasPower = power > 0
                 const adjustedPower = hasPower ? GGANBU_POWERS.slice(0, power).reduce((sum, current) => sum + current, 0) : 0
                 users[user.uuid] = {
@@ -944,7 +944,7 @@ export class GameApiService {
         const result = await Promise.all(players.slice(skip, skip + dto.limit).map(async (player: any) => {
             const statId = PlaySessionStatService.calculateId({ uuid: player.playerId, gameId: gameId })
             const playStats = await this.playSessionStatService.findOne({ id: statId });
-            player.playtime = playStats.timePlayed;
+            player.playtime = playStats?.timePlayed ?? '0';
             delete player.username;
             delete player.score; delete player.updatedAt;
             return player;
