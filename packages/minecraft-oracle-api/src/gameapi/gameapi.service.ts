@@ -6,7 +6,7 @@ import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { TextureService } from '../texture/texture.service';
 import { UserEntity } from '../user/user.entity';
 import { TextureType } from '../texture/texturetype.enum';
-import { RecognizedAsset, RecognizedAssetType } from '../config/constants';
+import { GGANBU_POWERS, RecognizedAsset, RecognizedAssetType } from '../config/constants';
 import { PlayerSkinDto } from './dtos/texturemap.dto';
 import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
 import { MaterialService } from '../material/material.service';
@@ -509,7 +509,7 @@ export class GameApiService {
         } while (!!batch && batch.length > 0)
 
         let counter: { [key: string]: number } = {}
-        let users: { [key: string]: { exists: boolean, eligible: boolean } } = {}
+        let users: { [key: string]: { exists: boolean, eligible: boolean, power: number, adjustedPower: number } } = {}
         let allDistinct = 0
         let gganbuDistinct = 0
         let powerSum = 0
@@ -544,10 +544,14 @@ export class GameApiService {
             if (!users[user.uuid]) {
                 allDistinct += 1
                 //const hasMoonsama = !!(await this.assetService.findOne({recognizedAssetType: RecognizedAssetType.MOONSAMA, owner: {uuid: user.uuid}, pendingIn: false}))
-                const hasPower = (playStats.power ?? 0) > 0
+                const power = (playStats.power ?? 0)
+                const hasPower = power > 0
+                const adjustedPower = hasPower ? GGANBU_POWERS.slice(0, power).reduce((sum, current) => sum + current, 0) : 0
                 users[user.uuid] = {
                     exists: true,
-                    eligible: false
+                    eligible: false,
+                    power,
+                    adjustedPower
                 }
 
                 if (
@@ -559,7 +563,7 @@ export class GameApiService {
                 ) {
                     users[user.uuid].eligible = true
                     gganbuDistinct += 1
-                    powerSum += playStats.power
+                    powerSum += adjustedPower
                 }
             }
         }
@@ -588,7 +592,6 @@ export class GameApiService {
         for (let i = 0; i < userUuids.length; i++) {
             const uuid = userUuids[i]
             const user = await this.userService.findOne({ uuid })
-            const stats = await this.playSessionStatService.findOne({ id: PlaySessionStatService.calculateId({ uuid, gameId: game?.id }) })
 
             // get user's snapshot items
             const snaps = items.filter(snap => snap.owner.uuid === uuid)
@@ -602,7 +605,7 @@ export class GameApiService {
                     // if yes, we reduce the original amount for gganbu and add the average if eligible
                     this.logger.debug(`Communism:: ${uuid} snap for ${materialName} existed. Adding..`, this.context)
 
-                    const gganbuAmount = users[uuid]?.eligible ? counter[existingSnap.material.name] * stats.power / powerSum : 0
+                    const gganbuAmount = users[uuid]?.eligible ? counter[existingSnap.material.name] * users[uuid].adjustedPower / powerSum : 0
 
                     const finalfinaldeduction = punishAll ? finalDeduction : (users[uuid]?.eligible ? finalDeduction : 1)
                     const amount = ((Number.parseFloat(existingSnap.amount) * finalfinaldeduction) + gganbuAmount).toString()
@@ -611,7 +614,7 @@ export class GameApiService {
                     await this.snapshotService.update(existingSnap.id, { amount })
                 } else {
                     this.logger.debug(`Communism:: ${uuid} snap for ${materialName} not found. Creating..`, this.context)
-                    const amount = counter[materialName] * stats.power / powerSum
+                    const amount = counter[materialName] * users[uuid].adjustedPower / powerSum
 
                     if (users[uuid]?.eligible) {
                         await this.assignSnapshot(user, game, { amount, materialName }, false, false)
