@@ -52,6 +52,7 @@ import { SortDirection } from '../common/enums/SortDirection';
 import { SetGameScoreTypeDto } from '../gamescoretype/dtos/gamescoretype.dto';
 import { PlayerScoreEntity } from '../playerscore/playerscore.entity';
 import { GameScoreTypeService } from '../gamescoretype/gamescoretype.service';
+import { isError } from 'joi';
 
 @Injectable()
 export class GameApiService {
@@ -725,10 +726,12 @@ export class GameApiService {
                         }
 
                         try {
+                            const stats = await this.playSessionStatService.findOne({id: PlaySessionStatService.calculateId({uuid: user.uuid, gameId: dto?.gameId})})
                             const logs: SnaplogEntity[] = newItem.snaps.map(snap => {
                                 return {
                                     ...snap,
-                                    processedAt: Date.now().toString()
+                                    processedAt: Date.now().toString(),
+                                    adjustedPower: GGANBU_POWERS.slice(0, stats?.power ?? 0).reduce((sum, current) => sum + current, 0)
                                 }
                             })
                             await this.snaplogService.createAll(logs)
