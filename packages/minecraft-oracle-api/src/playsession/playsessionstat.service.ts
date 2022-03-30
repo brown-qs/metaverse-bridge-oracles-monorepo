@@ -11,7 +11,7 @@ export class PlaySessionStatService {
         private readonly repository: Repository<PlaySessionStatEntity>
     ) {}
 
-    public static calculateId(dto: {uuid: string, gameId: string}): string {
+    public static calculateId(dto: {uuid: string, gameId?: string}): string {
         return `${dto.uuid}-${dto.gameId ?? 'NULL'}`
     }
     
