@@ -1,6 +1,3 @@
-import {
-    IsString
-} from 'class-validator';
 import { Column, Entity, Index, ManyToOne, PrimaryColumn } from 'typeorm';
 import { UserEntity } from '../user/user.entity';
 import { MaterialEntity } from '../material/material.entity';
@@ -15,16 +12,16 @@ export class SnaplogEntity {
     }
 
     @PrimaryColumn()
-    @IsString()
     id: string; // convention:: {user uuid}-{materialName}
 
     @Column()
-    @IsString()
     amount: string;
 
     @Column({type: "bigint"})
-    @IsString()
     processedAt: string;
+
+    @Column({nullable: true, default: 0})
+    adjustedPower?: number;
     
     @ManyToOne(() => MaterialEntity, (material) => material.snaplogs)
     material: MaterialEntity;
