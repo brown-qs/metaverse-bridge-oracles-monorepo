@@ -45,16 +45,7 @@ config()
 */
 
 const list = [
-    'unicfb910',
-    'TheVoxelle',
-    'Robster007',
-    'Ctoxity',
-    'Jabz004 ',
-    'Alexx86',
-    'Bubz589',
-    'Sharkotoshi',
-    'NagyKiki',
-    'OldSpiceVendor'
+    'UnicFb910'
 ]
 
 const gameId = 'minecraft-carnage-2022-03-20'
