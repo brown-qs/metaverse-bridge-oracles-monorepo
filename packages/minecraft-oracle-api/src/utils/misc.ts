@@ -5,7 +5,7 @@ import { format } from 'winston';
 import safeStringify from 'fast-safe-stringify';
 import * as ioTs from 'io-ts';
 import { AssetType, StringAssetType } from '../common/enums/AssetType';
-import { RecognizedAsset } from '../config/constants';
+import { GGANBU_POWERS, RecognizedAsset } from '../config/constants';
 import { AssetEntity } from '../asset/asset.entity';
 import { string } from 'fp-ts';
 
@@ -132,4 +132,8 @@ export function findRecognizedAsset(recassets: RecognizedAsset[], asset: {assetA
       )
     )
   })
+}
+
+export function adjustPower(power: number) {
+  return GGANBU_POWERS.slice(0, power).reduce((sum, current) => sum + current, 0)
 }
