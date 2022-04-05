@@ -359,7 +359,7 @@ export class GameApiController {
     @Get('game/:gameId/scores')
     @HttpCode(200)
     @ApiOperation({ summary: 'Fetches players scores' })
-    @ApiBearerAuth('AuthenticationHeader')
+    //@ApiBearerAuth('AuthenticationHeader')
     //@UseGuards(SharedSecretGuard)
     async getScores(
         @Query() dto: QueryPlayerScoresDto,
@@ -385,7 +385,7 @@ export class GameApiController {
     @Get('game/:gameId/scoretypes')
     @HttpCode(200)
     @ApiOperation({ summary: 'Fetches score types of a game'})
-    @ApiBearerAuth('AuthenticationHeader')
+    //@ApiBearerAuth('AuthenticationHeader')
     //@UseGuards(SharedSecretGuard)
     async getScoreTypes(
         @Param('gameId') gameId: string
@@ -433,7 +433,7 @@ export class GameApiController {
     @Get('game/:gameId/player/:uuid/achievements')
     @HttpCode(200)
     @ApiOperation({ summary: 'Queries all player achievements for a game.' })
-    @ApiBearerAuth('AuthenticationHeader')
+    //@ApiBearerAuth('AuthenticationHeader')
     //@UseGuards(SharedSecretGuard)
     async getPlayerAchievements(
         @Param('gameId') gameId: string,
