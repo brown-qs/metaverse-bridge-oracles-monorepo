@@ -53,6 +53,7 @@ import { SetGameScoreTypeDto } from '../gamescoretype/dtos/gamescoretype.dto';
 import { PlayerScoreEntity } from '../playerscore/playerscore.entity';
 import { GameScoreTypeService } from '../gamescoretype/gamescoretype.service';
 import { isError } from 'joi';
+import { adjustPower } from 'src/utils';
 
 @Injectable()
 export class GameApiService {
@@ -482,7 +483,7 @@ export class GameApiService {
 
     public async communism(settings: CommunismDto) {
 
-        const mintT = settings.minTimePlayed ?? 2700000
+        const mintT = settings.minTimePlayed ?? 3600000
         const averageM = settings.averageMultiplier ?? 1.0
         const finalDeduction = settings.deductionMultiplier ?? 0.5
         const msamasOnly = settings.moonsamasOnly ?? true
@@ -547,7 +548,7 @@ export class GameApiService {
                 //const hasMoonsama = !!(await this.assetService.findOne({recognizedAssetType: RecognizedAssetType.MOONSAMA, owner: {uuid: user.uuid}, pendingIn: false}))
                 const power = (playStats?.power ?? 0)
                 const hasPower = power > 0
-                const adjustedPower = hasPower ? GGANBU_POWERS.slice(0, power).reduce((sum, current) => sum + current, 0) : 0
+                const adjustedPower = hasPower ? adjustPower(power) : 0
                 users[user.uuid] = {
                     exists: true,
                     eligible: false,
@@ -731,7 +732,7 @@ export class GameApiService {
                                 return {
                                     ...snap,
                                     processedAt: Date.now().toString(),
-                                    adjustedPower: GGANBU_POWERS.slice(0, stats?.power ?? 0).reduce((sum, current) => sum + current, 0)
+                                    adjustedPower: adjustPower(stats?.power ?? 0)
                                 }
                             })
                             await this.snaplogService.createAll(logs)
