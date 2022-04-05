@@ -13,10 +13,6 @@ export class PlayerGameItemService {
         private configService: ConfigService
     ) {}
 
-    public static calculateId(dto: {playerId: string, itemId: string}) {
-        return `${dto.playerId}-${dto.itemId}`
-    }
-
     public async create(snapshotItem: PlayerGameItemEntity): Promise<PlayerGameItemEntity> {
         const u = await this.repository.save(snapshotItem);
         return u;
