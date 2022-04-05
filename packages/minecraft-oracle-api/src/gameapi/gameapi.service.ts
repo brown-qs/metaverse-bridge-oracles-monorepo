@@ -1118,19 +1118,23 @@ export class GameApiService {
                 throw new UnprocessableEntityException("Player not found.")
             }
 
-            const id = PlayerGameItemService.calculateId({
-                playerId: player.uuid,
+            const entity = await this.playerGameItemService.create({
+                ...dtos[i],
+                game,
+                player,
+            })
+            entities.push(entity)
+            
+            /*
+            const existingOne = await this.playerGameItemService.findOne({
+                player: {uuid: player.uuid},
                 itemId: dtos[i].itemId
             })
-
-            const existingOne = await this.playerGameItemService.findOne({
-                id
-            })
-
+            
             if (!!existingOne) {
                 existingOne.amount = dtos[i].amount
                 existingOne.updatedAt = dtos[i].updatedAt
-                await this.playerGameItemService.update(id, {
+                await this.playerGameItemService.update(existingOne.id, {
                     amount: existingOne.amount,
                     updatedAt: existingOne.updatedAt
                 })
@@ -1138,12 +1142,12 @@ export class GameApiService {
             } else {
                 const entity = await this.playerGameItemService.create({
                     ...dtos[i],
-                    id,
                     game,
                     player,
                 })
                 entities.push(entity)
             }
+            */
         }
 
         return entities;
