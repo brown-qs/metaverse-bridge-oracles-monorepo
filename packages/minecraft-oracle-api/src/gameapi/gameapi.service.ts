@@ -629,6 +629,27 @@ export class GameApiService {
         }
     }
 
+    private async updateSnaplogs(snaplogs: SnaplogEntity[]) {
+
+        let createList = []
+        for(let i = 0; i < snaplogs.length; i++) {
+            const snaplog = snaplogs[i]
+
+            const existing = await this.snaplogService.findOne({id: snaplog.id})
+
+            if (!existing) {
+                createList.push(snaplog)
+            } else {
+                const newNum = (Number.parseFloat(existing.amount) + Number.parseFloat(snaplog.amount)).toString()
+                await this.snaplogService.update(existing.id, {amount: newNum})
+            }
+        }
+
+        if (!!createList && createList.length > 0) {
+            await this.snaplogService.createAll(createList)
+        }
+    }
+
     public async bank(dto: BankDto): Promise<boolean> {
 
         this.ensureLock('bank')
@@ -735,7 +756,7 @@ export class GameApiService {
                                     adjustedPower: adjustPower(stats?.power ?? 0)
                                 }
                             })
-                            await this.snaplogService.createAll(logs)
+                            await this.updateSnaplogs(logs)
                             await this.snapshotService.removeAll(newItem.snaps)
                         } catch (e) {
                             this.logger.error(`Bank:: error deleting snapshot while banking ${newItem.inv}`, null, this.context)
@@ -1130,7 +1151,7 @@ export class GameApiService {
                 player: {uuid: player.uuid},
                 itemId: dtos[i].itemId
             })
-            
+
             if (!!existingOne) {
                 existingOne.amount = dtos[i].amount
                 existingOne.updatedAt = dtos[i].updatedAt
