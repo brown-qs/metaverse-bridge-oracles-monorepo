@@ -310,8 +310,8 @@ export class GameApiController {
     @Get('gametypes')
     @HttpCode(200)
     @ApiOperation({ summary: 'fetches game types' })
-    @ApiBearerAuth('AuthenticationHeader')
-    @UseGuards(SharedSecretGuard)
+    //@ApiBearerAuth('AuthenticationHeader')
+    //@UseGuards(SharedSecretGuard)
     async gameTypes() {
         const entities = await this.gameTypeService.find({})
         return (entities ?? [])
@@ -320,8 +320,8 @@ export class GameApiController {
     @Get('games')
     @HttpCode(200)
     @ApiOperation({ summary: 'fetch games' })
-    @ApiBearerAuth('AuthenticationHeader')
-    @UseGuards(SharedSecretGuard)
+    //@ApiBearerAuth('AuthenticationHeader')
+    //@UseGuards(SharedSecretGuard)
     async games() {
         const entities = await this.gameService.find({})
         return (entities ?? [])
@@ -464,8 +464,8 @@ export class GameApiController {
     @Get('game/:gameId/itemtypes')
     @HttpCode(200)
     @ApiOperation({ summary: 'Fetch item types for a game.' })
-    @ApiBearerAuth('AuthenticationHeader')
-    @UseGuards(SharedSecretGuard)
+    //@ApiBearerAuth('AuthenticationHeader')
+    //@UseGuards(SharedSecretGuard)
     async getGameItemTypes(
         @Param('gameId') gameId: string
     ): Promise<GameItemTypeDto[]> {
@@ -476,8 +476,8 @@ export class GameApiController {
     @Get('game/:gameId/player/:uuid/items')
     @HttpCode(200)
     @ApiOperation({ summary: 'Fetches all items for given game and player' })
-    @ApiBearerAuth('AuthenticationHeader')
-    @UseGuards(SharedSecretGuard)
+    //@ApiBearerAuth('AuthenticationHeader')
+    //@UseGuards(SharedSecretGuard)
     async getPlayerGameItems(
         @Param('gameId') gameId: string,
         @Param('uuid') uuid: string
@@ -489,8 +489,8 @@ export class GameApiController {
     @Get('game/:gameId/items')
     @HttpCode(200)
     @ApiOperation({ summary: 'Fetches players itmes.' })
-    @ApiBearerAuth('AuthenticationHeader')
-    @UseGuards(SharedSecretGuard)
+    //@ApiBearerAuth('AuthenticationHeader')
+    //@UseGuards(SharedSecretGuard)
     async getGameItems(
         @Query() dto: QueryGameItemsDto,
         @Param('gameId') gameId: string
