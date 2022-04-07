@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { GameKind } from "../game.enum";
 
 export class SetGameDto {
@@ -19,4 +19,10 @@ export class SetGameDto {
 
     @ApiProperty({ description: 'Game type ID this game belongs to'})
     gameTypeId: string
+}
+
+export class FetchGameDto {
+
+    @ApiPropertyOptional({ description: 'Filter results by game type id. Default: query all games'})
+    gameTypeId?: string
 }
