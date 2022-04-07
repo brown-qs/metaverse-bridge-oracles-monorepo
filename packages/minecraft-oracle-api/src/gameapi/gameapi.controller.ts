@@ -31,7 +31,7 @@ import { SetGameOngoingDto } from './dtos/setgameongoing.dto';
 import { GameKindInProgressDto } from './dtos/gamekndinprogress.dto';
 import { SetGameTypeDto } from '../gametype/dtos/gametype.dto';
 import { GameTypeService } from '../gametype/gametype.service';
-import { SetGameDto } from '../game/dto/game.dto';
+import { FetchGameDto, SetGameDto } from '../game/dto/game.dto';
 import { QueryPlayerScoresDto, SetPlayerScoresDto } from '../playerscore/dtos/playerscore.dto';
 import { SetAchievementsDto } from '../achievement/dtos/achievement.dto';
 import { AchievementService } from '../achievement/achievement.service';
@@ -322,8 +322,15 @@ export class GameApiController {
     @ApiOperation({ summary: 'fetch games' })
     //@ApiBearerAuth('AuthenticationHeader')
     //@UseGuards(SharedSecretGuard)
-    async games() {
-        const entities = await this.gameService.find({})
+    async games(
+        @Query() dto: FetchGameDto,
+    ) {
+        if (!dto?.gameTypeId) {
+            const entities = await this.gameService.findMany({relations: ['gameType']})
+            return (entities ?? [])
+        }
+
+        const entities = await this.gameService.findMany({where: {gameType: {id: dto.gameTypeId}}, relations: ['gameType']})
         return (entities ?? [])
     }
     
