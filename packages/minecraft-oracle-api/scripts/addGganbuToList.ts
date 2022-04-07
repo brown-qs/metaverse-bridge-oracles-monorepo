@@ -159,7 +159,7 @@ async function main() {
                 const mat = await connection.manager.getRepository(MaterialEntity).findOne({ where: { name: gganbu.material.name } })
                 const amount = (Number.parseFloat(gganbu.amount) * adjustedPower / powerSum).toString()
                 console.log('new amount', mat.name, amount)
-                continue
+                //continue
                 const ent = await connection.manager.getRepository(SnapshotItemEntity).create({
                     id: SnapshotService.calculateId({ uuid: user.uuid, materialName: gganbu.material.name, gameId: game.id }),
                     amount,
@@ -177,7 +177,7 @@ async function main() {
                 const amount = (Number.parseFloat(gganbu.amount) * adjustedPower / powerSum)
                 const updatedNum = (Number.parseFloat(snap.amount) + amount).toString()
                 console.log('updated amount', updatedNum)
-                continue
+                //continue
                 console.log(`   old/new`, snap.amount, updatedNum)
                 const x = await connection.manager.getRepository(SnapshotItemEntity).update(snap.id, { amount: updatedNum })
                 console.log('    success:', x?.affected > 0)
