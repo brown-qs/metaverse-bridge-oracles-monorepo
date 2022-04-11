@@ -1,4 +1,4 @@
-name: metaverse-bridge-oracles-monorepo-ci
+name: metaverse-monorepo-ci
 on: pull_request
 jobs:
   buid-image:
