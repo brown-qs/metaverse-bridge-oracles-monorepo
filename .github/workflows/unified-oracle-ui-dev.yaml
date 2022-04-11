@@ -23,17 +23,10 @@ jobs:
       - name: Push Image
         run: docker push ${{ env.IMAGE_TAG }}
 
-      - uses: convictional/trigger-workflow-and-wait@v1.6.0
-        with:
-          owner: moonsama
-          repo: metaverse-bridge-oracles-monorepo-deployment
-          github_token: ${{ secrets.GH_DEPLOY_TOKEN }}
-          github_user: moonsama-deploy
-          workflow_file_name: unified-oracle-ui-dev-deploy.yaml
-          ref: main
-          wait_interval: 30
-          client_payload: '{ "image_tag":"${{ env.IMAGE_TAG }}" }'
-          propagate_failure: false
-          trigger_workflow: true
-          wait_workflow: false
-          last_workflow_interval: 20      
+      - name: Trigger the deployment workflow
+        run: |
+          curl -X POST https://api.github.com/repos/moonsama/metaverse-bridge-oracles-monorepo-deployment/actions/workflows/unified-oracle-ui-dev-deploy.yaml/dispatches \
+          -H 'Accept: application/vnd.github.v3+json' \
+          -H 'Content-Type: application/json' \
+          -H "Authorization: Bearer ${{ secrets.GH_DEPLOY_TOKEN }}" \
+          --data "{\"ref\":\"main\",\"inputs\":{ \"image_tag\":\"${{ env.IMAGE_TAG }}\" }}"  
