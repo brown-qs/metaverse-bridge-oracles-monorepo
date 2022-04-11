@@ -35,7 +35,9 @@ export enum ChainId {
   EWC = 246,
   VOLTA = 73799,
   MOONRIVER = 1285,
+  MOONBEAM = 1284
 }
+
 
 export const MULTICALL_NETWORKS: { [chainId: number]: string } = {
   [ChainId.MAINNET]: '0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441',
