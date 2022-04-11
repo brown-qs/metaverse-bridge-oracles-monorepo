@@ -18,10 +18,10 @@ jobs:
         run: echo "IMAGE_TAG=$(echo moonsama/unified-oracle-ui:$(git rev-parse --short HEAD)-$(date +%F-%H-%M))" >> $GITHUB_ENV  
 
       - name: Build Image
-        run: docker build -t moonsama/unified-oracle-ui:${{ env.IMAGE_TAG }} -f packages/unified-oracle-ui/Dockerfile .
+        run: docker build -t ${{ env.IMAGE_TAG }} -f packages/unified-oracle-ui/Dockerfile .
       
       - name: Push Image
-        run: docker push moonsama/unified-oracle-ui:${{ env.IMAGE_TAG }}
+        run: docker push ${{ env.IMAGE_TAG }}
 
       - uses: convictional/trigger-workflow-and-wait@v1.6.0
         with:
