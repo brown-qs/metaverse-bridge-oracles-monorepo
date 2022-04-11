@@ -26,6 +26,8 @@ import OptionCard from './OptionCard';
 import usePrevious from 'hooks/usePrevious/usePrevious';
 import CircularProgress from '@mui/material/CircularProgress';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
+import useAddNetworkToMetamaskCb from 'hooks/useAddNetworkToMetamask/useAddNetworkToMetamask';
+import { ChainId } from '../../constants';
 
 const WALLET_VIEWS = {
   OPTIONS: 'options',
@@ -43,6 +45,7 @@ export const AccountDialog = () => {
   >();
   const [pendingError, setPendingError] = useState<boolean>();
   const [walletView, setWalletView] = useState(WALLET_VIEWS.ACCOUNT);
+  const {addNetwork} = useAddNetworkToMetamaskCb()
 
   const sortedRecentTransactions = useSortedRecentTransactions();
 
@@ -317,19 +320,37 @@ export const AccountDialog = () => {
     if (error) {
       return (
         <div className={styles.dialogContainer}>
-          <div>
-            {error instanceof UnsupportedChainIdError
-              ? 'Wrong Network'
-              : 'Error connecting'}
-          </div>
+          {error instanceof UnsupportedChainIdError && <>
+            <div>
+              Wrong Network
+            </div>
+            <h5>Please connect to the appropriate Ethereum network.</h5>
+            <Button
+              //className={formButton}
+              onClick={() => {
+                addNetwork(ChainId.MOONRIVER)
+              }}
+              color="primary"
+            >
+              Switch to Moonriver
+            </Button>
+            <Button
+              //className={formButton}
+              onClick={() => {
+                addNetwork(ChainId.MOONBEAM)
+              }}
+              color="primary"
+            >
+              Switch to Moonbeam
+            </Button>
+          </>}
 
-          <div>
-            {error instanceof UnsupportedChainIdError ? (
-              <h5>Please connect to the appropriate Ethereum network.</h5>
-            ) : (
-              'Error connecting. Try refreshing the page.'
-            )}
-          </div>
+          {!(error instanceof UnsupportedChainIdError) && <>
+            <div>
+              Something went wrong
+            </div>
+            <h5>Error connecting. Try refreshing the page.</h5>
+          </>}
         </div>
       );
     }
