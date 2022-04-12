@@ -35,9 +35,32 @@ export enum ChainId {
   EWC = 246,
   VOLTA = 73799,
   MOONRIVER = 1285,
-  MOONBEAM = 1284
+  MOONBEAM= 1284
 }
 
+export const PERMISSIONED_CHAINS = [ChainId.MOONRIVER, ChainId.MOONBEAM, ChainId.MAINNET, ChainId.ROPSTEN]
+export const DEFAULT_CHAIN = ChainId.MOONRIVER
+
+export const RPC_URLS: { [chainId: number]: string } = {
+  [ChainId.MOONRIVER]: 'https://rpc.api.moonriver.moonbeam.network',
+  [ChainId.MOONBEAM]: 'https://moonbeam-rpc.moonsama.com',
+  [ChainId.MAINNET]: 'https://mainnet.infura.io/v3/',
+  [ChainId.ROPSTEN]: 'https://ropsten.infura.io/v3/'
+};
+
+export const NATIVE_TOKEN_SYMBOL: { [chainId: number]: string } = {
+  [ChainId.MOONRIVER]: 'MOVR',
+  [ChainId.MOONBEAM]: 'GLMR',
+  [ChainId.MAINNET]: 'ETH',
+  [ChainId.ROPSTEN]: 'ETH'
+};
+
+export const NETWORK_NAME: { [chainId: number]: string } = {
+  [ChainId.MOONRIVER]: 'Moonriver',
+  [ChainId.MOONBEAM]: 'Moonbeam',
+  [ChainId.MAINNET]: 'Ethereum',
+  [ChainId.ROPSTEN]: 'Ropsten',
+};
 
 export const MULTICALL_NETWORKS: { [chainId: number]: string } = {
   [ChainId.MAINNET]: '0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441',
@@ -47,6 +70,7 @@ export const MULTICALL_NETWORKS: { [chainId: number]: string } = {
   [ChainId.GÖRLI]: '0x77dCa2C955b15e9dE4dbBCf1246B4B85b651e50e',
   [ChainId.VOLTA]: '0xf097d0eAb2dC8B6396a6433978567C443a691815', // latest multicall 2 deployments
   [ChainId.MOONRIVER]: '0x8B60499C8e99d1218Df15ba6e8f0937e1878b86c', // latest multicall 2 deployments
+  [ChainId.MOONBEAM]: '0x62614aee098C7a84dC070fF06688F4C35D3868F9'
 };
 
 export enum SUPPORTED_CONTRACTS {
