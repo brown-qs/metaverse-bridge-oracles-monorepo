@@ -33,6 +33,7 @@ import { useCallbackSkinEquip } from '../../hooks/multiverse/useCallbackSkinEqui
 import React, { useState } from 'react';
 import { SKIN_LABELS } from '../../constants/skins';
 import { InGameItemWithStatic } from 'hooks/multiverse/useInGameItems';
+import { DEFAULT_CHAIN,NETWORK_NAME } from "../../constants";
 
 export type ProfilePagePropTypes = {
     authData: AuthData
@@ -40,7 +41,7 @@ export type ProfilePagePropTypes = {
 
 const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
-    const { account } = useActiveWeb3React()
+    const { account, chainId } = useActiveWeb3React()
     const profile = useProfile();
     const playAllowedReasonTexts: any = {
         'MSAMA': 'You are eligible to play because you imported a Moonsama.',
@@ -302,7 +303,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                 </Dialog>
                             </div>
                             <div style={{ width: '50%' }}>
-                                <div className={columnTitle}><span className={columnTitleText}>On-chain items: Moonriver account</span></div>
+                                <div className={columnTitle}><span className={columnTitleText}>On-chain items: {NETWORK_NAME[chainId ?? DEFAULT_CHAIN]} account</span></div>
                                 <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
                                     {!!onChainImportables.length ? (onChainGoldenTickets ?? []).map((item, ind) => {
                                         return (
@@ -433,7 +434,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                 >Summon resources</Button>
                             </div>
                             <div style={{ width: '50%' }}>
-                                <div className={columnTitle}><span className={columnTitleText}>On-chain resources: Moonriver account</span></div>
+                                <div className={columnTitle}><span className={columnTitleText}>On-chain resources: {NETWORK_NAME[chainId ?? DEFAULT_CHAIN]} account</span></div>
                                 <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
 
                                     {!!onChainResources.length ? onChainResources.map((value) => {

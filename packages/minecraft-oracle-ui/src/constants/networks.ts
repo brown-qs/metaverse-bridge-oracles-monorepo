@@ -53,7 +53,7 @@ export const SUPPORTED_METAMASK_NETWORKS: {[key: number]: AddEthereumChainParame
         rpcUrls: ['https://ropsten.infura.io/v3/'],
         blockExplorerUrls: ['https://ropsten.etherscan.io'],
         nativeCurrency: {
-            name: 'ROPSTEN',
+            name: 'Ropsten',
             symbol: 'ETH',
             decimals: 18
         }
