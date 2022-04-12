@@ -1,4 +1,4 @@
-name: metaverse-bridge-oracles-monorepo-cd
+name: metaverse-monorepo-cd
 on: 
   workflow_dispatch:
   push:
