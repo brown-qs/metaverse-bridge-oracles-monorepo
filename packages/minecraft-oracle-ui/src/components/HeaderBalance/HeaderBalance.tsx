@@ -1,11 +1,12 @@
-import { useActiveWeb3React } from 'hooks';
-import { useClasses } from 'hooks';
+import { useActiveWeb3React, useClasses } from 'hooks';
 import { styles } from './HeaderBalance.styles';
 import { useNativeBalance } from 'hooks/useBalances/useBalances';
 import { Fraction } from 'utils/Fraction';
+import { DEFAULT_CHAIN, NATIVE_TOKEN_SYMBOL } from '../../constants';
 
 export const HeaderBalance = () => {
   const { balanceContainer, balance } = useClasses(styles);
+  const {chainId} = useActiveWeb3React()
 
   const bal = useNativeBalance();
   let formattedBalance = Fraction.from(bal, 18);
@@ -14,7 +15,7 @@ export const HeaderBalance = () => {
     <>
       <div className={balanceContainer}>
         <div className={balance}>{formattedBalance?.toFixed(0)}</div>
-        {formattedBalance && <p>MOVR</p>}
+        {formattedBalance && <p>{NATIVE_TOKEN_SYMBOL[chainId ?? DEFAULT_CHAIN]}</p>}
       </div>
     </>
   );

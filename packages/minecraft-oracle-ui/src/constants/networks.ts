@@ -35,5 +35,27 @@ export const SUPPORTED_METAMASK_NETWORKS: {[key: number]: AddEthereumChainParame
             symbol: 'GLMR',
             decimals: 18
         }
+    },
+    [ChainId.MAINNET]: {
+        chainId: '0x1',
+        chainName: 'Ethereum',
+        rpcUrls: ['https://mainnet.infura.io/v3/'],
+        blockExplorerUrls: ['https://etherscan.io'],
+        nativeCurrency: {
+            name: 'Ethereum',
+            symbol: 'ETH',
+            decimals: 18
+        }
+    },
+    [ChainId.ROPSTEN]: {
+        chainId: '0x3',
+        chainName: 'Ropsten',
+        rpcUrls: ['https://ropsten.infura.io/v3/'],
+        blockExplorerUrls: ['https://ropsten.etherscan.io'],
+        nativeCurrency: {
+            name: 'ROPSTEN',
+            symbol: 'ETH',
+            decimals: 18
+        }
     }
 }

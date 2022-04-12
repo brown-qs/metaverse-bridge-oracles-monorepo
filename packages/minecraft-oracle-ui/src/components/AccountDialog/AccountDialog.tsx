@@ -45,9 +45,9 @@ export const AccountDialog = () => {
   >();
   const [pendingError, setPendingError] = useState<boolean>();
   const [walletView, setWalletView] = useState(WALLET_VIEWS.ACCOUNT);
-  const {addNetwork} = useAddNetworkToMetamaskCb()
 
   const sortedRecentTransactions = useSortedRecentTransactions();
+  const {addNetwork} = useAddNetworkToMetamaskCb()
 
   const pendingTransactions = sortedRecentTransactions
     .filter((tx) => !tx.receipt)
@@ -343,6 +343,22 @@ export const AccountDialog = () => {
             >
               Switch to Moonbeam
             </Button>
+            <Button
+              onClick={() => {
+                addNetwork(ChainId.MAINNET)
+              }}
+              color="primary"
+            >
+              Switch to Ethereum
+            </Button>
+            <Button
+              onClick={() => {
+                addNetwork(ChainId.ROPSTEN)
+              }}
+              color="primary"
+            >
+              Switch to ROPSTEN Test network
+            </Button>
           </>}
 
           {!(error instanceof UnsupportedChainIdError) && <>
@@ -362,7 +378,7 @@ export const AccountDialog = () => {
             {showConnectedAccountDetails()}
           </div>
           {account &&
-          (!!pendingTransactions.length || !!confirmedTransactions.length) ? (
+            (!!pendingTransactions.length || !!confirmedTransactions.length) ? (
             <div className={styles.lowerSection}>
               <div className={styles.autoRow}>
                 <Typography>Recent transactions</Typography>
