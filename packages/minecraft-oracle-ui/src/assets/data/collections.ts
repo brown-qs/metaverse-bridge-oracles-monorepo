@@ -160,6 +160,18 @@ export const collections = {
       type: 'ERC1155',
       contractURI: 'ipfs://QmWzBDhV5nuPrud7XZo2vBLBWtTStwc6N8xSwCzuMdewd8',
       subgraph: 'https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/nft-1155-embassy'
+    },
+    {
+      chainId: 3,
+      address: '0x1d80D22D3e5adb37E528378e36b5622E97eF75bA',
+      display_name: 'ExoTestCollection',
+      symbol: 'ExoTest',
+      type: 'ERC721',
+      ids: undefined,
+      enrapturable: false,
+      importable: true,
+      contractURI: 'ipfs://QmPhFz5mKCtndGLLZBwGockGAWz7o7nef4Kgf37gYsTid5',
+      subgraph: 'https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/nft'
     }
   ]
 };

@@ -57,27 +57,25 @@ export class AuthApiService {
             this.microsoftSetupParams.redirectUrl
         )
         
-        // let accessToken: string
-        // try {
-        //     accessToken = await account.authFlow(code)
-        // } catch (err: any) {
-        //     this.logger.error('authLogin:: auth flow error', null, this.context)
-        //     this.logger.error(err, null, this.context)
-        //     throw new UnprocessableEntityException('Microsoft auth flow error')
-        // }
+        let accessToken: string
+        try {
+            accessToken = await account.authFlow(code)
+        } catch (err: any) {
+            this.logger.error('authLogin:: auth flow error', null, this.context)
+            this.logger.error(err, null, this.context)
+            throw new UnprocessableEntityException('Microsoft auth flow error')
+        }
 
-        // const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
-        // await delay(1000)
+        const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+        await delay(1000)
 
-        // try {
-        //     await account.getProfile()
-        // } catch (err: any) {
-        //     this.logger.error('authLogin:: error authenticating user', null, this.context)
-        //     this.logger.error(err, null, this.context)
-        //     throw new UnprocessableEntityException('User profile could not be fetched.')
-        // }
-        account.uuid = account.username = 'shin'
-
+        try {
+            await account.getProfile()
+        } catch (err: any) {
+            this.logger.error('authLogin:: error authenticating user', null, this.context)
+            this.logger.error(err, null, this.context)
+            throw new UnprocessableEntityException('User profile could not be fetched.')
+        }
 
         if (!!account.uuid && !!account.username) {
             const userData: UserEntity = {

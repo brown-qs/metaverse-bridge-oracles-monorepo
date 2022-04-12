@@ -65,7 +65,8 @@ export function useRawAssetsFromList(): RawAsset[] {
       return [];
     }
     const rawList = collectionListSchema.cast(collectionsList);
-    return rawList?.assets.filter((x) => x.chainId === chainId) ?? [];
+    // return rawList?.assets.filter((x) => x.chainId === chainId) ?? [];
+    return rawList?.assets.filter((x) => x.chainId) ?? [];
   }, [chainId]);
 
   return list;
