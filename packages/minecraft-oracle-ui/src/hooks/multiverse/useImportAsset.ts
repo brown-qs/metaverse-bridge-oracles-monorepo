@@ -22,7 +22,7 @@ export interface ImportRequest {
     owner: string | undefined | null,
     beneficiary: string| undefined | null,
     amount: string,
-    chain: number
+    chain?: number
 }
 
 export interface AssetRequest {
