@@ -111,7 +111,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const canSummon = !!inGameItems?.resources && inGameItems?.resources.length > 0 && !profile?.blacklisted
     const assetCounter = countGamePassAssets(inGameAssets)
     const hasImportedTicket = assetCounter.ticketNum > 0
-    console.log({inGameAssets})
+    // console.log({inGameAssets})
     return (
         <Grid className={profileContainer}>
             <Header />
@@ -227,7 +227,8 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                                                 assetId: value.assetId,
                                                                                 assetType: stringToStringAssetType(value.assetType),
                                                                                 id: 'x'
-                                                                            }
+                                                                            },
+                                                                            chain: value.exportChainName
                                                                         }
                                                                     );
                                                                 } else {

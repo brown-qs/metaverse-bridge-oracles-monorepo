@@ -51,7 +51,7 @@ export class ProfileApiService {
                 summonable: true,
                 recognizedAssetType: '',
                 enraptured: false,
-                exportChainName: 'Moonriver',
+                exportChainName: 1285,
                 exportAddress: undefined,
             }
         })
@@ -87,7 +87,7 @@ export class ProfileApiService {
                     summonable: false,
                     recognizedAssetType: recongizedEnraptureAsset.type.valueOf(),
                     enraptured: asset.enraptured,
-                    exportChainName: 'Moonriver',
+                    exportChainName: asset.chain,
                     exportAddress: mAsset?.owner?.toLowerCase() ?? undefined,
                 })
                 continue
@@ -113,7 +113,7 @@ export class ProfileApiService {
                     summonable: false,
                     recognizedAssetType: recongizedImportAsset.type.valueOf(),
                     enraptured: asset.enraptured,
-                    exportChainName: 'Moonriver',
+                    exportChainName: asset.chain,
                     exportAddress: mAsset?.owner?.toLowerCase() ?? undefined,
                 })
                 continue

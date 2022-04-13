@@ -82,6 +82,10 @@ export class AssetEntity {
     @Column({ type: 'json', nullable: true })
     metadata?: unknown;
 
+    @Column({default: 1285})
+    @IsString()
+    chain?: number;
+
     @ManyToOne(() => UserEntity, (user) => user.assets)
     owner?: UserEntity
 }
