@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsString } from "class-validator"
+import { IsNumber, IsString } from "class-validator"
 import { AssetDto } from "./asset.dto"
 
 export class ImportDto {
@@ -18,4 +18,8 @@ export class ImportDto {
     @ApiProperty({ description: 'Amount to import in wei'})
     @IsString()
     amount: string
+
+    @ApiProperty({ description: 'Chain ID'})
+    @IsNumber()
+    chain: number
 }

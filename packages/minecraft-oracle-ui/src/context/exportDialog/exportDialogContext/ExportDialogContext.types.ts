@@ -3,6 +3,7 @@ import { Asset } from 'hooks/marketplace/types';
 export type ExportDialogData = {
   asset?: Asset;
   address?: string;
+  chain? :number;
   hash?: string
 } | undefined;
 

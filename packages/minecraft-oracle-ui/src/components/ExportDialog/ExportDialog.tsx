@@ -26,6 +26,7 @@ import { ExportAssetCallbackState, useExportAssetCallback } from 'hooks/multiver
 import { useExportConfirmCallback } from 'hooks/multiverse/useConfirm';
 import { useExportDialog } from 'hooks/useExportDialog/useExportDialog';
 import { useActiveGame } from 'hooks/multiverse/useActiveGame';
+import { DEFAULT_CHAIN,NETWORK_NAME } from "../../constants";
 
 
 export const ExportDialog = () => {
@@ -38,7 +39,7 @@ export const ExportDialog = () => {
 
   const activeGame = useActiveGame()
 
-  console.log({activeGame})
+  // console.log({activeGame})
 
   const {
     divider,
@@ -92,7 +93,6 @@ export const ExportDialog = () => {
   const assetId = exportDialogData?.asset?.assetId;
   const assetType = exportDialogData?.asset?.assetType;
 
-
   let callbackError: string | undefined;
 
   const exportCallbackParams = useExportAssetCallback({hash: exportDialogData?.hash})
@@ -124,6 +124,16 @@ export const ExportDialog = () => {
         <div className={loadingContainer}>
           <div>
             <Typography>Sorry you cannot export with the bridge during an ongoing game</Typography>
+          </div>
+        </div>
+      );
+    }
+
+    if(!chainId || exportDialogData?.chain !== chainId ) {
+      return (
+        <div className={loadingContainer}>
+          <div>
+            <Typography>Sorry you should select {NETWORK_NAME[exportDialogData?.chain ?? DEFAULT_CHAIN]} network for export this item</Typography>
           </div>
         </div>
       );

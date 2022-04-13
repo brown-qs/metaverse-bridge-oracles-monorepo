@@ -42,7 +42,7 @@ export class AssetDto {
 
     @ApiProperty({ description: 'Name of Chain where the asset can be exported to'})
     @IsString()
-    exportChainName: string
+    exportChainName: number
 
     @ApiProperty({ description: 'Address where the asset can be exported to'})
     @IsString()

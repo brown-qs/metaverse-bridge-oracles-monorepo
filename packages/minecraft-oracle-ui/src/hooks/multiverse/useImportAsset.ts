@@ -21,7 +21,8 @@ export interface ImportRequest {
     },
     owner: string | undefined | null,
     beneficiary: string| undefined | null,
-    amount: string
+    amount: string,
+    chain: number
 }
 
 export interface AssetRequest {
@@ -30,7 +31,8 @@ export interface AssetRequest {
         assetId?: string,
         assetType?: AssetType
     },
-    amount: string
+    amount: string,
+    chain?: number
 }
 
 export type ImportRequestParams = {
@@ -88,7 +90,6 @@ export function useImportAssetCallback(
 } {
     const { account, chainId, library } = useActiveWeb3React();
 
-    //console.log('YOLO', { account, chainId, library });
     const contract = useMultiverseBridgeV1Contract(true);
 
     const importRequest = {
@@ -136,7 +137,6 @@ export function useImportAssetCallback(
         }
 
         const inputParams = [data, signature]
-
         return {
             state: CreateImportAssetCallbackState.VALID,
             hash,

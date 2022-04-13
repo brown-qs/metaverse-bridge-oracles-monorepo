@@ -19,7 +19,7 @@ export interface InGameItem {
     meta: any,
     recognizedAssetType: RecognizedAssetType,
     enraptured: boolean,
-    exportChainName: string,
+    exportChainName: number,
     exportAddress: string,
 }
 
@@ -82,7 +82,6 @@ export function useInGameItems(trigger: string | undefined = undefined) {
             setItems(undefined)
             return
         }
-        console.log({rawData})
         const melange = [...rawData.assets, ...rawData.resources]
         let staticDatas = await staticCallback(
             melange.map(x => {
@@ -106,7 +105,6 @@ export function useInGameItems(trigger: string | undefined = undefined) {
             });
             staticDatas = staticDatas.slice(rawData.assets.length)
         }
-        console.log('shinshin', {resultSet})
 
         if (rawData.resources.length > 0) {
             staticDatas.slice(0, rawData.resources.length).map((sd, i) => {

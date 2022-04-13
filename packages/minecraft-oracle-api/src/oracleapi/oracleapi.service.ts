@@ -75,6 +75,7 @@ export class OracleApiService {
                 beneficiary: data.beneficiary,
                 owner: data.owner,
                 amount: data.amount,
+                chain: data.chain,
                 metaverse: METAVERSE,
                 salt
             }
@@ -115,6 +116,7 @@ export class OracleApiService {
             beneficiary: data.beneficiary,
             owner: data.owner,
             amount: data.amount,
+            chain: data.chain,
             metaverse: METAVERSE,
             salt
         }
@@ -137,6 +139,7 @@ export class OracleApiService {
             amount: ma.amount,
             expiration: expiration.toString(),
             owner: user,
+            chain: ma.chain,
             salt
         })
         this.logger.debug(`InData: request: ${[hash, payload, signature]}`, this.context)
@@ -377,7 +380,7 @@ export class OracleApiService {
             let metadata = null
             let world = null
             try {
-                metadata = await this.nftApiService.getNFT('1285', assetEntry.assetType, assetEntry.assetAddress, assetEntry.assetId) as any ?? null
+                metadata = await this.nftApiService.getNFT(assetEntry.chain.toString(), assetEntry.assetType, assetEntry.assetAddress, assetEntry.assetId) as any ?? null
                 world = metadata?.tokenURI?.plot?.world ?? null
             } catch {
                 this.logger.error(`ImportConfirm: couldn't fetch asset metadata: ${hash}`, undefined, this.context)
@@ -478,7 +481,7 @@ export class OracleApiService {
             let metadata = null
             let world = null
             try {
-                metadata = await this.nftApiService.getNFT('1285', assetEntry.assetType, assetEntry.assetAddress, assetEntry.assetId) as any ?? null
+                metadata = await this.nftApiService.getNFT(assetEntry.chain.toString(), assetEntry.assetType, assetEntry.assetAddress, assetEntry.assetId) as any ?? null
                 world = metadata?.tokenURI?.plot?.world ?? null
             } catch {
                 this.logger.error(`ImportConfirm: couldn't fetch asset metadata: ${hash}`, undefined, this.context)
