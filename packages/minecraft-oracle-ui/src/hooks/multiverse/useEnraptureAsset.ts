@@ -21,7 +21,8 @@ export interface EnraptureRequest {
     },
     owner: string | undefined | null,
     beneficiary: string| undefined | null,
-    amount: string
+    amount: string,
+    chain?: number
 }
 
 export interface AssetRequest {
@@ -30,7 +31,8 @@ export interface AssetRequest {
         assetId?: string,
         assetType?: AssetType,
     },
-    amount: string
+    amount: string,
+    chain?: number
 }
 
 export type EnraptureRequestParams = {
@@ -96,7 +98,7 @@ export function useEnraptureAssetCallback(
     const enraptureRequest = {
         ...assetRequest,
         owner: account,
-        beneficiary: account
+        beneficiary: account,
     }
 
     const { confirmed, data, hash, signature } = useFetchEnraptureAssetArgumentsCallback(enraptureRequest) ?? {}
