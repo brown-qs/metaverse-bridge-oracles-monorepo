@@ -77,9 +77,9 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
     const onChainImportables = [...onChainGoldenTickets, ...onChainMoonbrella, ...onChainMoonsamas, ...onChainArt, ...onChainPlot, ...onChainEmbassy];
 
-    console.log('VIP Ticket', onChainGoldenTickets)
-    console.log('onChainMoonbrella', onChainMoonbrella)
-    console.log('onChainEmbassy', onChainEmbassy)
+    // console.log('VIP Ticket', onChainGoldenTickets)
+    // console.log('onChainMoonbrella', onChainMoonbrella)
+    // console.log('onChainEmbassy', onChainEmbassy)
 
     //In Game Items
     const inGameItems = useInGameItems(fetchtrigger);
@@ -411,9 +411,9 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     >
                                                         <ListItemButton>
                                                             <ListItemAvatar>
-                                                                <img src={resource.meta.image} alt={resource.name} className={itemImage}/>
+                                                                <img src={resource.meta?.image} alt={resource.name} className={itemImage}/>
                                                             </ListItemAvatar>
-                                                            <ListItemText id={resource.name} primary={resource.meta.name.slice(6)} />
+                                                            <ListItemText id={resource.name} primary={resource.meta?.name.slice(6)} />
                                                         </ListItemButton>
                                                     </ListItem>
                                                 )

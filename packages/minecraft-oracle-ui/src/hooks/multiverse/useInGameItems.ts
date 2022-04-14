@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import axios, { AxiosError } from 'axios';
 import { useBlockNumber } from 'state/application/hooks';
 import { useAuth } from 'hooks';
-import { StaticTokenData, useTokenStaticDataCallbackArray } from 'hooks/useTokenStaticDataCallback/useTokenStaticDataCallback';
+import { StaticTokenData, useTokenStaticDataCallbackArrayWithChains } from 'hooks/useTokenStaticDataCallback/useTokenStaticDataCallback';
 import { stringToStringAssetType } from 'utils/subgraph';
 import { RecognizedAssetType } from 'assets/data/recognized'
 
@@ -56,7 +56,7 @@ export interface ProfileInGameItemsWithStatic {
 export function useInGameItems(trigger: string | undefined = undefined) {
     const { authData, setAuthData } =  useAuth();
     const blocknumber = useBlockNumber();
-    const staticCallback = useTokenStaticDataCallbackArray();
+    const staticCallback = useTokenStaticDataCallbackArrayWithChains();
 
     const {jwt} = authData ?? {}
 
@@ -89,12 +89,13 @@ export function useInGameItems(trigger: string | undefined = undefined) {
                     assetId: x.assetId,
                     assetAddress: x.assetAddress,
                     assetType: stringToStringAssetType(x.assetType),
-                    id: '1'
+                    id: '1',
+                    chainId: x.exportChainName,
                 }
             })
         );
         let resultSet: ProfileInGameItemsWithStatic = { assets: [], resources: [], textures: []}
-        console.log({staticDatas, rawData})
+        console.log("staticDatas, rawData", {staticDatas, rawData})
         if (rawData.assets.length > 0) {
             staticDatas.slice(0, rawData.assets.length).map((sd, i) => {
                 resultSet.assets.push({
