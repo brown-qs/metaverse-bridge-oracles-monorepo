@@ -97,6 +97,14 @@ export const IMPORTABLE_ASSETS: RecognizedAsset[] = [
       gamepass: false
     }, /* embassy*/
     {
+      address: '0x1974eEAF317Ecf792ff307F25A3521C35eECde86'.toLowerCase(),
+      id: ['63', '67'],
+      type: RecognizedAssetType.OFFHAND,
+      chainId: ChainId.MOONRIVER,
+      name: 'Detectore',
+      gamepass: false
+    }, /* embassy*/
+    {
       address: '0xdea45e7c6944cb86a268661349e9c013836c79a2'.toLowerCase(),
       id: undefined,
       type: RecognizedAssetType.MOONSAMA,
