@@ -7,6 +7,7 @@ import { ChainId } from '../constants';
 import { hexZeroPad } from '@ethersproject/bytes';
 import { InGameItem } from '../hooks/multiverse/useInGameItems';
 import { RecognizedAssetType, RECOGNIZED_ASSETS } from '../assets/data/recognized';
+import { ethers } from 'ethers';
 
 export * as marketplace from './marketplace';
 export * as subgraph from './subgraph';
@@ -76,6 +77,19 @@ export function getContract(
   }
 
   return new Contract(address, ABI, getProviderOrSigner(library, account));
+}
+
+export function getContractwithChain(
+  address: string,
+  ABI: string,
+  rpcUrl: string
+): Contract {
+  if (!isAddress(address) || address === AddressZero) {
+    throw Error(`Invalid 'address' parameter '${address}'.`);
+  }
+
+  const Provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+  return new Contract(address, ABI, Provider);
 }
 
 const EXPLORER_PREFIXES: { [chainId in ChainId]: string } = {

@@ -1,6 +1,6 @@
 import { ConfigError } from './errors';
 import { ethers } from 'ethers';
-import { ALLOWED_CHAIN_IDS } from './constants';
+import { ALLOWED_CHAIN_IDS, RPC_URLS } from './constants';
 import { privateKeyToEthereumKeys } from '../crypto';
 
 export const loadChain = async () => {
@@ -10,8 +10,9 @@ export const loadChain = async () => {
         throw new Error(`RPC URL was not received`);
     }
 
-    let chainIds: number[] = ALLOWED_CHAIN_IDS
-    let chainId: number
+    let chainIds: number[] = ALLOWED_CHAIN_IDS;
+    let chainId: number;
+    let rpcUrls = RPC_URLS;
 
     try {
         chainId = await (await ethers.getDefaultProvider(rpcUrl).getNetwork()).chainId
@@ -39,6 +40,7 @@ export const loadChain = async () => {
         network: {
             chainIds,
             chainId,
+            rpcUrls,
             rpc: rpcUrl,
             oracle: {
                 privateKey: oracleKeys.privateKey,

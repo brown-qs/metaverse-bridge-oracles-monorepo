@@ -33,18 +33,18 @@ export const MetaverseContractProvider: FactoryProvider<ethers.Contract> = {
 
 export const MetaverseContractChainProvider: FactoryProvider = {
     provide: ProviderToken.METAVERSE_CONTRACT_CHAIN,
-    useFactory: (configService: ConfigService, client: ethers.providers.Provider) => {
+    useFactory: (configService: ConfigService, client: ethers.providers.Provider[]) => {
         const chainIds = configService.get<number[]>('network.chainIds');
         const oraclePrivateKey = configService.get<string>('network.oracle.privateKey');
-        const oracle = new ethers.Wallet(oraclePrivateKey, client);
         let contracts: any = {};
         chainIds.map((chainId: number) => {
+            const oracle = new ethers.Wallet(oraclePrivateKey, client[chainId]);
             if(METAVERSE_ADDRESSES[chainId])
                 contracts[chainId] = new Contract(METAVERSE_ADDRESSES[chainId], METAVERSE_ABI, oracle)
         })
         return contracts;
     },
-    inject: [ConfigService, ProviderToken.CLIENT_ETHEREUM],
+    inject: [ConfigService, ProviderToken.CLIENT_ALL],
     scope: Scope.DEFAULT
 };
 

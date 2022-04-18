@@ -6,9 +6,10 @@ import {
   MULTICALL_NETWORKS,
   RECOGNIZED_COLLECTIONS_ADDRESS,
   WAREHOUSE_ADDRESS,
+  RPC_URLS,
 } from '../../constants';
 import { useCallback, useMemo } from 'react';
-import { getContract } from 'utils';
+import { getContract, getContractwithChain } from 'utils';
 import {
   MARKETPLACE_V1_ABI,
   METAVERSE_V1_ABI,
@@ -43,24 +44,21 @@ export const useContract = (
 };
 
 export const useContractCallback = (ABI: any, withSignerIfPossible = true) => {
-  const { library, account } = useActiveWeb3React();
-
   return useCallback(
-    (address: string) => {
-      if (!address || !ABI || !library) return null;
+    (address: string, chainId: number) => {
+      if (!address || !ABI ) return null;
       try {
-        return getContract(
+        return getContractwithChain(
           address,
           ABI,
-          library,
-          withSignerIfPossible && account ? account : undefined
+          RPC_URLS[chainId]
         );
       } catch (error) {
         console.error('Failed to get contract', error);
         return null;
       }
     },
-    [library, account, ABI, withSignerIfPossible]
+    [ABI, withSignerIfPossible]
   );
 };
 
