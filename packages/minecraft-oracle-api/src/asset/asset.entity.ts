@@ -3,6 +3,7 @@ import {
     IsEnum,
     IsInt,
     IsJSON,
+    IsNumber,
     IsString
 } from 'class-validator';
 import { UserEntity } from '../user/user.entity';
@@ -83,7 +84,7 @@ export class AssetEntity {
     metadata?: unknown;
 
     @Column({default: 1285})
-    @IsString()
+    @IsNumber()
     chain?: number;
 
     @ManyToOne(() => UserEntity, (user) => user.assets)

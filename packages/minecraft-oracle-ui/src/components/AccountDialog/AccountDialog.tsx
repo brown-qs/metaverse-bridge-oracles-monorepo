@@ -351,14 +351,6 @@ export const AccountDialog = () => {
             >
               Switch to Ethereum
             </Button>
-            <Button
-              onClick={() => {
-                addNetwork(ChainId.ROPSTEN)
-              }}
-              color="primary"
-            >
-              Switch to ROPSTEN Test network
-            </Button>
           </>}
 
           {!(error instanceof UnsupportedChainIdError) && <>

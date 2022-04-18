@@ -43,6 +43,8 @@ export class OracleApiService {
         private configService: ConfigService,
         @Inject(ProviderToken.ORACLE_WALLET) private oracle: Signer,
         @Inject(ProviderToken.METAVERSE_CONTRACT) private metaverse: Contract,
+        @Inject(ProviderToken.METAVERSE_CONTRACT_CHAIN) private metaverseChain: Contract,
+        
         @Inject(ProviderToken.IMPORTABLE_ASSETS) private importableAssets: RecognizedAsset[],
         @Inject(ProviderToken.ENRAPTURABLE_ASSETS) private enrapturableAssets: RecognizedAsset[],
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
@@ -194,8 +196,8 @@ export class OracleApiService {
         return [hash, payload, signature, false]
     }
 
-    public async userSummonRequest(user: UserEntity, { recipient }: SummonDto): Promise<boolean> {
-        this.logger.debug(`userSummonRequest user ${user.uuid} to ${recipient}`, this.context)
+    public async userSummonRequest(user: UserEntity, { recipient, chainId }: SummonDto): Promise<boolean> {
+        this.logger.debug(`userSummonRequest user ${user.uuid} to ${recipient} ID is ${chainId}`, this.context)
 
         if (!recipient || recipient.length !== 42 || !recipient.startsWith('0x')) {
             this.logger.error(`Summon: recipient invalid: ${recipient}}`, null, this.context)
@@ -255,17 +257,16 @@ export class OracleApiService {
 
             const addresses = Object.keys(groups)
 
-
             for (let i = 0; i < addresses.length; i++) {
                 try {
+                    
                     const ids = groups[addresses[i]].ids
                     const amounts = groups[addresses[i]].amounts
                     //console.log({METAVERSE, recipient, ids, amounts, i})
-                    //console.log(this.metaverse)
-                    //console.log(JSON.stringify(this.metaverse.summonFromMetaverse))
-
-                    const receipt = await (await this.metaverse.summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], { value: 0, gasPrice: '3000000000', gasLimit: '1000000' })).wait()
-
+                    // console.log("SummonResult",this.metaverseChain[chainId])
+                    
+                    const receipt = await (await this.metaverseChain[chainId].summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], { value: 0, gasPrice: '3000000000', gasLimit: '1000000' })).wait()
+                    
                     try {
                         await this.inventoryService.removeAll(groups[addresses[i]].entities)
                     } catch (e) {

@@ -10,6 +10,7 @@ export const loadChain = async () => {
         throw new Error(`RPC URL was not received`);
     }
 
+    let chainIds: number[] = ALLOWED_CHAIN_IDS
     let chainId: number
 
     try {
@@ -36,6 +37,7 @@ export const loadChain = async () => {
 
     return {
         network: {
+            chainIds,
             chainId,
             rpc: rpcUrl,
             oracle: {

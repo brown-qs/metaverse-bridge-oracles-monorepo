@@ -36,5 +36,9 @@ export class SummonEntity {
     salt?: string;
 
     @ManyToOne(() => UserEntity, (user) => user.assets)
-    owner?: UserEntity
+    owner?: UserEntity;
+
+    @Column({default: 1285})
+    @IsString()
+    chain?: number;
 }
