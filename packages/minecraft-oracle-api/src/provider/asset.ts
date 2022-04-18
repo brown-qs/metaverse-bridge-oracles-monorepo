@@ -10,7 +10,7 @@ export const ImportableAssetsProvider: FactoryProvider<RecognizedAsset[]> = {
         const assets = IMPORTABLE_ASSETS.filter(x => x.chainId.valueOf() === chainId)
         return assets
     },
-    inject: [ConfigService, ProviderToken.CLIENT_ETHEREUM],
+    inject: [ConfigService],
     scope: Scope.DEFAULT
 };
 

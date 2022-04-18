@@ -142,6 +142,7 @@ export const SummonDialog = () => {
         </Grid>
         <Button
           onClick={() => {
+            setChainId(0);
             setSummonSubmitted(true);
             (async () => {
               const success = await summonCallback?.(recipient, chainId);

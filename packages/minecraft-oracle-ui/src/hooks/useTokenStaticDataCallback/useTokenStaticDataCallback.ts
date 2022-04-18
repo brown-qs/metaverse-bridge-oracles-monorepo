@@ -29,6 +29,7 @@ import {
   PERMISSIONED_CHAINS,
   MULTICALL_NETWORKS,
   ChainId,
+  RPC_URLS,
 } from '../../constants';
 import { integerPropType } from '@mui/utils';
 
@@ -408,9 +409,8 @@ export const useTokenStaticDataCallbackArrayWithChains = () => {
         ? MULTICALL_NETWORKS[chainId ?? ChainId.MOONRIVER]
         : undefined;
         if (!address) return;
-        if (calls[chainId]?.length) {
-
-          const result = await tryMultiCallCore(multi(address), calls[chainId]);
+        if (calls[chainId]?.length && RPC_URLS[chainId]) {
+          const result = await tryMultiCallCore(multi(address, chainId), calls[chainId]);
           console.log("result!", result)
           if (result) results = [...results, ...result];
 

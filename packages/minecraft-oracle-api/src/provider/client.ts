@@ -13,3 +13,19 @@ export const EthClientProvider: FactoryProvider<ethers.providers.JsonRpcProvider
     inject: [ConfigService],
     scope: Scope.DEFAULT
 };
+
+export const ClientProvider: FactoryProvider = {
+    provide: ProviderToken.CLIENT_ALL,
+    useFactory: (configService: ConfigService) => {
+        const rpcUrls = configService.get<{[chainId: number]: string}>('network.rpcUrls');
+        const chainIds = configService.get<number[]>('network.chainIds');
+        let provider: any = {};
+        chainIds.map((chainId: number) => {
+            if(rpcUrls[chainId])
+                provider[chainId] = new ethers.providers.JsonRpcProvider(rpcUrls[chainId]);
+        })
+        return provider;
+    },
+    inject: [ConfigService],
+    scope: Scope.DEFAULT
+};

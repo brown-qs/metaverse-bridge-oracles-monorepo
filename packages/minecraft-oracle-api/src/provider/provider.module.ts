@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import {
     OracleWalletProvider,
     EthClientProvider,
+    ClientProvider,
     MicrosoftSetupParamsProvider,
     MetaverseContractProvider,
     MetaverseContractChainProvider,
@@ -14,6 +15,7 @@ import {
     providers: [
         OracleWalletProvider,
         EthClientProvider,
+        ClientProvider,
         MicrosoftSetupParamsProvider,
         MetaverseContractProvider,
         MetaverseContractChainProvider,
@@ -24,6 +26,7 @@ import {
     exports: [
         OracleWalletProvider,
         EthClientProvider,
+        ClientProvider,
         MicrosoftSetupParamsProvider,
         MulticallContractProvider,
         MetaverseContractProvider,
