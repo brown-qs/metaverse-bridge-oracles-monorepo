@@ -4,6 +4,7 @@ import {
     EthClientProvider,
     MicrosoftSetupParamsProvider,
     MetaverseContractProvider,
+    MetaverseContractChainProvider,
     MulticallContractProvider,
     ImportableAssetsProvider,
     EnrapturableAssetsProvider
@@ -15,6 +16,7 @@ import {
         EthClientProvider,
         MicrosoftSetupParamsProvider,
         MetaverseContractProvider,
+        MetaverseContractChainProvider,
         MulticallContractProvider,
         EnrapturableAssetsProvider,
         ImportableAssetsProvider
@@ -25,6 +27,7 @@ import {
         MicrosoftSetupParamsProvider,
         MulticallContractProvider,
         MetaverseContractProvider,
+        MetaverseContractChainProvider,
         EnrapturableAssetsProvider,
         ImportableAssetsProvider
     ]

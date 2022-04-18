@@ -38,7 +38,7 @@ export enum ChainId {
   MOONBEAM= 1284
 }
 
-export const PERMISSIONED_CHAINS = [ChainId.MOONRIVER, ChainId.MOONBEAM, ChainId.MAINNET, ChainId.ROPSTEN]
+export const PERMISSIONED_CHAINS = [ChainId.MOONRIVER, ChainId.MOONBEAM, ChainId.MAINNET]
 export const DEFAULT_CHAIN = ChainId.MOONRIVER
 
 export const RPC_URLS: { [chainId: number]: string } = {

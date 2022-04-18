@@ -413,7 +413,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                             <ListItemAvatar>
                                                                 <img src={resource.meta?.image} alt={resource.name} className={itemImage}/>
                                                             </ListItemAvatar>
-                                                            <ListItemText id={resource.name} primary={resource.meta?.name.slice(6)} />
+                                                            <ListItemText id={resource.name} primary={resource.meta?.name} />
                                                         </ListItemButton>
                                                     </ListItem>
                                                 )
