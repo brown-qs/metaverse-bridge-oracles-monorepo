@@ -6,6 +6,9 @@ export const ProviderToken = {
     METAVERSE_CONTRACT: 'provider.contract.metaverse',
     METAVERSE_CONTRACT_CHAIN: 'provider.contract.metaversewithchain',
     MULTICALL_CONTRACT: 'provider.contract.multicall',
+    MULTICALL_CONTRACT_CHAIN: 'provider.contract.multicallwithchain',
     ENRAPTURABLE_ASSETS: 'provider.asset.enrapturable',
-    IMPORTABLE_ASSETS: 'provider.asset.importable'
+    ENRAPTURABLE_ASSETS_CHAIN: 'provider.asset.enrapturablechain',
+    IMPORTABLE_ASSETS: 'provider.asset.importable',
+    IMPORTABLE_ASSETS_CHAIN: 'provider.asset.importablechain'
 };

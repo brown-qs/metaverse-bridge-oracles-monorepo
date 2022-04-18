@@ -30,6 +30,22 @@ export const MetaverseContractProvider: FactoryProvider<ethers.Contract> = {
     scope: Scope.DEFAULT
 };
 
+export const MulticallContractChainProvider: FactoryProvider<ethers.Contract> = {
+    provide: ProviderToken.MULTICALL_CONTRACT_CHAIN,
+    useFactory: (configService: ConfigService, client: ethers.providers.Provider[]) => {
+        const chainIds = configService.get<number[]>('network.chainIds');
+        const oraclePrivateKey = configService.get<string>('network.oracle.privateKey');
+        let contracts: any = {};
+        chainIds.map((chainId: number) => {
+            const oracle = new ethers.Wallet(oraclePrivateKey, client[chainId]);
+            if(METAVERSE_ADDRESSES[chainId])
+                contracts[chainId] = new Contract(MULTICALL_ADDRESSES[chainId], METAVERSE_ABI, oracle)
+        })
+        return contracts;
+    },
+    inject: [ConfigService, ProviderToken.CLIENT_ALL],
+    scope: Scope.DEFAULT
+};
 
 export const MetaverseContractChainProvider: FactoryProvider = {
     provide: ProviderToken.METAVERSE_CONTRACT_CHAIN,

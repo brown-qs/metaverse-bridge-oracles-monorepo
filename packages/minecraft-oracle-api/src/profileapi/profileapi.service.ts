@@ -87,7 +87,7 @@ export class ProfileApiService {
                     summonable: false,
                     recognizedAssetType: recongizedEnraptureAsset.type.valueOf(),
                     enraptured: asset.enraptured,
-                    exportChainName: asset.chain,
+                    exportChainName: asset.chainId,
                     exportAddress: mAsset?.owner?.toLowerCase() ?? undefined,
                 })
                 continue
@@ -113,7 +113,7 @@ export class ProfileApiService {
                     summonable: false,
                     recognizedAssetType: recongizedImportAsset.type.valueOf(),
                     enraptured: asset.enraptured,
-                    exportChainName: asset.chain,
+                    exportChainName: asset.chainId,
                     exportAddress: mAsset?.owner?.toLowerCase() ?? undefined,
                 })
                 continue

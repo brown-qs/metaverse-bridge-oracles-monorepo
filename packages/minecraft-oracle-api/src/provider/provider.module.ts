@@ -7,8 +7,11 @@ import {
     MetaverseContractProvider,
     MetaverseContractChainProvider,
     MulticallContractProvider,
+    MulticallContractChainProvider,
     ImportableAssetsProvider,
-    EnrapturableAssetsProvider
+    ImportableAssetsChainProvider,
+    EnrapturableAssetsProvider,
+    EnrapturableAssetsChainProvider
 } from '.';
 
 @Module({
@@ -20,8 +23,11 @@ import {
         MetaverseContractProvider,
         MetaverseContractChainProvider,
         MulticallContractProvider,
+        MulticallContractChainProvider,
         EnrapturableAssetsProvider,
-        ImportableAssetsProvider
+        EnrapturableAssetsChainProvider,
+        ImportableAssetsProvider,
+        ImportableAssetsChainProvider
     ],
     exports: [
         OracleWalletProvider,
@@ -29,10 +35,13 @@ import {
         ClientProvider,
         MicrosoftSetupParamsProvider,
         MulticallContractProvider,
+        MulticallContractChainProvider,
         MetaverseContractProvider,
         MetaverseContractChainProvider,
         EnrapturableAssetsProvider,
-        ImportableAssetsProvider
+        EnrapturableAssetsChainProvider,
+        ImportableAssetsProvider,
+        ImportableAssetsChainProvider
     ]
 })
 export class ProviderModule {}

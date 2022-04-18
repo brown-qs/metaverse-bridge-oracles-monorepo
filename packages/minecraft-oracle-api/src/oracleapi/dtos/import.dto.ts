@@ -21,5 +21,5 @@ export class ImportDto {
 
     @ApiProperty({ description: 'Chain ID'})
     @IsNumber()
-    chain: number
+    chainId: number
 }

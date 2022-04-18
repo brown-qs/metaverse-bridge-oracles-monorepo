@@ -54,7 +54,7 @@ export class OracleApiService {
     }
 
     public async userInRequest(user: UserEntity, data: ImportDto, enraptured: boolean): Promise<[string, string, string, boolean]> {
-        this.logger.debug(`userInRequest: ${JSON.stringify(data)}`, this.context)
+        this.logger.debug(`userInRequest: ${JSON.stringify(data)}, enraptured: ${enraptured}`, this.context)
         const inAsset = enraptured ? findRecognizedAsset(this.enrapturableAssets, data.asset) : findRecognizedAsset(this.importableAssets, data.asset)
 
         if (!inAsset) {
@@ -77,7 +77,7 @@ export class OracleApiService {
                 beneficiary: data.beneficiary,
                 owner: data.owner,
                 amount: data.amount,
-                chain: data.chain,
+                chainId: data.chainId,
                 metaverse: METAVERSE,
                 salt
             }
@@ -118,7 +118,7 @@ export class OracleApiService {
             beneficiary: data.beneficiary,
             owner: data.owner,
             amount: data.amount,
-            chain: data.chain,
+            chainId: data.chainId,
             metaverse: METAVERSE,
             salt
         }
@@ -141,7 +141,7 @@ export class OracleApiService {
             amount: ma.amount,
             expiration: expiration.toString(),
             owner: user,
-            chain: ma.chain,
+            chainId: ma.chainId,
             salt
         })
         this.logger.debug(`InData: request: ${[hash, payload, signature]}`, this.context)
@@ -303,7 +303,9 @@ export class OracleApiService {
         return res
     }
 
-    public async userImportConfirm(user: UserEntity, { hash }: { hash: string }, asset?: AssetEntity): Promise<boolean> {
+    // public async userImportConfirm(user: UserEntity, { hash, chainId }: { hash: string, chainId:number }, asset?: AssetEntity): Promise<boolean> 
+    public async userImportConfirm(user: UserEntity, { hash }: { hash: string }, asset?: AssetEntity): Promise<boolean> 
+    {
 
         this.logger.log(`ImportConfirm: started ${user.uuid}: ${hash}`, this.context)
 
@@ -383,7 +385,7 @@ export class OracleApiService {
             let metadata = null
             let world = null
             try {
-                metadata = await this.nftApiService.getNFT(assetEntry.chain.toString(), assetEntry.assetType, assetEntry.assetAddress, assetEntry.assetId) as any ?? null
+                metadata = await this.nftApiService.getNFT(assetEntry.chainId.toString(), assetEntry.assetType, assetEntry.assetAddress, assetEntry.assetId) as any ?? null
                 world = metadata?.tokenURI?.plot?.world ?? null
             } catch {
                 this.logger.error(`ImportConfirm: couldn't fetch asset metadata: ${hash}`, undefined, this.context)
@@ -484,7 +486,7 @@ export class OracleApiService {
             let metadata = null
             let world = null
             try {
-                metadata = await this.nftApiService.getNFT(assetEntry.chain.toString(), assetEntry.assetType, assetEntry.assetAddress, assetEntry.assetId) as any ?? null
+                metadata = await this.nftApiService.getNFT(assetEntry.chainId.toString(), assetEntry.assetType, assetEntry.assetAddress, assetEntry.assetId) as any ?? null
                 world = metadata?.tokenURI?.plot?.world ?? null
             } catch {
                 this.logger.error(`ImportConfirm: couldn't fetch asset metadata: ${hash}`, undefined, this.context)

@@ -85,7 +85,7 @@ export class AssetEntity {
 
     @Column({default: 1285})
     @IsNumber()
-    chain?: number;
+    chainId?: number;
 
     @ManyToOne(() => UserEntity, (user) => user.assets)
     owner?: UserEntity

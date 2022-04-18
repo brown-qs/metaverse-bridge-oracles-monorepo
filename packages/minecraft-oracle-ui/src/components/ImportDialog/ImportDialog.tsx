@@ -138,7 +138,7 @@ export const ImportDialog = () => {
   
   useEffect(() => {
     const x = async () => {
-      const confirmed = await confirmCb(importCallbackParams?.hash)
+      const confirmed = await confirmCb(importCallbackParams?.hash, chainId)
       console.log('effect hook', confirmed)
       setImportConfirmed(confirmed)
     }
