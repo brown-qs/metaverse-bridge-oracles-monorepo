@@ -7,7 +7,7 @@ export function useImportConfirmCallback() {
     const { authData } =  useAuth();
     const {jwt} = authData ?? {}
     
-    return useCallback(async (hash?: string) => {
+    return useCallback(async (hash?: string, chainId?:number) => {
         if (!hash) {
             return false;
         }
@@ -15,7 +15,7 @@ export function useImportConfirmCallback() {
             const resp = await axios.request<boolean>({
                 method: 'put',
                 url: `${process.env.REACT_APP_BACKEND_API_URL}/oracle/import/confirm`,
-                data: {hash},
+                data: {hash, chainId},
                 headers: { Authorization: `Bearer ${jwt}` }
             });
             return resp.data
