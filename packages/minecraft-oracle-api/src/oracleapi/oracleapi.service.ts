@@ -268,9 +268,8 @@ export class OracleApiService {
                     //console.log({METAVERSE, recipient, ids, amounts, i})
                     // console.log("SummonResult",this.metaverseChain[chainId])
 
-                    // const receipt = await (await this.metaverseChain[chainId].summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], { value: 0, gasPrice: '3000000000', gasLimit: '1000000' })).wait()
-
-                    const receipt = await this.metaverseChain[chainId].summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], { value: 0, gasPrice: '3000000000', gasLimit: '1000000' })
+                    const receipt = await ((await this.metaverseChain[chainId].summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], { value: 0, gasPrice: '3000000000', gasLimit: '1000000' })).wait())
+                    // const receipt = await this.metaverseChain[chainId].summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], { value: 0, gasPrice: '3000000000', gasLimit: '1000000' })
 
                     try {
                         await this.inventoryService.removeAll(groups[addresses[i]].entities)
