@@ -161,14 +161,12 @@ const chooseAssets = (
   let chosenAssets: Asset[];
 
   if (ids?.length > 0) {
-    //console.log('xxxx')
     if (offsetNum >= ids.length) {
       return [];
     }
     const to = offsetNum + num >= ids.length ? ids.length : offsetNum + num;
     const chosenIds = ids.slice(offsetNum, to);
 
-    //console.log('xxxx', {ids, offsetNum, num, to, chosenIds})
     chosenAssets = chosenIds.map((x) => {
       return {
         assetId: x.toString(),
@@ -396,7 +394,6 @@ export const useTokenStaticDataCallbackArrayWithChains = () => {
       return [];
     }
 
-    
     let calls: any = {};
     let results: any[] = [];
     assets.map((asset, i) => {
@@ -411,7 +408,6 @@ export const useTokenStaticDataCallbackArrayWithChains = () => {
         if (!address) return;
         if (calls[chainId]?.length && RPC_URLS[chainId]) {
           const result = await tryMultiCallCore(multi(address, chainId), calls[chainId]);
-          console.log("result!", result)
           if (result) results = [...results, ...result];
 
         }
@@ -421,14 +417,8 @@ export const useTokenStaticDataCallbackArrayWithChains = () => {
     if (!results) {
       return [];
     }
-    console.log("staticData!!", {assets, results})
-
     const staticData = processTokenStaticCallResults(assets as Asset[], results);
-
-    
     const metas = await fetchUri(staticData);
-    console.log("staticData!", {staticData, metas})
-
     return metas.map((x, i) => {
       return {
         meta: x,

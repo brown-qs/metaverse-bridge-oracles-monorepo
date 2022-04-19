@@ -42,11 +42,12 @@ export class OracleApiService {
         private readonly nftApiService: NftApiService,
         private configService: ConfigService,
         @Inject(ProviderToken.ORACLE_WALLET) private oracle: Signer,
-        @Inject(ProviderToken.METAVERSE_CONTRACT) private metaverse: Contract,
+        // @Inject(ProviderToken.METAVERSE_CONTRACT) private metaverse: Contract,
+        // @Inject(ProviderToken.IMPORTABLE_ASSETS) private importableAssets: RecognizedAsset[],
+        // @Inject(ProviderToken.ENRAPTURABLE_ASSETS) private enrapturableAssets: RecognizedAsset[],
         @Inject(ProviderToken.METAVERSE_CONTRACT_CHAIN) private metaverseChain: Contract,
-        
-        @Inject(ProviderToken.IMPORTABLE_ASSETS) private importableAssets: RecognizedAsset[],
-        @Inject(ProviderToken.ENRAPTURABLE_ASSETS) private enrapturableAssets: RecognizedAsset[],
+        @Inject(ProviderToken.IMPORTABLE_ASSETS_CHAIN) private importableAssetsChain: RecognizedAsset[][],
+        @Inject(ProviderToken.ENRAPTURABLE_ASSETS) private enrapturableAssetsChain: RecognizedAsset[][],
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
         this.context = OracleApiService.name
@@ -55,7 +56,8 @@ export class OracleApiService {
 
     public async userInRequest(user: UserEntity, data: ImportDto, enraptured: boolean): Promise<[string, string, string, boolean]> {
         this.logger.debug(`userInRequest: ${JSON.stringify(data)}, enraptured: ${enraptured}`, this.context)
-        const inAsset = enraptured ? findRecognizedAsset(this.enrapturableAssets, data.asset) : findRecognizedAsset(this.importableAssets, data.asset)
+        const chainId = data.chainId;
+        const inAsset = enraptured ? findRecognizedAsset(this.enrapturableAssetsChain[chainId], data.asset) : findRecognizedAsset(this.importableAssetsChain[chainId], data.asset)
 
         if (!inAsset) {
             this.logger.error(`userInRequest: not an permissioned asset`, null, this.context)
@@ -85,12 +87,13 @@ export class OracleApiService {
             const payload = enraptured ? await encodeEnraptureWithSigData(ma, expirationContract) : await encodeImportWithSigData(ma, expirationContract)
             const signature = await getSignature(this.oracle, payload)
             const hash = await calculateMetaAssetHash(ma)
+            const chainId = ma.chainId
 
             this.logger.debug(`InData: request prepared: ${[hash, payload, signature]}`, this.context)
 
             let failedtoconfirm = false
             try {
-                const success = enraptured ? await this.userEnraptureConfirm(user, { hash }) : await this.userImportConfirm(user, { hash })
+                const success = enraptured ? await this.userEnraptureConfirm(user, { hash, chainId }) : await this.userImportConfirm(user, { hash, chainId })
                 this.logger.debug(`InData: previous inflow was confirmed: ${hash}`, this.context)
             } catch (e) {
                 failedtoconfirm = true
@@ -148,7 +151,7 @@ export class OracleApiService {
         return [hash, payload, signature, false]
     }
 
-    public async userOutRequest(user: UserEntity, { hash }: ExportDto): Promise<[string, string, string, boolean]> {
+    public async userOutRequest(user: UserEntity, { hash, chainId }: ExportDto): Promise<[string, string, string, boolean]> {
         this.logger.debug(`userOutRequest: ${hash}`, this.context)
 
         if (user.blacklisted) {
@@ -186,7 +189,7 @@ export class OracleApiService {
         await this.assetService.create(existingEntry)
 
         try {
-            confirmsuccess = await this.userExportConfirm(user, { hash })
+            confirmsuccess = await this.userExportConfirm(user, { hash, chainId })
         } catch (e) {
         }
 
@@ -303,14 +306,14 @@ export class OracleApiService {
         return res
     }
 
-    // public async userImportConfirm(user: UserEntity, { hash, chainId }: { hash: string, chainId:number }, asset?: AssetEntity): Promise<boolean> 
-    public async userImportConfirm(user: UserEntity, { hash }: { hash: string }, asset?: AssetEntity): Promise<boolean> 
+    public async userImportConfirm(user: UserEntity, { hash, chainId }: { hash: string, chainId:number }, asset?: AssetEntity): Promise<boolean> 
     {
 
         this.logger.log(`ImportConfirm: started ${user.uuid}: ${hash}`, this.context)
 
-        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash })
+        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, chainId })
 
+        console.log("assetEntry:", assetEntry)
 
         if (!assetEntry || assetEntry.hash !== hash || assetEntry.enraptured !== false) {
             this.logger.error(`ImportConfirm: invalid conditions. exists: ${!!assetEntry}, hash: ${hash}, enraptured: ${assetEntry?.enraptured}, pendingOut: ${assetEntry?.pendingOut}, pendingIn: ${assetEntry?.pendingIn}`)
@@ -321,14 +324,14 @@ export class OracleApiService {
             return true
         }
 
-        const mAsset: MetaAsset = await this.metaverse.getImportedMetaAsset(hash)
+        const mAsset: MetaAsset = await this.metaverseChain[chainId].getImportedMetaAsset(hash)
 
         if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress.toLowerCase() !== assetEntry.assetAddress.toLowerCase()) {
             this.logger.error(`ImportConfirm: on-chaind data didn't match for hash: ${hash}`, null, this.context)
             throw new UnprocessableEntityException(`On-chain data didn't match`)
         }
 
-        const recognizedAsset = findRecognizedAsset(this.importableAssets, assetEntry)
+        const recognizedAsset = findRecognizedAsset(this.importableAssetsChain[chainId], assetEntry)
         //console.log(recognizedAsset)
         //console.log(user.uuid, hash, RecognizedAssetType.MOONSAMA.valueOf(), RecognizedAssetType.TICKET.valueOf(), recognizedAsset?.id, JSON.stringify(mAsset))
 
@@ -409,11 +412,11 @@ export class OracleApiService {
         return true
     }
 
-    public async userEnraptureConfirm(user: UserEntity, { hash }: { hash: string }, asset?: AssetEntity): Promise<boolean> {
+    public async userEnraptureConfirm(user: UserEntity, { hash, chainId }: { hash: string, chainId:number }, asset?: AssetEntity): Promise<boolean> {
 
         this.logger.log(`EnraptureConfirm: started ${user.uuid}: ${hash}`, this.context)
 
-        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash })
+        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, chainId })
 
         if (!assetEntry || assetEntry.hash !== hash || assetEntry.enraptured !== true) {
             this.logger.error(`EnraptureConfirm: invalid conditions. exists: ${!!assetEntry}, hash: ${hash}, enraptured: ${assetEntry?.enraptured}, pendingOut: ${assetEntry?.pendingOut}, pendingIn: ${assetEntry?.pendingIn}`)
@@ -424,14 +427,14 @@ export class OracleApiService {
             return true
         }
 
-        const mAsset: MetaAsset = await this.metaverse.getEnrapturedMetaAsset(hash)
+        const mAsset: MetaAsset = await this.metaverseChain[chainId].getEnrapturedMetaAsset(hash)
 
         if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress.toLowerCase() !== assetEntry.assetAddress.toLowerCase()) {
             this.logger.error(`EnraptureConfirm: on-chaind data didn't match for hash: ${hash}`, null, this.context)
             throw new UnprocessableEntityException(`On-chain data didn't match`)
         }
 
-        const recognizedAsset = findRecognizedAsset(this.enrapturableAssets, assetEntry)
+        const recognizedAsset = findRecognizedAsset(this.enrapturableAssetsChain[chainId], assetEntry)
 
         // assign skin if asset unlocks one
         const texture = await this.textureService.findOne({ assetAddress: assetEntry.assetAddress.toLowerCase(), assetId: assetEntry.assetId })
@@ -510,7 +513,7 @@ export class OracleApiService {
         return true
     }
 
-    public async userExportConfirm(user: UserEntity, { hash }: { hash: string }, asset?: AssetEntity): Promise<boolean> {
+    public async userExportConfirm(user: UserEntity, { hash, chainId }: { hash: string, chainId:number }, asset?: AssetEntity): Promise<boolean> {
 
         if (!hash) {
             this.logger.warn(`ExportConfirm: hash not received`, this.context)
@@ -529,14 +532,14 @@ export class OracleApiService {
             return false
         }
 
-        const exists = await this.metaverse.existsImported(hash)
+        const exists = await this.metaverseChain[chainId].existsImported(hash)
 
         if (exists) {
             this.logger.error(`ExportConfirm: not exported yet: ${hash}`, null, this.context)
             throw new UnprocessableEntityException(`Not exported yet`)
         }
 
-        const recognizedAsset = findRecognizedAsset(this.importableAssets, assetEntry)
+        const recognizedAsset = findRecognizedAsset(this.importableAssetsChain[chainId], assetEntry)
 
         if (!!recognizedAsset && recognizedAsset.gamepass) {
             user.numGamePassAsset = (user.numGamePassAsset ?? 0) > 0 ? user.numGamePassAsset - 1 : 0

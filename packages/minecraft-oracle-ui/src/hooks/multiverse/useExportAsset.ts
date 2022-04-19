@@ -13,7 +13,8 @@ export enum ExportAssetCallbackState {
 }
 
 export interface ExportRequest {
-    hash?: string
+    hash?: string,
+    chainId?: number
 }
 
 export interface AssetRequest {
@@ -38,11 +39,11 @@ export function useFetchExportAssetArgumentsCallback(exportRequest: ExportReques
     const [params, setParams] = useState<ExportRequestParams | undefined>(undefined)
     const { authData } =  useAuth();
 
-    const {hash} = exportRequest ?? {}
+    const {hash, chainId} = exportRequest ?? {}
     const {jwt} = authData ?? {}
 
     const cb = useCallback(async () => {
-        if (!library || !account || !hash) {
+        if (!library || !account || !hash || !chainId) {
             setParams(undefined);
         }
         try {

@@ -77,19 +77,11 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
     const onChainImportables = [...onChainGoldenTickets, ...onChainMoonbrella, ...onChainMoonsamas, ...onChainArt, ...onChainPlot, ...onChainEmbassy];
 
-    // console.log('VIP Ticket', onChainGoldenTickets)
-    // console.log('onChainMoonbrella', onChainMoonbrella)
-    // console.log('onChainEmbassy', onChainEmbassy)
-
     //In Game Items
     const inGameItems = useInGameItems(fetchtrigger);
     const inGameAssets = inGameItems?.assets ?? [];
     const inGameResources = inGameItems?.resources ?? []
     const inGameTextures: InGameTexture[] = inGameItems?.textures ?? []
-
-    console.log('ingame items', inGameItems, { inGameAssets, inGameResources, inGameTextures })
-
-    // const { jwt, userProfile } = authData;
 
     const {
         profileContainer,
@@ -111,7 +103,6 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const canSummon = !!inGameItems?.resources && inGameItems?.resources.length > 0 && !profile?.blacklisted
     const assetCounter = countGamePassAssets(inGameAssets)
     const hasImportedTicket = assetCounter.ticketNum > 0
-    // console.log({inGameAssets})
     return (
         <Grid className={profileContainer}>
             <Header />
@@ -139,7 +130,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     >
                         {!!inGameTextures.length ? inGameTextures.sort((t1, t2) => t1.assetAddress.localeCompare(t2.assetAddress)).map((value, ind) => {
 
-                            console.log('SKIN', value)
+                            // console.log('SKIN', value)
 
                             const skinLabel = SKIN_LABELS[value.assetAddress.toLowerCase()]
 

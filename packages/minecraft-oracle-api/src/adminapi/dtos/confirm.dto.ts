@@ -17,6 +17,9 @@ export class AdminConfirmDto {
 
     @ApiProperty({ description: 'Confirm type', enum: OracleActionTypeDto})
     type: OracleActionTypeDto;
+
+    @ApiProperty({ description: 'ChainId'})
+    chainId: number;
 }
 
 export class AdminConfirmsDto {

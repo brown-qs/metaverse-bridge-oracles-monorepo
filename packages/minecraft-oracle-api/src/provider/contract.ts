@@ -38,7 +38,7 @@ export const MulticallContractChainProvider: FactoryProvider<ethers.Contract> = 
         let contracts: any = {};
         chainIds.map((chainId: number) => {
             const oracle = new ethers.Wallet(oraclePrivateKey, client[chainId]);
-            if(METAVERSE_ADDRESSES[chainId])
+            if(MULTICALL_ADDRESSES[chainId])
                 contracts[chainId] = new Contract(MULTICALL_ADDRESSES[chainId], METAVERSE_ABI, oracle)
         })
         return contracts;
