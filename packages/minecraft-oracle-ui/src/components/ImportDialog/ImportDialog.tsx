@@ -102,7 +102,7 @@ export const ImportDialog = () => {
     amount,
     owner,
     beneficiary,
-    chain: chainId
+    chainId
   }
 
   const bal = useBalances([

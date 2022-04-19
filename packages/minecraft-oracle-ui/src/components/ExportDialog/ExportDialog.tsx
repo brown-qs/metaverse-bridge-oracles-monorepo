@@ -43,33 +43,21 @@ export const ExportDialog = () => {
 
   const {
     divider,
-    infoContainer,
     button,
-    //
     row,
     col,
-    verticalDashedLine,
     formBox,
-    formLabel,
     formValue,
+    formLabel,
     formValueTokenDetails,
-    formValueGive,
-    formValueGet,
-    spaceOnLeft,
-    fieldError,
     formButton,
-    expand,
-    expandOpen,
   } = useClasses(appStyles);
-
-  const [UIAdvancedSectionExpanded, setExpanded] = useState(false);
 
   const {
     dialogContainer,
     loadingContainer,
     successContainer,
     successIcon,
-    inputContainer,
   } = useClasses(styles);
 
   const { chainId, account } = useActiveWeb3React();
@@ -95,7 +83,7 @@ export const ExportDialog = () => {
 
   let callbackError: string | undefined;
 
-  const exportCallbackParams = useExportAssetCallback({hash: exportDialogData?.hash})
+  const exportCallbackParams = useExportAssetCallback({hash: exportDialogData?.hash, chainId})
   
   
   if (!!exportCallbackParams.error) {
@@ -110,7 +98,7 @@ export const ExportDialog = () => {
   
   useEffect(() => {
     const x = async () => {
-      const confirmed = await confirmCb(exportDialogData?.hash)
+      const confirmed = await confirmCb(exportDialogData?.hash, chainId)
       console.log('effect hook', confirmed)
       setExportConfirmed(confirmed)
     }

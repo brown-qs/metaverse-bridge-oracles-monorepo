@@ -135,7 +135,7 @@ export const EnraptureDialog = () => {
   
   useEffect(() => {
     const x = async () => {
-      const confirmed = await confirmCb(enraptureCallbackParams?.hash)
+      const confirmed = await confirmCb(enraptureCallbackParams?.hash, chainId)
       console.log('effect hook', confirmed)
       setEnraptureConfirmed(confirmed)
     }

@@ -42,15 +42,15 @@ export class AssetWatchService {
           if (assets[i].pendingIn) {
             if (assets[i].enraptured) {
               this.logger.debug(`handleConfirmPatrol: enrapture confirm of ${assets[i].hash}`, this.context);
-              await this.oracleApiService.userEnraptureConfirm(assets[i].owner, {hash: assets[i].hash}, assets[i])
+              await this.oracleApiService.userEnraptureConfirm(assets[i].owner, {hash: assets[i].hash, chainId: assets[i].chainId}, assets[i])
             } else {
               this.logger.debug(`handleConfirmPatrol: import confirm of ${assets[i].hash}`, this.context);
-              await this.oracleApiService.userImportConfirm(assets[i].owner, {hash: assets[i].hash}, assets[i])
+              await this.oracleApiService.userImportConfirm(assets[i].owner, {hash: assets[i].hash, chainId: assets[i].chainId}, assets[i])
             }
           }
           if (assets[i].pendingOut) {
             this.logger.debug(`handleConfirmPatrol: export confirm of ${assets[i].hash}`, this.context);
-            await this.oracleApiService.userExportConfirm(assets[i].owner, {hash: assets[i].hash}, assets[i])
+            await this.oracleApiService.userExportConfirm(assets[i].owner, {hash: assets[i].hash, chainId: assets[i].chainId}, assets[i])
           }
         } catch (e) {
           this.logger.warn(`handleConfirmPatrol: error confirming ${assets[i].hash}`, this.context);
@@ -84,16 +84,16 @@ export class AssetWatchService {
           if (asset.pendingIn) {
             if (asset.enraptured) {
                 this.logger.debug(`handleCleanPatrol: enrapture confirm of ${asset.hash}`, this.context);
-                success = await this.oracleApiService.userEnraptureConfirm(asset.owner, {hash: asset.hash}, asset)
+                success = await this.oracleApiService.userEnraptureConfirm(asset.owner, {hash: asset.hash, chainId: asset.chainId}, asset)
               } else {
                 this.logger.debug(`handleCleanPatrol: import confirm of ${asset.hash}`, this.context);
-                success = await this.oracleApiService.userImportConfirm(asset.owner, {hash: asset.hash}, asset)
+                success = await this.oracleApiService.userImportConfirm(asset.owner, {hash: asset.hash, chainId: asset.chainId}, asset)
               }
           }
 
           if (asset.pendingOut) {
             this.logger.debug(`handleCleanPatrol: export confirm of ${asset.hash}`, this.context);
-            success = await this.oracleApiService.userExportConfirm(asset.owner, {hash: asset.hash}, asset)
+            success = await this.oracleApiService.userExportConfirm(asset.owner, {hash: asset.hash, chainId: asset.chainId}, asset)
             continue
           }
         } catch (e) {
