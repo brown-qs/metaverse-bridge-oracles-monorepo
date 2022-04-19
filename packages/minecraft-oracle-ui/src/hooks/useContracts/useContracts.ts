@@ -75,6 +75,20 @@ export function useMultiverseBridgeV1Contract(
   );
 }
 
+export function useMultiverseBridgeV2Contract(
+  withSignerIfPossible = true,
+  chainId?: number
+): Contract | null {
+  return useContract(
+    chainId
+      ? MULTIVERSE_BRIDGE_V1_ADDRESS[(chainId as ChainId) ?? ChainId.MOONRIVER]
+      : undefined,
+    METAVERSE_V1_ABI,
+    withSignerIfPossible
+  );
+}
+
+
 export function useMarketplaceV1Contract(
   withSignerIfPossible = true
 ): Contract | null {
