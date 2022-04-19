@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { calculateGasMargin, getSigner } from '../../utils';
-import { useMarketplaceV1Contract, useMultiverseBridgeV1Contract } from '../../hooks/useContracts/useContracts';
+import { useMultiverseBridgeV1Contract, useMultiverseBridgeV2Contract } from '../../hooks/useContracts/useContracts';
 import { useActiveWeb3React, useAuth } from '../../hooks';
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import axios from 'axios'
@@ -58,7 +58,7 @@ export function useFetchExportAssetArgumentsCallback(exportRequest: ExportReques
             console.error('Error fetching export params.')
             setParams(undefined)
         }
-    }, [library, account, hash, jwt])
+    }, [library, account, hash, jwt, chainId])
 
 
     useEffect(() => {
@@ -80,7 +80,8 @@ export function useExportAssetCallback(
     const { account, chainId, library } = useActiveWeb3React();
 
     //console.log('YOLO', { account, chainId, library });
-    const contract = useMultiverseBridgeV1Contract(true);
+    // const contract = useMultiverseBridgeV1Contract(true);
+    const contract = useMultiverseBridgeV2Contract(true, exportRequest.chainId);
 
     const { confirmed, data, hash, signature } = useFetchExportAssetArgumentsCallback(exportRequest) ?? {}
 
@@ -88,6 +89,8 @@ export function useExportAssetCallback(
 
     //console.warn('YOLO ORDER', { inputParams, inputOptions });
     const inputOptions = {}
+
+    console.log("useExportAssetCallback:", { confirmed, data, hash, signature })
 
     return useMemo(() => {
         if (!library || !account || !chainId || !contract ) {

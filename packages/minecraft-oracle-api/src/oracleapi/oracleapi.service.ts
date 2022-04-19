@@ -66,7 +66,7 @@ export class OracleApiService {
 
         console.log(data)
         const requestHash = await utf8ToKeccak(JSON.stringify(data))
-        const existingEntry = await this.assetService.findOne({ requestHash, enraptured, pendingIn: true, owner: { uuid: user.uuid } }, { order: { expiration: 'DESC' }, relations: ['owner'] })
+        const existingEntry = await this.assetService.findOne({ requestHash, chainId, enraptured, pendingIn: true, owner: { uuid: user.uuid } }, { order: { expiration: 'DESC' }, relations: ['owner'] })
 
         existingEntry ? console.log(Date.now() - Number.parseInt(existingEntry.expiration) - CALLDATA_EXPIRATION_THRESHOLD) : undefined
 
@@ -169,7 +169,7 @@ export class OracleApiService {
             throw new UnprocessableEntityException(`Forbidden during ongoing game`)
         }
 
-        const existingEntry = await this.assetService.findOne({ hash, enraptured: false, pendingIn: false, owner: { uuid: user.uuid } })
+        const existingEntry = await this.assetService.findOne({ hash, chainId, enraptured: false, pendingIn: false, owner: { uuid: user.uuid } })
         if (!existingEntry) {
             this.logger.error(`userOutRequest: exportable asset not found ${hash}`, null, this.context)
             throw new UnprocessableEntityException(`Exportable asset not found`)
@@ -311,8 +311,6 @@ export class OracleApiService {
         this.logger.log(`ImportConfirm: started ${user.uuid}: ${hash}`, this.context)
 
         const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, chainId })
-
-        console.log("assetEntry:", assetEntry)
 
         if (!assetEntry || assetEntry.hash !== hash || assetEntry.enraptured !== false) {
             this.logger.error(`ImportConfirm: invalid conditions. exists: ${!!assetEntry}, hash: ${hash}, enraptured: ${assetEntry?.enraptured}, pendingOut: ${assetEntry?.pendingOut}, pendingIn: ${assetEntry?.pendingIn}`)
@@ -519,7 +517,7 @@ export class OracleApiService {
             return false
         }
 
-        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, enraptured: false })
+        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, chainId, enraptured: false })
 
         if (!assetEntry) {
             this.logger.warn(`ExportConfirm: asset not found`, this.context)

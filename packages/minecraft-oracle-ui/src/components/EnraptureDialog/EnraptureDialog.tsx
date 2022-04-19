@@ -100,7 +100,7 @@ export const EnraptureDialog = () => {
     amount,
     owner,
     beneficiary,
-    chain: chainId
+    chainId
   }
 
   const bal = useBalances([
