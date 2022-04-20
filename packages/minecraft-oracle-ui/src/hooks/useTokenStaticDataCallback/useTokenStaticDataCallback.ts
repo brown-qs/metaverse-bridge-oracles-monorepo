@@ -92,7 +92,6 @@ export const useTokenStaticDataCallback = ({
         return [];
       }
 
-      //console.log('yolo tryMultiCallCore res', results);
       const staticData = processTokenStaticCallResults(assets, results);
 
       const metas = await fetchUri(staticData);

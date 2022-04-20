@@ -90,8 +90,6 @@ export function useExportAssetCallback(
     //console.warn('YOLO ORDER', { inputParams, inputOptions });
     const inputOptions = {}
 
-    console.log("useExportAssetCallback:", { confirmed, data, hash, signature })
-
     return useMemo(() => {
         if (!library || !account || !chainId || !contract ) {
             return {

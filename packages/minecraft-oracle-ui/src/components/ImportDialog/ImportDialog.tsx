@@ -133,13 +133,13 @@ export const ImportDialog = () => {
   const { importSubmitted, importTx } = useSubmittedImportTx(importCallbackParams?.hash);
   const isPending = useIsTransactionPending(importTx?.hash)
 
-  console.log('submission', { importSubmitted, importTx, finalTxSubmitted, importConfirmed, hash: importCallbackParams?.hash })
+  // console.log('submission', { importSubmitted, importTx, finalTxSubmitted, importConfirmed, hash: importCallbackParams?.hash })
   
   
   useEffect(() => {
     const x = async () => {
       const confirmed = await confirmCb(importCallbackParams?.hash, chainId)
-      console.log('effect hook', confirmed)
+      // console.log('effect hook', confirmed)
       setImportConfirmed(confirmed)
     }
     x()
