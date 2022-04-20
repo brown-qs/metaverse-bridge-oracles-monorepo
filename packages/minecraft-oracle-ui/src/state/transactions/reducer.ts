@@ -80,20 +80,20 @@ export default createReducer(initialState, (builder) =>
           },
         }
       ) => {
-        console.log('new TX added', {
-          chainId,
-          from,
-          hash,
-          approval,
-          summary,
-          order,
-          fill,
-          cancel,
-          transfer,
-          enraptureResult,
-          importResult,
-          exportResult
-        });
+        // console.log('new TX added', {
+        //   chainId,
+        //   from,
+        //   hash,
+        //   approval,
+        //   summary,
+        //   order,
+        //   fill,
+        //   cancel,
+        //   transfer,
+        //   enraptureResult,
+        //   importResult,
+        //   exportResult
+        // });
         if (transactions[chainId]?.[hash]) {
           throw Error('Attempted to add existing transaction.');
         }
