@@ -21,15 +21,15 @@ export class ChainEntity {
     @IsString()
     rpcUrl: string;
 
-    @Column()
+    @Column({ nullable: true, default: null })
     @IsString()
     multiverseAddress: string;
     
+    @Column({ nullable: true, default: null })
     @IsString()
-    @Column()
     multicallAddress?: string;
 
-    @IsBoolean()
     @Column()
+    @IsBoolean()
     allowed: boolean;
 }

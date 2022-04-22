@@ -25,6 +25,8 @@ import { SkinEntity } from '../skin/skin.entity';
 import { StringAssetType } from '../common/enums/AssetType';
 import { NftApiService } from '../nftapi/nftapi.service';
 import { GameKind } from '../game/game.enum';
+import { ChainService} from '../chain/chain.service';
+import { METAVERSE_ABI } from '../common/contracts/Metaverse';
 
 @Injectable()
 export class OracleApiService {
@@ -32,6 +34,7 @@ export class OracleApiService {
     private locks: Map<string, MutexInterface>;
 
     private readonly context: string;
+    private readonly oraclePrivateKey: string;
     constructor(
         private readonly userService: UserService,
         private readonly textureService: TextureService,
@@ -40,6 +43,7 @@ export class OracleApiService {
         private readonly assetService: AssetService,
         private readonly inventoryService: InventoryService,
         private readonly nftApiService: NftApiService,
+        private readonly chainService: ChainService,
         private configService: ConfigService,
         @Inject(ProviderToken.ORACLE_WALLET) private oracle: Signer,
         // @Inject(ProviderToken.METAVERSE_CONTRACT) private metaverse: Contract,
@@ -52,6 +56,8 @@ export class OracleApiService {
     ) {
         this.context = OracleApiService.name
         this.locks = new Map();
+        this.oraclePrivateKey = this.configService.get<string>('network.oracle.privateKey');
+
     }
 
     public async userInRequest(user: UserEntity, data: ImportDto, enraptured: boolean): Promise<[string, string, string, boolean]> {
@@ -260,6 +266,18 @@ export class OracleApiService {
 
             const addresses = Object.keys(groups)
 
+            const chainEntity = await this.chainService.findOne({chainId})
+            const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
+            const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
+
+            let contract: Contract;
+            if(chainEntity.multiverseAddress)
+                contract = new Contract(chainEntity.multiverseAddress, METAVERSE_ABI, oracle)
+            else{
+                this.logger.error(`Summon: failiure not find MultiverseAddress`)
+                throw new UnprocessableEntityException('Summon MultiverseAddress error.')
+            }
+
             for (let i = 0; i < addresses.length; i++) {
                 try {
                     
@@ -268,7 +286,9 @@ export class OracleApiService {
                     //console.log({METAVERSE, recipient, ids, amounts, i})
                     // console.log("SummonResult",this.metaverseChain[chainId])
 
-                    const receipt = await ((await this.metaverseChain[chainId].summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], { value: 0, gasPrice: '3000000000', gasLimit: '1000000' })).wait())
+                    // const receipt = await ((await this.metaverseChain[chainId].summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], { value: 0, gasPrice: '3000000000', gasLimit: '1000000' })).wait())
+
+                    const receipt = await ((await contract.summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], { value: 0, gasPrice: '3000000000', gasLimit: '1000000' })).wait())
 
                     try {
                         await this.inventoryService.removeAll(groups[addresses[i]].entities)

@@ -51,7 +51,7 @@ export class ProfileApiService {
                 summonable: true,
                 recognizedAssetType: '',
                 enraptured: false,
-                exportChainName: 1285,
+                exportChainId: 1285,
                 exportAddress: undefined,
             }
         })
@@ -87,7 +87,7 @@ export class ProfileApiService {
                     summonable: false,
                     recognizedAssetType: recongizedEnraptureAsset.type.valueOf(),
                     enraptured: asset.enraptured,
-                    exportChainName: asset.chainId,
+                    exportChainId: asset.chainId,
                     exportAddress: mAsset?.owner?.toLowerCase() ?? undefined,
                 })
                 continue
@@ -113,7 +113,7 @@ export class ProfileApiService {
                     summonable: false,
                     recognizedAssetType: recongizedImportAsset.type.valueOf(),
                     enraptured: asset.enraptured,
-                    exportChainName: asset.chainId,
+                    exportChainId: asset.chainId,
                     exportAddress: mAsset?.owner?.toLowerCase() ?? undefined,
                 })
                 continue

@@ -40,9 +40,9 @@ export class AssetDto {
     @IsBoolean()
     enraptured: boolean
 
-    @ApiProperty({ description: 'Name of Chain where the asset can be exported to'})
+    @ApiProperty({ description: 'Id of Chain where the asset can be exported to'})
     @IsString()
-    exportChainName: number
+    exportChainId: number
 
     @ApiProperty({ description: 'Address where the asset can be exported to'})
     @IsString()
