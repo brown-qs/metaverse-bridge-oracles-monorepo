@@ -219,7 +219,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                                                 assetType: stringToStringAssetType(value.assetType),
                                                                                 id: 'x'
                                                                             },
-                                                                            chain: value.exportChainName
+                                                                            chain: value.exportChainId
                                                                         }
                                                                     );
                                                                 } else {
@@ -274,7 +274,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                         <div className={row}>
                                                         <div className={formLabel}>Export Chain Name: </div>
                                                         <div className={`${formValue} ${formValueTokenDetails}`}>
-                                                            {itemDetailDialogData.exportChainName}
+                                                            {itemDetailDialogData.exportChainId}
                                                         </div>
                                                         </div>
                                                         <div className={row}>

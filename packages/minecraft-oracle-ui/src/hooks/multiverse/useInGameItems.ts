@@ -19,7 +19,7 @@ export interface InGameItem {
     meta: any,
     recognizedAssetType: RecognizedAssetType,
     enraptured: boolean,
-    exportChainName: number,
+    exportChainId: number,
     exportAddress: string,
 }
 
@@ -90,7 +90,7 @@ export function useInGameItems(trigger: string | undefined = undefined) {
                     assetAddress: x.assetAddress,
                     assetType: stringToStringAssetType(x.assetType),
                     id: '1',
-                    chainId: x.exportChainName,
+                    chainId: x.exportChainId,
                 }
             })
         );
