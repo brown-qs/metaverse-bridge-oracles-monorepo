@@ -13,3 +13,10 @@ export enum AssetType {
     ERC721=3,
     ERC1155=4
 }
+
+export enum BridgeAssetType {
+    NONE = 'NONE',
+    ENRAPTURED='ENRAPTURED',
+    IMPORTED='IMPORTED',
+    EXPORTED='EXPORTED'
+}

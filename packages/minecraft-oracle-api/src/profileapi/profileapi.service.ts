@@ -3,7 +3,7 @@ import { ProfileDto } from './dtos/profile.dto';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { AssetService } from '../asset/asset.service';
 import { UserEntity } from '../user/user.entity';
-import { RecognizedAsset, RecognizedAssetType, PlayEligibilityReason } from '../config/constants';
+import { RecognizedAssetType, PlayEligibilityReason } from '../config/constants';
 import { ProviderToken } from '../provider/token';
 import { AssetDto, TextureDto, ThingsDto } from './dtos/things.dto';
 import { InventoryService } from '../playerinventory/inventory.service';
@@ -11,25 +11,30 @@ import { UserService } from '../user/user.service';
 import { SkinselectDto } from './dtos/skinselect.dto';
 import { SkinService } from '../skin/skin.service';
 import { findRecognizedAsset } from '../utils';
-import { MetaAsset } from '../../src/oracleapi/oracleapi.types';
-import { Contract } from 'ethers';
+import { MetaAsset } from '../oracleapi/oracleapi.types';
+import { TypeContractsCallbackProvider, TypeRecognizedAssetsProvider } from '../provider';
+import { ConfigService } from '@nestjs/config';
+import { BridgeAssetType } from '../common/enums/AssetType';
+import { ContractType } from 'src/common/enums/ContractType';
 
 @Injectable()
 export class ProfileApiService {
 
     private readonly context: string;
+    private readonly defaultChainId: number;
 
     constructor(
         private readonly inventoryService: InventoryService,
         private readonly assetService: AssetService,
         private readonly skinService: SkinService,
         private readonly userService: UserService,
-        @Inject(ProviderToken.METAVERSE_CONTRACT) private metaverse: Contract,
-        @Inject(ProviderToken.IMPORTABLE_ASSETS) private importableAssets: RecognizedAsset[],
-        @Inject(ProviderToken.ENRAPTURABLE_ASSETS) private enrapturableAssets: RecognizedAsset[],
+        private configService: ConfigService,
+        @Inject(ProviderToken.CONTRACT_CHAIN_CALLBACK) private getContract: TypeContractsCallbackProvider,
+        @Inject(ProviderToken.RECOGNIZED_ASSETS_CALLBACK) private getRecognizedAssets: TypeRecognizedAssetsProvider,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
         this.context = ProfileApiService.name
+        this.defaultChainId = this.configService.get<number>('network.defaultChainId')
     }
 
     async userAssets(user: UserEntity) {
@@ -51,13 +56,16 @@ export class ProfileApiService {
                 summonable: true,
                 recognizedAssetType: '',
                 enraptured: false,
-                exportChainId: 1285,
+                exportChainId: undefined, // resources are multi chain
                 exportAddress: undefined,
             }
         })
 
         const userAssets = await this.assetService.findMany({ where: { owner: user.uuid, pendingIn: false } })
         const userSkins = await this.skinService.findMany({ where: { owner: user.uuid }, relations: ['texture'] })
+
+        const importableAssets = await this.getRecognizedAssets(BridgeAssetType.IMPORTED)
+        const enrapturableAssets = await this.getRecognizedAssets(BridgeAssetType.ENRAPTURED)
 
         //console.log(userSkins)
 
@@ -66,12 +74,13 @@ export class ProfileApiService {
         for(let i = 0; i < userAssets.length; i++) {
             const asset = userAssets[i]
 
-            const recongizedEnraptureAsset = findRecognizedAsset(this.enrapturableAssets, asset)
+            const recongizedEnraptureAsset = findRecognizedAsset(enrapturableAssets, asset)
 
             if (!!recongizedEnraptureAsset) {
+                const multiverse = await this.getContract(asset.chainId ?? this.defaultChainId, ContractType.MULTIVERSE_V1)
                 let mAsset: MetaAsset
                 try {
-                    mAsset = await this.metaverse.getEnrapturedMetaAsset(asset.hash)
+                    mAsset = await multiverse.getEnrapturedMetaAsset(asset.hash)
                 } catch {
 
                 }
@@ -93,12 +102,13 @@ export class ProfileApiService {
                 continue
             }
 
-            const recongizedImportAsset = findRecognizedAsset(this.importableAssets, asset)
+            const recongizedImportAsset = findRecognizedAsset(importableAssets, asset)
 
             if (!!recongizedImportAsset) {
+                const multiverse = await this.getContract(asset.chainId ?? this.defaultChainId, ContractType.MULTIVERSE_V1)
                 let mAsset: MetaAsset
                 try {
-                    mAsset = await this.metaverse.getImportedMetaAsset(asset.hash)
+                    mAsset = await multiverse.getImportedMetaAsset(asset.hash)
                 } catch {
 
                 }
