@@ -16,16 +16,26 @@ export class AssetWatchService {
   private lastConfirmPatrol: number = 0;
   private lastCleanPatrol: number = 0;
 
+  private disabled: boolean = false;
+
   constructor(
     private readonly assetService: AssetService,
     private readonly oracleApiService: OracleApiService,
+    private configService: ConfigService,
     @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
-      this.context = ConfigService.name
+      this.context = AssetWatchService.name
+
+      this.disabled = this.configService.get<boolean>('cron.disabled')
   }
 
   @Interval(IMPORT_CONFIRM_CRON_INTERVAL_MS)
   async handleConfirmPatrol() {
+    if (this.disabled) {
+      this.logger.debug('handleCleanPatrol: disabled', this.context);
+      return
+    }
+
     const now = Date.now()
     try {
       if (Date.now() - this.lastConfirmPatrol < IMPORT_CONFIRM_CRON_INTERVAL_MS) {
@@ -66,6 +76,11 @@ export class AssetWatchService {
 
 @Interval(CLEAN_CRON_INTERVAL_MS)
   async handleCleanPatrol() {
+    if (this.disabled) {
+      this.logger.debug('handleCleanPatrol: disabled', this.context);
+      return
+    }
+
     const now = Date.now()
     try {
       if (now - this.lastCleanPatrol < CLEAN_CRON_INTERVAL_MS) {

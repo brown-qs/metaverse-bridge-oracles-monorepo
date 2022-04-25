@@ -7,13 +7,6 @@ export enum ChainId {
   VOLTA = 73799
 }
 
-export const ALLOWED_CHAIN_IDS: ChainId[] = [
-  ChainId.MAINNET,
-  ChainId.MOONBEAM,
-  ChainId.MOONRIVER,
-  ChainId.VOLTA
-]
-
 export const RPC_URLS: { [chainId: number]: string } = {
   [ChainId.MOONRIVER]: 'https://rpc.api.moonriver.moonbeam.network',
   [ChainId.MOONBEAM]: 'https://moonbeam-rpc.moonsama.com',

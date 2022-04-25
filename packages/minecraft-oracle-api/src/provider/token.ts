@@ -1,14 +1,8 @@
 export const ProviderToken = {
-    CLIENT_ETHEREUM: 'provider.client.ethereum',
-    CLIENT_ALL: 'provider.client.all',
-    ORACLE_WALLET: 'provider.oracle.wallet',
+    CLIENT_EVM_CHAIN: 'provider.clien.evm.chain',
+    ORACLE_WALLET_CALLBACK: 'provider.oracle.wallet.callback',
     MICROSOFT_SETUP: 'provider.microsoft.setup',
-    METAVERSE_CONTRACT: 'provider.contract.metaverse',
-    METAVERSE_CONTRACT_CHAIN: 'provider.contract.metaversewithchain',
-    MULTICALL_CONTRACT: 'provider.contract.multicall',
-    MULTICALL_CONTRACT_CHAIN: 'provider.contract.multicallwithchain',
-    ENRAPTURABLE_ASSETS: 'provider.asset.enrapturable',
-    ENRAPTURABLE_ASSETS_CHAIN: 'provider.asset.enrapturablechain',
-    IMPORTABLE_ASSETS: 'provider.asset.importable',
-    IMPORTABLE_ASSETS_CHAIN: 'provider.asset.importablechain'
+    RECOGNIZED_CHAIN_ASSETS_CALLBACK: 'provider.chain.assets.recognized.callback',
+    RECOGNIZED_ASSETS_CALLBACK: 'provider.assets.recognized.callback',
+    CONTRACT_CHAIN_CALLBACK: 'provider.chain.contract.callback'
 };

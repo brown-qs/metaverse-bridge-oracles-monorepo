@@ -1,28 +1,7 @@
 import { ConfigError } from './errors';
-import { ethers } from 'ethers';
-import { ALLOWED_CHAIN_IDS, RPC_URLS } from './constants';
 import { privateKeyToEthereumKeys } from '../crypto';
 
 export const loadChain = async () => {
-    const rpcUrl = process.env.RPC_URL.trim();
-
-    if (!rpcUrl) {
-        throw new Error(`RPC URL was not received`);
-    }
-
-    let chainIds: number[] = ALLOWED_CHAIN_IDS;
-    let chainId: number;
-    let rpcUrls = RPC_URLS;
-
-    try {
-        chainId = await (await ethers.getDefaultProvider(rpcUrl).getNetwork()).chainId
-    } catch (e: any) {
-        throw new Error(`Error reaching RPC node: ${e}`);
-    }
-    
-    if (!ALLOWED_CHAIN_IDS.includes(chainId)) {
-        throw new Error(`Chain ID ${chainId} is not permitted.`);
-    }
     
     const pKeyString = process.env.ORACLE_PRIVATE_KEY.trim()
 
@@ -38,10 +17,7 @@ export const loadChain = async () => {
 
     return {
         network: {
-            chainIds,
-            chainId,
-            rpcUrls,
-            rpc: rpcUrl,
+            defaultChainId: process.env.DEFAULT_CHAIN_ID,
             oracle: {
                 privateKey: oracleKeys.privateKey,
                 address: oracleKeys.address
@@ -90,7 +66,8 @@ export const loadEnv = () => {
             expiration: process.env.JWT_EXPIRATION_STRING
         },
         cron: {
-            confirmWatchIntervalMs: process.env.CONFIRM_WATCH_INTERVAL_MS
+            confirmWatchIntervalMs: process.env.CONFIRM_WATCH_INTERVAL_MS,
+            disabled: process.env.CONFIRM_WATCH_DISABLED
         }
     };
 };
