@@ -1,5 +1,5 @@
 export const ProviderToken = {
-    CLIENT_EVM_CHAIN: 'provider.clien.evm.chain',
+    CLIENT_EVM_CHAIN: 'provider.client.evm.chain',
     ORACLE_WALLET_CALLBACK: 'provider.oracle.wallet.callback',
     MICROSOFT_SETUP: 'provider.microsoft.setup',
     RECOGNIZED_CHAIN_ASSETS_CALLBACK: 'provider.chain.assets.recognized.callback',
