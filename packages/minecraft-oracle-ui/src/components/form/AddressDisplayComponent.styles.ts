@@ -3,7 +3,7 @@ import { Theme } from '@mui/material';
 export const styles = (theme: Theme) => ({
   copyButton: {
     fontSize: '13px',
-    margin: '5px 0 0 -5px',
+    //margin: '5px 0 0 -5px',
     border: 0,
     borderRadius: 0,
     padding: 0,

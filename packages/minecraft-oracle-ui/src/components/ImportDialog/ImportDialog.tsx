@@ -256,6 +256,7 @@ export const ImportDialog = () => {
                   <div className={formLabel}>Address</div>
                   <AddressDisplayComponent
                     className={`${formValue} ${formValueTokenDetails}`}
+                    copyTooltipLabel={'Copy address'}
                     charsShown={5}
                   >
                     {importDialogData?.asset?.assetAddress ?? '?'}

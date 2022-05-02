@@ -273,6 +273,7 @@ export const EnraptureDialog = () => {
                   <div className={formLabel}>Address</div>
                   <AddressDisplayComponent
                     className={`${formValue} ${formValueTokenDetails}`}
+                    copyTooltipLabel={'Copy address'}
                     charsShown={5}
                   >
                     {enraptureDialogData?.asset?.assetAddress ?? '?'}

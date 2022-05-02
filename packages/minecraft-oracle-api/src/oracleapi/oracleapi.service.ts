@@ -148,6 +148,7 @@ export class OracleApiService {
             assetAddress: ma.asset.assetAddress,
             assetType: assetTypeToStringAssetType(ma.asset.assetType),
             assetId: ma.asset.assetId,
+            assetOwner: ma.owner,
             enraptured,
             hash,
             requestHash,

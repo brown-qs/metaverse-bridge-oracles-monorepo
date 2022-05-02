@@ -43,6 +43,10 @@ export class AssetEntity {
     @IsString()
     assetId: string;
 
+    @Column({nullable: true})
+    @IsString()
+    assetOwner?: string;
+
     @IsBoolean()
     @Column()
     enraptured: boolean;

@@ -77,14 +77,6 @@ export class ProfileApiService {
             const recongizedEnraptureAsset = findRecognizedAsset(enrapturableAssets, asset)
 
             if (!!recongizedEnraptureAsset) {
-                const multiverse = await this.getContract(asset.chainId ?? this.defaultChainId, ContractType.MULTIVERSE_V1)
-                let mAsset: MetaAsset
-                try {
-                    mAsset = await multiverse.getEnrapturedMetaAsset(asset.hash)
-                } catch {
-
-                }
-
                 assets.push({
                     amount: asset.amount,
                     assetAddress: asset.assetAddress.toLowerCase(),
@@ -97,7 +89,7 @@ export class ProfileApiService {
                     recognizedAssetType: recongizedEnraptureAsset.type.valueOf(),
                     enraptured: asset.enraptured,
                     exportChainId: asset.chainId,
-                    exportAddress: mAsset?.owner?.toLowerCase() ?? undefined,
+                    exportAddress: asset.assetOwner?.toLowerCase(),
                 })
                 continue
             }
@@ -105,13 +97,6 @@ export class ProfileApiService {
             const recongizedImportAsset = findRecognizedAsset(importableAssets, asset)
 
             if (!!recongizedImportAsset) {
-                const multiverse = await this.getContract(asset.chainId ?? this.defaultChainId, ContractType.MULTIVERSE_V1)
-                let mAsset: MetaAsset
-                try {
-                    mAsset = await multiverse.getImportedMetaAsset(asset.hash)
-                } catch {
-
-                }
                 assets.push({
                     amount: asset.amount,
                     assetAddress: asset.assetAddress.toLowerCase(),
@@ -124,7 +109,7 @@ export class ProfileApiService {
                     recognizedAssetType: recongizedImportAsset.type.valueOf(),
                     enraptured: asset.enraptured,
                     exportChainId: asset.chainId,
-                    exportAddress: mAsset?.owner?.toLowerCase() ?? undefined,
+                    exportAddress: asset.assetOwner?.toLowerCase(),
                 })
                 continue
             }
