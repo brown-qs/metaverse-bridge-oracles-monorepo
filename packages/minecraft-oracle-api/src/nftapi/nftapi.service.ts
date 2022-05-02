@@ -67,7 +67,7 @@ export class NftApiService {
                     url: imageurl,
                     ...await this.fetchMediaType(imageurl)
                 }
-                console.log('hmm', result);
+                //console.log('hmm', result);
                 return result;
             }))
         }

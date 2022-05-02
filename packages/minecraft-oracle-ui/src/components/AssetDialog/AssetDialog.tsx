@@ -133,6 +133,7 @@ export const AssetDialog = () => {
                   <div className={formLabel}>Address</div>
                   <AddressDisplayComponent
                     className={`${formValue} ${formValueTokenDetails}`}
+                    copyTooltipLabel={'Copy address'}
                     charsShown={5}
                   >
                     {assetDialogData?.assetERC1155?.assetAddress ?? '?'}
@@ -155,6 +156,7 @@ export const AssetDialog = () => {
                   <div className={formLabel}>Address</div>
                   <AddressDisplayComponent
                     className={`${formValue} ${formValueTokenDetails}`}
+                    copyTooltipLabel={'Copy address'}
                     charsShown={5}
                   >
                     {assetDialogData?.assetAddressERC20 ?? '?'}

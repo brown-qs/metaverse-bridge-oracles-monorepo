@@ -34,6 +34,11 @@ export const styles = (theme: Theme) => ({
         justifyContent: 'space-between',
     },
 
+    centeredRow: {
+        display: 'flex',
+        justifyContent: 'space-around',
+    },
+
     formBox: {
         border: 1,
         borderStyle: 'solid',

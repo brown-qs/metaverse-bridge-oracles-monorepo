@@ -121,7 +121,7 @@ export const ExportDialog = () => {
       return (
         <div className={loadingContainer}>
           <div>
-            <Typography>Sorry you should select {NETWORK_NAME[exportDialogData?.chain ?? DEFAULT_CHAIN]} network for export this item</Typography>
+            <Typography>You have to connect to {NETWORK_NAME[exportDialogData?.chain ?? DEFAULT_CHAIN]} network first to export this item</Typography>
           </div>
         </div>
       );
@@ -227,6 +227,7 @@ export const ExportDialog = () => {
                   <div className={formLabel}>Address</div>
                   <AddressDisplayComponent
                     className={`${formValue} ${formValueTokenDetails}`}
+                    copyTooltipLabel={'Copy address'}
                     charsShown={5}
                   >
                     {assetAddress ?? '?'}

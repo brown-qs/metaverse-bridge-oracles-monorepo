@@ -4,12 +4,8 @@ import { Box, Tooltip, Typography } from '@mui/material';
 import FileCopyOutlinedIcon from '@mui/icons-material/FileCopyOutlined';
 import { useClasses } from 'hooks';
 import { styles } from './AddressDisplayComponent.styles';
-import { getExplorerLink } from 'utils';
-import { useActiveWeb3React } from 'hooks';
-import { ExternalLink } from 'components/ExternalLink/ExternalLink';
-
-const CHARS_SHOWN = 3;
-const MIN_LENGTH = 5;
+import { EXPLORER_URL, ChainId } from '../../constants';
+import { ExternalLink } from '../ExternalLink/ExternalLink'
 
 const _fallbackCopyTextToClipboard = (text: string): void => {
   let textArea = document.createElement('textarea');
@@ -47,63 +43,45 @@ const _copyTextToClipboard = (text: string): void => {
   );
 };
 
-export const AddressDisplayComponent = (props: {
+export const ChainDataDisplayComponent = (props: {
   children: ReactNode;
-  charsShown: number;
+  chainId: ChainId;
   copyTooltipLabel: string;
   dontShowLink?: boolean;
   className?: string;
   buttonClassName?: string;
 }) => {
   const text = props.children?.toString() || '';
-  const charsShown = props.charsShown ? props.charsShown : CHARS_SHOWN;
+  const chainId = props.chainId ?? ChainId.MOONRIVER
   const copyTooltipLabel = props.copyTooltipLabel
 
   const { copyButton } = useClasses(styles);
-  const { chainId } = useActiveWeb3React();
-
-  const _apply_ellipsis = (): string => {
-    let _text = text;
-
-    if (_text.length > MIN_LENGTH) {
-      return (
-        _text.substr(0, charsShown) +
-        '...' +
-        _text.substr(_text.length - Math.floor(charsShown), _text.length)
-      );
-    }
-
-    return _text;
-  };
 
   return (
-    <React.Fragment>
+    
       <Box display="flex" alignItems="center">
-        <Tooltip title={text}>
           {!props.dontShowLink ? (
             <Typography className={props.className}>
-              <ExternalLink href={getExplorerLink(chainId, text, 'address')}>
-                {_apply_ellipsis()}
+              <ExternalLink href={EXPLORER_URL[chainId]}>
+                {text}
               </ExternalLink>
             </Typography>
           ) : (
             <Typography className={props.className}>
-              {_apply_ellipsis()}
+              {text}
             </Typography>
           )}
-        </Tooltip>
-        <Tooltip title={copyTooltipLabel}>
-          <Button
-            className={`${copyButton} ${props.buttonClassName}`}
-            size="small"
-            onClick={() => {
-              _copyTextToClipboard(text);
-            }}
-          >
-            <FileCopyOutlinedIcon color="secondary" />
-          </Button>
-        </Tooltip>
+          <Tooltip title={copyTooltipLabel}>
+            <Button
+              className={`${copyButton} ${props.buttonClassName}`}
+              size="small"
+              onClick={() => {
+                _copyTextToClipboard(text);
+              }}
+            >
+              <FileCopyOutlinedIcon color="secondary" />
+            </Button>
+          </Tooltip>
       </Box>
-    </React.Fragment>
   );
 };

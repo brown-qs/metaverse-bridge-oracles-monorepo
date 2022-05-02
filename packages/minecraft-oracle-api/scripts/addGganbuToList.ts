@@ -18,7 +18,6 @@ import { PlayerAchievementEntity } from '../src/playerachievement/playerachievem
 import { PlayerScoreEntity } from '../src/playerscore/playerscore.entity'
 import { GganbuEntity } from '../src/gganbu/gganbu.entity'
 import { SnaplogEntity } from '../src/snaplog/snaplog.entity'
-import { InventoryService } from '../src/playerinventory/inventory.service'
 import { GameItemTypeEntity } from '../src/gameitemtype/gameitemtype.entity'
 import { PlayerGameItemEntity } from '../src/playergameitem/playergameitem.entity'
 import { GameScoreTypeEntity } from '../src/gamescoretype/gamescoretype.entity'
@@ -48,9 +47,7 @@ config()
 */
 
 const list: { [key: string]: string } = {
-    "045e98e94a1a47b29f9376856fa90b63": "eunn296",
-    "7f23082131334911aaaebbb89f4d7986": "MerlinHermes",
-    "6432d40f399b4c7689db4a2ff64332bb": "ToxicBirdie999",
+    "386c595372bc4258b196a841a1922cf3": "Momsama",
 }
 
 const gameId = 'minecraft-carnage-2022-04-17'
