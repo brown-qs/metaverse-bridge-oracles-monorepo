@@ -16,7 +16,6 @@ import { Dialog } from 'ui';
 
 import { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 
-import { AddressDisplayComponent } from 'components/form/AddressDisplayComponent';
 
 import { useProfile } from 'hooks/multiverse/useProfile';
 import { useOnChainItems } from 'hooks/multiverse/useOnChainItems';
@@ -33,6 +32,8 @@ import { useCallbackSkinEquip } from '../../hooks/multiverse/useCallbackSkinEqui
 import React, { useState } from 'react';
 import { SKIN_LABELS } from '../../constants/skins';
 import { InGameItemWithStatic } from 'hooks/multiverse/useInGameItems';
+import { DEFAULT_CHAIN, NETWORK_NAME } from "../../constants";
+import { AssetChainDetails } from '../../components/AssetChainDetails/AssetChainDetails';
 
 export type ProfilePagePropTypes = {
     authData: AuthData
@@ -40,7 +41,7 @@ export type ProfilePagePropTypes = {
 
 const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
-    const { account } = useActiveWeb3React()
+    const { account, chainId } = useActiveWeb3React()
     const profile = useProfile();
     const playAllowedReasonTexts: any = {
         'MSAMA': 'You are eligible to play because you imported a Moonsama.',
@@ -76,19 +77,11 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
     const onChainImportables = [...onChainGoldenTickets, ...onChainMoonbrella, ...onChainMoonsamas, ...onChainArt, ...onChainPlot, ...onChainEmbassy];
 
-    console.log('VIP Ticket', onChainGoldenTickets)
-    console.log('onChainMoonbrella', onChainMoonbrella)
-    console.log('onChainEmbassy', onChainEmbassy)
-
     //In Game Items
     const inGameItems = useInGameItems(fetchtrigger);
     const inGameAssets = inGameItems?.assets ?? [];
     const inGameResources = inGameItems?.resources ?? []
     const inGameTextures: InGameTexture[] = inGameItems?.textures ?? []
-
-    console.log('ingame items', inGameItems, { inGameAssets, inGameResources, inGameTextures })
-
-    // const { jwt, userProfile } = authData;
 
     const {
         profileContainer,
@@ -104,13 +97,13 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
         formValue,
         formValueTokenDetails,
         row,
-        skinComponent
+        skinComponent,
+        centeredRow
     } = useClasses(styles);
 
     const canSummon = !!inGameItems?.resources && inGameItems?.resources.length > 0 && !profile?.blacklisted
     const assetCounter = countGamePassAssets(inGameAssets)
     const hasImportedTicket = assetCounter.ticketNum > 0
-    console.log({inGameAssets})
     return (
         <Grid className={profileContainer}>
             <Header />
@@ -122,9 +115,9 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     <span style={{ fontSize: '22px', }}>Welcome back {authData?.userProfile?.userName},</span> <br />
                     {profile?.allowedToPlay ? (
                         <Tooltip placement='bottom' title={playAllowedReasonTexts[profile.allowedToPlayReason] ?? playAllowedReasonTexts['DEFAULT']}>
-                            <span style={{ color: '#12753A', fontSize: '16px', fontWeight: 'bold' }}>{profile?.blacklisted ? `You are blacklisted but can play`: `You are eligible to play!`}</span>
+                            <span style={{ color: '#12753A', fontSize: '16px', fontWeight: 'bold' }}>{profile?.blacklisted ? `You are blacklisted but can play` : `You are eligible to play!`}</span>
                         </Tooltip>
-                        ) :
+                    ) :
                         (
                             <p style={{ color: '#DB3B21' }}>To be eligible to play, bridge a VIP ticket/Moonsama, <br /> or <a href="https://moonsama.com/freshoffers" target="_blank">visit the Marketplace to get one</a></p>)}
                 </div>
@@ -138,7 +131,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     >
                         {!!inGameTextures.length ? inGameTextures.sort((t1, t2) => t1.assetAddress.localeCompare(t2.assetAddress)).map((value, ind) => {
 
-                            console.log('SKIN', value)
+                            // console.log('SKIN', value)
 
                             const skinLabel = SKIN_LABELS[value.assetAddress.toLowerCase()]
 
@@ -150,8 +143,8 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                     className={`${skinComponent} ${value.equipped ? 'selected' : ''}`}
                                     gridRow='1'
                                 >
-                                    {value.coverURL && <Tooltip placement='left' title={`${skinLabel?.[value.assetId]?.label ?? skinLabel?.label ?? 'Available in-game skin'}${value.assetAddress !== '0x0' ? ` Because you imported ${value.name} #${value.assetId}`: ''}`}>
-                                        <a target='_blank' className={itemImage} href={`${value.renderURL ? `https://minerender.org/embed/skin/?skin=${value.renderURL}` : value.coverURL}`}>
+                                    {value.coverURL && <Tooltip placement='left' title={`${skinLabel?.[value.assetId]?.label ?? skinLabel?.label ?? 'Available in-game skin'}${value.assetAddress !== '0x0' ? ` Because you imported ${value.name} #${value.assetId}` : ''}`}>
+                                        <a target='_blank' className={itemImage} href={`${value.renderURL ? `https://minerender.org/embed/skin/?skin=${value.renderURL}` : value.coverURL}`} rel="noreferrer">
                                             <Media uri={value.coverURL} style={{ marginTop: `${value.equipped ? 'none' : '15px'}` }} />
                                         </a>
                                     </Tooltip>}
@@ -209,14 +202,13 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                         {/*<img className={itemImage} src={value?.meta?.image} alt="" />*/}
                                                         <Media uri={value?.meta?.image} />
                                                     </ListItemAvatar>
-                                                    <ListItemText primary={value?.meta?.name ?? `${value.assetAddress} ${value.assetId}`} style={{paddingLeft: '10px'}} />
+                                                    <ListItemText primary={value?.meta?.name ?? `${value.assetAddress} ${value.assetId}`} style={{ paddingLeft: '10px' }} />
                                                     {value?.exportable && (
-                                                    <Tooltip title={'Your exported asset will go back to the sender address you imported from. Associated items or skins will be unavailable.'}>
-                                                        <Button
-                                                            className={transferButtonMid}
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                if (!!account) {
+                                                        <Tooltip title={'Your exported asset will go back to the sender address you imported from. Associated items or skins will be unavailable.'}>
+                                                            <Button
+                                                                className={transferButtonMid}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
                                                                     setExportDialogOpen(true);
                                                                     setExportDialogData(
                                                                         {
@@ -226,17 +218,16 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                                                 assetId: value.assetId,
                                                                                 assetType: stringToStringAssetType(value.assetType),
                                                                                 id: 'x'
-                                                                            }
+                                                                            },
+                                                                            chain: value.exportChainId,
+                                                                            item: value
                                                                         }
                                                                     );
-                                                                } else {
-                                                                    setAccountDialogOpen(true)
-                                                                }
-                                                            }}
-                                                        >
-                                                            Export to wallet
-                                                        </Button>
-                                                    </Tooltip>
+                                                                }}
+                                                            >
+                                                                Export to wallet
+                                                            </Button>
+                                                        </Tooltip>
                                                     )}
                                                 </ListItemButton>
                                             </ListItem>
@@ -252,57 +243,43 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                     onClose={() => {
                                         setItemDetailDialogOpen(false)
                                     }}
-                                    title={'Item Detail'}
+                                    title={'Item details'}
                                     maxWidth="sm"
                                     fullWidth
-                                    >
+                                >
                                     <div className={dialogContainer}>
                                         <Grid container spacing={1} justifyContent="center">
-                                        <Grid item md={12} xs={12}>
-                                            <Box className={formBox}>
-                                                <div className={row}>
-                                                    <div className={formLabel}>Item Type</div>
-                                                    <div className={`${formValue} ${formValueTokenDetails}`}>
-                                                    {itemDetailDialogData.recognizedAssetType}
-                                                    </div>
-                                                </div>
-                                                <div className={row}>
-                                                    <div className={`${formValue} ${formValueTokenDetails}`}>
-                                                    {itemDetailDialogData.enraptured ? 'This item is enraptured.' : 'This item is imported.'}
-                                                    </div>
-                                                </div>
-                                                <div className={row}>
-                                                    <div className={`${formValue} ${formValueTokenDetails}`}>
-                                                    {itemDetailDialogData.exportable ? 'This item is exportable.' : 'This item is not exportable.'}
-                                                    </div>
-                                                </div>
-                                                {itemDetailDialogData.exportable ? (
-                                                    <React.Fragment>
-                                                        <div className={row}>
-                                                        <div className={formLabel}>Export Chain Name: </div>
+                                            <Grid item md={12} xs={12}>
+                                                <Box className={formBox}>
+                                                    <div className={row}>
+                                                        <div className={formLabel}>Item type</div>
                                                         <div className={`${formValue} ${formValueTokenDetails}`}>
-                                                            {itemDetailDialogData.exportChainName}
+                                                            {itemDetailDialogData.recognizedAssetType}
                                                         </div>
+                                                    </div>
+                                                    <div className={centeredRow}>
+                                                        <div className={`${formValue} ${formValueTokenDetails}`}>
+                                                            {itemDetailDialogData.enraptured ? 'This item is enraptured.' : 'This item is imported.'}
                                                         </div>
-                                                        <div className={row}>
-                                                        <div className={formLabel}>Export Address:</div>
-                                                        <AddressDisplayComponent
-                                                            className={`${formValue} ${formValueTokenDetails}`}
-                                                            charsShown={5}
-                                                        >
-                                                            {itemDetailDialogData.exportAddress}
-                                                        </AddressDisplayComponent>
+                                                    </div>
+                                                    <div className={centeredRow}>
+                                                        <div className={`${formValue} ${formValueTokenDetails}`}>
+                                                            {itemDetailDialogData.exportable ? <Tooltip title={'This item can be exported back to the chain it came from to the original owner address.'}>
+                                                                <div>This item is exportable.</div>
+                                                            </Tooltip> : <Tooltip title={'This item is burned into the metaverse forever. Cannot be taken back.'}>
+                                                                <div>This item is not exportable.</div>
+                                                            </Tooltip>}
                                                         </div>
-                                                    </React.Fragment>
-                                                ) : null}
-                                            </Box>
-                                        </Grid>
+                                                    </div>
+                                                    {itemDetailDialogData.exportable && <AssetChainDetails data={itemDetailDialogData} borderOn={false} />}
+                                                </Box>
+                                            </Grid>
                                         </Grid>
                                     </div>
                                 </Dialog>
                             </div>
                             <div style={{ width: '50%' }}>
-                                <div className={columnTitle}><span className={columnTitleText}>On-chain items: Moonriver account</span></div>
+                                <div className={columnTitle}><span className={columnTitleText}>On-chain items: {NETWORK_NAME[chainId ?? DEFAULT_CHAIN]} account</span></div>
                                 <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
                                     {!!onChainImportables.length ? (onChainGoldenTickets ?? []).map((item, ind) => {
                                         return (
@@ -315,7 +292,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                         {/*<img className={itemImage} src={item?.meta?.image} alt="" />*/}
                                                         <Media uri={item?.meta?.image} />
                                                     </ListItemAvatar>
-                                                    <ListItemText primary={item?.meta?.name} style={{paddingLeft: '10px'}}/>
+                                                    <ListItemText primary={item?.meta?.name} style={{ paddingLeft: '10px' }} />
                                                     <Tooltip title={'You can have 1 VIP ticket imported at a time.'}>
                                                         <span>
                                                             <Button
@@ -343,7 +320,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                             {/*<img className={itemImage} src={item?.meta?.image} alt="" />*/}
                                                             <Media uri={item?.meta?.image} />
                                                         </ListItemAvatar>
-                                                        <ListItemText primary={item?.meta?.name} style={{paddingLeft: '10px'}}/>
+                                                        <ListItemText primary={item?.meta?.name} style={{ paddingLeft: '10px' }} />
                                                         {item.importable && <Tooltip title={`Your imported ${item?.meta?.name} will bound to your Minecraft account. It will go back to the sender address when exported.`}>
                                                             <span>
                                                                 <Button
@@ -409,9 +386,9 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     >
                                                         <ListItemButton>
                                                             <ListItemAvatar>
-                                                                <img src={resource.meta.image} alt={resource.name} className={itemImage}/>
+                                                                <img src={resource.meta?.image} alt={resource.name} className={itemImage} />
                                                             </ListItemAvatar>
-                                                            <ListItemText id={resource.name} primary={resource.meta.name} />
+                                                            <ListItemText id={resource.name} primary={resource.meta?.name} />
                                                         </ListItemButton>
                                                     </ListItem>
                                                 )
@@ -433,7 +410,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                 >Summon resources</Button>
                             </div>
                             <div style={{ width: '50%' }}>
-                                <div className={columnTitle}><span className={columnTitleText}>On-chain resources: Moonriver account</span></div>
+                                <div className={columnTitle}><span className={columnTitleText}>On-chain resources: {NETWORK_NAME[chainId ?? DEFAULT_CHAIN]} account</span></div>
                                 <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
 
                                     {!!onChainResources.length ? onChainResources.map((value) => {
@@ -458,7 +435,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                             >
                                                 <ListItemButton>
                                                     <ListItemAvatar>
-                                                        <img src={value?.meta?.image} alt="" className={itemImage}/>
+                                                        <img src={value?.meta?.image} alt="" className={itemImage} />
                                                     </ListItemAvatar>
                                                     <ListItemText id={labelId} primary={value?.meta?.name} />
                                                 </ListItemButton>
@@ -468,22 +445,6 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                 </List>
                             </div>
                         </Stack>
-                    </Grid>
-                    <Grid item md={3} xs={12} justifyContent="center">
-                        {/*<div className={columnTitle}><span className={columnTitleText}>Info</span></div>*/}
-                        {/*<List dense sx={{ width: '100%', maxWidth: '100%', bgcolor: '#111', marginBottom: '16px' }}>*/}
-                        {/*    {['Server Status: Online', 'Next Event: 02/11/21 13:00 UTC'].map((value) => {*/}
-                        {/*        const labelId = `checkbox-list-secondary-label-${value}`;*/}
-                        {/*        return (*/}
-                        {/*            <ListItem*/}
-                        {/*                key={value}*/}
-                        {/*                disablePadding*/}
-                        {/*            >*/}
-                        {/*                <ListItemText id={labelId} primary={value} />*/}
-                        {/*            </ListItem>*/}
-                        {/*        );*/}
-                        {/*    })}*/}
-                        {/*</List>*/}
                     </Grid>
                 </Grid>
             </Grid>

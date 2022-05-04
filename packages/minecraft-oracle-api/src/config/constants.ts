@@ -1,16 +1,21 @@
 import { TextureType } from "../texture/texturetype.enum";
 
 export enum ChainId {
+  MAINNET = 1,
+  MOONBEAM= 1284,
   MOONRIVER = 1285,
   VOLTA = 73799
 }
 
-export const ALLOWED_CHAIN_IDS: ChainId[] = [
-  ChainId.MOONRIVER,
-  ChainId.VOLTA
-]
+export const RPC_URLS: { [chainId: number]: string } = {
+  [ChainId.MOONRIVER]: 'https://rpc.api.moonriver.moonbeam.network',
+  [ChainId.MOONBEAM]: 'https://moonbeam-rpc.moonsama.com',
+  [ChainId.MAINNET]: 'https://mainnet.infura.io/v3/'
+};
 
 export const CHAIN_ID_TO_NAME: { [chainId in ChainId]?: string } = {
+  1: 'Mainnet',
+  1284: 'Moonbeam',
   1285: 'Moonriver',
   73799: 'Volta'
 }
@@ -198,7 +203,7 @@ export const ENRAPTURABLE_ASSETS: RecognizedAsset[] = [
 export const METAVERSE = '0x03b0ce3a3c09a347630b1f2803b77e8708cacbdb24f2f74961671eb476fbd57e'
 export const METAVERSE_ADDRESSES: { [key: number]: string } = {
   [ChainId.VOLTA]: '0x58df3876BcE94941DE59088c5963781984EF264b',
-  [ChainId.MOONRIVER]: '0x59C481548CE7BA13f3288df9f4FCf44a10A589A0'//'0x710ddbaA47A4cCdC85A507a264865260e82c18EE'
+  [ChainId.MOONRIVER]: '0x59C481548CE7BA13f3288df9f4FCf44a10A589A0'//'0x7D5ebDb88D3bd969CC909FD49f1FF3A7bA1F4878'
 }
 export const MULTICALL_ADDRESSES: { [key: number]: string } = {
   [ChainId.MOONRIVER]: '0x8B60499C8e99d1218Df15ba6e8f0937e1878b86c'//'0x710ddbaA47A4cCdC85A507a264865260e82c18EE'

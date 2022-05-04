@@ -1,4 +1,4 @@
-export const CHAIN_ID = parseInt(process.env.REACT_APP_CHAIN_ID ?? '246', 10);
+export const CHAIN_ID = parseInt(process.env.REACT_APP_CHAIN_ID ?? '1285', 10);
 
 export const SUBGRAPH_URL =
   process.env.REACT_APP_SUBGRAPH_URL ??
@@ -35,7 +35,32 @@ export enum ChainId {
   EWC = 246,
   VOLTA = 73799,
   MOONRIVER = 1285,
+  MOONBEAM= 1284
 }
+
+export const PERMISSIONED_CHAINS = [ChainId.MOONRIVER]
+export const DEFAULT_CHAIN = ChainId.MOONRIVER
+
+export const RPC_URLS: { [chainId: number]: string } = {
+  [ChainId.MOONRIVER]: 'https://rpc.api.moonriver.moonbeam.network',
+  [ChainId.MOONBEAM]: 'https://moonbeam-rpc.moonsama.com',
+  [ChainId.MAINNET]: 'https://mainnet.infura.io/v3/',
+  [ChainId.ROPSTEN]: 'https://ropsten.infura.io/v3/'
+};
+
+export const NATIVE_TOKEN_SYMBOL: { [chainId: number]: string } = {
+  [ChainId.MOONRIVER]: 'MOVR',
+  [ChainId.MOONBEAM]: 'GLMR',
+  [ChainId.MAINNET]: 'ETH',
+  [ChainId.ROPSTEN]: 'ETH'
+};
+
+export const NETWORK_NAME: { [chainId: number]: string } = {
+  [ChainId.MOONRIVER]: 'Moonriver',
+  [ChainId.MOONBEAM]: 'Moonbeam',
+  [ChainId.MAINNET]: 'Ethereum',
+  [ChainId.ROPSTEN]: 'Ropsten',
+};
 
 export const MULTICALL_NETWORKS: { [chainId: number]: string } = {
   [ChainId.MAINNET]: '0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441',
@@ -45,6 +70,7 @@ export const MULTICALL_NETWORKS: { [chainId: number]: string } = {
   [ChainId.GÖRLI]: '0x77dCa2C955b15e9dE4dbBCf1246B4B85b651e50e',
   [ChainId.VOLTA]: '0xf097d0eAb2dC8B6396a6433978567C443a691815', // latest multicall 2 deployments
   [ChainId.MOONRIVER]: '0x8B60499C8e99d1218Df15ba6e8f0937e1878b86c', // latest multicall 2 deployments
+  [ChainId.MOONBEAM]: '0x62614aee098C7a84dC070fF06688F4C35D3868F9'
 };
 
 export enum SUPPORTED_CONTRACTS {
@@ -54,17 +80,20 @@ export enum SUPPORTED_CONTRACTS {
 export const MARKETPLACE_V1_ADDRESS: { [chainId in ChainId]?: string } = {
   [ChainId.VOLTA]: '0xE1681925E9d1fa2c735184835b348a98c34017C7',
   [ChainId.MOONRIVER]: '0x56f33FaAc598f6761bE886506bD41eC2304D74af',
+  [ChainId.MOONBEAM]: '0x46B6062Ad95239e30E3506f42147D5cCA00B5f0E'
 };
 
 export const WAREHOUSE_ADDRESS: { [chainId in ChainId]?: string } = {
   [ChainId.VOLTA]: '0xE796e4CC54856b5d88E44aAca85e3B7D633c34a1',
   [ChainId.MOONRIVER]: '0xe41509E3034f3f1C7Ea918423Da60B2bA6F14087',
+  [ChainId.MOONBEAM]: '0x108E9B2BFB98402208E4172f5045BF605F148eEb'
 };
 
 export const RECOGNIZED_COLLECTIONS_ADDRESS: { [chainId in ChainId]?: string } =
   {
     [ChainId.VOLTA]: '0xe35D9ACD226165d21d8bC7cf2C6D71b0deCb67d6',
     [ChainId.MOONRIVER]: '0x45613dAd51D4262dB6c0F94Fc96435D8800500cD',
+    [ChainId.MOONBEAM]: '0x9b7c849864F246b1A963fdbbbfC198083e646e5b'
   };
 
 export const WMOVR_ADDRESS: { [chainId in ChainId]?: string } = {
@@ -75,11 +104,12 @@ export const WMOVR_ADDRESS: { [chainId in ChainId]?: string } = {
 export const EXPLORER_URL: { [chainId in ChainId]?: string } = {
   [ChainId.VOLTA]: 'https://volta-explorer.energyweb.org',
   [ChainId.MOONRIVER]: 'https://moonriver.moonscan.io/',
+  [ChainId.MOONBEAM]: 'https://blockscout.moonbeam.network'
 };
 
 export const MULTIVERSE_BRIDGE_V1_ADDRESS: { [chainId in ChainId]?: string } = {
   [ChainId.VOLTA]: '0x58df3876BcE94941DE59088c5963781984EF264b',
-  [ChainId.MOONRIVER]: '0x59C481548CE7BA13f3288df9f4FCf44a10A589A0'//'0x710ddbaA47A4cCdC85A507a264865260e82c18EE',
+  [ChainId.MOONRIVER]: '0x59C481548CE7BA13f3288df9f4FCf44a10A589A0'//'0x7D5ebDb88D3bd969CC909FD49f1FF3A7bA1F4878',
 };
 
 export const PROTOCOL_FEE_BPS = '200';
@@ -94,7 +124,7 @@ export const IPFS_GATEWAYS = [
   'https://ipfs.io',
 ];
 
-export const MAX_WIDTH_TO_SHOW_NAVIGATION = 1000;
+export const MAX_WIDTH_TO_SHOW_NAVIGATION = 1360;
 
 export type MaterialType = {
   name: string

@@ -9,6 +9,7 @@ export function useEagerConnect() {
 
   useEffect(() => {
     injected.isAuthorized().then((isAuthorized) => {
+      //console.log('useeager', {isAuthorized, isMobile, tried})
       if (isAuthorized) {
         activate(injected, undefined, true).catch(() => {
           setTried(true);

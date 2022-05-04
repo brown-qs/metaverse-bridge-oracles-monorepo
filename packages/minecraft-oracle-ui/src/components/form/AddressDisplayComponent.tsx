@@ -9,7 +9,6 @@ import { useActiveWeb3React } from 'hooks';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 
 const CHARS_SHOWN = 3;
-const TXT_COPY_ADDRESS = 'Copy Address';
 const MIN_LENGTH = 5;
 
 const _fallbackCopyTextToClipboard = (text: string): void => {
@@ -51,12 +50,14 @@ const _copyTextToClipboard = (text: string): void => {
 export const AddressDisplayComponent = (props: {
   children: ReactNode;
   charsShown: number;
+  copyTooltipLabel: string;
   dontShowLink?: boolean;
   className?: string;
   buttonClassName?: string;
 }) => {
   const text = props.children?.toString() || '';
   const charsShown = props.charsShown ? props.charsShown : CHARS_SHOWN;
+  const copyTooltipLabel = props.copyTooltipLabel
 
   const { copyButton } = useClasses(styles);
   const { chainId } = useActiveWeb3React();
@@ -87,11 +88,13 @@ export const AddressDisplayComponent = (props: {
             </Typography>
           ) : (
             <Typography className={props.className}>
-              {_apply_ellipsis()}
+              <ExternalLink>
+                {_apply_ellipsis()}
+              </ExternalLink>
             </Typography>
           )}
         </Tooltip>
-        <Tooltip title={TXT_COPY_ADDRESS}>
+        <Tooltip title={copyTooltipLabel}>
           <Button
             className={`${copyButton} ${props.buttonClassName}`}
             size="small"

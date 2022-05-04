@@ -234,7 +234,7 @@ export const TransferDialog = () => {
 
             <div className={infoContainer}>
               <Typography className={formLabel}>Address</Typography>
-              <AddressDisplayComponent className={formValue} charsShown={10}>
+              <AddressDisplayComponent className={formValue} charsShown={10} copyTooltipLabel={'Copy address'}>
                 {transferData?.asset?.assetAddress ?? '?'}
               </AddressDisplayComponent>
             </div>

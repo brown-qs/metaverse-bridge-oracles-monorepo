@@ -3,6 +3,7 @@ import {
     IsEnum,
     IsInt,
     IsJSON,
+    IsNumber,
     IsString
 } from 'class-validator';
 import { UserEntity } from '../user/user.entity';
@@ -41,6 +42,10 @@ export class AssetEntity {
     @Column()
     @IsString()
     assetId: string;
+
+    @Column({nullable: true})
+    @IsString()
+    assetOwner?: string;
 
     @IsBoolean()
     @Column()
@@ -81,6 +86,10 @@ export class AssetEntity {
     @IsJSON()
     @Column({ type: 'json', nullable: true })
     metadata?: unknown;
+
+    @Column({default: 1285})
+    @IsNumber()
+    chainId?: number;
 
     @ManyToOne(() => UserEntity, (user) => user.assets)
     owner?: UserEntity

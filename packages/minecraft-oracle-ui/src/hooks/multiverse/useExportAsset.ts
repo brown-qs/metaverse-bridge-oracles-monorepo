@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { calculateGasMargin, getSigner } from '../../utils';
-import { useMarketplaceV1Contract, useMultiverseBridgeV1Contract } from '../../hooks/useContracts/useContracts';
+import { useMultiverseBridgeV1Contract, useMultiverseBridgeV2Contract } from '../../hooks/useContracts/useContracts';
 import { useActiveWeb3React, useAuth } from '../../hooks';
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import axios from 'axios'
@@ -13,7 +13,8 @@ export enum ExportAssetCallbackState {
 }
 
 export interface ExportRequest {
-    hash?: string
+    hash?: string,
+    chainId?: number
 }
 
 export interface AssetRequest {
@@ -38,11 +39,11 @@ export function useFetchExportAssetArgumentsCallback(exportRequest: ExportReques
     const [params, setParams] = useState<ExportRequestParams | undefined>(undefined)
     const { authData } =  useAuth();
 
-    const {hash} = exportRequest ?? {}
+    const {hash, chainId} = exportRequest ?? {}
     const {jwt} = authData ?? {}
 
     const cb = useCallback(async () => {
-        if (!library || !account || !hash) {
+        if (!library || !account || !hash || !chainId) {
             setParams(undefined);
         }
         try {
@@ -57,7 +58,7 @@ export function useFetchExportAssetArgumentsCallback(exportRequest: ExportReques
             console.error('Error fetching export params.')
             setParams(undefined)
         }
-    }, [library, account, hash, jwt])
+    }, [library, account, hash, jwt, chainId])
 
 
     useEffect(() => {
@@ -79,7 +80,8 @@ export function useExportAssetCallback(
     const { account, chainId, library } = useActiveWeb3React();
 
     //console.log('YOLO', { account, chainId, library });
-    const contract = useMultiverseBridgeV1Contract(true);
+    // const contract = useMultiverseBridgeV1Contract(true);
+    const contract = useMultiverseBridgeV2Contract(true, exportRequest.chainId);
 
     const { confirmed, data, hash, signature } = useFetchExportAssetArgumentsCallback(exportRequest) ?? {}
 

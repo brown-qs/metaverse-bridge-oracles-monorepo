@@ -6,9 +6,10 @@ import {
   MULTICALL_NETWORKS,
   RECOGNIZED_COLLECTIONS_ADDRESS,
   WAREHOUSE_ADDRESS,
+  RPC_URLS,
 } from '../../constants';
-import { useMemo } from 'react';
-import { getContract } from 'utils';
+import { useCallback, useMemo } from 'react';
+import { getContract, getContractWithChain } from 'utils';
 import {
   MARKETPLACE_V1_ABI,
   METAVERSE_V1_ABI,
@@ -42,6 +43,25 @@ export const useContract = (
   }, [address, ABI, library, withSignerIfPossible, account]);
 };
 
+export const useContractWithChainCallback = (ABI: any, withSignerIfPossible = true) => {
+  return useCallback(
+    (address: string, chainId: number) => {
+      if (!address || !ABI ) return null;
+      try {
+        return getContractWithChain(
+          address,
+          ABI,
+          RPC_URLS[chainId]
+        );
+      } catch (error) {
+        console.error('Failed to get contract', error);
+        return null;
+      }
+    },
+    [ABI]
+  );
+};
+
 export function useMultiverseBridgeV1Contract(
   withSignerIfPossible = true
 ): Contract | null {
@@ -54,6 +74,20 @@ export function useMultiverseBridgeV1Contract(
     withSignerIfPossible
   );
 }
+
+export function useMultiverseBridgeV2Contract(
+  withSignerIfPossible = true,
+  chainId?: number
+): Contract | null {
+  return useContract(
+    chainId
+      ? MULTIVERSE_BRIDGE_V1_ADDRESS[(chainId as ChainId) ?? ChainId.MOONRIVER]
+      : undefined,
+    METAVERSE_V1_ABI,
+    withSignerIfPossible
+  );
+}
+
 
 export function useMarketplaceV1Contract(
   withSignerIfPossible = true
@@ -101,6 +135,15 @@ export function useMulticall2Contract(
   const { chainId } = useActiveWeb3React();
   return useContract(
     chainId ? MULTICALL_NETWORKS[chainId ?? ChainId.MOONRIVER] : undefined,
+    MULTICALL2_ABI,
+    withSignerIfPossible
+  );
+}
+
+export function useMulticall2ContractWithChain(
+  withSignerIfPossible = true,
+) {
+  return useContractWithChainCallback(
     MULTICALL2_ABI,
     withSignerIfPossible
   );

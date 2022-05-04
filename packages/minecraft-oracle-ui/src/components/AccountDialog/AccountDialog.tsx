@@ -1,6 +1,6 @@
 import { useDispatch } from 'react-redux';
 
-import { Button } from '@mui/material';
+import { Button, Stack } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import { injected, walletconnect } from 'connectors';
 import { SUPPORTED_WALLETS } from '../../connectors';
@@ -26,6 +26,8 @@ import OptionCard from './OptionCard';
 import usePrevious from 'hooks/usePrevious/usePrevious';
 import CircularProgress from '@mui/material/CircularProgress';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
+import useAddNetworkToMetamaskCb from 'hooks/useAddNetworkToMetamask/useAddNetworkToMetamask';
+import { ChainId, NETWORK_NAME, PERMISSIONED_CHAINS } from '../../constants';
 
 const WALLET_VIEWS = {
   OPTIONS: 'options',
@@ -45,6 +47,7 @@ export const AccountDialog = () => {
   const [walletView, setWalletView] = useState(WALLET_VIEWS.ACCOUNT);
 
   const sortedRecentTransactions = useSortedRecentTransactions();
+  const {addNetwork} = useAddNetworkToMetamaskCb()
 
   const pendingTransactions = sortedRecentTransactions
     .filter((tx) => !tx.receipt)
@@ -127,11 +130,11 @@ export const AccountDialog = () => {
 
   function renderTransactions(transactions: string[]) {
     return (
-      <div className={styles.flexCoumnNoWrap}>
+      <Stack direction={'row'}>
         {transactions.map((hash, i) => {
           return <Transaction key={i} hash={hash} />;
         })}
-      </div>
+      </Stack>
     );
   }
 
@@ -317,19 +320,31 @@ export const AccountDialog = () => {
     if (error) {
       return (
         <div className={styles.dialogContainer}>
-          <div>
-            {error instanceof UnsupportedChainIdError
-              ? 'Wrong Network'
-              : 'Error connecting'}
-          </div>
+          {error instanceof UnsupportedChainIdError && <>
+            <div>
+              Unsupported network
+            </div>
+            <h5>Please connect to a supported Ethereum network.</h5>
+            {PERMISSIONED_CHAINS.map((chainId, i) => {
+              return <Button
+                //className={formButton}
+                key={`${chainId}-${i}`}
+                onClick={() => {
+                  addNetwork(chainId as ChainId)
+                }}
+                color="primary"
+              >
+                Switch to {NETWORK_NAME[chainId]}
+              </Button>
+            })}
+          </>}
 
-          <div>
-            {error instanceof UnsupportedChainIdError ? (
-              <h5>Please connect to the appropriate Ethereum network.</h5>
-            ) : (
-              'Error connecting. Try refreshing the page.'
-            )}
-          </div>
+          {!(error instanceof UnsupportedChainIdError) && <>
+            <div>
+              Something went wrong
+            </div>
+            <h5>Error connecting. Try refreshing the page.</h5>
+          </>}
         </div>
       );
     }
@@ -341,20 +356,20 @@ export const AccountDialog = () => {
             {showConnectedAccountDetails()}
           </div>
           {account &&
-          (!!pendingTransactions.length || !!confirmedTransactions.length) ? (
-            <div className={styles.lowerSection}>
-              <div className={styles.autoRow}>
+            (!!pendingTransactions.length || !!confirmedTransactions.length) ? (
+            <Stack className={styles.lowerSection}>
+              <Stack direction={'row'} justifyContent={'space-between'}>
                 <Typography>Recent transactions</Typography>
                 <Button
-                  className={styles.linkStyledButton}
+                  //className={styles.linkStyledButton}
                   onClick={clearAllTransactionsCallback}
                 >
                   (clear all)
                 </Button>
-              </div>
+              </Stack>
               {renderTransactions(pendingTransactions)}
               {renderTransactions(confirmedTransactions)}
-            </div>
+            </Stack>
           ) : (
             <div className={styles.lowerSection}>
               <Typography>Your transactions will appear here...</Typography>
@@ -413,6 +428,8 @@ export const AccountDialog = () => {
       open={isAccountDialogOpen}
       onClose={() => setAccountDialogOpen(false)}
       title="Account"
+      maxWidth='sm'
+      fullWidth={true}
     >
       {getModalContent()}
     </Dialog>

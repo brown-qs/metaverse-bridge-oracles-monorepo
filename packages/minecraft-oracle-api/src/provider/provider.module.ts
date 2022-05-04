@@ -1,32 +1,33 @@
 import { Module } from '@nestjs/common';
+import { ChainModule } from '../chain/chain.module';
 import {
     OracleWalletProvider,
-    EthClientProvider,
+    EvmChainClientProvider,
     MicrosoftSetupParamsProvider,
-    MetaverseContractProvider,
-    MulticallContractProvider,
-    ImportableAssetsProvider,
-    EnrapturableAssetsProvider
+    RecognizedAssetsProvider,
+    RecognizedChainAssetsProvider,
 } from '.';
+import { ContractsCallbackProvider } from './contract';
 
 @Module({
+    imports: [
+        ChainModule
+    ],
     providers: [
         OracleWalletProvider,
-        EthClientProvider,
+        EvmChainClientProvider,
         MicrosoftSetupParamsProvider,
-        MetaverseContractProvider,
-        MulticallContractProvider,
-        EnrapturableAssetsProvider,
-        ImportableAssetsProvider
+        RecognizedChainAssetsProvider,
+        RecognizedAssetsProvider,
+        ContractsCallbackProvider
     ],
     exports: [
         OracleWalletProvider,
-        EthClientProvider,
+        EvmChainClientProvider,
         MicrosoftSetupParamsProvider,
-        MulticallContractProvider,
-        MetaverseContractProvider,
-        EnrapturableAssetsProvider,
-        ImportableAssetsProvider
+        RecognizedChainAssetsProvider,
+        RecognizedAssetsProvider,
+        ContractsCallbackProvider
     ]
 })
 export class ProviderModule {}

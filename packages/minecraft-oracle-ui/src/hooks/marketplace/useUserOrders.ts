@@ -28,7 +28,7 @@ export const useUserOrders = ({
   const blockNumber = useBlockNumber();
   const { account } = useActiveWeb3React();
 
-  console.log('useUserOrders', blockNumber);
+  // console.log('useUserOrders', blockNumber);
 
   const [result, setResult] = useState<UserOrdersResults>({});
 

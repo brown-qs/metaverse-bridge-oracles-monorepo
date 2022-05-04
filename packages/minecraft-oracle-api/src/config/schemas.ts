@@ -8,7 +8,7 @@ export const envValidationSchema = () => {
             .valid('error', 'warn', 'info', 'verbose', 'debug', 'silly')
             .default('info'),
         // CHAIN
-        RPC_URL: Joi.string().required(),
+        DEFAULT_CHAIN_ID: Joi.number().default(1285),
         ORACLE_PRIVATE_KEY: Joi.string()
             .regex(/^(0x)?[0-9a-fA-f]+$/i)
             .required(),
@@ -18,6 +18,7 @@ export const envValidationSchema = () => {
         SERVER_SCHEME: Joi.string().default('http'),
         SERVER_REDIRECT_URL: Joi.string().required(),
         CONFIRM_WATCH_INTERVAL_MS: Joi.number().default(60000),
+        CONFIRM_WATCH_DISABLED: Joi.boolean().default(false),
         // REDIRECT
         AUTH_REDIRECT_URL: Joi.string().default('http://localhost:3000/login'),
         // APP

@@ -1,9 +1,12 @@
-import { Asset } from 'hooks/marketplace/types';
+import { Asset } from '../../../hooks/marketplace/types';
+import { InGameItemWithStatic } from '../../../hooks/multiverse/useInGameItems';
 
 export type ExportDialogData = {
   asset?: Asset;
   address?: string;
-  hash?: string
+  chain? :number;
+  hash?: string,
+  item?: InGameItemWithStatic
 } | undefined;
 
 export type ExportDialogContextType = {

@@ -6,9 +6,9 @@ import { TextureService } from '../texture/texture.service';
 import { UserEntity } from '../user/user.entity';
 import { GameService } from '../game/game.service';
 import { ImportDto } from './dtos/import.dto';
-import { CALLDATA_EXPIRATION_MS, CALLDATA_EXPIRATION_THRESHOLD, METAVERSE, RecognizedAsset, RecognizedAssetType } from '../config/constants';
+import { CALLDATA_EXPIRATION_MS, CALLDATA_EXPIRATION_THRESHOLD, METAVERSE, RecognizedAssetType } from '../config/constants';
 import { calculateMetaAssetHash, encodeEnraptureWithSigData, encodeExportWithSigData, encodeImportWithSigData, getSalt, getSignature, utf8ToKeccak } from './oracleapi.utils';
-import { Contract, ethers, Signer } from 'ethers';
+import { Contract, ethers } from 'ethers';
 import { ProviderToken } from '../provider/token';
 import { AssetService } from '../asset/asset.service';
 import { assetTypeToStringAssetType, findRecognizedAsset } from '../utils';
@@ -22,9 +22,12 @@ import { InventoryService } from '../playerinventory/inventory.service';
 import { InventoryEntity } from '../playerinventory/inventory.entity';
 import { SkinService } from '../skin/skin.service';
 import { SkinEntity } from '../skin/skin.entity';
-import { StringAssetType } from '../common/enums/AssetType';
+import { BridgeAssetType, StringAssetType } from '../common/enums/AssetType';
 import { NftApiService } from '../nftapi/nftapi.service';
 import { GameKind } from '../game/game.enum';
+import { ChainService } from '../chain/chain.service';
+import { METAVERSE_ABI } from '../common/contracts/Metaverse';
+import { TypeOracleWalletProvider, TypeRecognizedChainAssetsProvider } from '../provider';
 
 @Injectable()
 export class OracleApiService {
@@ -32,6 +35,9 @@ export class OracleApiService {
     private locks: Map<string, MutexInterface>;
 
     private readonly context: string;
+    private readonly oraclePrivateKey: string;
+    private readonly defaultChainId: number;
+
     constructor(
         private readonly userService: UserService,
         private readonly textureService: TextureService,
@@ -40,29 +46,39 @@ export class OracleApiService {
         private readonly assetService: AssetService,
         private readonly inventoryService: InventoryService,
         private readonly nftApiService: NftApiService,
+        private readonly chainService: ChainService,
         private configService: ConfigService,
-        @Inject(ProviderToken.ORACLE_WALLET) private oracle: Signer,
-        @Inject(ProviderToken.METAVERSE_CONTRACT) private metaverse: Contract,
-        @Inject(ProviderToken.IMPORTABLE_ASSETS) private importableAssets: RecognizedAsset[],
-        @Inject(ProviderToken.ENRAPTURABLE_ASSETS) private enrapturableAssets: RecognizedAsset[],
+        @Inject(ProviderToken.ORACLE_WALLET_CALLBACK) private getOracle: TypeOracleWalletProvider,
+        @Inject(ProviderToken.RECOGNIZED_CHAIN_ASSETS_CALLBACK) private getRecognizedAsset: TypeRecognizedChainAssetsProvider,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
         this.context = OracleApiService.name
         this.locks = new Map();
+        this.oraclePrivateKey = this.configService.get<string>('network.oracle.privateKey');
+        this.defaultChainId = this.configService.get<number>('network.defaultChainId')
     }
 
     public async userInRequest(user: UserEntity, data: ImportDto, enraptured: boolean): Promise<[string, string, string, boolean]> {
-        this.logger.debug(`userInRequest: ${JSON.stringify(data)}`, this.context)
-        const inAsset = enraptured ? findRecognizedAsset(this.enrapturableAssets, data.asset) : findRecognizedAsset(this.importableAssets, data.asset)
+        this.logger.debug(`userInRequest: ${JSON.stringify(data)}, enraptured: ${enraptured}`, this.context)
+        const sanitizedChainId = !!data.chainId ? data.chainId : this.defaultChainId;
+        const importableAssets = await this.getRecognizedAsset(sanitizedChainId, BridgeAssetType.IMPORTED)
+        const enrapturableAssets = await this.getRecognizedAsset(sanitizedChainId, BridgeAssetType.ENRAPTURED)
+        const inAsset = enraptured ? findRecognizedAsset(enrapturableAssets, data.asset) : findRecognizedAsset(importableAssets, data.asset)
 
         if (!inAsset) {
             this.logger.error(`userInRequest: not an permissioned asset`, null, this.context)
             throw new UnprocessableEntityException(`Not permissioned asset`)
         }
 
-        console.log(data)
+        const oracle = await this.getOracle(sanitizedChainId)
+
+        if (!oracle) {
+            this.logger.error(`userInRequest: oracle error`, null, this.context)
+            throw new UnprocessableEntityException(`Oracle could not serve your request`)
+        }
+
         const requestHash = await utf8ToKeccak(JSON.stringify(data))
-        const existingEntry = await this.assetService.findOne({ requestHash, enraptured, pendingIn: true, owner: { uuid: user.uuid } }, { order: { expiration: 'DESC' }, relations: ['owner'] })
+        const existingEntry = await this.assetService.findOne({ requestHash, chainId: sanitizedChainId, enraptured, pendingIn: true, owner: { uuid: user.uuid } }, { order: { expiration: 'DESC' }, relations: ['owner'] })
 
         existingEntry ? console.log(Date.now() - Number.parseInt(existingEntry.expiration) - CALLDATA_EXPIRATION_THRESHOLD) : undefined
 
@@ -75,19 +91,21 @@ export class OracleApiService {
                 beneficiary: data.beneficiary,
                 owner: data.owner,
                 amount: data.amount,
+                chainId: sanitizedChainId,
                 metaverse: METAVERSE,
                 salt
             }
             const expirationContract = (Math.floor(Number.parseInt(existingEntry.expiration) / 1000)).toString()
             const payload = enraptured ? await encodeEnraptureWithSigData(ma, expirationContract) : await encodeImportWithSigData(ma, expirationContract)
-            const signature = await getSignature(this.oracle, payload)
+            const signature = await getSignature(oracle, payload)
             const hash = await calculateMetaAssetHash(ma)
+            const chainId = ma.chainId
 
             this.logger.debug(`InData: request prepared: ${[hash, payload, signature]}`, this.context)
 
             let failedtoconfirm = false
             try {
-                const success = enraptured ? await this.userEnraptureConfirm(user, { hash }) : await this.userImportConfirm(user, { hash })
+                const success = enraptured ? await this.userEnraptureConfirm(user, { hash, chainId }) : await this.userImportConfirm(user, { hash, chainId })
                 this.logger.debug(`InData: previous inflow was confirmed: ${hash}`, this.context)
             } catch (e) {
                 failedtoconfirm = true
@@ -115,6 +133,7 @@ export class OracleApiService {
             beneficiary: data.beneficiary,
             owner: data.owner,
             amount: data.amount,
+            chainId: sanitizedChainId,
             metaverse: METAVERSE,
             salt
         }
@@ -122,13 +141,14 @@ export class OracleApiService {
         const expirationContract = (Math.floor(expiration / 1000)).toString()
         const payload = enraptured ? await encodeEnraptureWithSigData(ma, expirationContract) : await encodeImportWithSigData(ma, expirationContract)
 
-        const signature = await getSignature(this.oracle, payload)
+        const signature = await getSignature(oracle, payload)
         const hash = await calculateMetaAssetHash(ma)
 
         const assetEntry = await this.assetService.create({
             assetAddress: ma.asset.assetAddress,
             assetType: assetTypeToStringAssetType(ma.asset.assetType),
             assetId: ma.asset.assetId,
+            assetOwner: ma.owner,
             enraptured,
             hash,
             requestHash,
@@ -137,13 +157,14 @@ export class OracleApiService {
             amount: ma.amount,
             expiration: expiration.toString(),
             owner: user,
+            chainId: ma.chainId,
             salt
         })
         this.logger.debug(`InData: request: ${[hash, payload, signature]}`, this.context)
         return [hash, payload, signature, false]
     }
 
-    public async userOutRequest(user: UserEntity, { hash }: ExportDto): Promise<[string, string, string, boolean]> {
+    public async userOutRequest(user: UserEntity, { hash, chainId }: ExportDto): Promise<[string, string, string, boolean]> {
         this.logger.debug(`userOutRequest: ${hash}`, this.context)
 
         if (user.blacklisted) {
@@ -155,13 +176,20 @@ export class OracleApiService {
             throw new UnprocessableEntityException(`No hash was received.`)
         }
 
+        const oracle = await this.getOracle(!!chainId ? chainId : this.defaultChainId)
+
+        if (!oracle) {
+            this.logger.error(`userOutRequest`, null, this.context)
+            throw new UnprocessableEntityException(`Oracle could not serve the request`)
+        }
+
         const ongoingGame = await this.gameService.findOne({ ongoing: true, type: GameKind.CARNAGE })
         if (!!ongoingGame) {
             this.logger.error(`userOutRequest: forbidden during ongoing game`, null, this.context)
             throw new UnprocessableEntityException(`Forbidden during ongoing game`)
         }
 
-        const existingEntry = await this.assetService.findOne({ hash, enraptured: false, pendingIn: false, owner: { uuid: user.uuid } })
+        const existingEntry = await this.assetService.findOne({ hash, chainId, enraptured: false, pendingIn: false, owner: { uuid: user.uuid } })
         if (!existingEntry) {
             this.logger.error(`userOutRequest: exportable asset not found ${hash}`, null, this.context)
             throw new UnprocessableEntityException(`Exportable asset not found`)
@@ -171,7 +199,7 @@ export class OracleApiService {
         const expiration = Date.now() + CALLDATA_EXPIRATION_MS
         const expirationContract = (Math.floor(expiration / 1000)).toString()
         const payload = await encodeExportWithSigData({ hash }, expirationContract)
-        const signature = await getSignature(this.oracle, payload)
+        const signature = await getSignature(oracle, payload)
 
         this.logger.debug(`OutData: request prepared: ${[hash, payload, signature]}`, this.context)
 
@@ -181,7 +209,7 @@ export class OracleApiService {
         await this.assetService.create(existingEntry)
 
         try {
-            confirmsuccess = await this.userExportConfirm(user, { hash })
+            confirmsuccess = await this.userExportConfirm(user, { hash, chainId })
         } catch (e) {
         }
 
@@ -191,8 +219,8 @@ export class OracleApiService {
         return [hash, payload, signature, false]
     }
 
-    public async userSummonRequest(user: UserEntity, { recipient }: SummonDto): Promise<boolean> {
-        this.logger.debug(`userSummonRequest user ${user.uuid} to ${recipient}`, this.context)
+    public async userSummonRequest(user: UserEntity, { recipient, chainId }: SummonDto): Promise<boolean> {
+        this.logger.debug(`userSummonRequest user ${user.uuid} to ${recipient} ID is ${chainId}`, this.context)
 
         if (!recipient || recipient.length !== 42 || !recipient.startsWith('0x')) {
             this.logger.error(`Summon: recipient invalid: ${recipient}}`, null, this.context)
@@ -252,16 +280,27 @@ export class OracleApiService {
 
             const addresses = Object.keys(groups)
 
+            const chainEntity = await this.chainService.findOne({ chainId })
+            const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
+            const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
+
+            let contract: Contract;
+            if (chainEntity.multiverseAddress)
+                contract = new Contract(chainEntity.multiverseAddress, METAVERSE_ABI, oracle)
+            else {
+                this.logger.error(`Summon: failiure not find MultiverseAddress`)
+                throw new UnprocessableEntityException('Summon MultiverseAddress error.')
+            }
 
             for (let i = 0; i < addresses.length; i++) {
                 try {
+
                     const ids = groups[addresses[i]].ids
                     const amounts = groups[addresses[i]].amounts
                     //console.log({METAVERSE, recipient, ids, amounts, i})
-                    //console.log(this.metaverse)
-                    //console.log(JSON.stringify(this.metaverse.summonFromMetaverse))
+                    // console.log("SummonResult",this.metaverseChain[chainId])
 
-                    const receipt = await (await this.metaverse.summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], { value: 0, gasPrice: '3000000000', gasLimit: '1000000' })).wait()
+                    const receipt = await ((await contract.summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], { value: 0, gasPrice: '3000000000', gasLimit: '1000000' })).wait())
 
                     try {
                         await this.inventoryService.removeAll(groups[addresses[i]].entities)
@@ -297,12 +336,12 @@ export class OracleApiService {
         return res
     }
 
-    public async userImportConfirm(user: UserEntity, { hash }: { hash: string }, asset?: AssetEntity): Promise<boolean> {
-
+    public async userImportConfirm(user: UserEntity, data: { hash: string, chainId: number }, asset?: AssetEntity): Promise<boolean> {
+        const hash = data.hash;
         this.logger.log(`ImportConfirm: started ${user.uuid}: ${hash}`, this.context)
 
-        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash })
-
+        const chainId = !!data.chainId ? data.chainId : this.defaultChainId;
+        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, chainId: chainId })
 
         if (!assetEntry || assetEntry.hash !== hash || assetEntry.enraptured !== false) {
             this.logger.error(`ImportConfirm: invalid conditions. exists: ${!!assetEntry}, hash: ${hash}, enraptured: ${assetEntry?.enraptured}, pendingOut: ${assetEntry?.pendingOut}, pendingIn: ${assetEntry?.pendingIn}`)
@@ -313,16 +352,26 @@ export class OracleApiService {
             return true
         }
 
-        const mAsset: MetaAsset = await this.metaverse.getImportedMetaAsset(hash)
+        const chainEntity = await this.chainService.findOne({ chainId: chainId })
+        const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
+        const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
+
+        let contract: Contract;
+        if (chainEntity.multiverseAddress)
+            contract = new Contract(chainEntity.multiverseAddress, METAVERSE_ABI, oracle)
+        else {
+            this.logger.error(`Summon: failiure not find MultiverseAddress`)
+            throw new UnprocessableEntityException('Summon MultiverseAddress error.')
+        }
+
+        const mAsset: MetaAsset = await contract.getImportedMetaAsset(hash)
 
         if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress.toLowerCase() !== assetEntry.assetAddress.toLowerCase()) {
             this.logger.error(`ImportConfirm: on-chaind data didn't match for hash: ${hash}`, null, this.context)
             throw new UnprocessableEntityException(`On-chain data didn't match`)
         }
-
-        const recognizedAsset = findRecognizedAsset(this.importableAssets, assetEntry)
-        //console.log(recognizedAsset)
-        //console.log(user.uuid, hash, RecognizedAssetType.MOONSAMA.valueOf(), RecognizedAssetType.TICKET.valueOf(), recognizedAsset?.id, JSON.stringify(mAsset))
+        const importableAssets = await this.getRecognizedAsset(chainId, BridgeAssetType.IMPORTED)
+        const recognizedAsset = findRecognizedAsset(importableAssets, assetEntry)
 
         // assign skin if asset unlocks one
         const texture = await this.textureService.findOne({ assetAddress: assetEntry.assetAddress.toLowerCase(), assetId: assetEntry.assetId })
@@ -377,7 +426,7 @@ export class OracleApiService {
             let metadata = null
             let world = null
             try {
-                metadata = await this.nftApiService.getNFT('1285', assetEntry.assetType, assetEntry.assetAddress, assetEntry.assetId) as any ?? null
+                metadata = await this.nftApiService.getNFT(assetEntry.chainId.toString(), assetEntry.assetType, assetEntry.assetAddress, assetEntry.assetId) as any ?? null
                 world = metadata?.tokenURI?.plot?.world ?? null
             } catch {
                 this.logger.error(`ImportConfirm: couldn't fetch asset metadata: ${hash}`, undefined, this.context)
@@ -401,11 +450,13 @@ export class OracleApiService {
         return true
     }
 
-    public async userEnraptureConfirm(user: UserEntity, { hash }: { hash: string }, asset?: AssetEntity): Promise<boolean> {
-
+    public async userEnraptureConfirm(user: UserEntity, data: { hash: string, chainId: number }, asset?: AssetEntity): Promise<boolean> {
+        const hash = data.hash
         this.logger.log(`EnraptureConfirm: started ${user.uuid}: ${hash}`, this.context)
 
-        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash })
+        const chainId = !!data.chainId ? data.chainId : this.defaultChainId;
+
+        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, chainId })
 
         if (!assetEntry || assetEntry.hash !== hash || assetEntry.enraptured !== true) {
             this.logger.error(`EnraptureConfirm: invalid conditions. exists: ${!!assetEntry}, hash: ${hash}, enraptured: ${assetEntry?.enraptured}, pendingOut: ${assetEntry?.pendingOut}, pendingIn: ${assetEntry?.pendingIn}`)
@@ -416,14 +467,27 @@ export class OracleApiService {
             return true
         }
 
-        const mAsset: MetaAsset = await this.metaverse.getEnrapturedMetaAsset(hash)
+        const chainEntity = await this.chainService.findOne({ chainId })
+        const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
+        const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
+
+        let contract: Contract;
+        if (chainEntity.multiverseAddress)
+            contract = new Contract(chainEntity.multiverseAddress, METAVERSE_ABI, oracle)
+        else {
+            this.logger.error(`Summon: failiure not find MultiverseAddress`)
+            throw new UnprocessableEntityException('Summon MultiverseAddress error.')
+        }
+
+        const mAsset: MetaAsset = await contract.getEnrapturedMetaAsset(hash)
 
         if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress.toLowerCase() !== assetEntry.assetAddress.toLowerCase()) {
             this.logger.error(`EnraptureConfirm: on-chaind data didn't match for hash: ${hash}`, null, this.context)
             throw new UnprocessableEntityException(`On-chain data didn't match`)
         }
 
-        const recognizedAsset = findRecognizedAsset(this.enrapturableAssets, assetEntry)
+        const enrapturableAssets = await this.getRecognizedAsset(chainId, BridgeAssetType.ENRAPTURED)
+        const recognizedAsset = findRecognizedAsset(enrapturableAssets, assetEntry)
 
         // assign skin if asset unlocks one
         const texture = await this.textureService.findOne({ assetAddress: assetEntry.assetAddress.toLowerCase(), assetId: assetEntry.assetId })
@@ -478,7 +542,7 @@ export class OracleApiService {
             let metadata = null
             let world = null
             try {
-                metadata = await this.nftApiService.getNFT('1285', assetEntry.assetType, assetEntry.assetAddress, assetEntry.assetId) as any ?? null
+                metadata = await this.nftApiService.getNFT(assetEntry.chainId.toString(), assetEntry.assetType, assetEntry.assetAddress, assetEntry.assetId) as any ?? null
                 world = metadata?.tokenURI?.plot?.world ?? null
             } catch {
                 this.logger.error(`ImportConfirm: couldn't fetch asset metadata: ${hash}`, undefined, this.context)
@@ -502,14 +566,16 @@ export class OracleApiService {
         return true
     }
 
-    public async userExportConfirm(user: UserEntity, { hash }: { hash: string }, asset?: AssetEntity): Promise<boolean> {
+    public async userExportConfirm(user: UserEntity, data: { hash: string, chainId: number }, asset?: AssetEntity): Promise<boolean> {
 
+        const hash = data.hash
         if (!hash) {
             this.logger.warn(`ExportConfirm: hash not received`, this.context)
             return false
         }
 
-        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, enraptured: false })
+        const chainId = !!data.chainId ? data.chainId : this.defaultChainId;
+        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, chainId, enraptured: false })
 
         if (!assetEntry) {
             this.logger.warn(`ExportConfirm: asset not found`, this.context)
@@ -521,14 +587,28 @@ export class OracleApiService {
             return false
         }
 
-        const exists = await this.metaverse.existsImported(hash)
+        const chainEntity = await this.chainService.findOne({ chainId })
+        const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
+        const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
+
+        let contract: Contract;
+        if (chainEntity.multiverseAddress)
+            contract = new Contract(chainEntity.multiverseAddress, METAVERSE_ABI, oracle)
+        else {
+            this.logger.error(`Summon: failiure not find MultiverseAddress`)
+            throw new UnprocessableEntityException('Summon MultiverseAddress error.')
+        }
+
+        const exists = await contract.existsImported(hash)
 
         if (exists) {
             this.logger.error(`ExportConfirm: not exported yet: ${hash}`, null, this.context)
             throw new UnprocessableEntityException(`Not exported yet`)
         }
 
-        const recognizedAsset = findRecognizedAsset(this.importableAssets, assetEntry)
+
+        const importableAssets = await this.getRecognizedAsset(chainId, BridgeAssetType.IMPORTED)
+        const recognizedAsset = findRecognizedAsset(importableAssets, assetEntry)
 
         if (!!recognizedAsset && recognizedAsset.gamepass) {
             user.numGamePassAsset = (user.numGamePassAsset ?? 0) > 0 ? user.numGamePassAsset - 1 : 0

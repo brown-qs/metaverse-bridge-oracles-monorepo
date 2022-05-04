@@ -6,7 +6,7 @@ import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { TextureService } from '../texture/texture.service';
 import { UserEntity } from '../user/user.entity';
 import { TextureType } from '../texture/texturetype.enum';
-import { GGANBU_POWERS, RecognizedAsset, RecognizedAssetType } from '../config/constants';
+import { RecognizedAssetType } from '../config/constants';
 import { PlayerSkinDto } from './dtos/texturemap.dto';
 import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
 import { MaterialService } from '../material/material.service';
@@ -24,7 +24,6 @@ import { TextureEntity } from '../texture/texture.entity';
 import { SkinService } from '../skin/skin.service';
 import { AssetService } from '../asset/asset.service';
 import { AssetEntity } from '../asset/asset.entity';
-import { ProviderToken } from '../provider/token';
 import { CommunismDto } from '../adminapi/dtos/communism.dto';
 import { GameKind } from '../game/game.enum';
 import { SetGameOngoingDto } from './dtos/setgameongoing.dto';
@@ -52,7 +51,6 @@ import { SortDirection } from '../common/enums/SortDirection';
 import { SetGameScoreTypeDto } from '../gamescoretype/dtos/gamescoretype.dto';
 import { PlayerScoreEntity } from '../playerscore/playerscore.entity';
 import { GameScoreTypeService } from '../gamescoretype/gamescoretype.service';
-import { isError } from 'joi';
 import { adjustPower } from 'src/utils';
 
 @Injectable()
@@ -82,7 +80,6 @@ export class GameApiService {
         private readonly gameItemTypeService: GameItemTypeService,
         private readonly playerGameItemService: PlayerGameItemService,
         private readonly gameScoreTypeService: GameScoreTypeService,
-        @Inject(ProviderToken.IMPORTABLE_ASSETS) private importableAssets: RecognizedAsset[],
         private configService: ConfigService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
@@ -545,7 +542,6 @@ export class GameApiService {
 
             if (!users[user.uuid]) {
                 allDistinct += 1
-                //const hasMoonsama = !!(await this.assetService.findOne({recognizedAssetType: RecognizedAssetType.MOONSAMA, owner: {uuid: user.uuid}, pendingIn: false}))
                 const power = (playStats?.power ?? 0)
                 const hasPower = power > 0
                 const adjustedPower = hasPower ? adjustPower(power) : 0
@@ -1145,30 +1141,6 @@ export class GameApiService {
                 player,
             })
             entities.push(entity)
-            
-            /*
-            const existingOne = await this.playerGameItemService.findOne({
-                player: {uuid: player.uuid},
-                itemId: dtos[i].itemId
-            })
-
-            if (!!existingOne) {
-                existingOne.amount = dtos[i].amount
-                existingOne.updatedAt = dtos[i].updatedAt
-                await this.playerGameItemService.update(existingOne.id, {
-                    amount: existingOne.amount,
-                    updatedAt: existingOne.updatedAt
-                })
-                entities.push(existingOne)
-            } else {
-                const entity = await this.playerGameItemService.create({
-                    ...dtos[i],
-                    game,
-                    player,
-                })
-                entities.push(entity)
-            }
-            */
         }
 
         return entities;

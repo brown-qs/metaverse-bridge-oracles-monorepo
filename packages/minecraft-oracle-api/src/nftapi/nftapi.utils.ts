@@ -290,7 +290,7 @@ export default function uriToHttp(
   }
   const protocol = uri.split(':')[0].toLowerCase();
   //console.log('URI FETCH', { uri, tryHttpToHttps, protocol });
-  console.log(protocol)
+  //console.log(protocol)
   switch (protocol) {
     case 'https':
       return uri;
@@ -314,7 +314,7 @@ export const fetchUrlCallback = () => {
     }
     const url = uriToHttp(uriOrUrl, tryHttpToHttps);
       try {
-        console.log(url)
+        //console.log(url)
         const response = await axios.get(url, {});
         if (response.status === 200) {
           return response.data as T;

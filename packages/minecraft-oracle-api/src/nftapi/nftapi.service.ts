@@ -9,19 +9,23 @@ import { Contract } from '@ethersproject/contracts';
 import { fromStream } from 'file-type/core';
 import fetch from 'node-fetch'
 import { collections } from '../common/collections';
+import { TypeContractsCallbackProvider } from '../provider/contract';
+import { ContractType } from 'src/common/enums/ContractType';
 
 
 @Injectable()
 export class NftApiService {
 
     private readonly context: string;
+    private readonly defaultChainId: number;
 
     constructor(
-        @Inject(ProviderToken.MULTICALL_CONTRACT) private multicall: Contract,
+        @Inject(ProviderToken.CONTRACT_CHAIN_CALLBACK) private getContract: TypeContractsCallbackProvider,
         private configService: ConfigService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
         this.context = NftApiService.name
+        this.defaultChainId = this.configService.get<number>('network.defaultChainId')
     }
 
     public async getNFTCollection(chainId: string, tokenType: string, address: string): Promise<ProcessedStaticTokenData[] | StaticTokenData[]> {
@@ -41,7 +45,10 @@ export class NftApiService {
             calls = [...calls, ...getTokenStaticCalldata(asset)];
         });
 
-        const call_results = await this.tryMultiCallCore(this.multicall, calls, false);
+
+        const multicall = await this.getContract(!!chainId ? Number.parseInt(chainId): this.defaultChainId, ContractType.MULTICALL)
+
+        const call_results = await this.tryMultiCallCore(multicall, calls, false);
 
         if (!call_results) {
             return undefined
@@ -60,7 +67,7 @@ export class NftApiService {
                     url: imageurl,
                     ...await this.fetchMediaType(imageurl)
                 }
-                console.log('hmm', result);
+                //console.log('hmm', result);
                 return result;
             }))
         }
@@ -84,7 +91,8 @@ export class NftApiService {
             calls = [...calls, ...getTokenStaticCalldata(asset)];
         });
 
-        const results = await this.tryMultiCallCore(this.multicall, calls, false);
+        const multicall = await this.getContract(!!chainId ? Number.parseInt(chainId): this.defaultChainId, ContractType.MULTICALL)
+        const results = await this.tryMultiCallCore(multicall, calls, false);
 
         if (!results) {
             return undefined

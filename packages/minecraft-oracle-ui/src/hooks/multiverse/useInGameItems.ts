@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import axios, { AxiosError } from 'axios';
 import { useBlockNumber } from 'state/application/hooks';
 import { useAuth } from 'hooks';
-import { StaticTokenData, useTokenStaticDataCallbackArray } from 'hooks/useTokenStaticDataCallback/useTokenStaticDataCallback';
+import { StaticTokenData, useTokenStaticDataCallbackArrayWithChains } from 'hooks/useTokenStaticDataCallback/useTokenStaticDataCallback';
 import { stringToStringAssetType } from 'utils/subgraph';
 import { RecognizedAssetType } from 'assets/data/recognized'
 
@@ -19,7 +19,7 @@ export interface InGameItem {
     meta: any,
     recognizedAssetType: RecognizedAssetType,
     enraptured: boolean,
-    exportChainName: string,
+    exportChainId: number,
     exportAddress: string,
 }
 
@@ -56,7 +56,7 @@ export interface ProfileInGameItemsWithStatic {
 export function useInGameItems(trigger: string | undefined = undefined) {
     const { authData, setAuthData } =  useAuth();
     const blocknumber = useBlockNumber();
-    const staticCallback = useTokenStaticDataCallbackArray();
+    const staticCallback = useTokenStaticDataCallbackArrayWithChains();
 
     const {jwt} = authData ?? {}
 
@@ -82,20 +82,23 @@ export function useInGameItems(trigger: string | undefined = undefined) {
             setItems(undefined)
             return
         }
-        console.log({rawData})
+
+        //console.log('DEBUG rawData', {assets: rawData.assets, resources: rawData.resources})
         const melange = [...rawData.assets, ...rawData.resources]
         let staticDatas = await staticCallback(
             melange.map(x => {
+                //console.log('DEBUG melange', {asset: x})
                 return {
                     assetId: x.assetId,
                     assetAddress: x.assetAddress,
                     assetType: stringToStringAssetType(x.assetType),
-                    id: '1'
+                    id: '1',
+                    chainId: x.exportChainId,
                 }
             })
         );
+        //console.log('DEBUG staticDataCallbackArrayWithChains', {staticDatas})
         let resultSet: ProfileInGameItemsWithStatic = { assets: [], resources: [], textures: []}
-        console.log({staticDatas, rawData})
         if (rawData.assets.length > 0) {
             staticDatas.slice(0, rawData.assets.length).map((sd, i) => {
                 resultSet.assets.push({
@@ -106,7 +109,6 @@ export function useInGameItems(trigger: string | undefined = undefined) {
             });
             staticDatas = staticDatas.slice(rawData.assets.length)
         }
-        console.log('shinshin', {resultSet})
 
         if (rawData.resources.length > 0) {
             staticDatas.slice(0, rawData.resources.length).map((sd, i) => {

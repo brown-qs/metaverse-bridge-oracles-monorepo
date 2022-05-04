@@ -54,7 +54,7 @@ export const Token = ({ meta, staticData, order }: TokenData) => {
   const getOrderCB = useAssetOrdersCallback(asset.assetAddress, asset.assetId, false, true)
 
   useEffect(() => {
-    console.log('useEffect run!')
+    // console.log('useEffect run!')
     const fetch = async () => {
       const os: Order[] = await getOrderCB()
       const o: Order | undefined = os.reduce((prev: Order | undefined, current: Order | undefined) => {
