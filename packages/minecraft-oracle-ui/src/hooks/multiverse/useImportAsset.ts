@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { calculateGasMargin } from '../../utils';
-import { useMultiverseBridgeV1Contract } from '../../hooks/useContracts/useContracts';
+import { useMultiverseBridgeV1Contract, useMultiverseBridgeV2Contract } from '../../hooks/useContracts/useContracts';
 import { useActiveWeb3React, useAuth } from '../../hooks';
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import axios from 'axios'
@@ -21,7 +21,8 @@ export interface ImportRequest {
     },
     owner: string | undefined | null,
     beneficiary: string| undefined | null,
-    amount: string
+    amount: string,
+    chainId?: number
 }
 
 export interface AssetRequest {
@@ -30,7 +31,8 @@ export interface AssetRequest {
         assetId?: string,
         assetType?: AssetType
     },
-    amount: string
+    amount: string,
+    chainId?: number
 }
 
 export type ImportRequestParams = {
@@ -88,8 +90,8 @@ export function useImportAssetCallback(
 } {
     const { account, chainId, library } = useActiveWeb3React();
 
-    //console.log('YOLO', { account, chainId, library });
-    const contract = useMultiverseBridgeV1Contract(true);
+    // const contract = useMultiverseBridgeV1Contract(true);
+    const contract = useMultiverseBridgeV2Contract(true, assetRequest.chainId);
 
     const importRequest = {
         ...assetRequest,
@@ -136,7 +138,6 @@ export function useImportAssetCallback(
         }
 
         const inputParams = [data, signature]
-
         return {
             state: CreateImportAssetCallbackState.VALID,
             hash,

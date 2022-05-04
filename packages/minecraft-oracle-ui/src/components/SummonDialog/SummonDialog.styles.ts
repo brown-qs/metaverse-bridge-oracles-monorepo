@@ -42,4 +42,16 @@ export const styles = (theme: Theme) => ({
     height: 'auto',
     marginBottom: theme.spacing(2),
   },
+  sortElement: {
+    background: '#000 !important',
+    color: '#fff !important',
+    border: 1,
+    borderStyle: 'solid',
+    borderColor: theme.palette.grey[900],
+    maxHeight: 'auto',
+    alignSelf: 'center'
+  },
+  alignSelfCenter: {
+    alignSelf: 'center'
+  }
 });

@@ -1,4 +1,5 @@
-import { Asset } from 'hooks/marketplace/types';
+import { Asset } from '../../../hooks/marketplace/types';
+import { InGameItemWithStatic } from '../../../hooks/multiverse/useInGameItems';
 
 export type ImportDialogData = {
   asset?: Asset;
@@ -7,6 +8,7 @@ export type ImportDialogData = {
   beneficiary?: string;
   enrapturable?: boolean,
   importable?: boolean,
+  item?: InGameItemWithStatic
 } | undefined;
 
 export type ImportDialogContextType = {

@@ -1,31 +1,37 @@
 import { ConfigService } from '@nestjs/config';
 import { FactoryProvider, Scope } from '@nestjs/common';
-import { Contract, ethers } from 'ethers';
+import { ethers } from 'ethers';
+import { Contract } from '@ethersproject/contracts';
 import { ProviderToken } from './token';
-import {MULTICALL_ABI} from '../common/contracts/Multicall';
-import { METAVERSE_ADDRESSES, MULTICALL_ADDRESSES } from '../config/constants';
+import { MULTICALL_ABI } from '../common/contracts/Multicall';
 import { METAVERSE_ABI } from '../common/contracts/Metaverse';
+import { ChainService } from '../chain/chain.service';
+import { ContractType } from '../common/enums/ContractType';
 
-export const MulticallContractProvider: FactoryProvider<ethers.Contract> = {
-    provide: ProviderToken.MULTICALL_CONTRACT,
-    useFactory: (configService: ConfigService, client: ethers.providers.Provider) => {
-        const oraclePrivateKey = configService.get<string>('network.oracle.privateKey');
-        const chainId = configService.get<number>('network.chainId');
-        const oracle = new ethers.Wallet(oraclePrivateKey, client);
-        return new Contract(MULTICALL_ADDRESSES[chainId], MULTICALL_ABI, oracle)
-    },
-    inject: [ConfigService, ProviderToken.CLIENT_ETHEREUM],
-    scope: Scope.DEFAULT
-};
+export type TypeContractsCallbackProvider = (chainId: number, contractType: ContractType) => Promise<Contract | undefined>
 
-export const MetaverseContractProvider: FactoryProvider<ethers.Contract> = {
-    provide: ProviderToken.METAVERSE_CONTRACT,
-    useFactory: (configService: ConfigService, client: ethers.providers.Provider) => {
-        const oraclePrivateKey = configService.get<string>('network.oracle.privateKey');
-        const chainId = configService.get<number>('network.chainId');
-        const oracle = new ethers.Wallet(oraclePrivateKey, client);
-        return new Contract(METAVERSE_ADDRESSES[chainId], METAVERSE_ABI, oracle)
+export const ContractsCallbackProvider: FactoryProvider<(chainId: number, contractType: ContractType) => Promise<Contract | undefined>> = {
+    provide: ProviderToken.CONTRACT_CHAIN_CALLBACK,
+    useFactory: (configService: ConfigService, chainService: ChainService, client: ethers.providers.Provider[]) => {
+        const getContract = async (chainId: number, contractType: ContractType) => {
+            const chain = await chainService.findOne({ chainId })
+            if (!chain) {
+                return undefined
+            }
+            const provider = new ethers.providers.JsonRpcProvider(chain.rpcUrl);
+            const oraclePrivateKey = configService.get<string>('network.oracle.privateKey');
+            const oracle = new ethers.Wallet(oraclePrivateKey, provider);
+
+            if (contractType.valueOf() === ContractType.MULTICALL.valueOf()) {
+                return (new Contract(chain.multicallAddress, MULTICALL_ABI, oracle))
+            } else if (contractType.valueOf() === ContractType.MULTIVERSE_V1.valueOf()) {
+                return (new Contract(chain.multicallAddress, METAVERSE_ABI, oracle))
+            } else {
+                return undefined
+            }
+        }
+        return getContract;
     },
-    inject: [ConfigService, ProviderToken.CLIENT_ETHEREUM],
+    inject: [ConfigService, ChainService],
     scope: Scope.DEFAULT
 };

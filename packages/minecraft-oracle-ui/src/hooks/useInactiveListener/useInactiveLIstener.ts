@@ -6,7 +6,7 @@ export const useInactiveListener = (suppress = false) => {
   const { active, activate, error } = useWeb3React();
 
   useEffect(() => {
-    const { ethereum } = window;
+    const ethereum = window.ethereum ?? undefined
 
     if (ethereum && ethereum.on && !active && !error && !suppress) {
       const handleConnect = () => {
@@ -15,14 +15,14 @@ export const useInactiveListener = (suppress = false) => {
       };
 
       const handleChainChanged = () => {
-        activate(injected).catch((err) =>
+        activate(injected, undefined, true).catch((err) =>
           console.debug('Failed to activate after chain changed', err)
         );
       };
       const handleAccountsChanged = (accounts: string[]) => {
         if (accounts.length > 0) {
-          activate(injected).catch((err) =>
-            console.debug('Failed to activate after account changed', err)
+          activate(injected, undefined, true).catch((err) =>
+            console.debug('Failed to activate after accounts changed', err)
           );
         }
       };

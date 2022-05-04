@@ -5,7 +5,6 @@ export const styles = (theme: Theme) => ({
     display: 'flex',
     padding: theme.spacing(4),
     flexDirection: 'column',
-    // minWidth: 500,
   },
   nakedInput: {
     border: 0,
@@ -42,4 +41,5 @@ export const styles = (theme: Theme) => ({
     height: 'auto',
     marginBottom: theme.spacing(2),
   },
+  
 });

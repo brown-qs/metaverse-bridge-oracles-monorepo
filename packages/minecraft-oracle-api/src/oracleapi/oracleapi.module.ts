@@ -11,6 +11,7 @@ import { OracleApiService } from './oracleapi.service';
 import { InventoryModule } from '../playerinventory/inventory.module';
 import { SkinModule } from '../skin/skin.module';
 import { NftApiModule } from '../nftapi/nftapi.module';
+import { ChainModule } from '../chain/chain.module';
 
 @Module({
     imports: [
@@ -23,7 +24,8 @@ import { NftApiModule } from '../nftapi/nftapi.module';
         GameModule,
         SummonModule,
         ProviderModule,
-        NftApiModule
+        NftApiModule,
+        ChainModule
     ],
     providers: [OracleApiService],
     exports: [OracleApiService],

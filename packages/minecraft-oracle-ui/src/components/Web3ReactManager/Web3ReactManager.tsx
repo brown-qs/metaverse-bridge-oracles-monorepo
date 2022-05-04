@@ -18,12 +18,16 @@ export const Web3ReactManager = ({ children }: { children: JSX.Element }) => {
 
   // try to eagerly connect to an injected provider, if it exists and has granted access already
   const triedEager = useEagerConnect();
+  //const triedEager = true
 
   //console.log({ active, networkActive, networkError, triedEager });
 
   // after eagerly trying injected, if the network connect ever isn't active or in an error state, activate itd
+  
+  //console.log('eager', {triedEager, networkActive, networkError, active})
   useEffect(() => {
     if (triedEager && !networkActive && !networkError && !active) {
+      //console.log('eager activate')
       activateNetwork(network);
     }
   }, [triedEager, networkActive, networkError, activateNetwork, active]);
@@ -51,7 +55,7 @@ export const Web3ReactManager = ({ children }: { children: JSX.Element }) => {
 
   // if the account context isn't active, and there's an error on the network context, it's an irrecoverable error
   if (!active && networkError) {
-    return <div className={styles.messageWrapper}>unknownError</div>;
+    return <div className={styles.messageWrapper}>Oops! An unknown error occurred. Please refresh the page, or visit from another browser or device.</div>;
   }
 
   // if neither context is active, spin

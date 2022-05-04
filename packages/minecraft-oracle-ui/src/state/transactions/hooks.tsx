@@ -254,7 +254,7 @@ export function useSubmittedExportTx(entryHash?: string): {
   const exportTx = useMemo(() => {
     const txIndex = Object.keys(allTransactions).find((hash) => {
       const tx = allTransactions[hash];
-      console.log(tx?.exportResult?.hash, entryHash, tx?.exportResult?.hash === entryHash)
+      // console.log(tx?.exportResult?.hash, entryHash, tx?.exportResult?.hash === entryHash)
       return tx.exportResult && entryHash && tx.exportResult.hash === entryHash;
     });
     return txIndex && allTransactions[txIndex]

@@ -29,6 +29,7 @@ export const useTokenStaticData = (assets: Asset[]) => {
   const fetchDatas = useCallback(async () => {
     let calls: any[] = [];
     assets.map((asset, i) => {
+      //console.log('DEBUG token static', {asset})
       calls = [...calls, ...getTokenStaticCalldata(asset)];
     });
 

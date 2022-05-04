@@ -9,6 +9,15 @@ export interface Asset {
   assetAddress: string;
 }
 
+export interface AssetWithChain {
+  // {asset address}-{asset id}
+  id: string;
+  assetId: string;
+  assetType: StringAssetType;
+  assetAddress: string;
+  chainId: number;
+}
+
 export interface Fill {
   // tx hash
   id: string;

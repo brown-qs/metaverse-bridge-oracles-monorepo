@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger"
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger"
 import { IsBoolean, IsString } from "class-validator"
 
 
@@ -40,9 +40,9 @@ export class AssetDto {
     @IsBoolean()
     enraptured: boolean
 
-    @ApiProperty({ description: 'Name of Chain where the asset can be exported to'})
+    @ApiPropertyOptional({ description: 'Id of Chain where the asset can be exported to'})
     @IsString()
-    exportChainName: string
+    exportChainId?: number
 
     @ApiProperty({ description: 'Address where the asset can be exported to'})
     @IsString()

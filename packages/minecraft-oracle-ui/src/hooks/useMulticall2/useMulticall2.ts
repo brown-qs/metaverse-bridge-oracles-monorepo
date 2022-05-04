@@ -38,8 +38,8 @@ export const useMulticall2Raw = async (
 ) => {
   const multi = useMulticall2Contract(true);
 
-  console.log(calldata);
-  console.log(multi);
+  // console.log(calldata);
+  // console.log(multi);
 
   const [result, setResult] = useState<any | undefined>();
 
@@ -50,7 +50,6 @@ export const useMulticall2Raw = async (
       return;
     }
     try {
-      //console.log(await multi.getBlockNumber());
       const res = asStatic
         ? await multi.callStatic.aggregate(calldata)
         : await multi.aggregate(calldata);
