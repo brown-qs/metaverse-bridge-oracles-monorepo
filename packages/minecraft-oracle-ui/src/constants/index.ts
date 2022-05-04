@@ -38,7 +38,7 @@ export enum ChainId {
   MOONBEAM= 1284
 }
 
-export const PERMISSIONED_CHAINS = [ChainId.MOONRIVER, ChainId.MOONBEAM, ChainId.MAINNET]
+export const PERMISSIONED_CHAINS = [ChainId.MOONRIVER]
 export const DEFAULT_CHAIN = ChainId.MOONRIVER
 
 export const RPC_URLS: { [chainId: number]: string } = {
@@ -124,7 +124,7 @@ export const IPFS_GATEWAYS = [
   'https://ipfs.io',
 ];
 
-export const MAX_WIDTH_TO_SHOW_NAVIGATION = 1000;
+export const MAX_WIDTH_TO_SHOW_NAVIGATION = 1360;
 
 export type MaterialType = {
   name: string

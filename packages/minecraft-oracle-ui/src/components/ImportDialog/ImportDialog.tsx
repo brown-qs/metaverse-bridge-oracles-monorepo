@@ -1,14 +1,9 @@
-import {
-  Box,
-  Grid
-} from '@mui/material';
+
 import CircularProgress from '@mui/material/CircularProgress';
-import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
-import { ExternalLink } from 'components/ExternalLink/ExternalLink';
-import { AddressDisplayComponent } from 'components/form/AddressDisplayComponent';
-import 'date-fns';
-import { useActiveWeb3React, useImportDialog } from 'hooks';
+import { ExternalLink } from '../../components/ExternalLink/ExternalLink';
+import { TokenDetails } from '../../components/TokenDetails/TokenDetails';
+import { useActiveWeb3React, useImportDialog, useClasses } from '../../hooks';
 import {
   ApprovalState,
   useApproveCallback,
@@ -25,36 +20,24 @@ import { SuccessIcon } from 'icons';
 import { useEffect, useState } from 'react';
 import { Button, Dialog } from 'ui';
 import { styles as appStyles } from '../../app.styles';
-import { useClasses } from 'hooks';
 import { styles } from './ImportDialog.styles';
-import { useIsTransactionPending, useSubmittedImportTx } from 'state/transactions/hooks';
-import { CreateImportAssetCallbackState, useImportAssetCallback } from 'hooks/multiverse/useImportAsset';
-import { useImportConfirmCallback } from 'hooks/multiverse/useConfirm';
+import { useIsTransactionPending, useSubmittedImportTx } from '../../state/transactions/hooks';
+import { CreateImportAssetCallbackState, useImportAssetCallback } from '../../hooks/multiverse/useImportAsset';
+import { useImportConfirmCallback } from '../../hooks/multiverse/useConfirm';
+import Stack from '@mui/material/Stack/Stack';
 
 
 export const ImportDialog = () => {
   const [finalTxSubmitted, setFinalTxSubmitted] = useState<boolean>(false);
-  const { isImportDialogOpen, importDialogData, setImportDialogData, setImportDialogOpen } = useImportDialog();
+  const { isImportDialogOpen, importDialogData, setImportDialogOpen } = useImportDialog();
   const [importParamsLoaded, setImportParamsLoaded] = useState<boolean>(false);
   const [approvalSubmitted, setApprovalSubmitted] = useState<boolean>(false);
   const [importConfirmed, setImportConfirmed] = useState<boolean>(false);
   const confirmCb = useImportConfirmCallback()
 
   const {
-    divider,
-    infoContainer,
     button,
-    //
-    row,
-    col,
-    verticalDashedLine,
-    formBox,
-    formLabel,
-    formValue,
-    formValueTokenDetails,
     formButton,
-    expand,
-    expandOpen,
   } = useClasses(appStyles);
 
   const {
@@ -62,7 +45,6 @@ export const ImportDialog = () => {
     loadingContainer,
     successContainer,
     successIcon,
-    inputContainer,
   } = useClasses(styles);
 
   const { chainId, account } = useActiveWeb3React();
@@ -115,8 +97,8 @@ export const ImportDialog = () => {
   ])?.[0];
 
   const importCallbackParams = useImportAssetCallback(importObject)
-  
-  
+
+
   if (!!importCallbackParams.error) {
     callbackError = importCallbackParams.error
   }
@@ -134,8 +116,8 @@ export const ImportDialog = () => {
   const isPending = useIsTransactionPending(importTx?.hash)
 
   // console.log('submission', { importSubmitted, importTx, finalTxSubmitted, importConfirmed, hash: importCallbackParams?.hash })
-  
-  
+
+
   useEffect(() => {
     const x = async () => {
       const confirmed = await confirmCb(importCallbackParams?.hash, chainId)
@@ -178,9 +160,6 @@ export const ImportDialog = () => {
         <div className={successContainer}>
           <SuccessIcon className={successIcon} />
           <Typography>{`Import to metaverse confirmed!`}</Typography>
-          <Typography color="textSecondary">
-            {`Entry hash: ${importCallbackParams?.hash}`}
-          </Typography>
 
           {importTx && (
             <ExternalLink
@@ -220,7 +199,7 @@ export const ImportDialog = () => {
         </>
       );
     }
-    
+
     if (finalTxSubmitted && importSubmitted && !isPending) {
       return (
         <div className={successContainer}>
@@ -246,40 +225,8 @@ export const ImportDialog = () => {
     }
 
     return (
-      <>
-        <Grid container spacing={1} justifyContent="center">
-          <Grid item md={12} xs={12}>
-            <Box className={formBox}>
-              <Typography className="form-subheader">Token Details</Typography>
-              <div className={row}>
-                <div className={col}>
-                  <div className={formLabel}>Address</div>
-                  <AddressDisplayComponent
-                    className={`${formValue} ${formValueTokenDetails}`}
-                    copyTooltipLabel={'Copy address'}
-                    charsShown={5}
-                  >
-                    {importDialogData?.asset?.assetAddress ?? '?'}
-                  </AddressDisplayComponent>
-                </div>
-                <div className={col}>
-                  <div className={formLabel}>ID</div>
-                  <div className={`${formValue} ${formValueTokenDetails}`}>
-                    {assetId}
-                  </div>
-                </div>
-                <div className={col}>
-                  <div className={formLabel}>Type</div>
-                  <div className={`${formValue} ${formValueTokenDetails}`}>
-                    {assetType}
-                  </div>
-                </div>
-              </div>
-              <Divider variant="fullWidth" className={divider} />
-            </Box>
-          </Grid>
-        </Grid>
-
+      <Stack spacing={1} justifyContent="center">
+        <TokenDetails assetAddress={assetAddress} assetId={assetId} assetType={assetType} />
         {showApproveFlow ? (
           <Button
             onClick={() => {
@@ -312,7 +259,7 @@ export const ImportDialog = () => {
         <Button className={formButton} onClick={() => handleClose({}, "yada")} color="primary">
           Cancel
         </Button>
-      </>
+      </Stack>
     );
   };
   return (

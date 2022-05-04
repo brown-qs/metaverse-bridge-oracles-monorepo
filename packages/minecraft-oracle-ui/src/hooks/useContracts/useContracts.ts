@@ -9,7 +9,7 @@ import {
   RPC_URLS,
 } from '../../constants';
 import { useCallback, useMemo } from 'react';
-import { getContract, getContractwithChain } from 'utils';
+import { getContract, getContractWithChain } from 'utils';
 import {
   MARKETPLACE_V1_ABI,
   METAVERSE_V1_ABI,
@@ -43,12 +43,12 @@ export const useContract = (
   }, [address, ABI, library, withSignerIfPossible, account]);
 };
 
-export const useContractCallback = (ABI: any, withSignerIfPossible = true) => {
+export const useContractWithChainCallback = (ABI: any, withSignerIfPossible = true) => {
   return useCallback(
     (address: string, chainId: number) => {
       if (!address || !ABI ) return null;
       try {
-        return getContractwithChain(
+        return getContractWithChain(
           address,
           ABI,
           RPC_URLS[chainId]
@@ -58,7 +58,7 @@ export const useContractCallback = (ABI: any, withSignerIfPossible = true) => {
         return null;
       }
     },
-    [ABI, withSignerIfPossible]
+    [ABI]
   );
 };
 
@@ -143,7 +143,7 @@ export function useMulticall2Contract(
 export function useMulticall2ContractWithChain(
   withSignerIfPossible = true,
 ) {
-  return useContractCallback(
+  return useContractWithChainCallback(
     MULTICALL2_ABI,
     withSignerIfPossible
   );

@@ -26,6 +26,8 @@ import { useIsTransactionPending, useSubmittedEnraptureTx, useSubmittedImportTx 
 import { useEnraptureConfirmCallback } from 'hooks/multiverse/useConfirm';
 import { EnraptureAssetCallbackState, useEnraptureAssetCallback } from 'hooks/multiverse/useEnraptureAsset';
 import { stringAssetTypeToAssetType } from 'utils/marketplace';
+import Stack from '@mui/material/Stack/Stack';
+import { TokenDetails } from 'components/TokenDetails/TokenDetails';
 
 
 export const EnraptureDialog = () => {
@@ -38,28 +40,15 @@ export const EnraptureDialog = () => {
   const confirmCb = useEnraptureConfirmCallback();
 
   const {
-    divider,
-    infoContainer,
     button,
-    //
-    row,
-    col,
-    verticalDashedLine,
-    formBox,
-    formLabel,
-    formValue,
-    formValueTokenDetails,
     formButton,
-    expand,
-    expandOpen,
   } = useClasses(appStyles);
 
   const {
     dialogContainer,
     loadingContainer,
     successContainer,
-    successIcon,
-    inputContainer,
+    successIcon
   } = useClasses(styles);
 
   const { chainId, account } = useActiveWeb3React();
@@ -113,8 +102,8 @@ export const EnraptureDialog = () => {
   ])?.[0];
 
   const enraptureCallbackParams = useEnraptureAssetCallback(enraptureObject)
-  
-  
+
+
   if (!!enraptureCallbackParams.error) {
     callbackError = enraptureCallbackParams.error
   }
@@ -129,10 +118,10 @@ export const EnraptureDialog = () => {
   });
 
   const { enraptureSubmitted, enraptureTx } = useSubmittedEnraptureTx(enraptureCallbackParams?.hash);
-    const isPending = useIsTransactionPending(enraptureTx?.hash)
+  const isPending = useIsTransactionPending(enraptureTx?.hash)
 
-    console.log('enrapture submission', { enraptureSubmitted, enraptureTx, finalTxSubmitted, enraptureConfirmed, hash: enraptureCallbackParams?.hash })
-  
+  console.log('enrapture submission', { enraptureSubmitted, enraptureTx, finalTxSubmitted, enraptureConfirmed, hash: enraptureCallbackParams?.hash })
+
   useEffect(() => {
     const x = async () => {
       const confirmed = await confirmCb(enraptureCallbackParams?.hash, chainId)
@@ -175,9 +164,6 @@ export const EnraptureDialog = () => {
         <div className={successContainer}>
           <SuccessIcon className={successIcon} />
           <Typography>{`Enrapture to metaverse confirmed!`}</Typography>
-          <Typography color="textSecondary">
-            {`Entry hash: ${enraptureCallbackParams?.hash}`}
-          </Typography>
 
           {enraptureTx && (
             <ExternalLink
@@ -217,7 +203,7 @@ export const EnraptureDialog = () => {
         </>
       );
     }
-    
+
     if (finalTxSubmitted && enraptureSubmitted && !isPending) {
       return (
         <div className={successContainer}>
@@ -244,100 +230,72 @@ export const EnraptureDialog = () => {
     if (!userUnderstood) {
       return (
         <Grid container spacing={1} justifyContent="center">
-        <div className={successContainer}>
-          <Typography>{`NFT is going to be burned and bound to the MC account forever`}</Typography>
+          <div className={successContainer}>
+            <Typography>{`This NFT is going to be burned in the process and bound to the MC account forever!`}</Typography>
 
-          <Button
-            onClick={() => {
-              setUserUnderstood(true)
-            }}
-            className={button}
-            variant="contained"
-            color="primary"
-          >
-            Understood
-          </Button>
-        </div>
+            <Button
+              onClick={() => {
+                setUserUnderstood(true)
+              }}
+              className={button}
+              variant="contained"
+              color="primary"
+            >
+              I understood
+            </Button>
+          </div>
         </Grid>
       );
     }
 
     return (
-      <>
-        <Grid container spacing={1} justifyContent="center">
-          <Grid item md={12} xs={12}>
-            <Box className={formBox}>
-              <Typography className="form-subheader">Token Details</Typography>
-              <div className={row}>
-                <div className={col}>
-                  <div className={formLabel}>Address</div>
-                  <AddressDisplayComponent
-                    className={`${formValue} ${formValueTokenDetails}`}
-                    copyTooltipLabel={'Copy address'}
-                    charsShown={5}
-                  >
-                    {enraptureDialogData?.asset?.assetAddress ?? '?'}
-                  </AddressDisplayComponent>
-                </div>
-                <div className={col}>
-                  <div className={formLabel}>ID</div>
-                  <div className={`${formValue} ${formValueTokenDetails}`}>
-                    {assetId}
-                  </div>
-                </div>
-                <div className={col}>
-                  <div className={formLabel}>Type</div>
-                  <div className={`${formValue} ${formValueTokenDetails}`}>
-                    {assetType}
-                  </div>
-                </div>
-              </div>
-              <Divider variant="fullWidth" className={divider} />
-            </Box>
-          </Grid>
-        </Grid>
+      <Stack spacing={1} justifyContent="center" >
 
-        {showApproveFlow ? (
-          <Button
-            onClick={() => {
-              approveCallback();
-              setApprovalSubmitted(true);
-            }}
-            className={button}
-            variant="contained"
-            color="primary"
-            disabled={approvalState === ApprovalState.PENDING || !hasEnough}
-          >
-            Approve
-          </Button>
-        ) : (
-          <Button
-            onClick={() => {
-              enraptureCallbackParams.callback?.();
-              setFinalTxSubmitted(true);
-            }}
-            className={formButton}
-            variant="contained"
-            color="primary"
-            disabled={
-              enraptureCallbackParams.state !== EnraptureAssetCallbackState.VALID || !hasEnough
-            }
-          >
-            Enrapture to metaverse
-          </Button>
-        )}
+        <TokenDetails assetAddress={assetAddress} assetId={assetId} assetType={assetType}/>
+        {
+          showApproveFlow ? (
+            <Button
+              onClick={() => {
+                approveCallback();
+                setApprovalSubmitted(true);
+              }}
+              className={button}
+              variant="contained"
+              color="primary"
+              disabled={approvalState === ApprovalState.PENDING || !hasEnough}
+            >
+              Approve
+            </Button>
+          ) : (
+            <Button
+              onClick={() => {
+                enraptureCallbackParams.callback?.();
+                setFinalTxSubmitted(true);
+              }}
+              className={formButton}
+              variant="contained"
+              color="primary"
+              disabled={
+                enraptureCallbackParams.state !== EnraptureAssetCallbackState.VALID || !hasEnough
+              }
+            >
+              Enrapture to metaverse
+            </Button>
+          )
+        }
         <Button className={formButton} onClick={() => handleClose({}, "yada")} color="primary">
           Cancel
         </Button>
-      </>
+      </Stack >
     );
   };
   return (
     <Dialog
       open={isEnraptureDialogOpen}
       onClose={handleClose}
-      title={'MultiverseBridge: Enrapture'}
+      title={'MultiverseBridge: enrapture'}
       maxWidth="md"
+      style={{ justifyContent: 'center' }}
     >
       <div className={dialogContainer}>{renderBody()}</div>
     </Dialog>

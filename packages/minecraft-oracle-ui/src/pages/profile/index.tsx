@@ -16,7 +16,6 @@ import { Dialog } from 'ui';
 
 import { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 
-import { AddressDisplayComponent } from 'components/form/AddressDisplayComponent';
 
 import { useProfile } from 'hooks/multiverse/useProfile';
 import { useOnChainItems } from 'hooks/multiverse/useOnChainItems';
@@ -34,7 +33,7 @@ import React, { useState } from 'react';
 import { SKIN_LABELS } from '../../constants/skins';
 import { InGameItemWithStatic } from 'hooks/multiverse/useInGameItems';
 import { DEFAULT_CHAIN, NETWORK_NAME } from "../../constants";
-import { ChainDataDisplayComponent } from 'components/form/ChainDataDisplayComponent';
+import { AssetChainDetails } from '../../components/AssetChainDetails/AssetChainDetails';
 
 export type ProfilePagePropTypes = {
     authData: AuthData
@@ -145,7 +144,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                     gridRow='1'
                                 >
                                     {value.coverURL && <Tooltip placement='left' title={`${skinLabel?.[value.assetId]?.label ?? skinLabel?.label ?? 'Available in-game skin'}${value.assetAddress !== '0x0' ? ` Because you imported ${value.name} #${value.assetId}` : ''}`}>
-                                        <a target='_blank' className={itemImage} href={`${value.renderURL ? `https://minerender.org/embed/skin/?skin=${value.renderURL}` : value.coverURL}`}>
+                                        <a target='_blank' className={itemImage} href={`${value.renderURL ? `https://minerender.org/embed/skin/?skin=${value.renderURL}` : value.coverURL}`} rel="noreferrer">
                                             <Media uri={value.coverURL} style={{ marginTop: `${value.equipped ? 'none' : '15px'}` }} />
                                         </a>
                                     </Tooltip>}
@@ -210,23 +209,20 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                                 className={transferButtonMid}
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
-                                                                    if (!!account) {
-                                                                        setExportDialogOpen(true);
-                                                                        setExportDialogData(
-                                                                            {
-                                                                                hash: value.hash,
-                                                                                asset: {
-                                                                                    assetAddress: value.assetAddress,
-                                                                                    assetId: value.assetId,
-                                                                                    assetType: stringToStringAssetType(value.assetType),
-                                                                                    id: 'x'
-                                                                                },
-                                                                                chain: value.exportChainId
-                                                                            }
-                                                                        );
-                                                                    } else {
-                                                                        setAccountDialogOpen(true)
-                                                                    }
+                                                                    setExportDialogOpen(true);
+                                                                    setExportDialogData(
+                                                                        {
+                                                                            hash: value.hash,
+                                                                            asset: {
+                                                                                assetAddress: value.assetAddress,
+                                                                                assetId: value.assetId,
+                                                                                assetType: stringToStringAssetType(value.assetType),
+                                                                                id: 'x'
+                                                                            },
+                                                                            chain: value.exportChainId,
+                                                                            item: value
+                                                                        }
+                                                                    );
                                                                 }}
                                                             >
                                                                 Export to wallet
@@ -269,46 +265,13 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     <div className={centeredRow}>
                                                         <div className={`${formValue} ${formValueTokenDetails}`}>
                                                             {itemDetailDialogData.exportable ? <Tooltip title={'This item can be exported back to the chain it came from to the original owner address.'}>
-                                                                <div>TThis item is exportable.</div>
+                                                                <div>This item is exportable.</div>
                                                             </Tooltip> : <Tooltip title={'This item is burned into the metaverse forever. Cannot be taken back.'}>
                                                                 <div>This item is not exportable.</div>
                                                             </Tooltip>}
                                                         </div>
                                                     </div>
-                                                    {itemDetailDialogData.exportable ? (
-                                                        <>
-                                                            <div className={row}>
-                                                                <div className={formLabel}>Export chain ID: </div>
-                                                                <ChainDataDisplayComponent
-                                                                    className={`${formValue} ${formValueTokenDetails}`}
-                                                                    chainId={itemDetailDialogData.exportChainId}
-                                                                    copyTooltipLabel={'Copy chain ID'}
-                                                                >
-                                                                    {itemDetailDialogData.exportChainId}
-                                                                </ChainDataDisplayComponent>
-                                                            </div>
-                                                            <div className={row}>
-                                                                <div className={formLabel}>Export chain name: </div>
-                                                                <ChainDataDisplayComponent
-                                                                    className={`${formValue} ${formValueTokenDetails}`}
-                                                                    chainId={itemDetailDialogData.exportChainId}
-                                                                    copyTooltipLabel={'Copy chain name'}
-                                                                >
-                                                                    {NETWORK_NAME[itemDetailDialogData.exportChainId]}
-                                                                </ChainDataDisplayComponent>
-                                                            </div>
-                                                            <div className={row}>
-                                                                <div className={formLabel}>Export address:</div>
-                                                                <AddressDisplayComponent
-                                                                    className={`${formValue} ${formValueTokenDetails}`}
-                                                                    copyTooltipLabel={'Copy address'}
-                                                                    charsShown={5}
-                                                                >
-                                                                    {itemDetailDialogData.exportAddress}
-                                                                </AddressDisplayComponent>
-                                                            </div>
-                                                        </>
-                                                    ) : null}
+                                                    {itemDetailDialogData.exportable && <AssetChainDetails data={itemDetailDialogData} borderOn={false} />}
                                                 </Box>
                                             </Grid>
                                         </Grid>
@@ -482,22 +445,6 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                 </List>
                             </div>
                         </Stack>
-                    </Grid>
-                    <Grid item md={3} xs={12} justifyContent="center">
-                        {/*<div className={columnTitle}><span className={columnTitleText}>Info</span></div>*/}
-                        {/*<List dense sx={{ width: '100%', maxWidth: '100%', bgcolor: '#111', marginBottom: '16px' }}>*/}
-                        {/*    {['Server Status: Online', 'Next Event: 02/11/21 13:00 UTC'].map((value) => {*/}
-                        {/*        const labelId = `checkbox-list-secondary-label-${value}`;*/}
-                        {/*        return (*/}
-                        {/*            <ListItem*/}
-                        {/*                key={value}*/}
-                        {/*                disablePadding*/}
-                        {/*            >*/}
-                        {/*                <ListItemText id={labelId} primary={value} />*/}
-                        {/*            </ListItem>*/}
-                        {/*        );*/}
-                        {/*    })}*/}
-                        {/*</List>*/}
                     </Grid>
                 </Grid>
             </Grid>

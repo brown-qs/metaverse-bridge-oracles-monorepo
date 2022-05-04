@@ -1,6 +1,6 @@
 import { useDispatch } from 'react-redux';
 
-import { Button } from '@mui/material';
+import { Button, Stack } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import { injected, walletconnect } from 'connectors';
 import { SUPPORTED_WALLETS } from '../../connectors';
@@ -27,7 +27,7 @@ import usePrevious from 'hooks/usePrevious/usePrevious';
 import CircularProgress from '@mui/material/CircularProgress';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 import useAddNetworkToMetamaskCb from 'hooks/useAddNetworkToMetamask/useAddNetworkToMetamask';
-import { ChainId } from '../../constants';
+import { ChainId, NETWORK_NAME, PERMISSIONED_CHAINS } from '../../constants';
 
 const WALLET_VIEWS = {
   OPTIONS: 'options',
@@ -130,11 +130,11 @@ export const AccountDialog = () => {
 
   function renderTransactions(transactions: string[]) {
     return (
-      <div className={styles.flexCoumnNoWrap}>
+      <Stack direction={'row'}>
         {transactions.map((hash, i) => {
           return <Transaction key={i} hash={hash} />;
         })}
-      </div>
+      </Stack>
     );
   }
 
@@ -322,35 +322,21 @@ export const AccountDialog = () => {
         <div className={styles.dialogContainer}>
           {error instanceof UnsupportedChainIdError && <>
             <div>
-              Wrong Network
+              Unsupported network
             </div>
-            <h5>Please connect to the appropriate Ethereum network.</h5>
-            <Button
-              //className={formButton}
-              onClick={() => {
-                addNetwork(ChainId.MOONRIVER)
-              }}
-              color="primary"
-            >
-              Switch to Moonriver
-            </Button>
-            <Button
-              //className={formButton}
-              onClick={() => {
-                addNetwork(ChainId.MOONBEAM)
-              }}
-              color="primary"
-            >
-              Switch to Moonbeam
-            </Button>
-            <Button
-              onClick={() => {
-                addNetwork(ChainId.MAINNET)
-              }}
-              color="primary"
-            >
-              Switch to Ethereum
-            </Button>
+            <h5>Please connect to a supported Ethereum network.</h5>
+            {PERMISSIONED_CHAINS.map((chainId, i) => {
+              return <Button
+                //className={formButton}
+                key={`${chainId}-${i}`}
+                onClick={() => {
+                  addNetwork(chainId as ChainId)
+                }}
+                color="primary"
+              >
+                Switch to {NETWORK_NAME[chainId]}
+              </Button>
+            })}
           </>}
 
           {!(error instanceof UnsupportedChainIdError) && <>
@@ -371,19 +357,19 @@ export const AccountDialog = () => {
           </div>
           {account &&
             (!!pendingTransactions.length || !!confirmedTransactions.length) ? (
-            <div className={styles.lowerSection}>
-              <div className={styles.autoRow}>
+            <Stack className={styles.lowerSection}>
+              <Stack direction={'row'} justifyContent={'space-between'}>
                 <Typography>Recent transactions</Typography>
                 <Button
-                  className={styles.linkStyledButton}
+                  //className={styles.linkStyledButton}
                   onClick={clearAllTransactionsCallback}
                 >
                   (clear all)
                 </Button>
-              </div>
+              </Stack>
               {renderTransactions(pendingTransactions)}
               {renderTransactions(confirmedTransactions)}
-            </div>
+            </Stack>
           ) : (
             <div className={styles.lowerSection}>
               <Typography>Your transactions will appear here...</Typography>
@@ -442,6 +428,8 @@ export const AccountDialog = () => {
       open={isAccountDialogOpen}
       onClose={() => setAccountDialogOpen(false)}
       title="Account"
+      maxWidth='sm'
+      fullWidth={true}
     >
       {getModalContent()}
     </Dialog>

@@ -79,13 +79,17 @@ export function getContract(
   return new Contract(address, ABI, getProviderOrSigner(library, account));
 }
 
-export function getContractwithChain(
+export function getContractWithChain(
   address: string,
   ABI: string,
   rpcUrl: string
 ): Contract {
   if (!isAddress(address) || address === AddressZero) {
     throw Error(`Invalid 'address' parameter '${address}'.`);
+  }
+
+  if (!rpcUrl) {
+    throw Error(`Invalid 'rpcUrl' parameter.`);
   }
 
   const Provider = new ethers.providers.JsonRpcProvider(rpcUrl);

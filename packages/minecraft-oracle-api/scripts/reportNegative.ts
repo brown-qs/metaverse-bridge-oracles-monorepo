@@ -149,7 +149,7 @@ async function main() {
                 const snap = await connection.manager.getRepository(SnapshotItemEntity).findOne({ where: { owner: { uuid: user.uuid }, material: { name: gganbu.material.name } }, relations: ['owner', 'material'] })
                 if (!snap) {
                     const mat = await connection.manager.getRepository(MaterialEntity).findOne({ where: { name: gganbu.material.name } })
-                    const amount = (Number.parseFloat(gganbu.amount) * adjustedPower / powerSum).toString()
+                    const amount = (-1 * Number.parseFloat(gganbu.amount) * adjustedPower / powerSum).toString()
                     console.log('    new amount', mat.name, amount)
                     //continue
                     const ent = await connection.manager.getRepository(SnapshotItemEntity).create({
@@ -166,7 +166,7 @@ async function main() {
                     console.log('    new num', amount)
                 } else {
                     const amount = (Number.parseFloat(gganbu.amount) * adjustedPower / powerSum)
-                    const updatedNum = (Number.parseFloat(snap.amount) + amount).toString()
+                    const updatedNum = (Number.parseFloat(snap.amount) - amount).toString()
                     //continue
                     console.log(`    old/new`, snap.amount, updatedNum)
                     let x: any
@@ -203,7 +203,7 @@ async function main() {
 
                     if (!snap) {
                         const mat = await connection.manager.getRepository(MaterialEntity).findOne({ where: { name: materialName } })
-                        const amount = amo.toString()
+                        const amount = (-amo).toString()
                         //continue
                         console.log('    new amount', mat.name, amount)
                         const ent = await connection.manager.getRepository(SnapshotItemEntity).create({
@@ -217,7 +217,7 @@ async function main() {
                         x = await connection.manager.getRepository(SnapshotItemEntity).save(ent)
                         console.log('    success:', !!x)
                     } else {
-                        const updatedNum = (Number.parseFloat(snap.amount) + amo).toString()
+                        const updatedNum = (Number.parseFloat(snap.amount) - amo).toString()
                         console.log(`    updating. old/new`, snap.amount, updatedNum)
                         let x: any
                         x = await connection.manager.getRepository(SnapshotItemEntity).update(snap.id, { amount: updatedNum })

@@ -1,5 +1,5 @@
 import { MaterialEntity } from '../src/material/material.entity'
-import { Connection, createConnection, getConnection, In } from 'typeorm'
+import { Connection, createConnection, getConnection } from 'typeorm'
 
 import { config } from 'dotenv'
 import { SnapshotItemEntity } from '../src/snapshot/snapshotItem.entity'

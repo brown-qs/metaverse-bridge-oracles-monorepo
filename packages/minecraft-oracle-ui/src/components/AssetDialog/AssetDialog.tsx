@@ -1,91 +1,57 @@
 
 import {
-  Avatar,
   Box,
   Grid,
+  Stack,
 } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
-import Divider from '@mui/material/Divider';
-import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 import { AddressDisplayComponent } from 'components/form/AddressDisplayComponent';
 import 'date-fns';
-import { useActiveWeb3React } from 'hooks';
-import {
-  ChainId,
-} from '../../constants';
-import { getExplorerLink } from 'utils';
-import { SuccessIcon } from 'icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Button, Dialog } from 'ui';
 import { useClasses } from 'hooks';
 import { styles as appStyles } from '../../app.styles';
 import { styles as assetDialogStyles } from './AssetDialog.styles';
-import { useIsTransactionPending, useSubmittedExportTx } from 'state/transactions/hooks';
-import { ExportAssetCallbackState, useExportAssetCallback } from 'hooks/multiverse/useExportAsset';
 import { useAssetDialog } from 'hooks/useAssetDialog/useAssetDialog';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
 import useAddTokenToMetamask from 'hooks/useAddTokenToMetamask/useAddTokenToMetamask';
 import { useTokenStaticData } from 'hooks/useTokenStaticData/useTokenStaticData';
 import { StringAssetType } from 'utils/subgraph';
 import { AddressZero } from '@ethersproject/constants';
-import MetamaskLogo from '../../assets/images/metamask.png'
 
 
 export const AssetDialog = () => {
   const [assetParamsLoaded, setAssetParamsLoaded] = useState<boolean>(false);
-  const { isAssetDialogOpen, assetDialogData, setAssetDialogData, setAssetDialogOpen } = useAssetDialog();
+  const { isAssetDialogOpen, assetDialogData, setAssetDialogOpen } = useAssetDialog();
 
   const {
-    divider,
-    infoContainer,
-    button,
-    //
     row,
     col,
-    verticalDashedLine,
     formBox,
     formLabel,
     formValue,
     formValueTokenDetails,
-    formValueGive,
-    formValueGet,
-    spaceOnLeft,
-    fieldError,
     formButton,
-    expand,
-    expandOpen,
   } = useClasses(appStyles);
-
-  const [UIAdvancedSectionExpanded, setExpanded] = useState(false);
 
   const {
     dialogContainer,
     loadingContainer,
-    successContainer,
-    successIcon,
-    inputContainer,
   } = useClasses(assetDialogStyles);
-
-  const { chainId, account } = useActiveWeb3React();
 
   const handleClose = (event: any, reason: string) => {
     setAssetDialogOpen(false)
     setAssetParamsLoaded(false);
   };
 
-  if (!assetParamsLoaded && !! assetDialogData?.title) {
+  if (!assetParamsLoaded && !!assetDialogData?.title) {
     setAssetParamsLoaded(true);
   }
 
-  const erc20Data = useTokenStaticData([{assetAddress: assetDialogData?.assetAddressERC20 ?? AddressZero, assetId: '0', assetType: StringAssetType.ERC20, id: '1'}])
+  const erc20Data = useTokenStaticData([{ assetAddress: assetDialogData?.assetAddressERC20 ?? AddressZero, assetId: '0', assetType: StringAssetType.ERC20, id: '1' }])
 
-  console.log('yolo',{assetDialogData, erc20Data})
-  const {addToken} = useAddTokenToMetamask({
+  console.log('yolo', { assetDialogData, erc20Data })
+  const { addToken } = useAddTokenToMetamask({
     address: assetDialogData?.assetAddressERC20,
     decimals: erc20Data?.[0]?.decimals,
     symbol: erc20Data?.[0]?.symbol,
@@ -111,77 +77,71 @@ export const AssetDialog = () => {
     }
 
     return (
-      <>
-        <Grid container spacing={1} justifyContent="center">
-          <Typography className="form-subheader">Hybrid token details</Typography>
-          { assetDialogData?.assetERC1155 && <Grid item md={12} xs={12}>
-            <Box className={formBox}>
-              <div className={row}>
-                <div className={col}>
-                  <div className={formLabel}>Type</div>
-                  <div className={`${formValue} ${formValueTokenDetails}`}>
-                    {assetDialogData?.assetERC1155?.assetType}
-                  </div>
-                </div>
-                <div className={col}>
-                  <div className={formLabel}>ID</div>
-                  <div className={`${formValue} ${formValueTokenDetails}`}>
-                    {assetDialogData?.assetERC1155?.assetId}
-                  </div>
-                </div>
-                <div className={col}>
-                  <div className={formLabel}>Address</div>
-                  <AddressDisplayComponent
-                    className={`${formValue} ${formValueTokenDetails}`}
-                    copyTooltipLabel={'Copy address'}
-                    charsShown={5}
-                  >
-                    {assetDialogData?.assetERC1155?.assetAddress ?? '?'}
-                  </AddressDisplayComponent>
+      <Stack spacing={1} justifyContent="center">
+        <Typography style={{alignSelf: 'center'}} variant='body1'>Hybrid token details</Typography>
+        {assetDialogData?.assetERC1155 && <Grid item md={12} xs={12}>
+          <Stack direction={'row'} className={formBox} spacing={5}>
+            <div className={col}>
+              <div className={formLabel}>Type</div>
+              <div className={`${formValue} ${formValueTokenDetails}`}>
+                {assetDialogData?.assetERC1155?.assetType}
+              </div>
+            </div>
+            <div className={col}>
+              <div className={formLabel}>ID</div>
+              <div className={`${formValue} ${formValueTokenDetails}`}>
+                {assetDialogData?.assetERC1155?.assetId}
+              </div>
+            </div>
+            <div className={col}>
+              <div className={formLabel}>Address</div>
+              <AddressDisplayComponent
+                className={`${formValue} ${formValueTokenDetails}`}
+                copyTooltipLabel={'Copy address'}
+                charsShown={5}
+              >
+                {assetDialogData?.assetERC1155?.assetAddress ?? '?'}
+              </AddressDisplayComponent>
+            </div>
+          </Stack>
+        </Grid>}
+
+        {assetDialogData?.assetAddressERC20 && (
+            <Stack direction={'row'} className={`${formBox} ${row}`} spacing={5}>
+              <div className={col}>
+                <div className={formLabel}>Type</div>
+                <div className={`${formValue} ${formValueTokenDetails}`}>
+                  {'ERC20'}
                 </div>
               </div>
-            </Box>
-          </Grid>}
-
-          { assetDialogData?.assetAddressERC20 && <Grid item md={12} xs={12}>
-            <Box className={formBox}>
-              <div className={row}>
-                <div className={col}>
-                  <div className={formLabel}>Type</div>
-                  <div className={`${formValue} ${formValueTokenDetails}`}>
-                    {'ERC20'}
-                  </div>
-                </div>
-                <div className={col}>
-                  <div className={formLabel}>Address</div>
-                  <AddressDisplayComponent
-                    className={`${formValue} ${formValueTokenDetails}`}
-                    copyTooltipLabel={'Copy address'}
-                    charsShown={5}
-                  >
-                    {assetDialogData?.assetAddressERC20 ?? '?'}
-                  </AddressDisplayComponent>
-                </div>
-              </div> 
-              </Box>
-          </Grid>}
-        </Grid>
-          <Button
-            onClick={() => {
-              addToken()
-            }}
-            className={formButton}
-            variant="contained"
-            color="primary"
-            disabled={!assetDialogData?.assetAddressERC20}
-            //startIcon={<Avatar src={MetamaskLogo}>Add to Metamask</Avatar>}
-          >
-            Add to Metamask
-          </Button>
+              <div className={col}>
+                <div className={formLabel}>Address</div>
+                <AddressDisplayComponent
+                  className={`${formValue} ${formValueTokenDetails}`}
+                  copyTooltipLabel={'Copy address'}
+                  charsShown={5}
+                >
+                  {assetDialogData?.assetAddressERC20 ?? '?'}
+                </AddressDisplayComponent>
+              </div>
+            </Stack>
+          )}
+        <Button
+          onClick={() => {
+            addToken()
+          }}
+          className={formButton}
+          variant="contained"
+          color="primary"
+          disabled={!assetDialogData?.assetAddressERC20}
+        //startIcon={<Avatar src={MetamaskLogo}>Add to Metamask</Avatar>}
+        >
+          Add to Metamask
+        </Button>
         <Button className={formButton} onClick={() => handleClose({}, "yada")} color="primary">
           Cancel
         </Button>
-      </>
+      </Stack>
     );
   };
   return (
