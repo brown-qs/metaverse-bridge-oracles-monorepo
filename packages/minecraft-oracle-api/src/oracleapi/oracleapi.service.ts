@@ -131,7 +131,7 @@ export class OracleApiService {
         const ma = {
             asset: data.asset,
             beneficiary: data.beneficiary,
-            owner: data.owner,
+            owner: data.owner.toLowerCase(),
             amount: data.amount,
             chainId: sanitizedChainId,
             metaverse: METAVERSE,
