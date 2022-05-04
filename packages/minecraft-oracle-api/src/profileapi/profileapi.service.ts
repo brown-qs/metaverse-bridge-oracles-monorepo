@@ -11,11 +11,10 @@ import { UserService } from '../user/user.service';
 import { SkinselectDto } from './dtos/skinselect.dto';
 import { SkinService } from '../skin/skin.service';
 import { findRecognizedAsset } from '../utils';
-import { MetaAsset } from '../oracleapi/oracleapi.types';
 import { TypeContractsCallbackProvider, TypeRecognizedAssetsProvider } from '../provider';
 import { ConfigService } from '@nestjs/config';
 import { BridgeAssetType } from '../common/enums/AssetType';
-import { ContractType } from 'src/common/enums/ContractType';
+import { SnapshotItemEntity } from 'src/snapshot/snapshotItem.entity';
 
 @Injectable()
 export class ProfileApiService {
@@ -56,7 +55,7 @@ export class ProfileApiService {
                 summonable: true,
                 recognizedAssetType: '',
                 enraptured: false,
-                exportChainId: undefined, // resources are multi chain
+                exportChainId: 1285, // resources are multi chain
                 exportAddress: undefined,
             }
         })

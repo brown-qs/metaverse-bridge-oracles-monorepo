@@ -41,5 +41,6 @@ export const styles = (theme: Theme) => ({
     width: '30%',
     height: 'auto',
     marginBottom: theme.spacing(2),
+    color: 'green'
   },
 });

@@ -29,12 +29,13 @@ export const styles = (theme: Theme) => ({
     fontSize: '0.825rem',
     color: theme.palette.text.primary,
   },
-  iconWrapper: {
-    color: ({ pending, success }: Props) =>
-      pending
-        ? theme.palette.text.primary
-        : success
-        ? theme.palette.success.main
-        : theme.palette.error.main,
+  iconWrapperText: {
+    color: theme.palette.text.primary
+  },
+  iconWrapperSuccess: {
+    color: theme.palette.success.main
+  },
+  iconWrapperError: {
+    color: theme.palette.error.main
   },
 });

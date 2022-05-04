@@ -60,9 +60,9 @@ export class OracleApiService {
 
     public async userInRequest(user: UserEntity, data: ImportDto, enraptured: boolean): Promise<[string, string, string, boolean]> {
         this.logger.debug(`userInRequest: ${JSON.stringify(data)}, enraptured: ${enraptured}`, this.context)
-        const chainId = !!data.chainId ? data.chainId : this.defaultChainId;
-        const importableAssets = await this.getRecognizedAsset(chainId, BridgeAssetType.IMPORTED)
-        const enrapturableAssets = await this.getRecognizedAsset(chainId, BridgeAssetType.ENRAPTURED)
+        const sanitizedChainId = !!data.chainId ? data.chainId : this.defaultChainId;
+        const importableAssets = await this.getRecognizedAsset(sanitizedChainId, BridgeAssetType.IMPORTED)
+        const enrapturableAssets = await this.getRecognizedAsset(sanitizedChainId, BridgeAssetType.ENRAPTURED)
         const inAsset = enraptured ? findRecognizedAsset(enrapturableAssets, data.asset) : findRecognizedAsset(importableAssets, data.asset)
 
         if (!inAsset) {
@@ -70,7 +70,7 @@ export class OracleApiService {
             throw new UnprocessableEntityException(`Not permissioned asset`)
         }
 
-        const oracle = await this.getOracle(chainId)
+        const oracle = await this.getOracle(sanitizedChainId)
 
         if (!oracle) {
             this.logger.error(`userInRequest: oracle error`, null, this.context)
@@ -78,7 +78,7 @@ export class OracleApiService {
         }
 
         const requestHash = await utf8ToKeccak(JSON.stringify(data))
-        const existingEntry = await this.assetService.findOne({ requestHash, chainId, enraptured, pendingIn: true, owner: { uuid: user.uuid } }, { order: { expiration: 'DESC' }, relations: ['owner'] })
+        const existingEntry = await this.assetService.findOne({ requestHash, chainId: sanitizedChainId, enraptured, pendingIn: true, owner: { uuid: user.uuid } }, { order: { expiration: 'DESC' }, relations: ['owner'] })
 
         existingEntry ? console.log(Date.now() - Number.parseInt(existingEntry.expiration) - CALLDATA_EXPIRATION_THRESHOLD) : undefined
 
@@ -91,7 +91,7 @@ export class OracleApiService {
                 beneficiary: data.beneficiary,
                 owner: data.owner,
                 amount: data.amount,
-                chainId: data.chainId,
+                chainId: sanitizedChainId,
                 metaverse: METAVERSE,
                 salt
             }
@@ -133,7 +133,7 @@ export class OracleApiService {
             beneficiary: data.beneficiary,
             owner: data.owner,
             amount: data.amount,
-            chainId: data.chainId,
+            chainId: sanitizedChainId,
             metaverse: METAVERSE,
             salt
         }

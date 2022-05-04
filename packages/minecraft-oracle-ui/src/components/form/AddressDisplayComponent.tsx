@@ -88,7 +88,9 @@ export const AddressDisplayComponent = (props: {
             </Typography>
           ) : (
             <Typography className={props.className}>
-              {_apply_ellipsis()}
+              <ExternalLink>
+                {_apply_ellipsis()}
+              </ExternalLink>
             </Typography>
           )}
         </Tooltip>

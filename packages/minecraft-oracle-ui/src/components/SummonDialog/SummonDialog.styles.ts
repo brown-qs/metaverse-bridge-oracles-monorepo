@@ -49,5 +49,9 @@ export const styles = (theme: Theme) => ({
     borderStyle: 'solid',
     borderColor: theme.palette.grey[900],
     maxHeight: 'auto',
+    alignSelf: 'center'
   },
+  alignSelfCenter: {
+    alignSelf: 'center'
+  }
 });

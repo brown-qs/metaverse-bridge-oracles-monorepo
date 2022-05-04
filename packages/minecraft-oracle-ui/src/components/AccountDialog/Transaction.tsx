@@ -1,4 +1,4 @@
-import { CircularProgress } from '@mui/material';
+import { CircularProgress, Stack } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import { ExternalLink } from 'components';
 import { ChainId } from '../../constants';
@@ -32,16 +32,18 @@ export const Transaction = ({ hash }: { hash: string }) => {
           'transaction'
         )}
       >
-        <Typography>{summary ?? hash} ↗</Typography>
-        <div className={styles.iconWrapper}>
-          {pending ? (
-            <CircularProgress />
-          ) : success ? (
-            <CheckCircle size="16" />
-          ) : (
-            <Triangle size="16" />
-          )}
-        </div>
+        <Stack direction={'row'} spacing={1}>
+          <div className={`${pending ? styles.iconWrapperText: success ? styles.iconWrapperSuccess : styles.iconWrapperError}`}>
+            {pending ? (
+              <CircularProgress />
+            ) : success ? (
+              <CheckCircle size="16" />
+            ) : (
+              <Triangle size="16" />
+            )}
+          </div>
+        <Typography variant={'body2'}>{summary ?? hash} ↗</Typography>
+        </Stack>
       </ExternalLink>
     </div>
   );
