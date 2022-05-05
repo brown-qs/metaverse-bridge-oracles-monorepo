@@ -84,7 +84,7 @@ export class OracleApiService {
 
         // we try to confirm
         if (!!existingEntry) {
-            console.log('exists?')
+            //console.log('exists?')
             const salt = existingEntry.salt
             const ma = {
                 asset: data.asset,
@@ -105,7 +105,7 @@ export class OracleApiService {
 
             let failedtoconfirm = false
             try {
-                const success = enraptured ? await this.userEnraptureConfirm(user, { hash, chainId }) : await this.userImportConfirm(user, { hash, chainId })
+                const success = enraptured ? await this.userEnraptureConfirm(user, { hash, chainId: sanitizedChainId }) : await this.userImportConfirm(user, { hash, chainId: sanitizedChainId })
                 this.logger.debug(`InData: previous inflow was confirmed: ${hash}`, this.context)
             } catch (e) {
                 failedtoconfirm = true
@@ -126,12 +126,12 @@ export class OracleApiService {
                 return [hash, payload, signature, false]
             }
         }
-        console.log('polo')
+        //console.log('polo')
         const salt = await getSalt()
         const ma = {
             asset: data.asset,
             beneficiary: data.beneficiary,
-            owner: data.owner,
+            owner: data.owner.toLowerCase(),
             amount: data.amount,
             chainId: sanitizedChainId,
             metaverse: METAVERSE,

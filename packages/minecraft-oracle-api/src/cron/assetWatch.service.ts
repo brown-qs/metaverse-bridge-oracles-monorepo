@@ -25,14 +25,13 @@ export class AssetWatchService {
     @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
       this.context = AssetWatchService.name
-
-      this.disabled = this.configService.get<boolean>('cron.disabled')
+      this.disabled = this.configService.get<boolean>('cron.disabled') ?? false
   }
 
   @Interval(IMPORT_CONFIRM_CRON_INTERVAL_MS)
   async handleConfirmPatrol() {
     if (this.disabled) {
-      this.logger.debug('handleCleanPatrol: disabled', this.context);
+      this.logger.debug('handleConfirmPatrol: disabled', this.context);
       return
     }
 
@@ -48,22 +47,23 @@ export class AssetWatchService {
       this.logger.debug(`handleConfirmPatrol: found ${assets.length} assets to check`, this.context);
       
       for(let i = 0; i < assets.length; i++) {
+        const asset = assets[i]
         try {
-          if (assets[i].pendingIn) {
-            if (assets[i].enraptured) {
-              this.logger.debug(`handleConfirmPatrol: enrapture confirm of ${assets[i].hash}`, this.context);
-              await this.oracleApiService.userEnraptureConfirm(assets[i].owner, {hash: assets[i].hash, chainId: assets[i].chainId}, assets[i])
+          if (asset.pendingIn) {
+            if (asset.enraptured) {
+              this.logger.debug(`handleConfirmPatrol: enrapture confirm of ${asset.hash}`, this.context);
+              await this.oracleApiService.userEnraptureConfirm(asset.owner, {hash: asset.hash, chainId: asset.chainId}, asset)
             } else {
-              this.logger.debug(`handleConfirmPatrol: import confirm of ${assets[i].hash}`, this.context);
-              await this.oracleApiService.userImportConfirm(assets[i].owner, {hash: assets[i].hash, chainId: assets[i].chainId}, assets[i])
+              this.logger.debug(`handleConfirmPatrol: import confirm of ${asset.hash}`, this.context);
+              await this.oracleApiService.userImportConfirm(asset.owner, {hash: asset.hash, chainId: asset.chainId}, asset)
             }
           }
-          if (assets[i].pendingOut) {
-            this.logger.debug(`handleConfirmPatrol: export confirm of ${assets[i].hash}`, this.context);
-            await this.oracleApiService.userExportConfirm(assets[i].owner, {hash: assets[i].hash, chainId: assets[i].chainId}, assets[i])
+          if (asset.pendingOut) {
+            this.logger.debug(`handleConfirmPatrol: export confirm of ${asset.hash}`, this.context);
+            await this.oracleApiService.userExportConfirm(asset.owner, {hash: asset.hash, chainId: asset.chainId}, asset)
           }
         } catch (e) {
-          this.logger.warn(`handleConfirmPatrol: error confirming ${assets[i].hash}`, this.context);
+          this.logger.warn(`handleConfirmPatrol: error confirming ${asset.hash}`, this.context);
           this.logger.warn(e, this.context);
         }
       }
