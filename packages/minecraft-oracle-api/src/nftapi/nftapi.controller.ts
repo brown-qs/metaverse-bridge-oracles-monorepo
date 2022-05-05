@@ -30,7 +30,7 @@ export class NftApiController {
     @ApiOperation({ summary: 'Fetches NFT' })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
-    async profile(
+    async getNFT(
         @Param('chainId') chainId: string,
         @Param('tokenType') tokenType: string,
         @Param('address') address: string,
@@ -45,7 +45,7 @@ export class NftApiController {
     @ApiOperation({ summary: 'Fetches NFT Collection' })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
-    async collection(
+    async getNFTCollection(
         @Param('chainId') chainId: string,
         @Param('tokenType') tokenType: string,
         @Param('address') address: string,

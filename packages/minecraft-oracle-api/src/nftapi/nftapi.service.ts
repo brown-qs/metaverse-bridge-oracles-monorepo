@@ -72,10 +72,11 @@ export class NftApiService {
             }))
         }
         return results;
-
     }
 
     public async getNFT(chainId: string, tokenType: string, address: string, tokenId: string): Promise<ProcessedStaticTokenData | StaticTokenData> {
+
+        this.logger.log(`Fetching NFT metadata: ${chainId}-${tokenType}-${address}-${tokenId}`, this.context)
 
         const assets: Asset[] = [
             {
@@ -95,6 +96,7 @@ export class NftApiService {
         const results = await this.tryMultiCallCore(multicall, calls, false);
 
         if (!results) {
+            this.logger.error(`Fetching NFT metadata: ${chainId}-${tokenType}-${address}-${tokenId}`, undefined, this.context)
             return undefined
         }
         //console.log('yolo tryMultiCallCore res', results);
