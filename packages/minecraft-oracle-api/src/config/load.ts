@@ -67,7 +67,7 @@ export const loadEnv = () => {
         },
         cron: {
             confirmWatchIntervalMs: process.env.CONFIRM_WATCH_INTERVAL_MS,
-            disabled: process.env.CONFIRM_WATCH_DISABLED
+            disabled: process.env.CONFIRM_WATCH_DISABLED === 'true'
         }
     };
 };
