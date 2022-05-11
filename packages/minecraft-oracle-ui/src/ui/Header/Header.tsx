@@ -54,7 +54,7 @@ export const Header = () => {
                                         direction={'row'}
                                         onClick={() => setIsDrawerOpened(false)}
                                     >
-                                        <a href="https://moonsama.com" target='_blank' rel="noreferrer" className={navItem}>
+                                        <a href="https://marketplace.moonsama.com" target='_blank' rel="noreferrer" className={navItem}>
                                             Visit Marketplace↗
                                         </a> |
                                         <a href="https://wiki.moonsama.com" target='_blank' rel="noreferrer" className={navItem}>
@@ -70,7 +70,7 @@ export const Header = () => {
                                     >
                                         <Box>
                                             <div>
-                                            <a href="https://moonsama.com" target='_blank' rel="noreferrer" className={navItemDrawer}>
+                                            <a href="https://marketplace.moonsama.com" target='_blank' rel="noreferrer" className={navItemDrawer}>
                                                 Visit Marketplace↗
                                             </a>
                                             </div>
