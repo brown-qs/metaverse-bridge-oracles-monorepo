@@ -125,39 +125,3 @@ export const IPFS_GATEWAYS = [
 ];
 
 export const MAX_WIDTH_TO_SHOW_NAVIGATION = 1360;
-
-export type MaterialType = {
-  name: string
-  multiplier: number
-}
-
-export const WOOD_TYPES = [{name: 'OAK_LOG', multiplier: 1}, {name: 'ACACIA_LOG', multiplier: 1}, {name: 'JUNGLE_LOG', multiplier: 1}, {name: 'BIRCH_LOG', multiplier: 1}, {name: 'SPRUCE_LOG', multiplier: 1}, {name: 'DARK_OAK_LOG', multiplier: 1}];
-
-export const IRON_TYPES = [{name: 'IRON_INGOT', multiplier: 1}, {name: 'IRON_BLOCK', multiplier: 9}];
-export const GOLD_TYPES = [{name: 'GOLD_INGOT', multiplier: 1}, {name: 'GOLD_BLOCK', multiplier: 9}];
-export const EXP_TYPES = [{name: 'EXP', multiplier: 1}];
-
-export const MATERIAL_META = {
-  'OAK_INGOT': {
-    image: ''
-  },
-  'IRON_INGOT': {
-    image: ''
-  },
-  'GOLD_INGOT': {
-    image: ''
-  },
-  'COBBLESTONE': {
-    image: ''
-  },
-  'EXP': {
-    image: ''
-  }
-}
-
-export const MATERIAL_TYPES = ['LOG', 'GOLD_BLOCK', 'IRON_BLOCK', 'COBBLESTONE', 'IRON_INGOT', 'GOLD_INGOT', 'DIAMOND', 'DIAMOND_BLOCK', 'EXP'];
-
-export const RECOGNIZ: { [chainId in ChainId]?: string } = {
-  [ChainId.VOLTA]: '0x58df3876BcE94941DE59088c5963781984EF264b',
-  [ChainId.MOONRIVER]: '0x59C481548CE7BA13f3288df9f4FCf44a10A589A0'//'0x710ddbaA47A4cCdC85A507a264865260e82c18EE',
-};

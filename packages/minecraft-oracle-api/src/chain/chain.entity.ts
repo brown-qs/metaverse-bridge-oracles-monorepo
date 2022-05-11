@@ -16,7 +16,7 @@ export class ChainEntity {
     @Column()
     @IsString()
     chainName: string;
-    
+
     @Column()
     @IsString()
     rpcUrl: string;
@@ -24,7 +24,7 @@ export class ChainEntity {
     @Column({ nullable: true, default: null })
     @IsString()
     multiverseAddress: string;
-    
+
     @Column({ nullable: true, default: null })
     @IsString()
     multicallAddress?: string;
