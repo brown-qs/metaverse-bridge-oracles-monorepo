@@ -55,6 +55,8 @@ import { GameItemTypeEntity } from './gameitemtype/gameitemtype.entity';
 import { PlayerGameItemEntity } from './playergameitem/playergameitem.entity';
 import { ChainEntity } from './chain/chain.entity';
 import { ChainModule } from './chain/chain.module';
+import { MoonsamaApiModule } from './exoconfig/exoconfig.module';
+import { ConfigEntity } from './exoconfig/config.entity';
 
 @Module({
   imports: [
@@ -86,7 +88,7 @@ import { ChainModule } from './chain/chain.module';
             username: configService.get<string>('typeorm.username'),
             password: configService.get<string>('typeorm.password'),
             database: configService.get<string>('typeorm.database'),
-            entities: [UserEntity, SnapshotItemEntity, InventoryEntity, TextureEntity, SkinEntity, PlayerScoreEntity, MaterialEntity, GameEntity, GameTypeEntity, AchievementEntity, PlayerAchievementEntity, SecretEntity, AssetEntity, SummonEntity, PlaySessionEntity, PlaySessionStatEntity, GganbuEntity, SnaplogEntity, GameItemTypeEntity, PlayerGameItemEntity, GameScoreTypeEntity, ChainEntity],
+            entities: [UserEntity, SnapshotItemEntity, InventoryEntity, TextureEntity, SkinEntity, PlayerScoreEntity, MaterialEntity, GameEntity, GameTypeEntity, AchievementEntity, PlayerAchievementEntity, SecretEntity, AssetEntity, SummonEntity, PlaySessionEntity, PlaySessionStatEntity, GganbuEntity, SnaplogEntity, GameItemTypeEntity, PlayerGameItemEntity, GameScoreTypeEntity, ChainEntity, ConfigEntity],
             synchronize: configService.get<boolean>('typeorm.synchronize'),
             logging: configService.get<boolean>('typeorm.logging'),
         }),
@@ -130,7 +132,8 @@ import { ChainModule } from './chain/chain.module';
     NftApiModule,
     GganbuModule,
     SnaplogModule,
-    ChainModule
+    ChainModule,
+    MoonsamaApiModule
   ]
 })
 export class AppModule {}
