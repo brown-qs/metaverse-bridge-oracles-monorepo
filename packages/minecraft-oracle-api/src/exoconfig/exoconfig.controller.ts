@@ -1,10 +1,12 @@
 import {
     Controller,
     Get,
+    Put,
     Post,
     Body,
     HttpCode,
     Inject,
+    UnprocessableEntityException,
     Param,
     UseGuards
 } from '@nestjs/common';
@@ -46,7 +48,7 @@ export class MoonsamaAPIController {
     @ApiBearerAuth()
     @UseGuards(SharedSecretGuard)
     async getConfigByID(
-        @Param('id') id?: string,
+        @Param('id') id: string,
     ): Promise<ConfigDto> {
         const data = await this.moonsamaApiService.findOne({ id: id })
         return data
@@ -61,6 +63,23 @@ export class MoonsamaAPIController {
     ) {
         const data = await this.moonsamaApiService.find({})
         return data
+    }
+
+    @Put('configs/:id')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Update config' })
+    @ApiBearerAuth()
+    @UseGuards(SharedSecretGuard)
+    async updateConfig(
+        @Param('id') id: string,
+        @Body() config: ConfigDto,
+    ): Promise<boolean> {
+        const configData = await this.moonsamaApiService.findOne({id: id})
+        if (!configData) {
+            throw new UnprocessableEntityException('Config was not found')
+        }
+        const success = await this.moonsamaApiService.updateConfig(configData, config)
+        return success
     }
 
 }

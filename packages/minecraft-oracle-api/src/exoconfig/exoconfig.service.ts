@@ -49,4 +49,11 @@ export class MoonsamaApiService {
         const u = await this.repository.find(conditions)
         return u
     }
+
+    public async updateConfig(config: ConfigEntity, dto: ConfigDto): Promise<boolean> {
+
+        await this.repository.update(config.id, dto)
+
+        return true
+    }
 }
