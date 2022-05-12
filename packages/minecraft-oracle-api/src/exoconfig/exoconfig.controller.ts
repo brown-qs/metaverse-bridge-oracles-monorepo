@@ -10,6 +10,7 @@ import {
     Param,
     UseGuards
 } from '@nestjs/common';
+import { JwtAuthGuard } from '../authapi/jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { SharedSecretGuard } from '../authapi/secret.guard';
@@ -34,7 +35,7 @@ export class MoonsamaAPIController {
     @HttpCode(200)
     @ApiOperation({ summary: 'Add config' })
     @ApiBearerAuth()
-    @UseGuards(SharedSecretGuard)
+    @UseGuards(JwtAuthGuard)
     async addConfig(
         @Body() config: ConfigDto,
     ): Promise<ConfigDto> {
@@ -46,7 +47,7 @@ export class MoonsamaAPIController {
     @HttpCode(200)
     @ApiOperation({ summary: 'Get config' })
     @ApiBearerAuth()
-    @UseGuards(SharedSecretGuard)
+    @UseGuards(JwtAuthGuard)
     async getConfigByID(
         @Param('id') id: string,
     ): Promise<ConfigDto> {
@@ -58,7 +59,7 @@ export class MoonsamaAPIController {
     @HttpCode(200)
     @ApiOperation({ summary: 'Get all config' })
     @ApiBearerAuth()
-    @UseGuards(SharedSecretGuard)
+    @UseGuards(JwtAuthGuard)
     async getConfigAll(
     ) {
         const data = await this.moonsamaApiService.find({})
@@ -69,7 +70,7 @@ export class MoonsamaAPIController {
     @HttpCode(200)
     @ApiOperation({ summary: 'Update config' })
     @ApiBearerAuth()
-    @UseGuards(SharedSecretGuard)
+    @UseGuards(JwtAuthGuard)
     async updateConfig(
         @Param('id') id: string,
         @Body() config: ConfigDto,
