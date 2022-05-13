@@ -1,7 +1,9 @@
 import {
     IsString,
+    ValidateNested,
 } from 'class-validator';
-import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn, JoinColumn } from 'typeorm';
+import { AttributeEntity } from 'src/attribute/attribute.entity';
 
 @Entity()
 export class ConfigEntity {
@@ -38,4 +40,10 @@ export class ConfigEntity {
     @IsString()
     external_link: string;
 
+    @ValidateNested()
+    @OneToMany(() => AttributeEntity, attribute => attribute.config, {
+        eager: true, cascade: false,
+    })
+    @JoinColumn()
+    attributes?: AttributeEntity[];
 }

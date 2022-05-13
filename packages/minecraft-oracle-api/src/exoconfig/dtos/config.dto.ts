@@ -1,5 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger"
-import { IsString } from "class-validator"
+import { IsString, ValidateNested } from "class-validator"
+import { AttributeDto } from "src/attribute/dtos/attribute.dto"
+import { Type } from 'class-transformer';
 
 export class ConfigDto {
 
@@ -23,4 +25,7 @@ export class ConfigDto {
     @ApiProperty({ description: 'String. Example: https://www.rubentopia.com' })
     external_link: string
 
+    @ValidateNested()
+    @Type(() => AttributeDto)
+    attributes: AttributeDto[];
 }
