@@ -28,7 +28,7 @@ export class MoonsamaApiService {
     ) {
     }
 
-    public async addConfig(config: ConfigDto): Promise<ConfigDto> {
+    public async addConfig(config: ConfigDto): Promise<ConfigEntity> {
         const u = await this.repository.save({
             name: config.name,
             description: config.description,
