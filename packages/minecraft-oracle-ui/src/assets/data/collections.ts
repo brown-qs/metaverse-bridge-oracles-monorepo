@@ -155,7 +155,7 @@ export const collections = {
       display_name: 'Moonsama Embassy',
       floorDisplay: false,
       symbol: 'MEMBASSY',
-      ids: ['1', '2', '3', '4'],
+      ids: undefined,
       importable: false,
       enrapturable: true,
       type: 'ERC1155',
