@@ -51,11 +51,13 @@ import { SortDirection } from '../common/enums/SortDirection';
 import { SetGameScoreTypeDto } from '../gamescoretype/dtos/gamescoretype.dto';
 import { PlayerScoreEntity } from '../playerscore/playerscore.entity';
 import { GameScoreTypeService } from '../gamescoretype/gamescoretype.service';
-import { adjustPower } from 'src/utils';
+import { adjustPower } from '../utils';
+import { allToSha256, allToSha3_256 } from '../crypto/hash';
+import { UserAssetFingerprint, UserAssetFingerprintsResult } from './dtos/fingerprint.dto';
+import { buffer } from 'stream/consumers';
 
 @Injectable()
 export class GameApiService {
-
     private readonly context: string;
 
     private locks: Map<string, MutexInterface>;
@@ -628,16 +630,16 @@ export class GameApiService {
     private async updateSnaplogs(snaplogs: SnaplogEntity[]) {
 
         let createList = []
-        for(let i = 0; i < snaplogs.length; i++) {
+        for (let i = 0; i < snaplogs.length; i++) {
             const snaplog = snaplogs[i]
 
-            const existing = await this.snaplogService.findOne({id: snaplog.id})
+            const existing = await this.snaplogService.findOne({ id: snaplog.id })
 
             if (!existing) {
                 createList.push(snaplog)
             } else {
                 const newNum = (Number.parseFloat(existing.amount) + Number.parseFloat(snaplog.amount)).toString()
-                await this.snaplogService.update(existing.id, {amount: newNum})
+                await this.snaplogService.update(existing.id, { amount: newNum })
             }
         }
 
@@ -744,7 +746,7 @@ export class GameApiService {
                         }
 
                         try {
-                            const stats = await this.playSessionStatService.findOne({id: PlaySessionStatService.calculateId({uuid: user.uuid, gameId: dto?.gameId})})
+                            const stats = await this.playSessionStatService.findOne({ id: PlaySessionStatService.calculateId({ uuid: user.uuid, gameId: dto?.gameId }) })
                             const logs: SnaplogEntity[] = newItem.snaps.map(snap => {
                                 return {
                                     ...snap,
@@ -1144,5 +1146,39 @@ export class GameApiService {
         }
 
         return entities;
+    }
+
+    getAssetFingerprintForPlayer(user: UserEntity): UserAssetFingerprint {
+
+        if (!user) {
+            return undefined
+        }
+
+        //console.log(user.userName)
+        const hash = user.assets.filter(asset => !asset.pendingIn)
+            .reduce((prevResult, element) => {
+                const leafHash = allToSha256(element.chainId, element.assetAddress, element.assetId, JSON.stringify(element.metadata))
+                const result = allToSha256(prevResult, leafHash)
+                //console.log('    ', {leafHash, result: result.toString('hex')})
+                return result
+            }, Buffer.from([]))
+
+        if (!hash || hash.length === 0) {
+            return undefined
+        }
+
+        return {
+            uuid: user.uuid,
+            assetsFingerprint: hash.toString('hex')
+        }
+    }
+
+    async getAssetFingerprints(): Promise<UserAssetFingerprintsResult> {
+        const users = await this.userService.findMany({ where: { hasGame: true }, relations: ['assets'] })
+        const results: UserAssetFingerprint[] = users.map(user => this.getAssetFingerprintForPlayer(user)).filter(x => !!x)
+
+        return {
+            fingerprints: results
+        };
     }
 }
