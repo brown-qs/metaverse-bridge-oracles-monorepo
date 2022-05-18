@@ -183,14 +183,14 @@ async function main() {
     }
 
     try {
-        const assets = await connection.manager.find<AssetEntity>(AssetEntity, {})
+        const assets = await connection.manager.find<AssetEntity>(AssetEntity, {loadEagerRelations: true})
 
         for (let i = 0; i < assets.length; i++) {
             const asset = assets[i]
 
             console.log(i, !!asset.metadata)
             if (!asset.metadata) {
-                asset.metadata = await getNft('1285', asset.assetType.valueOf(), asset.assetAddress, asset.assetId)
+                asset.metadata = await getNft('1285', asset.collectionFragment.collection.assetType.valueOf(), asset.collectionFragment.collection.assetAddress, asset.assetId)
                 console.log('...updated')
             }
 

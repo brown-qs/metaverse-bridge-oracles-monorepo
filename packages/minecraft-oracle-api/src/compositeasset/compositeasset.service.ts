@@ -11,6 +11,10 @@ export class CompositeAssetService {
         private readonly repository: Repository<CompositeAssetEntity>
     ) {}
 
+    public static calculateId(dto: {chainId: string | number, assetAddress: string, assetId: string | number}): string {
+        return `${dto.chainId}-${dto.assetAddress}-${dto.assetId}`
+    }
+
     public async create(material: CompositeAssetEntity): Promise<CompositeAssetEntity> {
         const u = await this.repository.save(material);
         return u;

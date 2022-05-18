@@ -1,18 +1,17 @@
 import {
     IsJSON,
-    IsNumber,
     IsString
 } from 'class-validator';
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 import { CompositeCollectionFragmentEntity } from '../compositecollectionfragment/compositecollectionfragment.entity';
 import { AssetEntity } from '../asset/asset.entity';
+import { CompositeMetadataType } from './types';
 
 @Entity()
 export class CompositeAssetEntity {
 
-    @PrimaryGeneratedColumn()
-    @IsNumber()
-    id: number;
+    @PrimaryColumn()
+    id: string;
 
     @Column()
     @IsString()
@@ -20,13 +19,13 @@ export class CompositeAssetEntity {
 
     @IsJSON()
     @Column({ type: 'json', nullable: true })
-    originalMetadata?: unknown;
+    originalMetadata?: CompositeMetadataType;
 
     @IsJSON()
     @Column({ type: 'json', nullable: true })
-    compositeMetadata?: unknown;
+    compositeMetadata?: CompositeMetadataType;
 
-    @ManyToOne(() => CompositeCollectionFragmentEntity, (ccf) => ccf.composites)
+    @ManyToOne(() => CompositeCollectionFragmentEntity, (ccf) => ccf.compositeAssets)
     compositeCollectionFragment: CompositeCollectionFragmentEntity;
 
     @OneToMany(() => AssetEntity, (asset) => asset.compositeAsset)

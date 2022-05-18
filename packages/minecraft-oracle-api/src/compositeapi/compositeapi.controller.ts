@@ -10,9 +10,12 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import { User } from '../utils/decorators';
 import { JwtAuthGuard } from '../authapi/jwt-auth.guard';
 import { CompositeApiService } from './compositeapi.service';
 import { SaveCompositeConfigDto } from './dtos/save.dto';
+import { UserEntity } from '../user/user.entity';
+import { CompositeMetadataType } from '../compositeasset/types';
 
 @ApiTags('composite')
 @Controller('composite')
@@ -29,25 +32,26 @@ export class CompositeApiController {
 
     @Put('save')
     @HttpCode(200)
-    @ApiOperation({ summary: 'Confirms an export request, sealing the deal' })
+    @ApiOperation({ summary: 'Saves a composite config' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async saveCompositeConfig(
+        @User() user: UserEntity,
         @Body() dto: SaveCompositeConfigDto
-    ): Promise<boolean> {
-        const success = await this.compositeApiService.saveCompositeConfig(dto)
-        return success
+    ): Promise<CompositeMetadataType> {
+        const data = await this.compositeApiService.saveCompositeConfig(dto, user)
+        return data
     }
 
     @Get('metadata/:chainId/:assetAddress/:assetId')
     @HttpCode(200)
-    @ApiOperation({ summary: 'Gets the composite metadata of the asset, if any, returns original otherwise.' })
+    @ApiOperation({ summary: 'Fetches composite URI of a Moonsama 2.0 token' })
     async getCompositeMetadata(
         @Param('chainId') chainId: string,
         @Param('assetAddress') assetAddress: string,
         @Param('assetId') assetId: string
-    ): Promise<unknown> {
-        const success = await this.compositeApiService.getCompositeMetadata(chainId, assetAddress, assetId)
-        return success
+    ): Promise<CompositeMetadataType> {
+        const data = await this.compositeApiService.getCompositeMetadata(chainId, assetAddress, assetId)
+        return data
     }
 }

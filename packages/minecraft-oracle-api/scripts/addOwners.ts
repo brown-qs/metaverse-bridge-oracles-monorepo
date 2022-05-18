@@ -54,13 +54,13 @@ async function main() {
     const failed = []
 
     try {
-        const assets = await connection.manager.find<AssetEntity>(AssetEntity, {})
+        const assets = await connection.manager.find<AssetEntity>(AssetEntity, {loadEagerRelations: true})
 
         for (let i = 0; i < assets.length; i++) {
             const asset = assets[i]
             
             if (!asset.assetOwner) {
-                const chainEntity = await connection.manager.findOne<ChainEntity>(ChainEntity, { chainId: asset.chainId })
+                const chainEntity = await connection.manager.findOne<ChainEntity>(ChainEntity, { chainId: asset.collectionFragment.collection.chainId })
                 const contract = new Contract(chainEntity.multiverseAddress, METAVERSE_ABI, new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl))
                 console.log('hash', asset.hash)
                 try {

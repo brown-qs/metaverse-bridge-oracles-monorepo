@@ -24,21 +24,9 @@ export class AssetEntity {
     @IsString()
     hash: string;
 
-    @IsEnum(StringAssetType)
-    @Column({
-        type: 'enum',
-        enum: StringAssetType,
-        default: StringAssetType.NONE
-    })
-    assetType: StringAssetType;
-
     @Column()
     @IsString()
     amount: string;
-    
-    @Column()
-    @IsString()
-    assetAddress: string;
 
     @Column()
     @IsString()
@@ -87,10 +75,6 @@ export class AssetEntity {
     @IsJSON()
     @Column({ type: 'json', nullable: true })
     metadata?: unknown;
-
-    @Column({default: 1285})
-    @IsNumber()
-    chainId?: number;
 
     @ManyToOne(() => UserEntity, (user) => user.assets)
     owner?: UserEntity
