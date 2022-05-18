@@ -115,6 +115,38 @@ export class NftApiService {
         return result
     }
 
+    public async getRawNFTMetadata(chainId: string, tokenType: string, address: string, tokenId: string): Promise<unknown> {
+
+        this.logger.log(`Fetching NFT metadata: ${chainId}-${tokenType}-${address}-${tokenId}`, this.context)
+
+        const assets: Asset[] = [
+            {
+                assetAddress: address,
+                assetId: tokenId,
+                assetType: stringToStringAssetType(tokenType),
+                id: '1'
+            }
+        ]
+
+        let calls: any[] = [];
+        assets.map((asset, i) => {
+            calls = [...calls, ...getTokenStaticCalldata(asset)];
+        });
+
+        const multicall = await this.getContract(!!chainId ? Number.parseInt(chainId): this.defaultChainId, ContractType.MULTICALL)
+        const results = await this.tryMultiCallCore(multicall, calls, false);
+
+        if (!results) {
+            this.logger.error(`Fetching NFT metadata: ${chainId}-${tokenType}-${address}-${tokenId}`, undefined, this.context)
+            return undefined
+        }
+        //console.log('yolo tryMultiCallCore res', results);
+        let x = processTokenStaticCallResults(assets, results);
+        const tokenMetas = await this.useFetchRawTokenUri(x)
+
+        return tokenMetas?.[0] as TokenMeta
+    }
+
     private tryMultiCallCore = async (
         multi: Contract | undefined,
         calls: [any, string, string, any[]][], // list of lists: [abi fragment, target address, function name, [data]]
@@ -191,6 +223,37 @@ export class NftApiService {
                     ? uriToHttp(meta.youtube_url, false)
                     : undefined;
             }
+            return meta;
+        });
+
+        const metas = await Promise.all(promises);
+        return metas;
+    }
+
+    private async useFetchRawTokenUri(
+        uris: ({ tokenURI?: string } | undefined)[] | undefined
+    ): Promise<(TokenMeta | undefined)[]> {
+
+        const cb = fetchUrlCallback();
+
+        if (!uris) {
+            return []
+        }
+
+        //console.log(uris)
+        const promises = uris.map(async (uri) => {
+            //const rawmeta = await cb<TokenMeta>(uri?.tokenURI, false);
+            // FIXME fucking black token
+            const rawmeta = await cb<TokenMeta>(uri?.tokenURI === 'https://ipfs.io/ipfs/QmcuV7UqedmTKVzQ9yD2QNm3dhiaN5JXdqRtJTFKqTJEL3' ? 'ipfs://QmcN86vmnTrYaRjtPn3fP98rfAE7BUEkaoVLGHKhUtAurJ' : uri?.tokenURI, false);
+
+
+            let meta;
+            if (typeof rawmeta === 'string' || rawmeta instanceof String) {
+                meta = JSON.parse(rawmeta as string);
+            } else {
+                meta = rawmeta;
+            }
+
             return meta;
         });
 

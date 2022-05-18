@@ -1,6 +1,7 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import { Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 import { CompositeAssetEntity } from '../compositeasset/compositeasset.entity';
 import { CollectionEntity } from '../collection/collection.entity';
+
 
 @Entity()
 export class CompositeCollectionFragmentEntity {
@@ -11,6 +12,6 @@ export class CompositeCollectionFragmentEntity {
     @ManyToOne(() => CollectionEntity, (collection) => collection.compositeCollectionFragments)
     collection: CollectionEntity;
 
-    @OneToMany(() => CompositeAssetEntity, (composite) => composite.collection)
+    @OneToMany(() => CompositeAssetEntity, (composite) => composite.compositeCollectionFragment)
     composites?: CompositeAssetEntity[];
 }

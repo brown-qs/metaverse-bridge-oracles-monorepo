@@ -63,6 +63,7 @@ import { CollectionModule } from './collection/collection.module';
 import { CompositeAssetModule } from './compositeasset/compositeasset.module';
 import { CollectionFragmentModule } from './collectionfragment/collectionfragment.module';
 import { CompositeCollectionFragmentModule } from './compositecollectionfragment/compositecollectionfragment.module';
+import { CompositeApiModule } from './compositeapi/compositeapi.module';
 
 
 @Module({
@@ -170,7 +171,8 @@ import { CompositeCollectionFragmentModule } from './compositecollectionfragment
     CollectionModule,
     CollectionFragmentModule,
     CompositeCollectionFragmentModule,
-    CompositeAssetModule
+    CompositeAssetModule,
+    CompositeApiModule
   ]
 })
 export class AppModule {}
