@@ -118,6 +118,13 @@ export function stringToStringAssetType(
   return StringAssetType.NONE;
 }
 
+export function checkIfIdIsRecognized(idRange: undefined | string | string[], asset: {assetAddress: string, assetId: string}) {
+  return (!idRange || idRange.length === 0)
+        || (typeof idRange === 'string' && idRange === asset.assetId)
+        || (idRange.length === 1 && Number.parseInt(asset.assetId) === Number.parseInt(idRange[0]))
+        || (Number.parseInt(asset.assetId) >= Number.parseInt(idRange[0]) && Number.parseInt(asset.assetId) <= Number.parseInt(idRange[1]))
+}
+
 export function findRecognizedAsset(recognizedCollectionFragments: CollectionFragmentEntity[], asset: {assetAddress: string, assetId: string}) {
   //console.log({recassets})
   //console.log({asset})
@@ -125,12 +132,7 @@ export function findRecognizedAsset(recognizedCollectionFragments: CollectionFra
     //console.log(x)
     return (
       (x.collection.assetAddress.toLowerCase() === asset?.assetAddress?.toLowerCase())
-      && (
-        (!x.idRange || x.idRange.length === 0)
-        || (typeof x.idRange === 'string' && x.idRange === asset.assetId)
-        || (x.idRange.length === 1 && Number.parseInt(asset.assetId) === Number.parseInt(x.idRange[0]))
-        || (Number.parseInt(asset.assetId) >= Number.parseInt(x.idRange[0]) && Number.parseInt(asset.assetId) <= Number.parseInt(x.idRange[1]))
-      )
+      && checkIfIdIsRecognized(x.idRange, asset)
     )
   })
 }

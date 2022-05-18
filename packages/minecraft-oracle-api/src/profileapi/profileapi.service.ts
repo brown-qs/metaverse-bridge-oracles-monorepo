@@ -60,7 +60,7 @@ export class ProfileApiService {
             }
         })
 
-        const userAssets = await this.assetService.findMany({ where: { owner: user.uuid, pendingIn: false } })
+        const userAssets = await this.assetService.findMany({ where: { owner: user.uuid, pendingIn: false }, relations: ['collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
         const userSkins = await this.skinService.findMany({ where: { owner: user.uuid }, relations: ['texture'] })
 
         const importableAssets = await this.getRecognizedAssets(BridgeAssetType.IMPORTED)
@@ -70,16 +70,17 @@ export class ProfileApiService {
 
         const assets: AssetDto[] = []
 
-        for(let i = 0; i < userAssets.length; i++) {
+        for (let i = 0; i < userAssets.length; i++) {
             const asset = userAssets[i]
 
-            const recongizedEnraptureAsset = findRecognizedAsset(enrapturableAssets, asset)
+            const assetAddress = asset.collectionFragment.collection.assetAddress.toLowerCase()
+            const recongizedEnraptureAsset = findRecognizedAsset(enrapturableAssets, { assetAddress, assetId: asset.assetId })
 
             if (!!recongizedEnraptureAsset) {
                 assets.push({
                     amount: asset.amount,
-                    assetAddress: asset.assetAddress.toLowerCase(),
-                    assetType: asset.assetType,
+                    assetAddress,
+                    assetType: asset.collectionFragment.collection.assetType,
                     assetId: asset.assetId,
                     name: recongizedEnraptureAsset.name,
                     exportable: !asset.enraptured,
@@ -87,19 +88,19 @@ export class ProfileApiService {
                     summonable: false,
                     recognizedAssetType: recongizedEnraptureAsset.recognizedAssetType.valueOf(),
                     enraptured: asset.enraptured,
-                    exportChainId: asset.chainId,
+                    exportChainId: asset.collectionFragment.collection.chainId,
                     exportAddress: asset.assetOwner?.toLowerCase(),
                 })
                 continue
             }
 
-            const recongizedImportAsset = findRecognizedAsset(importableAssets, asset)
+            const recongizedImportAsset = findRecognizedAsset(importableAssets, { assetAddress, assetId: asset.assetId })
 
             if (!!recongizedImportAsset) {
                 assets.push({
                     amount: asset.amount,
-                    assetAddress: asset.assetAddress.toLowerCase(),
-                    assetType: asset.assetType,
+                    assetAddress: asset.collectionFragment.collection.assetAddress.toLowerCase(),
+                    assetType: asset.collectionFragment.collection.assetType,
                     assetId: asset.assetId,
                     name: recongizedImportAsset.name,
                     exportable: !asset.enraptured,
@@ -107,7 +108,7 @@ export class ProfileApiService {
                     summonable: false,
                     recognizedAssetType: recongizedImportAsset.recognizedAssetType.valueOf(),
                     enraptured: asset.enraptured,
-                    exportChainId: asset.chainId,
+                    exportChainId: asset.collectionFragment.collection.chainId,
                     exportAddress: asset.assetOwner?.toLowerCase(),
                 })
                 continue

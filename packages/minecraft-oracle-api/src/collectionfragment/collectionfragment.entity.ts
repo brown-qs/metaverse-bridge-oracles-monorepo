@@ -8,6 +8,7 @@ import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'ty
 import { RecognizedAssetType } from '../config/constants';
 import { CollectionEntity } from '../collection/collection.entity';
 import { AssetEntity } from '../asset/asset.entity';
+import { CompositePartEntity } from 'src/compositepart/compositepart.entity';
 
 @Entity()
 export class CollectionFragmentEntity {
@@ -51,9 +52,12 @@ export class CollectionFragmentEntity {
     @Column("text", { array: true, nullable: true })
     idRange?: string[];
 
+    @ManyToOne(() => CollectionEntity, (collection) => collection.collectionFragments)
+    collection: CollectionEntity;
+
     @OneToMany(() => AssetEntity, (bridgeAsset) => bridgeAsset.collectionFragment)
     bridgeAssets?: AssetEntity[];
 
-    @ManyToOne(() => CollectionEntity, (collection) => collection.collectionFragments)
-    collection: CollectionEntity;
+    @OneToMany(() => CompositePartEntity, (compositePart) => compositePart.collectionFragment)
+    compositeParts?: CompositePartEntity[];
 }

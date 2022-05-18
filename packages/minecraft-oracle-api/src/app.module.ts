@@ -64,6 +64,8 @@ import { CompositeAssetModule } from './compositeasset/compositeasset.module';
 import { CollectionFragmentModule } from './collectionfragment/collectionfragment.module';
 import { CompositeCollectionFragmentModule } from './compositecollectionfragment/compositecollectionfragment.module';
 import { CompositeApiModule } from './compositeapi/compositeapi.module';
+import { CompositePartEntity } from './compositepart/compositepart.entity';
+import { CompositePartModule } from './compositepart/compositepart.module';
 
 
 @Module({
@@ -122,7 +124,8 @@ import { CompositeApiModule } from './compositeapi/compositeapi.module';
                 CollectionEntity,
                 CollectionFragmentEntity,
                 CompositeCollectionFragmentEntity,
-                CompositeAssetEntity
+                CompositeAssetEntity,
+                CompositePartEntity
             ],
             synchronize: configService.get<boolean>('typeorm.synchronize'),
             logging: configService.get<boolean>('typeorm.logging'),
@@ -172,6 +175,7 @@ import { CompositeApiModule } from './compositeapi/compositeapi.module';
     CollectionFragmentModule,
     CompositeCollectionFragmentModule,
     CompositeAssetModule,
+    CompositePartModule,
     CompositeApiModule
   ]
 })
