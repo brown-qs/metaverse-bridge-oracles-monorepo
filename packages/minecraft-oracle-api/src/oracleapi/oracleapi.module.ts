@@ -12,6 +12,7 @@ import { InventoryModule } from '../playerinventory/inventory.module';
 import { SkinModule } from '../skin/skin.module';
 import { NftApiModule } from '../nftapi/nftapi.module';
 import { ChainModule } from '../chain/chain.module';
+import { CollectionFragmentModule } from '../collectionfragment/collectionfragment.module';
 
 @Module({
     imports: [
@@ -25,7 +26,8 @@ import { ChainModule } from '../chain/chain.module';
         SummonModule,
         ProviderModule,
         NftApiModule,
-        ChainModule
+        ChainModule,
+        CollectionFragmentModule
     ],
     providers: [OracleApiService],
     exports: [OracleApiService],

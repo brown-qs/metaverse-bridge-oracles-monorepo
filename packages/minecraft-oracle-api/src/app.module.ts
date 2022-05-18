@@ -55,9 +55,15 @@ import { GameItemTypeEntity } from './gameitemtype/gameitemtype.entity';
 import { PlayerGameItemEntity } from './playergameitem/playergameitem.entity';
 import { ChainEntity } from './chain/chain.entity';
 import { ChainModule } from './chain/chain.module';
-import { MoonsamaApiModule } from './exoconfig/exoconfig.module';
-import { ConfigEntity } from './exoconfig/config.entity';
-import { AttributeEntity } from './attribute/attribute.entity';
+import { CollectionEntity } from './collection/collection.entity';
+import { CollectionFragmentEntity } from './collectionfragment/collectionfragment.entity';
+import { CompositeCollectionFragmentEntity } from './compositecollectionfragment/compositecollectionfragment.entity';
+import { CompositeAssetEntity } from './compositeasset/compositeasset.entity';
+import { CollectionModule } from './collection/collection.module';
+import { CompositeAssetModule } from './compositeasset/compositeasset.module';
+import { CollectionFragmentModule } from './collectionfragment/collectionfragment.module';
+import { CompositeCollectionFragmentModule } from './compositecollectionfragment/compositecollectionfragment.module';
+
 
 @Module({
   imports: [
@@ -112,8 +118,10 @@ import { AttributeEntity } from './attribute/attribute.entity';
                 PlayerGameItemEntity,
                 GameScoreTypeEntity,
                 ChainEntity,
-                ConfigEntity,
-                AttributeEntity
+                CollectionEntity,
+                CollectionFragmentEntity,
+                CompositeCollectionFragmentEntity,
+                CompositeAssetEntity
             ],
             synchronize: configService.get<boolean>('typeorm.synchronize'),
             logging: configService.get<boolean>('typeorm.logging'),
@@ -159,7 +167,10 @@ import { AttributeEntity } from './attribute/attribute.entity';
     GganbuModule,
     SnaplogModule,
     ChainModule,
-    MoonsamaApiModule
+    CollectionModule,
+    CollectionFragmentModule,
+    CompositeCollectionFragmentModule,
+    CompositeAssetModule
   ]
 })
 export class AppModule {}
