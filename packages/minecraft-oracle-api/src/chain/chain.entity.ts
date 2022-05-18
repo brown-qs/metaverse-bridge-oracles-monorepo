@@ -3,7 +3,8 @@ import {
     IsNumber,
     IsString
 } from 'class-validator';
-import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
+import { CollectionEntity } from '../collection/collection.entity';
+import { Column, Entity, Index, OneToMany, PrimaryColumn } from 'typeorm';
 
 @Entity()
 @Index(['chainId'])
@@ -32,4 +33,7 @@ export class ChainEntity {
     @Column()
     @IsBoolean()
     allowed: boolean;
+
+    @OneToMany(() => CollectionEntity, (cc) => cc.chain)
+    compositeCollections?: CollectionEntity[]
 }

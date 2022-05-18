@@ -28,6 +28,7 @@ import { GameKind } from '../game/game.enum';
 import { ChainService } from '../chain/chain.service';
 import { METAVERSE_ABI } from '../common/contracts/Metaverse';
 import { TypeOracleWalletProvider, TypeRecognizedChainAssetsProvider } from '../provider';
+import { CollectionFragmentService } from '../collectionfragment/collectionfragment.service';
 
 @Injectable()
 export class OracleApiService {
@@ -47,6 +48,7 @@ export class OracleApiService {
         private readonly inventoryService: InventoryService,
         private readonly nftApiService: NftApiService,
         private readonly chainService: ChainService,
+        private readonly collectionFragmentService: CollectionFragmentService,
         private configService: ConfigService,
         @Inject(ProviderToken.ORACLE_WALLET_CALLBACK) private getOracle: TypeOracleWalletProvider,
         @Inject(ProviderToken.RECOGNIZED_CHAIN_ASSETS_CALLBACK) private getRecognizedAsset: TypeRecognizedChainAssetsProvider,
@@ -61,11 +63,11 @@ export class OracleApiService {
     public async userInRequest(user: UserEntity, data: ImportDto, enraptured: boolean): Promise<[string, string, string, boolean]> {
         this.logger.debug(`userInRequest: ${JSON.stringify(data)}, enraptured: ${enraptured}`, this.context)
         const sanitizedChainId = !!data.chainId ? data.chainId : this.defaultChainId;
-        const importableAssets = await this.getRecognizedAsset(sanitizedChainId, BridgeAssetType.IMPORTED)
-        const enrapturableAssets = await this.getRecognizedAsset(sanitizedChainId, BridgeAssetType.ENRAPTURED)
-        const inAsset = enraptured ? findRecognizedAsset(enrapturableAssets, data.asset) : findRecognizedAsset(importableAssets, data.asset)
+        const collectionFragment = enraptured ?
+            findRecognizedAsset(await this.getRecognizedAsset(sanitizedChainId, BridgeAssetType.ENRAPTURED), data.asset)
+            : findRecognizedAsset(await this.getRecognizedAsset(sanitizedChainId, BridgeAssetType.IMPORTED), data.asset)
 
-        if (!inAsset) {
+        if (!collectionFragment) {
             this.logger.error(`userInRequest: not an permissioned asset`, null, this.context)
             throw new UnprocessableEntityException(`Not permissioned asset`)
         }
@@ -78,7 +80,7 @@ export class OracleApiService {
         }
 
         const requestHash = await utf8ToKeccak(JSON.stringify(data))
-        const existingEntry = await this.assetService.findOne({ requestHash, chainId: sanitizedChainId, enraptured, pendingIn: true, owner: { uuid: user.uuid } }, { order: { expiration: 'DESC' }, relations: ['owner'] })
+        const existingEntry = await this.assetService.findOne({ requestHash, collectionFragment, enraptured, pendingIn: true, owner: { uuid: user.uuid } }, { order: { expiration: 'DESC' }, relations: ['owner', 'collectionFragment'] })
 
         existingEntry ? console.log(Date.now() - Number.parseInt(existingEntry.expiration) - CALLDATA_EXPIRATION_THRESHOLD) : undefined
 
@@ -99,7 +101,6 @@ export class OracleApiService {
             const payload = enraptured ? await encodeEnraptureWithSigData(ma, expirationContract) : await encodeImportWithSigData(ma, expirationContract)
             const signature = await getSignature(oracle, payload)
             const hash = await calculateMetaAssetHash(ma)
-            const chainId = ma.chainId
 
             this.logger.debug(`InData: request prepared: ${[hash, payload, signature]}`, this.context)
 
@@ -144,7 +145,7 @@ export class OracleApiService {
         const signature = await getSignature(oracle, payload)
         const hash = await calculateMetaAssetHash(ma)
 
-        const assetEntry = await this.assetService.create({
+        await this.assetService.create({
             assetAddress: ma.asset.assetAddress,
             assetType: assetTypeToStringAssetType(ma.asset.assetType),
             assetId: ma.asset.assetId,
@@ -158,7 +159,8 @@ export class OracleApiService {
             expiration: expiration.toString(),
             owner: user,
             chainId: ma.chainId,
-            salt
+            salt,
+            collectionFragment
         })
         this.logger.debug(`InData: request: ${[hash, payload, signature]}`, this.context)
         return [hash, payload, signature, false]
@@ -189,7 +191,7 @@ export class OracleApiService {
             throw new UnprocessableEntityException(`Forbidden during ongoing game`)
         }
 
-        const existingEntry = await this.assetService.findOne({ hash, chainId, enraptured: false, pendingIn: false, owner: { uuid: user.uuid } })
+        const existingEntry = await this.assetService.findOne({ hash, collectionFragment: { collection: { chainId } }, enraptured: false, pendingIn: false, owner: { uuid: user.uuid } }, { relations: ['collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
         if (!existingEntry) {
             this.logger.error(`userOutRequest: exportable asset not found ${hash}`, null, this.context)
             throw new UnprocessableEntityException(`Exportable asset not found`)
@@ -419,7 +421,7 @@ export class OracleApiService {
             }
         }
 
-        assetEntry.recognizedAssetType = recognizedAsset?.type ?? RecognizedAssetType.NONE;
+        assetEntry.recognizedAssetType = recognizedAsset?.recognizedAssetType ?? RecognizedAssetType.NONE;
         const finalentry = await this.assetService.create({ ...assetEntry, pendingIn: false });
 
         (async () => {
@@ -456,7 +458,7 @@ export class OracleApiService {
 
         const chainId = !!data.chainId ? data.chainId : this.defaultChainId;
 
-        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, chainId })
+        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, chainId }, { relations: ['collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
 
         if (!assetEntry || assetEntry.hash !== hash || assetEntry.enraptured !== true) {
             this.logger.error(`EnraptureConfirm: invalid conditions. exists: ${!!assetEntry}, hash: ${hash}, enraptured: ${assetEntry?.enraptured}, pendingOut: ${assetEntry?.pendingOut}, pendingIn: ${assetEntry?.pendingIn}`)
@@ -535,7 +537,7 @@ export class OracleApiService {
             }
         }
 
-        assetEntry.recognizedAssetType = recognizedAsset?.type ?? RecognizedAssetType.NONE;
+        assetEntry.recognizedAssetType = recognizedAsset?.recognizedAssetType ?? RecognizedAssetType.NONE;
         const finalentry = await this.assetService.create({ ...assetEntry, pendingIn: false });
 
         (async () => {
@@ -575,7 +577,7 @@ export class OracleApiService {
         }
 
         const chainId = !!data.chainId ? data.chainId : this.defaultChainId;
-        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, chainId, enraptured: false })
+        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, collectionFragment: {collection: {chainId}}, enraptured: false }, { relations: ['collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
 
         if (!assetEntry) {
             this.logger.warn(`ExportConfirm: asset not found`, this.context)
@@ -607,8 +609,8 @@ export class OracleApiService {
         }
 
 
-        const importableAssets = await this.getRecognizedAsset(chainId, BridgeAssetType.IMPORTED)
-        const recognizedAsset = findRecognizedAsset(importableAssets, assetEntry)
+        const exportableAssets = await this.getRecognizedAsset(chainId, BridgeAssetType.EXPORTED)
+        const recognizedAsset = findRecognizedAsset(exportableAssets, assetEntry)
 
         if (!!recognizedAsset && recognizedAsset.gamepass) {
             user.numGamePassAsset = (user.numGamePassAsset ?? 0) > 0 ? user.numGamePassAsset - 1 : 0
@@ -647,6 +649,8 @@ export class OracleApiService {
                 ]
             )
         }
+
+        // TODO modify composite asset if it belongs to one: either equipped, or as a base asset
 
         await this.assetService.remove(assetEntry)
         return true

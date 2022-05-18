@@ -5,9 +5,8 @@ import { format } from 'winston';
 import safeStringify from 'fast-safe-stringify';
 import * as ioTs from 'io-ts';
 import { AssetType, StringAssetType } from '../common/enums/AssetType';
-import { GGANBU_POWERS, RecognizedAsset } from '../config/constants';
-import { AssetEntity } from '../asset/asset.entity';
-import { string } from 'fp-ts';
+import { GGANBU_POWERS } from '../config/constants';
+import { CollectionFragmentEntity } from '../collectionfragment/collectionfragment.entity';
 
 export type ParsedErrors = {
     actual: any;
@@ -119,16 +118,18 @@ export function stringToStringAssetType(
   return StringAssetType.NONE;
 }
 
-export function findRecognizedAsset(recassets: RecognizedAsset[], asset: {assetAddress: string, assetId: string}) {
+export function findRecognizedAsset(recognizedCollectionFragments: CollectionFragmentEntity[], asset: {assetAddress: string, assetId: string}) {
   //console.log({recassets})
   //console.log({asset})
-  return recassets.find(x => {
+  return recognizedCollectionFragments.find(x => {
+    //console.log(x)
     return (
-      (x.address.toLowerCase() === asset?.assetAddress?.toLowerCase())
+      (x.collection.assetAddress.toLowerCase() === asset?.assetAddress?.toLowerCase())
       && (
-        (x.id === undefined)
-        || (x.id !== undefined && typeof x.id === 'string' && x.id === asset.assetId)
-        || (x.id !== undefined && Number.parseInt(asset.assetId) >= Number.parseInt(x.id[0]) && Number.parseInt(asset.assetId) <= Number.parseInt(x.id[1]))
+        (!x.idRange || x.idRange.length === 0)
+        || (typeof x.idRange === 'string' && x.idRange === asset.assetId)
+        || (x.idRange.length === 1 && Number.parseInt(asset.assetId) === Number.parseInt(x.idRange[0]))
+        || (Number.parseInt(asset.assetId) >= Number.parseInt(x.idRange[0]) && Number.parseInt(asset.assetId) <= Number.parseInt(x.idRange[1]))
       )
     )
   })
