@@ -27,7 +27,7 @@ export class CompositeAssetEntity {
     compositeMetadata?: unknown;
 
     @ManyToOne(() => CompositeCollectionFragmentEntity, (ccf) => ccf.composites)
-    collection: CompositeCollectionFragmentEntity;
+    compositeCollectionFragment: CompositeCollectionFragmentEntity;
 
     @OneToMany(() => AssetEntity, (asset) => asset.compositeAsset)
     children?: AssetEntity[];
