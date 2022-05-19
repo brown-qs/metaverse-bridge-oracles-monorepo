@@ -11,7 +11,7 @@ import { calculateMetaAssetHash, encodeEnraptureWithSigData, encodeExportWithSig
 import { Contract, ethers } from 'ethers';
 import { ProviderToken } from '../provider/token';
 import { AssetService } from '../asset/asset.service';
-import { assetTypeToStringAssetType, findRecognizedAsset } from '../utils';
+import { findRecognizedAsset } from '../utils';
 import { MetaAsset } from './oracleapi.types';
 import { ExportDto } from './dtos/export.dto';
 import { SummonDto } from './dtos/summon.dto';
@@ -28,6 +28,8 @@ import { GameKind } from '../game/game.enum';
 import { ChainService } from '../chain/chain.service';
 import { METAVERSE_ABI } from '../common/contracts/Metaverse';
 import { TypeOracleWalletProvider, TypeRecognizedChainAssetsProvider } from '../provider';
+import { CompositeApiService } from '../compositeapi/compositeapi.service';
+import { CompositeAssetService } from '../compositeasset/compositeasset.service';
 
 @Injectable()
 export class OracleApiService {
@@ -47,6 +49,8 @@ export class OracleApiService {
         private readonly inventoryService: InventoryService,
         private readonly nftApiService: NftApiService,
         private readonly chainService: ChainService,
+        private readonly compositeApiService: CompositeApiService,
+        private readonly compositeAssetService: CompositeAssetService,
         private configService: ConfigService,
         @Inject(ProviderToken.ORACLE_WALLET_CALLBACK) private getOracle: TypeOracleWalletProvider,
         @Inject(ProviderToken.RECOGNIZED_CHAIN_ASSETS_CALLBACK) private getRecognizedAsset: TypeRecognizedChainAssetsProvider,
@@ -61,11 +65,11 @@ export class OracleApiService {
     public async userInRequest(user: UserEntity, data: ImportDto, enraptured: boolean): Promise<[string, string, string, boolean]> {
         this.logger.debug(`userInRequest: ${JSON.stringify(data)}, enraptured: ${enraptured}`, this.context)
         const sanitizedChainId = !!data.chainId ? data.chainId : this.defaultChainId;
-        const importableAssets = await this.getRecognizedAsset(sanitizedChainId, BridgeAssetType.IMPORTED)
-        const enrapturableAssets = await this.getRecognizedAsset(sanitizedChainId, BridgeAssetType.ENRAPTURED)
-        const inAsset = enraptured ? findRecognizedAsset(enrapturableAssets, data.asset) : findRecognizedAsset(importableAssets, data.asset)
+        const collectionFragment = enraptured ?
+            findRecognizedAsset(await this.getRecognizedAsset(sanitizedChainId, BridgeAssetType.ENRAPTURED), data.asset)
+            : findRecognizedAsset(await this.getRecognizedAsset(sanitizedChainId, BridgeAssetType.IMPORTED), data.asset)
 
-        if (!inAsset) {
+        if (!collectionFragment) {
             this.logger.error(`userInRequest: not an permissioned asset`, null, this.context)
             throw new UnprocessableEntityException(`Not permissioned asset`)
         }
@@ -78,7 +82,7 @@ export class OracleApiService {
         }
 
         const requestHash = await utf8ToKeccak(JSON.stringify(data))
-        const existingEntry = await this.assetService.findOne({ requestHash, chainId: sanitizedChainId, enraptured, pendingIn: true, owner: { uuid: user.uuid } }, { order: { expiration: 'DESC' }, relations: ['owner'] })
+        const existingEntry = await this.assetService.findOne({ requestHash, collectionFragment, enraptured, pendingIn: true, owner: { uuid: user.uuid } }, { order: { expiration: 'DESC' }, relations: ['owner', 'collectionFragment'] })
 
         existingEntry ? console.log(Date.now() - Number.parseInt(existingEntry.expiration) - CALLDATA_EXPIRATION_THRESHOLD) : undefined
 
@@ -99,7 +103,6 @@ export class OracleApiService {
             const payload = enraptured ? await encodeEnraptureWithSigData(ma, expirationContract) : await encodeImportWithSigData(ma, expirationContract)
             const signature = await getSignature(oracle, payload)
             const hash = await calculateMetaAssetHash(ma)
-            const chainId = ma.chainId
 
             this.logger.debug(`InData: request prepared: ${[hash, payload, signature]}`, this.context)
 
@@ -144,9 +147,7 @@ export class OracleApiService {
         const signature = await getSignature(oracle, payload)
         const hash = await calculateMetaAssetHash(ma)
 
-        const assetEntry = await this.assetService.create({
-            assetAddress: ma.asset.assetAddress,
-            assetType: assetTypeToStringAssetType(ma.asset.assetType),
+        await this.assetService.create({
             assetId: ma.asset.assetId,
             assetOwner: ma.owner,
             enraptured,
@@ -157,8 +158,8 @@ export class OracleApiService {
             amount: ma.amount,
             expiration: expiration.toString(),
             owner: user,
-            chainId: ma.chainId,
-            salt
+            salt,
+            collectionFragment
         })
         this.logger.debug(`InData: request: ${[hash, payload, signature]}`, this.context)
         return [hash, payload, signature, false]
@@ -189,7 +190,7 @@ export class OracleApiService {
             throw new UnprocessableEntityException(`Forbidden during ongoing game`)
         }
 
-        const existingEntry = await this.assetService.findOne({ hash, chainId, enraptured: false, pendingIn: false, owner: { uuid: user.uuid } })
+        const existingEntry = await this.assetService.findOne({ hash, collectionFragment: { collection: { chainId } }, enraptured: false, pendingIn: false, owner: { uuid: user.uuid } }, { relations: ['collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
         if (!existingEntry) {
             this.logger.error(`userOutRequest: exportable asset not found ${hash}`, null, this.context)
             throw new UnprocessableEntityException(`Exportable asset not found`)
@@ -341,7 +342,7 @@ export class OracleApiService {
         this.logger.log(`ImportConfirm: started ${user.uuid}: ${hash}`, this.context)
 
         const chainId = !!data.chainId ? data.chainId : this.defaultChainId;
-        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, chainId: chainId })
+        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, collectionFragment: { collection: { chainId } } }, { relations: ['collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
 
         if (!assetEntry || assetEntry.hash !== hash || assetEntry.enraptured !== false) {
             this.logger.error(`ImportConfirm: invalid conditions. exists: ${!!assetEntry}, hash: ${hash}, enraptured: ${assetEntry?.enraptured}, pendingOut: ${assetEntry?.pendingOut}, pendingIn: ${assetEntry?.pendingIn}`)
@@ -352,7 +353,10 @@ export class OracleApiService {
             return true
         }
 
-        const chainEntity = await this.chainService.findOne({ chainId: chainId })
+        const assetAddress = assetEntry.collectionFragment.collection.assetAddress.toLowerCase()
+        const assetType = assetEntry.collectionFragment.collection.assetType
+        const assetId = assetEntry.assetId
+        const chainEntity = await this.chainService.findOne({ chainId })
         const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
         const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
 
@@ -366,15 +370,15 @@ export class OracleApiService {
 
         const mAsset: MetaAsset = await contract.getImportedMetaAsset(hash)
 
-        if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress.toLowerCase() !== assetEntry.assetAddress.toLowerCase()) {
+        if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress.toLowerCase() !== assetAddress) {
             this.logger.error(`ImportConfirm: on-chaind data didn't match for hash: ${hash}`, null, this.context)
             throw new UnprocessableEntityException(`On-chain data didn't match`)
         }
         const importableAssets = await this.getRecognizedAsset(chainId, BridgeAssetType.IMPORTED)
-        const recognizedAsset = findRecognizedAsset(importableAssets, assetEntry)
+        const recognizedAsset = findRecognizedAsset(importableAssets, { assetAddress, assetId })
 
         // assign skin if asset unlocks one
-        const texture = await this.textureService.findOne({ assetAddress: assetEntry.assetAddress.toLowerCase(), assetId: assetEntry.assetId })
+        const texture = await this.textureService.findOne({ assetAddress, assetId: assetId })
         if (!!texture) {
             this.logger.log('ImportConfirm: Moonsama, texture found', this.context)
             await this.skinService.create({
@@ -419,14 +423,14 @@ export class OracleApiService {
             }
         }
 
-        assetEntry.recognizedAssetType = recognizedAsset?.type ?? RecognizedAssetType.NONE;
+        assetEntry.recognizedAssetType = recognizedAsset?.recognizedAssetType ?? RecognizedAssetType.NONE;
         const finalentry = await this.assetService.create({ ...assetEntry, pendingIn: false });
 
         (async () => {
             let metadata = null
             let world = null
             try {
-                metadata = await this.nftApiService.getNFT(assetEntry.chainId.toString(), assetEntry.assetType, assetEntry.assetAddress, assetEntry.assetId) as any ?? null
+                metadata = await this.nftApiService.getNFT(chainId.toString(), assetType, assetAddress, assetId) as any ?? null
                 world = metadata?.tokenURI?.plot?.world ?? null
             } catch {
                 this.logger.error(`ImportConfirm: couldn't fetch asset metadata: ${hash}`, undefined, this.context)
@@ -456,7 +460,7 @@ export class OracleApiService {
 
         const chainId = !!data.chainId ? data.chainId : this.defaultChainId;
 
-        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, chainId })
+        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, collectionFragment: { collection: { chainId } } }, { relations: ['collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
 
         if (!assetEntry || assetEntry.hash !== hash || assetEntry.enraptured !== true) {
             this.logger.error(`EnraptureConfirm: invalid conditions. exists: ${!!assetEntry}, hash: ${hash}, enraptured: ${assetEntry?.enraptured}, pendingOut: ${assetEntry?.pendingOut}, pendingIn: ${assetEntry?.pendingIn}`)
@@ -468,6 +472,9 @@ export class OracleApiService {
         }
 
         const chainEntity = await this.chainService.findOne({ chainId })
+        const assetAddress = assetEntry.collectionFragment.collection.assetAddress.toLowerCase()
+        const assetType = assetEntry.collectionFragment.collection.assetType
+        const assetId = assetEntry.assetId
         const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
         const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
 
@@ -481,16 +488,16 @@ export class OracleApiService {
 
         const mAsset: MetaAsset = await contract.getEnrapturedMetaAsset(hash)
 
-        if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress.toLowerCase() !== assetEntry.assetAddress.toLowerCase()) {
+        if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress.toLowerCase() !== assetAddress) {
             this.logger.error(`EnraptureConfirm: on-chaind data didn't match for hash: ${hash}`, null, this.context)
             throw new UnprocessableEntityException(`On-chain data didn't match`)
         }
 
         const enrapturableAssets = await this.getRecognizedAsset(chainId, BridgeAssetType.ENRAPTURED)
-        const recognizedAsset = findRecognizedAsset(enrapturableAssets, assetEntry)
+        const recognizedAsset = findRecognizedAsset(enrapturableAssets, { assetAddress, assetId })
 
         // assign skin if asset unlocks one
-        const texture = await this.textureService.findOne({ assetAddress: assetEntry.assetAddress.toLowerCase(), assetId: assetEntry.assetId })
+        const texture = await this.textureService.findOne({ assetAddress, assetId })
         if (!!texture) {
             this.logger.log('EnraptureConfirm: texture found', this.context)
             await this.skinService.create({
@@ -535,14 +542,14 @@ export class OracleApiService {
             }
         }
 
-        assetEntry.recognizedAssetType = recognizedAsset?.type ?? RecognizedAssetType.NONE;
+        assetEntry.recognizedAssetType = recognizedAsset?.recognizedAssetType ?? RecognizedAssetType.NONE;
         const finalentry = await this.assetService.create({ ...assetEntry, pendingIn: false });
 
         (async () => {
             let metadata = null
             let world = null
             try {
-                metadata = await this.nftApiService.getNFT(assetEntry.chainId.toString(), assetEntry.assetType, assetEntry.assetAddress, assetEntry.assetId) as any ?? null
+                metadata = await this.nftApiService.getNFT(chainId.toString(), assetType, assetAddress, assetId) as any ?? null
                 world = metadata?.tokenURI?.plot?.world ?? null
             } catch {
                 this.logger.error(`ImportConfirm: couldn't fetch asset metadata: ${hash}`, undefined, this.context)
@@ -575,10 +582,10 @@ export class OracleApiService {
         }
 
         const chainId = !!data.chainId ? data.chainId : this.defaultChainId;
-        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, chainId, enraptured: false })
+        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, collectionFragment: { collection: { chainId } }, enraptured: false }, { relations: ['collectionFragment', 'collectionFragment.collection', 'compositeAsset'], loadEagerRelations: true })
 
         if (!assetEntry) {
-            this.logger.warn(`ExportConfirm: asset not found`, this.context)
+            this.logger.warn(`ExportConfirm: asset not found: ${chainId}-${hash}`, this.context)
             return true
         }
 
@@ -586,6 +593,9 @@ export class OracleApiService {
             this.logger.warn(`ExportConfirm: asset exists but is not pending for export`, this.context)
             return false
         }
+
+        const assetAddress = assetEntry.collectionFragment.collection.assetAddress
+        const assetId = assetEntry.assetId
 
         const chainEntity = await this.chainService.findOne({ chainId })
         const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
@@ -606,9 +616,8 @@ export class OracleApiService {
             throw new UnprocessableEntityException(`Not exported yet`)
         }
 
-
-        const importableAssets = await this.getRecognizedAsset(chainId, BridgeAssetType.IMPORTED)
-        const recognizedAsset = findRecognizedAsset(importableAssets, assetEntry)
+        const exportableAssets = await this.getRecognizedAsset(chainId, BridgeAssetType.EXPORTED)
+        const recognizedAsset = findRecognizedAsset(exportableAssets, { assetAddress, assetId })
 
         if (!!recognizedAsset && recognizedAsset.gamepass) {
             user.numGamePassAsset = (user.numGamePassAsset ?? 0) > 0 ? user.numGamePassAsset - 1 : 0
@@ -620,7 +629,7 @@ export class OracleApiService {
             await this.userService.update(user.uuid, { numGamePassAsset: user.numGamePassAsset, allowedToPlay: user.allowedToPlay, role: user.role })
         }
 
-        const skin = await this.skinService.findOne({ id: SkinEntity.toId(user.uuid, assetEntry.assetAddress, assetEntry.assetId) })
+        const skin = await this.skinService.findOne({ id: SkinEntity.toId(user.uuid, assetAddress, assetId) })
 
         if (!!skin) {
             const removed = await this.skinService.remove(skin)
@@ -648,7 +657,31 @@ export class OracleApiService {
             )
         }
 
+        // TODO modify composite asset if it belongs to one: either equipped, or as a base asset
+
+        const compositeAsset = assetEntry.compositeAsset
         await this.assetService.remove(assetEntry)
+
+        ;(async () => {
+            if (!!compositeAsset) {
+                try {
+                    await this.compositeApiService.reevaluate(compositeAsset, user)
+                    return
+                } catch {
+                    this.logger.error(`userExportConfirm:: composite reevaluation as child failed`, undefined, this.context)
+                }
+            }
+
+            const cas = await this.compositeAssetService.findOne({assetId, compositeCollectionFragment: {collection: {assetAddress, chainId}}}, {relations: ['compositeCollectionFragment', 'compositeCollectionFragment.collection'], loadEagerRelations: true})
+            if (!!cas) {
+                try {
+                    await this.compositeApiService.reevaluate(cas, user)
+                    return
+                } catch {
+                    this.logger.error(`userExportConfirm:: composite reevaluation as parent failed`, undefined, this.context)
+                }
+            }
+        })();
         return true
     }
 

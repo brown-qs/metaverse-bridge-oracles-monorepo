@@ -12,6 +12,9 @@ import { InventoryModule } from '../playerinventory/inventory.module';
 import { SkinModule } from '../skin/skin.module';
 import { NftApiModule } from '../nftapi/nftapi.module';
 import { ChainModule } from '../chain/chain.module';
+import { CollectionFragmentModule } from '../collectionfragment/collectionfragment.module';
+import { CompositeApiModule } from '../compositeapi/compositeapi.module';
+import { CompositeAssetModule } from '../compositeasset/compositeasset.module';
 
 @Module({
     imports: [
@@ -25,7 +28,10 @@ import { ChainModule } from '../chain/chain.module';
         SummonModule,
         ProviderModule,
         NftApiModule,
-        ChainModule
+        ChainModule,
+        CollectionFragmentModule,
+        CompositeApiModule,
+        CompositeAssetModule
     ],
     providers: [OracleApiService],
     exports: [OracleApiService],
