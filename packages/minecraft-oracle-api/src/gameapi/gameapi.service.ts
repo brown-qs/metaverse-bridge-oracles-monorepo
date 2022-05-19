@@ -1157,7 +1157,7 @@ export class GameApiService {
         //console.log(user.userName)
         const hash = user.assets.filter(asset => !asset.pendingIn)
             .reduce((prevResult, element) => {
-                const leafHash = allToSha256(element.chainId, element.assetAddress, element.assetId, JSON.stringify(element.metadata))
+                const leafHash = allToSha256(element.collectionFragment.collection.chainId, element.collectionFragment.collection.assetAddress, element.assetId, JSON.stringify(element.metadata))
                 const result = allToSha256(prevResult, leafHash)
                 //console.log('    ', {leafHash, result: result.toString('hex')})
                 return result
@@ -1174,7 +1174,7 @@ export class GameApiService {
     }
 
     async getAssetFingerprints(): Promise<UserAssetFingerprintsResult> {
-        const users = await this.userService.findMany({ where: { hasGame: true }, relations: ['assets'] })
+        const users = await this.userService.findMany({ where: { hasGame: true }, relations: ['assets', 'assets.collectionFragment', 'assets.collectionFragment.collection'], loadEagerRelations: true})
         const results: UserAssetFingerprint[] = users.map(user => this.getAssetFingerprintForPlayer(user)).filter(x => !!x)
 
         return {
