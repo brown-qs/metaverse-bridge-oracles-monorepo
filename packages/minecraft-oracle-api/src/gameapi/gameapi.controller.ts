@@ -43,6 +43,7 @@ import { SetGameScoreTypeDto } from '../gamescoretype/dtos/gamescoretype.dto';
 import { GameItemTypeDto, SetGameItemTypesDto } from '../gameitemtype/dtos/gameitemtype.dto';
 import { PlayerGameItemsDto, QueryGameItemsDto, SetPlayerGameItemsDto } from '../playergameitem/dtos/playergameitem.dto';
 import { GameService } from '../game/game.service';
+import { UserAssetFingerprint, UserAssetFingerprintsResult } from './dtos/fingerprint.dto';
 
 @ApiTags('game')
 @Controller('game')
@@ -530,5 +531,28 @@ export class GameApiController {
     ): Promise<boolean> {
         const entity = await this.gameApiService.putGameItems(gameId, dto.playerGameItems)
         return !!entity
+    }
+
+    @Get('fingerprint/assets/players')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Gets the fingerprints of all the players assets' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async getAssetFingerprints(): Promise<UserAssetFingerprintsResult> {
+        const result = await this.gameApiService.getAssetFingerprints()
+        return result
+    }
+
+    @Get('fingerprint/assets/player/:trimmedUuid')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Gets the fingerprints of all the players assets' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async getAssetFingerprintForPlayer(
+        @Param('trimmedUuid') uuid: string
+    ): Promise<UserAssetFingerprint> {
+        const user = await this.userService.findOne({uuid}, { relations: ['assets'] })
+        const result = await this.gameApiService.getAssetFingerprintForPlayer(user)
+        return result
     }
 }
