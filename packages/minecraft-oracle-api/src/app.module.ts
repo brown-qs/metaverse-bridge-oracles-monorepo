@@ -66,6 +66,10 @@ import { CompositeCollectionFragmentModule } from './compositecollectionfragment
 import { CompositeApiModule } from './compositeapi/compositeapi.module';
 import { CompositePartEntity } from './compositepart/compositepart.entity';
 import { CompositePartModule } from './compositepart/compositepart.module';
+import { SyntheticPartModule } from './syntheticpart/syntheticpart.module';
+import { SyntheticPartEntity } from './syntheticpart/syntheticpart.entity';
+import { SyntheticItemEntity } from './syntheticitem/syntheticitem.entity';
+import { SyntheticItemModule } from './syntheticitem/syntheticitem.module';
 
 
 @Module({
@@ -125,7 +129,9 @@ import { CompositePartModule } from './compositepart/compositepart.module';
                 CollectionFragmentEntity,
                 CompositeCollectionFragmentEntity,
                 CompositeAssetEntity,
-                CompositePartEntity
+                CompositePartEntity,
+                SyntheticPartEntity,
+                SyntheticItemEntity
             ],
             synchronize: configService.get<boolean>('typeorm.synchronize'),
             logging: configService.get<boolean>('typeorm.logging'),
@@ -176,6 +182,8 @@ import { CompositePartModule } from './compositepart/compositepart.module';
     CompositeCollectionFragmentModule,
     CompositeAssetModule,
     CompositePartModule,
+    SyntheticPartModule,
+    SyntheticItemModule,
     CompositeApiModule
   ]
 })

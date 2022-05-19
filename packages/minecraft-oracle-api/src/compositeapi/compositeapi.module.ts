@@ -8,6 +8,8 @@ import { NftApiModule } from '../nftapi/nftapi.module';
 import { UserModule } from '../user/user.module';
 import { CompositeApiService } from './compositeapi.service';
 import { CompositeApiController } from './compositeapi.controller';
+import { SyntheticPartModule } from '../syntheticpart/syntheticpart.module';
+import { SyntheticItemModule } from '../syntheticitem/syntheticitem.module';
 
 @Module({
     imports: [
@@ -17,6 +19,8 @@ import { CompositeApiController } from './compositeapi.controller';
         CompositeCollectionFragmentModule,
         CompositeAssetModule,
         CollectionFragmentModule,
+        SyntheticPartModule,
+        SyntheticItemModule,
         NftApiModule
     ],
     providers: [CompositeApiService],

@@ -79,7 +79,7 @@ export class AssetEntity {
     @ManyToOne(() => UserEntity, (user) => user.assets)
     owner?: UserEntity
 
-    @ManyToOne(() => CompositeAssetEntity, (compositeAsset) => compositeAsset.children)
+    @ManyToOne(() => CompositeAssetEntity, (compositeAsset) => compositeAsset.children, {onDelete: 'SET NULL', nullable: true})
     compositeAsset?: CompositeAssetEntity
 
     @ManyToOne(() => CollectionFragmentEntity, (collectionFragment) => collectionFragment.bridgeAssets)
