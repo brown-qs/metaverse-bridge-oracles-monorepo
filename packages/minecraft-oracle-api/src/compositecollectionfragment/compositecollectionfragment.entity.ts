@@ -1,7 +1,8 @@
 import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 import { CompositeAssetEntity } from '../compositeasset/compositeasset.entity';
 import { CollectionEntity } from '../collection/collection.entity';
-import { CompositePartEntity } from 'src/compositepart/compositepart.entity';
+import { CompositePartEntity } from '../compositepart/compositepart.entity';
+import { SyntheticPartEntity } from '../syntheticpart/syntheticpart.entity';
 
 @Entity()
 export class CompositeCollectionFragmentEntity {
@@ -23,4 +24,7 @@ export class CompositeCollectionFragmentEntity {
 
     @OneToMany(() => CompositePartEntity, (compositePart) => compositePart.compositeCollectionFragment)
     compositeParts?: CompositePartEntity[];
+
+    @OneToMany(() => SyntheticPartEntity, (syntheticPart) => syntheticPart.compositeCollectionFragment)
+    syntheticParts?: SyntheticPartEntity[];
 }

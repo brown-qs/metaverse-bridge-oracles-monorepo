@@ -28,7 +28,8 @@ import { GameKind } from '../game/game.enum';
 import { ChainService } from '../chain/chain.service';
 import { METAVERSE_ABI } from '../common/contracts/Metaverse';
 import { TypeOracleWalletProvider, TypeRecognizedChainAssetsProvider } from '../provider';
-import { CollectionFragmentService } from '../collectionfragment/collectionfragment.service';
+import { CompositeApiService } from '../compositeapi/compositeapi.service';
+import { CompositeAssetService } from '../compositeasset/compositeasset.service';
 
 @Injectable()
 export class OracleApiService {
@@ -48,7 +49,8 @@ export class OracleApiService {
         private readonly inventoryService: InventoryService,
         private readonly nftApiService: NftApiService,
         private readonly chainService: ChainService,
-        private readonly collectionFragmentService: CollectionFragmentService,
+        private readonly compositeApiService: CompositeApiService,
+        private readonly compositeAssetService: CompositeAssetService,
         private configService: ConfigService,
         @Inject(ProviderToken.ORACLE_WALLET_CALLBACK) private getOracle: TypeOracleWalletProvider,
         @Inject(ProviderToken.RECOGNIZED_CHAIN_ASSETS_CALLBACK) private getRecognizedAsset: TypeRecognizedChainAssetsProvider,
@@ -580,7 +582,7 @@ export class OracleApiService {
         }
 
         const chainId = !!data.chainId ? data.chainId : this.defaultChainId;
-        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, collectionFragment: { collection: { chainId } }, enraptured: false }, { relations: ['collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
+        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, collectionFragment: { collection: { chainId } }, enraptured: false }, { relations: ['collectionFragment', 'collectionFragment.collection', 'compositeAsset'], loadEagerRelations: true })
 
         if (!assetEntry) {
             this.logger.warn(`ExportConfirm: asset not found: ${chainId}-${hash}`, this.context)
@@ -657,7 +659,29 @@ export class OracleApiService {
 
         // TODO modify composite asset if it belongs to one: either equipped, or as a base asset
 
+        const compositeAsset = assetEntry.compositeAsset
         await this.assetService.remove(assetEntry)
+
+        ;(async () => {
+            if (!!compositeAsset) {
+                try {
+                    await this.compositeApiService.reevaluate(compositeAsset, user)
+                    return
+                } catch {
+                    this.logger.error(`userExportConfirm:: composite reevaluation as child failed`, undefined, this.context)
+                }
+            }
+
+            const cas = await this.compositeAssetService.findOne({assetId, compositeCollectionFragment: {collection: {assetAddress, chainId}}}, {relations: ['compositeCollectionFragment', 'compositeCollectionFragment.collection'], loadEagerRelations: true})
+            if (!!cas) {
+                try {
+                    await this.compositeApiService.reevaluate(cas, user)
+                    return
+                } catch {
+                    this.logger.error(`userExportConfirm:: composite reevaluation as parent failed`, undefined, this.context)
+                }
+            }
+        })();
         return true
     }
 

@@ -11,8 +11,8 @@ export class CompositeCollectionFragmentService {
         private readonly repository: Repository<CompositeCollectionFragmentEntity>
     ) {}
 
-    public static calculateId(dto: {uuid: string, gameId?: string}): string {
-        return `${dto.uuid}-${dto.gameId ?? 'NULL'}`
+    public static calculateId(dto: {assetAddress: string, chainId?: string | number}): string {
+        return `${dto.chainId}-${dto.assetAddress}`
     }
 
     public async create(material: CompositeCollectionFragmentEntity): Promise<CompositeCollectionFragmentEntity> {
