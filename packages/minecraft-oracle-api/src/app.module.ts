@@ -55,6 +55,22 @@ import { GameItemTypeEntity } from './gameitemtype/gameitemtype.entity';
 import { PlayerGameItemEntity } from './playergameitem/playergameitem.entity';
 import { ChainEntity } from './chain/chain.entity';
 import { ChainModule } from './chain/chain.module';
+import { CollectionEntity } from './collection/collection.entity';
+import { CollectionFragmentEntity } from './collectionfragment/collectionfragment.entity';
+import { CompositeCollectionFragmentEntity } from './compositecollectionfragment/compositecollectionfragment.entity';
+import { CompositeAssetEntity } from './compositeasset/compositeasset.entity';
+import { CollectionModule } from './collection/collection.module';
+import { CompositeAssetModule } from './compositeasset/compositeasset.module';
+import { CollectionFragmentModule } from './collectionfragment/collectionfragment.module';
+import { CompositeCollectionFragmentModule } from './compositecollectionfragment/compositecollectionfragment.module';
+import { CompositeApiModule } from './compositeapi/compositeapi.module';
+import { CompositePartEntity } from './compositepart/compositepart.entity';
+import { CompositePartModule } from './compositepart/compositepart.module';
+import { SyntheticPartModule } from './syntheticpart/syntheticpart.module';
+import { SyntheticPartEntity } from './syntheticpart/syntheticpart.entity';
+import { SyntheticItemEntity } from './syntheticitem/syntheticitem.entity';
+import { SyntheticItemModule } from './syntheticitem/syntheticitem.module';
+
 
 @Module({
   imports: [
@@ -86,7 +102,37 @@ import { ChainModule } from './chain/chain.module';
             username: configService.get<string>('typeorm.username'),
             password: configService.get<string>('typeorm.password'),
             database: configService.get<string>('typeorm.database'),
-            entities: [UserEntity, SnapshotItemEntity, InventoryEntity, TextureEntity, SkinEntity, PlayerScoreEntity, MaterialEntity, GameEntity, GameTypeEntity, AchievementEntity, PlayerAchievementEntity, SecretEntity, AssetEntity, SummonEntity, PlaySessionEntity, PlaySessionStatEntity, GganbuEntity, SnaplogEntity, GameItemTypeEntity, PlayerGameItemEntity, GameScoreTypeEntity, ChainEntity],
+            entities: [
+                UserEntity,
+                SnapshotItemEntity,
+                InventoryEntity,
+                TextureEntity,
+                SkinEntity,
+                PlayerScoreEntity,
+                MaterialEntity,
+                GameEntity,
+                GameTypeEntity,
+                AchievementEntity,
+                PlayerAchievementEntity,
+                SecretEntity,
+                AssetEntity,
+                SummonEntity,
+                PlaySessionEntity,
+                PlaySessionStatEntity,
+                GganbuEntity,
+                SnaplogEntity,
+                GameItemTypeEntity,
+                PlayerGameItemEntity,
+                GameScoreTypeEntity,
+                ChainEntity,
+                CollectionEntity,
+                CollectionFragmentEntity,
+                CompositeCollectionFragmentEntity,
+                CompositeAssetEntity,
+                CompositePartEntity,
+                SyntheticPartEntity,
+                SyntheticItemEntity
+            ],
             synchronize: configService.get<boolean>('typeorm.synchronize'),
             logging: configService.get<boolean>('typeorm.logging'),
         }),
@@ -130,7 +176,15 @@ import { ChainModule } from './chain/chain.module';
     NftApiModule,
     GganbuModule,
     SnaplogModule,
-    ChainModule
+    ChainModule,
+    CollectionModule,
+    CollectionFragmentModule,
+    CompositeCollectionFragmentModule,
+    CompositeAssetModule,
+    CompositePartModule,
+    SyntheticPartModule,
+    SyntheticItemModule,
+    CompositeApiModule
   ]
 })
 export class AppModule {}

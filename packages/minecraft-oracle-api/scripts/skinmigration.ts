@@ -44,7 +44,7 @@ async function main() {
     const IMPORTABLEASSETS = IMPORTABLE_ASSETS.filter(x => x.chainId.valueOf() === 1285)
 
     try {
-        const users = await connection.manager.find<UserEntity>(UserEntity, { relations: ['assets'] })
+        const users = await connection.manager.find<UserEntity>(UserEntity, { relations: ['assets'], loadEagerRelations: true})
         const defaultFemale = await connection.manager.findOne<TextureEntity>(TextureEntity, { where: { assetAddress: '0x0', assetId: '0', assetType: StringAssetType.NONE } })
         const defaultMale = await connection.manager.findOne<TextureEntity>(TextureEntity, { where: { assetAddress: '0x0', assetId: '1', assetType: StringAssetType.NONE } })
 
@@ -52,15 +52,19 @@ async function main() {
             const user = users[i]
             console.log('processing user', user.uuid)
             for (let j = 0; j < user.assets.length; j++) {
+
                 const asset = user.assets[j]
-                const texture = await connection.manager.findOne<TextureEntity>(TextureEntity, { where: { assetId: asset.assetId, assetAddress: asset.assetAddress, assetType: asset.assetType } })
+                const assetAddress = asset.collectionFragment.collection.assetAddress.toLowerCase()
+                const assetType = asset.collectionFragment.collection.assetType
+
+                const texture = await connection.manager.findOne<TextureEntity>(TextureEntity, { where: { assetId: asset.assetId, assetAddress: assetAddress, assetType: assetType } })
                 if (!!texture) {
-                    console.log('    found texture', `${asset.assetAddress}`, `${asset.assetId}`)
-                    const entity = await connection.manager.create<SkinEntity>(SkinEntity, { id: SkinEntity.toId(user.uuid, asset.assetAddress, asset.assetId), owner: user, texture })
+                    console.log('    found texture', `${assetAddress}`, `${asset.assetId}`)
+                    const entity = await connection.manager.create<SkinEntity>(SkinEntity, { id: SkinEntity.toId(user.uuid, assetAddress, asset.assetId), owner: user, texture })
                     await connection.manager.save<SkinEntity>(entity)
                     console.log('        added')
                 }
-                const found = IMPORTABLEASSETS.find(x => x.address.toLowerCase() == asset.assetAddress.toLowerCase())
+                const found = IMPORTABLEASSETS.find(x => x.address.toLowerCase() == assetAddress.toLowerCase())
                 if (!!found && found.gamepass) {
                     user.numGamePassAsset = (user.numGamePassAsset ?? 0) + 1
                 }

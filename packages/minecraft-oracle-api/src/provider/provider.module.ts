@@ -8,10 +8,12 @@ import {
     RecognizedChainAssetsProvider,
 } from '.';
 import { ContractsCallbackProvider } from './contract';
+import { CollectionFragmentModule } from '../collectionfragment/collectionfragment.module';
 
 @Module({
     imports: [
-        ChainModule
+        ChainModule,
+        CollectionFragmentModule
     ],
     providers: [
         OracleWalletProvider,
