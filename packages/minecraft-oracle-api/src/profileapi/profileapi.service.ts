@@ -14,6 +14,7 @@ import { findRecognizedAsset } from '../utils';
 import { TypeContractsCallbackProvider, TypeRecognizedAssetsProvider } from '../provider';
 import { ConfigService } from '@nestjs/config';
 import { BridgeAssetType } from '../common/enums/AssetType';
+import { ResourceInventoryService } from 'src/resourceinventory/resourceinventory.service';
 
 @Injectable()
 export class ProfileApiService {
@@ -26,6 +27,7 @@ export class ProfileApiService {
         private readonly assetService: AssetService,
         private readonly skinService: SkinService,
         private readonly userService: UserService,
+        private readonly resourceInventoryService: ResourceInventoryService,
         private configService: ConfigService,
         @Inject(ProviderToken.CONTRACT_CHAIN_CALLBACK) private getContract: TypeContractsCallbackProvider,
         @Inject(ProviderToken.RECOGNIZED_ASSETS_CALLBACK) private getRecognizedAssets: TypeRecognizedAssetsProvider,
@@ -75,7 +77,7 @@ export class ProfileApiService {
             const assetAddress = asset.collectionFragment.collection.assetAddress.toLowerCase()
             const recongizedEnraptureAsset = findRecognizedAsset(enrapturableAssets, { assetAddress, assetId: asset.assetId })
 
-            if (!!recongizedEnraptureAsset) {
+            if (!!recongizedEnraptureAsset && recongizedEnraptureAsset.recognizedAssetType.valueOf() !== RecognizedAssetType.RESOURCE.valueOf()) {
                 assets.push({
                     amount: asset.amount,
                     assetAddress,
@@ -126,6 +128,32 @@ export class ProfileApiService {
                 name: skin.texture.name
             }
         })
+        
+
+        // TODO fixme
+        const bait = await this.resourceInventoryService.findOne({owner: user}, {relations: ['owner']})
+        if (!!bait) {
+            const baitAsset = userAssets.find(x => x.assetId === bait.assetId && x.collectionFragment.recognizedAssetType.valueOf() === RecognizedAssetType.RESOURCE.valueOf())
+            
+            if (!!baitAsset) {
+                assets.push(
+                    {
+                        amount: baitAsset.amount,
+                        assetAddress: baitAsset.collectionFragment.collection.assetAddress.toLowerCase(),
+                        assetType: baitAsset.collectionFragment.collection.assetType,
+                        assetId: baitAsset.assetId,
+                        name: baitAsset.collectionFragment.name,
+                        exportable: !baitAsset.enraptured,
+                        hash: baitAsset.hash,
+                        summonable: false,
+                        recognizedAssetType: baitAsset.recognizedAssetType.valueOf(),
+                        enraptured: baitAsset.enraptured,
+                        exportChainId: baitAsset.collectionFragment.collection.chainId,
+                        exportAddress: baitAsset.assetOwner?.toLowerCase(),
+                    }
+                )
+            }
+        }
 
         return {
             resources,
