@@ -33,7 +33,9 @@ import { CompositePartEntity } from '../src/compositepart/compositepart.entity'
 import { SecretEntity } from '../src/secret/secret.entity'
 import { SyntheticItemEntity } from '../src/syntheticitem/syntheticitem.entity'
 import { SyntheticPartEntity } from '../src/syntheticpart/syntheticpart.entity'
-import { METAVERSE_ADDRESSES, MULTICALL_ADDRESSES, RecognizedAssetType } from '../src/config/constants'
+import { METAVERSE_ADDRESSES, RecognizedAssetType } from '../src/config/constants'
+import { checkIfIdIsRecognized } from '../src/utils'
+import { ResourceInventoryEntity } from '../src/resourceinventory/resourceinventory.entity'
 config()
 
 async function main() {
@@ -78,7 +80,8 @@ async function main() {
                 CompositeAssetEntity,
                 CompositePartEntity,
                 SyntheticPartEntity,
-                SyntheticItemEntity
+                SyntheticItemEntity,
+                ResourceInventoryEntity
             ],
             synchronize: true
         })
@@ -100,45 +103,40 @@ async function main() {
     }
 
     try {
-        const assets = await connection.manager.find<AssetEntity>(AssetEntity, {relations: ['collectionFragment'], loadEagerRelations: true})
-
-        assets[0].collectionFragment
+        const assets = await connection.manager.find<AssetEntity>(AssetEntity, { relations: ['collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
 
         const client = new ethers.providers.JsonRpcProvider('https://moonriver-rpc.moonsama.com');
         const oracle = new ethers.Wallet(process.env.ORACLE_PRIVATE_KEY, client);
         const m = new Contract(METAVERSE_ADDRESSES[1285], METAVERSE_ABI, oracle)
 
+        const dangling = []
+
         for (let i = 0; i < assets.length; i++) {
             console.log(i)
             const asset = assets[i]
+            try {
+                const entry = asset.enraptured ? await m.getEnrapturedMetaAsset(asset.hash) : await m.getImportedMetaAsset(asset.hash)
+                const assetAddress = entry.asset.assetAddress.toLowerCase() as string
+                const assetId = entry.asset.assetId.toString() as string
+                const cfs = await connection.manager.find<CollectionFragmentEntity>(CollectionFragmentEntity, { where: { collection: { chainId: 1285, assetAddress } }, relations: ['collection', 'bridgeAssets'], loadEagerRelations: true })
 
-            if (asset.recognizedAssetType.valueOf() === RecognizedAssetType.MOONSAMA.valueOf()) {
-                console.log('     sama')
-                try {
-                    const entry = asset.enraptured ? await m.getEnrapturedMetaAsset(asset.hash): await m.getImportedMetaAsset(asset.hash)
-                    const assetAddress = entry.asset.assetAddress.toLowerCase()
-                    const cf = await connection.manager.findOne<CollectionFragmentEntity>(CollectionFragmentEntity, {where: {collection: {chainId: 1285, assetAddress}}, relations: ['collection', 'bridgeAssets'], loadEagerRelations: true})
+                const cf = cfs.find(x => {
+                    return checkIfIdIsRecognized(x.idRange, { assetAddress, assetId })
+                })
+                if (cf) {
+                    console.log('    FOUND', cf.recognizedAssetType, cf.collection.assetType, cf.collection.assetAddress, assetId)
                     const res = await connection.manager.update<AssetEntity>(AssetEntity, asset.hash, {collectionFragment: cf})
                     console.log('    ', 'update:', res.affected > 0)
-                } catch (error) {
-                    console.log(error)
+                } else {
+                    console.log('    DANGLING asset', assetAddress, assetId)
+                    dangling.push(`${asset.hash}-${assetAddress}-${assetId}`)
                 }
-                continue
+
+            } catch (error) {
+                console.log(error)
             }
-
-            const assetAddress = MAP[asset.recognizedAssetType.valueOf()]
-
-            console.log('    ', asset.recognizedAssetType.valueOf(), assetAddress)
-
-            if (!assetAddress || !!asset.collectionFragment) {
-                continue
-            }
-
-            const cf = await connection.manager.findOne<CollectionFragmentEntity>(CollectionFragmentEntity, {where: {collection: {chainId: 1285, assetAddress}}, relations: ['collection', 'bridgeAssets'], loadEagerRelations: true})
-
-            const res = await connection.manager.update<AssetEntity>(AssetEntity, asset.hash, {collectionFragment: cf})
-            console.log('    ', 'update:', res.affected > 0)
         }
+        console.log(dangling)
 
     } catch (err) {
         console.log(err)
