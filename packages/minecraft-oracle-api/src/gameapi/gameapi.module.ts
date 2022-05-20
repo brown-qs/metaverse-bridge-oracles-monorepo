@@ -23,6 +23,8 @@ import { GameScoreTypeModule } from '../gamescoretype/gamescoretype.module';
 
 import { GameItemTypeModule } from '../gameitemtype/gameitemtype.module';
 import { PlayerGameItemModule } from '../playergameitem/playergameitem.module';
+import { ResourceInventoryModule } from 'src/resourceinventory/resourceinventory.module';
+import { CollectionFragmentModule } from 'src/collectionfragment/collectionfragment.module';
 
 @Module({
     imports: [
@@ -47,6 +49,8 @@ import { PlayerGameItemModule } from '../playergameitem/playergameitem.module';
         ProviderModule,
         GameItemTypeModule,
         PlayerGameItemModule,
+        ResourceInventoryModule,
+        CollectionFragmentModule
     ],
     providers: [GameApiService],
     exports: [GameApiService],

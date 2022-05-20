@@ -70,6 +70,8 @@ import { SyntheticPartModule } from './syntheticpart/syntheticpart.module';
 import { SyntheticPartEntity } from './syntheticpart/syntheticpart.entity';
 import { SyntheticItemEntity } from './syntheticitem/syntheticitem.entity';
 import { SyntheticItemModule } from './syntheticitem/syntheticitem.module';
+import { ResourceInventoryEntity } from './resourceinventory/resourceinventory.entity';
+import { ResourceInventoryModule } from './resourceinventory/resourceinventory.module';
 
 
 @Module({
@@ -131,7 +133,8 @@ import { SyntheticItemModule } from './syntheticitem/syntheticitem.module';
                 CompositeAssetEntity,
                 CompositePartEntity,
                 SyntheticPartEntity,
-                SyntheticItemEntity
+                SyntheticItemEntity,
+                ResourceInventoryEntity
             ],
             synchronize: configService.get<boolean>('typeorm.synchronize'),
             logging: configService.get<boolean>('typeorm.logging'),
@@ -184,6 +187,7 @@ import { SyntheticItemModule } from './syntheticitem/syntheticitem.module';
     CompositePartModule,
     SyntheticPartModule,
     SyntheticItemModule,
+    ResourceInventoryModule,
     CompositeApiModule
   ]
 })
