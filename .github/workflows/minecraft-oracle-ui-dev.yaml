@@ -1,6 +1,11 @@
-name: oracle-ui-dev
+name: minecraft-oracle-ui-dev
 on:
-  workflow_dispatch
+  workflow_dispatch:
+  push:
+    branches:
+      - dev
+    paths:
+      - packages/minecraft-oracle-ui/**
 jobs:
   buid-image:
     runs-on: ubuntu-20.04
@@ -35,9 +40,10 @@ jobs:
 
       - name: Push Image
         run: docker push ${{ env.IMAGE_TAG }}
+
       - name: Trigger the deployment workflow
         run: |
-          curl -X POST https://api.github.com/repos/moonsama/metaverse-bridge-oracles-monorepo-deployment/actions/workflows/oracle-ui-dev-deploy.yaml/dispatches \
+          curl -X POST https://api.github.com/repos/moonsama/metaverse-bridge-oracles-monorepo-deployment/actions/workflows/minecraft-oracle-ui-dev-deploy.yaml/dispatches \
           -H 'Accept: application/vnd.github.v3+json' \
           -H 'Content-Type: application/json' \
           -H "Authorization: Bearer ${{ secrets.GH_DEPLOY_TOKEN }}" \
