@@ -6,7 +6,7 @@ import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 import { CompositeCollectionFragmentEntity } from '../compositecollectionfragment/compositecollectionfragment.entity';
 import { AssetEntity } from '../asset/asset.entity';
 import { CompositeMetadataType } from './types';
-import { SyntheticItemEntity } from 'src/syntheticitem/syntheticitem.entity';
+import { SyntheticItemEntity } from '../syntheticitem/syntheticitem.entity';
 
 @Entity()
 export class CompositeAssetEntity {

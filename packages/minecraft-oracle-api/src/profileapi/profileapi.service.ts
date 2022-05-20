@@ -14,7 +14,6 @@ import { findRecognizedAsset } from '../utils';
 import { TypeContractsCallbackProvider, TypeRecognizedAssetsProvider } from '../provider';
 import { ConfigService } from '@nestjs/config';
 import { BridgeAssetType } from '../common/enums/AssetType';
-import { SnapshotItemEntity } from 'src/snapshot/snapshotItem.entity';
 
 @Injectable()
 export class ProfileApiService {
