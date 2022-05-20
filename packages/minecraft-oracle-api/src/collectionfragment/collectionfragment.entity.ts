@@ -8,7 +8,7 @@ import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'ty
 import { RecognizedAssetType } from '../config/constants';
 import { CollectionEntity } from '../collection/collection.entity';
 import { AssetEntity } from '../asset/asset.entity';
-import { CompositePartEntity } from 'src/compositepart/compositepart.entity';
+import { CompositePartEntity } from '../compositepart/compositepart.entity';
 
 @Entity()
 export class CollectionFragmentEntity {
