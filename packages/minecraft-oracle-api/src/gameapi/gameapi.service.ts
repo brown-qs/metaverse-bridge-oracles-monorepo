@@ -57,7 +57,7 @@ import { UserAssetFingerprint, UserAssetFingerprintsResult } from './dtos/finger
 import { ResourceInventoryService } from '../resourceinventory/resourceinventory.service';
 import { formatEther, parseEther } from 'ethers/lib/utils';
 import { ResourceInventoryQueryResult, SetResourceInventoryItems } from './dtos/resourceinventory.dto';
-import { CollectionFragmentService } from 'src/collectionfragment/collectionfragment.service';
+import { CollectionFragmentService } from '../collectionfragment/collectionfragment.service';
 
 @Injectable()
 export class GameApiService {

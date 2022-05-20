@@ -9,7 +9,7 @@ import { RecognizedAssetType } from '../config/constants';
 import { CollectionEntity } from '../collection/collection.entity';
 import { AssetEntity } from '../asset/asset.entity';
 import { CompositePartEntity } from '../compositepart/compositepart.entity';
-import { ResourceInventoryEntity } from 'src/resourceinventory/resourceinventory.entity';
+import { ResourceInventoryEntity } from '../resourceinventory/resourceinventory.entity';
 
 @Entity()
 export class CollectionFragmentEntity {
