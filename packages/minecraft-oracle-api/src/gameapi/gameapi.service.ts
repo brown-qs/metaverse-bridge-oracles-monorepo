@@ -54,7 +54,10 @@ import { GameScoreTypeService } from '../gamescoretype/gamescoretype.service';
 import { adjustPower } from '../utils';
 import { allToSha256, allToSha3_256 } from '../crypto/hash';
 import { UserAssetFingerprint, UserAssetFingerprintsResult } from './dtos/fingerprint.dto';
-import { buffer } from 'stream/consumers';
+import { ResourceInventoryService } from '../resourceinventory/resourceinventory.service';
+import { formatEther, parseEther } from 'ethers/lib/utils';
+import { ResourceInventoryQueryResult, SetResourceInventoryItems } from './dtos/resourceinventory.dto';
+import { CollectionFragmentService } from 'src/collectionfragment/collectionfragment.service';
 
 @Injectable()
 export class GameApiService {
@@ -82,6 +85,8 @@ export class GameApiService {
         private readonly gameItemTypeService: GameItemTypeService,
         private readonly playerGameItemService: PlayerGameItemService,
         private readonly gameScoreTypeService: GameScoreTypeService,
+        private readonly resourceInventoryService: ResourceInventoryService,
+        private readonly collectionFragmentService: CollectionFragmentService,
         private configService: ConfigService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
@@ -1180,5 +1185,37 @@ export class GameApiService {
         return {
             fingerprints: results
         };
+    }
+
+    async getResourceInventoryPlayer(user: UserEntity): Promise<ResourceInventoryQueryResult[]> {
+        const res = await this.resourceInventoryService.findMany({where: {owner: {uuid: user.uuid}}, relations: ['owner', 'collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true})
+
+        return res.map(x => {
+            return {
+                assetId: x.assetId,
+                assetAddress: x.collectionFragment.collection.assetAddress,
+                chainId: x.collectionFragment.collection.chainId,
+                assetType: x.collectionFragment.collection.assetType,
+                amount: formatEther(x.amount)
+            }
+        })
+    }
+
+    async setResourceInventoryPlayer(user: UserEntity, dto: SetResourceInventoryItems): Promise<boolean> {
+        const res = await this.resourceInventoryService.findMany({where: {owner: {uuid: user.uuid}}, relations: ['owner']})
+
+        await Promise.all(dto.items.map(async (x) => {
+            const id = ResourceInventoryService.calculateId(x)
+
+            await this.resourceInventoryService.create({
+                amount: parseEther(x.amount).toString(),
+                id,
+                owner: user,
+                assetId: x.assetId,
+                collectionFragment: await this.collectionFragmentService.findOne({collection: {assetAddress: x.assetAddress.toLowerCase(), chainId: x.chainId}}, {relations: ['collection']})
+            })
+        }))
+
+        return true
     }
 }

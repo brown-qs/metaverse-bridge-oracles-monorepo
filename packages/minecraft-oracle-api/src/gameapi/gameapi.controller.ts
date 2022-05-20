@@ -44,6 +44,7 @@ import { GameItemTypeDto, SetGameItemTypesDto } from '../gameitemtype/dtos/gamei
 import { PlayerGameItemsDto, QueryGameItemsDto, SetPlayerGameItemsDto } from '../playergameitem/dtos/playergameitem.dto';
 import { GameService } from '../game/game.service';
 import { UserAssetFingerprint, UserAssetFingerprintsResult } from './dtos/fingerprint.dto';
+import { ResourceInventoryQueryResult, SetResourceInventoryItems } from './dtos/resourceinventory.dto';
 
 @ApiTags('game')
 @Controller('game')
@@ -553,6 +554,33 @@ export class GameApiController {
     ): Promise<UserAssetFingerprint> {
         const user = await this.userService.findOne({uuid}, { relations: ['assets'] })
         const result = await this.gameApiService.getAssetFingerprintForPlayer(user)
+        return result
+    }
+
+    @Get('resourceinventory/player/:trimmedUuid')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Gets player resource inventory' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async getResourceInventoryPlayer(
+        @Param('trimmedUuid') uuid: string
+    ): Promise<ResourceInventoryQueryResult[]> {
+        const user = await this.userService.findOne({uuid}, { relations: ['assets'] })
+        const result = await this.gameApiService.getResourceInventoryPlayer(user)
+        return result
+    }
+
+    @Put('resourceinventory/player/:trimmedUuid')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Gets player resource inventory' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async setResourceInventoryPlayer(
+        @Param('trimmedUuid') uuid: string,
+        @Body() dto: SetResourceInventoryItems
+    ): Promise<boolean> {
+        const user = await this.userService.findOne({uuid}, { relations: ['assets'] })
+        const result = await this.gameApiService.setResourceInventoryPlayer(user, dto)
         return result
     }
 }

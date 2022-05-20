@@ -15,12 +15,15 @@ import { ChainModule } from '../chain/chain.module';
 import { CollectionFragmentModule } from '../collectionfragment/collectionfragment.module';
 import { CompositeApiModule } from '../compositeapi/compositeapi.module';
 import { CompositeAssetModule } from '../compositeasset/compositeasset.module';
+import { MaterialModule } from '../material/material.module';
+import { ResourceInventoryModule } from '../resourceinventory/resourceinventory.module';
 
 @Module({
     imports: [
         AssetModule,
         UserModule,
         SecretModule,
+        MaterialModule,
         TextureModule,
         SkinModule,
         InventoryModule,
@@ -31,7 +34,8 @@ import { CompositeAssetModule } from '../compositeasset/compositeasset.module';
         ChainModule,
         CollectionFragmentModule,
         CompositeApiModule,
-        CompositeAssetModule
+        CompositeAssetModule,
+        ResourceInventoryModule
     ],
     providers: [OracleApiService],
     exports: [OracleApiService],
