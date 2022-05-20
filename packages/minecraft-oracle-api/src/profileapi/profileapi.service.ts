@@ -15,6 +15,7 @@ import { TypeContractsCallbackProvider, TypeRecognizedAssetsProvider } from '../
 import { ConfigService } from '@nestjs/config';
 import { BridgeAssetType } from '../common/enums/AssetType';
 import { ResourceInventoryService } from 'src/resourceinventory/resourceinventory.service';
+import { formatEther } from 'ethers/lib/utils';
 
 @Injectable()
 export class ProfileApiService {
@@ -138,7 +139,7 @@ export class ProfileApiService {
             if (!!baitAsset) {
                 assets.push(
                     {
-                        amount: baitAsset.amount,
+                        amount: formatEther(bait.amount),
                         assetAddress: baitAsset.collectionFragment.collection.assetAddress.toLowerCase(),
                         assetType: baitAsset.collectionFragment.collection.assetType,
                         assetId: baitAsset.assetId,

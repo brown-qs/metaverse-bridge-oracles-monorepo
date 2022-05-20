@@ -274,6 +274,11 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                             </Tooltip>}
                                                         </div>
                                                     </div>
+                                                    <div className={centeredRow}>
+                                                        <div className={`${formValue} ${formValueTokenDetails}`}>
+                                                            {`Bridge balance: ${itemDetailDialogData.amount}`}
+                                                        </div>
+                                                    </div>
                                                     {itemDetailDialogData.exportable && <AssetChainDetails data={itemDetailDialogData} borderOn={false} />}
                                                 </Box>
                                             </Grid>
