@@ -568,7 +568,7 @@ export class OracleApiService {
         // TODO disgustang
 
         if (assetEntry.recognizedAssetType.valueOf() === RecognizedAssetType.RESOURCE.valueOf()) {
-            const cid = ResourceInventoryService.calculateId({chainId, assetAddress, assetId})
+            const cid = ResourceInventoryService.calculateId({chainId, assetAddress, assetId, uuid: user.uuid})
             const inv = await this.resourceInventoryService.findOne({id: cid})
             if (!inv) {
                 await this.resourceInventoryService.create({

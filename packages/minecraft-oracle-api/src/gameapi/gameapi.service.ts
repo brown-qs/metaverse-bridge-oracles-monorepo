@@ -1205,7 +1205,7 @@ export class GameApiService {
         const res = await this.resourceInventoryService.findMany({where: {owner: {uuid: user.uuid}}, relations: ['owner']})
 
         await Promise.all(dto.items.map(async (x) => {
-            const id = ResourceInventoryService.calculateId(x)
+            const id = ResourceInventoryService.calculateId({...x, uuid: user.uuid})
 
             await this.resourceInventoryService.create({
                 amount: parseEther(x.amount).toString(),
