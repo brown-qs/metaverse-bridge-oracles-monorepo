@@ -13,8 +13,8 @@ export class ResourceInventoryService {
         private configService: ConfigService
     ) {}
 
-    public static calculateId(dto: {chainId: string | number; assetAddress: string; assetId: string | number}): string {
-        return `${dto.chainId}-${dto.assetAddress}-${dto.assetId}`
+    public static calculateId(dto: {chainId: string | number; assetAddress: string; assetId: string | number, uuid: string}): string {
+        return `${dto.uuid}-${dto.chainId}-${dto.assetAddress}-${dto.assetId}`
     }
     
     public async create(snapshotItem: ResourceInventoryEntity): Promise<ResourceInventoryEntity> {
