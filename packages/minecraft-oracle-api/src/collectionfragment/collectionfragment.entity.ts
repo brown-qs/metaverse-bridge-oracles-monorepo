@@ -25,6 +25,10 @@ export class CollectionFragmentEntity {
     })
     recognizedAssetType: RecognizedAssetType;
 
+    @Column({nullable: true, default: 1})
+    @IsNumber()
+    decimals?: number;
+
     @Column()
     @IsBoolean()
     enrapturable: boolean;
