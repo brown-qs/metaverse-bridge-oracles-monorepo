@@ -4,7 +4,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
-import { AddressDisplayComponent } from 'components/form/AddressDisplayComponent';
+import { parseEther, formatEther } from '@ethersproject/units';
 import 'date-fns';
 import { useActiveWeb3React, useEnraptureDialog } from 'hooks';
 import {
@@ -12,6 +12,7 @@ import {
   useApproveCallback,
 } from 'hooks/useApproveCallback/useApproveCallback';
 import {
+  BURNABLE_RESOURCES_IDS,
   ChainId
 } from '../../constants';
 import { useBalances } from 'hooks/useBalances/useBalances';
@@ -28,6 +29,8 @@ import { EnraptureAssetCallbackState, useEnraptureAssetCallback } from 'hooks/mu
 import { stringAssetTypeToAssetType } from 'utils/marketplace';
 import Stack from '@mui/material/Stack/Stack';
 import { TokenDetails } from 'components/TokenDetails/TokenDetails';
+import TextField from '@mui/material/TextField';
+import { BigNumber } from 'ethereum-multicall/node_modules/ethers/lib/ethers';
 
 
 export const EnraptureDialog = () => {
@@ -72,6 +75,8 @@ export const EnraptureDialog = () => {
   let callbackError: string | undefined;
 
 
+
+
   const assetAddress = enraptureDialogData?.asset?.assetAddress;
   const assetId = enraptureDialogData?.asset?.assetId;
   const assetType = enraptureDialogData?.asset?.assetType;
@@ -80,13 +85,25 @@ export const EnraptureDialog = () => {
   const owner = enraptureDialogData?.owner ?? account
   const beneficiary = enraptureDialogData?.beneficiary ?? account
 
+  const isResource = BURNABLE_RESOURCES_IDS.includes(assetId ?? '0') && assetAddress === '0x1b30a3b5744e733d8d2f19f0812e3f79152a8777'
+
+  const [chosenAmount, setChosenAmount] = useState<string>(amount);
+
+  const finalAmount = isResource ? parseEther(chosenAmount).toString() : chosenAmount
+
+  const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.value) {
+      setChosenAmount(event.target.value);
+    }
+  };
+
   const enraptureObject = {
     asset: {
       assetAddress,
       assetId,
       assetType: stringAssetTypeToAssetType(assetType),
     },
-    amount,
+    amount: finalAmount,
     owner,
     beneficiary,
     chainId
@@ -108,13 +125,13 @@ export const EnraptureDialog = () => {
     callbackError = enraptureCallbackParams.error
   }
 
-  const hasEnough = bal?.gte(amount);
+  const hasEnough = bal?.gte(finalAmount);
 
   const [approvalState, approveCallback] = useApproveCallback({
     assetAddress: assetAddress,
     assetId: assetId,
     assetType: assetType,
-    amountToApprove: amount,
+    amountToApprove: finalAmount,
   });
 
   const { enraptureSubmitted, enraptureTx } = useSubmittedEnraptureTx(enraptureCallbackParams?.hash);
@@ -249,43 +266,46 @@ export const EnraptureDialog = () => {
     }
 
     return (
-      <Stack spacing={1} justifyContent="center" >
+      <Stack spacing={3} justifyContent="center" >
 
-        <TokenDetails assetAddress={assetAddress} assetId={assetId} assetType={assetType}/>
-        {
-          showApproveFlow ? (
-            <Button
-              onClick={() => {
-                approveCallback();
-                setApprovalSubmitted(true);
-              }}
-              className={button}
-              variant="contained"
-              color="primary"
-              disabled={approvalState === ApprovalState.PENDING || !hasEnough}
-            >
-              Approve
-            </Button>
-          ) : (
-            <Button
-              onClick={() => {
-                enraptureCallbackParams.callback?.();
-                setFinalTxSubmitted(true);
-              }}
-              className={formButton}
-              variant="contained"
-              color="primary"
-              disabled={
-                enraptureCallbackParams.state !== EnraptureAssetCallbackState.VALID || !hasEnough
-              }
-            >
-              Enrapture to metaverse
-            </Button>
-          )
-        }
-        <Button className={formButton} onClick={() => handleClose({}, "yada")} color="primary">
-          Cancel
-        </Button>
+        <TokenDetails assetAddress={assetAddress} assetId={assetId} assetType={assetType} />
+        {isResource && <TextField onChange={handleAmountChange} style={{alignSelf: 'center'}} label='Amount' value={chosenAmount} inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} />}
+        <Stack spacing={1} justifyContent="center" direction={'column'} >
+          {
+            showApproveFlow ? (
+              <Button
+                onClick={() => {
+                  approveCallback();
+                  setApprovalSubmitted(true);
+                }}
+                className={formButton}
+                variant="contained"
+                color="primary"
+                disabled={approvalState === ApprovalState.PENDING || !hasEnough}
+              >
+                Approve
+              </Button>
+            ) : (
+              <Button
+                onClick={() => {
+                  enraptureCallbackParams.callback?.();
+                  setFinalTxSubmitted(true);
+                }}
+                className={formButton}
+                variant="contained"
+                color="primary"
+                disabled={
+                  enraptureCallbackParams.state !== EnraptureAssetCallbackState.VALID || !hasEnough
+                }
+              >
+                Enrapture to metaverse
+              </Button>
+            )
+          }
+          <Button className={formButton} onClick={() => handleClose({}, "yada")} color="primary">
+            Cancel
+          </Button>
+        </Stack>
       </Stack >
     );
   };
