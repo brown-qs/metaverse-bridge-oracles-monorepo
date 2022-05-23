@@ -4,6 +4,7 @@ import { useAuth } from "hooks";
 import HomePage from './home';
 import AuthPage from './auth';
 import ProfilePage from './profile';
+import MoonsamaCharacterDesignerPage from './moonsama/designer';
 import { TransferDialog } from '../components/TransferDiaog/TransferDialog';
 import { ExportDialog } from '../components/ExportDialog/ExportDialog';
 import { ImportDialog } from '../components/ImportDialog/ImportDialog';
@@ -20,22 +21,27 @@ export const Routing = () => {
                 <AuthPage />
             </Route>
             <Route exact path="/auth/:jwt">
-                <AuthPage/>
+                <AuthPage />
             </Route>
             <Route exact path="/login">
                 {!!authData?.jwt ? <ProfilePage authData={authData} /> : <HomePage />}
             </Route>
             <Route path="/profile/:type/:address/:id">
-                <TransferDialog/>
+                <TransferDialog />
             </Route>
             <Route path="/profile">
-                <ImportDialog/>
-                <ExportDialog/>
-                <EnraptureDialog/>
-                <SummonDialog/>
-                <AssetDialog/>
+                <ImportDialog />
+                <ExportDialog />
+                <EnraptureDialog />
+                <SummonDialog />
+                <AssetDialog />
                 {!!authData?.jwt ? <ProfilePage authData={authData} /> : <AuthPage />}
                 {/*<ProfilePage authData={{ jwt: '2034823423', userProfile: { name: 'cleanston3r' } }} />*/}
+            </Route>
+
+
+            <Route exact path="/moonsama/designer">
+                <MoonsamaCharacterDesignerPage authData={authData} />
             </Route>
         </Switch>
     )
