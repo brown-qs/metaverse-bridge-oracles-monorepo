@@ -16,6 +16,7 @@ import { PlayerAchievementEntity } from '../playerachievement/playerachievement.
 import { SnaplogEntity } from '../snaplog/snaplog.entity';
 import { PlayerScoreEntity } from '../playerscore/playerscore.entity';
 import { PlayerGameItemEntity } from '../playergameitem/playergameitem.entity';
+import { ResourceInventoryEntity } from '../resourceinventory/resourceinventory.entity';
 
 @Entity()
 @Index(['uuid'], {unique: true})
@@ -101,6 +102,9 @@ export class UserEntity {
 
     @OneToMany(() => PlayerGameItemEntity, (playerGameItemEntities) => playerGameItemEntities.player)
     playerGameItems?: PlayerGameItemEntity[];
+
+    @OneToMany(() => ResourceInventoryEntity, (resourceInventoryItem) => resourceInventoryItem.owner)
+    resourceInventoryItems?: ResourceInventoryEntity[];
 
     @OneToOne(() => UserEntity, (user) => user.gganbu)
     @JoinColumn()

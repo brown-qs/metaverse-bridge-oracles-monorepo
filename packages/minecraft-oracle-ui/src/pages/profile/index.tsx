@@ -32,7 +32,7 @@ import { useCallbackSkinEquip } from '../../hooks/multiverse/useCallbackSkinEqui
 import React, { useState } from 'react';
 import { SKIN_LABELS } from '../../constants/skins';
 import { InGameItemWithStatic } from 'hooks/multiverse/useInGameItems';
-import { DEFAULT_CHAIN, NETWORK_NAME } from "../../constants";
+import { BURNABLE_RESOURCES_IDS, DEFAULT_CHAIN, NETWORK_NAME } from "../../constants";
 import { AssetChainDetails } from '../../components/AssetChainDetails/AssetChainDetails';
 
 export type ProfilePagePropTypes = {
@@ -75,7 +75,10 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const onChainMoonbrella = onChainItems?.['Moonbrella'] ?? [];
     const onChainEmbassy = onChainItems?.['Moonsama Embassy'] ?? [];
 
-    const onChainImportables = [...onChainGoldenTickets, ...onChainMoonbrella, ...onChainMoonsamas, ...onChainArt, ...onChainPlot, ...onChainEmbassy];
+    // TODO fixme
+    const onChainBurnableResources = onChainResources.filter(x => BURNABLE_RESOURCES_IDS.includes(x.asset.assetId))
+
+    const onChainImportables = [...onChainBurnableResources, ...onChainGoldenTickets, ...onChainMoonbrella, ...onChainMoonsamas, ...onChainArt, ...onChainPlot, ...onChainEmbassy];
 
     //In Game Items
     const inGameItems = useInGameItems(fetchtrigger);
@@ -271,6 +274,11 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                             </Tooltip>}
                                                         </div>
                                                     </div>
+                                                    <div className={centeredRow}>
+                                                        <div className={`${formValue} ${formValueTokenDetails}`}>
+                                                            {`Bridge balance: ${itemDetailDialogData.amount}`}
+                                                        </div>
+                                                    </div>
                                                     {itemDetailDialogData.exportable && <AssetChainDetails data={itemDetailDialogData} borderOn={false} />}
                                                 </Box>
                                             </Grid>
@@ -309,7 +317,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                             </ListItem>
                                         );
                                     }).concat(
-                                        [...(onChainArt ?? []), ...(onChainPlot ?? []), ...(onChainMoonbrella ?? []), ...(onChainEmbassy ?? []), ...(onChainMoonsamas ?? [])].map((item, ind) => {
+                                        [...(onChainBurnableResources ?? []), ...(onChainArt ?? []), ...(onChainPlot ?? []), ...(onChainMoonbrella ?? []), ...(onChainEmbassy ?? []), ...(onChainMoonsamas ?? [])].map((item, ind) => {
                                             return (
                                                 <ListItem
                                                     key={`${item?.asset?.assetAddress}-${item?.asset?.assetId}-${ind}`} //update key

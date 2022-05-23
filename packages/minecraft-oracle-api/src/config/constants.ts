@@ -38,7 +38,12 @@ export enum RecognizedAssetType {
   PLOT = 'PLOT',
   OFFHAND = 'OFFHAND',
   WEAPON_SKIN = 'WEAPON_SKIN',
-  TEMPORARY_TICKET = 'TEMPORARY_TICKET'
+  TEMPORARY_TICKET = 'TEMPORARY_TICKET',
+  ITEM = 'ITEM',
+  WEARABLE = 'WEARABLE',
+  RESOURCE = 'RESOURCE',
+  CONSUMABLE = 'CONSUMABLE',
+  
 }
 
 export enum PlayEligibilityReason {
