@@ -1,0 +1,71 @@
+[
+  {
+    "title": "Moonsama",
+    "icon": "https://static.moonsama.com/customizer-ui/accordion-icons/icon-moonsama.svg",
+    "background": "https://static.moonsama.com/customizer-ui/accordion-bgs/moonsamas-selector-dropdown.png",
+    "assetAddress": "0xb654611f84a8dc429ba3cb4fda9fad236c505a1a",
+    "assetIDRanges": [[1, 999]],
+    "chainID": 1285,
+    "assetType": "ERC725",
+    "uriPrefix": "https://static.moonsama.com/",
+    "uriPostfix": ".png",
+    "equippableType": "parent",
+    "zIndex": 0
+  },
+
+  {
+    "title": "Ambience",
+    "icon": "https://static.moonsama.com/customizer-ui/accordion-icons/icon-ambient.svg",
+    "background": "https://static.moonsama.com/customizer-ui/accordion-bgs/ambient-selector-dropdown.png",
+    "assetAddress": "0x00001",
+    "assetIDRanges": [[1, 2]],
+    "chainID": 1285,
+    "assetType": "ERC1155",
+    "uriPrefix": "https://static.moonsama.com/",
+    "uriPostfix": ".png",
+    "equippableType": "child",
+    "zIndex": -1
+  },
+
+  {
+    "title": "Main Hand",
+    "icon": "https://static.moonsama.com/customizer-ui/accordion-icons/icon-mainhand.svg",
+    "background": "https://static.moonsama.com/customizer-ui/accordion-bgs/main-hand-selector-dropdown.png",
+    "assetAddress": "0x1974eeaf317ecf792ff307f25a3521c35eecde86",
+    "assetIDRanges": [[11, 58]],
+    "chainID": 1285,
+    "assetType": "ERC1155",
+    "uriPrefix": "https://static.moonsama.com/",
+    "uriPostfix": ".png",
+    "equippableType": "child",
+    "zIndex": 1
+  },
+
+  {
+    "title": "Off Hand",
+    "icon": "https://static.moonsama.com/customizer-ui/accordion-icons/icon-offhand.svg",
+    "background": "https://static.moonsama.com/customizer-ui/accordion-bgs/offhand-selector-dropdown.png",
+    "assetAddress": "0x1974eeaf317ecf792ff307f25a3521c35eecde86",
+    "assetIDRanges": [[2, 9], [59, 67]],
+    "chainID": 1285,
+    "assetType": "ERC1155",
+    "uriPrefix": "https://static.moonsama.com/",
+    "uriPostfix": ".png",
+    "equippableType": "child",
+    "zIndex": 2
+  },
+
+  {
+    "title": "Special Items",
+    "icon": "https://static.moonsama.com/customizer-ui/accordion-icons/icon-special.svg",
+    "background": "https://static.moonsama.com/customizer-ui/accordion-bgs/special-selector-dropdown.png",
+    "assetAddress": "0x1974eeaf317ecf792ff307f25a3521c35eecde86",
+    "assetIDRanges": [[]],
+    "chainID": 1285,
+    "assetType": "ERC1155",
+    "uriPrefix": "https://static.moonsama.com/",
+    "uriPostfix": ".png",
+    "equippableType": "child",
+    "zIndex": 1
+  }
+]
