@@ -10,7 +10,7 @@ import { fromStream } from 'file-type/core';
 import fetch from 'node-fetch'
 import { collections } from '../common/collections';
 import { TypeContractsCallbackProvider } from '../provider/contract';
-import { ContractType } from 'src/common/enums/ContractType';
+import { ContractType } from '../common/enums/ContractType';
 
 
 @Injectable()

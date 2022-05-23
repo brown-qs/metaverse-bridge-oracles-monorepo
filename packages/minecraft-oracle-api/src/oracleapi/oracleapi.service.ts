@@ -8,7 +8,7 @@ import { GameService } from '../game/game.service';
 import { ImportDto } from './dtos/import.dto';
 import { CALLDATA_EXPIRATION_MS, CALLDATA_EXPIRATION_THRESHOLD, METAVERSE, RecognizedAssetType } from '../config/constants';
 import { calculateMetaAssetHash, encodeEnraptureWithSigData, encodeExportWithSigData, encodeImportWithSigData, getSalt, getSignature, utf8ToKeccak } from './oracleapi.utils';
-import { Contract, ethers } from 'ethers';
+import { BigNumber, Contract, ethers } from 'ethers';
 import { ProviderToken } from '../provider/token';
 import { AssetService } from '../asset/asset.service';
 import { findRecognizedAsset } from '../utils';
@@ -30,6 +30,9 @@ import { METAVERSE_ABI } from '../common/contracts/Metaverse';
 import { TypeOracleWalletProvider, TypeRecognizedChainAssetsProvider } from '../provider';
 import { CompositeApiService } from '../compositeapi/compositeapi.service';
 import { CompositeAssetService } from '../compositeasset/compositeasset.service';
+import { MaterialService } from '../material/material.service';
+import { ResourceInventoryService } from '../resourceinventory/resourceinventory.service';
+import { ResourceInventoryEntity } from 'src/resourceinventory/resourceinventory.entity';
 
 @Injectable()
 export class OracleApiService {
@@ -51,6 +54,8 @@ export class OracleApiService {
         private readonly chainService: ChainService,
         private readonly compositeApiService: CompositeApiService,
         private readonly compositeAssetService: CompositeAssetService,
+        private readonly materialService: MaterialService,
+        private readonly resourceInventoryService: ResourceInventoryService,
         private configService: ConfigService,
         @Inject(ProviderToken.ORACLE_WALLET_CALLBACK) private getOracle: TypeOracleWalletProvider,
         @Inject(ProviderToken.RECOGNIZED_CHAIN_ASSETS_CALLBACK) private getRecognizedAsset: TypeRecognizedChainAssetsProvider,
@@ -545,6 +550,8 @@ export class OracleApiService {
         assetEntry.recognizedAssetType = recognizedAsset?.recognizedAssetType ?? RecognizedAssetType.NONE;
         const finalentry = await this.assetService.create({ ...assetEntry, pendingIn: false });
 
+        // TODO proper sideffects
+        
         (async () => {
             let metadata = null
             let world = null
@@ -558,6 +565,28 @@ export class OracleApiService {
                 await this.assetService.update({ hash: assetEntry.hash }, { metadata, world })
             }
         })()
+
+        // TODO disgustang
+
+        if (assetEntry.recognizedAssetType.valueOf() === RecognizedAssetType.RESOURCE.valueOf()) {
+            const cid = ResourceInventoryService.calculateId({chainId, assetAddress, assetId, uuid: user.uuid})
+            const inv = await this.resourceInventoryService.findOne({id: cid}, {relations: ['assets']})
+            if (!inv) {
+                await this.resourceInventoryService.create({
+                    amount: assetEntry.amount,
+                    owner: user,
+                    id: cid,
+                    assetId,
+                    collectionFragment: assetEntry.collectionFragment,
+                    assets: [finalentry]
+                })
+            } else {
+                const newAmount = (BigNumber.from(inv.amount).add(assetEntry.amount)).toString()
+                const entry: ResourceInventoryEntity = {...inv, amount: newAmount, assets: (inv.assets ?? []).concat([finalentry])}
+                console.log(entry)
+                await this.resourceInventoryService.create(entry)
+            }
+        }
 
         if (!finalentry) {
             this.logger.error(`EnraptureConfirm: couldn't change pending flag: ${hash}`, undefined, this.context)

@@ -7,6 +7,7 @@ export type EnraptureDialogData = {
   beneficiary?: string;
   enrapturable?: boolean,
   importable?: boolean,
+  isResource?: boolean,
 } | undefined;
 
 export type EnraptureDialogContextType = {

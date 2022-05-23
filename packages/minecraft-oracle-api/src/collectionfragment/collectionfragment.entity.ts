@@ -8,7 +8,8 @@ import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'ty
 import { RecognizedAssetType } from '../config/constants';
 import { CollectionEntity } from '../collection/collection.entity';
 import { AssetEntity } from '../asset/asset.entity';
-import { CompositePartEntity } from 'src/compositepart/compositepart.entity';
+import { CompositePartEntity } from '../compositepart/compositepart.entity';
+import { ResourceInventoryEntity } from '../resourceinventory/resourceinventory.entity';
 
 @Entity()
 export class CollectionFragmentEntity {
@@ -24,6 +25,10 @@ export class CollectionFragmentEntity {
         default: RecognizedAssetType.NONE
     })
     recognizedAssetType: RecognizedAssetType;
+
+    @Column({nullable: true, default: 1})
+    @IsNumber()
+    decimals?: number;
 
     @Column()
     @IsBoolean()
@@ -60,4 +65,7 @@ export class CollectionFragmentEntity {
 
     @OneToMany(() => CompositePartEntity, (compositePart) => compositePart.collectionFragment)
     compositeParts?: CompositePartEntity[];
+
+    @OneToMany(() => ResourceInventoryEntity, (rie) => rie.collectionFragment)
+    resourceInventoryItems?: ResourceInventoryEntity[];
 }

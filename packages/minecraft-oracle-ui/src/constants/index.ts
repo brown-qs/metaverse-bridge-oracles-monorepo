@@ -125,3 +125,6 @@ export const IPFS_GATEWAYS = [
 ];
 
 export const MAX_WIDTH_TO_SHOW_NAVIGATION = 1360;
+
+
+export const BURNABLE_RESOURCES_IDS = ['14'] 

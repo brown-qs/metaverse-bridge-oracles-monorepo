@@ -11,6 +11,7 @@ import { StringAssetType } from '../common/enums/AssetType';
 import { RecognizedAssetType } from '../config/constants';
 import { CompositeAssetEntity } from '../compositeasset/compositeasset.entity';
 import { CollectionFragmentEntity } from '../collectionfragment/collectionfragment.entity';
+import { ResourceInventoryEntity } from 'src/resourceinventory/resourceinventory.entity';
 
 @Entity()
 @Index(['hash'], {unique: true})
@@ -84,4 +85,7 @@ export class AssetEntity {
 
     @ManyToOne(() => CollectionFragmentEntity, (collectionFragment) => collectionFragment.bridgeAssets)
     collectionFragment?: CollectionFragmentEntity
+
+    @ManyToOne(() => ResourceInventoryEntity, (rie) => rie.assets)
+    resourceInventory?: ResourceInventoryEntity
 }

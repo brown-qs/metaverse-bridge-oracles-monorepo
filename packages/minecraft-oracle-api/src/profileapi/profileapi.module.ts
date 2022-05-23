@@ -13,6 +13,7 @@ import { ProfileApiController } from './profileapi.controller';
 import { ProfileApiService } from './profileapi.service';
 import { InventoryModule } from '../playerinventory/inventory.module';
 import { SkinModule } from '../skin/skin.module';
+import { ResourceInventoryModule } from '../resourceinventory/resourceinventory.module';
 
 @Module({
     imports: [
@@ -36,7 +37,8 @@ import { SkinModule } from '../skin/skin.module';
         InventoryModule,
         forwardRef(() => GameApiModule),
         SummonModule,
-        ProviderModule
+        ProviderModule,
+        ResourceInventoryModule
     ],
     providers: [ProfileApiService],
     exports: [ProfileApiService],
