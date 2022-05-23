@@ -32,6 +32,7 @@ import { CompositeApiService } from '../compositeapi/compositeapi.service';
 import { CompositeAssetService } from '../compositeasset/compositeasset.service';
 import { MaterialService } from '../material/material.service';
 import { ResourceInventoryService } from '../resourceinventory/resourceinventory.service';
+import { ResourceInventoryEntity } from 'src/resourceinventory/resourceinventory.entity';
 
 @Injectable()
 export class OracleApiService {
@@ -569,18 +570,21 @@ export class OracleApiService {
 
         if (assetEntry.recognizedAssetType.valueOf() === RecognizedAssetType.RESOURCE.valueOf()) {
             const cid = ResourceInventoryService.calculateId({chainId, assetAddress, assetId, uuid: user.uuid})
-            const inv = await this.resourceInventoryService.findOne({id: cid})
+            const inv = await this.resourceInventoryService.findOne({id: cid}, {relations: ['assets']})
             if (!inv) {
                 await this.resourceInventoryService.create({
                     amount: assetEntry.amount,
                     owner: user,
                     id: cid,
                     assetId,
-                    collectionFragment: assetEntry.collectionFragment
+                    collectionFragment: assetEntry.collectionFragment,
+                    assets: [finalentry]
                 })
             } else {
                 const newAmount = (BigNumber.from(inv.amount).add(assetEntry.amount)).toString()
-                await this.resourceInventoryService.update(inv.id, {amount: newAmount})
+                const entry: ResourceInventoryEntity = {...inv, amount: newAmount, assets: (inv.assets ?? []).concat([finalentry])}
+                console.log(entry)
+                await this.resourceInventoryService.create(entry)
             }
         }
 
