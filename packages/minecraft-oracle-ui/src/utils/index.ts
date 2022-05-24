@@ -12,8 +12,8 @@ import { ethers } from 'ethers';
 export * as marketplace from './marketplace';
 export * as subgraph from './subgraph';
 
-export const truncateAddress = (address: string) =>
-  `${address.slice(0, 2)}...${address.slice(address.length - 4)}`;
+export const truncateAddress = (address: string, beginnerCharNum=0) =>
+  `${address.slice(0, 2+beginnerCharNum)}...${address.slice(address.length - 4)}`;
 
 export const truncateHexString = (str?: string, chars = 4) => {
   if (!str) {

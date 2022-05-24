@@ -1,8 +1,10 @@
+
 import Box from '@mui/material/Box';
 import "@fontsource/orbitron/500.css";
 import { useAccountDialog, useActiveWeb3React } from 'hooks';
 import { truncateAddress } from 'utils';
 import { useClasses } from 'hooks';
+import Identicon from 'components/Identicon/Identicon';
 
 export default function WalletAccount() {
   const { account } = useActiveWeb3React();
@@ -57,12 +59,10 @@ export default function WalletAccount() {
       {
         account ? (
           <Box onClick={() => setAccountDialogOpen(true)} className={WalletDetailsStyle}>
-            <svg xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '8px' }} width="24" height="24" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#0EEBA8" fill="none" strokeLinecap="round" strokeLinejoin="round">
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M17 8v-3a1 1 0 0 0 -1 -1h-10a2 2 0 0 0 0 4h12a1 1 0 0 1 1 1v3m0 4v3a1 1 0 0 1 -1 1h-12a2 2 0 0 1 -2 -2v-12" />
-              <path d="M20 12v4h-4a2 2 0 0 1 0 -4h4" />
-            </svg>
-            <span>{truncateAddress(account)}</span>
+            <div style={{margin: '0 8px'}}>
+              <Identicon/>
+            </div>
+            <span>{truncateAddress(account, 4)}</span>
           </Box >
         ) : (
           <Box onClick={() => setAccountDialogOpen(true)} className={ConnectBoxStyle}>
