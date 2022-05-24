@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Switch, Route, Redirect } from 'react-router-dom';
 import { useAuth } from "hooks";
 import HomePage from './home';
 import AuthPage from './auth';
 import ProfilePage from './profile';
 import MoonsamaCharacterDesignerPage from './moonsama/designer';
-import { TransferDialog } from '../components/TransferDiaog/TransferDialog';
 import { ExportDialog } from '../components/ExportDialog/ExportDialog';
 import { ImportDialog } from '../components/ImportDialog/ImportDialog';
 import { EnraptureDialog } from '../components/EnraptureDialog/EnraptureDialog';
