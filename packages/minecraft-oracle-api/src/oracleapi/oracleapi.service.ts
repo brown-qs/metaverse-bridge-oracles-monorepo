@@ -32,7 +32,7 @@ import { CompositeApiService } from '../compositeapi/compositeapi.service';
 import { CompositeAssetService } from '../compositeasset/compositeasset.service';
 import { MaterialService } from '../material/material.service';
 import { ResourceInventoryService } from '../resourceinventory/resourceinventory.service';
-import { ResourceInventoryEntity } from 'src/resourceinventory/resourceinventory.entity';
+import { ResourceInventoryEntity } from '../resourceinventory/resourceinventory.entity';
 
 @Injectable()
 export class OracleApiService {
