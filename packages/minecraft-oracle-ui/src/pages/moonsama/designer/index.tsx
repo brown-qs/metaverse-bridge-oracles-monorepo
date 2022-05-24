@@ -1,8 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useOnChainItems } from 'hooks/multiverse/useOnChainItems';
 import { useActiveWeb3React } from 'hooks';
-import { AppBar, Box, Typography, Toolbar } from '@mui/material';
-import { truncateAddress } from 'utils';
+import { Box, Typography, Modal } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useClasses } from 'hooks';
@@ -14,15 +13,20 @@ import MuiAccordionSummary, {
   AccordionSummaryProps,
 } from '@mui/material/AccordionSummary';
 import customizationOptions from 'fixtures/MoonsamaCustomizer.json'
+import birdToHand from 'fixtures/MoonsamaBirdHandPairing.json'
 import ImageStack from 'components/ImageStacks/Moonsama2';
 import { FixedSizeGrid, GridChildComponentProps } from 'react-window';
 import { useProfile } from 'hooks/multiverse/useProfile';
-// import LoginButton from 'components/LoginButton';
-// import { saveCustomization, shareCustomization, fetchCustomizations } from 'utils/customizers/moonsama';
 import { styled } from '@mui/material/styles';
 import "@fontsource/orbitron/500.css";
-import { AuthData } from 'context/auth/AuthContext/AuthContext.types';
-
+import { useInGameItems } from 'hooks/multiverse/useInGameItems';
+import type { InGameItemWithStatic } from 'hooks/multiverse/useInGameItems'
+import SimpleBar from 'simplebar-react';
+import 'simplebar/dist/simplebar.min.css';
+import axios from 'axios';
+import type { AuthData } from 'context/auth/AuthContext/AuthContext.types';
+import MoonsamaNav from 'ui/Navigation/MoonsamaNav';
+import { downloadAsImage, saveCustomization, shareCustomization } from 'utils/customizers';
 
 const ExpandMoreIcon = ({ expanded }: { expanded?: boolean }) => {
   return (
@@ -53,10 +57,17 @@ const Cell = ({ columnIndex, rowIndex, style, data }: GridChildComponentProps) =
 
   const isSelected = (data.selectedAsset === data.traitOptionsAssets[assetIndex].assetID)
 
+  const customization = data.myCustomizations[`${data.traitOptionsAssets[assetIndex].assetAddress} - ${data.traitOptionsAssets[assetIndex].assetID}`]
+
   return (
     <Box style={style} sx={{ overflow: 'hidden', padding: '8px' }} onClick={() => data.onSelectAsset(assetIndex)}>
       <Box className={cx({ [gridItem]: true }, { [selected]: isSelected })}>
-        <img src={data.traitOptionsAssets[assetIndex].thumbnailUrl} style={{ borderRadius: '8px', backgroundColor: '#1B1B3A' }} width="200" height="200" alt="" />
+        {typeof customization === 'undefined' ? (
+          <img src={data.traitOptionsAssets[assetIndex].thumbnailUrl} style={{ borderRadius: '8px', backgroundColor: '#1B1B3A' }} width="200" height="200" alt="" />
+        ) : (
+          <ImageStack layers={customization.layers} />
+        )
+        }
       </Box>
     </Box>
   );
@@ -81,10 +92,17 @@ type asset = {
   fullSizeUrl: string,
   chainID: number,
   assetAddress: string,
-  assetID: number,
+  assetID: string,
   assetType: string,
   zIndex: number,
   customizableTraitName: string
+}
+
+type assetIdentifier = {
+  chainID: number,
+  assetAddress: string,
+  assetID: string,
+  assetType: string,
 }
 
 type customizationType = {
@@ -92,30 +110,97 @@ type customizationType = {
   children: Array<asset>
 }
 
-const getAssetImages = (customizableTrait: customizableTraitType) => {
-  const options = []
+type getCustomizationsResponse = {
+  composite: boolean
+}
+
+const getCustomization = async ({ chainID, assetAddress, assetID }: { chainID: number, assetAddress: string, assetID: string }, authData: AuthData) => {
+  return await axios.request<getCustomizationsResponse>({
+    method: 'get',
+    url: `${process.env.REACT_APP_BACKEND_API_URL}/composite/metadata/${chainID}/${assetAddress}/${assetID}`,
+    headers: { Authorization: `Bearer ${authData?.jwt}` }
+  }).catch(console.error)
+}
+
+const transformBridgedAssets = (inGameAssets: Array<InGameItemWithStatic> | undefined) => {
+  if (typeof inGameAssets === 'undefined') return []
+
+  return inGameAssets.map((inGameAsset) => {
+    return {
+      chainID: 1285,
+      assetAddress: inGameAsset?.assetAddress.replace('0x9bca2cced0aeebd47f2d6f2e37564c5175cd0e2e', '0xb654611f84a8dc429ba3cb4fda9fad236c505a1a'),
+      // assetAddress: inGameAsset?.assetAddress,
+      assetID: inGameAsset?.assetId,
+      assetType: inGameAsset?.assetType,
+    }
+  })
+}
+
+const transformOnChainAssets = (onChainItems: Array<any> | undefined) => {
+  if (typeof onChainItems === 'undefined') return []
+
+  return onChainItems.map((onChainItem) => {
+    return {
+      chainID: 1285,
+      assetAddress: onChainItem?.asset.assetAddress.replace('0x9bca2cced0aeebd47f2d6f2e37564c5175cd0e2e', '0xb654611f84a8dc429ba3cb4fda9fad236c505a1a'),
+      // assetAddress: onChainItem?.asset.assetAddress,
+      assetID: onChainItem?.asset.assetId,
+      assetType: onChainItem?.asset.assetType,
+    }
+  })
+}
+
+const isOwnedAsset = ({ chainID, assetAddress, assetID, assetType }: assetIdentifier, ownedAssets: Array<assetIdentifier>): boolean => {
+  for (let i = 0; i < ownedAssets.length; i++) {
+    if (ownedAssets[i].chainID === chainID && ownedAssets[i].assetAddress === assetAddress && ownedAssets[i].assetID === assetID && ownedAssets[i].assetType === assetType) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+const getAssetImages = (customizableTrait: customizableTraitType, ownedAssets: Array<assetIdentifier>) => {
+  const options = [], ownedOptions = []
 
   for (let i = 0; i < customizableTrait.assetIDRanges.length; i++) {
     const assetRange = customizableTrait.assetIDRanges[i];
 
     for (let j = assetRange[0]; j <= assetRange[1]; j++) {
-      options.push({
+      const option = {
         thumbnailUrl: `${customizableTrait.uriPrefix}customizer/${customizableTrait.chainID}/${customizableTrait.assetAddress}/${j}${customizableTrait.uriPostfix}`,
         fullSizeUrl: `${customizableTrait.uriPrefix}${customizableTrait.chainID}/${customizableTrait.assetAddress}/${j}${customizableTrait.uriPostfix}`,
         chainID: customizableTrait.chainID,
         assetAddress: customizableTrait.assetAddress,
-        assetID: j,
+        assetID: j.toString(),
         assetType: customizableTrait.assetType,
         zIndex: customizableTrait.zIndex,
         customizableTraitName: customizableTrait.title
-      })
+      }
+
+      if (isOwnedAsset(option, ownedAssets)) {
+        ownedOptions.push({
+          owned: true,
+          ...option
+        })
+      } else {
+        options.push({
+          owned: false,
+          customization: false,
+          ...option
+        })
+      }
     }
   }
 
-  return options;
+  return [...ownedOptions, ...options];
 }
 
-const CharacterDesignerPage = ({ authData }: {authData: AuthData}) => {
+const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
+  const theme = useTheme();
+  const isMobileViewport = useMediaQuery(theme.breakpoints.down('sm'));
+  const isLoggedIn = !!authData && !!authData.userProfile
+
   const [expanded, setExpanded] = useState<customizableTraitType>(customizationOptions[0]);
 
   const [currentCustomization, setCurrentCustomization] = useState<customizationType>({
@@ -123,21 +208,109 @@ const CharacterDesignerPage = ({ authData }: {authData: AuthData}) => {
     children: [],
   });
 
+  const [ownedAssets, setOwnedAssets] = useState<Array<assetIdentifier>>([])
+  const [numCols, setNumCols] = useState(isMobileViewport ? 2 : 3);
+  const [myCustomizations, setMyCustomizations] = useState<Array<any>>([]);
+  const [showShareModal, setShowShareModal] = useState<boolean>(false);
+
   const { account } = useActiveWeb3React();
   const profile = useProfile();
   const onChainItems = useOnChainItems();
+  const inGameItems = useInGameItems();
 
-  const theme = useTheme();
-  const isMobileViewport = useMediaQuery(theme.breakpoints.down('sm'));
-
-  const traitOptionsAssets = useMemo(() => getAssetImages(expanded), [expanded]);
-  const [numCols, setNumCols] = useState(isMobileViewport ? 2 : 3);
+  const traitOptionsAssets = useMemo(() => getAssetImages(expanded, ownedAssets), [expanded, ownedAssets]);
 
   useEffect(() => setNumCols(isMobileViewport ? 2 : 3), [isMobileViewport]);
 
-  // if (authData && onChainItems) {
-  //   fetchCustomizations(onChainItems.['Moonsama'] ?? [])
-  // }
+  useEffect(() => {
+    const myBridgedAssets = transformBridgedAssets(inGameItems?.assets)
+    const myMoonsamas = transformOnChainAssets(onChainItems?.['Moonsama'] ?? [])
+    const my1155s = transformOnChainAssets(onChainItems?.['???'] ?? [])
+
+    setOwnedAssets([...myBridgedAssets, ...myMoonsamas, ...my1155s])
+  }, [onChainItems, inGameItems])
+
+  useEffect(() => {
+    const getCustomizations = async () => {
+      const customizations: any = {}
+
+      for (let i = 0; i < ownedAssets.length; i++) {
+        const customizationResponse = await getCustomization({
+          chainID: ownedAssets[i].chainID,
+          assetAddress: ownedAssets[i].assetAddress,
+          assetID: ownedAssets[i].assetID,
+        }, authData).catch(e => alert('error'));
+
+        if (typeof customizationResponse !== 'undefined' && customizationResponse.data.composite) {
+          customizations[`${ownedAssets[i].assetAddress}-${ownedAssets[i].assetID}`] = customizationResponse.data
+        }
+      }
+
+      setMyCustomizations(customizations)
+    }
+
+    if (!!authData && !!authData.userProfile) {
+      getCustomizations()
+    }
+  }, [ownedAssets, authData])
+
+  const getSideEffectLayers = ({parent, children}: customizationType): customizationType => {
+    let hasEquippedMainHand = false, mainHandTrait, weaponHandTrait
+
+    if (parent === null) return {parent, children}
+
+    for (let i = 0; i < customizationOptions.length; i++) {
+      if (customizationOptions[i].title === 'Main Hand') {
+        mainHandTrait = customizationOptions[i];
+      } else if (customizationOptions[i].title === 'Weapon Hand') {
+        weaponHandTrait = customizationOptions[i]
+      }
+    }
+
+    if (!mainHandTrait || !weaponHandTrait) return {parent, children}
+
+    for (let i = 0; i < children.length; i++) {
+      if (hasEquippedMainHand) break
+
+      if (children[i].assetAddress === mainHandTrait.assetAddress) {
+        for (let j = 0; j < mainHandTrait.assetIDRanges?.length; j++) {
+          if (parseInt(children[i].assetID) >= mainHandTrait.assetIDRanges[j][0] && parseInt(children[i].assetID) <= mainHandTrait.assetIDRanges[j][1]) {
+            hasEquippedMainHand = true
+            break
+          }
+        }
+      }
+    }
+
+    if (!hasEquippedMainHand) return {parent, children}
+
+    const toReplace = children.findIndex(asset => asset.customizableTraitName === 'Weapon Hand')
+    const newChildren = [...children]
+    const birdHandMapping: {[index: string]: number} = birdToHand
+
+    const weaponHandAssetID = birdHandMapping[parent.assetID].toString()
+
+    const weaponHand = {
+      thumbnailUrl: '',
+      fullSizeUrl: `${weaponHandTrait?.uriPrefix}${weaponHandTrait?.chainID}/${weaponHandTrait?.assetAddress}/${weaponHandAssetID}${weaponHandTrait?.uriPostfix}`,
+      chainID: weaponHandTrait?.chainID,
+      assetAddress: weaponHandTrait?.assetAddress,
+      assetID: weaponHandAssetID,
+      assetType: weaponHandTrait?.assetType,
+      zIndex: weaponHandTrait?.zIndex,
+      customizableTraitName: weaponHandTrait?.title
+    }
+
+    if (toReplace > -1) {
+      newChildren.splice(toReplace, 1, weaponHand)
+    } else {
+      newChildren.push(weaponHand)
+    }
+
+    return {
+      parent, children: newChildren
+    };
+  };
 
   const {
     customizerContainer,
@@ -153,10 +326,10 @@ const CharacterDesignerPage = ({ authData }: {authData: AuthData}) => {
 
   const selectAsset = (assetIndex: number) => {
     if (expanded.equippableType === 'parent') {
-      setCurrentCustomization({
+      setCurrentCustomization(getSideEffectLayers({
         parent: traitOptionsAssets[assetIndex],
         children: currentCustomization.children
-      })
+      }))
     } else {
       const toReplace = currentCustomization.children.findIndex(asset => asset.customizableTraitName === expanded.title)
       const newChildren = [...currentCustomization.children]
@@ -167,10 +340,10 @@ const CharacterDesignerPage = ({ authData }: {authData: AuthData}) => {
         newChildren.push(traitOptionsAssets[assetIndex])
       }
 
-      setCurrentCustomization({
+      setCurrentCustomization(getSideEffectLayers({
         parent: currentCustomization.parent,
         children: newChildren
-      })
+      }))
     }
   }
 
@@ -206,22 +379,7 @@ const CharacterDesignerPage = ({ authData }: {authData: AuthData}) => {
 
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <AppBar sx={{ backgroundColor: '#1B1B3A', boxShadow: '0px 20px 25px -5px rgba(0, 0, 0, 0.1), 0px 10px 10px -5px rgba(0, 0, 0, 0.04)' }} position="static">
-        <Toolbar sx={{ position: 'relative' }}>
-          <Typography component="div" sx={{ marginRight: 'auto', display: 'flex', alignItems: 'center' }}>
-            {isMobileViewport ? (
-              <svg width="67" height="32" viewBox="0 0 267 128" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M89.124 24.677v23.998h28.471V24.677H89.124Zm58.844 0v23.957h28.47V24.677h-28.47Zm-58.844 0v23.998h28.471V24.677H89.124Zm58.844 0v23.957h28.47V24.677h-28.47Zm-58.844 0v23.998h28.471V24.677H89.124Zm58.844 0v23.957h28.47V24.677h-28.47Zm76.621 60.221-11.526 17.551h23.196l-11.67-17.55Zm0 0-11.526 17.551h23.196l-11.67-17.55ZM89.124 24.677v23.998h28.471V24.677H89.124Zm58.844 0v23.957h28.47V24.677h-28.47Zm-50.793 60.2L85.649 102.45h23.196l-11.67-17.572Zm-8.051-60.2v23.998h28.471V24.677H89.124Zm58.844 0v23.957h28.47V24.677h-28.47Zm76.621 60.221-11.526 17.551h23.196l-11.67-17.55Zm0 0-11.526 17.551h23.196l-11.67-17.55ZM89.124 24.677v23.998h28.471V24.677H89.124Zm8.05 60.17L85.65 102.449h23.196l-11.67-17.602Zm50.794-60.17v23.957h28.47V24.677h-28.47ZM0 0v128h266.755V0H0Zm134.837 12.338h54.731V60.91h-54.731V12.338Zm-122.499 0h9.799l19.947 20.934 20.009-20.934h9.788v48.644H58.69V34.866l-16.605 17.48-16.667-17.48v26.116H12.338V12.338Zm50.999 103.375h-51.41v-12.708h38.29v-3.548l-37.879-5.624V67.162H63.06V79.5H25.417v3.959l37.92 5.552v26.702Zm63.748 0H67.45v-9.521l25.838-39.236h7.917l25.839 39.236.041 9.521Zm3.681-54.741H75.994V12.421h54.731l.041 48.551Zm60.026 54.741h-13.233V89.597l-16.605 17.479-16.667-17.48v26.117h-13.13V67.028h9.798l19.999 20.975 20.008-20.975h9.789l.041 48.685Zm2.93-103.457h10.005l29.869 27.926V12.256h13.119v48.757h-9.994l-29.869-27.761v27.761h-13.171l.041-48.757Zm60.777 103.457h-59.635v-9.521l25.838-39.236h7.917l25.839 39.236.041 9.521Zm-41.395-13.264H236.3l-11.711-17.572-11.485 17.572Zm-65.136-53.836h28.47V24.677h-28.47v23.936Zm-30.373-23.936H89.124v23.998h28.471V24.677Zm30.373 0v23.957h28.47V24.677h-28.47Zm-58.844 0v23.998h28.471V24.677H89.124Zm135.465 60.2-11.526 17.572h23.196l-11.67-17.572Zm-76.621-60.2v23.957h28.47V24.677h-28.47Zm-58.844 0v23.998h28.471V24.677H89.124Zm58.844 0v23.957h28.47V24.677h-28.47Zm-58.844 0v23.998h28.471V24.677H89.124Zm0 0v23.998h28.471V24.677H89.124Zm0 0v23.998h28.471V24.677H89.124Z" fill="#fff" /></svg>
-            ) : (
-              <svg width="316" height="32" viewBox="0 0 474 48" fill="none" xmlns="http://www.w3.org/2000/svg"><g clipPath="url(#a)"><path d="M29.334 20.72 9.647.07H0V48h12.926V22.29l16.408 17.167 16.338-17.168V48h12.997V.07h-9.647L29.334 20.72ZM62.758 48h53.881V.202h-53.88V48Zm12.886-35.691h28.029v23.585H75.644V12.309ZM120.648 48h53.881V.202h-53.881V48Zm12.967-35.691h28.028v23.585h-28.028V12.309Zm84.207 15.183L188.427 0h-9.849v48h12.926V20.65L220.899 48h9.849V0h-12.926v27.492Zm30.306-15.183h37.068V.202h-49.984V26.46l37.331 5.537v3.492h-37.746V48h50.672V21.672l-37.341-5.466v-3.897ZM314.956 0l-25.458 38.637V48h58.709v-9.363L322.75 0h-7.794Zm-7.531 34.942 11.357-17.299 11.489 17.3h-22.846Zm74.136-14.222L361.873.07h-9.637V48h12.916V22.29l16.409 17.167 16.347-17.168V48h12.987V.07h-9.636l-19.698 20.65ZM448.175 0h-7.794l-25.437 38.637V48h58.709v-9.363L448.175 0ZM432.86 34.942l11.358-17.299 11.478 17.3H432.86Z" fill="#fff" /></g><defs><clipPath id="a"><path fill="#fff" d="M0 0h473.613v48H0z" /></clipPath></defs></svg>
-            )}
-          </Typography>
-
-          {/* <Typography variant="h6">
-            {account && truncateAddress(account)}
-          </Typography> */}
-          {/* <LoginButton /> */}
-        </Toolbar>
-      </AppBar>
+      <MoonsamaNav />
       <Box sx={{ minHeight: '100vh', width: '100%', background: 'url("/moonsama/egg-pattern.svg"), url("/moonsama/background-aurora.svg") top right no-repeat, radial-gradient(73.61% 73.46% at 49.9% 50%, rgba(123, 97, 255, 0.5) 13.27%, rgba(123, 97, 255, 0) 100%), linear-gradient(77.59deg, #4A4A77 -1.39%, #1B1B3A 44.24%);', backgroundBlendMode: 'overlay, hard-light', backgroundSize: 'auto, contain, auto' }}>
         <Box className={customizerContainer}>
           <Box className={previewViewport}>
@@ -234,7 +392,11 @@ const CharacterDesignerPage = ({ authData }: {authData: AuthData}) => {
                 <ImageStack layers={[...currentCustomization.children, currentCustomization.parent]} />
                 <div style={{ position: 'absolute', bottom: '16px', left: '8px', display: 'flex' }}>
                   <button
-                    // onClick={saveCustomization}
+                    onClick={() => {
+                      if (currentCustomization.children !== null && currentCustomization.parent !== null) {
+                        downloadAsImage([...currentCustomization.children, currentCustomization.parent])
+                      }
+                    }}
                     type="button"
                     className={customizerActionButton}>
                     <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-download" width="34" height="34" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#ffffff" fill="none" strokeLinecap="round" strokeLinejoin="round">
@@ -245,34 +407,49 @@ const CharacterDesignerPage = ({ authData }: {authData: AuthData}) => {
                     </svg>
                   </button>
 
-                  <button
-                    // onClick={shareCustomization}
-                    type="button"
-                    className={customizerActionButton}>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-share" width="34" height="34" viewBox="0 0 24 24" stroke-width="1.5" stroke="#ffffff" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                      <circle cx="6" cy="12" r="3" />
-                      <circle cx="18" cy="6" r="3" />
-                      <circle cx="18" cy="18" r="3" />
-                      <line x1="8.7" y1="10.7" x2="15.3" y2="7.3" />
-                      <line x1="8.7" y1="13.3" x2="15.3" y2="16.7" />
-                    </svg>
-                  </button>
+                  {isLoggedIn && (<>
+                    <button
+                      onClick={() => saveCustomization(currentCustomization, authData)}
+                      type="button"
+                      className={customizerActionButton}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" fill="none" stroke="#fff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" className="icon icon-tabler icon-tabler-file-upload" viewBox="0 0 24 24">
+                        <path stroke="none" d="M0 0h24v24H0z"></path>
+                        <path d="M14 3v4a1 1 0 001 1h4"></path>
+                        <path d="M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"></path>
+                        <path d="M12 11L12 17"></path>
+                        <path d="M9 14L12 11 15 14"></path>
+                      </svg>
+                    </button>
+
+                    <button
+                      onClick={() => shareCustomization(currentCustomization, authData, setShowShareModal)}
+                      type="button"
+                      className={customizerActionButton}>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-share" width="34" height="34" viewBox="0 0 24 24" stroke-width="1.5" stroke="#ffffff" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <circle cx="6" cy="12" r="3" />
+                        <circle cx="18" cy="6" r="3" />
+                        <circle cx="18" cy="18" r="3" />
+                        <line x1="8.7" y1="10.7" x2="15.3" y2="7.3" />
+                        <line x1="8.7" y1="13.3" x2="15.3" y2="16.7" />
+                      </svg>
+                    </button>
+                  </>)}
                 </div>
               </div>
             )}
           </Box>
           <Box className={traitExplorer}>
-            {customizationOptions.map(customizationOption => {
+            {customizationOptions.filter(option => option.shown).map(customizationOption => {
               const isExpanded = expanded.title === customizationOption.title
 
               return (
-                <Accordion sx={{ borderBottom: `${isExpanded ? '2px' : '0px'} solid` }} expanded={isExpanded} onChange={handleChange(customizationOption)}>
+                <Accordion TransitionProps={{ unmountOnExit: true }} sx={{ borderBottom: `${isExpanded ? '2px' : '0px'} solid` }} expanded={isExpanded} onChange={handleChange(customizationOption)}>
                   <AccordionSummary
                     sx={{ opacity: isExpanded ? 1 : 0.6, background: `url(${customizationOption.background})`, backgroundSize: 'contain', backgroundRepeat: 'no-repeat' }}
                     aria-controls={`${customizationOption.title}-content`}
                     expandIcon={<ExpandMoreIcon expanded={isExpanded} />}
-                    id={`${customizationOption.title}-header`}>
+                    id={`${customizationOption.title.replace(' ', '-').toLowerCase()}-header`}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                       <img src={customizationOption.icon} width="32" height="32" style={{ flexShrink: 0 }} alt={`${customizationOption.title} Icon`} />
                       <Typography sx={{ marginLeft: '12px', flexShrink: 0, fontFamily: 'Orbitron', fontSize: '16px', letterSpacing: '0.1em', fontWeight: '500', textTransform: 'uppercase', lineHeight: '24px' }}>
@@ -282,18 +459,20 @@ const CharacterDesignerPage = ({ authData }: {authData: AuthData}) => {
                   </AccordionSummary>
 
                   <AccordionDetails sx={{ height: 360, overflowY: 'auto', padding: 0 }}>
-                    <FixedSizeGrid
-                      columnCount={isMobileViewport ? 2 : 3}
-                      columnWidth={isMobileViewport ? 500 / 2 : 670 / 3}
-                      height={380}
-                      rowCount={Math.ceil(traitOptionsAssets.length / (isMobileViewport ? 2 : 3))}
-                      rowHeight={isMobileViewport ? 500 / 2 : 670 / 3}
-                      width={isMobileViewport ? 500 : 670}
-                      itemData={{ traitOptionsAssets, numCols, selectedAsset: getSelectedAsset(expanded), onSelectAsset: selectAsset }}
-                      overscanRowCount={3}
-                    >
-                      {Cell}
-                    </FixedSizeGrid>
+                    <SimpleBar style={{ maxHeight: 360 }}>
+                      <FixedSizeGrid
+                        columnCount={isMobileViewport ? 2 : 3}
+                        columnWidth={isMobileViewport ? 500 / 2 : 670 / 3}
+                        height={360}
+                        rowCount={Math.ceil(traitOptionsAssets.length / (isMobileViewport ? 2 : 3))}
+                        rowHeight={isMobileViewport ? 500 / 2 : 670 / 3}
+                        width={isMobileViewport ? 500 : 670}
+                        itemData={{ traitOptionsAssets, numCols, selectedAsset: getSelectedAsset(expanded), onSelectAsset: selectAsset, myCustomizations }}
+                        overscanRowCount={3}
+                      >
+                        {Cell}
+                      </FixedSizeGrid>
+                    </SimpleBar>
                   </AccordionDetails>
                 </Accordion>
               )
@@ -301,9 +480,58 @@ const CharacterDesignerPage = ({ authData }: {authData: AuthData}) => {
           </Box>
         </Box>
       </Box>
-    </Box>
+      <Modal
+        open={showShareModal}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={{
+          position: 'absolute' as 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 600,
+          bgcolor: 'background.paper',
+          border: '2px solid #000',
+          borderRadius: '8px',
+          color: '#333',
+          boxShadow: 24,
+          p: 4,
+        }}>
+          <Typography id="modal-modal-title" variant="h6" component="h2" sx={{ fontWeight: 600, textAlign: 'center' }}>
+            Share your customized Moonsama.
+          </Typography>
+          <Typography id="modal-modal-description" sx={{ mt: 2, wordBreak: 'break-word', wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+            {(new URL(`/moonsama/designer/${currentCustomization.parent?.assetAddress}/${currentCustomization.parent?.assetID}`, `${window.location.protocol}//${window.location.host}`)).href}
+          </Typography>
+
+          <Box sx={{
+            backgroundColor: '#0EB8A8',
+            textTransform: 'uppercase',
+            padding: '12px 18px',
+            fontFamily: 'Orbitron',
+            fontSize: '12px',
+            lineHeight: '16px',
+            letterSpacing: '0.032em',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            border: '1px solid transparent',
+            margin: '32px auto 0px auto',
+            width: '60px',
+            cursor: 'pointer',
+            borderRadius: '4px',
+            textAlign: 'center',
+            fontWeight: '600',
+            color: '#FFFFFF'
+          }} onClick={() => setShowShareModal(false)}>Done</Box>
+        </Box>
+      </Modal>
+    </Box >
   );
 };
 
 export default CharacterDesignerPage;
 export type { asset };
+export type { assetIdentifier };
+export type { customizationType };

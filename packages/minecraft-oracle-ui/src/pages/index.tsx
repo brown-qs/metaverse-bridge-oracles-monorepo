@@ -20,15 +20,19 @@ export const Routing = () => {
             <Route exact path="/">
                 <AuthPage />
             </Route>
+
             <Route exact path="/auth/:jwt">
                 <AuthPage />
             </Route>
+
             <Route exact path="/login">
                 {!!authData?.jwt ? <ProfilePage authData={authData} /> : <HomePage />}
             </Route>
+
             <Route path="/profile/:type/:address/:id">
                 <TransferDialog />
             </Route>
+
             <Route path="/profile">
                 <ImportDialog />
                 <ExportDialog />
@@ -39,8 +43,11 @@ export const Routing = () => {
                 {/*<ProfilePage authData={{ jwt: '2034823423', userProfile: { name: 'cleanston3r' } }} />*/}
             </Route>
 
-
             <Route exact path="/moonsama/designer">
+                <MoonsamaCharacterDesignerPage authData={authData} />
+            </Route>
+
+            <Route exact path="/moonsama/designer/:assetAddress/:assetID">
                 <MoonsamaCharacterDesignerPage authData={authData} />
             </Route>
         </Switch>
