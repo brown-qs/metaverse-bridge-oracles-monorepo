@@ -11,6 +11,7 @@ import { AssetEntity } from '../asset/asset.entity';
 import { CompositePartEntity } from '../compositepart/compositepart.entity';
 import { ResourceInventoryEntity } from '../resourceinventory/resourceinventory.entity';
 
+
 @Entity()
 export class CollectionFragmentEntity {
 
@@ -29,6 +30,10 @@ export class CollectionFragmentEntity {
     @Column({nullable: true, default: 1})
     @IsNumber()
     decimals?: number;
+
+    @Column({nullable: true, default: false})
+    @IsBoolean()
+    treatAsFungible?: boolean;
 
     @Column()
     @IsBoolean()
