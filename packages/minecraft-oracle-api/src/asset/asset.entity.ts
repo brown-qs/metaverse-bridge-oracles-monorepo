@@ -7,11 +7,10 @@ import {
 } from 'class-validator';
 import { UserEntity } from '../user/user.entity';
 import { Column, Entity, Index, ManyToOne, PrimaryColumn } from 'typeorm';
-import { StringAssetType } from '../common/enums/AssetType';
 import { RecognizedAssetType } from '../config/constants';
 import { CompositeAssetEntity } from '../compositeasset/compositeasset.entity';
 import { CollectionFragmentEntity } from '../collectionfragment/collectionfragment.entity';
-import { ResourceInventoryEntity } from 'src/resourceinventory/resourceinventory.entity';
+import { ResourceInventoryEntity } from '../resourceinventory/resourceinventory.entity';
 
 @Entity()
 @Index(['hash'], {unique: true})
