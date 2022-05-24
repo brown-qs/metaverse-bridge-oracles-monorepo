@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Switch, Route } from 'react-router-dom';
+import { Switch, Route, Redirect } from 'react-router-dom';
 import { useAuth } from "hooks";
 import HomePage from './home';
 import AuthPage from './auth';
@@ -18,7 +18,7 @@ export const Routing = () => {
     return (
         <Switch>
             <Route exact path="/">
-                <AuthPage />
+                <Redirect to="/login" />
             </Route>
 
             <Route exact path="/auth/:jwt">
@@ -26,28 +26,23 @@ export const Routing = () => {
             </Route>
 
             <Route exact path="/login">
-                {!!authData?.jwt ? <ProfilePage authData={authData} /> : <HomePage />}
+                {!!authData?.jwt ? <Redirect to="/bridge" /> : <HomePage />}
             </Route>
 
-            <Route path="/profile/:type/:address/:id">
-                <TransferDialog />
-            </Route>
-
-            <Route path="/profile">
+            <Route path="/bridge">
                 <ImportDialog />
                 <ExportDialog />
                 <EnraptureDialog />
                 <SummonDialog />
                 <AssetDialog />
-                {!!authData?.jwt ? <ProfilePage authData={authData} /> : <AuthPage />}
-                {/*<ProfilePage authData={{ jwt: '2034823423', userProfile: { name: 'cleanston3r' } }} />*/}
+                {!!authData?.jwt ? <ProfilePage authData={authData} /> : <HomePage />}
             </Route>
 
-            <Route exact path="/moonsama/designer">
+            <Route exact path="/moonsama/customizer">
                 <MoonsamaCharacterDesignerPage authData={authData} />
             </Route>
 
-            <Route exact path="/moonsama/designer/:assetAddress/:assetID">
+            <Route exact path="/moonsama/customizer/:assetAddress/:assetID">
                 <MoonsamaCharacterDesignerPage authData={authData} />
             </Route>
         </Switch>

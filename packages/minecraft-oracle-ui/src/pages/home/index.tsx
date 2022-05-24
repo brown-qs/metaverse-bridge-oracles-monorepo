@@ -23,18 +23,6 @@ const HomePage = () => {
       setIsLoading(true);
 
       window.location.href = `${process.env.REACT_APP_BACKEND_API_URL}/auth/login`;
-      /*
-      axios.get('http://localhost:3030/api/v1/auth/login', {headers: {"Access-Control-Allow-Origin": "*"}})
-          .then(response => {
-              console.log('Logged In');
-              console.log(response)
-              setIsLoading(false);
-          })
-          .catch(error => {
-              console.log('Error Logging in: ', error);
-              setIsLoading(false);
-          });
-          */
   };
 
   return (
@@ -43,7 +31,7 @@ const HomePage = () => {
         <img src={WhiteLogo} alt="" />
      </div>
      <span className={glitchText}>
-          Multiverse Bridge: Minecraft
+          Multiverse Bridge
      </span>
 
         <div style={{  }}>
