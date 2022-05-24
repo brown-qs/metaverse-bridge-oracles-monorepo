@@ -7,6 +7,7 @@ const AuthPage = () => {
     const { authData, setAuthData } = useAuth();
     const params = useParams<{ jwt: string }>();
     const jwt = params.jwt;
+    const redirectRoute = window.sessionStorage.getItem('authSuccessRedirect') ?? '/profile';
     
     if(!!authData?.jwt){
         return <Redirect to='/profile'  />;
@@ -18,7 +19,7 @@ const AuthPage = () => {
            userProfile: authData?.userProfile
         });
 
-        return <Redirect to='/profile'  />;
+        return <Redirect to={redirectRoute} />;
     }
 
     return <Redirect to='/login'  />;

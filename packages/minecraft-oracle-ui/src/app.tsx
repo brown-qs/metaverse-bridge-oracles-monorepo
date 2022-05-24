@@ -6,7 +6,7 @@ function MyApp() {
   return (
     <AppProviders>
       <AccountDialog />
-        <Routing />
+      <Routing />
     </AppProviders>
   );
 }
