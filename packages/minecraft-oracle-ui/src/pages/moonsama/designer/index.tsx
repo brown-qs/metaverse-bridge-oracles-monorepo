@@ -25,7 +25,6 @@ import SimpleBar from 'simplebar-react';
 import 'simplebar/dist/simplebar.min.css';
 import axios from 'axios';
 import type { AuthData } from 'context/auth/AuthContext/AuthContext.types';
-import MoonsamaNav from 'ui/Navigation/MoonsamaNav';
 import { downloadAsImage, saveCustomization, shareCustomization } from 'utils/customizers';
 
 const ExpandMoreIcon = ({ expanded }: { expanded?: boolean }) => {

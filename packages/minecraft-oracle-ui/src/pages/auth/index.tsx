@@ -4,14 +4,14 @@ import { useAuth } from "hooks";
 const AuthPage = () => {
     const { authData, setAuthData } = useAuth();
     const params = useParams<{ jwt: string }>();
-    const jwt = params.jwt;
+    const jwt = params?.jwt;
     const redirectRoute = window.sessionStorage.getItem('authSuccessRedirect') ?? '/bridge';
     
-    if(!!authData?.jwt){
-        return <Redirect to='/bridge'  />;
+    if(!!authData?.jwt && !jwt){
+        return <Redirect to={redirectRoute}  />;
     }
 
-    if(jwt) {
+    if(!!jwt) {
         setAuthData({
            jwt,
            userProfile: authData?.userProfile
