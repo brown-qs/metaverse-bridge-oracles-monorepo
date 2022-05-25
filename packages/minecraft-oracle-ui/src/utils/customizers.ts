@@ -6,15 +6,20 @@ import type { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 
 const downloadAsImage = (layers: Array<assetType>) => {
   const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
   canvas.width = 1280;
   canvas.height = 1280;
-  let numImagesDrawn = 0
-  const ctx = canvas.getContext('2d');
+  let numImagesDrawn = 0;
+  let samaNumber: string;
 
-  layers.sort((a, b) => a.zIndex === b.zIndex ? 1 : (a.zIndex < b.zIndex ? -1 : 1)).forEach(layer => {
+  layers.sort((a, b) => a.zIndex === b.zIndex ? 0 : (a.zIndex < b.zIndex ? -1 : 1)).forEach(layer => {
     const image = new Image();
-    image.crossOrigin = 'Anonymous';
-    image.src = layer.fullSizeUrl;
+    image.crossOrigin = 'anonymous';
+    image.src = (new URL(layer.fullSizeUrl)).href;
+
+    if (layer.zIndex === 0) {
+      samaNumber = layer.assetID
+    }
 
     image.addEventListener('load', e => {
       ctx?.drawImage(image, 0, 0, 1280, 1280);
@@ -22,7 +27,7 @@ const downloadAsImage = (layers: Array<assetType>) => {
 
       if (numImagesDrawn === layers.length) {
         var link = document.createElement('a');
-        link.download = 'filename.png';
+        link.download = `Moonsama ${samaNumber}.png`;
         link.href = canvas.toDataURL();
         link.click();
       }
@@ -48,7 +53,9 @@ const saveCustomization = async ({parent, children}: customizationType, authData
 
   return await axios.put(`${process.env.REACT_APP_BACKEND_API_URL}/composite/save`, payload, {
     headers: { Authorization: `Bearer ${authData?.jwt}` }
-  }).catch(console.error);
+  }).catch(e => {
+    alert('Something went wrong while saving your customization.\n\nPlease try again.')
+  });
 }
 
 const shareCustomization = async ({parent, children}: customizationType, authData: AuthData, setShowShareModal: (show: boolean) => void) => {

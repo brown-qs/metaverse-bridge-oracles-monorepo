@@ -7,11 +7,11 @@ export const styles = (theme: Theme) => ({
     flexDirection: 'column',
     borderRadius: 12,
     overflow: 'hidden',
-    height: 680,
     maxWidth: 1437,
     marginLeft: 'auto',
     marginRight: 'auto',
     backgroundColor: '#1B1B3A',
+    flex: 1,
     boxShadow: '0px 20px 25px -5px rgba(0, 0, 0, 0.1), 0px 10px 10px -5px rgba(0, 0, 0, 0.04)',
     [theme.breakpoints.up('sm')]: {
       flexDirection: 'row',
@@ -21,7 +21,7 @@ export const styles = (theme: Theme) => ({
   },
   previewViewport: {
     width: '100%',
-    height: '50vh',
+    height: '100vw',
     flexShrink: 0,
     [theme.breakpoints.up('sm')]: {
       width: '760px',
@@ -30,15 +30,36 @@ export const styles = (theme: Theme) => ({
   },
   traitExplorer: {
     width: '100%',
-    height: '50vh',
+    height: '760px',
     [theme.breakpoints.up('sm')]: {
       width: '677px',
       height: 'auto',
     }
   },
 
+  startCue: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '1rem',
+    textAlign: 'center',
+    fontSize: '1rem',
+    [theme.breakpoints.up('sm')]: {
+      fontSize: '1.5rem',
+    }
+  },
+
   gridItem: {
-    padding: '2px', width: '204px', cursor: 'pointer', height: '204px', borderRadius: '8px',
+    padding: '2px',
+    cursor: 'pointer',
+    borderRadius: '8px',
+    display: 'flex',
+    flexShrink: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
     '&:hover': {
       backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5))'
     },
@@ -64,6 +85,9 @@ export const styles = (theme: Theme) => ({
     justifyContent: 'center',
     boxShadow: 'box-shadow: 0px 4px 6px -1px rgba(0, 0, 0, 0.1), 0px 2px 4px -1px rgba(0, 0, 0, 0.06)',
     width: '48px',
-    height: '48px' 
+    height: '48px',
+    '&:hover': {
+      backgroundColor: '#FFC914',
+    }
   }
 });
