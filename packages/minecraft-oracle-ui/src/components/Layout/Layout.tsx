@@ -8,7 +8,7 @@ export const Layout = ({ children }: LayoutProps) => {
   return (
       <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <MoonsamaNav/>
-        <Container style={{paddingLeft: 0, paddingRight: 0}} maxWidth={false}>{children}</Container>
+        <Container style={{paddingLeft: 0, paddingRight: 0, flex: 1}} maxWidth={false}>{children}</Container>
       </Box>
   )
 };

@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useOnChainItems } from 'hooks/multiverse/useOnChainItems';
-import { useActiveWeb3React } from 'hooks';
 import { Box, Typography, Modal } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -16,7 +15,6 @@ import customizationOptions from 'fixtures/MoonsamaCustomizer.json'
 import birdToHand from 'fixtures/MoonsamaBirdHandPairing.json'
 import ImageStack from 'components/ImageStacks/Moonsama2';
 import { FixedSizeGrid, GridChildComponentProps } from 'react-window';
-import { useProfile } from 'hooks/multiverse/useProfile';
 import { styled } from '@mui/material/styles';
 import "@fontsource/orbitron/500.css";
 import { useInGameItems } from 'hooks/multiverse/useInGameItems';
@@ -26,51 +24,6 @@ import 'simplebar/dist/simplebar.min.css';
 import axios from 'axios';
 import type { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 import { downloadAsImage, saveCustomization, shareCustomization } from 'utils/customizers';
-
-const ExpandMoreIcon = ({ expanded }: { expanded?: boolean }) => {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      fill="none"
-      stroke={expanded ? '#FFC914' : '#66C8FF'}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      className="icon icon-tabler icon-tabler-chevron-down"
-      viewBox="0 0 24 24"
-    >
-      <path stroke="none" d="M0 0h24v24H0z"></path>
-      <path d="M6 9L12 15 18 9"></path>
-    </svg>
-  );
-}
-
-const Cell = ({ columnIndex, rowIndex, style, data }: GridChildComponentProps) => {
-  const { gridItem, selected } = useClasses(styles);
-
-  const assetIndex = (data.numCols * rowIndex) + columnIndex
-
-  if (assetIndex >= data.traitOptionsAssets.length) return <></>
-
-  const isSelected = (data.selectedAsset === data.traitOptionsAssets[assetIndex].assetID)
-
-  const customization = data.myCustomizations[`${data.traitOptionsAssets[assetIndex].assetAddress} - ${data.traitOptionsAssets[assetIndex].assetID}`]
-
-  return (
-    <Box style={style} sx={{ overflow: 'hidden', padding: '8px' }} onClick={() => data.onSelectAsset(assetIndex)}>
-      <Box className={cx({ [gridItem]: true }, { [selected]: isSelected })}>
-        {typeof customization === 'undefined' ? (
-          <img src={data.traitOptionsAssets[assetIndex].thumbnailUrl} style={{ borderRadius: '8px', backgroundColor: '#1B1B3A' }} width="200" height="200" alt="" />
-        ) : (
-          <ImageStack layers={customization.layers} />
-        )
-        }
-      </Box>
-    </Box>
-  );
-}
 
 type customizableTraitType = {
   title: string,
@@ -195,7 +148,64 @@ const getAssetImages = (customizableTrait: customizableTraitType, ownedAssets: A
   return [...ownedOptions, ...options];
 }
 
+const ExpandMoreIcon = ({ expanded }: { expanded?: boolean }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      fill="none"
+      stroke={expanded ? '#FFC914' : '#66C8FF'}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      className="icon icon-tabler icon-tabler-chevron-down"
+      viewBox="0 0 24 24"
+    >
+      <path stroke="none" d="M0 0h24v24H0z"></path>
+      <path d="M6 9L12 15 18 9"></path>
+    </svg>
+  );
+}
+
+const Cell = ({ columnIndex, rowIndex, style, data }: GridChildComponentProps) => {
+  const { gridItem, selected } = useClasses(styles);
+  const theme = useTheme();
+  const isMobileViewport = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const assetIndex = (data.numCols * rowIndex) + columnIndex;
+
+  if (assetIndex >= data.traitOptionsAssets.length) return <></>;
+
+  const isSelected = (data.selectedAsset === data.traitOptionsAssets[assetIndex].assetID);
+
+  /*
+   * TODO @Kyilkhor: If I own this asset and a customization exists for it, we should show the asset with the customization applied.
+   * Selecting this asset should automatically apply the customization to the "currentCustomization" variable.
+  */
+
+  const customization = data.myCustomizations[`${data.traitOptionsAssets[assetIndex].assetAddress} - ${data.traitOptionsAssets[assetIndex].assetID}`];
+
+  return (
+    <Box style={style} sx={{ overflow: 'hidden', padding: isMobileViewport ? '0px' : '8px' }} onClick={() => data.onSelectAsset(assetIndex)}>
+      <Box className={cx({ [gridItem]: true }, { [selected]: isSelected })}>
+        {typeof customization === 'undefined' ? (
+          <img src={data.traitOptionsAssets[assetIndex].thumbnailUrl} style={{ borderRadius: '8px', backgroundColor: '#1B1B3A' }} width={isMobileViewport ? ((Math.floor(window.innerWidth / 3)) - 8) : '200'} height={isMobileViewport ? ((Math.floor(window.innerWidth / 3)) - 8) : '200'} alt="" />
+        ) : (
+          <ImageStack layers={customization.layers} />
+        )
+        }
+      </Box>
+    </Box>
+  );
+};
+
 const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
+  /*
+   * TODO @Kyilkhor: This component keeps re-rendering on each new block. I'd like for a re-render to occur when the state of
+   * onChainItems or inGameItems changes but not on each block.
+  */
+
   const theme = useTheme();
   const isMobileViewport = useMediaQuery(theme.breakpoints.down('sm'));
   const isLoggedIn = !!authData && !!authData.userProfile
@@ -212,8 +222,6 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   const [myCustomizations, setMyCustomizations] = useState<Array<any>>([]);
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
 
-  const { account } = useActiveWeb3React();
-  const profile = useProfile();
   const onChainItems = useOnChainItems();
   const inGameItems = useInGameItems();
 
@@ -228,6 +236,12 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
 
     setOwnedAssets([...myBridgedAssets, ...myMoonsamas, ...my1155s])
   }, [onChainItems, inGameItems])
+
+
+  /**
+   * TODO @Ishan: If the page has loaded on an asset's URL (...customizer/:assetAddress/:assetID), fetch and set
+   * that customization as the currentCustomization.
+  */
 
   useEffect(() => {
     const getCustomizations = async () => {
@@ -253,7 +267,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
     }
   }, [ownedAssets, authData])
 
-  const getSideEffectLayers = ({parent, children}: customizationType): customizationType => {
+  const applyAdditionalLayers = ({parent, children}: customizationType): customizationType => {
     let hasEquippedMainHand = false, mainHandTrait, weaponHandTrait
 
     if (parent === null) return {parent, children}
@@ -316,6 +330,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
     previewViewport,
     traitExplorer,
     customizerActionButton,
+    startCue,
   } = useClasses(styles);
 
   const handleChange =
@@ -325,7 +340,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
 
   const selectAsset = (assetIndex: number) => {
     if (expanded.equippableType === 'parent') {
-      setCurrentCustomization(getSideEffectLayers({
+      setCurrentCustomization(applyAdditionalLayers({
         parent: traitOptionsAssets[assetIndex],
         children: currentCustomization.children
       }))
@@ -339,7 +354,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
         newChildren.push(traitOptionsAssets[assetIndex])
       }
 
-      setCurrentCustomization(getSideEffectLayers({
+      setCurrentCustomization(applyAdditionalLayers({
         parent: currentCustomization.parent,
         children: newChildren
       }))
@@ -360,6 +375,10 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
     return null
   }
 
+  /**
+   * TODO @Ishan: Accordion not animating and no hover effect.
+  */
+
   const Accordion = styled((props: AccordionProps) => (
     <MuiAccordion disableGutters elevation={0} square {...props} />
   ))(({ theme }) => ({
@@ -376,14 +395,18 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
     height: '80px',
   }));
 
+
+  /**
+   * TODO @Ishan: Fix issue with page height on larger viewports.
+  */
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ minHeight: '100vh', width: '100%', background: 'url("/moonsama/egg-pattern.svg"), url("/moonsama/background-aurora.svg") top right no-repeat, radial-gradient(73.61% 73.46% at 49.9% 50%, rgba(123, 97, 255, 0.5) 13.27%, rgba(123, 97, 255, 0) 100%), linear-gradient(77.59deg, #4A4A77 -1.39%, #1B1B3A 44.24%);', backgroundBlendMode: 'overlay, hard-light', backgroundSize: 'auto, contain, auto' }}>
+    <Box sx={{ flex: 1, height: isMobileViewport ? '100%' : '100vh', minHeight: '100%', display: 'flex', flexDirection: 'column', background: 'url("/moonsama/egg-pattern.svg"), url("/moonsama/background-aurora.svg") top right no-repeat, radial-gradient(73.61% 73.46% at 49.9% 50%, rgba(123, 97, 255, 0.5) 13.27%, rgba(123, 97, 255, 0) 100%), linear-gradient(77.59deg, #4A4A77 -1.39%, #1B1B3A 44.24%);', backgroundBlendMode: 'overlay, hard-light', backgroundSize: 'auto, contain, auto' }}>
+      <Box sx={{ flex: 1, width: '100%' }}>
         <Box className={customizerContainer}>
           <Box className={previewViewport}>
             {currentCustomization.parent === null ? (
-              <Box style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', padding: '1rem', textAlign: 'center' }}>
-                Select a Moonsama from the right to begin.
+              <Box className={startCue}>
+                Select a Moonsama from {isMobileViewport ? 'below' : 'the right'} to begin.
               </Box>
             ) : (
               <div style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -459,12 +482,12 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
                   <AccordionDetails sx={{ height: 360, overflowY: 'auto', padding: 0 }}>
                     <SimpleBar style={{ maxHeight: 360 }}>
                       <FixedSizeGrid
-                        columnCount={isMobileViewport ? 2 : 3}
-                        columnWidth={isMobileViewport ? 500 / 2 : 670 / 3}
+                        columnCount={isMobileViewport ? 3 : 3}
+                        columnWidth={isMobileViewport ? Math.floor(window.innerWidth / 3) : 670 / 3}
                         height={360}
-                        rowCount={Math.ceil(traitOptionsAssets.length / (isMobileViewport ? 2 : 3))}
-                        rowHeight={isMobileViewport ? 500 / 2 : 670 / 3}
-                        width={isMobileViewport ? 500 : 670}
+                        rowCount={Math.ceil(traitOptionsAssets.length / 3)}
+                        rowHeight={isMobileViewport ? Math.floor(window.innerWidth / 3) : 670 / 3}
+                        width={isMobileViewport ? window.innerWidth : 670}
                         itemData={{ traitOptionsAssets, numCols, selectedAsset: getSelectedAsset(expanded), onSelectAsset: selectAsset, myCustomizations }}
                         overscanRowCount={3}
                       >
