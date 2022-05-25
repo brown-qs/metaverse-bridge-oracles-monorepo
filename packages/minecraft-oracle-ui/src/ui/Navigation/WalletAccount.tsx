@@ -59,7 +59,7 @@ export default function WalletAccount() {
       {
         account ? (
           <Box onClick={() => setAccountDialogOpen(true)} className={WalletDetailsStyle}>
-            <div style={{margin: '0 8px'}}>
+            <div style={{margin: '0 8px', height: '24px', width: '24px'}}>
               <Identicon/>
             </div>
             <span>{truncateAddress(account, 4)}</span>
