@@ -1,3 +1,4 @@
+import { CompositeMetadataType } from '../compositeasset/types';
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { CompositeCollectionFragmentEntity } from '../compositecollectionfragment/compositecollectionfragment.entity';
 import { SyntheticItemEntity } from '../syntheticitem/syntheticitem.entity';
@@ -11,11 +12,11 @@ export class SyntheticPartEntity {
     @Column()
     zIndex: number
 
-    @Column()
-    uriPrefix: string
+    @Column({nullable: true})
+    mediaUriPrefix: string
 
-    @Column()
-    uriPostfix: string
+    @Column({nullable: true})
+    mediaUriPostfix: string
 
     @Column()
     assetAddress: string

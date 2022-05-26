@@ -11,8 +11,8 @@ export class SyntheticItemService {
         private readonly repository: Repository<SyntheticItemEntity>
     ) {}
 
-    public static calculateId(dto: {chainId: string | number, assetAddress: string, assetId: string | number}): string {
-        return `${dto.chainId}-${dto.assetAddress}-${dto.assetId}`
+    public static calculateId(dto: {chainId: string | number, assetAddress: string, assetId: string | number, syntheticPartId: string | number}): string {
+        return `${dto.chainId}-${dto.assetAddress}-${dto.assetId}-${dto.syntheticPartId}`
     }
 
     public async create(material: SyntheticItemEntity): Promise<SyntheticItemEntity> {

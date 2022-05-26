@@ -11,10 +11,6 @@ export class SyntheticPartService {
         private readonly repository: Repository<SyntheticPartEntity>
     ) {}
 
-    public static calculateId(dto: {chainId: string | number, assetAddress: string, fragmentId: string | number}): string {
-        return `${dto.chainId}-${dto.assetAddress}-${dto.fragmentId}`
-    }
-
     public async create(material: SyntheticPartEntity): Promise<SyntheticPartEntity> {
         const u = await this.repository.save(material);
         return u;

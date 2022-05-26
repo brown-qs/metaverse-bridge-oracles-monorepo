@@ -49,6 +49,8 @@ export class CompositeApiService {
 
     private readonly bucket: string;
 
+    private readonly metadataPublicPath: string;
+
     constructor(
         private readonly userService: UserService,
         private readonly assetService: AssetService,
@@ -72,6 +74,8 @@ export class CompositeApiService {
         this.compositeUriPrefix = this.configService.get<string>('composite.uriPrefix')
         this.compositeUriPostfix = this.configService.get<string>('composite.uriPostfix')
         this.bucket = this.configService.get<string>('s3.bucket')
+
+        this.metadataPublicPath = this.configService.get<string>('composite.metadataPublicPath')
     }
 
     public async saveCompositeConfig(dto: SaveCompositeConfigDto, user: UserEntity): Promise<CompositeMetadataType> {
@@ -182,7 +186,7 @@ export class CompositeApiService {
 
             //x.collectionFragment.collection.chainId.toString(), x.collectionFragment.collection.assetAddress,
             // we fake this shit
-            return { collectionFragment: { collection: { chainId: childChainId, assetAddress: childAssetAddress } }, syntheticPart: syntheticAsset, assetId: childAssetId, zIndex: syntheticAsset.zIndex, uriPrefix: syntheticAsset.uriPrefix, uriPostfix: syntheticAsset.uriPostfix, synthetic: true } as unknown as CompositeEnrichedAssetEntity
+            return { collectionFragment: { collection: { chainId: childChainId, assetAddress: childAssetAddress } }, syntheticPart: syntheticAsset, assetId: childAssetId, zIndex: syntheticAsset.zIndex, uriPrefix: syntheticAsset.mediaUriPrefix, uriPostfix: syntheticAsset.mediaUriPostfix, synthetic: true } as unknown as CompositeEnrichedAssetEntity
 
 
         }))
@@ -221,7 +225,12 @@ export class CompositeApiService {
                         compositeAsset,
                         syntheticPart: c.syntheticPart,
                         assetId: c.assetId,
-                        id: SyntheticItemService.calculateId({ assetId: c.assetId, chainId: c.collectionFragment.collection.chainId, assetAddress: c.collectionFragment.collection.assetAddress })
+                        id: SyntheticItemService.calculateId({
+                            assetId: c.assetId,
+                            chainId: c.collectionFragment.collection.chainId,
+                            assetAddress: c.collectionFragment.collection.assetAddress,
+                            syntheticPartId: c.syntheticPart.id
+                        })
                     }
                 )
             }
@@ -246,27 +255,32 @@ export class CompositeApiService {
         if (!compositeEntry || !compositeEntry.compositeMetadata) {
 
             let meta, metaUri
+            let synthetic = false
             // if no original meta was fetched ever
             if (!compositeEntry?.originalMetadata) {
                 const collection = await this.collectionService.findOne({ assetAddress: sanitizedAssetAddress, chainId: sanitizedChainId })
                 const assetType = collection?.assetType ?? 'ERC721'
 
-                const metaResult = await this.nftApiService.getRawNFTMetadata(chainId, assetType, sanitizedAssetAddress, assetId)
-                meta = metaResult.metaObject
-                metaUri = metaResult.metaUri
+                const metaResult = await this.fetchOriginalMetadata(chainId, assetType, sanitizedAssetAddress, assetId)
+                meta = metaResult?.metaObject
+                metaUri = metaResult?.metaUri
+                synthetic = metaResult.synthetic
             } else {
                 meta = compositeEntry.originalMetadata
                 metaUri = compositeEntry.originalMetadataUri
             }
 
+            if (!!meta && synthetic) {
+                return meta
+            }
+
             if (!!meta) {
-                   
+
                 const ccf = await this.compositeCollectionFragmentService.findOne({ collection: { chainId: sanitizedChainId, assetAddress: sanitizedAssetAddress } }, { relations: ['collection'] })
                 const compMediaUrl = `${ccf.uriPrefix}/${ccf.collection.chainId}/${ccf.collection.assetAddress.toLowerCase()}/${assetId}${ccf.uriPostfix}`
 
                 const compositeMeta: CompositeMetadataType = {
                     ...meta as CompositeMetadataType,
-                    layers: [metaUri],
                     composite: false,
                     image: compMediaUrl
                 }
@@ -305,7 +319,7 @@ export class CompositeApiService {
         if (!compositeEntry || !compositeEntry.originalMetadata) {
             const collection = await this.collectionService.findOne({ assetAddress: sanitizedAssetAddress, chainId: sanitizedChainId })
             const assetType = collection?.assetType ?? 'ERC721'
-            const {metaObject: meta, metaUri} = await this.nftApiService.getRawNFTMetadata(chainId, assetType, sanitizedAssetAddress, assetId)
+            const { metaObject: meta, metaUri } = await this.fetchOriginalMetadata(chainId, assetType, sanitizedAssetAddress, assetId)
 
             if (!!meta) {
                 const compositeEntryId = CompositeAssetService.calculateId({ chainId: sanitizedChainId, assetAddress: sanitizedAssetAddress, assetId })
@@ -336,6 +350,12 @@ export class CompositeApiService {
 
     public async createCompositeMetadata(parentAsset: CompositeEnrichedAssetEntity, childrenAssets: CompositeEnrichedAssetEntity[]): Promise<CompositeMetadataType> {
 
+        const parentChainId = parentAsset.collectionFragment.collection.chainId
+        const parentAddress = parentAsset.collectionFragment.collection.assetAddress
+        const parentId = parentAsset.assetId
+
+        this.logger.debug(`createCompositeMetadata:: started for ${parentChainId}-${parentAddress}-${parentId}`, this.context)
+
         // get parent asset metadata
         // - fetch from saved DB
         // - if not found in saved DB, then fetch from chain -> originalURI -> tokenURI
@@ -354,19 +374,15 @@ export class CompositeApiService {
 
         let attributes = [...parentOriginalMetadata?.attributes]
         const childrenMetas = await Promise.all(childrenAssets.map(async (x) => {
-            const meta = await this.getCompositeMetadata(x.collectionFragment.collection.chainId.toString(), x.collectionFragment.collection.assetAddress, x.assetId)
+            const meta = await this.fetchOriginalMetadata(x.collectionFragment.collection.chainId.toString(), x.collectionFragment.collection.assetType, x.collectionFragment.collection.assetAddress, x.assetId)
             //console.log(meta)
-            attributes = attributes.concat(meta?.attributes ?? [])
+            attributes = attributes.concat(meta?.metaObject?.attributes ?? [])
             return meta
         }))
 
         // TODO -> printed image
 
         let image = ''
-
-        const parentChainId = parentAsset.collectionFragment.collection.chainId
-        const parentAddress = parentAsset.collectionFragment.collection.assetAddress
-        const parentId = parentAsset.assetId
 
         if (layers.length > 1) {
             const cb = fetchImageBufferCallback()
@@ -408,7 +424,7 @@ export class CompositeApiService {
             image = layers[0]
         }
 
-        //console.log('image', image)
+        console.log('image', image)
 
         return {
             ...parentOriginalMetadata,
@@ -471,5 +487,39 @@ export class CompositeApiService {
 
         const data = await cb<string>(uri, false);
         return data
+    }
+
+    private async fetchOriginalMetadata(chainId: string, assetType: string, assetAddress: string, assetId: string): Promise<{ metaObject: CompositeMetadataType, metaUri: string, synthetic: boolean }> {
+
+        // check if synthetic
+
+        const syntheticPart = await this.syntheticPartService.findOne({ assetAddress })
+
+        if (!!syntheticPart) {
+            const path = `${chainId}/${assetAddress}/${assetId}`
+            return {
+                metaObject: {
+                    image: `${syntheticPart.mediaUriPrefix}/${path}${syntheticPart.mediaUriPostfix}`,
+                    external_url: 'https://moonsama.com',
+                    asset: {
+                        assetAddress,
+                        assetId,
+                        assetType,
+                        chainId: Number.parseInt(chainId)
+                    },
+                    name: `Synthetic Asset`,
+                    description: `This is Moonsama synthetic asset ${path}. It is not on the blockchain.`,
+                    composite: false
+                },
+                metaUri: `${this.metadataPublicPath}/${path}`,
+                synthetic: true
+            }
+        }
+
+        const res = await this.nftApiService.getRawNFTMetadata(chainId, assetType, assetAddress, assetId)
+        return {
+            ...res as any,
+            synthetic: false
+        }
     }
 }

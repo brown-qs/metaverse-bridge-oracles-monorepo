@@ -115,7 +115,7 @@ export class NftApiService {
         return result
     }
 
-    public async getRawNFTMetadata(chainId: string, tokenType: string, address: string, tokenId: string): Promise<{metaObject?: unknown, metaUri?: string}> {
+    public async getRawNFTMetadata(chainId: string, tokenType: string, address: string, tokenId: string): Promise<{metaObject?: unknown, metaUri?: string} | undefined> {
 
         this.logger.log(`Fetching NFT metadata: ${chainId}-${tokenType}-${address}-${tokenId}`, this.context)
 

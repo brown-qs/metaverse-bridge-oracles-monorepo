@@ -52,5 +52,6 @@ export const envValidationSchema = () => {
         COMPOSITE_URI_PREFIX: Joi.string().optional().default('https://static.moonsama.com'),
         COMPOSITE_URI_POSTFIX: Joi.string().optional().default('.png'),
         COMPOSITE_MEDIA_KEY_PREFIX: Joi.string().optional().default('composite/media'),
+        COMPOSITE_METADATA_PUBLIC_PATH: Joi.string().optional().default('http://localhost:3030/api/v1/composite/metadata'),
     });
 };

@@ -79,6 +79,7 @@ export const loadEnv = () => {
             uriPrefix: process.env.COMPOSITE_URI_PREFIX,
             uriPostfix: process.env.COMPOSITE_URI_POSTFIX,
             mediaKeyPrefix: process.env.COMPOSITE_MEDIA_KEY_PREFIX,
+            metadataPublicPath: process.env.COMPOSITE_METADATA_PUBLIC_PATH
         }
     };
 };
