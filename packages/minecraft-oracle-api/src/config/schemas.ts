@@ -43,5 +43,14 @@ export const envValidationSchema = () => {
         // JWT
         JWT_SECRET: Joi.string().required(),
         JWT_EXPIRATION_STRING: Joi.string().default('30m'),
+        // S3
+        S3_ACCESS_KEY_ID: Joi.string().required(), 
+        S3_SECRET_ACCESS_KEY: Joi.string().required(),
+        S3_REGION: Joi.string().optional().default('eu-west-1'),
+        S3_BUCKET: Joi.string().optional().default('moonsama-static-origin'),
+        // COMPOSITE
+        COMPOSITE_URI_PREFIX: Joi.string().optional().default('https://static.moonsama.com'),
+        COMPOSITE_URI_POSTFIX: Joi.string().optional().default('.png'),
+        COMPOSITE_MEDIA_KEY_PREFIX: Joi.string().optional().default('composite/media'),
     });
 };

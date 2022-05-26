@@ -6,6 +6,7 @@ import {
     MicrosoftSetupParamsProvider,
     RecognizedAssetsProvider,
     RecognizedChainAssetsProvider,
+    S3ClientProvider
 } from '.';
 import { ContractsCallbackProvider } from './contract';
 import { CollectionFragmentModule } from '../collectionfragment/collectionfragment.module';
@@ -21,7 +22,8 @@ import { CollectionFragmentModule } from '../collectionfragment/collectionfragme
         MicrosoftSetupParamsProvider,
         RecognizedChainAssetsProvider,
         RecognizedAssetsProvider,
-        ContractsCallbackProvider
+        ContractsCallbackProvider,
+        S3ClientProvider
     ],
     exports: [
         OracleWalletProvider,
@@ -29,7 +31,8 @@ import { CollectionFragmentModule } from '../collectionfragment/collectionfragme
         MicrosoftSetupParamsProvider,
         RecognizedChainAssetsProvider,
         RecognizedAssetsProvider,
-        ContractsCallbackProvider
+        ContractsCallbackProvider,
+        S3ClientProvider
     ]
 })
 export class ProviderModule {}

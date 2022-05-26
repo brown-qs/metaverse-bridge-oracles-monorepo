@@ -8,7 +8,7 @@ const AuthPage = () => {
     const redirectRoute = window.sessionStorage.getItem('authSuccessRedirect') ?? '/bridge';
     
     if(!!authData?.jwt && !jwt){
-        return <Redirect to={redirectRoute}  />;
+        return <Redirect to={'/bridge'}  />;
     }
 
     if(!!jwt) {
@@ -17,7 +17,7 @@ const AuthPage = () => {
            userProfile: authData?.userProfile
         });
 
-        return <Redirect to={redirectRoute} />;
+        return <Redirect to={'/bridge'} />;
     }
 
     return <Redirect to='/login'  />;

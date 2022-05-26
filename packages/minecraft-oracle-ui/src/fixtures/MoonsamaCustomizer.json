@@ -5,7 +5,7 @@
     "icon": "https://static.moonsama.com/customizer-ui/accordion-icons/icon-moonsama.svg",
     "background": "https://static.moonsama.com/customizer-ui/accordion-bgs/moonsamas-selector-dropdown.png",
     "assetAddress": "0xb654611f84a8dc429ba3cb4fda9fad236c505a1a",
-    "assetIDRanges": [[1, 999]],
+    "assetIDRanges": [[1, 1000]],
     "chainID": 1285,
     "assetType": "ERC721",
     "uriPrefix": "https://static.moonsama.com/",

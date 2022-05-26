@@ -20,7 +20,11 @@ import { SyntheticPartService } from "../syntheticpart/syntheticpart.service";
 import { SyntheticPartEntity } from "../syntheticpart/syntheticpart.entity";
 import { CompositeAssetEntity } from "../compositeasset/compositeasset.entity";
 import { SyntheticItemService } from "../syntheticitem/syntheticitem.service";
-import { remove } from "winston";
+import S3 from 'aws-sdk/clients/s3';
+import sharp from "sharp";
+import { ProviderToken } from "../provider/token";
+import { fetchImageBufferCallback } from "./compositeapi.utils";
+import { string } from "fp-ts";
 
 export type CompositeEnrichedAssetEntity = AssetEntity & {
     zIndex: number
@@ -39,6 +43,12 @@ export class CompositeApiService {
     private readonly oraclePrivateKey: string;
     private readonly defaultChainId: number;
 
+    private readonly compositeMediaKeyPrefix: string;
+    private readonly compositeUriPrefix: string;
+    private readonly compositeUriPostfix: string;
+
+    private readonly bucket: string;
+
     constructor(
         private readonly userService: UserService,
         private readonly assetService: AssetService,
@@ -49,6 +59,7 @@ export class CompositeApiService {
         private readonly syntheticPartService: SyntheticPartService,
         private readonly syntheticItemService: SyntheticItemService,
         private readonly nftApiService: NftApiService,
+        @Inject(ProviderToken.S3_CLIENT) private readonly s3: S3,
         private configService: ConfigService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
@@ -56,6 +67,11 @@ export class CompositeApiService {
         this.locks = new Map();
         this.oraclePrivateKey = this.configService.get<string>('network.oracle.privateKey');
         this.defaultChainId = this.configService.get<number>('network.defaultChainId')
+
+        this.compositeMediaKeyPrefix = this.configService.get<string>('composite.mediaKeyPrefix')
+        this.compositeUriPrefix = this.configService.get<string>('composite.uriPrefix')
+        this.compositeUriPostfix = this.configService.get<string>('composite.uriPostfix')
+        this.bucket = this.configService.get<string>('s3.bucket')
     }
 
     public async saveCompositeConfig(dto: SaveCompositeConfigDto, user: UserEntity): Promise<CompositeMetadataType> {
@@ -323,19 +339,65 @@ export class CompositeApiService {
         }))
 
         // TODO -> printed image
-        // TODO -> use metadatas instead of just images
 
-        // - merge metadata together -> attributes merged, layers merged, image replaced
+        let image = ''
+
+        const parentChainId = parentAsset.collectionFragment.collection.chainId
+        const parentAddress = parentAsset.collectionFragment.collection.assetAddress
+        const parentId = parentAsset.assetId
+
+        if (layers.length > 1) {
+            const cb = fetchImageBufferCallback()
+            const imageLayers = (await Promise.all(layers.map(async (layer) => cb(layer))) as string[]).map(x => Buffer.from(x))
+            //console.log(typeof imageLayers[0])
+
+            let data
+            try {
+                data = await sharp(imageLayers[0]).composite(imageLayers.slice(1).map((x, i) => {
+                    //console.log(i)
+                    return {
+                        input: x,
+                        gravity: sharp.gravity.southeast
+                    }
+                })).toFormat('png').toBuffer()
+            } catch (err) {
+                this.logger.error(`createCompositeMetadata:: media stacking error`, undefined, this.context)
+            }
+
+            //console.log(data)
+
+            const key = `${this.compositeMediaKeyPrefix}/${parentChainId}/${parentAddress}/${parentId}${this.compositeUriPostfix}`
+            try {
+                const res = await this.s3.upload({ Bucket: this.bucket, Body: data, Key: key, }, {}, (err, data) => {
+                    if (err) {
+                        this.logger.error(`createCompositeMetadata:: s3 upload error`, err.message, this.context)
+                    }
+                    if (data) {
+                        this.logger.debug(`createCompositeMetadata:: upload ${JSON.stringify(data)}`, this.context)
+                    }
+                })
+                this.logger.debug(`createCompositeMetadata:: s3 upload ${key}`, this.context)
+                image = `${parentAsset.uriPrefix}/${key}`
+            } catch (err) {
+                this.logger.error(`createCompositeMetadata:: s3 error`, undefined, this.context)
+                //console.log(err)
+            }
+        } else {
+            image = layers[0]
+        }
+
+        //console.log('image', image)
 
         return {
             ...parentOriginalMetadata,
+            image,
             attributes,
             layers,
             composite: true,
             asset: {
-                chainId: parentAsset.collectionFragment.collection.chainId,
-                assetAddress: parentAsset.collectionFragment.collection.assetAddress,
-                assetId: parentAsset.assetId,
+                chainId: parentChainId,
+                assetAddress: parentAddress,
+                assetId: parentId,
                 assetType: parentAsset.collectionFragment.collection.assetType
             }
         }
