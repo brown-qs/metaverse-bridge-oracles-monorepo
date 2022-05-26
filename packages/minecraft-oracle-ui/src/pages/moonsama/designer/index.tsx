@@ -11,7 +11,7 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import MuiAccordionSummary, {
   AccordionSummaryProps,
 } from '@mui/material/AccordionSummary';
-import customizationOptions from 'fixtures/MoonsamaCustomizer.json'
+import CUSTOMIZATION_OPTIONS from 'fixtures/MoonsamaCustomizer.json'
 import birdToHand from 'fixtures/MoonsamaBirdHandPairing.json'
 import ImageStack from 'components/ImageStacks/Moonsama2';
 import { FixedSizeGrid, GridChildComponentProps } from 'react-window';
@@ -25,7 +25,13 @@ import axios from 'axios';
 import type { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 import { downloadAsImage, saveCustomization, shareCustomization } from 'utils/customizers';
 
-type customizableTraitType = {
+enum AssetLocation {
+  BRIDGE = 'BRIDGE',
+  WALLET = 'WALLET',
+  NONE = 'NONE'
+}
+
+type CustomizableTraitType = {
   title: string,
   icon: string,
   background: string,
@@ -37,6 +43,7 @@ type customizableTraitType = {
   chainID: number,
   equippableType: string,
   zIndex: number,
+  location?: AssetLocation
 }
 
 type asset = {
@@ -50,14 +57,20 @@ type asset = {
   customizableTraitName: string
 }
 
-type assetIdentifier = {
+type AssetIdentifier = {
   chainID: number,
   assetAddress: string,
   assetID: string,
   assetType: string,
 }
 
-type customizationType = {
+type OwnedAssets = {
+  bridge: AssetIdentifier[],
+  wallet: AssetIdentifier[],
+  notOwned: AssetIdentifier[]
+}
+
+type CustomizationType = {
   parent: asset | null,
   children: Array<asset>
 }
@@ -102,18 +115,26 @@ const transformOnChainAssets = (onChainItems: Array<any> | undefined) => {
   })
 }
 
-const isOwnedAsset = ({ chainID, assetAddress, assetID, assetType }: assetIdentifier, ownedAssets: Array<assetIdentifier>): boolean => {
-  for (let i = 0; i < ownedAssets.length; i++) {
-    if (ownedAssets[i].chainID === chainID && ownedAssets[i].assetAddress === assetAddress && ownedAssets[i].assetID === assetID && ownedAssets[i].assetType === assetType) {
-      return true;
+const getAssetLocation = ({ chainID, assetAddress, assetID, assetType }: AssetIdentifier, ownedAssets: OwnedAssets): AssetLocation => {
+  for (let i = 0; i < ownedAssets.bridge.length; i++) {
+    if (ownedAssets.bridge[i].chainID === chainID && ownedAssets.bridge[i].assetAddress === assetAddress && ownedAssets.bridge[i].assetID === assetID && ownedAssets.bridge[i].assetType === assetType) {
+      return AssetLocation.BRIDGE;
     }
   }
 
-  return false;
+  for (let i = 0; i < ownedAssets.wallet.length; i++) {
+    if (ownedAssets.wallet[i].chainID === chainID && ownedAssets.wallet[i].assetAddress === assetAddress && ownedAssets.wallet[i].assetID === assetID && ownedAssets.wallet[i].assetType === assetType) {
+      return AssetLocation.WALLET;
+    }
+  }
+
+  return AssetLocation.NONE
 }
 
-const getAssetImages = (customizableTrait: customizableTraitType, ownedAssets: Array<assetIdentifier>) => {
-  const options = [], ownedOptions = []
+const getAssetImages = (customizableTrait: CustomizableTraitType, ownedAssets: OwnedAssets) => {
+  const options = []
+  const bridgeOptions = []
+  const walletOptions = []
 
   for (let i = 0; i < customizableTrait.assetIDRanges.length; i++) {
     const assetRange = customizableTrait.assetIDRanges[i];
@@ -127,25 +148,37 @@ const getAssetImages = (customizableTrait: customizableTraitType, ownedAssets: A
         assetID: j.toString(),
         assetType: customizableTrait.assetType,
         zIndex: customizableTrait.zIndex,
-        customizableTraitName: customizableTrait.title
+        customizableTraitName: customizableTrait.title,
+        location: AssetLocation.NONE
       }
 
-      if (isOwnedAsset(option, ownedAssets)) {
-        ownedOptions.push({
+      option.location = getAssetLocation(option, ownedAssets)
+
+      if (option.location.valueOf() === AssetLocation.BRIDGE.valueOf()) {
+        bridgeOptions.push({
           owned: true,
           ...option
         })
-      } else {
-        options.push({
-          owned: false,
-          customization: false,
+        continue
+      }
+      
+      if (option.location.valueOf() === AssetLocation.WALLET.valueOf()) {
+        walletOptions.push({
+          owned: true,
           ...option
         })
+        continue
       }
+      
+      options.push({
+        owned: false,
+        customization: false,
+        ...option
+      })
     }
   }
 
-  return [...ownedOptions, ...options];
+  return [...bridgeOptions, ...walletOptions, ...options];
 }
 
 const ExpandMoreIcon = ({ expanded }: { expanded?: boolean }) => {
@@ -210,14 +243,14 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   const isMobileViewport = useMediaQuery(theme.breakpoints.down('sm'));
   const isLoggedIn = !!authData && !!authData.userProfile
 
-  const [expanded, setExpanded] = useState<customizableTraitType>(customizationOptions[0]);
+  const [expanded, setExpanded] = useState<CustomizableTraitType>(CUSTOMIZATION_OPTIONS[0]);
 
-  const [currentCustomization, setCurrentCustomization] = useState<customizationType>({
+  const [currentCustomization, setCurrentCustomization] = useState<CustomizationType>({
     parent: null,
     children: [],
   });
 
-  const [ownedAssets, setOwnedAssets] = useState<Array<assetIdentifier>>([])
+  const [ownedAssets, setOwnedAssets] = useState<OwnedAssets>({bridge: [], wallet: [], notOwned: []})
   const [numCols, setNumCols] = useState(isMobileViewport ? 2 : 3);
   const [myCustomizations, setMyCustomizations] = useState<Array<any>>([]);
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
@@ -234,8 +267,13 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
     const myMoonsamas = transformOnChainAssets(onChainItems?.['Moonsama'] ?? [])
     const my1155s = transformOnChainAssets(onChainItems?.['???'] ?? [])
 
-    setOwnedAssets([...myBridgedAssets, ...myMoonsamas, ...my1155s])
-  }, [onChainItems, inGameItems])
+    setOwnedAssets({
+        bridge: myBridgedAssets,
+        wallet: [...myMoonsamas, ...my1155s],
+        notOwned: []
+    })
+
+  }, [JSON.stringify(onChainItems), JSON.stringify(inGameItems)])
 
 
   /**
@@ -247,15 +285,16 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
     const getCustomizations = async () => {
       const customizations: any = {}
 
-      for (let i = 0; i < ownedAssets.length; i++) {
+      const ownedAssetsArray = [...ownedAssets.bridge, ...ownedAssets.wallet, ...ownedAssets.notOwned]
+      for (let i = 0; i < ownedAssetsArray.length; i++) {
         const customizationResponse = await getCustomization({
-          chainID: ownedAssets[i].chainID,
-          assetAddress: ownedAssets[i].assetAddress,
-          assetID: ownedAssets[i].assetID,
+          chainID: ownedAssetsArray[i].chainID,
+          assetAddress: ownedAssetsArray[i].assetAddress,
+          assetID: ownedAssetsArray[i].assetID,
         }, authData).catch(e => alert('error'));
 
         if (typeof customizationResponse !== 'undefined' && customizationResponse.data.composite) {
-          customizations[`${ownedAssets[i].assetAddress}-${ownedAssets[i].assetID}`] = customizationResponse.data
+          customizations[`${ownedAssetsArray[i].assetAddress}-${ownedAssetsArray[i].assetID}`] = customizationResponse.data
         }
       }
 
@@ -265,22 +304,22 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
     if (!!authData && !!authData.userProfile) {
       getCustomizations()
     }
-  }, [ownedAssets, authData])
+  }, [JSON.stringify(ownedAssets), JSON.stringify(authData)])
 
-  const applyAdditionalLayers = ({parent, children}: customizationType): customizationType => {
+  const applyAdditionalLayers = ({ parent, children }: CustomizationType): CustomizationType => {
     let hasEquippedMainHand = false, mainHandTrait, weaponHandTrait
 
-    if (parent === null) return {parent, children}
+    if (parent === null) return { parent, children }
 
-    for (let i = 0; i < customizationOptions.length; i++) {
-      if (customizationOptions[i].title === 'Main Hand') {
-        mainHandTrait = customizationOptions[i];
-      } else if (customizationOptions[i].title === 'Weapon Hand') {
-        weaponHandTrait = customizationOptions[i]
+    for (let i = 0; i < CUSTOMIZATION_OPTIONS.length; i++) {
+      if (CUSTOMIZATION_OPTIONS[i].title === 'Main Hand') {
+        mainHandTrait = CUSTOMIZATION_OPTIONS[i];
+      } else if (CUSTOMIZATION_OPTIONS[i].title === 'Weapon Hand') {
+        weaponHandTrait = CUSTOMIZATION_OPTIONS[i]
       }
     }
 
-    if (!mainHandTrait || !weaponHandTrait) return {parent, children}
+    if (!mainHandTrait || !weaponHandTrait) return { parent, children }
 
     for (let i = 0; i < children.length; i++) {
       if (hasEquippedMainHand) break
@@ -295,11 +334,11 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
       }
     }
 
-    if (!hasEquippedMainHand) return {parent, children}
+    if (!hasEquippedMainHand) return { parent, children }
 
     const toReplace = children.findIndex(asset => asset.customizableTraitName === 'Weapon Hand')
     const newChildren = [...children]
-    const birdHandMapping: {[index: string]: number} = birdToHand
+    const birdHandMapping: { [index: string]: number } = birdToHand
 
     const weaponHandAssetID = birdHandMapping[parent.assetID].toString()
 
@@ -334,7 +373,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   } = useClasses(styles);
 
   const handleChange =
-    (customizationOption: customizableTraitType) => (event: React.SyntheticEvent, isExpanded: boolean) => {
+    (customizationOption: CustomizableTraitType) => (event: React.SyntheticEvent, isExpanded: boolean) => {
       setExpanded(customizationOption);
     };
 
@@ -361,7 +400,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
     }
   }
 
-  const getSelectedAsset = (expanded: customizableTraitType) => {
+  const getSelectedAsset = (expanded: CustomizableTraitType) => {
     if (currentCustomization.parent?.customizableTraitName === expanded.title) {
       return currentCustomization.parent?.assetID
     }
@@ -446,7 +485,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
                       onClick={() => shareCustomization(currentCustomization, authData, setShowShareModal)}
                       type="button"
                       className={customizerActionButton}>
-                      <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-share" width="34" height="34" viewBox="0 0 24 24" stroke-width="1.5" stroke="#ffffff" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-share" width="34" height="34" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#ffffff" fill="none" strokeLinecap="round" strokeLinejoin="round">
                         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                         <circle cx="6" cy="12" r="3" />
                         <circle cx="18" cy="6" r="3" />
@@ -461,7 +500,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
             )}
           </Box>
           <Box className={traitExplorer}>
-            {customizationOptions.filter(option => option.shown).map(customizationOption => {
+            {CUSTOMIZATION_OPTIONS.filter(option => option.shown).map(customizationOption => {
               const isExpanded = expanded.title === customizationOption.title
 
               return (
@@ -554,5 +593,5 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
 
 export default CharacterDesignerPage;
 export type { asset };
-export type { assetIdentifier };
-export type { customizationType };
+export type { AssetIdentifier };
+export type { CustomizationType };

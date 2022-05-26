@@ -4,5 +4,6 @@ export const ProviderToken = {
     MICROSOFT_SETUP: 'provider.microsoft.setup',
     RECOGNIZED_CHAIN_ASSETS_CALLBACK: 'provider.chain.assets.recognized.callback',
     RECOGNIZED_ASSETS_CALLBACK: 'provider.assets.recognized.callback',
-    CONTRACT_CHAIN_CALLBACK: 'provider.chain.contract.callback'
+    CONTRACT_CHAIN_CALLBACK: 'provider.chain.contract.callback',
+    S3_CLIENT: 'provider.client.s3'
 };

@@ -1,8 +1,9 @@
 import axios from 'axios';
-import type { customizationType } from 'pages/moonsama/designer/index'
+import type { CustomizationType } from 'pages/moonsama/designer/index'
 import type { asset as assetType } from 'pages/moonsama/designer/index'
-import type { assetIdentifier } from 'pages/moonsama/designer/index'
+import type { AssetIdentifier } from 'pages/moonsama/designer/index'
 import type { AuthData } from 'context/auth/AuthContext/AuthContext.types';
+
 
 const downloadAsImage = (layers: Array<assetType>) => {
   const canvas = document.createElement('canvas');
@@ -35,9 +36,9 @@ const downloadAsImage = (layers: Array<assetType>) => {
   });
 }
 
-const saveCustomization = async ({parent, children}: customizationType, authData: AuthData) => {
+const saveCustomization = async ({parent, children}: CustomizationType, authData: AuthData) => {
   const payload = {
-    compositeChildren: children.map((childAsset: assetIdentifier) => ({
+    compositeChildren: children.map((childAsset: AssetIdentifier) => ({
       assetAddress: childAsset.assetAddress,
       assetId: childAsset.assetID,
       assetType: childAsset.assetType,
@@ -58,7 +59,7 @@ const saveCustomization = async ({parent, children}: customizationType, authData
   });
 }
 
-const shareCustomization = async ({parent, children}: customizationType, authData: AuthData, setShowShareModal: (show: boolean) => void) => {
+const shareCustomization = async ({parent, children}: CustomizationType, authData: AuthData, setShowShareModal: (show: boolean) => void) => {
   await saveCustomization({parent, children}, authData)
 
   if (navigator.share) {
