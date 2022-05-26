@@ -18,6 +18,9 @@ export class CompositeAssetEntity {
     @IsString()
     assetId: string;
 
+    @Column({ nullable: true })
+    originalMetadataUri?: string
+
     @IsJSON()
     @Column({ type: 'json', nullable: true })
     originalMetadata?: CompositeMetadataType;

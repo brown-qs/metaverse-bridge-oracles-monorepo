@@ -231,7 +231,11 @@ export class CompositeApiService {
         return compositeMetadata
     }
 
-
+    // TODO
+    // for now it tries to:
+    // 1, return saved composite meta in db
+    // 2, return original meta with composite image/layers replaced
+    // 3. return original meta
     public async getCompositeMetadata(chainId: string, assetAddress: string, assetId: string): Promise<CompositeMetadataType> {
 
         const sanitizedChainId = chainId ? Number.parseInt(chainId) : ChainId.MOONRIVER.valueOf()
@@ -239,37 +243,54 @@ export class CompositeApiService {
 
         const compositeEntry = await this.compositeAssetService.findOne({ assetId, compositeCollectionFragment: { collection: { chainId: sanitizedChainId, assetAddress: sanitizedAssetAddress } } }, { relations: ['compositeCollectionFragment', 'compositeCollectionFragment.collection'], loadEagerRelations: true })
 
-
         if (!compositeEntry || !compositeEntry.compositeMetadata) {
+
+            let meta, metaUri
+            // if no original meta was fetched ever
             if (!compositeEntry?.originalMetadata) {
                 const collection = await this.collectionService.findOne({ assetAddress: sanitizedAssetAddress, chainId: sanitizedChainId })
                 const assetType = collection?.assetType ?? 'ERC721'
 
-                const meta = await this.nftApiService.getRawNFTMetadata(chainId, assetType, sanitizedAssetAddress, assetId)
+                const metaResult = await this.nftApiService.getRawNFTMetadata(chainId, assetType, sanitizedAssetAddress, assetId)
+                meta = metaResult.metaObject
+                metaUri = metaResult.metaUri
+            } else {
+                meta = compositeEntry.originalMetadata
+                metaUri = compositeEntry.originalMetadataUri
+            }
 
-                if (!!meta) {
-                    const compositeEntryId = CompositeAssetService.calculateId({ chainId: sanitizedChainId, assetAddress: sanitizedAssetAddress, assetId })
-                    if (!compositeEntry) {
-                        const ccf = await this.compositeCollectionFragmentService.findOne({ collection: { chainId: sanitizedChainId, assetAddress: sanitizedAssetAddress } }, { relations: ['collection'] })
-                        if (!!ccf) {
-                            await this.compositeAssetService.create({
-                                originalMetadata: meta as CompositeMetadataType,
-                                assetId,
-                                compositeCollectionFragment: ccf,
-                                id: compositeEntryId
-                            })
-                        }
-                    } else {
-                        await this.compositeAssetService.update(compositeEntryId, { originalMetadata: meta })
-                    }
+            if (!!meta) {
+                   
+                const ccf = await this.compositeCollectionFragmentService.findOne({ collection: { chainId: sanitizedChainId, assetAddress: sanitizedAssetAddress } }, { relations: ['collection'] })
+                const compMediaUrl = `${ccf.uriPrefix}/${ccf.collection.chainId}/${ccf.collection.assetAddress.toLowerCase()}/${assetId}${ccf.uriPostfix}`
+
+                const compositeMeta: CompositeMetadataType = {
+                    ...meta as CompositeMetadataType,
+                    layers: [metaUri],
+                    composite: false,
+                    image: compMediaUrl
                 }
 
-                // TODO create composite entry?
-                // TODO fetched from imported asset if exists?
-                // TODO save fetched originalMetadata?
-                return meta as CompositeMetadataType
+                const compositeEntryId = CompositeAssetService.calculateId({ chainId: sanitizedChainId, assetAddress: sanitizedAssetAddress, assetId })
+
+                if (!compositeEntry) {
+                    if (!!ccf) {
+                        await this.compositeAssetService.create({
+                            originalMetadata: meta as CompositeMetadataType,
+                            compositeMetadata: compositeMeta,
+                            assetId,
+                            compositeCollectionFragment: ccf,
+                            originalMetadataUri: metaUri,
+                            id: compositeEntryId
+                        })
+                    }
+                } else {
+                    await this.compositeAssetService.update(compositeEntryId, { originalMetadata: meta, compositeMetadata: compositeMeta })
+                }
+
+                return compositeMeta
             }
-            return compositeEntry.originalMetadata
+            throw new UnprocessableEntityException(`Error fetching metadata`)
         }
         return compositeEntry.compositeMetadata
     }
@@ -284,7 +305,7 @@ export class CompositeApiService {
         if (!compositeEntry || !compositeEntry.originalMetadata) {
             const collection = await this.collectionService.findOne({ assetAddress: sanitizedAssetAddress, chainId: sanitizedChainId })
             const assetType = collection?.assetType ?? 'ERC721'
-            const meta = await this.nftApiService.getRawNFTMetadata(chainId, assetType, sanitizedAssetAddress, assetId)
+            const {metaObject: meta, metaUri} = await this.nftApiService.getRawNFTMetadata(chainId, assetType, sanitizedAssetAddress, assetId)
 
             if (!!meta) {
                 const compositeEntryId = CompositeAssetService.calculateId({ chainId: sanitizedChainId, assetAddress: sanitizedAssetAddress, assetId })
@@ -294,6 +315,7 @@ export class CompositeApiService {
                         await this.compositeAssetService.create({
                             originalMetadata: meta as CompositeMetadataType,
                             assetId,
+                            originalMetadataUri: metaUri,
                             compositeCollectionFragment: ccf,
                             id: compositeEntryId
                         })
