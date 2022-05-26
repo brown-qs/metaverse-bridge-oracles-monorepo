@@ -58,6 +58,7 @@ export function useInGameItems(trigger: string | undefined = undefined) {
     const blocknumber = useBlockNumber();
     const staticCallback = useTokenStaticDataCallbackArrayWithChains();
 
+    console.log({authData})
     const {jwt} = authData ?? {}
 
     const [items, setItems] = useState<ProfileInGameItemsWithStatic | undefined>(undefined);
