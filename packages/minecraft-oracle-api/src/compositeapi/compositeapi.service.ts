@@ -362,8 +362,8 @@ export class CompositeApiService {
 
         const sortedArray = [parentAsset, ...childrenAssets].sort((a, b) => a.zIndex - b.zIndex)
 
-        const layers = sortedArray.map(x => `${x.uriPrefix}/${x.collectionFragment.collection.chainId}/${x.collectionFragment.collection.assetAddress.toLowerCase()}/${x.assetId}${x.uriPostfix}`)
-
+        const imglayers = sortedArray.map(x => `${x.uriPrefix}/${x.collectionFragment.collection.chainId}/${x.collectionFragment.collection.assetAddress.toLowerCase()}/${x.assetId}${x.uriPostfix}`)
+        const layers = sortedArray.map(x => `${this.metadataPublicPath}/${x.collectionFragment.collection.chainId}/${x.collectionFragment.collection.assetAddress}/${x.assetId}`)
         // TODO
         // print composite image
 
@@ -384,9 +384,9 @@ export class CompositeApiService {
 
         let image = ''
 
-        if (layers.length > 1) {
+        if (imglayers.length > 1) {
             const cb = fetchImageBufferCallback()
-            const imageLayers = (await Promise.all(layers.map(async (layer) => cb(layer))) as string[]).map(x => Buffer.from(x))
+            const imageLayers = (await Promise.all(imglayers.map(async (layer) => cb(layer))) as string[]).map(x => Buffer.from(x))
             //console.log(typeof imageLayers[0])
 
             let data
@@ -421,7 +421,7 @@ export class CompositeApiService {
                 //console.log(err)
             }
         } else {
-            image = layers[0]
+            image = imglayers[0]
         }
 
         console.log('image', image)
@@ -475,18 +475,6 @@ export class CompositeApiService {
                 }
             }))
         }, user)
-    }
-
-    private async fetchCompositeMedia(uri: string): Promise<string> {
-
-        const cb = fetchUrlCallback();
-
-        if (!uri) {
-            return undefined
-        }
-
-        const data = await cb<string>(uri, false);
-        return data
     }
 
     private async fetchOriginalMetadata(chainId: string, assetType: string, assetAddress: string, assetId: string): Promise<{ metaObject: CompositeMetadataType, metaUri: string, synthetic: boolean }> {
