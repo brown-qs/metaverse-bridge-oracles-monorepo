@@ -1,6 +1,7 @@
 import { CompositeAssetEntity } from '../compositeasset/compositeasset.entity';
 import { Column, Entity, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { SyntheticPartEntity } from '../syntheticpart/syntheticpart.entity';
+import { CompositeMetadataType } from '../compositeasset/types';
 
 @Entity()
 export class SyntheticItemEntity {
