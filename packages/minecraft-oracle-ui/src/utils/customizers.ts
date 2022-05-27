@@ -57,9 +57,7 @@ const saveCustomization = async ({parent, children}: CustomizationType, authData
   })
 }
 
-const shareCustomization = async ({parent, children}: CustomizationType, authData: AuthData, setShowShareModal: (show: boolean) => void) => {
-  await saveCustomization({parent, children}, authData)
-
+const shareCustomization = async ({parent, children}: CustomizationType, setShowShareModal: (show: boolean) => void) => {
   if (navigator.share) {
     await navigator.share({
       title: 'Check out my customized Moonsama!',
