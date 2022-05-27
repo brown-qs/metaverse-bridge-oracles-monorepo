@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useOnChainItems } from 'hooks/multiverse/useOnChainItems';
+import { useOnChainItemsWithCompositeMetaAndAssets } from 'hooks/multiverse/useOnChainItems';
 import { Box, Typography, Modal } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -17,8 +17,7 @@ import ImageStack from 'components/ImageStacks/Moonsama2';
 import { FixedSizeGrid, GridChildComponentProps } from 'react-window';
 import { styled } from '@mui/material/styles';
 import "@fontsource/orbitron/500.css";
-import { useInGameItems } from 'hooks/multiverse/useInGameItems';
-import type { InGameItemWithStatic } from 'hooks/multiverse/useInGameItems'
+import { InGameItemWithStatic, useInGameItemsWithCompositeMetaAndAssets } from 'hooks/multiverse/useInGameItems'
 import SimpleBar from 'simplebar-react';
 import 'simplebar/dist/simplebar.min.css';
 import axios from 'axios';
@@ -419,8 +418,8 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   const [myCustomizations, setMyCustomizations] = useState<Array<any>>([]);
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
 
-  const onChainItems = useOnChainItems();
-  const inGameItems = useInGameItems();
+  const onChainItems = useOnChainItemsWithCompositeMetaAndAssets();
+  const inGameItems = useInGameItemsWithCompositeMetaAndAssets();
 
   const traitOptionsAssets = useMemo(() => getAssetImages(expanded, ownedAssets), [expanded, JSON.stringify(ownedAssets)]);
 
