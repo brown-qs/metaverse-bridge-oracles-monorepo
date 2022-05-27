@@ -943,8 +943,8 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
           <Typography id="modal-modal-title" variant="h6" component="h2" sx={{ fontWeight: 600, textAlign: 'center' }}>
             Your 2.0 Moonsama is being cooked
           </Typography>
-          {saveProgress.inProgress && <CircularProgress/>}
-          {!saveProgress.inProgress && !saveProgress.errorMessage && <Typography id="modal-modal-description" sx={{ mt: 2, wordBreak: 'break-word', wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+          {saveProgress.inProgress && <Box display={'flex'} style={{ paddingTop: theme.spacing(2) }}><CircularProgress sx={{ alignSelf: 'center', textAlign: 'center'}}/></Box>}
+          {!saveProgress.inProgress && !saveProgress.errorMessage && <Typography id="modal-modal-description" sx={{ mt: 2, wordBreak: 'break-word', wordWrap: 'break-word', overflowWrap: 'break-word', textAlign: 'center' }}>
             Done! You can access your config at
           </Typography>
           }
