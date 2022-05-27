@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import { Theme } from '@mui/material';
 import { useClasses } from 'hooks';
-import { asset as assetType } from 'pages/moonsama/designer/index'
+import { Asset as AssetType } from 'pages/moonsama/designer/index'
 
 const styles = (theme: Theme) => ({
   imageStackLayer: {
@@ -13,7 +13,7 @@ const styles = (theme: Theme) => ({
   }
 });
 
-type layersType = Array<assetType>;
+type layersType = Array<AssetType>;
 
 const ImageStack = ({ layers }: {layers: layersType}) => {
   const {
