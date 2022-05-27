@@ -76,7 +76,7 @@ export class NftApiService {
 
     public async getNFT(chainId: string, tokenType: string, address: string, tokenId: string): Promise<ProcessedStaticTokenData | StaticTokenData> {
 
-        this.logger.log(`Fetching NFT metadata: ${chainId}-${tokenType}-${address}-${tokenId}`, this.context)
+        this.logger.debug(`Fetching NFT metadata: ${chainId}-${tokenType}-${address}-${tokenId}`, this.context)
 
         const assets: Asset[] = [
             {
@@ -117,7 +117,7 @@ export class NftApiService {
 
     public async getRawNFTMetadata(chainId: string, tokenType: string, address: string, tokenId: string): Promise<{metaObject?: unknown, metaUri?: string} | undefined> {
 
-        this.logger.log(`Fetching NFT metadata: ${chainId}-${tokenType}-${address}-${tokenId}`, this.context)
+        this.logger.debug(`Fetching NFT metadata: ${chainId}-${tokenType}-${address}-${tokenId}`, this.context)
 
         const assets: Asset[] = [
             {

@@ -246,6 +246,8 @@ export class CompositeApiService {
     // 3. return original meta
     public async getCompositeMetadata(chainId: string, assetAddress: string, assetId: string): Promise<CompositeMetadataType> {
 
+        this.logger.debug(`getCompositeMetadata:: started for ${chainId}-${assetAddress}-${assetId}`, this.context)
+
         const sanitizedChainId = chainId ? Number.parseInt(chainId) : ChainId.MOONRIVER.valueOf()
         const sanitizedAssetAddress = assetAddress.toLowerCase()
 
@@ -276,7 +278,7 @@ export class CompositeApiService {
             if (!!meta) {
 
                 const ccf = await this.compositeCollectionFragmentService.findOne({ collection: { chainId: sanitizedChainId, assetAddress: sanitizedAssetAddress } }, { relations: ['collection'] })
-                const compMediaUrl = `${ccf.uriPrefix}/${ccf.collection.chainId}/${ccf.collection.assetAddress.toLowerCase()}/${assetId}${ccf.uriPostfix}`
+                const compMediaUrl = ccf ? `${ccf.uriPrefix}/${ccf.collection.chainId}/${ccf.collection.assetAddress.toLowerCase()}/${assetId}${ccf.uriPostfix}` : meta?.image
 
                 const compositeMeta: CompositeMetadataType = {
                     ...meta as CompositeMetadataType,

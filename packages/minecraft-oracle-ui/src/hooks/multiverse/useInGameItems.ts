@@ -5,6 +5,7 @@ import { useAuth } from 'hooks';
 import { StaticTokenData, useTokenStaticDataCallbackArrayWithChains } from 'hooks/useTokenStaticDataCallback/useTokenStaticDataCallback';
 import { stringToStringAssetType } from 'utils/subgraph';
 import { RecognizedAssetType } from 'assets/data/recognized'
+import { useFetchUrlCallback } from 'hooks/useFetchUrlCallback/useFetchUrlCallback';
 
 export interface InGameItem {
     name: string
@@ -117,6 +118,102 @@ export function useInGameItems(trigger: string | undefined = undefined) {
                     ...rawData.resources[i],
                     staticData: sd.staticData,
                     meta: sd.meta
+                })
+            });
+        }
+
+        resultSet.textures = await Promise.all(rawData.textures.map(async (texture) => {
+            const decoded = Buffer.from(texture.textureData, 'base64').toString()
+            const textureURL = !!decoded ? JSON.parse(decoded)?.textures?.SKIN?.url : undefined
+            const coverURL = !!textureURL ? `https://api.mineskin.org/render/skin?url=${textureURL}` : undefined
+
+            /*
+            const resp = await axios.post<{uuid: string}>(
+                `https://api.mineskin.org/generate/url`,
+                {
+                    name: 'string',
+                    visibility: 1,
+                    url: textureURL
+                });
+
+            const renderURL = `https://api.mineskin.org/render/texture/${resp.data.uuid}`
+            */
+
+            texture['decodedData'] = decoded
+            texture['textureURL'] = textureURL
+            texture['coverURL'] = coverURL
+            //texture['renderURL'] = renderURL
+
+            return texture
+        }))
+
+        setItems(resultSet)
+        
+    }, [blocknumber, jwt, trigger])
+
+    useEffect(() => {
+        getUserItems()
+    }, [blocknumber, jwt, trigger])
+
+    return items
+}
+
+export function useInGameItemsWithCompositeMetaAndAssets(trigger: string | undefined = undefined) {
+    const { authData, setAuthData } =  useAuth();
+    const blocknumber = useBlockNumber();
+    const urlCb = useFetchUrlCallback()
+
+    console.log({authData})
+    const {jwt} = authData ?? {}
+
+    const [items, setItems] = useState<ProfileInGameItemsWithStatic | undefined>(undefined);
+
+    const getUserItems = useCallback(async () => {
+        let rawData: ProfileInGameItems
+        try {
+            const resp = await axios.request<ProfileInGameItems>({
+                method: 'get',
+                url: `${process.env.REACT_APP_BACKEND_API_URL}/user/resources`,
+                headers: { Authorization: `Bearer ${authData?.jwt}` }
+            });
+            rawData = resp.data
+        } catch(e) {
+            const err = e as AxiosError;
+
+            if(err?.response?.data.statusCode === 401){
+                window.localStorage.removeItem('authData');
+                setAuthData(undefined);
+            };
+            console.error('Error fetching in game items. Try again later.')
+            setItems(undefined)
+            return
+        }
+
+        //console.log('DEBUG rawData', {assets: rawData.assets, resources: rawData.resources})
+        const melange = [...rawData.assets, ...rawData.resources]
+
+        let metas = await Promise.all(melange.map(async (asset) => {
+            const meta = await urlCb(`${process.env.REACT_APP_BACKEND_API_URL}/composite/metadata/${asset.exportChainId}/${asset?.assetAddress}/${asset?.assetId}`, false)
+            return meta
+          }))
+
+        //console.log('DEBUG staticDataCallbackArrayWithChains', {staticDatas})
+        let resultSet: ProfileInGameItemsWithStatic = { assets: [], resources: [], textures: []}
+        if (rawData.assets.length > 0) {
+            metas.slice(0, rawData.assets.length).map((meta, i) => {
+                resultSet.assets.push({
+                    ...rawData.assets[i],
+                    meta
+                })
+            });
+            metas = metas.slice(rawData.assets.length)
+        }
+
+        if (rawData.resources.length > 0) {
+            metas.slice(0, rawData.resources.length).map((meta, i) => {
+                resultSet.resources.push({
+                    ...rawData.resources[i],
+                    meta
                 })
             });
         }
