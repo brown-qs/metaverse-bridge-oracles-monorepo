@@ -54,9 +54,7 @@ const saveCustomization = async ({parent, children}: CustomizationType, authData
 
   return await axios.put(`${process.env.REACT_APP_BACKEND_API_URL}/composite/save`, payload, {
     headers: { Authorization: `Bearer ${authData?.jwt}` }
-  }).catch(e => {
-    alert('Something went wrong while saving your customization.\n\nPlease try again.')
-  });
+  })
 }
 
 const shareCustomization = async ({parent, children}: CustomizationType, authData: AuthData, setShowShareModal: (show: boolean) => void) => {
