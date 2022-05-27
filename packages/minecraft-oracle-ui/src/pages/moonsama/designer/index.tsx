@@ -70,7 +70,8 @@ type Asset = {
   assetId: string,
   assetType: string,
   zIndex: number,
-  customizableTraitName: string
+  customizableTraitName: string,
+  location: AssetLocation
 }
 
 type AssetIdentifier = {
@@ -425,7 +426,11 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
 
   useEffect(() => setNumCols(isMobileViewport ? 2 : 3), [isMobileViewport]);
 
+  const onChainMoonsamas = onChainItems?.['Moonsama'] ?? []
+  const onChainQQQs = onChainItems?.['???'] ?? []
+
   useEffect(() => {
+    console.log('TRIGGERED')
     const myBridgedAssets = transformBridgedAssets(inGameItems?.assets)
     const myMoonsamas = transformOnChainAssets(onChainItems?.['Moonsama'] ?? [])
     const my1155s = transformOnChainAssets(onChainItems?.['???'] ?? [])
@@ -437,7 +442,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
       walletAttributes: [...(myMoonsamas?.attributes ?? [])]
     })
 
-  }, [JSON.stringify(onChainItems), JSON.stringify(inGameItems?.assets)])
+  }, [JSON.stringify(onChainMoonsamas), JSON.stringify(JSON.stringify(onChainQQQs)), JSON.stringify(inGameItems?.assets)])
 
 
   /**
@@ -511,6 +516,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
     const weaponHandAssetID = birdHandMapping[parent.assetId].toString()
 
     const weaponHand = {
+      location: AssetLocation.INCLUDED,
       title: weaponHandTrait?.title,
       thumbnailUrl: '',
       fullSizeUrl: `${weaponHandTrait?.uriPrefix}${weaponHandTrait?.chainId}/${weaponHandTrait?.assetAddress}/${weaponHandAssetID}${weaponHandTrait?.uriPostfix}`,
@@ -584,6 +590,16 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
     return null
   }
 
+  // owns all the selected items
+  let allowedToSave = true;
+  
+  [currentCustomization.parent, ...currentCustomization.children].map(x => {
+    const loc = x?.location.valueOf()
+    if (loc === AssetLocation.NONE.valueOf() || loc === AssetLocation.WALLET.valueOf()) {
+      allowedToSave = false;
+    }
+  })
+
   /**
    * TODO @Ishan: Accordion not animating and no hover effect.
   */
@@ -637,7 +653,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
                     </svg>
                   </button>
 
-                  {isLoggedIn && (<>
+                  {isLoggedIn && allowedToSave && (<>
                     <button
                       onClick={() => saveCustomization(currentCustomization, authData)}
                       type="button"
