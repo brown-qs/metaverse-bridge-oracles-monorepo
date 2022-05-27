@@ -218,7 +218,7 @@ export const useOnChainItemsWithCompositeMetaAndAssets = (trigger: string | unde
 
         const ot: OwnedTokens = response.owners?.[0];
 
-        console.log(ot)
+        //console.log(ot)
 
         if (!ot) {
           result[collection.display_name] = []
@@ -242,7 +242,7 @@ export const useOnChainItemsWithCompositeMetaAndAssets = (trigger: string | unde
           };
         });
 
-        console.log(assets)
+        //console.log(assets)
       } else {
         const query = QUERY_USER_ERC1155(account)
         const response = await request(collection.subgraph, query);
@@ -286,7 +286,7 @@ export const useOnChainItemsWithCompositeMetaAndAssets = (trigger: string | unde
         return meta
       })) as TokenMeta[]
 
-      console.log('FETCH', {metas})
+      //console.log('FETCH', {metas})
 
       const datas = metas.map((meta, i) => {
         return {
@@ -301,7 +301,15 @@ export const useOnChainItemsWithCompositeMetaAndAssets = (trigger: string | unde
     })
 
     await Promise.all(fetches)
-    setOnChainItems(result)
+    
+    if (!checkResultsEqual(result, onChainItems)) {
+      console.log('WAAA')
+      console.log({
+        before: JSON.stringify(onChainItems),
+        after: JSON.stringify(result)
+      })
+      setOnChainItems(result)
+    }
   },
     [chainId, blocknumber, account, trigger]
   );
@@ -312,3 +320,32 @@ export const useOnChainItemsWithCompositeMetaAndAssets = (trigger: string | unde
 
   return onChainItems;
 };
+
+function checkResultsEqual(a?: UserCollectionWithCompositeMetaOnly, b?: UserCollectionWithCompositeMetaOnly): boolean {
+  if (!a) {
+    if (!b) {
+      return true
+    }
+    return false
+  }
+
+  if (!b) {
+    if (!a) {
+      return true
+    }
+    return false
+  }
+
+  const keys = Object.keys(a)
+
+  for(let i=0; i< keys.length; i++) {
+    const key = keys[i]
+    if (a[key]?.length !== b[key]?.length) {
+      return false
+    }
+    if (JSON.stringify(a[key]) !== JSON.stringify(b[key])) {
+      return false
+    }
+  }
+  return true
+}
