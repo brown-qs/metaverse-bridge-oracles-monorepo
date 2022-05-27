@@ -26,8 +26,7 @@ import type { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 import { downloadAsImage, saveCustomization, shareCustomization } from 'utils/customizers';
 import MOONSAMA_CUSTOMIZER_CATEGORIES from 'fixtures/MoonsamaCustomizerCategories';
 import { MOONSAMA_ATTR_TO_ID_MAP } from 'fixtures/MoonsamaAttributeToIdMap';
-import { MOONSAMA_TRAITS } from 'utils/constants';
-import MOONSAMA_CATEGORY_INCOMPATIBILITIES from 'fixtures/MoonsamaItemIncompatibilities';
+import {MOONSAMA_CATEGORY_INCOMPATIBILITIES, MOONSAMA_PARENT_CHILDREN_OVERRIDES} from 'fixtures/MoonsamaItemRules';
 
 
 enum AssetLocation {
@@ -566,7 +565,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
 
       setCurrentCustomization(applyAdditionalLayers({
         parent: currentCustomization.parent,
-        children: newChildren.filter(x => !MOONSAMA_CATEGORY_INCOMPATIBILITIES[newSelectedAsset.title].includes(x.title))
+        children: newChildren.filter(x => !MOONSAMA_CATEGORY_INCOMPATIBILITIES[newSelectedAsset.title] || !MOONSAMA_CATEGORY_INCOMPATIBILITIES[newSelectedAsset.title].includes(x.title))
       }))
     }
   }
