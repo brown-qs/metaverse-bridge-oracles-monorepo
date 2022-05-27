@@ -1,10 +1,8 @@
 import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
-import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
-import { parseEther, formatEther } from '@ethersproject/units';
+import { parseEther } from '@ethersproject/units';
 import 'date-fns';
 import { useActiveWeb3React, useEnraptureDialog } from 'hooks';
 import {
@@ -23,14 +21,13 @@ import { Button, Dialog } from 'ui';
 import { styles } from './EnraptureDialog.styles';
 import { styles as appStyles } from '../../app.styles';
 import { useClasses } from 'hooks';
-import { useIsTransactionPending, useSubmittedEnraptureTx, useSubmittedImportTx } from 'state/transactions/hooks';
+import { useIsTransactionPending, useSubmittedEnraptureTx } from 'state/transactions/hooks';
 import { useEnraptureConfirmCallback } from 'hooks/multiverse/useConfirm';
 import { EnraptureAssetCallbackState, useEnraptureAssetCallback } from 'hooks/multiverse/useEnraptureAsset';
 import { stringAssetTypeToAssetType } from 'utils/marketplace';
 import Stack from '@mui/material/Stack/Stack';
 import { TokenDetails } from 'components/TokenDetails/TokenDetails';
 import TextField from '@mui/material/TextField';
-import { BigNumber } from 'ethereum-multicall/node_modules/ethers/lib/ethers';
 
 
 export const EnraptureDialog = () => {

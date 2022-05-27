@@ -29,12 +29,16 @@ export const Routing = () => {
             </Route>
 
             <Route path="/bridge">
-                <ImportDialog />
-                <ExportDialog />
-                <EnraptureDialog />
-                <SummonDialog />
-                <AssetDialog />
-                {!!authData?.jwt ? <ProfilePage authData={authData} /> : <HomePage />}
+                {!!authData?.jwt ? (
+                    <>
+                        <ImportDialog />
+                        <ExportDialog />
+                        <EnraptureDialog />
+                        <SummonDialog />
+                        <AssetDialog />
+                        <ProfilePage authData={authData} />
+                    </>
+                ) : <HomePage />}
             </Route>
 
             <Route exact path="/moonsama/customizer">
