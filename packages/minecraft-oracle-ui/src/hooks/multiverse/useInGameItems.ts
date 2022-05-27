@@ -243,7 +243,10 @@ export function useInGameItemsWithCompositeMetaAndAssets(trigger: string | undef
             return texture
         }))
 
-        setItems(resultSet)
+        if (!checkResultsEqual(resultSet, items)) {
+            console.log('WAAAA 2222')
+            setItems(resultSet)
+        }
         
     }, [blocknumber, jwt, trigger])
 
@@ -253,3 +256,42 @@ export function useInGameItemsWithCompositeMetaAndAssets(trigger: string | undef
 
     return items
 }
+
+function checkResultsEqual(a?: ProfileInGameItemsWithStatic, b?: ProfileInGameItemsWithStatic): boolean {
+    if (!a) {
+      if (!b) {
+        return true
+      }
+      return false
+    }
+  
+    if (!b) {
+      if (!a) {
+        return true
+      }
+      return false
+    }
+
+    if (a.assets?.length !== b.assets?.length) {
+        return false
+    }
+    if (JSON.stringify(a.assets) !== JSON.stringify(b.assets)) {
+        return false
+    }
+
+    if (a.resources?.length !== b.resources?.length) {
+        return false
+    }
+    if (JSON.stringify(a.resources) !== JSON.stringify(b.resources)) {
+        return false
+    }
+
+    if (a.textures?.length !== b.textures?.length) {
+        return false
+    }
+    if (JSON.stringify(a.textures) !== JSON.stringify(b.textures)) {
+        return false
+    }
+
+    return true
+  }

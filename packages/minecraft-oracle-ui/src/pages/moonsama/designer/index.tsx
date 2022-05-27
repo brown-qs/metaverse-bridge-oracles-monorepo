@@ -498,11 +498,6 @@ const Cell = ({ columnIndex, rowIndex, style, data }: GridChildComponentProps) =
 };
 
 const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
-  /*
-   * TODO @Kyilkhor: This component keeps re-rendering on each new block. I'd like for a re-render to occur when the state of
-   * onChainItems or inGameItems changes but not on each block.
-  */
-
   const theme = useTheme();
   const isMobileViewport = useMediaQuery(theme.breakpoints.down('sm'));
   const isLoggedIn = !!authData && !!authData.userProfile
@@ -525,6 +520,8 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   const onChainItems = useOnChainItemsWithCompositeMetaAndAssets();
   const inGameItems = useInGameItemsWithCompositeMetaAndAssets();
 
+  console.log('BINNNNNGGGG')
+
   const traitOptionsAssets = useMemo(() => getAssetImages(expanded, ownedAssets), [expanded, JSON.stringify(ownedAssets)]);
 
   useEffect(() => setNumCols(isMobileViewport ? 2 : 3), [isMobileViewport]);
@@ -545,7 +542,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
       walletAttributes: [...(myMoonsamas?.attributes ?? [])]
     })
 
-  }, [JSON.stringify(onChainMoonsamas), JSON.stringify(JSON.stringify(onChainQQQs)), JSON.stringify(inGameItems?.assets)])
+  }, [JSON.stringify(onChainMoonsamas), JSON.stringify(onChainQQQs), JSON.stringify(inGameItems?.assets)])
 
 
   /**
