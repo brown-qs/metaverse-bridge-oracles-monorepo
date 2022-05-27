@@ -101,9 +101,6 @@ export class CompositeApiService {
             const existingCompositeAsset = await this.compositeAssetService.findOne({ assetId: parentAssetId, compositeCollectionFragment: { collection: { assetAddress: parentAssetAddress, chainId: parentChainId } } }, { relations: ['compositeCollectionFragment', 'compositeCollectionFragment.collection', 'syntheticChildren'], loadEagerRelations: true })
 
             if (!!existingCompositeAsset) {
-                if (!!existingCompositeAsset.syntheticChildren) {
-                    await this.syntheticItemService.removeMultiple(existingCompositeAsset.syntheticChildren)
-                }
                 await this.compositeAssetService.remove(existingCompositeAsset)
             }
 
@@ -219,19 +216,28 @@ export class CompositeApiService {
             if (!c.synthetic) {
                 await this.assetService.update(c.hash, { compositeAsset })
             } else {
-                await this.syntheticItemService.create(
-                    {
-                        compositeAsset,
-                        syntheticPart: c.syntheticPart,
-                        assetId: c.assetId,
+
+                const sit = await this.syntheticItemService.findOne({
                         id: SyntheticItemService.calculateId({
                             assetId: c.assetId,
                             chainId: c.collectionFragment.collection.chainId,
                             assetAddress: c.collectionFragment.collection.assetAddress,
                             syntheticPartId: c.syntheticPart.id
                         })
-                    }
+                    },
+                    {relations: ['compositeAssets']}
                 )
+
+                if (!!sit) {
+                    const x = sit.compositeAssets?.find(x => x.id === compositeAsset.id)
+                    // relation does not exist yet
+                    if (!x) {
+                        await this.syntheticItemService.create({
+                            ...sit,
+                            compositeAssets: [...sit.compositeAssets, compositeAsset]
+                        })
+                    }
+                }
             }
         }))
 
@@ -357,7 +363,6 @@ export class CompositeApiService {
 
         this.logger.debug(`createCompositeMetadata:: started for ${parentChainId}-${parentAddress}-${parentId}`, this.context)
 
-
         // sort by z index
         const sortedArray = [parentAsset, ...childrenAssets].sort((a, b) => a.zIndex - b.zIndex)
 
@@ -369,12 +374,15 @@ export class CompositeApiService {
         const parentOriginalMetadata = await this.getOriginalMetadata(parentAsset.collectionFragment.collection.chainId.toString(), parentAsset.collectionFragment.collection.assetAddress, parentAsset.assetId)
 
         let attributes = [...parentOriginalMetadata?.attributes]
-        const childrenMetas = await Promise.all(childrenAssets.map(async (x) => {
+        const attributelists = await Promise.all(childrenAssets.map(async (x) => {
             const meta = await this.fetchOriginalMetadata(x.collectionFragment.collection.chainId.toString(), x.collectionFragment.collection.assetType, x.collectionFragment.collection.assetAddress, x.assetId)
-            //console.log(meta)
-            attributes = attributes.concat(meta?.metaObject?.attributes ?? [])
-            return meta
+            return meta?.metaObject?.attributes ?? []
         }))
+
+        for (let i =0; i< attributelists.length; i++) {
+            attributes = attributes.concat(attributelists[i])
+        }
+        console.log(attributes)
 
         // TODO -> printed image
 
@@ -420,7 +428,7 @@ export class CompositeApiService {
             image = imglayers[0]
         }
 
-        console.log('image', image)
+        //console.log('image', image)
 
         return {
             ...parentOriginalMetadata,
@@ -480,13 +488,27 @@ export class CompositeApiService {
         const syntheticPart = await this.syntheticPartService.findOne({ assetAddress })
 
         if (!!syntheticPart) {
+
+            // check if synthetic item exists
+            console.log({assetAddress, assetId})
+
+            const syntheticItem = await this.syntheticItemService.findOne({syntheticPart, assetId})
+
+            let attributes
+            if (!!syntheticItem) {
+                attributes = syntheticItem.attributes ?? []
+            }
+
+            console.log('attributes', attributes)
+
             const path = `${chainId}/${assetAddress}/${assetId}`
             return {
                 metaObject: {
                     image: `${syntheticPart.mediaUriPrefix}/${path}${syntheticPart.mediaUriPostfix}`,
                     external_url: 'https://moonsama.com',
+                    attributes,
                     asset: {
-                        assetAddress,
+                        assetAddress: assetAddress.toLowerCase(),
                         assetId,
                         assetType,
                         chainId: Number.parseInt(chainId)
@@ -502,7 +524,17 @@ export class CompositeApiService {
 
         const res = await this.nftApiService.getRawNFTMetadata(chainId, assetType, assetAddress, assetId)
         return {
-            ...res as any,
+            metaObject: {
+                ...(res.metaObject as any),
+                asset: {
+                    assetAddress: assetAddress.toLowerCase(),
+                    assetId,
+                    assetType,
+                    chainId: Number.parseInt(chainId)
+                },
+                composite: false
+            },
+            metaUri: res.metaUri,
             synthetic: false
         }
     }
