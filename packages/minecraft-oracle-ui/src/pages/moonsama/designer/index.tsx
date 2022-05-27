@@ -25,7 +25,8 @@ import type { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 import { downloadAsImage, saveCustomization, shareCustomization } from 'utils/customizers';
 import MOONSAMA_CUSTOMIZER_CATEGORIES from 'fixtures/MoonsamaCustomizerCategories';
 import { MOONSAMA_ATTR_TO_ID_MAP } from 'fixtures/MoonsamaAttributeToIdMap';
-import {MOONSAMA_CATEGORY_INCOMPATIBILITIES, MOONSAMA_PARENT_CHILDREN_OVERRIDES} from 'fixtures/MoonsamaItemRules';
+import { MOONSAMA_CATEGORY_INCOMPATIBILITIES, MOONSAMA_PARENT_CHILDREN_OVERRIDES } from 'fixtures/MoonsamaItemRules';
+import { useFetchUrlCallback } from 'hooks/useFetchUrlCallback/useFetchUrlCallback';
 
 
 enum AssetLocation {
@@ -96,6 +97,22 @@ type getCustomizationsResponse = {
   composite: boolean
 }
 
+export type CompositeMetadataType = {
+  image: string
+  name: string,
+  description: string,
+  external_url: string,
+  artist?: string
+  artist_url?: string
+  composite?: boolean
+  asset?: AssetIdentifier
+  layers?: string[]
+  attributes?: any[]
+  background_color?: string
+  animation_url?: string
+  youtube_url?: string
+}
+
 const getCustomization = async ({ chainId, assetAddress, assetId }: { chainId: number, assetAddress: string, assetId: string }, authData: AuthData) => {
   return await axios.request<getCustomizationsResponse>({
     method: 'get',
@@ -121,6 +138,57 @@ const attributeFunnel = (attributes: string[]): AssetIdentifier[] => {
   }).filter(x => !!x)
 
   return ret as AssetIdentifier[]
+}
+
+const findAssetItemGroup = (asset?: AssetIdentifier) => {
+  const ig = MOONSAMA_CUSTOMIZATION_ITEM_GROUPS.find(group => {
+    const baseCheck = group.assetAddress === asset?.assetAddress && group.chainId === asset?.chainId
+    if (baseCheck && group.assetIDRanges) {
+      for (let i = 0; i < group.assetIDRanges.length; i++) {
+        const range = group.assetIDRanges[i]
+        const id = Number.parseInt(asset.assetId)
+        return id >= range[0] && id <= range[1]
+      }
+    } else {
+      return false
+    }
+  })
+
+  return ig
+}
+
+const createLayerAssets = (parent: Asset, layers: CompositeMetadataType[]): Asset[] => {
+  const repeatMap: { [key: string]: boolean } = {}
+
+  const res = layers.map(layerMeta => {
+
+    if (layerMeta.asset?.assetAddress === parent.assetAddress && layerMeta?.asset?.assetId === parent.assetId) {
+      return undefined
+    }
+
+    const asset = layerMeta.asset
+    const ig = findAssetItemGroup(asset)
+
+    if (!ig || !asset) {
+      return undefined
+    }
+
+    return {
+      title: ig.title,
+      thumbnailUrl: `${ig.uriPrefix}customizer/${ig.chainId}/${ig.assetAddress}/${asset.assetId}${ig.uriPostfix}`,
+      fullSizeUrl: `${ig.uriPrefix}${ig.chainId}/${ig.assetAddress}/${asset.assetId}${ig.uriPostfix}`,
+      chainId: ig.chainId,
+      assetAddress: ig.assetAddress,
+      assetId: asset.assetId,
+      assetType: ig.assetType,
+      zIndex: ig.zIndex,
+      igName: ig.title,
+      location: AssetLocation.INCLUDED,
+      customizableTraitName: ig.title,
+      owned: true
+    }
+  }).filter(x => !!x)
+  return res as Asset[]
 }
 
 const transformBridgedAssets = (inGameAssets: Array<InGameItemWithStatic> | undefined) => {
@@ -177,7 +245,12 @@ const transformOnChainAssets = (onChainItems: Array<any> | undefined) => {
   }
 }
 
-const getAssetLocation = ({ chainId, assetAddress, assetId, assetType }: AssetIdentifier, ownedAssets: OwnedAssets): AssetLocation => {
+const getAssetLocation = ({ chainId, assetAddress, assetId, assetType, title }: AssetIdentifier & { title: string }, ownedAssets: OwnedAssets): AssetLocation => {
+
+  if (title === 'Ambience' || title === 'Foreground') {
+    return AssetLocation.INCLUDED
+  }
+
   for (let i = 0; i < ownedAssets.bridge.length; i++) {
     if (ownedAssets.bridge[i].chainId === chainId && ownedAssets.bridge[i].assetAddress === assetAddress && ownedAssets.bridge[i].assetId === assetId && ownedAssets.bridge[i].assetType === assetType) {
       return AssetLocation.BRIDGE;
@@ -191,6 +264,34 @@ const getAssetLocation = ({ chainId, assetAddress, assetId, assetType }: AssetId
   }
 
   return AssetLocation.NONE
+}
+
+const createAttributeAssets = (assetIdentifiers: AssetIdentifier[]): Asset[] => {
+  return assetIdentifiers.map(asset => {
+    const ig = MOONSAMA_CUSTOMIZATION_ITEM_GROUPS.find(item => {
+      return item.assetAddress === asset.assetAddress && asset.chainId === item.chainId
+    })
+
+    if (!ig) {
+      return undefined
+    }
+
+    return {
+      title: ig.title,
+      thumbnailUrl: `${ig.uriPrefix}customizer/${ig.chainId}/${ig.assetAddress}/${asset.assetId}${ig.uriPostfix}`,
+      fullSizeUrl: `${ig.uriPrefix}${ig.chainId}/${ig.assetAddress}/${asset.assetId}${ig.uriPostfix}`,
+      chainId: ig.chainId,
+      assetAddress: ig.assetAddress,
+      assetId: asset.assetId,
+      assetType: ig.assetType,
+      zIndex: ig.zIndex,
+      igName: ig.title,
+      location: AssetLocation.INCLUDED,
+      customizableTraitName: ig.title,
+      owned: true
+    }
+
+  }).filter(x => !!x) as Asset[]
 }
 
 const getAssetImages = (customizationCategory: CustomizationCategory, ownedAssets: OwnedAssets) => {
@@ -386,10 +487,10 @@ const Cell = ({ columnIndex, rowIndex, style, data }: GridChildComponentProps) =
     <Box style={style} sx={{ overflow: 'hidden', padding: isMobileViewport ? '0px' : '8px' }} onClick={() => data.onSelectAsset(assetIndex)}>
       <Box className={cx({ [gridItem]: true }, { [selected]: isSelected })}>
         {typeof customization === 'undefined' ? (
-            <img src={data.traitOptionsAssets[assetIndex].thumbnailUrl} style={{ borderRadius: '8px', backgroundColor: '#1B1B3A' }} width={isMobileViewport ? ((Math.floor(window.innerWidth / 3)) - 8) : '200'} height={isMobileViewport ? ((Math.floor(window.innerWidth / 3)) - 8) : '200'} alt="" />
-          ) : (
-            <ImageStack layers={customization.layers} />
-          )
+          <img src={data.traitOptionsAssets[assetIndex].thumbnailUrl} style={{ borderRadius: '8px', backgroundColor: '#1B1B3A' }} width={isMobileViewport ? ((Math.floor(window.innerWidth / 3)) - 8) : '200'} height={isMobileViewport ? ((Math.floor(window.innerWidth / 3)) - 8) : '200'} alt="" />
+        ) : (
+          <ImageStack layers={customization.layers} />
+        )
         }
       </Box>
     </Box>
@@ -405,6 +506,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   const theme = useTheme();
   const isMobileViewport = useMediaQuery(theme.breakpoints.down('sm'));
   const isLoggedIn = !!authData && !!authData.userProfile
+  const urlCb = useFetchUrlCallback()
 
   const [expanded, setExpanded] = useState<CustomizationCategory>(MOONSAMA_CUSTOMIZER_CATEGORIES[0]);
 
@@ -551,12 +653,48 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
       setExpanded(customizationOption);
     };
 
-  const selectAsset = (assetIndex: number) => {
+  const selectAsset = async (assetIndex: number) => {
+    // if asset is already selected, don't do anything
     if (expanded.equippableType === 'parent') {
-      setCurrentCustomization(applyAdditionalLayers({
-        parent: traitOptionsAssets[assetIndex],
-        children: currentCustomization.children
-      }))
+      if (
+        traitOptionsAssets[assetIndex].assetAddress !== currentCustomization.parent?.assetAddress
+        || traitOptionsAssets[assetIndex].assetId !== currentCustomization.parent?.assetId
+        || traitOptionsAssets[assetIndex].chainId !== currentCustomization.parent?.chainId
+      ) {
+        // check if asset has a pre-existing config and use that
+        //const preExistingConfig = fetchPreExistingConfig(existingConfig)
+
+        const asset = traitOptionsAssets[assetIndex]
+        if (asset) {
+          const meta = await urlCb(`${process.env.REACT_APP_BACKEND_API_URL}/composite/metadata/${asset.chainId}/${asset?.assetAddress}/${asset?.assetId}`, false) as CompositeMetadataType
+
+          if (!!meta) {
+            if (meta.composite) {
+              const layerObjects = await Promise.all((meta.layers ?? []).map((x) => urlCb(x, false)))
+              const layerChildAssets = createLayerAssets(asset, layerObjects as CompositeMetadataType[])
+
+              setCurrentCustomization(applyAdditionalLayers({
+                parent: asset,
+                children: layerChildAssets
+              }))
+            } else {
+              const attributes = attributeFunnel((meta.attributes as any[] ?? []).map(x => x?.value))
+
+              setCurrentCustomization(applyAdditionalLayers({
+                parent: asset,
+                children: createAttributeAssets(attributes)
+              }))
+            }
+          }
+        }
+
+        /*
+        setCurrentCustomization(applyAdditionalLayers({
+          parent: traitOptionsAssets[assetIndex],
+          children: currentCustomization.children
+        }))
+        */
+      }
     } else {
       const toReplace = currentCustomization.children.findIndex(asset => asset.customizableTraitName === expanded.title)
       const newChildren = [...currentCustomization.children]
@@ -591,10 +729,11 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
 
   // owns all the selected items
   let allowedToSave = true;
-  
+
   [currentCustomization.parent, ...currentCustomization.children].map(x => {
     const loc = x?.location.valueOf()
     if (loc === AssetLocation.NONE.valueOf() || loc === AssetLocation.WALLET.valueOf()) {
+      console.log('CANNOT SAVE', x?.title, x?.assetAddress, x?.assetId)
       allowedToSave = false;
     }
   })

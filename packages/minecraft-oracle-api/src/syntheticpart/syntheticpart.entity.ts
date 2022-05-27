@@ -1,5 +1,4 @@
-import { CompositeMetadataType } from '../compositeasset/types';
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { CompositeCollectionFragmentEntity } from '../compositecollectionfragment/compositecollectionfragment.entity';
 import { SyntheticItemEntity } from '../syntheticitem/syntheticitem.entity';
 
