@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useOnChainItemsWithCompositeMetaAndAssets } from 'hooks/multiverse/useOnChainItems';
-import { Box, Typography, Modal } from '@mui/material';
+import { Box, Typography, Modal, CircularProgress } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useClasses } from 'hooks';
@@ -519,6 +519,8 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   const [numCols, setNumCols] = useState(isMobileViewport ? 2 : 3);
   const [myCustomizations, setMyCustomizations] = useState<Array<any>>([]);
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
+  const [saveConfigModal, setShowSaveConfigModal] = useState<boolean>(false);
+  const [saveProgress, setSaveProgress] = useState<{inProgress?: boolean, errorMessage?: string}>({});
 
   const onChainItems = useOnChainItemsWithCompositeMetaAndAssets();
   const inGameItems = useInGameItemsWithCompositeMetaAndAssets();
@@ -793,7 +795,16 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
 
                   {isLoggedIn && allowedToSave && (<>
                     <button
-                      onClick={() => saveCustomization(currentCustomization, authData)}
+                      onClick={async () => {
+                        setSaveProgress({ inProgress: true, errorMessage: undefined })
+                        setShowSaveConfigModal(true)
+                        try{
+                          await saveCustomization(currentCustomization, authData)
+                          setSaveProgress({inProgress: false, errorMessage:  undefined})
+                        } catch (err) {
+                          setSaveProgress({inProgress: false, errorMessage: (err as any)?.toString()})
+                        }
+                      }}
                       type="button"
                       className={customizerActionButton}>
                       <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" fill="none" stroke="#fff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" className="icon icon-tabler icon-tabler-file-upload" viewBox="0 0 24 24">
@@ -908,6 +919,67 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
             fontWeight: '600',
             color: '#FFFFFF'
           }} onClick={() => setShowShareModal(false)}>Done</Box>
+        </Box>
+      </Modal>
+
+      <Modal
+        open={saveConfigModal}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={{
+          position: 'absolute' as 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 600,
+          bgcolor: 'background.paper',
+          border: '2px solid #000',
+          borderRadius: '8px',
+          color: '#333',
+          boxShadow: 24,
+          p: 4,
+        }}>
+          <Typography id="modal-modal-title" variant="h6" component="h2" sx={{ fontWeight: 600, textAlign: 'center' }}>
+            Your 2.0 Moonsama is being cooked
+          </Typography>
+          {saveProgress.inProgress && <CircularProgress/>}
+          {!saveProgress.inProgress && !saveProgress.errorMessage && <Typography id="modal-modal-description" sx={{ mt: 2, wordBreak: 'break-word', wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+            Done! You can access your config at
+          </Typography>
+          }
+          {!saveProgress.inProgress && !saveProgress.errorMessage && <Typography id="modal-modal-description" sx={{ mt: 2, wordBreak: 'break-word', wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+            {(new URL(`/moonsama/designer/${currentCustomization.parent?.assetAddress}/${currentCustomization.parent?.assetId}`, `${window.location.protocol}//${window.location.host}`)).href}
+          </Typography>
+          }
+
+          {!saveProgress.inProgress && saveProgress.errorMessage && <Typography id="modal-modal-description" sx={{ mt: 2, wordBreak: 'break-word', wordWrap: 'break-word', overflowWrap: 'break-word' , textAlign: 'center'}}>
+            {saveProgress.errorMessage}
+          </Typography>
+          }
+
+          {!saveProgress.inProgress && <Box sx={{
+            backgroundColor: '#0EB8A8',
+            textTransform: 'uppercase',
+            padding: '12px 18px',
+            fontFamily: 'Orbitron',
+            fontSize: '12px',
+            lineHeight: '16px',
+            letterSpacing: '0.032em',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            border: '1px solid transparent',
+            margin: '32px auto 0px auto',
+            width: '60px',
+            cursor: 'pointer',
+            borderRadius: '4px',
+            textAlign: 'center',
+            fontWeight: '600',
+            color: '#FFFFFF'
+          }} onClick={() => {
+            setShowSaveConfigModal(false)
+          }}>{!saveProgress?.errorMessage ? `Great!`: `Oops`}</Box>}
         </Box>
       </Modal>
     </Box >
