@@ -21,6 +21,9 @@ export class SyntheticPartEntity {
     @Column()
     assetAddress: string
 
+    @Column({ nullable: true })
+    name?: string
+
     @Column("text", { array: true, nullable: true })
     idRange?: string[];
 
