@@ -520,7 +520,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   const [myCustomizations, setMyCustomizations] = useState<Array<any>>([]);
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
   const [saveConfigModal, setShowSaveConfigModal] = useState<boolean>(false);
-  const [saveProgress, setSaveProgress] = useState<{inProgress?: boolean, errorMessage?: string}>({});
+  const [saveProgress, setSaveProgress] = useState<{ inProgress?: boolean, errorMessage?: string }>({});
 
   const onChainItems = useOnChainItemsWithCompositeMetaAndAssets();
   const inGameItems = useInGameItemsWithCompositeMetaAndAssets();
@@ -760,6 +760,18 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
     height: '80px',
   }));
 
+  const saveCustomizationCallback = async (openModal = true) => {
+    setSaveProgress({ inProgress: true, errorMessage: undefined })
+    if (openModal) {
+      setShowSaveConfigModal(true)
+    }
+    try {
+      await saveCustomization(currentCustomization, authData)
+      setSaveProgress({ inProgress: false, errorMessage: undefined })
+    } catch (err) {
+      setSaveProgress({ inProgress: false, errorMessage: (err as any)?.toString() })
+    }
+  }
 
   /**
    * TODO @Ishan: Fix issue with page height on larger viewports.
@@ -795,16 +807,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
 
                   {isLoggedIn && allowedToSave && (<>
                     <button
-                      onClick={async () => {
-                        setSaveProgress({ inProgress: true, errorMessage: undefined })
-                        setShowSaveConfigModal(true)
-                        try{
-                          await saveCustomization(currentCustomization, authData)
-                          setSaveProgress({inProgress: false, errorMessage:  undefined})
-                        } catch (err) {
-                          setSaveProgress({inProgress: false, errorMessage: (err as any)?.toString()})
-                        }
-                      }}
+                      onClick={() => saveCustomizationCallback()}
                       type="button"
                       className={customizerActionButton}>
                       <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" fill="none" stroke="#fff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" className="icon icon-tabler icon-tabler-file-upload" viewBox="0 0 24 24">
@@ -817,7 +820,10 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
                     </button>
 
                     <button
-                      onClick={() => shareCustomization(currentCustomization, authData, setShowShareModal)}
+                      onClick={() => {
+                        saveCustomizationCallback(false)
+                        shareCustomization(currentCustomization, setShowShareModal)
+                      }}
                       type="button"
                       className={customizerActionButton}>
                       <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-share" width="34" height="34" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#ffffff" fill="none" strokeLinecap="round" strokeLinejoin="round">
@@ -943,7 +949,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
           <Typography id="modal-modal-title" variant="h6" component="h2" sx={{ fontWeight: 600, textAlign: 'center' }}>
             Your 2.0 Moonsama is being cooked
           </Typography>
-          {saveProgress.inProgress && <Box display={'flex'} style={{ paddingTop: theme.spacing(2) }}><CircularProgress sx={{ alignSelf: 'center', textAlign: 'center'}}/></Box>}
+          {saveProgress.inProgress && <Box display={'flex'} style={{ paddingTop: theme.spacing(2) }}><CircularProgress sx={{ alignSelf: 'center', textAlign: 'center' }} /></Box>}
           {!saveProgress.inProgress && !saveProgress.errorMessage && <Typography id="modal-modal-description" sx={{ mt: 2, wordBreak: 'break-word', wordWrap: 'break-word', overflowWrap: 'break-word', textAlign: 'center' }}>
             Done! You can access your config at
           </Typography>
@@ -953,7 +959,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
           </Typography>
           }
 
-          {!saveProgress.inProgress && saveProgress.errorMessage && <Typography id="modal-modal-description" sx={{ mt: 2, wordBreak: 'break-word', wordWrap: 'break-word', overflowWrap: 'break-word' , textAlign: 'center'}}>
+          {!saveProgress.inProgress && saveProgress.errorMessage && <Typography id="modal-modal-description" sx={{ mt: 2, wordBreak: 'break-word', wordWrap: 'break-word', overflowWrap: 'break-word', textAlign: 'center' }}>
             {saveProgress.errorMessage}
           </Typography>
           }
@@ -979,7 +985,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
             color: '#FFFFFF'
           }} onClick={() => {
             setShowSaveConfigModal(false)
-          }}>{!saveProgress?.errorMessage ? `Great!`: `Oops`}</Box>}
+          }}>{!saveProgress?.errorMessage ? `Great!` : `Oops`}</Box>}
         </Box>
       </Modal>
     </Box >
