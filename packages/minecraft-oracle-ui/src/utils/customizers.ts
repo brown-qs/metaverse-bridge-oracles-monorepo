@@ -1,11 +1,11 @@
 import axios from 'axios';
 import type { CustomizationType } from 'pages/moonsama/designer/index'
-import type { asset as assetType } from 'pages/moonsama/designer/index'
+import type { Asset as AssetType } from 'pages/moonsama/designer/index'
 import type { AssetIdentifier } from 'pages/moonsama/designer/index'
 import type { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 
 
-const downloadAsImage = (layers: Array<assetType>) => {
+const downloadAsImage = (layers: Array<AssetType>) => {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   canvas.width = 1280;
@@ -19,7 +19,7 @@ const downloadAsImage = (layers: Array<assetType>) => {
     image.src = (new URL(layer.fullSizeUrl)).href;
 
     if (layer.zIndex === 0) {
-      samaNumber = layer.assetID
+      samaNumber = layer.assetId
     }
 
     image.addEventListener('load', e => {
@@ -40,15 +40,15 @@ const saveCustomization = async ({parent, children}: CustomizationType, authData
   const payload = {
     compositeChildren: children.map((childAsset: AssetIdentifier) => ({
       assetAddress: childAsset.assetAddress,
-      assetId: childAsset.assetID,
+      assetId: childAsset.assetId,
       assetType: childAsset.assetType,
-      chainId: childAsset.chainID,
+      chainId: childAsset.chainId,
     })),
     compositeParent: {
       assetAddress: parent?.assetAddress,
-      assetId: parent?.assetID,
+      assetId: parent?.assetId,
       assetType: parent?.assetType,
-      chainId: parent?.chainID,
+      chainId: parent?.chainId,
     }
   }
 
@@ -65,7 +65,7 @@ const shareCustomization = async ({parent, children}: CustomizationType, authDat
   if (navigator.share) {
     await navigator.share({
       title: 'Check out my customized Moonsama!',
-      url: (new URL(`/moonsama/designer/${parent?.assetAddress}/${parent?.assetID}`, `${window.location.protocol}//${window.location.host}`)).href
+      url: (new URL(`/moonsama/designer/${parent?.assetAddress}/${parent?.assetId}`, `${window.location.protocol}//${window.location.host}`)).href
     })
   } else {
     setShowShareModal(true)

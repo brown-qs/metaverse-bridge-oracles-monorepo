@@ -15,7 +15,6 @@ import { SaveCompositeConfigDto } from "./dtos/save.dto";
 import { AssetEntity } from "../asset/asset.entity";
 import { CompositeMetadataType } from "../compositeasset/types";
 import { checkIfIdIsRecognized } from "../utils/misc";
-import { fetchUrlCallback } from "../nftapi/nftapi.utils";
 import { SyntheticPartService } from "../syntheticpart/syntheticpart.service";
 import { SyntheticPartEntity } from "../syntheticpart/syntheticpart.entity";
 import { CompositeAssetEntity } from "../compositeasset/compositeasset.entity";
@@ -24,7 +23,7 @@ import S3 from 'aws-sdk/clients/s3';
 import sharp from "sharp";
 import { ProviderToken } from "../provider/token";
 import { fetchImageBufferCallback } from "./compositeapi.utils";
-import { string } from "fp-ts";
+
 
 export type CompositeEnrichedAssetEntity = AssetEntity & {
     zIndex: number
@@ -356,21 +355,16 @@ export class CompositeApiService {
 
         this.logger.debug(`createCompositeMetadata:: started for ${parentChainId}-${parentAddress}-${parentId}`, this.context)
 
-        // get parent asset metadata
-        // - fetch from saved DB
-        // - if not found in saved DB, then fetch from chain -> originalURI -> tokenURI
 
+        // sort by z index
         const sortedArray = [parentAsset, ...childrenAssets].sort((a, b) => a.zIndex - b.zIndex)
 
+        // get metadata layers and images ordered by z index
         const imglayers = sortedArray.map(x => `${x.uriPrefix}/${x.collectionFragment.collection.chainId}/${x.collectionFragment.collection.assetAddress.toLowerCase()}/${x.assetId}${x.uriPostfix}`)
         const layers = sortedArray.map(x => `${this.metadataPublicPath}/${x.collectionFragment.collection.chainId}/${x.collectionFragment.collection.assetAddress}/${x.assetId}`)
-        // TODO
-        // print composite image
 
         // mix attributes
         const parentOriginalMetadata = await this.getOriginalMetadata(parentAsset.collectionFragment.collection.chainId.toString(), parentAsset.collectionFragment.collection.assetAddress, parentAsset.assetId)
-
-        // get children metadata
 
         let attributes = [...parentOriginalMetadata?.attributes]
         const childrenMetas = await Promise.all(childrenAssets.map(async (x) => {
