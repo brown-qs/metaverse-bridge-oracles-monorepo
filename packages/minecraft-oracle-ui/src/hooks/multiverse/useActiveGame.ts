@@ -29,12 +29,7 @@ export function useActiveGame() {
             setItems(resp.data)
         } catch(e) {
             const err = e as AxiosError;
-
-            if(err?.response?.data.statusCode === 401){
-                window.localStorage.removeItem('authData');
-                setAuthData(undefined);
-            };
-            console.error('Error summoning. Try again later.')
+            console.error('Error fetching active game. Try again later.')
             setItems(false)
         }
     }, [blocknumber, jwt])

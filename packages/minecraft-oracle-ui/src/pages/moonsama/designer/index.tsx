@@ -578,7 +578,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   const applyAdditionalLayers = ({ parent, children }: CustomizationType): CustomizationType => {
     let hasEquippedMainHand = false, mainHandTrait, weaponHandTrait
 
-    if (parent === null) return { parent, children }
+    if ( !parent ) return { parent, children }
 
 
     // FIXME
@@ -778,7 +778,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
       <Box sx={{ flex: 1, width: '100%' }}>
         <Box className={customizerContainer}>
           <Box className={previewViewport}>
-            {currentCustomization.parent === null ? (
+            {!currentCustomization.parent ? (
               <Box className={startCue}>
                 Select a Moonsama from {isMobileViewport ? 'below' : 'the right'} to begin.
               </Box>
