@@ -24,7 +24,7 @@ export default function MoonsamaNav() {
   );
 
   const collapseLogo = useMediaQuery(
-    `(max-width: 1542px)`
+    `(max-width: 1440px)`
   );
   const [isDrawerOpened, setIsDrawerOpened] = useState<boolean>(false);
 
@@ -61,7 +61,6 @@ export default function MoonsamaNav() {
                 </Stack>
               ) : (
                 <Stack direction='row' alignItems="center" justifyContent="space-between">
-                  <div className={menuNavItemRegular}><ConnectedNetwork /></div>
                   <div className={menuNavItemRegular}><WalletAccount /></div>
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" style={{ flexShrink: 0 }} fill="none" stroke="#66C8FF" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" onClick={() => setIsDrawerOpened(true)}>
                     <path stroke="none" d="M0 0h24v24H0z"></path>
@@ -85,6 +84,7 @@ export default function MoonsamaNav() {
                       <div className={menuNavItemDrawer}><NavMenuItem href={'https://marketplace.moonsama.com'} label={`Marketplace`} external={true}/></div>
                       <div className={menuNavItemDrawer}><NavMenuItem href={'https://wiki.moonsama.com'} label={`Docs`} external={true}/></div>
                       <div className={menuNavItemDrawer}><CarnageStatus /></div>
+                      <div className={menuNavItemDrawer}><ConnectedNetwork /></div>
                       <div className={menuNavItemDrawer}><ServerAccount /></div>
                     </Box>
                   </Drawer>
