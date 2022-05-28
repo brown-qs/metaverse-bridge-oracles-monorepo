@@ -18,8 +18,6 @@ import { FixedSizeGrid, GridChildComponentProps } from 'react-window';
 import { styled } from '@mui/material/styles';
 import "@fontsource/orbitron/500.css";
 import { InGameItemWithStatic, useInGameItemsWithCompositeMetaAndAssets } from 'hooks/multiverse/useInGameItems'
-import SimpleBar from 'simplebar-react';
-import 'simplebar/dist/simplebar.min.css';
 import axios from 'axios';
 import type { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 import { downloadAsImage, saveCustomization, shareCustomization } from 'utils/customizers';
@@ -487,7 +485,7 @@ const Cell = ({ columnIndex, rowIndex, style, data }: GridChildComponentProps) =
     <Box style={style} sx={{ overflow: 'hidden', padding: isMobileViewport ? '0px' : '8px' }} onClick={() => data.onSelectAsset(assetIndex)}>
       <Box className={cx({ [gridItem]: true }, { [selected]: isSelected })}>
         {typeof customization === 'undefined' ? (
-          <img src={data.traitOptionsAssets[assetIndex].thumbnailUrl} style={{ borderRadius: '8px', backgroundColor: '#1B1B3A' }} width={isMobileViewport ? ((Math.floor(window.innerWidth / 3)) - 8) : '200'} height={isMobileViewport ? ((Math.floor(window.innerWidth / 3)) - 8) : '200'} alt="" />
+          <img src={data.traitOptionsAssets[assetIndex].thumbnailUrl} style={{ borderRadius: '8px', backgroundColor: '#1B1B3A' }} width={isMobileViewport ? ((Math.floor(window.innerWidth / 3)) - 12) : '200'} height={isMobileViewport ? ((Math.floor(window.innerWidth / 3)) - 12) : '200'} alt="" />
         ) : (
           <ImageStack layers={customization.layers} />
         )
@@ -576,7 +574,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   const applyAdditionalLayers = ({ parent, children }: CustomizationType): CustomizationType => {
     let hasEquippedMainHand = false, mainHandTrait, weaponHandTrait
 
-    if ( !parent ) return { parent, children }
+    if (!parent) return { parent, children }
 
 
     // FIXME
@@ -643,6 +641,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
     traitExplorer,
     customizerActionButton,
     startCue,
+    grid,
   } = useClasses(styles);
 
   const handleChange =
@@ -753,6 +752,9 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
     />
   ))(({ theme }) => ({
     height: '80px',
+    '::before': {
+      display: 'none'
+    }
   }));
 
   const saveCustomizationCallback = async (openModal = true) => {
@@ -840,9 +842,9 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
               const isExpanded = expanded.title === customizationOption.title
 
               return (
-                <Accordion TransitionProps={{ unmountOnExit: true }} sx={{ borderBottom: `${isExpanded ? '2px' : '0px'} solid` }} expanded={isExpanded} onChange={handleChange(customizationOption)}>
+                <Accordion TransitionProps={{ unmountOnExit: true }} sx={{ borderBottom: `${isExpanded ? '2px solid' : 'none'}` }} expanded={isExpanded} onChange={handleChange(customizationOption)}>
                   <AccordionSummary
-                    sx={{ opacity: isExpanded ? 1 : 0.6, background: `url(${customizationOption.background})`, backgroundSize: 'contain', backgroundRepeat: 'no-repeat' }}
+                    sx={{ opacity: isExpanded ? 1 : 0.6, background: `url(${customizationOption.background})`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat' }}
                     aria-controls={`${customizationOption.title}-content`}
                     expandIcon={<ExpandMoreIcon expanded={isExpanded} />}
                     id={`${customizationOption.title.replace(' ', '-').toLowerCase()}-header`}>
@@ -853,21 +855,20 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
                       </Typography>
                     </Box>
                   </AccordionSummary>
-                  <AccordionDetails sx={{ height: 360, overflowY: 'auto', padding: 0 }}>
-                    <SimpleBar style={{ maxHeight: 360 }}>
-                      <FixedSizeGrid
-                        columnCount={isMobileViewport ? 3 : 3}
-                        columnWidth={isMobileViewport ? Math.floor(window.innerWidth / 3) : 670 / 3}
-                        height={360}
-                        rowCount={Math.ceil(traitOptionsAssets.length / 3)}
-                        rowHeight={isMobileViewport ? Math.floor(window.innerWidth / 3) : 670 / 3}
-                        width={isMobileViewport ? window.innerWidth : 670}
-                        itemData={{ traitOptionsAssets, numCols, selectedAsset: getSelectedAsset(expanded), onSelectAsset: selectAsset, myCustomizations }}
-                        overscanRowCount={3}
-                      >
-                        {Cell}
-                      </FixedSizeGrid>
-                    </SimpleBar>
+                  <AccordionDetails sx={{ height: 360, overflowY: 'auto', padding: 0, position: 'relative' }}>
+                    <FixedSizeGrid
+                      columnCount={isMobileViewport ? 3 : 3}
+                      columnWidth={isMobileViewport ? (Math.floor(window.innerWidth / 3) - 6) : 670 / 3}
+                      height={360}
+                      rowCount={Math.ceil(traitOptionsAssets.length / 3)}
+                      rowHeight={isMobileViewport ? Math.floor(window.innerWidth / 3) : 670 / 3}
+                      width={isMobileViewport ? window.innerWidth : 670}
+                      itemData={{ traitOptionsAssets, numCols, selectedAsset: getSelectedAsset(expanded), onSelectAsset: selectAsset, myCustomizations }}
+                      overscanRowCount={3}
+                      className={grid}
+                    >
+                      {Cell}
+                    </FixedSizeGrid>
                   </AccordionDetails>
                 </Accordion>
               )
