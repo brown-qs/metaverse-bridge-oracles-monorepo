@@ -232,6 +232,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                             </Button>
                                                         </Tooltip>
                                                     )}
+                                                    {value.amount} {value.name}
                                                 </ListItemButton>
                                             </ListItem>
                                         );
@@ -272,11 +273,6 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                             </Tooltip> : <Tooltip title={'This item is burned into the metaverse forever. Cannot be taken back.'}>
                                                                 <div>This item is not exportable.</div>
                                                             </Tooltip>}
-                                                        </div>
-                                                    </div>
-                                                    <div className={centeredRow}>
-                                                        <div className={`${formValue} ${formValueTokenDetails}`}>
-                                                            {`Bridge balance: ${itemDetailDialogData.amount}`}
                                                         </div>
                                                     </div>
                                                     {itemDetailDialogData.exportable && <AssetChainDetails data={itemDetailDialogData} borderOn={false} />}
