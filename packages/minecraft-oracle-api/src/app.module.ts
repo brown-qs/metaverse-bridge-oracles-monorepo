@@ -72,6 +72,8 @@ import { SyntheticItemEntity } from './syntheticitem/syntheticitem.entity';
 import { SyntheticItemModule } from './syntheticitem/syntheticitem.module';
 import { ResourceInventoryEntity } from './resourceinventory/resourceinventory.entity';
 import { ResourceInventoryModule } from './resourceinventory/resourceinventory.module';
+import { ResourceInventoryOffsetEntity } from './resourceinventoryoffset/resourceinventoryoffset.entity';
+import { ResourceInventoryOffsetModule } from './resourceinventoryoffset/resourceinventoryoffset.module';
 
 
 @Module({
@@ -134,7 +136,8 @@ import { ResourceInventoryModule } from './resourceinventory/resourceinventory.m
                 CompositePartEntity,
                 SyntheticPartEntity,
                 SyntheticItemEntity,
-                ResourceInventoryEntity
+                ResourceInventoryEntity,
+                ResourceInventoryOffsetEntity
             ],
             synchronize: configService.get<boolean>('typeorm.synchronize'),
             logging: configService.get<boolean>('typeorm.logging'),
@@ -188,6 +191,7 @@ import { ResourceInventoryModule } from './resourceinventory/resourceinventory.m
     SyntheticPartModule,
     SyntheticItemModule,
     ResourceInventoryModule,
+    ResourceInventoryOffsetModule,
     CompositeApiModule
   ]
 })

@@ -45,6 +45,7 @@ import { PlayerGameItemsDto, QueryGameItemsDto, SetPlayerGameItemsDto } from '..
 import { GameService } from '../game/game.service';
 import { UserAssetFingerprint, UserAssetFingerprintsResult } from './dtos/fingerprint.dto';
 import { ResourceInventoryQueryResult, SetResourceInventoryItems } from './dtos/resourceinventory.dto';
+import { ResourceInventoryOffsetQueryResult, SetResourceInventoryOffsetItems } from './dtos/resourceinventoryoffset.dto';
 
 @ApiTags('game')
 @Controller('game')
@@ -572,12 +573,39 @@ export class GameApiController {
 
     @Put('resourceinventory/player/:trimmedUuid')
     @HttpCode(200)
-    @ApiOperation({ summary: 'Gets player resource inventory' })
+    @ApiOperation({ summary: 'Create player resource inventory' })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
     async setResourceInventoryPlayer(
         @Param('trimmedUuid') uuid: string,
         @Body() dto: SetResourceInventoryItems
+    ): Promise<boolean> {
+        const user = await this.userService.findOne({uuid}, { relations: ['assets'] })
+        const result = await this.gameApiService.setResourceInventoryPlayer(user, dto)
+        return result
+    }
+
+    @Get('resourceinventory/offset/player/:trimmedUuid')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Gets player resource inventory offset' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async getResourceInventoryOffsetPlayer(
+        @Param('trimmedUuid') uuid: string
+    ): Promise<ResourceInventoryQueryResult[]> {
+        const user = await this.userService.findOne({uuid}, { relations: ['assets'] })
+        const result = await this.gameApiService.getResourceInventoryOffsetPlayer(user)
+        return result
+    }
+
+    @Put('resourceinventory/offset/player/:trimmedUuid')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Create player resource inventory offset' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async setResourceInventoryOffsetPlayer(
+        @Param('trimmedUuid') uuid: string,
+        @Body() dto: SetResourceInventoryOffsetItems
     ): Promise<boolean> {
         const user = await this.userService.findOne({uuid}, { relations: ['assets'] })
         const result = await this.gameApiService.setResourceInventoryPlayer(user, dto)
