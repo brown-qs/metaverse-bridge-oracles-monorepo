@@ -16,6 +16,7 @@ import { ConfigService } from '@nestjs/config';
 import { BridgeAssetType } from '../common/enums/AssetType';
 import { ResourceInventoryService } from '../resourceinventory/resourceinventory.service';
 import { formatEther } from 'ethers/lib/utils';
+import { BigNumber } from 'ethers';
 
 @Injectable()
 export class ProfileApiService {
@@ -132,14 +133,14 @@ export class ProfileApiService {
         
 
         // TODO fixme
-        const bait = await this.resourceInventoryService.findOne({owner: user}, {relations: ['owner']})
+        const bait = await this.resourceInventoryService.findOne({owner: user}, {relations: ['owner', 'offset']})
         if (!!bait) {
             const baitAsset = userAssets.find(x => x.assetId === bait.assetId && x.collectionFragment.recognizedAssetType.valueOf() === RecognizedAssetType.RESOURCE.valueOf())
             
             if (!!baitAsset) {
                 assets.push(
                     {
-                        amount: formatEther(bait.amount),
+                        amount: formatEther(BigNumber.from(bait.amount).sub(bait.offset?.amount ?? '0')),
                         assetAddress: baitAsset.collectionFragment.collection.assetAddress.toLowerCase(),
                         assetType: baitAsset.collectionFragment.collection.assetType,
                         assetId: baitAsset.assetId,
