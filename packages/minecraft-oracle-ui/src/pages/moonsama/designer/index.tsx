@@ -25,6 +25,7 @@ import MOONSAMA_CUSTOMIZER_CATEGORIES from 'fixtures/MoonsamaCustomizerCategorie
 import { MOONSAMA_ATTR_TO_ID_MAP } from 'fixtures/MoonsamaAttributeToIdMap';
 import { MOONSAMA_CATEGORY_INCOMPATIBILITIES, MOONSAMA_PARENT_CHILDREN_OVERRIDES } from 'fixtures/MoonsamaItemRules';
 import { useFetchUrlCallback } from 'hooks/useFetchUrlCallback/useFetchUrlCallback';
+import { useParams } from 'react-router';
 
 
 enum AssetLocation {
@@ -112,11 +113,18 @@ export type CompositeMetadataType = {
 }
 
 const getCustomization = async ({ chainId, assetAddress, assetId }: { chainId: number, assetAddress: string, assetId: string }, authData: AuthData) => {
-  return await axios.request<getCustomizationsResponse>({
-    method: 'get',
-    url: `${process.env.REACT_APP_BACKEND_API_URL}/composite/metadata/${chainId}/${assetAddress}/${assetId}`,
-    headers: { Authorization: `Bearer ${authData?.jwt}` }
-  }).catch(console.error)
+  try {
+    const result = await axios.request<getCustomizationsResponse>({
+      method: 'get',
+      url: `${process.env.REACT_APP_BACKEND_API_URL}/composite/metadata/${chainId}/${assetAddress}/${assetId}`,
+      headers: { Authorization: `Bearer ${authData?.jwt}` }
+    })
+    return result
+  } catch (error) {
+    console.log(error)
+    return undefined
+  }
+  
 }
 
 const attributeFunnel = (attributes: string[]): AssetIdentifier[] => {
@@ -497,6 +505,8 @@ const Cell = ({ columnIndex, rowIndex, style, data }: GridChildComponentProps) =
 
 const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   const theme = useTheme();
+  const { assetAddress, assetId, chainId } = useParams<{assetAddress?: string, assetId?: string, chainId?: string}>();
+  console.log('PARAMS', {assetAddress, assetId, chainId})
   const isMobileViewport = useMediaQuery(theme.breakpoints.down('sm'));
   const isLoggedIn = !!authData && !!authData.userProfile
   const numCols = 3
@@ -559,13 +569,12 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
           chainId: ownedAssetsArray[i].chainId,
           assetAddress: ownedAssetsArray[i].assetAddress,
           assetId: ownedAssetsArray[i].assetId,
-        }, authData).catch(e => alert('error'));
+        }, authData)
 
-        if (typeof customizationResponse !== 'undefined' && customizationResponse.data.composite) {
+        if (!!customizationResponse && customizationResponse.data.composite) {
           customizations[`${ownedAssetsArray[i].assetAddress}-${ownedAssetsArray[i].assetId}`] = customizationResponse.data
         }
       }
-
       setMyCustomizations(customizations)
     }
 
@@ -573,6 +582,23 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
       getCustomizations()
     }
   }, [JSON.stringify(ownedAssets), authData?.jwt])
+
+  useEffect(() => {
+    if (!!assetAddress && !!assetId && !!chainId) {
+      const ae = assetAddress.toLowerCase()
+      try {
+        const cid = Number.parseInt(chainId)
+        const index = traitOptionsAssets.findIndex(x => {
+          return x.assetAddress === ae && x.assetId === assetId && x.chainId === cid
+        })
+        if (index >= 0) {
+          selectAsset(index)
+        }
+      } catch (err) {
+        console.error(err)
+      }
+    }
+  }, [assetAddress, assetId, chainId])
 
   const applyAdditionalLayers = ({ parent, children }: CustomizationType): CustomizationType => {
     let hasEquippedMainHand = false, mainHandTrait, weaponHandTrait
@@ -901,7 +927,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
             Share your customized Moonsama.
           </Typography>
           <Typography id="modal-modal-description" sx={{ mt: 2, wordBreak: 'break-word', wordWrap: 'break-word', overflowWrap: 'break-word' }}>
-            {(new URL(`/moonsama/designer/${currentCustomization.parent?.assetAddress}/${currentCustomization.parent?.assetId}`, `${window.location.protocol}//${window.location.host}`)).href}
+            {(new URL(`/moonsama/customizer/${currentCustomization.parent?.chainId}/${currentCustomization.parent?.assetAddress}/${currentCustomization.parent?.assetId}`, `${window.location.protocol}//${window.location.host}`)).href}
           </Typography>
 
           <Box sx={{
@@ -954,7 +980,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
           </Typography>
           }
           {!saveProgress.inProgress && !saveProgress.errorMessage && <Typography id="modal-modal-description" sx={{ mt: 2, wordBreak: 'break-word', wordWrap: 'break-word', overflowWrap: 'break-word' }}>
-            {(new URL(`/moonsama/designer/${currentCustomization.parent?.assetAddress}/${currentCustomization.parent?.assetId}`, `${window.location.protocol}//${window.location.host}`)).href}
+            {(new URL(`/moonsama/customzier/${currentCustomization.parent?.chainId}/${currentCustomization.parent?.assetAddress}/${currentCustomization.parent?.assetId}`, `${window.location.protocol}//${window.location.host}`)).href}
           </Typography>
           }
 
