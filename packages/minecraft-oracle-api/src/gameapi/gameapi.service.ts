@@ -55,8 +55,10 @@ import { adjustPower } from '../utils';
 import { allToSha256, allToSha3_256 } from '../crypto/hash';
 import { UserAssetFingerprint, UserAssetFingerprintsResult } from './dtos/fingerprint.dto';
 import { ResourceInventoryService } from '../resourceinventory/resourceinventory.service';
+import { ResourceInventoryOffsetService } from '../resourceinventoryoffset/resourceinventoryoffset.service';
 import { formatEther, parseEther } from 'ethers/lib/utils';
 import { ResourceInventoryQueryResult, SetResourceInventoryItems } from './dtos/resourceinventory.dto';
+import { ResourceInventoryOffsetQueryResult, SetResourceInventoryOffsetItems } from './dtos/resourceinventoryoffset.dto';
 import { CollectionFragmentService } from '../collectionfragment/collectionfragment.service';
 
 @Injectable()
@@ -86,6 +88,7 @@ export class GameApiService {
         private readonly playerGameItemService: PlayerGameItemService,
         private readonly gameScoreTypeService: GameScoreTypeService,
         private readonly resourceInventoryService: ResourceInventoryService,
+        private readonly resourceInventoryOffsetService: ResourceInventoryOffsetService,
         private readonly collectionFragmentService: CollectionFragmentService,
         private configService: ConfigService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
@@ -769,6 +772,27 @@ export class GameApiService {
                         this.logger.error(`Bank:: error updating user inventory ${newItem.inv}`, null, this.context)
                         this.logger.error(e, null, this.context)
                     }
+
+                    // FIXME event sourcing
+                    // FIXME hardcoding
+                    if (newItem.inv.material.name === 'FISH_SPECIMEN') {
+                        const _id = `${newItem.inv.owner.uuid}-1285-0x1b30a3b5744e733d8d2f19f0812e3f79152a8777-14`
+                        const offset = await this.resourceInventoryOffsetService.findOne({ id: _id }, { relations: ['resourceInventory', 'resourceInventory.owner'], loadEagerRelations: true })
+                        if (!offset) {
+                            const resourceInventory = await this.resourceInventoryService.findOne({ id: _id })
+                            resourceInventory.owner
+                            if (!!resourceInventory) {
+                                await this.resourceInventoryOffsetService.create({
+                                    id: _id,
+                                    amount: parseEther(newItem.inv.amount).toString(),
+                                    resourceInventory
+                                })
+                            }
+                        } else {
+                            const updatedAmount = parseEther(newItem.inv.amount).add(offset.amount).toString()
+                            await this.resourceInventoryOffsetService.update(_id, { amount: updatedAmount })
+                        }
+                    }
                 }))
 
                 return true
@@ -1179,7 +1203,7 @@ export class GameApiService {
     }
 
     async getAssetFingerprints(): Promise<UserAssetFingerprintsResult> {
-        const users = await this.userService.findMany({ where: { hasGame: true }, relations: ['assets', 'assets.collectionFragment', 'assets.collectionFragment.collection'], loadEagerRelations: true})
+        const users = await this.userService.findMany({ where: { hasGame: true }, relations: ['assets', 'assets.collectionFragment', 'assets.collectionFragment.collection'], loadEagerRelations: true })
         const results: UserAssetFingerprint[] = users.map(user => this.getAssetFingerprintForPlayer(user)).filter(x => !!x)
 
         return {
@@ -1188,7 +1212,7 @@ export class GameApiService {
     }
 
     async getResourceInventoryPlayer(user: UserEntity): Promise<ResourceInventoryQueryResult[]> {
-        const res = await this.resourceInventoryService.findMany({where: {owner: {uuid: user.uuid}}, relations: ['owner', 'collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true})
+        const res = await this.resourceInventoryService.findMany({ where: { owner: { uuid: user.uuid } }, relations: ['owner', 'collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
 
         return res.map(x => {
             return {
@@ -1202,17 +1226,51 @@ export class GameApiService {
     }
 
     async setResourceInventoryPlayer(user: UserEntity, dto: SetResourceInventoryItems): Promise<boolean> {
-        const res = await this.resourceInventoryService.findMany({where: {owner: {uuid: user.uuid}}, relations: ['owner']})
+        const res = await this.resourceInventoryService.findMany({ where: { owner: { uuid: user.uuid } }, relations: ['owner'] })
 
         await Promise.all(dto.items.map(async (x) => {
-            const id = ResourceInventoryService.calculateId({...x, uuid: user.uuid})
+            const id = ResourceInventoryService.calculateId({ ...x, uuid: user.uuid })
 
             await this.resourceInventoryService.create({
                 amount: parseEther(x.amount).toString(),
                 id,
                 owner: user,
                 assetId: x.assetId,
-                collectionFragment: await this.collectionFragmentService.findOne({collection: {assetAddress: x.assetAddress.toLowerCase(), chainId: x.chainId}}, {relations: ['collection']})
+                collectionFragment: await this.collectionFragmentService.findOne({ collection: { assetAddress: x.assetAddress.toLowerCase(), chainId: x.chainId } }, { relations: ['collection'] })
+            })
+        }))
+
+        return true
+    }
+
+    async getResourceInventoryOffsetPlayer(user: UserEntity): Promise<ResourceInventoryOffsetQueryResult[]> {
+        const res = await this.resourceInventoryOffsetService.findMany({ where: { owner: { uuid: user.uuid } }, relations: ['owner', 'resourceInventory', 'resourceInventory.collectionFragment', 'resourceInventory.collectionFragment.collection'], loadEagerRelations: true })
+
+        return res.map(x => {
+            return {
+                assetId: x.resourceInventory.assetId,
+                assetAddress: x.resourceInventory.collectionFragment.collection.assetAddress,
+                chainId: x.resourceInventory.collectionFragment.collection.chainId,
+                assetType: x.resourceInventory.collectionFragment.collection.assetType,
+                amount: formatEther(x.amount)
+            }
+        })
+    }
+
+    async setResourceInventoryOffsetPlayer(user: UserEntity, dto: SetResourceInventoryOffsetItems): Promise<boolean> {
+        await Promise.all(dto.items.map(async (x) => {
+            const id = ResourceInventoryOffsetService.calculateId({ ...x, uuid: user.uuid })
+
+            const resourceInventory = await this.resourceInventoryService.findOne({ id })
+
+            if (!resourceInventory) {
+                return undefined
+            }
+
+            await this.resourceInventoryOffsetService.create({
+                amount: parseEther(x.amount).toString(),
+                id,
+                resourceInventory
             })
         }))
 
