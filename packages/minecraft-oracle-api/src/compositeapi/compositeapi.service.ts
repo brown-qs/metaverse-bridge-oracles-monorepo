@@ -166,7 +166,7 @@ export class CompositeApiService {
 
             //x.collectionFragment.collection.chainId.toString(), x.collectionFragment.collection.assetAddress,
             // we fake this shit
-            return { collectionFragment: { collection: { chainId: childChainId, assetAddress: childAssetAddress } }, syntheticPart: syntheticAsset, assetId: childAssetId, zIndex: syntheticAsset.zIndex, uriPrefix: syntheticAsset.uriPrefix, uriPostfix: syntheticAsset.uriPostfix, synthetic: true } as unknown as CompositeEnrichedAssetEntity
+            return { collectionFragment: { collection: { chainId: childChainId, assetAddress: childAssetAddress } }, syntheticPart: syntheticAsset, assetId: childAssetId, zIndex: syntheticAsset.zIndex, uriPrefix: syntheticAsset.mediaUriPrefix, uriPostfix: syntheticAsset.mediaUriPostfix, synthetic: true } as unknown as CompositeEnrichedAssetEntity
 
 
         }))

@@ -2,10 +2,11 @@ import {
     IsBoolean,
     IsString
 } from 'class-validator';
-import { Column, Entity, Index, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import { Column, Entity, Index, ManyToOne, OneToMany, OneToOne, PrimaryColumn } from 'typeorm';
 import { UserEntity } from '../user/user.entity';
 import { CollectionFragmentEntity } from '../collectionfragment/collectionfragment.entity';
 import { AssetEntity } from '../asset/asset.entity';
+import { ResourceInventoryOffsetEntity } from '../resourceinventoryoffset/resourceinventoryoffset.entity';
 
 @Entity()
 @Index(['id'], {unique: true})
@@ -26,6 +27,9 @@ export class ResourceInventoryEntity {
     @Column()
     @IsBoolean()
     assetId: string;
+
+    @OneToOne(() => ResourceInventoryOffsetEntity, (offset) => offset.resourceInventory)
+    offset?: ResourceInventoryOffsetEntity;
 
     @ManyToOne(() => UserEntity, (user) => user.resourceInventoryItems)
     owner: UserEntity;

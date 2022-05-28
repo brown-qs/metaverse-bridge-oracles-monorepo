@@ -12,10 +12,10 @@ export class SyntheticPartEntity {
     zIndex: number
 
     @Column()
-    uriPrefix: string
+    mediaUriPrefix: string
 
     @Column()
-    uriPostfix: string
+    mediaUriPostfix: string
 
     @Column()
     assetAddress: string
