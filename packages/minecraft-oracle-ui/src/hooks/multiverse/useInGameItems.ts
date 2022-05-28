@@ -160,7 +160,7 @@ export function useInGameItems(trigger: string | undefined = undefined) {
 
 export function useInGameItemsWithCompositeMetaAndAssets(trigger: string | undefined = undefined) {
     const { authData, setAuthData } =  useAuth();
-    const blocknumber = useBlockNumber();
+    //const blocknumber = useBlockNumber();
     const urlCb = useFetchUrlCallback()
 
     console.log({authData})
@@ -248,11 +248,11 @@ export function useInGameItemsWithCompositeMetaAndAssets(trigger: string | undef
             setItems(resultSet)
         }
         
-    }, [blocknumber, jwt, trigger])
+    }, [jwt, trigger])
 
     useEffect(() => {
         getUserItems()
-    }, [blocknumber, jwt, trigger])
+    }, [jwt, trigger])
 
     return items
 }

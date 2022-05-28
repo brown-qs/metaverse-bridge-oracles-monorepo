@@ -41,11 +41,11 @@ export const Routing = () => {
                 ) : <HomePage />}
             </Route>
 
-            <Route exact path="/moonsama/customizer">
+            <Route path="/moonsama/customizer/:chainId/:assetAddress/:assetId">
                 <MoonsamaCharacterDesignerPage authData={authData} />
             </Route>
 
-            <Route exact path="/moonsama/customizer/:assetAddress/:assetID">
+            <Route exact path="/moonsama/customizer">
                 <MoonsamaCharacterDesignerPage authData={authData} />
             </Route>
         </Switch>

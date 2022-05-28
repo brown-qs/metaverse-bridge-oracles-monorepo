@@ -180,7 +180,7 @@ export const useOnChainItems = (trigger: string | undefined = undefined) => {
 
 export const useOnChainItemsWithCompositeMetaAndAssets = (trigger: string | undefined = undefined) => {
   const { chainId, account } = useActiveWeb3React();
-  const blocknumber = useBlockNumber()
+  //const blocknumber = useBlockNumber()
   const urlCb = useFetchUrlCallback()
   const rawCollections = useRawAssetsFromList()
 
@@ -311,12 +311,12 @@ export const useOnChainItemsWithCompositeMetaAndAssets = (trigger: string | unde
       setOnChainItems(result)
     }
   },
-    [chainId, blocknumber, account, trigger]
+    [chainId, account, trigger]
   );
 
   useEffect(() => {
     fetchUserCollection()
-  }, [chainId, blocknumber, account, trigger])
+  }, [chainId, account, trigger])
 
   return onChainItems;
 };
