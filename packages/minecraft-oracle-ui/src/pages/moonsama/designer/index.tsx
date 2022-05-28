@@ -175,8 +175,8 @@ const createLayerAssets = (parent: Asset, layers: CompositeMetadataType[]): Asse
 
     return {
       title: ig.title,
-      thumbnailUrl: `${ig.uriPrefix}customizer/${ig.chainId}/${ig.assetAddress}/${asset.assetId}${ig.uriPostfix}`,
-      fullSizeUrl: `${ig.uriPrefix}${ig.chainId}/${ig.assetAddress}/${asset.assetId}${ig.uriPostfix}`,
+      thumbnailUrl: `${ig.uriPrefix}/customizer/${ig.chainId}/${ig.assetAddress}/${asset.assetId}${ig.uriPostfix}`,
+      fullSizeUrl: `${ig.uriPrefix}/${ig.chainId}/${ig.assetAddress}/${asset.assetId}${ig.uriPostfix}`,
       chainId: ig.chainId,
       assetAddress: ig.assetAddress,
       assetId: asset.assetId,
@@ -278,8 +278,8 @@ const createAttributeAssets = (assetIdentifiers: AssetIdentifier[]): Asset[] => 
 
     return {
       title: ig.title,
-      thumbnailUrl: `${ig.uriPrefix}customizer/${ig.chainId}/${ig.assetAddress}/${asset.assetId}${ig.uriPostfix}`,
-      fullSizeUrl: `${ig.uriPrefix}${ig.chainId}/${ig.assetAddress}/${asset.assetId}${ig.uriPostfix}`,
+      thumbnailUrl: `${ig.uriPrefix}/customizer/${ig.chainId}/${ig.assetAddress}/${asset.assetId}${ig.uriPostfix}`,
+      fullSizeUrl: `${ig.uriPrefix}/${ig.chainId}/${ig.assetAddress}/${asset.assetId}${ig.uriPostfix}`,
       chainId: ig.chainId,
       assetAddress: ig.assetAddress,
       assetId: asset.assetId,
@@ -334,8 +334,8 @@ const getAssetImages = (customizationCategory: CustomizationCategory, ownedAsset
         if (bridgeOwnedAttribute) {
           attributeBridgeOptions.push({
             title: customizableTrait.title,
-            thumbnailUrl: `${customizableTrait.uriPrefix}customizer/${customizableTrait.chainId}/${customizableTrait.assetAddress}/${bridgeOwnedAttribute.assetId}${customizableTrait.uriPostfix}`,
-            fullSizeUrl: `${customizableTrait.uriPrefix}${customizableTrait.chainId}/${customizableTrait.assetAddress}/${bridgeOwnedAttribute.assetId}${customizableTrait.uriPostfix}`,
+            thumbnailUrl: `${customizableTrait.uriPrefix}/customizer/${customizableTrait.chainId}/${customizableTrait.assetAddress}/${bridgeOwnedAttribute.assetId}${customizableTrait.uriPostfix}`,
+            fullSizeUrl: `${customizableTrait.uriPrefix}/${customizableTrait.chainId}/${customizableTrait.assetAddress}/${bridgeOwnedAttribute.assetId}${customizableTrait.uriPostfix}`,
             chainId: customizableTrait.chainId,
             assetAddress: customizableTrait.assetAddress,
             assetId: bridgeOwnedAttribute.assetId,
@@ -362,8 +362,8 @@ const getAssetImages = (customizationCategory: CustomizationCategory, ownedAsset
         if (walletOwnedAttribute) {
           attributeWalletOptions.push({
             title: customizableTrait.title,
-            thumbnailUrl: `${customizableTrait.uriPrefix}customizer/${customizableTrait.chainId}/${customizableTrait.assetAddress}/${walletOwnedAttribute.assetId}${customizableTrait.uriPostfix}`,
-            fullSizeUrl: `${customizableTrait.uriPrefix}${customizableTrait.chainId}/${customizableTrait.assetAddress}/${walletOwnedAttribute.assetId}${customizableTrait.uriPostfix}`,
+            thumbnailUrl: `${customizableTrait.uriPrefix}/customizer/${customizableTrait.chainId}/${customizableTrait.assetAddress}/${walletOwnedAttribute.assetId}${customizableTrait.uriPostfix}`,
+            fullSizeUrl: `${customizableTrait.uriPrefix}/${customizableTrait.chainId}/${customizableTrait.assetAddress}/${walletOwnedAttribute.assetId}${customizableTrait.uriPostfix}`,
             chainId: customizableTrait.chainId,
             assetAddress: customizableTrait.assetAddress,
             assetId: walletOwnedAttribute.assetId,
@@ -381,8 +381,8 @@ const getAssetImages = (customizationCategory: CustomizationCategory, ownedAsset
         if (notOwnedAttribute) {
           attributeOptions.push({
             title: customizableTrait.title,
-            thumbnailUrl: `${customizableTrait.uriPrefix}customizer/${customizableTrait.chainId}/${customizableTrait.assetAddress}/${notOwnedAttribute.assetId}${customizableTrait.uriPostfix}`,
-            fullSizeUrl: `${customizableTrait.uriPrefix}${customizableTrait.chainId}/${customizableTrait.assetAddress}/${notOwnedAttribute.assetId}${customizableTrait.uriPostfix}`,
+            thumbnailUrl: `${customizableTrait.uriPrefix}/customizer/${customizableTrait.chainId}/${customizableTrait.assetAddress}/${notOwnedAttribute.assetId}${customizableTrait.uriPostfix}`,
+            fullSizeUrl: `${customizableTrait.uriPrefix}/${customizableTrait.chainId}/${customizableTrait.assetAddress}/${notOwnedAttribute.assetId}${customizableTrait.uriPostfix}`,
             chainId: customizableTrait.chainId,
             assetAddress: customizableTrait.assetAddress,
             assetId: notOwnedAttribute.assetId,
@@ -404,8 +404,8 @@ const getAssetImages = (customizationCategory: CustomizationCategory, ownedAsset
         for (let j = assetRange[0]; j <= assetRange[1]; j++) {
           const option = {
             title: customizableTrait.title,
-            thumbnailUrl: `${customizableTrait.uriPrefix}customizer/${customizableTrait.chainId}/${customizableTrait.assetAddress}/${j}${customizableTrait.uriPostfix}`,
-            fullSizeUrl: `${customizableTrait.uriPrefix}${customizableTrait.chainId}/${customizableTrait.assetAddress}/${j}${customizableTrait.uriPostfix}`,
+            thumbnailUrl: `${customizableTrait.uriPrefix}/customizer/${customizableTrait.chainId}/${customizableTrait.assetAddress}/${j}${customizableTrait.uriPostfix}`,
+            fullSizeUrl: `${customizableTrait.uriPrefix}/${customizableTrait.chainId}/${customizableTrait.assetAddress}/${j}${customizableTrait.uriPostfix}`,
             chainId: customizableTrait.chainId,
             assetAddress: customizableTrait.assetAddress,
             assetId: j.toString(),
@@ -522,7 +522,10 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
 
   console.log('BINNNNNGGGG')
 
-  const traitOptionsAssets = useMemo(() => getAssetImages(expanded, ownedAssets), [expanded, JSON.stringify(ownedAssets)]);
+  const traitOptionsAssets = useMemo(() => {
+    console.log('MEMOOO')
+    return getAssetImages(expanded, ownedAssets)
+  }, [expanded, JSON.stringify(ownedAssets)]);
 
   useEffect(() => setNumCols(isMobileViewport ? 2 : 3), [isMobileViewport]);
 
@@ -619,7 +622,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
       location: AssetLocation.INCLUDED,
       title: weaponHandTrait?.title,
       thumbnailUrl: '',
-      fullSizeUrl: `${weaponHandTrait?.uriPrefix}${weaponHandTrait?.chainId}/${weaponHandTrait?.assetAddress}/${weaponHandAssetID}${weaponHandTrait?.uriPostfix}`,
+      fullSizeUrl: `${weaponHandTrait?.uriPrefix}/${weaponHandTrait?.chainId}/${weaponHandTrait?.assetAddress}/${weaponHandAssetID}${weaponHandTrait?.uriPostfix}`,
       chainId: weaponHandTrait?.chainId,
       assetAddress: weaponHandTrait?.assetAddress,
       assetId: weaponHandAssetID,
