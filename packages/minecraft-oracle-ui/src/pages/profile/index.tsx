@@ -107,7 +107,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const hasImportedTicket = assetCounter.ticketNum > 0
     return (
         <Container className={profileContainer} maxWidth='xl'>
-            <Stack justifyContent="center" style={{ marginTop: '30px' }} sx={{minWidth: '90%'}} spacing={theme.spacing(4)}>
+            <Stack justifyContent="center" style={{ marginTop: '30px', minWidth: '90%', maxWidth: '90%'}} spacing={theme.spacing(4)}>
                 <Stack direction='row' display='flex' justifyContent='space-between' alignItems={'baseline'}>
                     <div style={{ fontSize: '38px', fontFamily: `VT323, 'arial'`, textAlign: 'left' }}>Available skins</div>
                     <div style={{ textAlign: 'right' }}>
@@ -125,8 +125,9 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                 </Stack>
                 <Stack
                     style={{ marginTop: '20px', background: '#111' }}
+                    maxWidth='100%'
                     direction={{ xs: 'row', sm: 'row' }}
-                    justifyContent="space-evenly"
+                    justifyContent="space-between"
                     alignItems="flex-start"
                     spacing={theme.spacing(4)}
                     overflow='auto'
@@ -142,7 +143,6 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                 direction='column'
                                 alignItems="center"
                                 justifyContent="space-between"
-                                height={'100%'}
                                 key={`${value?.assetAddress}-${value?.assetId}-${ind}`} //update key
                                 className={`${skinComponent} ${value.equipped ? 'selected' : ''}`}
                             >
