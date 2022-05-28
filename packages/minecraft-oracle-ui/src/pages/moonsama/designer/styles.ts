@@ -65,6 +65,27 @@ export const styles = (theme: Theme) => ({
     },
   },
 
+  grid: {
+    overflowX: 'hidden',
+    '&::-webkit-scrollbar-track': {
+      boxShadow: 'inset 0 0 6px rgba(0,0,0,0.1)',
+      backgroundColor: '#36333F',
+      borderRadius: '10px'
+    },
+
+
+    '&::-webkit-scrollbar': {
+      width: '10px',
+      backgroundColor: '#36333F'
+    },
+
+    '&::-webkit-scrollbar-thumb': {
+      borderRadius: '10px',
+      backgroundColor: '#36333F',
+      backgroundImage: 'linear-gradient(#423D66, #6D94A5, #423D66)'
+    }
+  },
+
   selected: {
     cursor: 'default',
     backgroundImage: 'linear-gradient(270deg, #F84AA7 2.78%, #FB7A6F 32.52%, #FFC914 62.72%, #0EEBA8 90.83%)',
