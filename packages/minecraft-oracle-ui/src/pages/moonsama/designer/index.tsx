@@ -501,6 +501,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   const theme = useTheme();
   const isMobileViewport = useMediaQuery(theme.breakpoints.down('sm'));
   const isLoggedIn = !!authData && !!authData.userProfile
+  const numCols = 3
   const urlCb = useFetchUrlCallback()
 
   const [expanded, setExpanded] = useState<CustomizationCategory>(MOONSAMA_CUSTOMIZER_CATEGORIES[0]);
@@ -511,7 +512,6 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   });
 
   const [ownedAssets, setOwnedAssets] = useState<OwnedAssets>({ bridge: [], wallet: [], walletAttributes: [], bridgeAttributes: [] })
-  const [numCols, setNumCols] = useState(isMobileViewport ? 2 : 3);
   const [myCustomizations, setMyCustomizations] = useState<Array<any>>([]);
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
   const [saveConfigModal, setShowSaveConfigModal] = useState<boolean>(false);
@@ -523,8 +523,6 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   console.log('BINNNNNGGGG')
 
   const traitOptionsAssets = useMemo(() => getAssetImages(expanded, ownedAssets), [expanded, JSON.stringify(ownedAssets)]);
-
-  useEffect(() => setNumCols(isMobileViewport ? 2 : 3), [isMobileViewport]);
 
   const onChainMoonsamas = onChainItems?.['Moonsama'] ?? []
   const onChainQQQs = onChainItems?.['???'] ?? []
