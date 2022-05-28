@@ -13,6 +13,7 @@ ARG REACT_APP_RPC_URL=https://rpc.api.moonriver.moonbeam.network
 ARG REACT_APP_SUBGRAPH_URL=https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/marketplacev2
 ARG REACT_APP_NFT_SUBGRAPH_URL=https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/nft
 ARG REACT_APP_BACKEND_API_URL=https://minecraft-metaverse-api.moonsama.com/api/v1
+ARG REACT_APP_COMPOSITE_MEDIA_URI_PREFIX=https://dev.static.moonsama.com
 
 RUN yarn
 
