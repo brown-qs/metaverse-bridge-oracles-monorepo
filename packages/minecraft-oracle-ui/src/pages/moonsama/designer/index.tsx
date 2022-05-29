@@ -124,7 +124,7 @@ const getCustomization = async ({ chainId, assetAddress, assetId }: { chainId: n
     console.log(error)
     return undefined
   }
-  
+
 }
 
 const attributeFunnel = (attributes: string[]): AssetIdentifier[] => {
@@ -143,7 +143,7 @@ const attributeFunnel = (attributes: string[]): AssetIdentifier[] => {
     return MOONSAMA_ATTR_TO_ID_MAP[attr]
   }).filter(x => !!x)
 
-  console.log('PRELOAD', 'attributeFunnel', {ret})
+  console.log('PRELOAD', 'attributeFunnel', { ret })
 
   return ret as AssetIdentifier[]
 }
@@ -179,7 +179,7 @@ const createLayerAssets = (parent: Asset, layers: CompositeMetadataType[]): Asse
       console.log('PRELOAD', 'createLayerAssets layer', 'it is the parent')
       return undefined
     }
-    
+
     const ig = findAssetItemGroup(asset)
 
     if (!ig) {
@@ -203,7 +203,7 @@ const createLayerAssets = (parent: Asset, layers: CompositeMetadataType[]): Asse
     }
   }).filter(x => !!x)
 
-  console.log('PRELOAD', 'createLayerAssets', {res})
+  console.log('PRELOAD', 'createLayerAssets', { res })
 
   return res as Asset[]
 }
@@ -516,8 +516,8 @@ const Cell = ({ columnIndex, rowIndex, style, data }: GridChildComponentProps) =
 
 const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   const theme = useTheme();
-  const { assetAddress, assetId, chainId } = useParams<{assetAddress?: string, assetId?: string, chainId?: string}>();
-  console.log('PARAMS', {assetAddress, assetId, chainId})
+  const { assetAddress, assetId, chainId } = useParams<{ assetAddress?: string, assetId?: string, chainId?: string }>();
+  console.log('PARAMS', { assetAddress, assetId, chainId })
   const isMobileViewport = useMediaQuery(theme.breakpoints.down('sm'));
   const isLoggedIn = !!authData && !!authData.userProfile
   const numCols = 3
@@ -597,7 +597,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   useEffect(() => {
     if (!!assetAddress && !!assetId && !!chainId) {
       const ae = assetAddress.toLowerCase()
-      console.log('PRELOAD', 'loading rom url', {assetAddress, assetId, chainId})
+      console.log('PRELOAD', 'loading rom url', { assetAddress, assetId, chainId })
       try {
         const cid = Number.parseInt(chainId)
         const index = traitOptionsAssets.findIndex(x => {
@@ -683,6 +683,8 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
     customizerActionButton,
     startCue,
     grid,
+    accordion,
+    accordionExpanded,
   } = useClasses(styles);
 
   const handleChange =
@@ -702,12 +704,12 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
         //const preExistingConfig = fetchPreExistingConfig(existingConfig)
 
         const asset = traitOptionsAssets[assetIndex]
-        console.log('PRELOAD', {asset})
+        console.log('PRELOAD', { asset })
         if (asset) {
           const meta = await urlCb(`${process.env.REACT_APP_BACKEND_API_URL}/composite/metadata/${asset.chainId}/${asset?.assetAddress}/${asset?.assetId}`, false) as CompositeMetadataType
 
           if (!!meta) {
-            console.log('PRELOAD', {meta})
+            console.log('PRELOAD', { meta })
             if (meta.composite) {
               const layerObjects = await Promise.all((meta.layers ?? []).map((x) => urlCb(x, false)))
               const layerChildAssets = createLayerAssets(asset, layerObjects as CompositeMetadataType[])
@@ -785,20 +787,22 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   const Accordion = styled((props: AccordionProps) => (
     <MuiAccordion disableGutters elevation={0} square {...props} />
   ))(({ theme }) => ({
-    borderImageSlice: 1,
-    borderImageSource: 'linear-gradient(270deg, #F84AA7 2.78%, #FB7A6F 32.52%, #FFC914 62.72%, #0EEBA8 90.83%)',
-    padding: 0
   }));
 
-  const AccordionSummary = styled((props: AccordionSummaryProps) => (
+  const AccordionSummary = styled((props: any) => (
     <MuiAccordionSummary
       {...props}
     />
-  ))(({ theme }) => ({
+  ))(({ theme, backgroundImage }) => ({
     height: '80px',
-    '::before': {
-      display: 'none'
-    }
+    background: `url(${backgroundImage})`,
+    backgroundSize: 'cover !important',
+    backgroundBlendMode: 'lighten',
+    backgroundRepeat: 'no-repeat',
+    '&:hover': {
+      opacity: 1,
+      background: `#313168 url(${backgroundImage})`,
+    },
   }));
 
   const saveCustomizationCallback = async (openModal = true) => {
@@ -886,11 +890,11 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
               const isExpanded = expanded.title === customizationOption.title
 
               return (
-                <Accordion TransitionProps={{ unmountOnExit: true }} sx={{ borderBottom: `${isExpanded ? '2px solid' : 'none'}` }} expanded={isExpanded} onChange={handleChange(customizationOption)}>
+                <Accordion className={cx({ [accordion]: true, [accordionExpanded]: isExpanded })} expanded={isExpanded} onChange={handleChange(customizationOption)}>
                   <AccordionSummary
-                    sx={{ opacity: isExpanded ? 1 : 0.6, background: `url(${customizationOption.background})`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat' }}
                     aria-controls={`${customizationOption.title}-content`}
                     expandIcon={<ExpandMoreIcon expanded={isExpanded} />}
+                    backgroundImage={customizationOption.background}
                     id={`${customizationOption.title.replace(' ', '-').toLowerCase()}-header`}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                       <img src={customizationOption.icon} width="32" height="32" style={{ flexShrink: 0 }} alt={`${customizationOption.title} Icon`} />
@@ -902,10 +906,10 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
                   <AccordionDetails sx={{ height: 360, overflowY: 'auto', padding: 0, position: 'relative' }}>
                     <FixedSizeGrid
                       columnCount={isMobileViewport ? 3 : 3}
-                      columnWidth={isMobileViewport ? (Math.floor(window.innerWidth / 3) - 6) : 670 / 3}
+                      columnWidth={isMobileViewport ? (Math.floor(window.innerWidth / 3) - 6) : (678 / 3) - 6}
                       height={360}
                       rowCount={Math.ceil(traitOptionsAssets.length / 3)}
-                      rowHeight={isMobileViewport ? Math.floor(window.innerWidth / 3) : 670 / 3}
+                      rowHeight={isMobileViewport ? (Math.floor(window.innerWidth / 3) - 6) : (678 / 3) - 6}
                       width={isMobileViewport ? window.innerWidth : 670}
                       itemData={{ traitOptionsAssets, numCols, selectedAsset: getSelectedAsset(expanded), onSelectAsset: selectAsset, myCustomizations }}
                       overscanRowCount={3}
@@ -913,6 +917,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
                     >
                       {Cell}
                     </FixedSizeGrid>
+                    <Box style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: '100%', backgroundImage: 'linear-gradient(rgba(0,0,0,0) 95%, rgba(0,0,0,0.5)', pointerEvents: 'none' }}></Box>
                   </AccordionDetails>
                 </Accordion>
               )
