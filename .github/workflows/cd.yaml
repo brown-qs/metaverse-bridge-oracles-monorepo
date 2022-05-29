@@ -1,4 +1,4 @@
-name: metaverse-monorepo-cd
+name: Build Backend Image
 on: 
   workflow_dispatch:
   push:
