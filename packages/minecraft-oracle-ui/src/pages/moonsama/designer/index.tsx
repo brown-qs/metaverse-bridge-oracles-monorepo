@@ -143,6 +143,8 @@ const attributeFunnel = (attributes: string[]): AssetIdentifier[] => {
     return MOONSAMA_ATTR_TO_ID_MAP[attr]
   }).filter(x => !!x)
 
+  console.log('PRELOAD', 'attributeFunnel', {ret})
+
   return ret as AssetIdentifier[]
 }
 
@@ -164,18 +166,24 @@ const findAssetItemGroup = (asset?: AssetIdentifier) => {
 }
 
 const createLayerAssets = (parent: Asset, layers: CompositeMetadataType[]): Asset[] => {
-  const repeatMap: { [key: string]: boolean } = {}
-
   const res = layers.map(layerMeta => {
 
-    if (layerMeta.asset?.assetAddress === parent.assetAddress && layerMeta?.asset?.assetId === parent.assetId) {
+    const asset = layerMeta.asset
+
+    if (!asset) {
+      console.log('PRELOAD', 'createLayerAssets layer', 'asset null')
       return undefined
     }
 
-    const asset = layerMeta.asset
+    if (asset.assetAddress === parent.assetAddress && asset.assetId === parent.assetId) {
+      console.log('PRELOAD', 'createLayerAssets layer', 'it is the parent')
+      return undefined
+    }
+    
     const ig = findAssetItemGroup(asset)
 
-    if (!ig || !asset) {
+    if (!ig) {
+      console.log('PRELOAD', 'createLayerAssets layer', 'asset item group not found')
       return undefined
     }
 
@@ -194,6 +202,9 @@ const createLayerAssets = (parent: Asset, layers: CompositeMetadataType[]): Asse
       owned: true
     }
   }).filter(x => !!x)
+
+  console.log('PRELOAD', 'createLayerAssets', {res})
+
   return res as Asset[]
 }
 
@@ -586,6 +597,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   useEffect(() => {
     if (!!assetAddress && !!assetId && !!chainId) {
       const ae = assetAddress.toLowerCase()
+      console.log('PRELOAD', 'loading rom url', {assetAddress, assetId, chainId})
       try {
         const cid = Number.parseInt(chainId)
         const index = traitOptionsAssets.findIndex(x => {
@@ -690,10 +702,12 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
         //const preExistingConfig = fetchPreExistingConfig(existingConfig)
 
         const asset = traitOptionsAssets[assetIndex]
+        console.log('PRELOAD', {asset})
         if (asset) {
           const meta = await urlCb(`${process.env.REACT_APP_BACKEND_API_URL}/composite/metadata/${asset.chainId}/${asset?.assetAddress}/${asset?.assetId}`, false) as CompositeMetadataType
 
           if (!!meta) {
+            console.log('PRELOAD', {meta})
             if (meta.composite) {
               const layerObjects = await Promise.all((meta.layers ?? []).map((x) => urlCb(x, false)))
               const layerChildAssets = createLayerAssets(asset, layerObjects as CompositeMetadataType[])
@@ -703,7 +717,8 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
                 children: layerChildAssets
               }))
             } else {
-              const attributes = attributeFunnel((meta.attributes as any[] ?? []).map(x => x?.value))
+              console.log('PRELOAD', 'meta is null')
+              const attributes = attributeFunnel((meta?.attributes as any[] ?? []).map(x => x?.value))
 
               setCurrentCustomization(applyAdditionalLayers({
                 parent: asset,
