@@ -28,7 +28,7 @@ export default function CarnageStatus() {
       cursor: 'pointer',
       borderRadius: '4px',
       '&:hover': {
-        border: '1px solid #0EEBA8',
+        border: `1px solid ${errorState ? '#FFC914' : '#0EEBA8'}`,
       }
     }
   })
