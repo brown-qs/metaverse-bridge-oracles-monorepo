@@ -94,6 +94,39 @@ export const styles = (theme: Theme) => ({
     },
   },
 
+  accordion: {
+    padding: 0,
+
+    '&:before': {
+      opacity: 0
+    },
+
+    '&:after': {
+      position: 'absolute',
+      left: 0,
+      bottom: '-2px',
+      right: 0,
+      height: '2px',
+      content: '""',
+      opacity: 0,
+      backgroundImage: 'linear-gradient(270deg, #F84AA7 2.78%, #FB7A6F 32.52%, #FFC914 62.72%, #0EEBA8 90.83%)',
+      transition: 'opacity 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
+      zIndex: 999,
+    },
+
+    '&:hover': {
+      '&:after': {
+        opacity: 1
+      }
+    }
+  },
+
+  accordionExpanded: {
+    '&:after': {
+      opacity: 1
+    }
+  },
+
   customizerActionButton: {
     padding: '12px',
     marginLeft: '8px',
