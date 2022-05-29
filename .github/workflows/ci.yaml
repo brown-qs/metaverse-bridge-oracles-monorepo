@@ -1,4 +1,4 @@
-name: metaverse-monorepo-ci
+name: CI Tests
 on: pull_request
 jobs:
   buid-image:
@@ -7,5 +7,3 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Build Image
-        run: docker build -t moonsama/bridge:$(git rev-parse --short HEAD)-$(date +%F-%H-%M) .
