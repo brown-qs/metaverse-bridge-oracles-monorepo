@@ -60,6 +60,8 @@ import { formatEther, parseEther } from 'ethers/lib/utils';
 import { ResourceInventoryQueryResult, SetResourceInventoryItems } from './dtos/resourceinventory.dto';
 import { ResourceInventoryOffsetQueryResult, SetResourceInventoryOffsetItems } from './dtos/resourceinventoryoffset.dto';
 import { CollectionFragmentService } from '../collectionfragment/collectionfragment.service';
+import { BigNumber } from 'ethers';
+import { GetFungibleBalancesResultDto } from './dtos/fungiblebalances.dto';
 
 @Injectable()
 export class GameApiService {
@@ -1275,5 +1277,25 @@ export class GameApiService {
         }))
 
         return true
+    }
+
+    async getFungibleBalancesForPlayer(user: UserEntity): Promise<GetFungibleBalancesResultDto> {
+
+        const res = await this.resourceInventoryService.findMany({ where: { owner: { uuid: user.uuid } }, relations: ['owner', 'offset', 'collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
+
+        if (!res) {
+            return {balances: [], uuid: user.uuid}
+        }
+        const results = await Promise.all(res.map(async (x) => {
+            return {
+                assetId: x.assetId,
+                assetAddress: x.collectionFragment.collection.assetAddress,
+                chainId: x.collectionFragment.collection.chainId,
+                assetType: x.collectionFragment.collection.assetType,
+                amount: x.offset?.amount ? formatEther(BigNumber.from(x.amount).sub(x.offset?.amount ?? '0')) : formatEther(x.amount)
+            }
+        }))
+
+        return {balances: results, uuid: user.uuid}
     }
 }

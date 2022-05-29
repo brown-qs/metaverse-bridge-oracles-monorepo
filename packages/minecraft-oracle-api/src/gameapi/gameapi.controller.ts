@@ -45,7 +45,8 @@ import { PlayerGameItemsDto, QueryGameItemsDto, SetPlayerGameItemsDto } from '..
 import { GameService } from '../game/game.service';
 import { UserAssetFingerprint, UserAssetFingerprintsResult } from './dtos/fingerprint.dto';
 import { ResourceInventoryQueryResult, SetResourceInventoryItems } from './dtos/resourceinventory.dto';
-import { ResourceInventoryOffsetQueryResult, SetResourceInventoryOffsetItems } from './dtos/resourceinventoryoffset.dto';
+import { SetResourceInventoryOffsetItems } from './dtos/resourceinventoryoffset.dto';
+import { GetFungibleBalancesResultDto } from './dtos/fungiblebalances.dto';
 
 @ApiTags('game')
 @Controller('game')
@@ -609,6 +610,19 @@ export class GameApiController {
     ): Promise<boolean> {
         const user = await this.userService.findOne({uuid}, { relations: ['assets'] })
         const result = await this.gameApiService.setResourceInventoryPlayer(user, dto)
+        return result
+    }
+
+    @Get('fungible/balances/player/:trimmedUuid')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Gets player enraptured/imported fungible balances with offsets applied' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async getFungibleBalancesForPlayer(
+        @Param('trimmedUuid') uuid: string
+    ): Promise<GetFungibleBalancesResultDto> {
+        const user = await this.userService.findOne({uuid}, { relations: ['assets'] })
+        const result = await this.gameApiService.getFungibleBalancesForPlayer(user)
         return result
     }
 }
