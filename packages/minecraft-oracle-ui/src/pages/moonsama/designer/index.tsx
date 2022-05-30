@@ -166,6 +166,7 @@ const findAssetItemGroup = (asset?: AssetIdentifier) => {
 }
 
 const createLayerAssets = (parent: Asset, layers: CompositeMetadataType[]): Asset[] => {
+  console.log('PRELOAD', 'createLayerAssets layers', {layers})
   const res = layers.map(layerMeta => {
 
     const asset = layerMeta.asset
@@ -711,7 +712,10 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
           if (!!meta) {
             console.log('PRELOAD', { meta })
             if (meta.composite) {
-              const layerObjects = await Promise.all((meta.layers ?? []).map((x) => urlCb(x, false)))
+              const layerObjects = await Promise.all((meta.layers ?? []).map(async (x) => {
+                const meta = await urlCb(x, false)
+                return meta
+              }))
               const layerChildAssets = createLayerAssets(asset, layerObjects as CompositeMetadataType[])
 
               setCurrentCustomization(applyAdditionalLayers({
