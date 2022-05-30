@@ -400,8 +400,26 @@ export module MojangAPI {
     }
 
     export async function getProfile(token: string) {
-        let response = await HttpGet_BEARER("https://api.minecraftservices.com/minecraft/profile", token);
-        let jsonResponse: MCProfileResponse = JSON.parse(response);
+        let outboundProxy;
+        if ( process.env.OUTBOUND_PROXY ){
+            outboundProxy = {
+                host: process.env.OUTBOUND_PROXY_HOST,
+                port: process.env.OUTBOUND_PROXY_PORT,
+                auth: {
+                        username: process.env.OUTBOUND_PROXY_USERNAME,
+                        password: process.env.OUTBOUND_PROXY_PASSWORD
+                }
+            }
+        }
+        let response = await axios({
+            url: 'https://api.minecraftservices.com/minecraft/profile', 
+            method: 'get',
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            proxy: outboundProxy
+        })
+        let jsonResponse: MCProfileResponse = response.data;
         return jsonResponse;
     }
 
