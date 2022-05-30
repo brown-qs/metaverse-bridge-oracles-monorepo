@@ -8,11 +8,8 @@ import { cx } from '@emotion/css';
 import { styles } from './styles';
 import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
-import MuiAccordionSummary, {
-  AccordionSummaryProps,
-} from '@mui/material/AccordionSummary';
-import MOONSAMA_CUSTOMIZATION_ITEM_GROUPS from 'fixtures/MoonsamaCustomizerItemGroups'
-import birdToHand from 'fixtures/MoonsamaBirdHandPairing.json'
+import MuiAccordionSummary from '@mui/material/AccordionSummary';
+import MOONSAMA_CUSTOMIZATION_ITEM_GROUPS from './fixtures/CustomizerItemGroups'
 import ImageStack from 'components/ImageStacks/Moonsama2';
 import { FixedSizeGrid, GridChildComponentProps } from 'react-window';
 import { styled } from '@mui/material/styles';
@@ -21,9 +18,9 @@ import { InGameItemWithStatic, useInGameItemsWithCompositeMetaAndAssets } from '
 import axios from 'axios';
 import type { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 import { downloadAsImage, saveCustomization, shareCustomization } from 'utils/customizers';
-import MOONSAMA_CUSTOMIZER_CATEGORIES from 'fixtures/MoonsamaCustomizerCategories';
-import { MOONSAMA_ATTR_TO_ID_MAP } from 'fixtures/MoonsamaAttributeToIdMap';
-import { MOONSAMA_CATEGORY_INCOMPATIBILITIES, MOONSAMA_PARENT_CHILDREN_OVERRIDES } from 'fixtures/MoonsamaItemRules';
+import MOONSAMA_CUSTOMIZER_CATEGORIES from './fixtures/CustomizerCategories';
+import { MOONSAMA_ATTR_TO_ID_MAP } from './fixtures/AttributeToAssetMap';
+import { ADDITIONAL_PARENT_LAYERS_CONFIG, ADDITIONAL_CHILD_LAYERS_CONFIG, MOONSAMA_CATEGORY_INCOMPATIBILITIES } from './fixtures/ItemRules';
 import { useFetchUrlCallback } from 'hooks/useFetchUrlCallback/useFetchUrlCallback';
 import { useParams } from 'react-router';
 
@@ -70,7 +67,9 @@ type Asset = {
   assetType: string,
   zIndex: number,
   customizableTraitName: string,
-  location: AssetLocation
+  location: AssetLocation,
+  synthetic: boolean,
+  dependant: boolean
 }
 
 type AssetIdentifier = {
@@ -148,7 +147,7 @@ const attributeFunnel = (attributes: string[]): AssetIdentifier[] => {
   return ret as AssetIdentifier[]
 }
 
-const findAssetItemGroup = (asset?: AssetIdentifier) => {
+const findAssetItemGroup = (asset?: { assetAddress: string, assetId: string, chainId: number }) => {
   const ig = MOONSAMA_CUSTOMIZATION_ITEM_GROUPS.find(group => {
     const baseCheck = group.assetAddress === asset?.assetAddress && group.chainId === asset?.chainId
     if (baseCheck && group.assetIDRanges) {
@@ -166,7 +165,7 @@ const findAssetItemGroup = (asset?: AssetIdentifier) => {
 }
 
 const createLayerAssets = (parent: Asset, layers: CompositeMetadataType[]): Asset[] => {
-  console.log('PRELOAD', 'createLayerAssets layers', {layers})
+  console.log('PRELOAD', 'createLayerAssets layers', { layers })
   const res = layers.map(layerMeta => {
 
     const asset = layerMeta.asset
@@ -200,7 +199,9 @@ const createLayerAssets = (parent: Asset, layers: CompositeMetadataType[]): Asse
       igName: ig.title,
       location: AssetLocation.INCLUDED,
       customizableTraitName: ig.title,
-      owned: true
+      owned: true,
+      synthetic: ig.synthetic,
+      dependant: ig.dependant
     }
   }).filter(x => !!x)
 
@@ -306,13 +307,15 @@ const createAttributeAssets = (assetIdentifiers: AssetIdentifier[]): Asset[] => 
       igName: ig.title,
       location: AssetLocation.INCLUDED,
       customizableTraitName: ig.title,
-      owned: true
+      owned: true,
+      synthetic: ig.synthetic,
+      dependant: ig.dependant
     }
 
   }).filter(x => !!x) as Asset[]
 }
 
-const getAssetImages = (customizationCategory: CustomizationCategory, ownedAssets: OwnedAssets) => {
+const getAssetImages = (customizationCategory: CustomizationCategory, ownedAssets: OwnedAssets): Asset[] => {
   const options = []
   const bridgeOptions = []
   const walletOptions = []
@@ -361,7 +364,9 @@ const getAssetImages = (customizationCategory: CustomizationCategory, ownedAsset
             zIndex: customizableTrait.zIndex,
             customizableTraitName: customizableTrait.title,
             location: AssetLocation.BRIDGE,
-            owned: true
+            owned: true,
+            synthetic: customizableTrait.synthetic,
+            dependant: customizableTrait.dependant
           })
           continue
         }
@@ -389,7 +394,9 @@ const getAssetImages = (customizationCategory: CustomizationCategory, ownedAsset
             zIndex: customizableTrait.zIndex,
             customizableTraitName: customizableTrait.title,
             location: AssetLocation.WALLET,
-            owned: true
+            owned: true,
+            synthetic: customizableTrait.synthetic,
+            dependant: customizableTrait.dependant
           })
           continue
         }
@@ -409,7 +416,9 @@ const getAssetImages = (customizationCategory: CustomizationCategory, ownedAsset
             customizableTraitName: customizableTrait.title,
             location: AssetLocation.WALLET,
             owned: true,
-            customization: false
+            customization: false,
+            synthetic: customizableTrait.synthetic,
+            dependant: customizableTrait.dependant
           })
         }
       }
@@ -430,7 +439,9 @@ const getAssetImages = (customizationCategory: CustomizationCategory, ownedAsset
             assetType: customizableTrait.assetType,
             zIndex: customizableTrait.zIndex,
             customizableTraitName: customizableTrait.title,
-            location: AssetLocation.NONE
+            location: AssetLocation.NONE,
+            synthetic: customizableTrait.synthetic,
+            dependant: customizableTrait.dependant
           }
 
           option.location = getAssetLocation(option, ownedAssets)
@@ -532,7 +543,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   });
 
   const [ownedAssets, setOwnedAssets] = useState<OwnedAssets>({ bridge: [], wallet: [], walletAttributes: [], bridgeAttributes: [] })
-  const [myCustomizations, setMyCustomizations] = useState<Array<any>>([]);
+  const [myCustomizations, setMyCustomizations] = useState<Array<Asset>>([]);
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
   const [saveConfigModal, setShowSaveConfigModal] = useState<boolean>(false);
   const [saveProgress, setSaveProgress] = useState<{ inProgress?: boolean, errorMessage?: string }>({});
@@ -614,64 +625,121 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   }, [assetAddress, assetId, chainId])
 
   const applyAdditionalLayers = ({ parent, children }: CustomizationType): CustomizationType => {
-    let hasEquippedMainHand = false, mainHandTrait, weaponHandTrait
+    console.log('SYNTHETIC ADDITIONAL RUN')
 
     if (!parent) return { parent, children }
 
+    const newChildren: Asset[] = []
 
-    // FIXME
-    // this is fine for now because no attribute traits are main hand traits
-    for (let i = 0; i < MOONSAMA_CUSTOMIZATION_ITEM_GROUPS.length; i++) {
-      if (MOONSAMA_CUSTOMIZATION_ITEM_GROUPS[i].title === 'Main Hand') {
-        mainHandTrait = MOONSAMA_CUSTOMIZATION_ITEM_GROUPS[i];
-      } else if (MOONSAMA_CUSTOMIZATION_ITEM_GROUPS[i].title === 'Weapon Hand') {
-        weaponHandTrait = MOONSAMA_CUSTOMIZATION_ITEM_GROUPS[i]
-      }
-    }
-
-    if (!mainHandTrait || !weaponHandTrait) return { parent, children }
-
-    for (let i = 0; i < children.length; i++) {
-      if (hasEquippedMainHand) break
-
-      const assetIdRanges = mainHandTrait?.assetIDRanges ?? []
-      if (children[i].assetAddress === mainHandTrait.assetAddress) {
-        for (let j = 0; j < assetIdRanges?.length; j++) {
-          if (parseInt(children[i].assetId) >= assetIdRanges[j][0] && parseInt(children[i].assetId) <= assetIdRanges[j][1]) {
-            hasEquippedMainHand = true
-            break
+    const adjustments = (layer: Asset, isParent = false) => {
+      // check requirements
+      // THIS IS HARDCODING
+      if (isParent) {
+        console.log('ADJUSTMENTS parent found')
+          const mainHand = children.find(x => x.title === 'Main Hand')
+          if (!mainHand) {
+            return
           }
+          const layerRequirement = ADDITIONAL_PARENT_LAYERS_CONFIG['requirement']['Main Hand']
+          const requiredAssetId = layerRequirement.map(parent.assetId)
+          
+          const group = findAssetItemGroup({
+            chainId: layerRequirement.otherChainId,
+            assetAddress: layerRequirement.otherAddress,
+            assetId: requiredAssetId,
+          })
+          console.log('ADJUSTMENTS parent', {requiredAssetId, group})
+          if (!!group) {
+            console.log('ADJUSTMENT parent group found, child being added')
+            newChildren.push({
+              chainId: group.chainId,
+              assetAddress: group.assetAddress,
+              assetId: requiredAssetId,
+              assetType: group.assetType,
+              customizableTraitName: group.title,
+              fullSizeUrl: `${group?.uriPrefix}/${group?.chainId}/${group?.assetAddress}/${requiredAssetId}${group?.uriPostfix}`,
+              location: AssetLocation.INCLUDED,
+              thumbnailUrl: '',
+              title: group.title,
+              zIndex: group.zIndex,
+              synthetic: group.synthetic,
+              dependant: group.dependant
+            })
+          }
+          return
+      }
+
+      const layerRequirement = ADDITIONAL_CHILD_LAYERS_CONFIG['requirement'][layer.title]
+      if (!!layerRequirement) {
+        const requiredAssetId = layerRequirement.map(layer.assetId)
+        console.log('ADJUSTMENTS child', layer.assetId, requiredAssetId)
+        if (!!requiredAssetId) {
+          const requiredAddress = layerRequirement.otherAddress
+          const requiredChanId = layerRequirement.otherChainId
+          let checkSuccess = false
+          // check if requirement is met
+          for (let j = 0; j < children.length; j++) {
+            const childToCheck = children[j]
+            console.log('ADJUSTMENTS child', { layer, childToCheck })
+            // we found a requirement
+            if (childToCheck.chainId === requiredChanId && childToCheck.assetAddress === requiredAddress && childToCheck.assetId === requiredAssetId) {
+              console.log('ADJUSTMENTS child existing found')
+              if (!isParent) {
+                newChildren.push(layer)
+              }
+              newChildren.push(childToCheck)
+              checkSuccess = true
+              break
+            }
+          }
+
+          // if we find the corree add the missing required layer
+          if (!checkSuccess) {
+            console.log('ADJUSTMENTS child new one adding')
+            if (!isParent) {
+              newChildren.push(layer)
+            }
+            const group = findAssetItemGroup({
+              chainId: requiredChanId,
+              assetAddress: requiredAddress,
+              assetId: requiredAssetId,
+            })
+            if (!!group) {
+              console.log('ADJUSTMENT child group found, child being added')
+              newChildren.push({
+                chainId: requiredChanId,
+                assetAddress: requiredAddress,
+                assetId: requiredAssetId,
+                assetType: group.assetType,
+                customizableTraitName: group.title,
+                fullSizeUrl: `${group?.uriPrefix}/${group?.chainId}/${group?.assetAddress}/${requiredAssetId}${group?.uriPostfix}`,
+                location: AssetLocation.INCLUDED,
+                thumbnailUrl: '',
+                title: group.title,
+                zIndex: group.zIndex,
+                synthetic: group.synthetic,
+                dependant: group.dependant
+              })
+            }
+          }
+        } else {
+          if (!layer.dependant && !isParent) {
+            newChildren.push(layer)
+          }
+        }
+      } else {
+        if (!layer.dependant && !isParent) {
+          newChildren.push(layer)
         }
       }
     }
 
-    if (!hasEquippedMainHand) return { parent, children: children.filter(x => x.title !== 'Weapon Hand') }
-
-    const toReplace = children.findIndex(asset => asset.customizableTraitName === 'Weapon Hand')
-    const newChildren = [...children]
-    const birdHandMapping: { [index: string]: number } = birdToHand
-
-    const weaponHandAssetID = birdHandMapping[parent.assetId].toString()
-
-    const weaponHand = {
-      location: AssetLocation.INCLUDED,
-      title: weaponHandTrait?.title,
-      thumbnailUrl: '',
-      fullSizeUrl: `${weaponHandTrait?.uriPrefix}/${weaponHandTrait?.chainId}/${weaponHandTrait?.assetAddress}/${weaponHandAssetID}${weaponHandTrait?.uriPostfix}`,
-      chainId: weaponHandTrait?.chainId,
-      assetAddress: weaponHandTrait?.assetAddress,
-      assetId: weaponHandAssetID,
-      assetType: weaponHandTrait?.assetType,
-      zIndex: weaponHandTrait?.zIndex,
-      customizableTraitName: weaponHandTrait?.title
+    adjustments(parent, true)
+    for (let i = 0; i < children.length; i++) {
+      adjustments(children[i])
     }
 
-    if (toReplace > -1) {
-      newChildren.splice(toReplace, 1, weaponHand)
-    } else {
-      newChildren.push(weaponHand)
-    }
-
+    console.log('ADJUSTMENTS', {children, newChildren})
     return {
       parent, children: newChildren
     };
@@ -787,7 +855,6 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   /**
    * TODO @Ishan: Accordion not animating and no hover effect.
   */
-
   const Accordion = styled((props: AccordionProps) => (
     <MuiAccordion disableGutters elevation={0} square {...props} />
   ))(({ theme }) => ({

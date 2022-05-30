@@ -14,7 +14,8 @@ const x = [
     "uriPostfix": ".png",
     "equippableType": "parent",
     "zIndex": 0,
-    "synthetic": false
+    "synthetic": false,
+    "dependant": false
   },
   {
     "title": "Ambience",
@@ -22,7 +23,7 @@ const x = [
     "assetIDRanges": [
       [
         1,
-        2
+        3
       ]
     ],
     "chainId": 1285,
@@ -30,8 +31,9 @@ const x = [
     "uriPrefix": `${process.env.REACT_APP_COMPOSITE_MEDIA_URI_PREFIX}`,
     "uriPostfix": ".png",
     "equippableType": "child",
-    "zIndex": -1,
-    "synthetic": true
+    "zIndex": -100,
+    "synthetic": true,
+    "dependant": false
   },
   {
     "title": "Foreground",
@@ -48,7 +50,8 @@ const x = [
     "uriPostfix": ".png",
     "equippableType": "child",
     "zIndex": 100,
-    "synthetic": true
+    "synthetic": true,
+    "dependant": true
   },
   {
     "title": "Main Hand",
@@ -69,10 +72,12 @@ const x = [
     "uriPostfix": ".png",
     "equippableType": "child",
     "zIndex": 1,
-    "synthetic": false
+    "synthetic": false,
+    "dependant": false
   },
   {
     "title": "Off Hand",
+    "subtitle": "Moonbrellas, banana, burger, rum",
     "assetAddress": "0x1974eeaf317ecf792ff307f25a3521c35eecde86",
     "assetIDRanges": [
       [
@@ -81,6 +86,44 @@ const x = [
       ],
       [
         59,
+        61
+      ]
+    ],
+    "chainId": 1285,
+    "assetType": "ERC1155",
+    "uriPrefix": `${process.env.REACT_APP_COMPOSITE_MEDIA_URI_PREFIX}`,
+    "uriPostfix": ".png",
+    "equippableType": "child",
+    "zIndex": -1,
+    "synthetic": false,
+    "dependant": false
+  },
+  {
+    "title": "Off Hand",
+    "subtitle": "Detectore & paw",
+    "assetAddress": "0x1974eeaf317ecf792ff307f25a3521c35eecde86",
+    "assetIDRanges": [
+      [
+        62,
+        67
+      ]
+    ],
+    "chainId": 1285,
+    "assetType": "ERC1155",
+    "uriPrefix": `${process.env.REACT_APP_COMPOSITE_MEDIA_URI_PREFIX}`,
+    "uriPostfix": ".png",
+    "equippableType": "child",
+    "zIndex": 2,
+    "synthetic": false,
+    "dependant": false
+  },
+  {
+    "title": "Off Hand",
+    "subtitle": "Squid",
+    "assetAddress": "0x1974eeaf317ecf792ff307f25a3521c35eecde86",
+    "assetIDRanges": [
+      [
+        68,
         69
       ]
     ],
@@ -90,7 +133,8 @@ const x = [
     "uriPostfix": ".png",
     "equippableType": "child",
     "zIndex": 2,
-    "synthetic": false
+    "synthetic": false,
+    "dependant": false
   },
   {
     "title": "Off Hand",
@@ -105,7 +149,8 @@ const x = [
     "uriPostfix": ".png",
     "equippableType": "child",
     "zIndex": 2,
-    "synthetic": true
+    "synthetic": true,
+    "dependant": false
   },
   {
     "title": "Weapon Hand",
@@ -122,21 +167,8 @@ const x = [
     "uriPostfix": ".png",
     "equippableType": "child",
     "zIndex": 3,
-    "synthetic": true
-  },
-  {
-    "title": "Special Items",
-    "assetAddress": "0x1974eeaf317ecf792ff307f25a3521c35eecde86",
-    "assetIDRanges": [
-      []
-    ],
-    "chainId": 1285,
-    "assetType": "ERC1155",
-    "uriPrefix": `${process.env.REACT_APP_COMPOSITE_MEDIA_URI_PREFIX}`,
-    "uriPostfix": ".png",
-    "equippableType": "child",
-    "zIndex": 1,
-    "synthetic": false
+    "synthetic": true,
+    "dependant": true
   },
   {
     "title": "Special Items",
@@ -153,7 +185,27 @@ const x = [
     "uriPostfix": ".png",
     "equippableType": "child",
     "zIndex": 1,
-    "synthetic": true
+    "synthetic": true,
+    "dependant": false
+  },
+  {
+    "title": "Off Hand Multipart",
+    "subtitle": "Squid second halfs",
+    "assetAddress": "0x00006",
+    "assetIDRanges": [
+      [
+        1,
+        2
+      ]
+    ],
+    "chainId": 1285,
+    "assetType": "ERC1155",
+    "uriPrefix": `${process.env.REACT_APP_COMPOSITE_MEDIA_URI_PREFIX}`,
+    "uriPostfix": ".png",
+    "equippableType": "child",
+    "zIndex": -1,
+    "synthetic": true,
+    "dependant": true
   }
 ]
 
