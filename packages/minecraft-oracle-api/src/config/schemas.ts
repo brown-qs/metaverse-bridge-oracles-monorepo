@@ -53,5 +53,9 @@ export const envValidationSchema = () => {
         COMPOSITE_URI_POSTFIX: Joi.string().optional().default('.png'),
         COMPOSITE_MEDIA_KEY_PREFIX: Joi.string().optional().default('composite/media'),
         COMPOSITE_METADATA_PUBLIC_PATH: Joi.string().optional().default('http://localhost:3030/api/v1/composite/metadata'),
+        OUTBOUND_PROXY_HOST: Joi.string().default(""),
+        OUTBOUND_PROXY_PORT: Joi.string().default("20000"),
+        OUTBOUND_PROXY_USERNAME: Joi.string().default(""),
+        OUTBOUND_PROXY_PASSWORD: Joi.string().default(""),
     });
 };
