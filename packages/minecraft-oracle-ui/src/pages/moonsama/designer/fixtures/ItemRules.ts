@@ -20,9 +20,6 @@ export const MOONSAMA_PARENT_CHILDREN_OVERRIDES: { [key: string]: { [key: string
     }
 }
 
-const reverseOffHandMultipartMap = reverseMap(OFFHAND_MULTIPART_MAP)
-const reverseBackgroundToForegroundMap = reverseMap(BACKGROUND_TO_FOREGROUND_MAP)
-
 type AdditionalLayersConfigType = {
     requirement: { [key: string]: { other: string, map: PairingType, otherAddress: string, otherChainId: number } }
 }
