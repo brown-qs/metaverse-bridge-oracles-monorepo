@@ -23,7 +23,7 @@ import { MOONSAMA_ATTR_TO_ID_MAP } from './fixtures/AttributeToAssetMap';
 import { ADDITIONAL_PARENT_LAYERS_CONFIG, ADDITIONAL_CHILD_LAYERS_CONFIG, MOONSAMA_CATEGORY_INCOMPATIBILITIES } from './fixtures/ItemRules';
 import { useFetchUrlCallback } from 'hooks/useFetchUrlCallback/useFetchUrlCallback';
 import { useParams } from 'react-router';
-
+import NoSsr from '@mui/base/NoSsr';
 
 enum AssetLocation {
   INCLUDED = 'INCLUDED',
@@ -516,11 +516,18 @@ const Cell = ({ columnIndex, rowIndex, style, data }: GridChildComponentProps) =
     <Box style={style} sx={{ overflow: 'hidden', padding: isMobileViewport ? '0px' : '8px' }} onClick={() => data.onSelectAsset(assetIndex)}>
       <Box className={cx({ [gridItem]: true }, { [selected]: isSelected })}>
         {typeof customization === 'undefined' ? (
-          <img src={data.traitOptionsAssets[assetIndex].thumbnailUrl} style={{ borderRadius: '8px', backgroundColor: '#1B1B3A' }} width={isMobileViewport ? ((Math.floor(window.innerWidth / 3)) - 12) : '200'} height={isMobileViewport ? ((Math.floor(window.innerWidth / 3)) - 12) : '200'} alt="" />
+          <img src={data.traitOptionsAssets[assetIndex].thumbnailUrl}
+            style={{ borderRadius: '8px', backgroundColor: '#1B1B3A' }}
+            width={isMobileViewport ? ((Math.floor(window.innerWidth / 3)) - 12) : '200'}
+            height={isMobileViewport ? ((Math.floor(window.innerWidth / 3)) - 12) : '200'}
+            alt="" />
         ) : (
           <ImageStack layers={customization.layers} />
         )
         }
+        {data.traitOptionsAssets[assetIndex].location === AssetLocation.INCLUDED && <div style={{ position: 'absolute', bottom: '-2px', right: '-2px', textTransform: 'uppercase', fontSize: '8px', background: '#FFC914', color: '#16132B', padding: '4px 8px', letterSpacing: '0.02em' }}>INCLUDED</div>}
+        {data.traitOptionsAssets[assetIndex].location === AssetLocation.BRIDGE && <div style={{ position: 'absolute', bottom: '-2px', right: '-2px', textTransform: 'uppercase', fontSize: '8px', background: '#7515FF', color: '#16132B', padding: '4px 8px', letterSpacing: '0.02em' }}>IN THE BRIDGE</div>}
+        {data.traitOptionsAssets[assetIndex].location === AssetLocation.WALLET && <div style={{ position: 'absolute', bottom: '-2px', right: '-2px', textTransform: 'uppercase', fontSize: '8px', background: '#FFC914', color: '#16132B', padding: '4px 8px', letterSpacing: '0.02em' }}>IN WALLET</div>}
       </Box>
     </Box>
   );
@@ -975,19 +982,21 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
                     </Box>
                   </AccordionSummary>
                   <AccordionDetails sx={{ height: 360, overflowY: 'auto', padding: 0, position: 'relative' }}>
-                    <FixedSizeGrid
-                      columnCount={isMobileViewport ? 3 : 3}
-                      columnWidth={isMobileViewport ? (Math.floor(window.innerWidth / 3) - 6) : (678 / 3) - 6}
-                      height={360}
-                      rowCount={Math.ceil(traitOptionsAssets.length / 3)}
-                      rowHeight={isMobileViewport ? (Math.floor(window.innerWidth / 3) - 6) : (678 / 3) - 6}
-                      width={isMobileViewport ? window.innerWidth : 670}
-                      itemData={{ traitOptionsAssets, numCols, selectedAsset: getSelectedAsset(expanded), onSelectAsset: selectAsset, myCustomizations }}
-                      overscanRowCount={3}
-                      className={grid}
-                    >
-                      {Cell}
-                    </FixedSizeGrid>
+                    <NoSsr>
+                      <FixedSizeGrid
+                        columnCount={3}
+                        columnWidth={isMobileViewport ? (Math.floor(window.innerWidth / 3) - 6) : (678 / 3) - 6}
+                        height={360}
+                        rowCount={Math.ceil(traitOptionsAssets.length / 3)}
+                        rowHeight={isMobileViewport ? (Math.floor(window.innerWidth / 3) - 6) : (678 / 3) - 6}
+                        width={isMobileViewport ? window.innerWidth : 670}
+                        itemData={{ traitOptionsAssets, numCols, selectedAsset: getSelectedAsset(expanded), onSelectAsset: selectAsset, myCustomizations }}
+                        overscanRowCount={3}
+                        className={grid}
+                      >
+                        {Cell}
+                      </FixedSizeGrid>
+                    </NoSsr>
                     <Box style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: '100%', backgroundImage: 'linear-gradient(rgba(0,0,0,0) 95%, rgba(0,0,0,0.5)', pointerEvents: 'none' }}></Box>
                   </AccordionDetails>
                 </Accordion>
