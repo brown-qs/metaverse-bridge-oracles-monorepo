@@ -266,7 +266,7 @@ const transformOnChainAssets = (onChainItems: Array<any> | undefined) => {
 
 const getAssetLocation = ({ chainId, assetAddress, assetId, assetType, title }: AssetIdentifier & { title: string }, ownedAssets: OwnedAssets): AssetLocation => {
 
-  if (title === 'Ambience' || title === 'Foreground') {
+  if (title === 'Ambience' || title === 'Foreground' || title === 'Off Hand Multipart' || title === 'Attribute Multipart') {
     return AssetLocation.INCLUDED
   }
 
@@ -276,8 +276,20 @@ const getAssetLocation = ({ chainId, assetAddress, assetId, assetType, title }: 
     }
   }
 
+  for (let i = 0; i < ownedAssets.bridgeAttributes.length; i++) {
+    if (ownedAssets.bridgeAttributes[i].chainId === chainId && ownedAssets.bridgeAttributes[i].assetAddress === assetAddress && ownedAssets.bridgeAttributes[i].assetId === assetId && ownedAssets.bridgeAttributes[i].assetType === assetType) {
+      return AssetLocation.BRIDGE;
+    }
+  }
+
   for (let i = 0; i < ownedAssets.wallet.length; i++) {
     if (ownedAssets.wallet[i].chainId === chainId && ownedAssets.wallet[i].assetAddress === assetAddress && ownedAssets.wallet[i].assetId === assetId && ownedAssets.wallet[i].assetType === assetType) {
+      return AssetLocation.WALLET;
+    }
+  }
+
+  for (let i = 0; i < ownedAssets.walletAttributes.length; i++) {
+    if (ownedAssets.walletAttributes[i].chainId === chainId && ownedAssets.walletAttributes[i].assetAddress === assetAddress && ownedAssets.walletAttributes[i].assetId === assetId && ownedAssets.walletAttributes[i].assetType === assetType) {
       return AssetLocation.WALLET;
     }
   }
@@ -414,7 +426,7 @@ const getAssetImages = (customizationCategory: CustomizationCategory, ownedAsset
             assetType: customizableTrait.assetType,
             zIndex: customizableTrait.zIndex,
             customizableTraitName: customizableTrait.title,
-            location: AssetLocation.WALLET,
+            location: AssetLocation.NONE,
             owned: true,
             customization: false,
             synthetic: customizableTrait.synthetic,
