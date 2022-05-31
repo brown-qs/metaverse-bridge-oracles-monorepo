@@ -1,5 +1,5 @@
 import { reverseMap } from "../utils"
-import { BACKGROUND_TO_FOREGROUND_MAP, BIRD_TO_WEAPON_HAND_MAP, OFFHAND_MULTIPART_MAP } from "./SyntheticPairing"
+import { ATTRIBUTE_MULTIPART_MAP, BACKGROUND_TO_FOREGROUND_MAP, BIRD_TO_WEAPON_HAND_MAP, OFFHAND_MULTIPART_MAP } from "./SyntheticPairing"
 
 export type PairingMap = { [key: string]: string }
 export type PairingType = { (key: string): string }
@@ -37,6 +37,12 @@ export const ADDITIONAL_CHILD_LAYERS_CONFIG: AdditionalLayersConfigType = {
             otherAddress: '0x00002',
             otherChainId: 1285,
             map: (id: string) => BACKGROUND_TO_FOREGROUND_MAP[id],
+        },
+        "Special Items": {
+            other: 'Attribute Multipart',
+            otherAddress: '0x00007',
+            otherChainId: 1285,
+            map: (id: string) => BACKGROUND_TO_FOREGROUND_MAP[id],
         }
     }
 }
@@ -48,6 +54,12 @@ export const ADDITIONAL_PARENT_LAYERS_CONFIG: AdditionalLayersConfigType = {
             otherAddress: '0x00003',
             otherChainId: 1285,
             map: (id: string) => BIRD_TO_WEAPON_HAND_MAP[id]
+        },
+        "*": {
+            other: 'Attribute Multipart',
+            otherAddress: '0x00007',
+            otherChainId: 1285,
+            map: (id: string) => ATTRIBUTE_MULTIPART_MAP[id]
         }
     }
 }
