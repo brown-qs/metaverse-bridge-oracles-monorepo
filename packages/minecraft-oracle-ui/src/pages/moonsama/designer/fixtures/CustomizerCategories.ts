@@ -13,6 +13,7 @@ const x = [
         "background": `${process.env.REACT_APP_COMPOSITE_MEDIA_URI_PREFIX}/customizer-ui/accordion-bgs/ambient-selector-dropdown.png`,
         "equippableType": "child"
     },
+    /*
     {
         "title": "Foreground",
         "shown": true,
@@ -20,6 +21,7 @@ const x = [
         "background": `${process.env.REACT_APP_COMPOSITE_MEDIA_URI_PREFIX}/customizer-ui/accordion-bgs/ambient-selector-dropdown.png`,
         "equippableType": "child"
     },
+    */
     {
         "title": "Main Hand",
         "shown": true,

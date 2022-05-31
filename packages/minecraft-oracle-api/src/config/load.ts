@@ -80,6 +80,12 @@ export const loadEnv = () => {
             uriPostfix: process.env.COMPOSITE_URI_POSTFIX,
             mediaKeyPrefix: process.env.COMPOSITE_MEDIA_KEY_PREFIX,
             metadataPublicPath: process.env.COMPOSITE_METADATA_PUBLIC_PATH
+        },
+        outboundProxy: {
+            hostname: process.env.OUTBOUND_PROXY_HOST,
+            port: process.env.OUTBOUND_PROXY_PORT,
+            username: process.env.OUTBOUND_PROXY_USERNAME,
+            password: process.env.OUTBOUND_PROXY_PASSWORD
         }
     };
 };
