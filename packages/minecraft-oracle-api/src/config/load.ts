@@ -82,10 +82,9 @@ export const loadEnv = () => {
             metadataPublicPath: process.env.COMPOSITE_METADATA_PUBLIC_PATH
         },
         outboundProxy: {
-            enabled: process.env.OUTBOUND_PROXY,
             hostname: process.env.OUTBOUND_PROXY_HOST,
             port: process.env.OUTBOUND_PROXY_PORT,
-            username: process.env.OUTBOUND_PROXY_USER,
+            username: process.env.OUTBOUND_PROXY_USERNAME,
             password: process.env.OUTBOUND_PROXY_PASSWORD
         }
     };

@@ -107,10 +107,10 @@ export module MicrosoftAuth {
         }
 
         let outboundProxy;
-        if ( process.env.OUTBOUND_PROXY ){
+        if ( process.env.OUTBOUND_PROXY_HOST != "" ){
             outboundProxy = {
                 host: process.env.OUTBOUND_PROXY_HOST,
-                port: process.env.OUTBOUND_PROXY_PORT,
+                port: Number(process.env.OUTBOUND_PROXY_PORT),
                 auth: {
                         username: process.env.OUTBOUND_PROXY_USERNAME,
                         password: process.env.OUTBOUND_PROXY_PASSWORD
@@ -401,10 +401,10 @@ export module MojangAPI {
 
     export async function getProfile(token: string) {
         let outboundProxy;
-        if ( process.env.OUTBOUND_PROXY ){
+        if ( process.env.OUTBOUND_PROXY_HOST != "" ){
             outboundProxy = {
                 host: process.env.OUTBOUND_PROXY_HOST,
-                port: process.env.OUTBOUND_PROXY_PORT,
+                port: Number(process.env.OUTBOUND_PROXY_PORT),
                 auth: {
                         username: process.env.OUTBOUND_PROXY_USERNAME,
                         password: process.env.OUTBOUND_PROXY_PASSWORD
