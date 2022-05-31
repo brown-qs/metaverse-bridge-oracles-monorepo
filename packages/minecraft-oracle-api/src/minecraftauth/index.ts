@@ -246,8 +246,7 @@ export module MojangAuth {
         let url = authUrl + "/validate";
         let body = {
             "accessToken": `${token}`,
-        }
-        
+        }        
         let response = await HttpPost(url, JSON.stringify(body), {"Content-Type": "application/json"})
         if (response.length < 1) return true;
         let jsonResponse: MCErrorResponse = JSON.parse(response);
