@@ -99,6 +99,12 @@ export const MOONSAMA_ATTR_TO_ID_MAP: {[key: string]: AssetIdentifier | undefine
         assetId: '2',
         assetType: 'ERC1155'
     },
+    "Urban Background": {
+        chainId: 1285,
+        assetAddress: '0x00001',
+        assetId: '3',
+        assetType: 'ERC1155'
+    },
     "Moonsama Launch Foreground": {
         chainId: 1285,
         assetAddress: '0x00002',
