@@ -643,19 +643,28 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
       // THIS IS HARDCODING
       if (isParent) {
         console.log('ADJUSTMENTS parent found')
-          const mainHand = children.find(x => x.title === 'Main Hand')
-          if (!mainHand) {
+        Object.keys(ADDITIONAL_PARENT_LAYERS_CONFIG['requirement']).map(key => {
+          const layerRequirement = ADDITIONAL_PARENT_LAYERS_CONFIG['requirement'][key]
+
+          if (key !== '*') {
+            const childPresent = children.find(x => x.title === key)
+            if (!childPresent) {
+              return
+            }
+          }
+
+          const requiredAssetId = layerRequirement.map(parent.assetId)
+          if (!requiredAssetId) {
             return
           }
-          const layerRequirement = ADDITIONAL_PARENT_LAYERS_CONFIG['requirement']['Main Hand']
-          const requiredAssetId = layerRequirement.map(parent.assetId)
-          
+
           const group = findAssetItemGroup({
             chainId: layerRequirement.otherChainId,
             assetAddress: layerRequirement.otherAddress,
             assetId: requiredAssetId,
           })
-          console.log('ADJUSTMENTS parent', {requiredAssetId, group})
+
+          console.log('ADJUSTMENTS parent', { requiredAssetId, group })
           if (!!group) {
             console.log('ADJUSTMENT parent group found, child being added')
             newChildren.push({
@@ -673,7 +682,8 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
               dependant: group.dependant
             })
           }
-          return
+        })
+        return
       }
 
       const layerRequirement = ADDITIONAL_CHILD_LAYERS_CONFIG['requirement'][layer.title]
@@ -746,7 +756,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
       adjustments(children[i])
     }
 
-    console.log('ADJUSTMENTS', {children, newChildren})
+    console.log('ADJUSTMENTS', { children, newChildren })
     return {
       parent, children: newChildren
     };

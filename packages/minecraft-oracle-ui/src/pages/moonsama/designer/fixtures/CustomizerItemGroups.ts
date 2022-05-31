@@ -206,6 +206,25 @@ const x = [
     "zIndex": -1,
     "synthetic": true,
     "dependant": true
+  },
+  {
+    "title": "Attribute Multipart",
+    "subtitle": "Hero Outfit",
+    "assetAddress": "0x00007",
+    "assetIDRanges": [
+      [
+        1,
+        1
+      ]
+    ],
+    "chainId": 1285,
+    "assetType": "ERC1155",
+    "uriPrefix": `${process.env.REACT_APP_COMPOSITE_MEDIA_URI_PREFIX}`,
+    "uriPostfix": ".png",
+    "equippableType": "child",
+    "zIndex": -2,
+    "synthetic": true,
+    "dependant": true
   }
 ]
 

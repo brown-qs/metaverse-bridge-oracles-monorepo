@@ -67,7 +67,12 @@ export const MOONSAMA_ATTR_TO_ID_MAP: {[key: string]: AssetIdentifier | undefine
     "White Bird": undefined,
     "Straight Blonde": undefined,
     "Black Shades": undefined,
-    "Hero Outfit": undefined,
+    "Hero Outfit": {
+        chainId: 1285,
+        assetAddress: '0x00007',
+        assetId: '1',
+        assetType: 'ERC1155'
+    },
     "Pink Headset": undefined,
     "Black Cowboy": undefined,
     "Green Hair": undefined,
@@ -116,6 +121,5 @@ export const MOONSAMA_ATTR_TO_ID_MAP: {[key: string]: AssetIdentifier | undefine
         assetAddress: '0x00002',
         assetId: '2',
         assetType: 'ERC1155'
-    },
-
+    }
 }
