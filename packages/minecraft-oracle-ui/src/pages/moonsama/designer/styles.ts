@@ -60,6 +60,7 @@ export const styles = (theme: Theme) => ({
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
+    position: 'relative',
     '&:hover': {
       backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5))'
     },
