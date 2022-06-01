@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, memo } from 'react';
 import { useOnChainItemsWithCompositeMetaAndAssets } from 'hooks/multiverse/useOnChainItems';
 import { Box, Typography, Modal, CircularProgress } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
@@ -6,12 +6,14 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { useClasses } from 'hooks';
 import { cx } from '@emotion/css';
 import { styles } from './styles';
-import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
+import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
+import Stack from '@mui/material/Stack';
+import LoadingButton from '@mui/lab/LoadingButton';
 import MuiAccordionSummary from '@mui/material/AccordionSummary';
 import MOONSAMA_CUSTOMIZATION_ITEM_GROUPS from './fixtures/CustomizerItemGroups'
 import ImageStack from 'components/ImageStacks/Moonsama2';
-import { FixedSizeGrid, GridChildComponentProps } from 'react-window';
+import { FixedSizeGrid, GridChildComponentProps, areEqual } from 'react-window';
 import { styled } from '@mui/material/styles';
 import "@fontsource/orbitron/500.css";
 import { InGameItemWithStatic, useInGameItemsWithCompositeMetaAndAssets } from 'hooks/multiverse/useInGameItems'
@@ -494,30 +496,45 @@ const ExpandMoreIcon = ({ expanded }: { expanded?: boolean }) => {
   );
 }
 
-const Cell = ({ columnIndex, rowIndex, style, data }: GridChildComponentProps) => {
+const Cell = memo(({ columnIndex, rowIndex, style, data }: GridChildComponentProps) => {
+  const [isLoading, setIsLoading] = useState(false);
   const { gridItem, selected } = useClasses(styles);
   const theme = useTheme();
   const isMobileViewport = useMediaQuery(theme.breakpoints.down('sm'));
 
   const assetIndex = (data.numCols * rowIndex) + columnIndex;
 
-  if (assetIndex >= data.traitOptionsAssets.length) return <></>;
-
   const isSelected = (data.selectedAsset === data.traitOptionsAssets[assetIndex].assetId);
-
-  /*
-   * TODO @Kyilkhor: If I own this asset and a customization exists for it, we should show the asset with the customization applied.
-   * Selecting this asset should automatically apply the customization to the "currentCustomization" variable.
-  */
 
   const customization = data.myCustomizations[`${data.traitOptionsAssets[assetIndex].assetAddress} - ${data.traitOptionsAssets[assetIndex].assetId}`];
 
+  useEffect(() => {
+    if (assetIndex >= data.traitOptionsAssets.length) return
+
+    const fetching = data.fetchingCustomizations.find((customization: AssetIdentifier) => {
+      return (
+        data.traitOptionsAssets[assetIndex].chainId === customization.chainId &&
+        data.traitOptionsAssets[assetIndex].assetAddress === customization.assetAddress &&
+        data.traitOptionsAssets[assetIndex].assetId === customization.assetId
+      )
+    })
+
+    if (!fetching) {
+      setIsLoading(false)
+    }
+  }, [data, assetIndex])
+
+  if (assetIndex >= data.traitOptionsAssets.length) return <></>;
+
   return (
-    <Box style={style} sx={{ overflow: 'hidden', padding: isMobileViewport ? '0px' : '8px' }} onClick={() => data.onSelectAsset(assetIndex)}>
+    <Box style={style} sx={{ overflow: 'hidden', padding: isMobileViewport ? '0px' : '8px' }} onClick={() => {
+      setIsLoading(true);
+      data.onSelectAsset(assetIndex);
+    }}>
       <Box className={cx({ [gridItem]: true }, { [selected]: isSelected })}>
         {typeof customization === 'undefined' ? (
           <img src={data.traitOptionsAssets[assetIndex].thumbnailUrl}
-            style={{ borderRadius: '8px', backgroundColor: '#1B1B3A' }}
+            style={{ borderRadius: '8px', backgroundColor: '#1B1B3A', opacity: isLoading ? 0.75 : 1 }}
             width={isMobileViewport ? ((Math.floor(window.innerWidth / 3)) - 12) : '200'}
             height={isMobileViewport ? ((Math.floor(window.innerWidth / 3)) - 12) : '200'}
             alt="" />
@@ -525,13 +542,20 @@ const Cell = ({ columnIndex, rowIndex, style, data }: GridChildComponentProps) =
           <ImageStack layers={customization.layers} />
         )
         }
-        {data.traitOptionsAssets[assetIndex].location === AssetLocation.INCLUDED && <div style={{ position: 'absolute', bottom: '-2px', right: '-2px', textTransform: 'uppercase', fontSize: '8px', background: '#FFC914', color: '#16132B', padding: '4px 8px', letterSpacing: '0.02em' }}>INCLUDED</div>}
+
+        {isLoading && (
+          <div style={{ position: 'absolute' }}>
+            <CircularProgress sx={{ alignSelf: 'center', textAlign: 'center', color: '#fff' }} />
+          </div>
+        )}
+        {data.traitOptionsAssets[assetIndex].location === AssetLocation.INCLUDED && <div style={{ position: 'absolute', bottom: '-2px', right: '-2px', textTransform: 'uppercase', fontSize: '8px', background: '#0EEBA8', color: '#16132B', padding: '4px 8px', letterSpacing: '0.02em' }}>INCLUDED</div>}
         {data.traitOptionsAssets[assetIndex].location === AssetLocation.BRIDGE && <div style={{ position: 'absolute', bottom: '-2px', right: '-2px', textTransform: 'uppercase', fontSize: '8px', background: '#7515FF', color: '#16132B', padding: '4px 8px', letterSpacing: '0.02em' }}>IN THE BRIDGE</div>}
         {data.traitOptionsAssets[assetIndex].location === AssetLocation.WALLET && <div style={{ position: 'absolute', bottom: '-2px', right: '-2px', textTransform: 'uppercase', fontSize: '8px', background: '#FFC914', color: '#16132B', padding: '4px 8px', letterSpacing: '0.02em' }}>IN WALLET</div>}
+        {data.traitOptionsAssets[assetIndex].location === AssetLocation.NONE && <div style={{ position: 'absolute', bottom: '-2px', right: '-2px', textTransform: 'uppercase', fontSize: '8px', background: '#F84AA7', color: '#16132B', padding: '4px 8px', letterSpacing: '0.02em' }}>NOT OWNED</div>}
       </Box>
     </Box>
   );
-};
+}, areEqual);
 
 const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   const theme = useTheme();
@@ -552,8 +576,10 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   const [ownedAssets, setOwnedAssets] = useState<OwnedAssets>({ bridge: [], wallet: [], walletAttributes: [], bridgeAttributes: [] })
   const [myCustomizations, setMyCustomizations] = useState<Array<Asset>>([]);
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
+  const [shareURLCopied, setShareURLCopied] = useState<boolean>(false);
   const [saveConfigModal, setShowSaveConfigModal] = useState<boolean>(false);
   const [saveProgress, setSaveProgress] = useState<{ inProgress?: boolean, errorMessage?: string }>({});
+  const [fetchingCustomizations, setFetchingCustomizations] = useState<Array<AssetIdentifier>>([]);
 
   const onChainItems = useOnChainItemsWithCompositeMetaAndAssets();
   const inGameItems = useInGameItemsWithCompositeMetaAndAssets();
@@ -562,7 +588,8 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
 
   const traitOptionsAssets = useMemo(() => {
     console.log('MEMOOO')
-    return getAssetImages(expanded, ownedAssets)
+    return getAssetImages(expanded, ownedAssets);
+
   }, [expanded, JSON.stringify(ownedAssets)]);
 
   const onChainMoonsamas = onChainItems?.['Moonsama'] ?? []
@@ -594,12 +621,40 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
       const customizations: any = {}
 
       const ownedAssetsArray = [...ownedAssets.bridge, ...ownedAssets.wallet]
+
       for (let i = 0; i < ownedAssetsArray.length; i++) {
+        const fetching = fetchingCustomizations.find((customization: AssetIdentifier) => {
+          return (
+            ownedAssetsArray[i].chainId === customization.chainId &&
+            ownedAssetsArray[i].assetAddress === customization.assetAddress &&
+            ownedAssetsArray[i].assetId === customization.assetId
+          )
+        })
+
+        if (!fetching) {
+          const fetchingAsset: AssetIdentifier = {
+            chainId: ownedAssetsArray[i].chainId,
+            assetAddress: ownedAssetsArray[i].assetAddress,
+            assetId: ownedAssetsArray[i].assetId,
+            assetType: ownedAssetsArray[i].assetType
+          }
+
+          fetchingCustomizations.push(fetchingAsset)
+        }
+
         const customizationResponse = await getCustomization({
           chainId: ownedAssetsArray[i].chainId,
           assetAddress: ownedAssetsArray[i].assetAddress,
           assetId: ownedAssetsArray[i].assetId,
         }, authData)
+
+        setFetchingCustomizations(fetchingCustomizations.filter((customization: AssetIdentifier) => {
+          return (
+            ownedAssetsArray[i].chainId !== customization.chainId ||
+            ownedAssetsArray[i].assetAddress !== customization.assetAddress ||
+            ownedAssetsArray[i].assetId !== customization.assetId
+          )
+        }))
 
         if (!!customizationResponse && customizationResponse.data.composite) {
           customizations[`${ownedAssetsArray[i].assetAddress}-${ownedAssetsArray[i].assetId}`] = customizationResponse.data
@@ -643,37 +698,37 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
       // THIS IS HARDCODING
       if (isParent) {
         console.log('ADJUSTMENTS parent found')
-          const mainHand = children.find(x => x.title === 'Main Hand')
-          if (!mainHand) {
-            return
-          }
-          const layerRequirement = ADDITIONAL_PARENT_LAYERS_CONFIG['requirement']['Main Hand']
-          const requiredAssetId = layerRequirement.map(parent.assetId)
-          
-          const group = findAssetItemGroup({
-            chainId: layerRequirement.otherChainId,
-            assetAddress: layerRequirement.otherAddress,
-            assetId: requiredAssetId,
-          })
-          console.log('ADJUSTMENTS parent', {requiredAssetId, group})
-          if (!!group) {
-            console.log('ADJUSTMENT parent group found, child being added')
-            newChildren.push({
-              chainId: group.chainId,
-              assetAddress: group.assetAddress,
-              assetId: requiredAssetId,
-              assetType: group.assetType,
-              customizableTraitName: group.title,
-              fullSizeUrl: `${group?.uriPrefix}/${group?.chainId}/${group?.assetAddress}/${requiredAssetId}${group?.uriPostfix}`,
-              location: AssetLocation.INCLUDED,
-              thumbnailUrl: '',
-              title: group.title,
-              zIndex: group.zIndex,
-              synthetic: group.synthetic,
-              dependant: group.dependant
-            })
-          }
+        const mainHand = children.find(x => x.title === 'Main Hand')
+        if (!mainHand) {
           return
+        }
+        const layerRequirement = ADDITIONAL_PARENT_LAYERS_CONFIG['requirement']['Main Hand']
+        const requiredAssetId = layerRequirement.map(parent.assetId)
+
+        const group = findAssetItemGroup({
+          chainId: layerRequirement.otherChainId,
+          assetAddress: layerRequirement.otherAddress,
+          assetId: requiredAssetId,
+        })
+        console.log('ADJUSTMENTS parent', { requiredAssetId, group })
+        if (!!group) {
+          console.log('ADJUSTMENT parent group found, child being added')
+          newChildren.push({
+            chainId: group.chainId,
+            assetAddress: group.assetAddress,
+            assetId: requiredAssetId,
+            assetType: group.assetType,
+            customizableTraitName: group.title,
+            fullSizeUrl: `${group?.uriPrefix}/${group?.chainId}/${group?.assetAddress}/${requiredAssetId}${group?.uriPostfix}`,
+            location: AssetLocation.INCLUDED,
+            thumbnailUrl: '',
+            title: group.title,
+            zIndex: group.zIndex,
+            synthetic: group.synthetic,
+            dependant: group.dependant
+          })
+        }
+        return
       }
 
       const layerRequirement = ADDITIONAL_CHILD_LAYERS_CONFIG['requirement'][layer.title]
@@ -746,7 +801,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
       adjustments(children[i])
     }
 
-    console.log('ADJUSTMENTS', {children, newChildren})
+    console.log('ADJUSTMENTS', { children, newChildren })
     return {
       parent, children: newChildren
     };
@@ -764,8 +819,11 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   } = useClasses(styles);
 
   const handleChange =
-    (customizationOption: CustomizationCategory) => (event: React.SyntheticEvent, isExpanded: boolean) => {
-      setExpanded(customizationOption);
+    (customizationOption: CustomizationCategory) => (event: React.SyntheticEvent, newExpanded: boolean) => {
+      console.log(customizationOption, newExpanded)
+      if (newExpanded) {
+        setExpanded(customizationOption)
+      }
     };
 
   const selectAsset = async (assetIndex: number) => {
@@ -782,6 +840,25 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
         const asset = traitOptionsAssets[assetIndex]
         console.log('PRELOAD', { asset })
         if (asset) {
+          const fetching = fetchingCustomizations.find((customization: AssetIdentifier) => {
+            return (
+              asset.chainId === customization.chainId &&
+              asset.assetAddress === customization.assetAddress &&
+              asset.assetId === customization.assetId
+            )
+          })
+
+          if (!fetching) {
+            const fetchingAsset: AssetIdentifier = {
+              chainId: asset.chainId,
+              assetAddress: asset.assetAddress,
+              assetId: asset.assetId,
+              assetType: asset.assetType
+            }
+
+            fetchingCustomizations.push(fetchingAsset)
+          }
+
           const meta = await urlCb(`${process.env.REACT_APP_BACKEND_API_URL}/composite/metadata/${asset.chainId}/${asset?.assetAddress}/${asset?.assetId}`, false) as CompositeMetadataType
 
           if (!!meta) {
@@ -807,6 +884,14 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
               }))
             }
           }
+
+          setFetchingCustomizations(fetchingCustomizations.filter((customization: AssetIdentifier) => {
+            return (
+              asset.chainId !== customization.chainId ||
+              asset.assetAddress !== customization.assetAddress ||
+              asset.assetId !== customization.assetId
+            )
+          }))
         }
 
         /*
@@ -859,14 +944,6 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
     }
   })
 
-  /**
-   * TODO @Ishan: Accordion not animating and no hover effect.
-  */
-  const Accordion = styled((props: AccordionProps) => (
-    <MuiAccordion disableGutters elevation={0} square {...props} />
-  ))(({ theme }) => ({
-  }));
-
   const AccordionSummary = styled((props: any) => (
     <MuiAccordionSummary
       {...props}
@@ -877,10 +954,12 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
     backgroundSize: 'cover !important',
     backgroundBlendMode: 'lighten',
     backgroundRepeat: 'no-repeat',
-    '&:hover': {
+    cursor: 'default',
+    '&:not(.expanded)&:hover': {
+      cursor: 'pointer',
       opacity: 1,
       background: `#313168 url(${backgroundImage})`,
-    },
+    }
   }));
 
   const saveCustomizationCallback = async (openModal = true) => {
@@ -911,68 +990,92 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
             ) : (
               <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                 <ImageStack layers={[...currentCustomization.children, currentCustomization.parent]} />
-                <div style={{ position: 'absolute', bottom: '16px', left: '8px', display: 'flex' }}>
-                  <button
-                    onClick={() => {
-                      if (currentCustomization.children !== null && currentCustomization.parent !== null) {
-                        downloadAsImage([...currentCustomization.children, currentCustomization.parent])
-                      }
-                    }}
-                    type="button"
-                    className={customizerActionButton}>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-download" width="34" height="34" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#ffffff" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                      <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
-                      <polyline points="7 11 12 16 17 11" />
-                      <line x1="12" y1="4" x2="12" y2="16" />
-                    </svg>
-                  </button>
-
-                  {isLoggedIn && allowedToSave && (<>
-                    <button
-                      onClick={() => saveCustomizationCallback()}
-                      type="button"
-                      className={customizerActionButton}>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" fill="none" stroke="#fff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" className="icon icon-tabler icon-tabler-file-upload" viewBox="0 0 24 24">
-                        <path stroke="none" d="M0 0h24v24H0z"></path>
-                        <path d="M14 3v4a1 1 0 001 1h4"></path>
-                        <path d="M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"></path>
-                        <path d="M12 11L12 17"></path>
-                        <path d="M9 14L12 11 15 14"></path>
-                      </svg>
-                    </button>
-
-                    <button
+                <div style={{ position: 'absolute', bottom: '8px', left: '8px' }}>
+                  <Stack direction="row" justifyContent="start" alignItems="end" spacing={1}>
+                    <LoadingButton
+                      variant="outlined"
+                      loadingPosition="start"
                       onClick={() => {
-                        saveCustomizationCallback(false)
-                        shareCustomization(currentCustomization, setShowShareModal)
+                        if (currentCustomization.children !== null && currentCustomization.parent !== null) {
+                          downloadAsImage([...currentCustomization.children, currentCustomization.parent])
+                        }
                       }}
-                      type="button"
-                      className={customizerActionButton}>
-                      <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-share" width="34" height="34" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#ffffff" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                        <circle cx="6" cy="12" r="3" />
-                        <circle cx="18" cy="6" r="3" />
-                        <circle cx="18" cy="18" r="3" />
-                        <line x1="8.7" y1="10.7" x2="15.3" y2="7.3" />
-                        <line x1="8.7" y1="13.3" x2="15.3" y2="16.7" />
-                      </svg>
-                    </button>
-                  </>)}
+                      className={customizerActionButton}
+                      sx={{ marginBottom: 1 }}
+                      startIcon={(
+                        <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-download" width="20" height="20" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#ffffff" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                          <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
+                          <polyline points="7 11 12 16 17 11" />
+                          <line x1="12" y1="4" x2="12" y2="16" />
+                        </svg>)}>Download
+                    </LoadingButton>
+
+                    <Stack direction={isMobileViewport ? 'column' : 'row-reverse'} spacing={1} alignItems="center" sx={{ backgroundColor: isLoggedIn && allowedToSave ? 'transparent' : 'rgba(22, 19, 43, 0.75)', backgroundBlendMode: 'lighten', p: 1, borderRadius: (isMobileViewport ? '0.5rem' : '800px') }}>
+                      <Box style={{ textTransform: 'uppercase', fontSize: '12px', display: 'flex', alignItems: 'center', paddingRight: (isMobileViewport ? '0px' : '8px'), textAlign: 'center' }}>
+                        {!isLoggedIn && 'Login to save or share'}
+                        {isLoggedIn && !allowedToSave && 'Assets not owned by you'}
+                      </Box>
+
+                      <Stack direction="row" spacing={1}>
+                        <LoadingButton
+                          loading={saveProgress.inProgress}
+                          variant="outlined"
+                          loadingPosition="start"
+                          onClick={() => saveCustomizationCallback()}
+                          className={customizerActionButton}
+                          disabled={!isLoggedIn || !allowedToSave}
+                          startIcon={(
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#fff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" className="icon icon-tabler icon-tabler-file-upload" viewBox="0 0 24 24">
+                              <path stroke="none" d="M0 0h24v24H0z"></path>
+                              <path d="M14 3v4a1 1 0 001 1h4"></path>
+                              <path d="M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"></path>
+                              <path d="M12 11L12 17"></path>
+                              <path d="M9 14L12 11 15 14"></path>
+                            </svg>)}>
+                          Save
+                        </LoadingButton>
+
+                        <LoadingButton
+                          variant="outlined"
+                          loadingPosition="start"
+                          loading={saveProgress.inProgress}
+                          onClick={() => {
+                            saveCustomizationCallback(false)
+                            setShareURLCopied(false)
+                            shareCustomization(currentCustomization, setShowShareModal)
+                          }}
+                          className={customizerActionButton}
+                          disabled={!isLoggedIn || !allowedToSave}
+                          startIcon={(
+                            <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-share" width="20" height="20" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#ffffff" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                              <circle cx="6" cy="12" r="3" />
+                              <circle cx="18" cy="6" r="3" />
+                              <circle cx="18" cy="18" r="3" />
+                              <line x1="8.7" y1="10.7" x2="15.3" y2="7.3" />
+                              <line x1="8.7" y1="13.3" x2="15.3" y2="16.7" />
+                            </svg>)}>
+                          Share
+                        </LoadingButton>
+                      </Stack>
+                    </Stack>
+                  </Stack>
                 </div>
               </div>
             )}
           </Box>
           <Box className={traitExplorer}>
-            {MOONSAMA_CUSTOMIZER_CATEGORIES.filter(option => option.shown).map(customizationOption => {
+            {MOONSAMA_CUSTOMIZER_CATEGORIES.filter(option => option.shown).map((customizationOption, optionIndex) => {
               const isExpanded = expanded.title === customizationOption.title
 
               return (
-                <Accordion className={cx({ [accordion]: true, [accordionExpanded]: isExpanded })} expanded={isExpanded} onChange={handleChange(customizationOption)}>
+                <Accordion key={customizationOption.title} disableGutters elevation={0} defaultExpanded={optionIndex === 0} className={cx({ [accordion]: true, [accordionExpanded]: isExpanded })} expanded={expanded.title === customizationOption.title} onChange={handleChange(customizationOption)}>
                   <AccordionSummary
                     aria-controls={`${customizationOption.title}-content`}
                     expandIcon={<ExpandMoreIcon expanded={isExpanded} />}
                     backgroundImage={customizationOption.background}
+                    className={isExpanded && 'expanded'}
                     id={`${customizationOption.title.replace(' ', '-').toLowerCase()}-header`}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                       <img src={customizationOption.icon} width="32" height="32" style={{ flexShrink: 0 }} alt={`${customizationOption.title} Icon`} />
@@ -990,7 +1093,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
                         rowCount={Math.ceil(traitOptionsAssets.length / 3)}
                         rowHeight={isMobileViewport ? (Math.floor(window.innerWidth / 3) - 6) : (678 / 3) - 6}
                         width={isMobileViewport ? window.innerWidth : 670}
-                        itemData={{ traitOptionsAssets, numCols, selectedAsset: getSelectedAsset(expanded), onSelectAsset: selectAsset, myCustomizations }}
+                        itemData={{ traitOptionsAssets, numCols, fetchingCustomizations, selectedAsset: getSelectedAsset(expanded), onSelectAsset: selectAsset, myCustomizations }}
                         overscanRowCount={3}
                         className={grid}
                       >
@@ -1015,13 +1118,15 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: 600,
-          bgcolor: 'background.paper',
-          border: '2px solid #000',
+          width: '90%',
+          maxWidth: '600px',
+          color: '#fffff',
+          backgroundImage: 'linear-gradient(311.18deg, #1B1B3A 67.03%, #313168 100%)',
+          border: '2px solid #0EEBA8',
           borderRadius: '8px',
-          color: '#333',
           boxShadow: 24,
           p: 4,
+          fontFamily: 'Orbitron',
         }}>
           <Typography id="modal-modal-title" variant="h6" component="h2" sx={{ fontWeight: 600, textAlign: 'center' }}>
             Share your customized Moonsama.
@@ -1030,26 +1135,51 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
             {(new URL(`/moonsama/customizer/${currentCustomization.parent?.chainId}/${currentCustomization.parent?.assetAddress}/${currentCustomization.parent?.assetId}`, `${window.location.protocol}//${window.location.host}`)).href}
           </Typography>
 
-          <Box sx={{
-            backgroundColor: '#0EB8A8',
-            textTransform: 'uppercase',
-            padding: '12px 18px',
-            fontFamily: 'Orbitron',
-            fontSize: '12px',
-            lineHeight: '16px',
-            letterSpacing: '0.032em',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            border: '1px solid transparent',
-            margin: '32px auto 0px auto',
-            width: '60px',
-            cursor: 'pointer',
-            borderRadius: '4px',
-            textAlign: 'center',
-            fontWeight: '600',
-            color: '#FFFFFF'
-          }} onClick={() => setShowShareModal(false)}>Done</Box>
+          <Stack direction="row" justifyContent="space-between" sx={{ width: '100%' }}>
+            <Box sx={{
+              backgroundColor: '#0EEBA8',
+              textTransform: 'uppercase',
+              padding: '12px 18px',
+              fontFamily: 'Orbitron',
+              fontSize: '12px',
+              lineHeight: '16px',
+              letterSpacing: '0.032em',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              border: '1px solid transparent',
+              margin: '32px auto 0px auto',
+              width: '1/3',
+              cursor: 'pointer',
+              borderRadius: '800px',
+              textAlign: 'center',
+              fontWeight: '600',
+              color: '#000000'
+            }} onClick={() => {
+              navigator.clipboard.writeText((new URL(`/moonsama/customizer/${currentCustomization.parent?.chainId}/${currentCustomization.parent?.assetAddress}/${currentCustomization.parent?.assetId}`, `${window.location.protocol}//${window.location.host}`)).href)
+              setShareURLCopied(true)
+            }}>{shareURLCopied ? 'Copied' : 'Copy'}</Box>
+            <Box sx={{
+              backgroundColor: '#0EEBA8',
+              textTransform: 'uppercase',
+              padding: '12px 18px',
+              fontFamily: 'Orbitron',
+              fontSize: '12px',
+              lineHeight: '16px',
+              letterSpacing: '0.032em',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              border: '1px solid transparent',
+              margin: '32px auto 0px auto',
+              width: '1/3',
+              cursor: 'pointer',
+              borderRadius: '800px',
+              textAlign: 'center',
+              fontWeight: '600',
+              color: '#000000'
+            }} onClick={() => setShowShareModal(false)}>Done</Box>
+          </Stack>
         </Box>
       </Modal>
 
@@ -1063,19 +1193,23 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: 600,
-          bgcolor: 'background.paper',
-          border: '2px solid #000',
+          width: '90%',
+          maxWidth: '600px',
+          color: '#fffff',
+          backgroundImage: 'linear-gradient(311.18deg, #1B1B3A 67.03%, #313168 100%)',
+          border: '2px solid #0EEBA8',
           borderRadius: '8px',
-          color: '#333',
           boxShadow: 24,
           p: 4,
         }}>
-          <Typography id="modal-modal-title" variant="h6" component="h2" sx={{ fontWeight: 600, textAlign: 'center' }}>
+          <Typography id="modal-modal-title" variant="h6" component="h2" sx={{
+            fontWeight: 600, textAlign: 'center',
+            fontFamily: 'Orbitron',
+          }}>
             Your 2.0 Moonsama is being cooked
           </Typography>
           {saveProgress.inProgress && <Box display={'flex'} style={{ paddingTop: theme.spacing(2) }}><CircularProgress sx={{ alignSelf: 'center', textAlign: 'center' }} /></Box>}
-          {!saveProgress.inProgress && !saveProgress.errorMessage && <Typography id="modal-modal-description" sx={{ mt: 2, wordBreak: 'break-word', wordWrap: 'break-word', overflowWrap: 'break-word', textAlign: 'center' }}>
+          {!saveProgress.inProgress && !saveProgress.errorMessage && <Typography id="modal-modal-description" sx={{ mt: 2, wordBreak: 'break-word', wordWrap: 'break-word', overflowWrap: 'break-word', textAlign: 'center', fontFamily: 'Orbitron' }}>
             Done! You can access your config at
           </Typography>
           }
@@ -1089,7 +1223,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
           }
 
           {!saveProgress.inProgress && <Box sx={{
-            backgroundColor: '#0EB8A8',
+            backgroundColor: '#0EEBA8',
             textTransform: 'uppercase',
             padding: '12px 18px',
             fontFamily: 'Orbitron',
@@ -1101,12 +1235,12 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
             alignItems: 'center',
             border: '1px solid transparent',
             margin: '32px auto 0px auto',
-            width: '60px',
+            width: '1/3',
             cursor: 'pointer',
-            borderRadius: '4px',
+            borderRadius: '800px',
             textAlign: 'center',
             fontWeight: '600',
-            color: '#FFFFFF'
+            color: '#000000'
           }} onClick={() => {
             setShowSaveConfigModal(false)
           }}>{!saveProgress?.errorMessage ? `Great!` : `Oops`}</Box>}
