@@ -516,9 +516,9 @@ const Cell = memo(({ columnIndex, rowIndex, style, data }: GridChildComponentPro
 
   const assetIndex = (data.numCols * rowIndex) + columnIndex;
 
-  const isSelected = (data.selectedAsset === data.traitOptionsAssets[assetIndex].assetId);
+  const isSelected = (data.selectedAsset === data.traitOptionsAssets[assetIndex]?.assetId);
 
-  const customization = data.myCustomizations[`${data.traitOptionsAssets[assetIndex].assetAddress} - ${data.traitOptionsAssets[assetIndex].assetId}`];
+  const customization = data.myCustomizations[`${data.traitOptionsAssets[assetIndex]?.assetAddress} - ${data.traitOptionsAssets[assetIndex]?.assetId}`];
 
   useEffect(() => {
     if (assetIndex >= data.traitOptionsAssets.length) return
