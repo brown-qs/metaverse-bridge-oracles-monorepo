@@ -268,7 +268,7 @@ const transformOnChainAssets = (onChainItems: Array<any> | undefined) => {
 
 const getAssetLocation = ({ chainId, assetAddress, assetId, assetType, title }: AssetIdentifier & { title: string }, ownedAssets: OwnedAssets): AssetLocation => {
 
-  if (title === 'Ambience' || title === 'Foreground') {
+  if (title === 'Ambience' || title === 'Foreground' || title === 'Off Hand Multipart' || title === 'Attribute Multipart') {
     return AssetLocation.INCLUDED
   }
 
@@ -278,8 +278,20 @@ const getAssetLocation = ({ chainId, assetAddress, assetId, assetType, title }: 
     }
   }
 
+  for (let i = 0; i < ownedAssets.bridgeAttributes.length; i++) {
+    if (ownedAssets.bridgeAttributes[i].chainId === chainId && ownedAssets.bridgeAttributes[i].assetAddress === assetAddress && ownedAssets.bridgeAttributes[i].assetId === assetId && ownedAssets.bridgeAttributes[i].assetType === assetType) {
+      return AssetLocation.BRIDGE;
+    }
+  }
+
   for (let i = 0; i < ownedAssets.wallet.length; i++) {
     if (ownedAssets.wallet[i].chainId === chainId && ownedAssets.wallet[i].assetAddress === assetAddress && ownedAssets.wallet[i].assetId === assetId && ownedAssets.wallet[i].assetType === assetType) {
+      return AssetLocation.WALLET;
+    }
+  }
+
+  for (let i = 0; i < ownedAssets.walletAttributes.length; i++) {
+    if (ownedAssets.walletAttributes[i].chainId === chainId && ownedAssets.walletAttributes[i].assetAddress === assetAddress && ownedAssets.walletAttributes[i].assetId === assetId && ownedAssets.walletAttributes[i].assetType === assetType) {
       return AssetLocation.WALLET;
     }
   }
@@ -416,7 +428,7 @@ const getAssetImages = (customizationCategory: CustomizationCategory, ownedAsset
             assetType: customizableTrait.assetType,
             zIndex: customizableTrait.zIndex,
             customizableTraitName: customizableTrait.title,
-            location: AssetLocation.WALLET,
+            location: AssetLocation.NONE,
             owned: true,
             customization: false,
             synthetic: customizableTrait.synthetic,
@@ -698,36 +710,46 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
       // THIS IS HARDCODING
       if (isParent) {
         console.log('ADJUSTMENTS parent found')
-        const mainHand = children.find(x => x.title === 'Main Hand')
-        if (!mainHand) {
-          return
-        }
-        const layerRequirement = ADDITIONAL_PARENT_LAYERS_CONFIG['requirement']['Main Hand']
-        const requiredAssetId = layerRequirement.map(parent.assetId)
+        Object.keys(ADDITIONAL_PARENT_LAYERS_CONFIG['requirement']).map(key => {
+          const layerRequirement = ADDITIONAL_PARENT_LAYERS_CONFIG['requirement'][key]
 
-        const group = findAssetItemGroup({
-          chainId: layerRequirement.otherChainId,
-          assetAddress: layerRequirement.otherAddress,
-          assetId: requiredAssetId,
-        })
-        console.log('ADJUSTMENTS parent', { requiredAssetId, group })
-        if (!!group) {
-          console.log('ADJUSTMENT parent group found, child being added')
-          newChildren.push({
-            chainId: group.chainId,
-            assetAddress: group.assetAddress,
+          if (key !== '*') {
+            const childPresent = children.find(x => x.title === key)
+            if (!childPresent) {
+              return
+            }
+          }
+
+          const requiredAssetId = layerRequirement.map(parent.assetId)
+          if (!requiredAssetId) {
+            return
+          }
+
+          const group = findAssetItemGroup({
+            chainId: layerRequirement.otherChainId,
+            assetAddress: layerRequirement.otherAddress,
             assetId: requiredAssetId,
-            assetType: group.assetType,
-            customizableTraitName: group.title,
-            fullSizeUrl: `${group?.uriPrefix}/${group?.chainId}/${group?.assetAddress}/${requiredAssetId}${group?.uriPostfix}`,
-            location: AssetLocation.INCLUDED,
-            thumbnailUrl: '',
-            title: group.title,
-            zIndex: group.zIndex,
-            synthetic: group.synthetic,
-            dependant: group.dependant
           })
-        }
+
+          console.log('ADJUSTMENTS parent', { requiredAssetId, group })
+          if (!!group) {
+            console.log('ADJUSTMENT parent group found, child being added')
+            newChildren.push({
+              chainId: group.chainId,
+              assetAddress: group.assetAddress,
+              assetId: requiredAssetId,
+              assetType: group.assetType,
+              customizableTraitName: group.title,
+              fullSizeUrl: `${group?.uriPrefix}/${group?.chainId}/${group?.assetAddress}/${requiredAssetId}${group?.uriPostfix}`,
+              location: AssetLocation.INCLUDED,
+              thumbnailUrl: '',
+              title: group.title,
+              zIndex: group.zIndex,
+              synthetic: group.synthetic,
+              dependant: group.dependant
+            })
+          }
+        })
         return
       }
 
@@ -1241,6 +1263,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
             textAlign: 'center',
             fontWeight: '600',
             color: '#000000'
+
           }} onClick={() => {
             setShowSaveConfigModal(false)
           }}>{!saveProgress?.errorMessage ? `Great!` : `Oops`}</Box>}
