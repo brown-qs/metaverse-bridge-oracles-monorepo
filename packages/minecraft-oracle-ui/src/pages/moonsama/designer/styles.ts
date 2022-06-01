@@ -46,6 +46,9 @@ export const styles = (theme: Theme) => ({
     padding: '1rem',
     textAlign: 'center',
     fontSize: '1rem',
+    backgroundImage: 'url(https://static.moonsama.com/customizer-ui/preview-background.jpg)',
+    backgroundSize: 'cover',
+    backgroundRepeat: 'no-repeat',
     [theme.breakpoints.up('sm')]: {
       fontSize: '1.5rem',
     }
@@ -129,20 +132,32 @@ export const styles = (theme: Theme) => ({
   },
 
   customizerActionButton: {
-    padding: '12px',
-    marginLeft: '8px',
-    cursor: 'pointer',
-    backgroundColor: '#F84AA7',
+    fontFamily: 'Orbitron',
+    color: '#ffffff',
+    textTransform: 'uppercase',
     borderRadius: '800px',
-    border: 'none',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    boxShadow: 'box-shadow: 0px 4px 6px -1px rgba(0, 0, 0, 0.1), 0px 2px 4px -1px rgba(0, 0, 0, 0.06)',
-    width: '48px',
-    height: '48px',
-    '&:hover': {
-      backgroundColor: '#FFC914',
+    paddingTop: 2,
+    paddingBottom: 2,
+    paddingLeft: 12,
+    paddingRight: 12,
+    fontWeight: '600',
+    fontSize: '0.65rem',
+    cursor: 'default !important',
+    backgroundColor: '#888888',
+    [theme.breakpoints.up('sm')]: {
+      paddingTop: 2,
+      paddingBottom: 2,
+      paddingLeft: 16,
+      paddingRight: 16,
+    },
+    '&[disabled]': {
+      color: '#ffffff',
+      opacity: 0.75,
+    },
+    '&:not([disabled])': {
+      backgroundColor: '#F84AA7',
+      cursor: 'pointer !important',
+      '&:hover': { backgroundColor: '#FFC914' },
     }
   }
 });
