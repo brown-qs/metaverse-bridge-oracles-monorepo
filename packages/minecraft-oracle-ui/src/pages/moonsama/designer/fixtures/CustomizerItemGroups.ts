@@ -158,7 +158,7 @@ const x = [
     "assetIDRanges": [
       [
         1,
-        10
+        13
       ]
     ],
     "chainId": 1285,
