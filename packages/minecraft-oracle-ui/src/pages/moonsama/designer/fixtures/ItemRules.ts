@@ -37,12 +37,6 @@ export const ADDITIONAL_CHILD_LAYERS_CONFIG: AdditionalLayersConfigType = {
             otherAddress: '0x00002',
             otherChainId: 1285,
             map: (id: string) => BACKGROUND_TO_FOREGROUND_MAP[id],
-        },
-        "Special Items": {
-            other: 'Attribute Multipart',
-            otherAddress: '0x00007',
-            otherChainId: 1285,
-            map: (id: string) => BACKGROUND_TO_FOREGROUND_MAP[id],
         }
     }
 }
