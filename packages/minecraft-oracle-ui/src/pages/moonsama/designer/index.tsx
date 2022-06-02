@@ -338,9 +338,6 @@ const getAssetImages = (customizationCategory: CustomizationCategory, ownedAsset
   const attributeBridgeOptions = []
   const attributeWalletOptions = []
 
-  //const attrDuplicateMap: {[key: string]: boolean} = {}
-
-
   const items = MOONSAMA_CUSTOMIZATION_ITEM_GROUPS.filter(item => {
     return item.title === customizationCategory.title
   })
@@ -520,6 +517,8 @@ const Cell = memo(({ columnIndex, rowIndex, style, data }: GridChildComponentPro
 
   const customization = data.myCustomizations[`${data.traitOptionsAssets[assetIndex]?.assetAddress} - ${data.traitOptionsAssets[assetIndex]?.assetId}`];
 
+  //console.log('CELL', {columnIndex, rowIndex, style, data, assetIndex, isSelected, traitLength: data.traitOptionsAssets.length, windowInnerWIdth: window.innerWidth})
+
   useEffect(() => {
     if (assetIndex >= data.traitOptionsAssets.length) return
 
@@ -592,6 +591,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   const [saveConfigModal, setShowSaveConfigModal] = useState<boolean>(false);
   const [saveProgress, setSaveProgress] = useState<{ inProgress?: boolean, errorMessage?: string }>({});
   const [fetchingCustomizations, setFetchingCustomizations] = useState<Array<AssetIdentifier>>([]);
+  const [bullshit, setBullshit] = useState<boolean>(false);
 
   const onChainItems = useOnChainItemsWithCompositeMetaAndAssets();
   const inGameItems = useInGameItemsWithCompositeMetaAndAssets();
@@ -599,7 +599,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   console.log('BINNNNNGGGG')
 
   const traitOptionsAssets = useMemo(() => {
-    console.log('MEMOOO')
+    console.log('MEMOOO', {ownedAssets})
     return getAssetImages(expanded, ownedAssets);
 
   }, [expanded, JSON.stringify(ownedAssets)]);
@@ -954,6 +954,19 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
 
     return null
   }
+
+
+  useEffect(() => {
+    if (!ownedAssets.bridge && !ownedAssets.bridgeAttributes && !ownedAssets.wallet && !ownedAssets.walletAttributes) {
+      return
+    }
+
+    // needed to fix glitch when no wallet no bridge connected
+    // lol
+    console.debug('BULLSHIT trigger', {ownedAssets})
+    setBullshit(!bullshit)
+
+  }, [JSON.stringify(ownedAssets)]);
 
   // owns all the selected items
   let allowedToSave = true;
