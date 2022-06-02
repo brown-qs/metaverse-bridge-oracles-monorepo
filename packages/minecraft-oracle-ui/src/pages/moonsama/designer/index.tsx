@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, memo } from 'react';
 import { useOnChainItemsWithCompositeMetaAndAssets } from 'hooks/multiverse/useOnChainItems';
-import { Box, Typography, Modal, CircularProgress } from '@mui/material';
+import { Box, Typography, Modal, CircularProgress, IconButton } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useClasses } from 'hooks';
@@ -599,7 +599,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
   console.log('BINNNNNGGGG')
 
   const traitOptionsAssets = useMemo(() => {
-    console.log('MEMOOO', {ownedAssets})
+    console.log('MEMOOO', { ownedAssets })
     return getAssetImages(expanded, ownedAssets);
 
   }, [expanded, JSON.stringify(ownedAssets)]);
@@ -963,7 +963,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
 
     // needed to fix glitch when no wallet no bridge connected
     // lol
-    console.debug('BULLSHIT trigger', {ownedAssets})
+    console.debug('BULLSHIT trigger', { ownedAssets })
     setBullshit(!bullshit)
 
   }, [JSON.stringify(ownedAssets)]);
@@ -1026,63 +1026,53 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
               <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                 <ImageStack layers={[...currentCustomization.children, currentCustomization.parent]} />
                 <div style={{ position: 'absolute', bottom: '8px', left: '8px' }}>
-                  <Stack direction="row" justifyContent="start" alignItems="end" spacing={1}>
-                    <LoadingButton
-                      variant="outlined"
-                      loadingPosition="start"
-                      onClick={() => {
-                        if (currentCustomization.children !== null && currentCustomization.parent !== null) {
-                          downloadAsImage([...currentCustomization.children, currentCustomization.parent])
-                        }
-                      }}
-                      className={customizerActionButton}
-                      sx={{ marginBottom: 1 }}
-                      startIcon={(
+                  {isMobileViewport ? (
+                    <Stack direction="row" justifyContent="start" alignItems="end" spacing={1}>
+                      <IconButton
+                        style={{ justifySelf: 'center', alignSelf: 'center', margin: 0 }}
+                        onClick={() => {
+                          if (currentCustomization.children !== null && currentCustomization.parent !== null) {
+                            downloadAsImage([...currentCustomization.children, currentCustomization.parent])
+                          }
+                        }}
+                        className={customizerActionButton}
+                        sx={{ marginBottom: 1 }}
+                      >
                         <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-download" width="20" height="20" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#ffffff" fill="none" strokeLinecap="round" strokeLinejoin="round">
                           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                           <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
                           <polyline points="7 11 12 16 17 11" />
                           <line x1="12" y1="4" x2="12" y2="16" />
-                        </svg>)}>Download
-                    </LoadingButton>
-
-                    <Stack direction={isMobileViewport ? 'column' : 'row-reverse'} spacing={1} alignItems="center" sx={{ backgroundColor: isLoggedIn && allowedToSave ? 'transparent' : 'rgba(22, 19, 43, 0.75)', backgroundBlendMode: 'lighten', p: 1, borderRadius: (isMobileViewport ? '0.5rem' : '800px') }}>
-                      <Box style={{ textTransform: 'uppercase', fontSize: '12px', display: 'flex', alignItems: 'center', paddingRight: (isMobileViewport ? '0px' : '8px'), textAlign: 'center' }}>
-                        {!isLoggedIn && 'Login to save or share'}
-                        {isLoggedIn && !allowedToSave && 'Assets not owned by you'}
-                      </Box>
-
-                      <Stack direction="row" spacing={1}>
-                        <LoadingButton
-                          loading={saveProgress.inProgress}
-                          variant="outlined"
-                          loadingPosition="start"
-                          onClick={() => saveCustomizationCallback()}
-                          className={customizerActionButton}
-                          disabled={!isLoggedIn || !allowedToSave}
-                          startIcon={(
+                        </svg>
+                      </IconButton>
+                      <Stack direction={isMobileViewport ? 'row-reverse' : 'row-reverse'} spacing={1} alignItems="center" sx={{ backgroundColor: isLoggedIn && allowedToSave ? 'transparent' : 'rgba(22, 19, 43, 0.75)', backgroundBlendMode: 'lighten', p: 1, borderRadius: (isMobileViewport ? '0.5rem' : '800px') }}>
+                        <Box style={{ textTransform: 'uppercase', fontSize: '12px', display: 'flex', alignItems: 'center', paddingRight: (isMobileViewport ? '0px' : '8px'), textAlign: 'center' }}>
+                          {!isLoggedIn && 'Login to save or share'}
+                          {isLoggedIn && !allowedToSave && 'Assets not owned by you'}
+                          {isLoggedIn && allowedToSave && <IconButton
+                            style={{ justifySelf: 'center', alignSelf: 'center', marginBottom: 0 }}
+                            onClick={() => saveCustomizationCallback()}
+                            className={customizerActionButton}
+                            sx={{ marginBottom: 1 }}
+                          >
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#fff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" className="icon icon-tabler icon-tabler-file-upload" viewBox="0 0 24 24">
                               <path stroke="none" d="M0 0h24v24H0z"></path>
                               <path d="M14 3v4a1 1 0 001 1h4"></path>
                               <path d="M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"></path>
                               <path d="M12 11L12 17"></path>
                               <path d="M9 14L12 11 15 14"></path>
-                            </svg>)}>
-                          Save
-                        </LoadingButton>
-
-                        <LoadingButton
-                          variant="outlined"
-                          loadingPosition="start"
-                          loading={saveProgress.inProgress}
-                          onClick={() => {
-                            saveCustomizationCallback(false)
-                            setShareURLCopied(false)
-                            shareCustomization(currentCustomization, setShowShareModal)
-                          }}
-                          className={customizerActionButton}
-                          disabled={!isLoggedIn || !allowedToSave}
-                          startIcon={(
+                            </svg>
+                          </IconButton>}
+                          {isLoggedIn && allowedToSave && <IconButton
+                            style={{ justifySelf: 'center', alignSelf: 'center', marginBottom: 0, marginLeft: '8px' }}
+                            onClick={() => {
+                              saveCustomizationCallback(false)
+                              setShareURLCopied(false)
+                              shareCustomization(currentCustomization, setShowShareModal)
+                            }}
+                            className={customizerActionButton}
+                            sx={{ marginBottom: 1 }}
+                          >
                             <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-share" width="20" height="20" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#ffffff" fill="none" strokeLinecap="round" strokeLinejoin="round">
                               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                               <circle cx="6" cy="12" r="3" />
@@ -1090,12 +1080,84 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
                               <circle cx="18" cy="18" r="3" />
                               <line x1="8.7" y1="10.7" x2="15.3" y2="7.3" />
                               <line x1="8.7" y1="13.3" x2="15.3" y2="16.7" />
-                            </svg>)}>
-                          Share
-                        </LoadingButton>
+                            </svg>
+                          </IconButton>}
+                        </Box>
                       </Stack>
                     </Stack>
-                  </Stack>
+                  ) : (
+                    <Stack direction="row" justifyContent="start" alignItems="end" spacing={1}>
+                      <LoadingButton
+                        variant="outlined"
+                        loadingPosition="start"
+                        onClick={() => {
+                          if (currentCustomization.children !== null && currentCustomization.parent !== null) {
+                            downloadAsImage([...currentCustomization.children, currentCustomization.parent])
+                          }
+                        }}
+                        className={customizerActionButton}
+                        sx={{ marginBottom: 1 }}
+                        startIcon={(
+                          <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-download" width="20" height="20" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#ffffff" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
+                            <polyline points="7 11 12 16 17 11" />
+                            <line x1="12" y1="4" x2="12" y2="16" />
+                          </svg>)}>
+                        Download
+                      </LoadingButton>
+
+                      <Stack direction={isMobileViewport ? 'row-reverse' : 'row-reverse'} spacing={1} alignItems="center" sx={{ backgroundColor: isLoggedIn && allowedToSave ? 'transparent' : 'rgba(22, 19, 43, 0.75)', backgroundBlendMode: 'lighten', p: 1, borderRadius: (isMobileViewport ? '0.5rem' : '800px') }}>
+                        <Box style={{ textTransform: 'uppercase', fontSize: '12px', display: 'flex', alignItems: 'center', paddingRight: (isMobileViewport ? '0px' : '8px'), textAlign: 'center' }}>
+                          {!isLoggedIn && 'Login to save or share'}
+                          {isLoggedIn && !allowedToSave && 'Assets not owned by you'}
+                        </Box>
+
+                        <Stack direction="row" spacing={1}>
+                          <LoadingButton
+                            loading={saveProgress.inProgress}
+                            variant="outlined"
+                            loadingPosition="start"
+                            onClick={() => saveCustomizationCallback()}
+                            className={customizerActionButton}
+                            disabled={!isLoggedIn || !allowedToSave}
+                            startIcon={(
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#fff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" className="icon icon-tabler icon-tabler-file-upload" viewBox="0 0 24 24">
+                                <path stroke="none" d="M0 0h24v24H0z"></path>
+                                <path d="M14 3v4a1 1 0 001 1h4"></path>
+                                <path d="M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"></path>
+                                <path d="M12 11L12 17"></path>
+                                <path d="M9 14L12 11 15 14"></path>
+                              </svg>)}>
+                            Save
+                          </LoadingButton>
+
+                          <LoadingButton
+                            variant="outlined"
+                            loadingPosition="start"
+                            loading={saveProgress.inProgress}
+                            onClick={() => {
+                              saveCustomizationCallback(false)
+                              setShareURLCopied(false)
+                              shareCustomization(currentCustomization, setShowShareModal)
+                            }}
+                            className={customizerActionButton}
+                            disabled={!isLoggedIn || !allowedToSave}
+                            startIcon={(
+                              <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-share" width="20" height="20" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#ffffff" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <circle cx="6" cy="12" r="3" />
+                                <circle cx="18" cy="6" r="3" />
+                                <circle cx="18" cy="18" r="3" />
+                                <line x1="8.7" y1="10.7" x2="15.3" y2="7.3" />
+                                <line x1="8.7" y1="13.3" x2="15.3" y2="16.7" />
+                              </svg>)}>
+                            Share
+                          </LoadingButton>
+                        </Stack>
+                      </Stack>
+                    </Stack>
+                  )}
                 </div>
               </div>
             )}
