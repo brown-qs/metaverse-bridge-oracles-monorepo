@@ -6,7 +6,8 @@ export const styles = (theme: Theme) => ({
     minWidth: '100vw',
     overflow: 'hidden',
     backgroundImage: `url(${BackgroundImage})`,
-    backgroundRepeat: 'no-repeat'
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: 'cover'
   },
   logo: {
     width: 300,
