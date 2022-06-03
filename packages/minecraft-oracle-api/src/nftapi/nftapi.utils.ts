@@ -317,6 +317,8 @@ export const fetchUrlCallback = () => {
         //console.log(url)
         const response = await axios.get(url, {});
         if (response.status === 200) {
+          //console.log(url)
+          //console.log(typeof response.data)
           return response.data as T;
         }
       } catch (err) {

@@ -76,7 +76,7 @@ export class NftApiService {
 
     public async getNFT(chainId: string, tokenType: string, address: string, tokenId: string): Promise<ProcessedStaticTokenData | StaticTokenData> {
 
-        this.logger.log(`Fetching NFT metadata: ${chainId}-${tokenType}-${address}-${tokenId}`, this.context)
+        this.logger.debug(`Fetching NFT metadata: ${chainId}-${tokenType}-${address}-${tokenId}`, this.context)
 
         const assets: Asset[] = [
             {
@@ -115,9 +115,9 @@ export class NftApiService {
         return result
     }
 
-    public async getRawNFTMetadata(chainId: string, tokenType: string, address: string, tokenId: string): Promise<unknown> {
+    public async getRawNFTMetadata(chainId: string, tokenType: string, address: string, tokenId: string): Promise<{metaObject?: unknown, metaUri?: string} | undefined> {
 
-        this.logger.log(`Fetching NFT metadata: ${chainId}-${tokenType}-${address}-${tokenId}`, this.context)
+        this.logger.debug(`Fetching NFT metadata: ${chainId}-${tokenType}-${address}-${tokenId}`, this.context)
 
         const assets: Asset[] = [
             {
@@ -142,9 +142,14 @@ export class NftApiService {
         }
         //console.log('yolo tryMultiCallCore res', results);
         let x = processTokenStaticCallResults(assets, results);
+        const tokenMetaUris = x.map(x => x.tokenURI)
         const tokenMetas = await this.useFetchRawTokenUri(x)
+        
 
-        return tokenMetas?.[0] as TokenMeta
+        return {
+            metaObject: tokenMetas?.[0] as TokenMeta,
+            metaUri: tokenMetaUris?.[0]
+        }
     }
 
     private tryMultiCallCore = async (

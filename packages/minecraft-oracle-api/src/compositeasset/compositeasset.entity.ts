@@ -2,7 +2,7 @@ import {
     IsJSON,
     IsString
 } from 'class-validator';
-import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 import { CompositeCollectionFragmentEntity } from '../compositecollectionfragment/compositecollectionfragment.entity';
 import { AssetEntity } from '../asset/asset.entity';
 import { CompositeMetadataType } from './types';
@@ -18,6 +18,9 @@ export class CompositeAssetEntity {
     @IsString()
     assetId: string;
 
+    @Column({ nullable: true })
+    originalMetadataUri?: string
+
     @IsJSON()
     @Column({ type: 'json', nullable: true })
     originalMetadata?: CompositeMetadataType;
@@ -32,6 +35,7 @@ export class CompositeAssetEntity {
     @OneToMany(() => AssetEntity, (asset) => asset.compositeAsset)
     children?: AssetEntity[];
 
-    @OneToMany(() => SyntheticItemEntity, (sItem) => sItem.compositeAsset)
+    @ManyToMany(() => SyntheticItemEntity, (sItem) => sItem.compositeAssets)
+    @JoinTable()
     syntheticChildren?: SyntheticItemEntity[];
 }

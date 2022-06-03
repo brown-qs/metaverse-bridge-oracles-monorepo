@@ -6,7 +6,6 @@ export const styles = (theme: Theme) => ({
         alignItems: 'center',
         flexDirection: 'column',
         margin: `${theme.spacing(8)}px 0`,
-
         [theme.breakpoints.down('sm')]: {
             textAlign: 'center',
         },
@@ -234,7 +233,7 @@ export const styles = (theme: Theme) => ({
             //background: '#710021 !important',
             borderColor: '#710021 !important',
             alignContent: 'center',
-            justifyContent: 'center'
+            justifyContent: 'space-between'
         },
     }
 });

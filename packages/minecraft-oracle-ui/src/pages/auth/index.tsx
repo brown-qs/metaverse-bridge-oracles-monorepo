@@ -1,24 +1,23 @@
 import { useParams, Redirect } from "react-router-dom";
 import { useAuth } from "hooks";
-import { useEffect } from "react";
-import { useProfileCallback } from "hooks/multiverse/useProfile";
 
 const AuthPage = () => {
     const { authData, setAuthData } = useAuth();
     const params = useParams<{ jwt: string }>();
-    const jwt = params.jwt;
+    const jwt = params?.jwt;
+    const redirectRoute = window.sessionStorage.getItem('authSuccessRedirect') ?? '/bridge';
     
-    if(!!authData?.jwt){
-        return <Redirect to='/profile'  />;
+    if(!!authData?.jwt && !jwt){
+        return <Redirect to={'/bridge'}  />;
     }
 
-    if(jwt) {
+    if(!!jwt) {
         setAuthData({
            jwt,
            userProfile: authData?.userProfile
         });
 
-        return <Redirect to='/profile'  />;
+        return <Redirect to={'/bridge'} />;
     }
 
     return <Redirect to='/login'  />;

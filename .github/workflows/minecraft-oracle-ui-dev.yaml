@@ -30,6 +30,7 @@ jobs:
           --build-arg REACT_APP_SUBGRAPH_URL=${{ env.REACT_APP_SUBGRAPH_URL }} \
           --build-arg REACT_APP_NFT_SUBGRAPH_URL=${{ env.REACT_APP_NFT_SUBGRAPH_URL }} \
           --build-arg REACT_APP_BACKEND_API_URL=${{ env.REACT_APP_BACKEND_API_URL }} \
+          --build-arg REACT_APP_COMPOSITE_MEDIA_URI_PREFIX=${{ env.REACT_APP_COMPOSITE_MEDIA_URI_PREFIX }} \
           -t ${{ env.IMAGE_TAG }} -f packages/minecraft-oracle-ui/Dockerfile .
         env:
           REACT_APP_CHAIN_ID: 1285
@@ -37,6 +38,7 @@ jobs:
           REACT_APP_SUBGRAPH_URL: https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/marketplacev2
           REACT_APP_NFT_SUBGRAPH_URL: https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/nft
           REACT_APP_BACKEND_API_URL: https://minecraft-metaverse-api-staging.moonsama.com/api/v1
+          REACT_APP_COMPOSITE_MEDIA_URI_PREFIX: https://dev.static.moonsama.com
 
       - name: Push Image
         run: docker push ${{ env.IMAGE_TAG }}
