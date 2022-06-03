@@ -386,8 +386,9 @@ export class CompositeApiService {
 
         if (imglayers.length > 1) {
             const cb = fetchImageBufferCallback()
+            console.log(JSON.stringify(imglayers))
             const imageLayers = (await Promise.all(imglayers.map(async (layer) => cb(layer))) as string[]).map(x => Buffer.from(x))
-            //console.log(typeof imageLayers[0])
+            console.log(typeof imageLayers[0])
 
             let data
             try {
@@ -408,7 +409,7 @@ export class CompositeApiService {
             try {
                 const res = await this.s3.upload({ Bucket: this.bucket, Body: data, Key: key, }, {}, (err, data) => {
                     if (err) {
-                        this.logger.error(`createCompositeMetadata:: s3 upload error`, err.message, this.context)
+                        this.logger.error(`createCompositeMetadata:: s3 upload error`, JSON.stringify(err.message), this.context)
                     }
                     if (data) {
                         this.logger.debug(`createCompositeMetadata:: upload ${JSON.stringify(data)}`, this.context)
