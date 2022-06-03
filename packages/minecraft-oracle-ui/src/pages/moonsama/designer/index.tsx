@@ -161,6 +161,7 @@ const findAssetItemGroup = (asset?: { assetAddress: string, assetId: string, cha
           return included
         }
       }
+      return false
     } else {
       return false
     }
