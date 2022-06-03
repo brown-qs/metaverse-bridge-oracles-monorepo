@@ -208,10 +208,6 @@ export class CompositeApiService {
 
         await this.compositeAssetService.update(compositeAsset.id, { compositeMetadata })
 
-        if (!!compositeAsset.syntheticChildren) {
-            await this.syntheticItemService.removeMultiple(compositeAsset.syntheticChildren)
-        }
-
         await Promise.all(childrenAssets.map(async (c) => {
             if (!c.synthetic) {
                 await this.assetService.update(c.hash, { compositeAsset })
