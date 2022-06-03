@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import {plainToClass} from "class-transformer";
 import crypto from "crypto";
 import atob from "atob";
+import axios from "axios";
 import {HttpCustom, HttpGet, HttpPost} from "http-client-methods";
 
 export module MicrosoftAuth {
@@ -104,12 +105,29 @@ export module MicrosoftAuth {
         let body = {
             "identityToken": `XBL3.0 x=${uhs};${xstsToken}`
         }
-        let response = await HttpPost("https://api.minecraftservices.com/authentication/login_with_xbox", JSON.stringify(body), {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        })
 
-        let jsonResponse: MCTokenResponse = JSON.parse(response);
+        let outboundProxy;
+        if ( process.env.OUTBOUND_PROXY_HOST != "" ){
+            outboundProxy = {
+                host: process.env.OUTBOUND_PROXY_HOST,
+                port: Number(process.env.OUTBOUND_PROXY_PORT),
+                auth: {
+                        username: process.env.OUTBOUND_PROXY_USERNAME,
+                        password: process.env.OUTBOUND_PROXY_PASSWORD
+                }
+            }
+        }
+        let response = await axios({
+            url: 'https://api.minecraftservices.com/authentication/login_with_xbox', 
+            method: 'post',
+            data: JSON.stringify(body),
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            proxy: outboundProxy
+        })
+        let jsonResponse: MCTokenResponse = response.data;
         return jsonResponse;
     }
 
@@ -381,8 +399,26 @@ export module MojangAPI {
     }
 
     export async function getProfile(token: string) {
-        let response = await HttpGet_BEARER("https://api.minecraftservices.com/minecraft/profile", token);
-        let jsonResponse: MCProfileResponse = JSON.parse(response);
+        let outboundProxy;
+        if ( process.env.OUTBOUND_PROXY_HOST != "" ){
+            outboundProxy = {
+                host: process.env.OUTBOUND_PROXY_HOST,
+                port: Number(process.env.OUTBOUND_PROXY_PORT),
+                auth: {
+                        username: process.env.OUTBOUND_PROXY_USERNAME,
+                        password: process.env.OUTBOUND_PROXY_PASSWORD
+                }
+            }
+        }
+        let response = await axios({
+            url: 'https://api.minecraftservices.com/minecraft/profile', 
+            method: 'get',
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            proxy: outboundProxy
+        })
+        let jsonResponse: MCProfileResponse = response.data;
         return jsonResponse;
     }
 

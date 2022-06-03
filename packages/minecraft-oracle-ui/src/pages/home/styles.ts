@@ -1,17 +1,11 @@
 import { Theme } from '@mui/material';
+import BackgroundImage from '../../assets/images/home/background.jpg'
 
 export const styles = (theme: Theme) => ({
   homeContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    flexDirection: 'column',
-    height: '100vh',
-    width: '100%',
+    minWidth: '100vw',
     overflow: 'hidden',
-
-    [theme.breakpoints.down('sm')]: {
-      textAlign: 'center',
-    },
+    backgroundImage: `url(${BackgroundImage})`
   },
   logo: {
     width: 300,
@@ -21,10 +15,7 @@ export const styles = (theme: Theme) => ({
     '& > img': {
       maxWidth: '100%',
       marginBottom: '-22px',
-    },
-    // [theme.breakpoints.down('sm')]: {
-    //   marginLeft: '20px',
-    // },
+    }
   },
   loginButton: {
     fontFamily: `VT323, 'arial'`,
@@ -52,9 +43,26 @@ export const styles = (theme: Theme) => ({
       transition: 'box-shadow 0.1s, background 0.1s, padding 0.1s',
     },
   },
+  loginButtonStyleV2: {
+      backgroundColor: 'rgba(14, 235, 168, 0.2)',
+      textTransform: 'uppercase',
+      padding: '12px 24px 12px 16px',
+      fontFamily: 'Orbitron',
+      fontSize: '12px',
+      lineHeight: '24px',
+      letterSpacing: '0.032em',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      border: '1px solid transparent',
+      cursor: 'pointer',
+      borderRadius: '4px',
+      '&:hover': {
+        border: '1px solid #0EEBA8',
+      }
+  },
   glitchText: {
-    fontFamily: `VT323, 'arial'`,
-    fontSize: '84px',
+    fontSize: '50px',
     color: '#fff',
     fontWeight: 'bold'
   },
@@ -62,12 +70,21 @@ export const styles = (theme: Theme) => ({
     position: 'absolute',
     left: 0,
     bottom: 0,
-    width: '43%',
+    maxHeight: '70%',
+    maxWidth: '50%'
   },
   rightBgImage: {
     position: 'absolute',
     right: 0,
     bottom: 0,
-    width: '43%',
+    maxHeight: '70%',
+    maxWidth: '50%'
+  },
+  centerBgImage: {
+    position: 'absolute',
+    right: '50%',
+    transform: 'translateX(50%)',
+    bottom: 0,
+    maxHeight: '40%'
   }
 });

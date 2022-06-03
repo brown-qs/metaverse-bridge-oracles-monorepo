@@ -2,7 +2,7 @@ import { ConfigError } from './errors';
 import { privateKeyToEthereumKeys } from '../crypto';
 
 export const loadChain = async () => {
-    
+
     const pKeyString = process.env.ORACLE_PRIVATE_KEY.trim()
 
     if (!pKeyString) {
@@ -68,6 +68,24 @@ export const loadEnv = () => {
         cron: {
             confirmWatchIntervalMs: process.env.CONFIRM_WATCH_INTERVAL_MS,
             disabled: process.env.CONFIRM_WATCH_DISABLED === 'true'
+        },
+        s3: {
+            accessKeyId: process.env.S3_ACCESS_KEY_ID,
+            secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+            region: process.env.S3_REGION,
+            bucket: process.env.S3_BUCKET
+        },
+        composite: {
+            uriPrefix: process.env.COMPOSITE_URI_PREFIX,
+            uriPostfix: process.env.COMPOSITE_URI_POSTFIX,
+            mediaKeyPrefix: process.env.COMPOSITE_MEDIA_KEY_PREFIX,
+            metadataPublicPath: process.env.COMPOSITE_METADATA_PUBLIC_PATH
+        },
+        outboundProxy: {
+            hostname: process.env.OUTBOUND_PROXY_HOST,
+            port: process.env.OUTBOUND_PROXY_PORT,
+            username: process.env.OUTBOUND_PROXY_USERNAME,
+            password: process.env.OUTBOUND_PROXY_PASSWORD
         }
     };
 };

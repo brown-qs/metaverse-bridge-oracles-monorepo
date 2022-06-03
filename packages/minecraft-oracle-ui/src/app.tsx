@@ -1,6 +1,5 @@
 import { AppProviders } from 'providers/AppProvider';
-import { Layout } from 'components';
-import { AccountDialog } from 'components';
+import { AccountDialog, Layout } from 'components';
 import { Routing } from 'pages';
 
 function MyApp() {

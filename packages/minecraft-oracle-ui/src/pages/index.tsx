@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { Switch, Route } from 'react-router-dom';
+import React from 'react';
+import { Switch, Route, Redirect } from 'react-router-dom';
 import { useAuth } from "hooks";
 import HomePage from './home';
 import AuthPage from './auth';
 import ProfilePage from './profile';
-import { TransferDialog } from '../components/TransferDiaog/TransferDialog';
+import MoonsamaCharacterDesignerPage from './moonsama/designer';
 import { ExportDialog } from '../components/ExportDialog/ExportDialog';
 import { ImportDialog } from '../components/ImportDialog/ImportDialog';
 import { EnraptureDialog } from '../components/EnraptureDialog/EnraptureDialog';
@@ -17,25 +17,36 @@ export const Routing = () => {
     return (
         <Switch>
             <Route exact path="/">
+                <Redirect to="/login" />
+            </Route>
+
+            <Route exact path="/auth/:jwt">
                 <AuthPage />
             </Route>
-            <Route exact path="/auth/:jwt">
-                <AuthPage/>
-            </Route>
+
             <Route exact path="/login">
-                {!!authData?.jwt ? <ProfilePage authData={authData} /> : <HomePage />}
+                {!!authData?.jwt ? <Redirect to="/bridge" /> : <HomePage />}
             </Route>
-            <Route path="/profile/:type/:address/:id">
-                <TransferDialog/>
+
+            <Route path="/bridge">
+                {!!authData?.jwt ? (
+                    <>
+                        <ImportDialog />
+                        <ExportDialog />
+                        <EnraptureDialog />
+                        <SummonDialog />
+                        <AssetDialog />
+                        <ProfilePage authData={authData} />
+                    </>
+                ) : <HomePage />}
             </Route>
-            <Route path="/profile">
-                <ImportDialog/>
-                <ExportDialog/>
-                <EnraptureDialog/>
-                <SummonDialog/>
-                <AssetDialog/>
-                {!!authData?.jwt ? <ProfilePage authData={authData} /> : <AuthPage />}
-                {/*<ProfilePage authData={{ jwt: '2034823423', userProfile: { name: 'cleanston3r' } }} />*/}
+
+            <Route path="/moonsama/customizer/:chainId/:assetAddress/:assetId">
+                <MoonsamaCharacterDesignerPage authData={authData} />
+            </Route>
+
+            <Route exact path="/moonsama/customizer">
+                <MoonsamaCharacterDesignerPage authData={authData} />
             </Route>
         </Switch>
     )

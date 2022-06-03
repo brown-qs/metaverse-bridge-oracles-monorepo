@@ -1,5 +1,5 @@
 import { CompositeAssetEntity } from '../compositeasset/compositeasset.entity';
-import { Column, Entity, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToMany, ManyToOne, PrimaryColumn } from 'typeorm';
 import { SyntheticPartEntity } from '../syntheticpart/syntheticpart.entity';
 
 @Entity()
@@ -11,8 +11,11 @@ export class SyntheticItemEntity {
     @Column()
     assetId: string
 
-    @ManyToOne(() => CompositeAssetEntity, (compositeAsset) => compositeAsset.syntheticChildren)
-    compositeAsset: CompositeAssetEntity;
+    @Column({ type: 'json', nullable: true })
+    attributes?: any;
+
+    @ManyToMany(() => CompositeAssetEntity, (compositeAsset) => compositeAsset.syntheticChildren)
+    compositeAssets?: CompositeAssetEntity[];
 
     @ManyToOne(() => SyntheticPartEntity, (syntheticPart) => syntheticPart.items)
     syntheticPart: SyntheticPartEntity;
