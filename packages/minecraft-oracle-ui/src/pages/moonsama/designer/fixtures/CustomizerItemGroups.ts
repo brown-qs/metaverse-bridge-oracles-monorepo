@@ -143,6 +143,12 @@ const x = [
     "attributes": [
       "Moonfinity Gauntlet"
     ],
+    "assetIDRanges": [
+      [
+        1,
+        1
+      ]
+    ],
     "chainId": 1285,
     "assetType": "ERC1155",
     "uriPrefix": `${process.env.REACT_APP_COMPOSITE_MEDIA_URI_PREFIX}`,
@@ -178,6 +184,12 @@ const x = [
       "Cheerleader Pom",
       "Champion Gloves",
       "Boxing Gloves"
+    ],
+    "assetIDRanges": [
+      [
+        1,
+        3
+      ]
     ],
     "chainId": 1285,
     "assetType": "ERC1155",
