@@ -5,7 +5,8 @@ export const styles = (theme: Theme) => ({
   homeContainer: {
     minWidth: '100vw',
     overflow: 'hidden',
-    backgroundImage: `url(${BackgroundImage})`
+    backgroundImage: `url(${BackgroundImage})`,
+    backgroundRepeat: 'no-repeat'
   },
   logo: {
     width: 300,
