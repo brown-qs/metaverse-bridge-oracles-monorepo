@@ -156,7 +156,10 @@ const findAssetItemGroup = (asset?: { assetAddress: string, assetId: string, cha
       for (let i = 0; i < group.assetIDRanges.length; i++) {
         const range = group.assetIDRanges[i]
         const id = Number.parseInt(asset.assetId)
-        return id >= range[0] && id <= range[1]
+        const included = id >= range[0] && id <= range[1]
+        if (included) {
+          return included
+        }
       }
     } else {
       return false
