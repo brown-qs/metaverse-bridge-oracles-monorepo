@@ -41,7 +41,7 @@ const HomePage = () => {
           <div className={logo}>
             <img src={WhiteLogo} alt="" />
           </div>
-          <Typography className={glitchText} fontFamily={'Orbitron'}>MULTIVERSE BRIDGE</Typography>
+          <Typography className={glitchText} fontSize={isMobileViewport ? '20px': '50px'} fontFamily={'Orbitron'}>MULTIVERSE BRIDGE</Typography>
 
           {!isLoading ? (
             <Tooltip title={`Login with your Microsoft Minecraft account. If you are still on Mojang please migrate first.`}>
