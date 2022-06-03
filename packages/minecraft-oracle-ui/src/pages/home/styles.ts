@@ -64,7 +64,6 @@ export const styles = (theme: Theme) => ({
       }
   },
   glitchText: {
-    fontSize: '50px',
     color: '#fff',
     fontWeight: 'bold'
   },
