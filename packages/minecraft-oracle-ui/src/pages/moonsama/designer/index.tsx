@@ -565,8 +565,8 @@ const Cell = memo(({ columnIndex, rowIndex, style, data }: GridChildComponentPro
         )}
         {data.traitOptionsAssets[assetIndex].location === AssetLocation.INCLUDED && <div style={{ position: 'absolute', bottom: '-2px', right: '-2px', textTransform: 'uppercase', fontSize: '8px', background: '#0EEBA8', color: '#16132B', padding: '4px 8px', letterSpacing: '0.02em', borderRadius: '8px 0 8px 0' }}>INCLUDED</div>}
         {data.traitOptionsAssets[assetIndex].location === AssetLocation.BRIDGE && <div style={{ position: 'absolute', bottom: '-2px', right: '-2px', textTransform: 'uppercase', fontSize: '8px', background: '#7515FF', color: '#16132B', padding: '4px 8px', letterSpacing: '0.02em', borderRadius: '8px 0 8px 0' }}>IN THE BRIDGE</div>}
-        {data.traitOptionsAssets[assetIndex].location === AssetLocation.WALLET && <div style={{ position: 'absolute', bottom: '-2px', right: '-2px', textTransform: 'uppercase', fontSize: '8px', background: '#FFC914', color: '#16132B', padding: '4px 8px', letterSpacing: '0.02em', borderRadius: '8px 0 8px 0' }}>IN WALLET</div>}
-        {data.traitOptionsAssets[assetIndex].location === AssetLocation.NONE && <div style={{ position: 'absolute', bottom: '-2px', right: '-2px', textTransform: 'uppercase', fontSize: '8px', background: '#F84AA7', color: '#16132B', padding: '4px 8px', letterSpacing: '0.02em', borderRadius: '8px 0 8px 0' }}>NOT OWNED</div>}
+        {data.traitOptionsAssets[assetIndex].location === AssetLocation.WALLET && <div style={{ position: 'absolute', bottom: '-2px', right: '-2px', textTransform: 'uppercase', fontSize: '8px', background: '#FFC914', color: '#FFFFFF', padding: '4px 8px', letterSpacing: '0.02em', borderRadius: '8px 0 8px 0' }}>IN WALLET</div>}
+        {data.traitOptionsAssets[assetIndex].location === AssetLocation.NONE && <div style={{ position: 'absolute', bottom: '-2px', right: '-2px', textTransform: 'uppercase', fontSize: '8px', background: '#F84AA7', color: '#FFFFFF', padding: '4px 8px', letterSpacing: '0.02em', borderRadius: '8px 0 8px 0' }}>NOT OWNED</div>}
       </Box>
     </Box>
   );
@@ -994,10 +994,14 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
     backgroundBlendMode: 'lighten',
     backgroundRepeat: 'no-repeat',
     cursor: 'default',
+    opacity: 0.6,
     '&:not(.expanded)&:hover': {
       cursor: 'pointer',
       opacity: 1,
       background: `#313168 url(${backgroundImage})`,
+    },
+    '&.expanded': {
+      opacity: 1,
     }
   }));
 
