@@ -43,7 +43,7 @@ export enum RecognizedAssetType {
   WEARABLE = 'WEARABLE',
   RESOURCE = 'RESOURCE',
   CONSUMABLE = 'CONSUMABLE',
-  
+  PONDSAMA_FISH = 'PONDSAMA_FISH'
 }
 
 export enum PlayEligibilityReason {
