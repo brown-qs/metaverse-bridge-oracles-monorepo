@@ -66,6 +66,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     //On chain Items
     const onChainItems = useOnChainItems();
     const onChainMoonsamas = onChainItems?.['Moonsama'] ?? [];
+    const onChainPondsamas = onChainItems?.['Pondsama'] ?? [];
     const onChainGoldenTickets = onChainItems?.['VIP Ticket'] ?? [];
     const onChainResources = onChainItems?.['Moonsama Metaverse Asset Factory'] ?? [];
     const onChainPlot = onChainItems?.['Moonsama Minecraft Plots Season 1'] ?? [];
@@ -76,7 +77,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     // TODO fixme
     const onChainBurnableResources = onChainResources.filter(x => BURNABLE_RESOURCES_IDS.includes(x.asset.assetId))
 
-    const onChainImportables = [...onChainBurnableResources, ...onChainGoldenTickets, ...onChainMoonbrella, ...onChainMoonsamas, ...onChainArt, ...onChainPlot, ...onChainEmbassy];
+    const onChainImportables = [...onChainBurnableResources, ...onChainGoldenTickets, ...onChainMoonbrella, ...onChainPondsamas, ...onChainMoonsamas, ...onChainArt, ...onChainPlot, ...onChainEmbassy];
 
     //In Game Items
     const inGameItems = useInGameItems(fetchtrigger);
@@ -318,7 +319,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                     </ListItem>
                                 );
                             }).concat(
-                                [...(onChainBurnableResources ?? []), ...(onChainArt ?? []), ...(onChainPlot ?? []), ...(onChainMoonbrella ?? []), ...(onChainEmbassy ?? []), ...(onChainMoonsamas ?? [])].map((item, ind) => {
+                                [...(onChainBurnableResources ?? []), ...(onChainArt ?? []), ...(onChainPlot ?? []), ...(onChainMoonbrella ?? []), ...(onChainEmbassy ?? []), ...(onChainMoonsamas ?? []), ...(onChainPondsamas ?? [])].map((item, ind) => {
                                     return (
                                         <ListItem
                                             key={`${item?.asset?.assetAddress}-${item?.asset?.assetId}-${ind}`} //update key
