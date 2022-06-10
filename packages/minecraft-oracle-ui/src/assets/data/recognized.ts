@@ -8,7 +8,8 @@ export enum RecognizedAssetType {
   PLOT='PLOT',
   OFFHAND='OFFHAND',
   WEAPON_SKIN='WEAPON_SKIN',
-  TEMPORARY_TICKET='TEMPORARY_TICKET'
+  TEMPORARY_TICKET='TEMPORARY_TICKET',
+  PONDSAMA='PONDSAMA'
 }
 
 export type RecognizedAsset = {

@@ -78,6 +78,18 @@ export const collections = {
     */
     {
       chainId: 1285,
+      address: '0xe4edcaaea73684b310fc206405ee80abcec73ee0',
+      display_name: 'Pondsama',
+      symbol: 'PONDSAMA',
+      type: 'ERC721',
+      ids: undefined,
+      enrapturable: false,
+      importable: true,
+      contractURI: 'ipfs://QmdCKgexLpBjST3FdWLbPZLH2FWRtu2NXE9dk5ZirdDRGb',
+      subgraph: 'https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/erc721-pondsama'
+    },
+    {
+      chainId: 1285,
       address: '0xb654611F84A8dc429BA3cb4FDA9Fad236C505a1a',
       display_name: 'Moonsama',
       symbol: 'MSAMA',
