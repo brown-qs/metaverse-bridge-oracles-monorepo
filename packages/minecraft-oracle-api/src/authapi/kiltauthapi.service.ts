@@ -4,20 +4,26 @@ import { UserService } from '../user/user.service';
 import { randomAsHex, cryptoWaitReady } from "@polkadot/util-crypto"
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { Did, init } from '@kiltprotocol/sdk-js'
-import { decryptChallenge, getFullDid } from "../kilt/verifier";
-export interface KiltChallengeSession {
+import { Did, IEncryptedMessage, init, Message, MessageBodyType, Utils, Credential, ICredential } from '@kiltprotocol/sdk-js'
+import { decryptChallenge, encryptionKeystore, getFullDid } from "../kilt/verifier";
+import { WalletLoginMessageApi } from './dtos/kilt.dto';
+export interface KiltSession {
     sessionId: string,
-    challenge: string,
+    walletSessionChallenge: string,
     dappName: string,
-    dAppEncryptionKeyId: string
+    dAppEncryptionKeyId: string,
+    walletLoginChallenge?: string,
+    did?: string,
+    didConfirmed?: boolean,
+    encryptionKeyId?: string,
+    verified?: boolean
 }
 
 @Injectable()
 export class KiltAuthApiService {
 
     private readonly context: string;
-    private readonly challengeSessions: KiltChallengeSession[] = []
+    private readonly kiltSessions: KiltSession[] = []
 
     constructor(
         private userService: UserService,
@@ -28,7 +34,7 @@ export class KiltAuthApiService {
         this.context = KiltAuthApiService.name;
     }
 
-    async getChallenge(): Promise<KiltChallengeSession> {
+    async getWalletSessionChallenge(): Promise<KiltSession> {
         await cryptoWaitReady()
         await init({ address: process.env.KILT_WSS_ADDRESS })
         // create session data
@@ -36,24 +42,20 @@ export class KiltAuthApiService {
 
         const dAppEncryptionKeyId = fullDid.assembleKeyId(fullDid.encryptionKey.id);
 
-        const kiltChallengeSession = {
+        const kiltSession = {
             sessionId: randomAsHex(),
-            challenge: randomAsHex(),
+            walletSessionChallenge: randomAsHex(),
             dappName: process.env.KILT_DAPP_NAME,
             dAppEncryptionKeyId,
         }
-        this.challengeSessions.push(kiltChallengeSession)
-        return kiltChallengeSession
+        this.kiltSessions.push(kiltSession)
+        return { ...kiltSession }
     }
 
 
-    async verifyChallenge(encryptionKeyId: string, encryptedChallenge: string, nonce: string, sessionId: string) {
+    async verifyWalletSessionChallenge(encryptionKeyId: string, encryptedWalletSessionChallenge: string, nonce: string, sessionId: string) {
 
-        // load the session, fail if null
-
-        //this.logger.error('authLogin:: auth flow error', null, this.context)
-
-        const session = this.challengeSessions.find(sess => sess.sessionId === sessionId)
+        const session = this.kiltSessions.find(sess => sess.sessionId === sessionId)
         if (!session) {
             this.logger.error(`kiltAuthVerifyChallenge:: sessionId: ${sessionId} not found`, null, this.context)
             throw new UnauthorizedException
@@ -67,11 +69,112 @@ export class KiltAuthApiService {
         }
 
         // decrypt the message
-        const decrypted = await decryptChallenge(encryptedChallenge, encryptionKey, nonce);
-        if (decrypted !== session.challenge) {
+        const decrypted = await decryptChallenge(encryptedWalletSessionChallenge, encryptionKey, nonce);
+        if (decrypted !== session.walletSessionChallenge) {
             this.logger.error(`kiltAuthVerifyChallenge:: challenge mismatch`, null, this.context)
             throw new UnauthorizedException
         }
+        session.did = encryptionKey.controller
+        session.encryptionKeyId = encryptionKeyId
+        session.didConfirmed = true
+    }
+
+    async getWalletLoginChallenge(sessionId: string): Promise<IEncryptedMessage> {
+        const session = this.kiltSessions.find(sess => sess.sessionId === sessionId)
+        if (!session) {
+            this.logger.error(`walletCredentialMessage:: sessionId: ${sessionId} not found`, null, this.context)
+            throw new UnauthorizedException
+        }
+
+        // load encryptionKeyId and the did, making sure it's confirmed
+        const { did, didConfirmed, encryptionKeyId } = session;
+        if (!did || !didConfirmed) {
+            this.logger.error(`walletCredentialMessage:: unconfirmed did`, null, this.context)
+            throw new UnauthorizedException
+        }
+        if (!encryptionKeyId) {
+            this.logger.error(`walletCredentialMessage:: missing encryptionKeyId`, null, this.context)
+            throw new UnauthorizedException
+        }
+
+
+        // set the challenge
+        const walletLoginChallenge = Utils.UUID.generate();
+        //TODO: i
+        session.walletLoginChallenge = walletLoginChallenge
+
+        // construct the message
+        const content = { cTypes, challenge: walletLoginChallenge };
+        const type = MessageBodyType.REQUEST_CREDENTIAL;
+        const didUri = process.env.KILT_VERIFIER_DID_URI;
+        const keyDid = encryptionKeyId.replace(/#.*$/, '');
+        const message = new Message({ content, type }, didUri, keyDid);
+        if (!message) {
+            this.logger.error(`walletCredentialMessage:: failed to construct message`, null, this.context)
+            throw new UnauthorizedException
+        }
+        const fullDid = await getFullDid();
+        // encrypt the message
+        let output
+        try {
+            output = await message.encrypt(fullDid.encryptionKey.id, fullDid, encryptionKeystore, encryptionKeyId);
+
+        } catch (e) {
+            this.logger.error(`walletCredentialMessage:: unable to encrypt challege`, null, this.context)
+            throw new UnauthorizedException
+
+        }
+
+
+        if (!output) {
+            this.logger.error(`walletCredentialMessage:: failed to encrypt message`, null, this.context)
+
+            throw new UnauthorizedException
+        }
+
+        return output
+    }
+    async verifyWalletLoginChallenge(sessionId: string, rawMessage: WalletLoginMessageApi) {
+
+        const session = this.kiltSessions.find(sess => sess.sessionId === sessionId)
+        if (!session) {
+            this.logger.error(`verifyWalletLoginChallenge:: sessionId: ${sessionId} not found`, null, this.context)
+            throw new UnauthorizedException
+        }
+
+
+        const walletLoginChallenge = session.walletLoginChallenge
+        if (!walletLoginChallenge) {
+            this.logger.error(`verifyWalletLoginChallenge:: invalid loginChallenge request`, null, this.context)
+            throw new UnauthorizedException
+        }
+
+        // get decrypted message
+        const fullDid = await getFullDid();
+        const message = await Message.decrypt(rawMessage, encryptionKeystore, fullDid);
+        const messageBody = message.body;
+        const type = messageBody.type
+        const content = messageBody.content as ICredential[]
+
+        // fail if incorrect message type
+        if (type !== 'submit-credential') {
+            this.logger.error(`verifyWalletLoginChallenge:: unexpected message type`, null, this.context)
+            throw new UnauthorizedException
+        }
+
+        // load the credential, check attestation and ownership
+        const credential = Credential.fromCredential(content[0]);
+        const isValid = await credential.verify({ challenge: walletLoginChallenge });
+        const { owner } = credential.request.claim
+        const did = owner.includes(':light:') ? `did:kilt:${owner.split(':')[3]}` : owner
+
+        if (!isValid) {
+            this.logger.error(`verifyWalletLoginChallenge:: invalid credential`, null, this.context)
+            throw new UnauthorizedException
+        }
+        session.verified = true
+        console.log("successfully logged in")
+        //TODO: mark session as verified: true
     }
 }
 
@@ -81,3 +184,32 @@ async function getEncryptionKey(encryptionKeyId: string) {
     const encryptionKey = await Did.DidResolver.resolveKey(encryptionKeyId);
     return encryptionKey
 }
+
+const cTypes = [
+
+    {
+        name: 'peregrine email',
+        cTypeHash:
+            '0x3291bb126e33b4862d421bfaa1d2f272e6cdfc4f96658988fbcffea8914bd9ac',
+    },
+    {
+        name: 'peregrine github',
+        cTypeHash:
+            '0xad52bd7a8bd8a52e03181a99d2743e00d0a5e96fdc0182626655fcf0c0a776d0',
+    },
+    {
+        name: 'peregrine twitch',
+        cTypeHash:
+            '0x568ec5ffd7771c4677a5470771adcdea1ea4d6b566f060dc419ff133a0089d80',
+    },
+    {
+        name: 'peregrine twitter',
+        cTypeHash:
+            '0x47d04c42bdf7fdd3fc5a194bcaa367b2f4766a6b16ae3df628927656d818f420',
+    },
+    {
+        name: 'peregrine discord',
+        cTypeHash:
+            '0xd8c61a235204cb9e3c6acb1898d78880488846a7247d325b833243b46d923abe',
+    },
+]
