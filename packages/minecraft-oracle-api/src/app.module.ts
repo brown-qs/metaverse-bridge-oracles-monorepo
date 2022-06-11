@@ -74,125 +74,127 @@ import { ResourceInventoryEntity } from './resourceinventory/resourceinventory.e
 import { ResourceInventoryModule } from './resourceinventory/resourceinventory.module';
 import { ResourceInventoryOffsetEntity } from './resourceinventoryoffset/resourceinventoryoffset.entity';
 import { ResourceInventoryOffsetModule } from './resourceinventoryoffset/resourceinventoryoffset.module';
+import { KiltAuthModule } from './authapi/kiltauthapi.module';
 
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-        envFilePath: ['.env', '.env.ci'],
-        isGlobal: true,
-        validationSchema: envValidationSchema(),
-        load: [loadAll]
-    }),
-    WinstonModule.forRootAsync({
-        useFactory: async (configService: ConfigService) => {
-            //console.log(configService.get<string>('typeorm'))
-            return {
-                level: configService.get<string>('log.level'),
-                format: winston.format.combine(
-                    winston.format.timestamp(),
-                    nestLikeConsoleFormat()
-                ),
-                transports: [new winston.transports.Console()]
-            };
-        },
-        inject: [ConfigService]
-    }),
-    TypeOrmModule.forRootAsync({
-        useFactory: async (configService: ConfigService) => ({
-            type: configService.get<string>('typeorm.connection') as any,
-            host: configService.get<string>('typeorm.host'),
-            port: configService.get<number>('typeorm.port'),
-            username: configService.get<string>('typeorm.username'),
-            password: configService.get<string>('typeorm.password'),
-            database: configService.get<string>('typeorm.database'),
-            entities: [
-                UserEntity,
-                SnapshotItemEntity,
-                InventoryEntity,
-                TextureEntity,
-                SkinEntity,
-                PlayerScoreEntity,
-                MaterialEntity,
-                GameEntity,
-                GameTypeEntity,
-                AchievementEntity,
-                PlayerAchievementEntity,
-                SecretEntity,
-                AssetEntity,
-                SummonEntity,
-                PlaySessionEntity,
-                PlaySessionStatEntity,
-                GganbuEntity,
-                SnaplogEntity,
-                GameItemTypeEntity,
-                PlayerGameItemEntity,
-                GameScoreTypeEntity,
-                ChainEntity,
-                CollectionEntity,
-                CollectionFragmentEntity,
-                CompositeCollectionFragmentEntity,
-                CompositeAssetEntity,
-                CompositePartEntity,
-                SyntheticPartEntity,
-                SyntheticItemEntity,
-                ResourceInventoryEntity,
-                ResourceInventoryOffsetEntity
-            ],
-            synchronize: configService.get<boolean>('typeorm.synchronize'),
-            logging: configService.get<boolean>('typeorm.logging'),
+    imports: [
+        ConfigModule.forRoot({
+            envFilePath: ['.env', '.env.ci'],
+            isGlobal: true,
+            validationSchema: envValidationSchema(),
+            load: [loadAll]
         }),
-        inject: [ConfigService]
-    }),
-    RedisModule.forRootAsync({
-        useFactory: (configService: ConfigService) => [
-            {
-                name: configService.get<string>('redis.name'),
-                host: configService.get<string>('redis.host'),
-                port: configService.get<number>('redis.port'),
-                password: configService.get<string>('redis.password'),
-                keyPrefix: configService.get<string>('redis.keyPrefix')
-            }
-        ],
-        inject: [ConfigService]
-    }),
-    PlaySessionModule,
-    CronModule,
-    ProviderModule,
-    CacheModule,
-    SecretModule,
-    AssetModule,
-    UserModule,
-    ProfileApiModule,
-    AuthModule,
-    TextureModule,
-    SkinModule,
-    MaterialModule,
-    SnapshotModule,
-    InventoryModule,
-    SummonModule,
-    AchievementModule,
-    PlayerAchievementModule,
-    PlayerScoreModule,
-    GameModule,
-    GameTypeModule,
-    GameApiModule,
-    AdminApiModule,
-    OracleApiModule,
-    NftApiModule,
-    GganbuModule,
-    SnaplogModule,
-    ChainModule,
-    CollectionModule,
-    CollectionFragmentModule,
-    CompositeCollectionFragmentModule,
-    CompositeAssetModule,
-    CompositePartModule,
-    SyntheticPartModule,
-    SyntheticItemModule,
-    ResourceInventoryModule,
-    ResourceInventoryOffsetModule,
-    CompositeApiModule
-  ]
+        WinstonModule.forRootAsync({
+            useFactory: async (configService: ConfigService) => {
+                //console.log(configService.get<string>('typeorm'))
+                return {
+                    level: configService.get<string>('log.level'),
+                    format: winston.format.combine(
+                        winston.format.timestamp(),
+                        nestLikeConsoleFormat()
+                    ),
+                    transports: [new winston.transports.Console()]
+                };
+            },
+            inject: [ConfigService]
+        }),
+        TypeOrmModule.forRootAsync({
+            useFactory: async (configService: ConfigService) => ({
+                type: configService.get<string>('typeorm.connection') as any,
+                host: configService.get<string>('typeorm.host'),
+                port: configService.get<number>('typeorm.port'),
+                username: configService.get<string>('typeorm.username'),
+                password: configService.get<string>('typeorm.password'),
+                database: configService.get<string>('typeorm.database'),
+                entities: [
+                    UserEntity,
+                    SnapshotItemEntity,
+                    InventoryEntity,
+                    TextureEntity,
+                    SkinEntity,
+                    PlayerScoreEntity,
+                    MaterialEntity,
+                    GameEntity,
+                    GameTypeEntity,
+                    AchievementEntity,
+                    PlayerAchievementEntity,
+                    SecretEntity,
+                    AssetEntity,
+                    SummonEntity,
+                    PlaySessionEntity,
+                    PlaySessionStatEntity,
+                    GganbuEntity,
+                    SnaplogEntity,
+                    GameItemTypeEntity,
+                    PlayerGameItemEntity,
+                    GameScoreTypeEntity,
+                    ChainEntity,
+                    CollectionEntity,
+                    CollectionFragmentEntity,
+                    CompositeCollectionFragmentEntity,
+                    CompositeAssetEntity,
+                    CompositePartEntity,
+                    SyntheticPartEntity,
+                    SyntheticItemEntity,
+                    ResourceInventoryEntity,
+                    ResourceInventoryOffsetEntity
+                ],
+                synchronize: configService.get<boolean>('typeorm.synchronize'),
+                logging: configService.get<boolean>('typeorm.logging'),
+            }),
+            inject: [ConfigService]
+        }),
+        RedisModule.forRootAsync({
+            useFactory: (configService: ConfigService) => [
+                {
+                    name: configService.get<string>('redis.name'),
+                    host: configService.get<string>('redis.host'),
+                    port: configService.get<number>('redis.port'),
+                    password: configService.get<string>('redis.password'),
+                    keyPrefix: configService.get<string>('redis.keyPrefix')
+                }
+            ],
+            inject: [ConfigService]
+        }),
+        PlaySessionModule,
+        CronModule,
+        ProviderModule,
+        CacheModule,
+        SecretModule,
+        AssetModule,
+        UserModule,
+        ProfileApiModule,
+        AuthModule,
+        KiltAuthModule,
+        TextureModule,
+        SkinModule,
+        MaterialModule,
+        SnapshotModule,
+        InventoryModule,
+        SummonModule,
+        AchievementModule,
+        PlayerAchievementModule,
+        PlayerScoreModule,
+        GameModule,
+        GameTypeModule,
+        GameApiModule,
+        AdminApiModule,
+        OracleApiModule,
+        NftApiModule,
+        GganbuModule,
+        SnaplogModule,
+        ChainModule,
+        CollectionModule,
+        CollectionFragmentModule,
+        CompositeCollectionFragmentModule,
+        CompositeAssetModule,
+        CompositePartModule,
+        SyntheticPartModule,
+        SyntheticItemModule,
+        ResourceInventoryModule,
+        ResourceInventoryOffsetModule,
+        CompositeApiModule
+    ]
 })
-export class AppModule {}
+export class AppModule { }

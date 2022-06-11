@@ -11,6 +11,7 @@ import { Module } from '@nestjs/common';
 import { SecretModule } from '../secret/secret.module';
 import { SkinModule } from '../skin/skin.module';
 import { TextureModule } from '../texture/texture.module';
+import { KiltAuthApiService } from './kiltauthapi.service';
 
 @Module({
     imports: [
@@ -32,8 +33,8 @@ import { TextureModule } from '../texture/texture.module';
             inject: [ConfigService]
         })
     ],
-    providers: [MicrosoftSetupParamsProvider, AuthApiService, JwtStrategy],
+    providers: [KiltAuthApiService, JwtStrategy],
     controllers: [KiltAuthApiController],
     exports: [KiltAuthApiService]
 })
-export class AuthModule { }
+export class KiltAuthModule { }
