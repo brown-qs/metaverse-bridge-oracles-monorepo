@@ -38,4 +38,10 @@ export class KiltAuthApiController {
     async validateWalletSession(@Body() resp: { encryptionKeyId: string, encryptedChallenge: string, nonce: string, sessionId: string }) {
         return await this.kiltAuthApiService.verifyChallenge(resp.encryptionKeyId, resp.encryptedChallenge, resp.nonce, resp.sessionId)
     }
+
+    @Get('present_credential')
+    @ApiOperation({ summary: 'Present credential' })
+    async presentCredential(@Query("walletSessionId") walletSessionId: string): Promise<void> {
+
+    }
 }
