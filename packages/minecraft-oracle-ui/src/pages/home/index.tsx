@@ -35,29 +35,40 @@ const HomePage = () => {
 
 
   return (
-    <Stack direction="column" className={homeContainer} alignItems='center' textAlign='center' style={{height: `calc(100vh - ${isMobileViewport ? '58px': '80px'})`}}>
+    <Stack direction="column" className={homeContainer} alignItems='center' textAlign='center' style={{ height: `calc(100vh - ${isMobileViewport ? '58px' : '80px'})` }}>
 
-        <Stack direction={'column'} justifyContent='center' alignItems='center' spacing={3}>
-          <div className={logo}>
-            <img src={WhiteLogo} alt="" />
-          </div>
-          <Typography className={glitchText} fontSize={isMobileViewport ? '20px': '50px'} fontFamily={'Orbitron'}>MULTIVERSE BRIDGE</Typography>
+      <Stack direction={'column'} justifyContent='center' alignItems='center' spacing={3}>
+        <div className={logo}>
+          <img src={WhiteLogo} alt="" />
+        </div>
+        <Typography className={glitchText} fontSize={isMobileViewport ? '20px' : '50px'} fontFamily={'Orbitron'}>MULTIVERSE BRIDGE</Typography>
 
-          {!isLoading ? (
-            <Tooltip title={`Login with your Microsoft Minecraft account. If you are still on Mojang please migrate first.`}>
-              <Box onClick={handleLoginWithMinecraft} className={loginButtonStyleV2}>
-                <svg xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '8px' }} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0EEBA8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line>
-                </svg>
-                <span>Login with Minecraft</span>
-              </Box>
-            </Tooltip>
-          ) : <Loader />}
-        </Stack>
+        {!isLoading ? (
+          <Tooltip title={`Login with your Microsoft Minecraft account. If you are still on Mojang please migrate first.`}>
+            <Box onClick={handleLoginWithMinecraft} className={loginButtonStyleV2}>
+              <svg xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '8px' }} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0EEBA8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line>
+              </svg>
+              <span>Login with Minecraft</span>
+            </Box>
+          </Tooltip>
+        ) : <Loader />}
 
-        {!isMobileViewport && <img src={LeftImage} className={leftBgImage} alt="" />}
-        {!isMobileViewport && <img src={RightImageFlip} className={rightBgImage} alt="" />}
-        {isMobileViewport && <img src={LeftImage} className={centerBgImage} alt="" />}
+        {!isLoading ? (
+          <Tooltip title={`Login with your Kilt ident. Sporran wallet required`}>
+            <Box onClick={handleLoginWithMinecraft} className={loginButtonStyleV2}>
+              <svg xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '8px' }} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0EEBA8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line>
+              </svg>
+              <span>Login with Kilt</span>
+            </Box>
+          </Tooltip>
+        ) : <Loader />}
+      </Stack>
+
+      {!isMobileViewport && <img src={LeftImage} className={leftBgImage} alt="" />}
+      {!isMobileViewport && <img src={RightImageFlip} className={rightBgImage} alt="" />}
+      {isMobileViewport && <img src={LeftImage} className={centerBgImage} alt="" />}
     </Stack>
   );
 };
