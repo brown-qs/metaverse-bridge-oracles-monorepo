@@ -2,7 +2,7 @@ import { Inject, Injectable, UnprocessableEntityException } from '@nestjs/common
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { UserService } from '../user/user.service';
 
-import {MicrosoftAccount, MicrosoftAuth} from '../minecraftauth'
+import { MicrosoftAccount, MicrosoftAuth } from '../minecraftauth'
 import { ConfigService } from '@nestjs/config';
 import { ProviderToken } from '../provider/token';
 import { MicrosoftSetupParams } from '../provider';
@@ -25,7 +25,7 @@ export class AuthApiService {
     }
 
     public generateJwtToken(uuid: string, userName: string): string {
-        const payload = {sub: uuid, userName};
+        const payload = { sub: uuid, userName };
         return this.jwtService.sign(payload);
     }
 
@@ -56,7 +56,7 @@ export class AuthApiService {
             this.microsoftSetupParams.appSecret,
             this.microsoftSetupParams.redirectUrl
         )
-        
+
         let accessToken: string
         try {
             accessToken = await account.authFlow(code)
@@ -94,7 +94,7 @@ export class AuthApiService {
 
             const jwt = this.generateJwtToken(user.uuid, user.userName);
             const redirectLink = `${successfulAuthRedirect}/${jwt}`;
-            
+
             // check default skins
             /*
             (async () => {

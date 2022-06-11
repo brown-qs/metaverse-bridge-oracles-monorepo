@@ -31,6 +31,7 @@
     "seed:run": "ts-node ./node_modules/typeorm-seeding/dist/cli.js seed"
   },
   "dependencies": {
+    "@kiltprotocol/sdk-js": "^0.27.0",
     "@nestjs/common": "^8.0.6",
     "@nestjs/config": "^1.0.2",
     "@nestjs/core": "^8.0.6",
@@ -40,6 +41,7 @@
     "@nestjs/schedule": "^1.0.1",
     "@nestjs/swagger": "^5.1.0",
     "@nestjs/typeorm": "8.0.3",
+    "@polkadot/util-crypto": "^9.4.1",
     "@types/node-fetch": "2",
     "async-mutex": "^0.3.2",
     "atob": "2.1.2",
