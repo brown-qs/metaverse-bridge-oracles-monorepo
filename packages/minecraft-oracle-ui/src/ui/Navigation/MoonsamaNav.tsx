@@ -15,7 +15,6 @@ import ServerAccount from './ServerAccount';
 import NavMenuItem from './NavMenuItem';
 import { styles } from './MoonsamaNav.styles'
 import { useClasses } from 'hooks';
-import KiltAccount from './KiltAccount';
 
 export default function MoonsamaNav() {
   const theme = useTheme();
@@ -55,7 +54,6 @@ export default function MoonsamaNav() {
                   <div className={menuNavItemRegular}><NavMenuItem href={'/moonsama/customizer'} label={`Customizer`} /></div>
                   <div className={menuNavItemRegular}><NavMenuItem href={'https://marketplace.moonsama.com'} label={`Marketplace`} external={true} /></div>
                   <div className={menuNavItemRegular}><NavMenuItem href={'https://wiki.moonsama.com'} label={`Docs`} external={true} /></div>
-                  <div className={menuNavItemRegular}><KiltAccount /></div>
                   <div className={menuNavItemRegular}><CarnageStatus /></div>
                   <div className={menuNavItemRegular}><ConnectedNetwork /></div>
                   <div className={menuNavItemRegular}><WalletAccount /></div>
@@ -85,7 +83,6 @@ export default function MoonsamaNav() {
                       <div className={menuNavItemDrawer}><NavMenuItem href={'/moonsama/customizer'} label={`Customizer`} /></div>
                       <div className={menuNavItemDrawer}><NavMenuItem href={'https://marketplace.moonsama.com'} label={`Marketplace`} external={true} /></div>
                       <div className={menuNavItemDrawer}><NavMenuItem href={'https://wiki.moonsama.com'} label={`Docs`} external={true} /></div>
-                      <div className={menuNavItemDrawer}><KiltAccount /></div>
                       <div className={menuNavItemDrawer}><CarnageStatus /></div>
                       <div className={menuNavItemDrawer}><ConnectedNetwork /></div>
                       <div className={menuNavItemDrawer}><ServerAccount /></div>
