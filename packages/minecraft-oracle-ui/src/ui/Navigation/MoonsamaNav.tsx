@@ -13,8 +13,9 @@ import ConnectedNetwork from './ConnectedNetwork';
 import WalletAccount from './WalletAccount';
 import ServerAccount from './ServerAccount';
 import NavMenuItem from './NavMenuItem';
-import {styles} from './MoonsamaNav.styles'
+import { styles } from './MoonsamaNav.styles'
 import { useClasses } from 'hooks';
+import KiltAccount from './KiltAccount';
 
 export default function MoonsamaNav() {
   const theme = useTheme();
@@ -37,7 +38,7 @@ export default function MoonsamaNav() {
   return (
     <AppBar sx={{ backgroundColor: '#1B1B3A', boxShadow: '0px 20px 25px -5px rgba(0, 0, 0, 0.1), 0px 10px 10px -5px rgba(0, 0, 0, 0.04)' }} position="static">
       <Toolbar sx={{ position: 'relative' }}>
-        <Container maxWidth={false} style={{paddingLeft: 0, paddingRight: 0}} sx={{ paddingTop: '4px', paddingBottom: '4px'}}>
+        <Container maxWidth={false} style={{ paddingLeft: 0, paddingRight: 0 }} sx={{ paddingTop: '4px', paddingBottom: '4px' }}>
           <Stack direction='row' alignItems="center" justifyContent="space-between">
             <div style={{ marginRight: 'auto', display: 'flex', alignItems: 'center' }}>
               {collapseLogo ? (
@@ -50,10 +51,11 @@ export default function MoonsamaNav() {
             <Stack direction='row' justifyContent='flex-end'>
               {!showRegularMenu ? (
                 <Stack direction={'row'} onClick={() => setIsDrawerOpened(false)}>
-                  <div className={menuNavItemRegular}><NavMenuItem href={'/bridge'} label={`Bridge`}/></div>
-                  <div className={menuNavItemRegular}><NavMenuItem href={'/moonsama/customizer'} label={`Customizer`}/></div>
-                  <div className={menuNavItemRegular}><NavMenuItem href={'https://marketplace.moonsama.com'} label={`Marketplace`} external={true}/></div>
-                  <div className={menuNavItemRegular}><NavMenuItem href={'https://wiki.moonsama.com'} label={`Docs`} external={true}/></div>
+                  <div className={menuNavItemRegular}><NavMenuItem href={'/bridge'} label={`Bridge`} /></div>
+                  <div className={menuNavItemRegular}><NavMenuItem href={'/moonsama/customizer'} label={`Customizer`} /></div>
+                  <div className={menuNavItemRegular}><NavMenuItem href={'https://marketplace.moonsama.com'} label={`Marketplace`} external={true} /></div>
+                  <div className={menuNavItemRegular}><NavMenuItem href={'https://wiki.moonsama.com'} label={`Docs`} external={true} /></div>
+                  <div className={menuNavItemRegular}><KiltAccount /></div>
                   <div className={menuNavItemRegular}><CarnageStatus /></div>
                   <div className={menuNavItemRegular}><ConnectedNetwork /></div>
                   <div className={menuNavItemRegular}><WalletAccount /></div>
@@ -79,10 +81,11 @@ export default function MoonsamaNav() {
                     onOpen={() => setIsDrawerOpened(true)}
                     onClick={() => setIsDrawerOpened(false)}>
                     <Box>
-                      <div className={menuNavItemDrawer}><NavMenuItem href={'/bridge'} label={`Bridge`}/></div>
-                      <div className={menuNavItemDrawer}><NavMenuItem href={'/moonsama/customizer'} label={`Customizer`}/></div>
-                      <div className={menuNavItemDrawer}><NavMenuItem href={'https://marketplace.moonsama.com'} label={`Marketplace`} external={true}/></div>
-                      <div className={menuNavItemDrawer}><NavMenuItem href={'https://wiki.moonsama.com'} label={`Docs`} external={true}/></div>
+                      <div className={menuNavItemDrawer}><NavMenuItem href={'/bridge'} label={`Bridge`} /></div>
+                      <div className={menuNavItemDrawer}><NavMenuItem href={'/moonsama/customizer'} label={`Customizer`} /></div>
+                      <div className={menuNavItemDrawer}><NavMenuItem href={'https://marketplace.moonsama.com'} label={`Marketplace`} external={true} /></div>
+                      <div className={menuNavItemDrawer}><NavMenuItem href={'https://wiki.moonsama.com'} label={`Docs`} external={true} /></div>
+                      <div className={menuNavItemDrawer}><KiltAccount /></div>
                       <div className={menuNavItemDrawer}><CarnageStatus /></div>
                       <div className={menuNavItemDrawer}><ConnectedNetwork /></div>
                       <div className={menuNavItemDrawer}><ServerAccount /></div>
