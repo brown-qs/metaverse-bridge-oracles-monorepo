@@ -3,9 +3,12 @@ import "@fontsource/orbitron/500.css";
 import { useClasses } from 'hooks';
 import { getKilExtension, walletLogin } from 'utils/kilt';
 import { useEffect, useState } from 'react';
+import { Button } from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 export default function KiltAccount() {
   const [loading, setLoading] = useState<boolean>(false);
+  const [loggedIn, setLoggedIn] = useState<boolean>(false);
 
   const errorState = false
   const styles = () => ({
@@ -52,9 +55,16 @@ export default function KiltAccount() {
       alert("No kilt wallet!")
       return
     }
-    await walletLogin(kiltExtension)
 
+    try {
+      await walletLogin(kiltExtension)
+    } catch (e) {
+      setLoading(false)
+      alert(e)
+      return
+    }
 
+    setLoggedIn(true)
     setLoading(false)
   }
 
@@ -62,15 +72,16 @@ export default function KiltAccount() {
 
   if (loading) {
     return (
-      <Box className={BoxStyle}>
-        Kilt Login Loading
-      </Box>
+      <LoadingButton loading loadingPosition="end" variant="contained" onClick={() => handleLogin()}>KILT Login&nbsp;&nbsp;&nbsp;</LoadingButton>
+    );
+  } else if (loggedIn) {
+    return (
+      <LoadingButton variant="contained" onClick={() => handleLogin()}>KILT Logout</LoadingButton>
+
     );
   } else {
     return (
-      <Box className={BoxStyle} onClick={() => handleLogin()}>
-        Kilt Login
-      </Box>
+      <LoadingButton variant="contained" onClick={() => handleLogin()}>KILT Login</LoadingButton>
     );
   }
 
