@@ -16,7 +16,7 @@ import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { GameApiService } from './gameapi.service';
 import { UserService } from '../user/user.service';
 import { ProfileDto } from '../profileapi/dtos/profile.dto';
-import { SnapshotsDto } from './dtos/snapshot.dto';
+import { BulkSnapshotRequestDto, SnapshotsDto } from './dtos/snapshot.dto';
 import { PlayerSkinDto } from './dtos/texturemap.dto';
 import { PermittedMaterials } from './dtos/permitted-material.dto';
 import { SharedSecretGuard } from '../authapi/secret.guard';
@@ -142,7 +142,7 @@ export class GameApiController {
     @ApiOperation({ summary: 'Saves player resources' })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
-    async snapshot(
+    async playerSnapshot(
         @Param('uuid') uuid: string,
         @Body() snapshots: SnapshotsDto,
     ): Promise<boolean[]> {
@@ -152,7 +152,19 @@ export class GameApiController {
             throw new UnprocessableEntityException('No player found')
         }
 
-        const [snapshottedItems, successArray, receivedNum, savedNum] = await this.gameApiService.processSnapshots(user, snapshots)
+        const [snapshottedItems, successArray, receivedNum, savedNum] = await this.gameApiService.processUserSnapshots(user, snapshots)
+        return successArray
+    }
+
+    @Put('snapshot')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Saves resources' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async snapshot(
+        @Body() dto: BulkSnapshotRequestDto,
+    ): Promise<boolean[]> {
+        const successArray = await this.gameApiService.processSnapshots(dto)
         return successArray
     }
 
