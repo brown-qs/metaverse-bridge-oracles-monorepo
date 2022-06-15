@@ -7,6 +7,7 @@ export interface Asset {
   assetId: string;
   assetType: StringAssetType;
   assetAddress: string;
+  chainId?: number
 }
 
 export interface StaticTokenData {
