@@ -1,16 +1,19 @@
-import { ApiProperty } from "@nestjs/swagger"
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger"
 import { UserEntryDto } from "./alluserassets.dto"
 
 export class UsersFungibleBalancesQueryDto {
 
-    @ApiProperty({ description: 'Pagination take. Number of users queried.', default: 100 })
+    @ApiPropertyOptional({ description: 'Pagination take. Number of users queried.', default: 100 })
     take: number
 
-    @ApiProperty({ description: 'Pagination offset', default: 0 })
+    @ApiPropertyOptional({ description: 'Pagination offset', default: 0 })
     offset: number
 
     @ApiProperty({ description: 'Whether to exclude entries with no balances', default: false })
     excludeEmpty: boolean
+
+    @ApiPropertyOptional({ description: 'Specific user uuids (trimmed) to query instead of take and offset.'})
+    specifics?: string[]
 }
 
 class FungibleBalanceDto {

@@ -15,6 +15,8 @@ import { UserService } from '../user/user.service';
 import { AllAssetsQueryDto, AllAssetsResultDto } from './dtos/allassets.dto';
 import { FungibleBalanceEntryDto, UsersFungibleBalancesQueryDto, UsersFungibleBalancesResultDto } from './dtos/fungiblebalances.dto';
 import { CollectionFragmentService } from '../collectionfragment/collectionfragment.service';
+import { In } from 'typeorm';
+import { fromTokenizer } from 'file-type';
 
 @Injectable()
 export class AssetApiService {
@@ -36,7 +38,11 @@ export class AssetApiService {
     async allUserAssets(dto: AllAssetsQueryDto) {
         const take = dto.take ?? 100
         const skip = dto.offset ?? 0
-        const users = await this.userService.findMany({ where: { pendingIn: false }, take, skip, order: { uuid: 'ASC' }, relations: ['assets'] })
+
+        const specs = typeof dto.specifics === 'string' ? [dto.specifics] : dto.specifics
+
+        const users = dto.specifics ? await this.userService.findMany({ where: { uuid: In(specs) }, order: { uuid: 'ASC' }, relations: ['assets'] })
+             : await this.userService.findMany({ take, skip, order: { uuid: 'ASC' }, relations: ['assets'] })
         return {
             results: users.map(u => {
                 return {
@@ -53,7 +59,11 @@ export class AssetApiService {
     async allAssets(dto: AllAssetsQueryDto): Promise<AllAssetsResultDto> {
         const take = dto.take ?? 1000
         const skip = dto.offset ?? 0
-        const assets = await this.assetService.findMany({ where: { pendingIn: false }, take, skip, order: { hash: 'ASC' }, relations: ['owner'] })
+
+        const specs = typeof dto.specifics === 'string' ? [dto.specifics] : dto.specifics
+
+        const assets = dto.specifics ? await this.assetService.findMany({ where: { hash: In(specs)}, order: { hash: 'ASC' }, relations: ['owner'] })
+            : await this.assetService.findMany({ where: { pendingIn: false }, take, skip, order: { hash: 'ASC' }, relations: ['owner'] })
         return {
             results: assets.map(a => {
                 return { ...a, owner: { name: a.owner.userName, uuid: a.owner.uuid } }
@@ -89,7 +99,11 @@ export class AssetApiService {
     async getAssetFingerprints(dto: UsersAssetFingerprintQuery): Promise<UserAssetFingerprintsResult> {
         const take = dto.take ?? 100
         const skip = dto.offset ?? 0
-        const users = await this.userService.findMany({ where: { hasGame: true }, relations: ['assets', 'assets.collectionFragment', 'assets.collectionFragment.collection'], loadEagerRelations: true, take, skip, order: { uuid: 'ASC' } })
+
+        const specs = typeof dto.specifics === 'string' ? [dto.specifics] : dto.specifics
+
+        const users = dto.specifics ? await this.userService.findMany({ where: { hasGame: true, uuid: In(specs) }, relations: ['assets', 'assets.collectionFragment', 'assets.collectionFragment.collection'], loadEagerRelations: true, order: { uuid: 'ASC' } })
+            : await this.userService.findMany({ where: { hasGame: true }, relations: ['assets', 'assets.collectionFragment', 'assets.collectionFragment.collection'], loadEagerRelations: true, take, skip, order: { uuid: 'ASC' } })
         const results: UserAssetFingerprint[] = users.map(user => this.getAssetFingerprintForPlayer(user)).filter(x => !!x)
 
         return {
@@ -186,7 +200,10 @@ export class AssetApiService {
         const take = dto.take ?? 100
         const skip = dto.offset ?? 0
 
-        const res = await this.userService.findMany({ relations: ['resourceInventoryItems', 'resourceInventoryItems.offset', 'resourceInventoryItems.collectionFragment', 'resourceInventoryItems.collectionFragment.collection'], loadEagerRelations: true, take, skip, order: { uuid: 'ASC' } })
+        const specs = typeof dto.specifics === 'string' ? [dto.specifics] : dto.specifics
+
+        const res = dto.specifics ? await this.userService.findMany({ where: {uuid: In(specs)}, relations: ['resourceInventoryItems', 'resourceInventoryItems.offset', 'resourceInventoryItems.collectionFragment', 'resourceInventoryItems.collectionFragment.collection'], loadEagerRelations: true, order: { uuid: 'ASC' } })
+            : await this.userService.findMany({ relations: ['resourceInventoryItems', 'resourceInventoryItems.offset', 'resourceInventoryItems.collectionFragment', 'resourceInventoryItems.collectionFragment.collection'], loadEagerRelations: true, take, skip, order: { uuid: 'ASC' } })
 
         const results = res.map((user) => {
             return {

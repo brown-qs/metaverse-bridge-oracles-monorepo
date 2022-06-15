@@ -1,13 +1,16 @@
-import { ApiProperty } from "@nestjs/swagger"
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger"
 import { AssetEntity } from "../../asset/asset.entity"
 
 export class AllUserAssetsQueryDto {
 
-    @ApiProperty({ description: 'Pagination take. Number of users queried.', default: 100 })
+    @ApiPropertyOptional({ description: 'Pagination take. Number of users queried.', default: 100 })
     take: number
 
-    @ApiProperty({ description: 'Pagination offset', default: 0 })
+    @ApiPropertyOptional({ description: 'Pagination offset', default: 0 })
     offset: number
+
+    @ApiPropertyOptional({ description: 'Specific user uuids (trimmed) to query instead of take and offset.'})
+    specifics?: string[]
 }
 
 export class UserEntryDto {

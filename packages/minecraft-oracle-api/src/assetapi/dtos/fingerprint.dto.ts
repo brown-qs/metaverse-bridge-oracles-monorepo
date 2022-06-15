@@ -7,6 +7,9 @@ export class UsersAssetFingerprintQuery {
 
     @ApiProperty({ description: 'Pagination offset', default: 0 })
     offset: number
+
+    @ApiPropertyOptional({ description: 'Specific user uuids (trimmed) to query instead of take and offset.'})
+    specifics?: string[]
 }
 
 
