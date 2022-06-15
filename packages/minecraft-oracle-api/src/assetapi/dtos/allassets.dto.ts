@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger"
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger"
 import { AssetEntity } from "../../asset/asset.entity"
 import { UserEntryDto } from "./alluserassets.dto"
 
@@ -9,6 +9,9 @@ export class AllAssetsQueryDto {
 
     @ApiProperty({ description: 'Pagination offset', default: 0 })
     offset: number
+
+    @ApiPropertyOptional({ description: 'Specific asset hashes to query instead of take and offset.'})
+    specifics?: string[]
 }
 
 export class AllAssetsResultDto {
