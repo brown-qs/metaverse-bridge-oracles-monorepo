@@ -74,6 +74,7 @@ import { ResourceInventoryEntity } from './resourceinventory/resourceinventory.e
 import { ResourceInventoryModule } from './resourceinventory/resourceinventory.module';
 import { ResourceInventoryOffsetEntity } from './resourceinventoryoffset/resourceinventoryoffset.entity';
 import { ResourceInventoryOffsetModule } from './resourceinventoryoffset/resourceinventoryoffset.module';
+import { AssetApiModule } from './assetapi/assetapi.module';
 
 
 @Module({
@@ -192,7 +193,8 @@ import { ResourceInventoryOffsetModule } from './resourceinventoryoffset/resourc
     SyntheticItemModule,
     ResourceInventoryModule,
     ResourceInventoryOffsetModule,
-    CompositeApiModule
+    CompositeApiModule,
+    AssetApiModule
   ]
 })
 export class AppModule {}
