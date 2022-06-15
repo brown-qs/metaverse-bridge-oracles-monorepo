@@ -78,8 +78,6 @@ export class ProfileApiController {
     @Get('inprogress')
     @HttpCode(200)
     @ApiOperation({ summary: 'Returns whether there is an active game in progress or not' })
-    @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard)
     async getGameInProgress(dto: GameKindInProgressDto): Promise<boolean> {
         const inprogress = await this.gameApiService.getGameKindInProgress(dto)
         return inprogress
