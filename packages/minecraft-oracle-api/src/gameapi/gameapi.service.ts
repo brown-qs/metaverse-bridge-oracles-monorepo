@@ -11,7 +11,7 @@ import { PlayerSkinDto } from './dtos/texturemap.dto';
 import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
 import { MaterialService } from '../material/material.service';
 import { SnapshotService } from '../snapshot/snapshot.service';
-import { SnapshotDto, SnapshotsDto } from './dtos/snapshot.dto';
+import { BulkSnapshotRequestDto, SnapshotDto, SnapshotsDto } from './dtos/snapshot.dto';
 import { PermittedMaterial, PermittedMaterials } from './dtos/permitted-material.dto';
 import { GameService } from '../game/game.service';
 
@@ -117,7 +117,20 @@ export class GameApiService {
         }
     }
 
-    public async processSnapshots(user: UserEntity, dto: SnapshotsDto): Promise<[SnapshotItemEntity[], boolean[], number, number]> {
+    public async processSnapshots(dto: BulkSnapshotRequestDto): Promise<boolean[]> {
+        const res = []
+        for(const entry of dto.entries) {
+            const user = await this.userService.findByUuid(entry.uuid)
+            if (!user) {
+                res.push(false)
+            }
+            const [a,b,c,d] = await this.processUserSnapshots(user, entry)
+            res.push(c === d)
+        }
+        return res
+    }
+
+    public async processUserSnapshots(user: UserEntity, dto: SnapshotsDto): Promise<[SnapshotItemEntity[], boolean[], number, number]> {
 
         if (!user || !dto || !dto.snapshots || dto.snapshots.length == 0) {
             return [[], [], 0, 0]
