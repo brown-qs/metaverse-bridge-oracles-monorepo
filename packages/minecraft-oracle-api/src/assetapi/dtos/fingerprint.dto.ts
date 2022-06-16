@@ -19,7 +19,7 @@ export class UserAssetFingerprint {
     uuid: string
 
     @ApiProperty({ description: 'Fingerprint (hash) calculated out of the user assets.' })
-    assetsFingerprint: string
+    assetsFingerprint: string | undefined
 }
 
 export class UserAssetFingerprintsResult {

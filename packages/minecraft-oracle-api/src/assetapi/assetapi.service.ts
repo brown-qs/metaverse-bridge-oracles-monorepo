@@ -104,7 +104,7 @@ export class AssetApiService {
 
         const users = dto.specifics ? await this.userService.findMany({ where: { hasGame: true, uuid: In(specs) }, relations: ['assets', 'assets.collectionFragment', 'assets.collectionFragment.collection'], loadEagerRelations: true, order: { uuid: 'ASC' } })
             : await this.userService.findMany({ where: { hasGame: true }, relations: ['assets', 'assets.collectionFragment', 'assets.collectionFragment.collection'], loadEagerRelations: true, take, skip, order: { uuid: 'ASC' } })
-        const results: UserAssetFingerprint[] = users.map(user => this.getAssetFingerprintForPlayer(user)).filter(x => !!x)
+        const results: UserAssetFingerprint[] = users.map(user => this.getAssetFingerprintForPlayer(user))
 
         return {
             fingerprints: results
