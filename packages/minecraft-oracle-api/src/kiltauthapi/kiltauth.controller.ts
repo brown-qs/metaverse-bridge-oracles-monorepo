@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
-import { WalletLoginApiDto } from './dtos/kilt.dto';
+import { WalletLoginDto, WalletSessionDto } from './dtos';
 import { KiltAuthApiService } from './kiltauthapi.service';
 
 @ApiTags('kiltauth')
@@ -37,8 +37,8 @@ export class KiltAuthApiController {
     @Post('wallet_session')
     @HttpCode(200)
     @ApiOperation({ summary: 'Validate kilt wallet session' })
-    async validateWalletSession(@Body() resp: { encryptionKeyId: string, encryptedWalletSessionChallenge: string, nonce: string, sessionId: string }) {
-        return await this.kiltAuthApiService.verifyWalletSessionChallenge(resp.encryptionKeyId, resp.encryptedWalletSessionChallenge, resp.nonce, resp.sessionId)
+    async validateWalletSession(@Body() dto: WalletSessionDto) {
+        return await this.kiltAuthApiService.verifyWalletSessionChallenge(dto.encryptionKeyId, dto.encryptedWalletSessionChallenge, dto.nonce, dto.sessionId)
     }
 
     //creates and returns an encrypted message for Sporran session to prompt credential sharing
@@ -51,7 +51,7 @@ export class KiltAuthApiController {
     @Post('wallet_login')
     @HttpCode(200)
     @ApiOperation({ summary: 'Validate kilt wallet login challenge' })
-    async validateWalletCredential(@Body() dto: WalletLoginApiDto): Promise<void> {
+    async validateWalletCredential(@Body() dto: WalletLoginDto): Promise<void> {
         return await this.kiltAuthApiService.verifyWalletLoginChallenge(dto.sessionId, dto.message)
     }
 }

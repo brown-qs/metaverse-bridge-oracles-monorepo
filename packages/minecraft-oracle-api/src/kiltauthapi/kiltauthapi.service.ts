@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Did, IEncryptedMessage, init, Message, MessageBodyType, Utils, Credential, ICredential } from '@kiltprotocol/sdk-js'
 import { decryptChallenge, encryptionKeystore, getFullDid } from "../kilt/verifier";
-import { WalletLoginMessageApi } from './dtos/kilt.dto';
+import { WalletLoginMessage } from './dtos';
 export interface KiltSession {
     sessionId: string,
     walletSessionChallenge: string,
@@ -134,7 +134,7 @@ export class KiltAuthApiService {
 
         return output
     }
-    async verifyWalletLoginChallenge(sessionId: string, rawMessage: WalletLoginMessageApi) {
+    async verifyWalletLoginChallenge(sessionId: string, rawMessage: WalletLoginMessage) {
 
         const session = this.kiltSessions.find(sess => sess.sessionId === sessionId)
         if (!session) {
