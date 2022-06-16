@@ -74,7 +74,7 @@ import { ResourceInventoryEntity } from './resourceinventory/resourceinventory.e
 import { ResourceInventoryModule } from './resourceinventory/resourceinventory.module';
 import { ResourceInventoryOffsetEntity } from './resourceinventoryoffset/resourceinventoryoffset.entity';
 import { ResourceInventoryOffsetModule } from './resourceinventoryoffset/resourceinventoryoffset.module';
-import { KiltAuthModule } from './authapi/kiltauthapi.module';
+import { KiltAuthModule } from './kiltauthapi/kiltauthapi.module';
 
 
 @Module({

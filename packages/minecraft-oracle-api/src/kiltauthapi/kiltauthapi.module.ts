@@ -1,11 +1,8 @@
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { AuthApiService } from './authapi.service';
 import { KiltAuthApiController } from './kiltauth.controller';
-import { JwtStrategy } from './jwt.strategy';
 import { UserModule } from '../user/user.module';
-import { MicrosoftSetupParamsProvider } from '../provider';
 import { CacheModule } from '../cache/cache.module';
 import { Module } from '@nestjs/common';
 import { SecretModule } from '../secret/secret.module';
@@ -33,7 +30,7 @@ import { KiltAuthApiService } from './kiltauthapi.service';
             inject: [ConfigService]
         })
     ],
-    providers: [KiltAuthApiService, JwtStrategy],
+    providers: [KiltAuthApiService],
     controllers: [KiltAuthApiController],
     exports: [KiltAuthApiService]
 })

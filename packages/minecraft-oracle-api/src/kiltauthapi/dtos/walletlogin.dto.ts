@@ -1,12 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class WalletLoginApiDto {
+export class WalletLoginDto {
     @ApiProperty({ description: 'Kilt wallet session id' })
     sessionId: string;
-    message: WalletLoginMessageApi
+    message: WalletLoginMessage
 }
 
-export class WalletLoginMessageApi {
+export class WalletLoginMessage {
     @ApiProperty({ description: 'ciphertext' })
     ciphertext: string;
 
