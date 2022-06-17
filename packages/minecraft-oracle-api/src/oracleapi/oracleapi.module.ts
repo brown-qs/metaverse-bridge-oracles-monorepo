@@ -5,7 +5,7 @@ import { ProviderModule } from '../provider/provider.module';
 import { SecretModule } from '../secret/secret.module';
 import { SummonModule } from '../summon/summon.module';
 import { TextureModule } from '../texture/texture.module';
-import { UserModule } from '../user/user.module';
+import { MinecraftUserModule } from '../user/minecraft-user/minecraft-user.module';
 import { OracleApiController } from './oracleapi.controller';
 import { OracleApiService } from './oracleapi.service';
 import { InventoryModule } from '../playerinventory/inventory.module';
@@ -21,7 +21,7 @@ import { ResourceInventoryModule } from '../resourceinventory/resourceinventory.
 @Module({
     imports: [
         AssetModule,
-        UserModule,
+        MinecraftUserModule,
         SecretModule,
         MaterialModule,
         TextureModule,
@@ -41,4 +41,4 @@ import { ResourceInventoryModule } from '../resourceinventory/resourceinventory.
     exports: [OracleApiService],
     controllers: [OracleApiController]
 })
-export class OracleApiModule {}
+export class OracleApiModule { }

@@ -3,16 +3,23 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { UserEntity } from '../user/user.entity';
-import { UserService } from '../user/user.service';
+import { MinecraftUserEntity } from '../user/minecraft-user/minecraft-user.entity';
+import { MinecraftUserService as MinecraftUserService } from '../user/minecraft-user/minecraft-user.service';
 
 export type AuthenticatedUser = {
-    player: UserEntity
+    player: MinecraftUserEntity
+}
+
+export enum AuthProvider {
+    Email = "email",
+    Kilt = "kilt",
 }
 
 export type JwtPayload = {
     sub: string;
-    userName: string
+    provider: AuthProvider,
+    minecraftUuid: string | null
+    minecraftUsername: string | null
 }
 
 @Injectable()
@@ -22,7 +29,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     constructor(
         configService: ConfigService,
-        private userService: UserService,
+        private userService: MinecraftUserService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
         super({
@@ -33,11 +40,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         this.context = JwtStrategy.name
     }
 
-    async validate(payload: JwtPayload): Promise<UserEntity> {
+    async validate(payload: JwtPayload): Promise<MinecraftUserEntity> {
         this.logger.debug('validate:: called', this.context)
         //const token = req.headers.authorization.slice(7);
 
-        if (!payload || !payload.sub || !payload.userName) {
+        if (!payload || !payload.sub || !payload.minecraftUsername) {
             this.logger.error('validate:: no uuid or username was received', null, this.context)
             throw new UnauthorizedException();
         }

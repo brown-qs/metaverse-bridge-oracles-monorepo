@@ -2,11 +2,11 @@ import { Injectable, Inject, UnprocessableEntityException } from "@nestjs/common
 import { ConfigService } from "@nestjs/config/dist/config.service";
 import MutexInterface from "async-mutex/lib/MutexInterface";
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from "nest-winston";
-import { UserEntity } from "../user/user.entity";
+import { MinecraftUserEntity } from "../user/minecraft-user/minecraft-user.entity";
 import { AssetService } from "../asset/asset.service";
 import { CollectionFragmentService } from "../collectionfragment/collectionfragment.service";
 import { CompositeCollectionFragmentService } from "../compositecollectionfragment/compositecollectionfragment.service";
-import { UserService } from "../user/user.service";
+import { MinecraftUserService } from "../user/minecraft-user/minecraft-user.service";
 import { CompositeAssetService } from "../compositeasset/compositeasset.service";
 import { ChainId } from "../config/constants";
 import { NftApiService } from "../nftapi/nftapi.service";
@@ -51,7 +51,7 @@ export class CompositeApiService {
     private readonly metadataPublicPath: string;
 
     constructor(
-        private readonly userService: UserService,
+        private readonly userService: MinecraftUserService,
         private readonly assetService: AssetService,
         private readonly collectionService: CollectionService,
         private readonly compositeAssetService: CompositeAssetService,
@@ -77,7 +77,7 @@ export class CompositeApiService {
         this.metadataPublicPath = this.configService.get<string>('composite.metadataPublicPath')
     }
 
-    public async saveCompositeConfig(dto: SaveCompositeConfigDto, user: UserEntity): Promise<CompositeMetadataType> {
+    public async saveCompositeConfig(dto: SaveCompositeConfigDto, user: MinecraftUserEntity): Promise<CompositeMetadataType> {
         const compositeParent = dto.compositeParent
         const compositeChildren = dto.compositeChildren
 
@@ -214,14 +214,14 @@ export class CompositeApiService {
             } else {
 
                 const sit = await this.syntheticItemService.findOne({
-                        id: SyntheticItemService.calculateId({
-                            assetId: c.assetId,
-                            chainId: c.collectionFragment.collection.chainId,
-                            assetAddress: c.collectionFragment.collection.assetAddress,
-                            syntheticPartId: c.syntheticPart.id
-                        })
-                    },
-                    {relations: ['compositeAssets']}
+                    id: SyntheticItemService.calculateId({
+                        assetId: c.assetId,
+                        chainId: c.collectionFragment.collection.chainId,
+                        assetAddress: c.collectionFragment.collection.assetAddress,
+                        syntheticPartId: c.syntheticPart.id
+                    })
+                },
+                    { relations: ['compositeAssets'] }
                 )
 
                 if (!!sit) {
@@ -375,7 +375,7 @@ export class CompositeApiService {
             return meta?.metaObject?.attributes ?? []
         }))
 
-        for (let i =0; i< attributelists.length; i++) {
+        for (let i = 0; i < attributelists.length; i++) {
             attributes = attributes.concat(attributelists[i])
         }
         console.log(attributes)
@@ -442,7 +442,7 @@ export class CompositeApiService {
         }
     }
 
-    public async reevaluate(compositeAsset: CompositeAssetEntity, user: UserEntity) {
+    public async reevaluate(compositeAsset: CompositeAssetEntity, user: MinecraftUserEntity) {
         const ca = await this.compositeAssetService.findOne(
             { id: compositeAsset.id },
             { relations: ['compositeCollectionFragment', 'compositeCollectionFragment.collection', 'children', 'children.collectionFragment', 'children.collectionFragment.collection', 'syntheticChildren', 'syntheticChildren.syntheticPart', 'syntheticChildren.syntheticPart.compositeCollectionFragment', 'syntheticChildren.syntheticPart.compositeCollectionFragment.collection'], loadEagerRelations: true })
@@ -487,9 +487,9 @@ export class CompositeApiService {
         if (!!syntheticPart) {
 
             // check if synthetic item exists
-            console.log({assetAddress, assetId})
+            console.log({ assetAddress, assetId })
 
-            const syntheticItem = await this.syntheticItemService.findOne({syntheticPart, assetId})
+            const syntheticItem = await this.syntheticItemService.findOne({ syntheticPart, assetId })
 
             let attributes
             if (!!syntheticItem) {

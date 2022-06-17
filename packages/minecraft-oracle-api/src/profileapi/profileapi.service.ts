@@ -2,12 +2,12 @@ import { Inject, Injectable, UnprocessableEntityException } from '@nestjs/common
 import { ProfileDto } from './dtos/profile.dto';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { AssetService } from '../asset/asset.service';
-import { UserEntity } from '../user/user.entity';
+import { MinecraftUserEntity } from '../user/minecraft-user/minecraft-user.entity';
 import { RecognizedAssetType, PlayEligibilityReason } from '../config/constants';
 import { ProviderToken } from '../provider/token';
 import { AssetDto, TextureDto, ThingsDto } from './dtos/things.dto';
 import { InventoryService } from '../playerinventory/inventory.service';
-import { UserService } from '../user/user.service';
+import { MinecraftUserService } from '../user/minecraft-user/minecraft-user.service';
 import { SkinselectDto } from './dtos/skinselect.dto';
 import { SkinService } from '../skin/skin.service';
 import { findRecognizedAsset } from '../utils';
@@ -28,7 +28,7 @@ export class ProfileApiService {
         private readonly inventoryService: InventoryService,
         private readonly assetService: AssetService,
         private readonly skinService: SkinService,
-        private readonly userService: UserService,
+        private readonly userService: MinecraftUserService,
         private readonly resourceInventoryService: ResourceInventoryService,
         private configService: ConfigService,
         @Inject(ProviderToken.CONTRACT_CHAIN_CALLBACK) private getContract: TypeContractsCallbackProvider,
@@ -39,12 +39,12 @@ export class ProfileApiService {
         this.defaultChainId = this.configService.get<number>('network.defaultChainId')
     }
 
-    async userAssets(user: UserEntity) {
+    async userAssets(user: MinecraftUserEntity) {
         let userAssets = await this.assetService.findMany({ where: { owner: user.uuid, pendingIn: false } })
         return userAssets
     }
 
-    async getPlayerItems(user: UserEntity): Promise<ThingsDto> {
+    async getPlayerItems(user: MinecraftUserEntity): Promise<ThingsDto> {
         const snapshots = await this.inventoryService.findMany({ relations: ['material', 'owner'], where: { owner: { uuid: user.uuid } } })
 
         const resources: AssetDto[] = snapshots.map(snapshot => {
@@ -130,13 +130,13 @@ export class ProfileApiService {
                 name: skin.texture.name
             }
         })
-        
+
 
         // TODO fixme
-        const bait = await this.resourceInventoryService.findOne({owner: user}, {relations: ['owner', 'offset']})
+        const bait = await this.resourceInventoryService.findOne({ owner: user }, { relations: ['owner', 'offset'] })
         if (!!bait) {
             const baitAsset = userAssets.find(x => x.assetId === bait.assetId && x.collectionFragment.recognizedAssetType.valueOf() === RecognizedAssetType.RESOURCE.valueOf())
-            
+
             if (!!baitAsset) {
                 assets.push(
                     {
@@ -164,7 +164,7 @@ export class ProfileApiService {
         }
     }
 
-    async userProfile(user: UserEntity): Promise<ProfileDto> {
+    async userProfile(user: MinecraftUserEntity): Promise<ProfileDto> {
         let allowedToPlayReason: PlayEligibilityReason = PlayEligibilityReason.NONE;
         if (user.allowedToPlay) {
             const userAssets = await this.assetService.findMany({ where: { owner: user.uuid, pendingIn: false } })
@@ -187,7 +187,7 @@ export class ProfileApiService {
         }
     }
 
-    public async userThings(user: UserEntity) {
+    public async userThings(user: MinecraftUserEntity) {
         const userfull = await this.userService.findOne({ uuid: user.uuid }, { relations: ['skins', 'assets'] })
         return {
             assets: userfull.assets ?? [],
@@ -196,7 +196,7 @@ export class ProfileApiService {
 
     }
 
-    public async skinSelect(user: UserEntity, dto: SkinselectDto): Promise<boolean> {
+    public async skinSelect(user: MinecraftUserEntity, dto: SkinselectDto): Promise<boolean> {
         const skins = await this.skinService.findMany({ where: { owner: { uuid: user.uuid } }, relations: ['texture'] })
 
         const selectedIndex = skins.findIndex(skin => {

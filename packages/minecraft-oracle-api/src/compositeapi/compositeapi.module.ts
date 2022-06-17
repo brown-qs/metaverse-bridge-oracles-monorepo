@@ -5,7 +5,7 @@ import { CollectionModule } from '../collection/collection.module';
 import { CompositeAssetModule } from '../compositeasset/compositeasset.module';
 import { CompositeCollectionFragmentModule } from '../compositecollectionfragment/compositecollectionfragment.module';
 import { NftApiModule } from '../nftapi/nftapi.module';
-import { UserModule } from '../user/user.module';
+import { MinecraftUserModule } from '../user/minecraft-user/minecraft-user.module';
 import { CompositeApiService } from './compositeapi.service';
 import { CompositeApiController } from './compositeapi.controller';
 import { SyntheticPartModule } from '../syntheticpart/syntheticpart.module';
@@ -15,7 +15,7 @@ import { ProviderModule } from 'src/provider/provider.module';
 @Module({
     imports: [
         ProviderModule,
-        UserModule,
+        MinecraftUserModule,
         AssetModule,
         CollectionModule,
         CompositeCollectionFragmentModule,

@@ -7,7 +7,7 @@ import { MaterialEntity } from '../src/material/material.entity';
 import { SnapshotItemEntity } from '../src/snapshot/snapshotItem.entity';
 import { SummonEntity } from '../src/summon/summon.entity';
 import { TextureEntity } from '../src/texture/texture.entity';
-import { UserEntity } from '../src/user/user.entity';
+import { MinecraftUserEntity } from '../src/user/minecraft-user/minecraft-user.entity';
 import { PlaySessionEntity } from '../src/playsession/playsession.entity';
 import { PlaySessionStatEntity } from '../src/playsession/playsessionstat.entity';
 import { InventoryEntity } from '../src/playerinventory/inventory.entity';
@@ -51,7 +51,7 @@ async function main () {
             host: process.env.TYPEORM_HOST,
             port: Number.parseInt(process.env.TYPEORM_PORT),
             database: process.env.TYPEORM_DATABASE,
-            entities: [MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity, SkinEntity, AssetEntity, SummonEntity, InventoryEntity, PlaySessionEntity, PlaySessionStatEntity],
+            entities: [MaterialEntity, SnapshotItemEntity, MinecraftUserEntity, TextureEntity, SkinEntity, AssetEntity, SummonEntity, InventoryEntity, PlaySessionEntity, PlaySessionStatEntity],
             synchronize: false
         })
     } catch (err) {

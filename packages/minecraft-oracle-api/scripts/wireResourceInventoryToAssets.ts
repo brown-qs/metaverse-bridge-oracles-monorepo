@@ -3,7 +3,7 @@ import { Connection, createConnection, getConnection } from 'typeorm'
 
 import { config } from 'dotenv'
 import { SnapshotItemEntity } from '../src/snapshot/snapshotItem.entity'
-import { UserEntity } from '../src/user/user.entity'
+import { MinecraftUserEntity } from '../src/user/minecraft-user/minecraft-user.entity'
 import { TextureEntity } from '../src/texture/texture.entity'
 import { AssetEntity } from '../src/asset/asset.entity'
 import { SummonEntity } from '../src/summon/summon.entity'
@@ -48,7 +48,7 @@ async function main() {
             port: Number.parseInt(process.env.TYPEORM_PORT),
             database: process.env.TYPEORM_DATABASE,
             entities: [
-                UserEntity,
+                MinecraftUserEntity,
                 SnapshotItemEntity,
                 InventoryEntity,
                 TextureEntity,

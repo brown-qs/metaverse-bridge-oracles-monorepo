@@ -8,9 +8,8 @@ import { ProviderModule } from './provider/provider.module';
 import { RedisModule } from 'nestjs-redis';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TextureEntity } from './texture/texture.entity';
-import { UserEntity } from './user/user.entity';
+import { MinecraftUserEntity } from './user/minecraft-user/minecraft-user.entity';
 import { SnapshotItemEntity } from './snapshot/snapshotItem.entity';
-import { AuthModule } from './authapi/authapi.module';
 import { CacheModule } from './cache/cache.module';
 import { GameApiModule } from './gameapi/gameapi.module';
 import { TextureModule } from './texture/texture.module';
@@ -27,7 +26,7 @@ import { AssetModule } from './asset/asset.module';
 import { AssetEntity } from './asset/asset.entity';
 import { SummonEntity } from './summon/summon.entity';
 import { SummonModule } from './summon/summon.module';
-import { UserModule } from './user/user.module';
+import { MinecraftUserModule } from './user/minecraft-user/minecraft-user.module';
 import { ProfileApiModule } from './profileapi/profileapi.module';
 import { CronModule } from './cron/cron.module';
 import { PlaySessionModule } from './playsession/playsession.module';
@@ -74,9 +73,14 @@ import { ResourceInventoryEntity } from './resourceinventory/resourceinventory.e
 import { ResourceInventoryModule } from './resourceinventory/resourceinventory.module';
 import { ResourceInventoryOffsetEntity } from './resourceinventoryoffset/resourceinventoryoffset.entity';
 import { ResourceInventoryOffsetModule } from './resourceinventoryoffset/resourceinventoryoffset.module';
-import { KiltAuthModule } from './kiltauthapi/kiltauthapi.module';
-
-
+import { EmailAuthModule } from './authapi/email-auth/email-auth.module';
+import { KiltAuthModule } from './authapi/kilt-auth/kilt-auth.module';
+import { MicrosoftAuthModule } from './authapi/minecraft-auth/minecraft-auth.module';
+import { KiltUserEntity } from './user/kilt-user/kilt-user.entity';
+import { EmailUserEntity } from './user/email-user/email-user.entity';
+import { KiltUserModule } from './user/kilt-user/kilt-user.module';
+import { EmailUserModule } from './user/email-user/email-user.module';
+import { AccountModule } from './account/account.module';
 @Module({
     imports: [
         ConfigModule.forRoot({
@@ -108,7 +112,9 @@ import { KiltAuthModule } from './kiltauthapi/kiltauthapi.module';
                 password: configService.get<string>('typeorm.password'),
                 database: configService.get<string>('typeorm.database'),
                 entities: [
-                    UserEntity,
+                    KiltUserEntity,
+                    EmailUserEntity,
+                    MinecraftUserEntity,
                     SnapshotItemEntity,
                     InventoryEntity,
                     TextureEntity,
@@ -163,10 +169,13 @@ import { KiltAuthModule } from './kiltauthapi/kiltauthapi.module';
         CacheModule,
         SecretModule,
         AssetModule,
-        UserModule,
+        KiltUserModule,
+        EmailUserModule,
+        MinecraftUserModule,
         ProfileApiModule,
-        AuthModule,
         KiltAuthModule,
+        EmailAuthModule,
+        MicrosoftAuthModule,
         TextureModule,
         SkinModule,
         MaterialModule,
@@ -194,7 +203,10 @@ import { KiltAuthModule } from './kiltauthapi/kiltauthapi.module';
         SyntheticItemModule,
         ResourceInventoryModule,
         ResourceInventoryOffsetModule,
-        CompositeApiModule
-    ]
+        CompositeApiModule,
+        AccountModule,
+
+    ],
+    controllers: []
 })
 export class AppModule { }

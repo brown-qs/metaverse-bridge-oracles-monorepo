@@ -5,6 +5,7 @@ import * as winston from 'winston';
 import { nestLikeConsoleFormat } from './utils';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -14,14 +15,15 @@ async function bootstrap() {
       transports: [new winston.transports.Console()]
     })
   });
+  app.useGlobalPipes(new ValidationPipe());
   app.enableCors();
   app.setGlobalPrefix('/api/v1');
   const options = new DocumentBuilder()
     .setTitle('Moonsama Minecraft Oracle')
     .setDescription(`Oracle for the Minecraft Moonriver bridge of the Moonsama metaverse`)
     .setVersion('1.0')
-    .addBearerAuth({scheme: 'bearer', type: 'http'})
-    .addApiKey({type: 'apiKey', in: 'header', name: 'AuthenticationHeader'}, 'AuthenticationHeader')
+    .addBearerAuth({ scheme: 'bearer', type: 'http' })
+    .addApiKey({ type: 'apiKey', in: 'header', name: 'AuthenticationHeader' }, 'AuthenticationHeader')
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('/api/v1/docs', app, document);

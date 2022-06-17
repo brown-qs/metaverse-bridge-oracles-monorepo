@@ -43,7 +43,6 @@ const HomePage = () => {
           <img src={WhiteLogo} alt="" />
         </div>
         <Typography className={glitchText} fontSize={isMobileViewport ? '20px' : '50px'} fontFamily={'Orbitron'}>MULTIVERSE BRIDGE</Typography>
-        <KiltAccount></KiltAccount>
         {!isLoading ? (
           <Tooltip title={`Login with your Microsoft Minecraft account. If you are still on Mojang please migrate first.`}>
             <Box onClick={handleLoginWithMinecraft} className={loginButtonStyleV2}>

@@ -4,7 +4,7 @@ import {
     IsInt,
     IsString
 } from 'class-validator';
-import { UserEntity } from '../user/user.entity';
+import { MinecraftUserEntity } from '../user/minecraft-user/minecraft-user.entity';
 import { Column, Entity, Index, ManyToOne, PrimaryColumn } from 'typeorm';
 
 @Entity()
@@ -35,6 +35,6 @@ export class SummonEntity {
     @Column({ nullable: true })
     salt?: string;
 
-    @ManyToOne(() => UserEntity, (user) => user.assets)
-    owner?: UserEntity;
+    @ManyToOne(() => MinecraftUserEntity, (user) => user.assets)
+    owner?: MinecraftUserEntity;
 }

@@ -75,6 +75,17 @@ export const loadEnv = () => {
             region: process.env.S3_REGION,
             bucket: process.env.S3_BUCKET
         },
+        kilt: {
+            wssAddress: process.env.KILT_WSS_ADDRESS,
+            verifierMnemonic: process.env.KILT_VERIFIER_MNEMONIC,
+            verifierAddress: process.env.KILT_VERIFIER_ADDRESS,
+            verifierDidUri: process.env.KILT_VERIFIER_DID_URI,
+            dappName: process.env.KILT_DAPP_NAME
+        },
+        recaptcha: {
+            sitekey: process.env.RECAPTCHA_SITEKEY,
+            secret: process.env.RECAPTCHA_SECRETKEY,
+        },
         composite: {
             uriPrefix: process.env.COMPOSITE_URI_PREFIX,
             uriPostfix: process.env.COMPOSITE_URI_POSTFIX,
@@ -86,6 +97,9 @@ export const loadEnv = () => {
             port: process.env.OUTBOUND_PROXY_PORT,
             username: process.env.OUTBOUND_PROXY_USERNAME,
             password: process.env.OUTBOUND_PROXY_PASSWORD
+        },
+        frontend: {
+            url: process.env.FRONTEND_URL
         }
     };
 };

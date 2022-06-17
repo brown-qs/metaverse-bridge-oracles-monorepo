@@ -10,6 +10,10 @@ import { ImportDialog } from '../components/ImportDialog/ImportDialog';
 import { EnraptureDialog } from '../components/EnraptureDialog/EnraptureDialog';
 import { SummonDialog } from '../components/SummonDialog/SummonDialog';
 import { AssetDialog } from '../components/AssetDialog/AssetDialog';
+import AccountPage from './account';
+import LoginPage from './account/login';
+import EmailLoginPage from './account/login/email';
+import KiltLoginPage from './account/login/kilt';
 
 export const Routing = () => {
     const { authData } = useAuth();
@@ -18,6 +22,22 @@ export const Routing = () => {
         <Switch>
             <Route exact path="/">
                 <Redirect to="/login" />
+            </Route>
+
+            <Route exact path="/account">
+                <AccountPage></AccountPage>
+            </Route>
+
+            <Route exact path="/account/login">
+                <LoginPage></LoginPage>
+            </Route>
+
+            <Route exact path="/account/login/email">
+                <EmailLoginPage></EmailLoginPage>
+            </Route>
+
+            <Route exact path="/account/login/kilt">
+                <KiltLoginPage></KiltLoginPage>
             </Route>
 
             <Route exact path="/auth/:jwt">

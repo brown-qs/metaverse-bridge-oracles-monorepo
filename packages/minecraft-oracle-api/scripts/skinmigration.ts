@@ -5,7 +5,7 @@ import { Connection, createConnection, getConnection } from 'typeorm'
 
 import { config } from 'dotenv'
 import { SnapshotItemEntity } from '../src/snapshot/snapshotItem.entity'
-import { UserEntity } from '../src/user/user.entity'
+import { MinecraftUserEntity } from '../src/user/minecraft-user/minecraft-user.entity'
 import { TextureEntity } from '../src/texture/texture.entity'
 import { AssetEntity } from '../src/asset/asset.entity'
 import { SummonEntity } from '../src/summon/summon.entity'
@@ -30,7 +30,7 @@ async function main() {
             host: process.env.TYPEORM_HOST,
             port: Number.parseInt(process.env.TYPEORM_PORT),
             database: process.env.TYPEORM_DATABASE,
-            entities: [MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity, SkinEntity, AssetEntity, SummonEntity, InventoryEntity, PlaySessionEntity, PlaySessionStatEntity],
+            entities: [MaterialEntity, SnapshotItemEntity, MinecraftUserEntity, TextureEntity, SkinEntity, AssetEntity, SummonEntity, InventoryEntity, PlaySessionEntity, PlaySessionStatEntity],
             synchronize: true
         })
     } catch (err) {
@@ -44,7 +44,7 @@ async function main() {
     const IMPORTABLEASSETS = IMPORTABLE_ASSETS.filter(x => x.chainId.valueOf() === 1285)
 
     try {
-        const users = await connection.manager.find<UserEntity>(UserEntity, { relations: ['assets'], loadEagerRelations: true})
+        const users = await connection.manager.find<MinecraftUserEntity>(MinecraftUserEntity, { relations: ['assets'], loadEagerRelations: true })
         const defaultFemale = await connection.manager.findOne<TextureEntity>(TextureEntity, { where: { assetAddress: '0x0', assetId: '0', assetType: StringAssetType.NONE } })
         const defaultMale = await connection.manager.findOne<TextureEntity>(TextureEntity, { where: { assetAddress: '0x0', assetId: '1', assetType: StringAssetType.NONE } })
 
@@ -99,7 +99,7 @@ async function main() {
                     console.log('    default set to', SkinEntity.toId(user.uuid, '0x0', '0'))
                 }
             }
-            await connection.manager.update<UserEntity>(UserEntity, { uuid: user.uuid}, { numGamePassAsset: user.numGamePassAsset })
+            await connection.manager.update<MinecraftUserEntity>(MinecraftUserEntity, { uuid: user.uuid }, { numGamePassAsset: user.numGamePassAsset })
         }
 
     } catch (err) {

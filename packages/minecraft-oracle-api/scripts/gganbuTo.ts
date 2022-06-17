@@ -2,7 +2,7 @@ import { MaterialEntity } from '../src/material/material.entity'
 import { Connection, createConnection, getConnection } from 'typeorm'
 import { config } from 'dotenv'
 import { SnapshotItemEntity } from '../src/snapshot/snapshotItem.entity'
-import { UserEntity } from '../src/user/user.entity'
+import { MinecraftUserEntity } from '../src/user/minecraft-user/minecraft-user.entity'
 import { TextureEntity } from '../src/texture/texture.entity'
 import { AssetEntity } from '../src/asset/asset.entity'
 import { SummonEntity } from '../src/summon/summon.entity'
@@ -41,7 +41,7 @@ async function main() {
             host: process.env.TYPEORM_HOST,
             port: Number.parseInt(process.env.TYPEORM_PORT),
             database: process.env.TYPEORM_DATABASE,
-            entities: [MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity, AssetEntity, SummonEntity, InventoryEntity, PlaySessionEntity, PlaySessionStatEntity, SkinEntity, GameEntity, GameTypeEntity, AchievementEntity, PlayerAchievementEntity, PlayerScoreEntity, GganbuEntity, SnaplogEntity],
+            entities: [MaterialEntity, SnapshotItemEntity, MinecraftUserEntity, TextureEntity, AssetEntity, SummonEntity, InventoryEntity, PlaySessionEntity, PlaySessionStatEntity, SkinEntity, GameEntity, GameTypeEntity, AchievementEntity, PlayerAchievementEntity, PlayerScoreEntity, GganbuEntity, SnaplogEntity],
             synchronize: true
         })
     } catch (err) {
@@ -59,7 +59,7 @@ async function main() {
     const gganbus = await connection.manager.getRepository(GganbuEntity).find({ where: {game: {id: gameId}}, relations: ['material']})
     //console.log(gganbus)
     for(let i = 0; i< list.length; i++) {
-        const user = await connection.manager.getRepository(UserEntity).findOne({ userName: list[i] })
+        const user = await connection.manager.getRepository(MinecraftUserEntity).findOne({ userName: list[i] })
 
         
         if (!user) {

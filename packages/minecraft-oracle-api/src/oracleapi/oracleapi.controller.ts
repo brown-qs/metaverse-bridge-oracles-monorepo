@@ -9,7 +9,7 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { JwtAuthGuard } from '../authapi/jwt-auth.guard';
-import { UserEntity } from '../user/user.entity';
+import { MinecraftUserEntity } from '../user/minecraft-user/minecraft-user.entity';
 import { User } from '../utils/decorators';
 import { CallparamDto } from './dtos/callparams.dto';
 import { OracleApiService } from './oracleapi.service';
@@ -27,7 +27,7 @@ export class OracleApiController {
     constructor(
         private readonly oracleApiService: OracleApiService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
-    ) { 
+    ) {
         this.context = OracleApiController.name;
     }
 
@@ -37,7 +37,7 @@ export class OracleApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async import(
-        @User() user: UserEntity,
+        @User() user: MinecraftUserEntity,
         @Body() data: ImportDto
     ): Promise<CallparamDto> {
         const params = await this.oracleApiService.userInRequest(user, data, false)
@@ -56,7 +56,7 @@ export class OracleApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async importConfirm(
-        @User() user: UserEntity,
+        @User() user: MinecraftUserEntity,
         @Body() data: ConfirmDto
     ): Promise<boolean> {
         const success = await this.oracleApiService.userImportConfirm(user, data)
@@ -69,7 +69,7 @@ export class OracleApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async enrapture(
-        @User() user: UserEntity,
+        @User() user: MinecraftUserEntity,
         @Body() data: ImportDto
     ): Promise<CallparamDto> {
         const params = await this.oracleApiService.userInRequest(user, data, true)
@@ -87,7 +87,7 @@ export class OracleApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async enraptureConfirm(
-        @User() user: UserEntity,
+        @User() user: MinecraftUserEntity,
         @Body() data: ConfirmDto
     ): Promise<boolean> {
         const success = await this.oracleApiService.userEnraptureConfirm(user, data)
@@ -100,7 +100,7 @@ export class OracleApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async export(
-        @User() user: UserEntity,
+        @User() user: MinecraftUserEntity,
         @Body() data: ExportDto
     ): Promise<CallparamDto> {
         const params = await this.oracleApiService.userOutRequest(user, data)
@@ -118,7 +118,7 @@ export class OracleApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async exportConfirm(
-        @User() user: UserEntity,
+        @User() user: MinecraftUserEntity,
         @Body() data: ConfirmDto
     ): Promise<boolean> {
         const success = await this.oracleApiService.userExportConfirm(user, data)
@@ -131,7 +131,7 @@ export class OracleApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async summon(
-        @User() user: UserEntity,
+        @User() user: MinecraftUserEntity,
         @Body() data: SummonDto
     ): Promise<boolean> {
         const success = await this.oracleApiService.userSummonRequest(user, data)
