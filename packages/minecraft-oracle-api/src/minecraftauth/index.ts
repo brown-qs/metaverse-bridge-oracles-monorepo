@@ -1,9 +1,9 @@
 import 'reflect-metadata';
-import {plainToClass} from "class-transformer";
+import { plainToClass } from "class-transformer";
 import crypto from "crypto";
 import atob from "atob";
 import axios from "axios";
-import {HttpCustom, HttpGet, HttpPost} from "http-client-methods";
+import { HttpCustom, HttpGet, HttpPost } from "http-client-methods";
 
 export module MicrosoftAuth {
     export let appID: string;
@@ -33,7 +33,7 @@ export module MicrosoftAuth {
     export async function getToken(authCode: string) {
         let url = "https://login.live.com/oauth20_token.srf";
         let body = `client_id=${compiledID}&client_secret=${compiledSecret}&code=${authCode}&grant_type=authorization_code&redirect_uri=${compiledUrl}`
-        let response = await HttpPost(url, body, {"Content-Type": "application/x-www-form-urlencoded"})
+        let response = await HttpPost(url, body, { "Content-Type": "application/x-www-form-urlencoded" })
 
         let jsonResponse: TokenResponse = JSON.parse(response);
         if (jsonResponse.error) {
@@ -46,7 +46,7 @@ export module MicrosoftAuth {
     export async function getTokenRefresh(refreshToken: string) {
         let url = "https://login.live.com/oauth20_token.srf";
         let body = `client_id=${compiledID}&client_secret=${compiledSecret}&refresh_token=${refreshToken}&grant_type=refresh_token&redirect_uri=${compiledUrl}`
-        let response = await HttpPost(url, body, {"Content-Type": "application/x-www-form-urlencoded"})
+        let response = await HttpPost(url, body, { "Content-Type": "application/x-www-form-urlencoded" })
 
         let jsonResponse: TokenResponse = JSON.parse(response);
         if (jsonResponse.error) {
@@ -107,18 +107,18 @@ export module MicrosoftAuth {
         }
 
         let outboundProxy;
-        if ( process.env.OUTBOUND_PROXY_HOST != "" ){
+        if (process.env.OUTBOUND_PROXY_HOST != "") {
             outboundProxy = {
                 host: process.env.OUTBOUND_PROXY_HOST,
                 port: Number(process.env.OUTBOUND_PROXY_PORT),
                 auth: {
-                        username: process.env.OUTBOUND_PROXY_USERNAME,
-                        password: process.env.OUTBOUND_PROXY_PASSWORD
+                    username: process.env.OUTBOUND_PROXY_USERNAME,
+                    password: process.env.OUTBOUND_PROXY_PASSWORD
                 }
             }
         }
         let response = await axios({
-            url: 'https://api.minecraftservices.com/authentication/login_with_xbox', 
+            url: 'https://api.minecraftservices.com/authentication/login_with_xbox',
             method: 'post',
             data: JSON.stringify(body),
             headers: {
@@ -145,7 +145,7 @@ export module MicrosoftAuth {
         let xblRes = await authXBL(token);
         let xstsRes = await authXSTS(xblRes.Token);
         let mcToken = await getMinecraftToken(xstsRes.Token, xblRes.DisplayClaims.xui[0].uhs)
-        return {access_token: mcToken.access_token, refresh_token: refresh_token}
+        return { access_token: mcToken.access_token, refresh_token: refresh_token }
     }
 
     export type TokenResponse = {
@@ -214,7 +214,7 @@ export module MojangAuth {
         if (clientToken) {
             body.clientToken = clientToken;
         }
-        let response = await HttpPost(url, JSON.stringify(body), {"Content-Type": "application/json"})
+        let response = await HttpPost(url, JSON.stringify(body), { "Content-Type": "application/json" })
         let jsonResponse: MCAuthResponse = JSON.parse(response);
         if (jsonResponse.error) {
             throw new AuthenticationError(jsonResponse.error, jsonResponse.errorMessage, jsonResponse.cause)
@@ -229,7 +229,7 @@ export module MojangAuth {
             "clientToken": `${clientToken}`,
             "requestUser": true
         }
-        let response = await HttpPost(url, JSON.stringify(body), {"Content-Type": "application/json"})
+        let response = await HttpPost(url, JSON.stringify(body), { "Content-Type": "application/json" })
         let jsonResponse: MCAuthResponse = JSON.parse(response);
         if (jsonResponse.error) {
             throw new AuthenticationError(jsonResponse.error, jsonResponse.errorMessage, jsonResponse.cause)
@@ -247,7 +247,7 @@ export module MojangAuth {
         let body = {
             "accessToken": `${token}`,
         }
-        let response = await HttpPost(url, JSON.stringify(body), {"Content-Type": "application/json"})
+        let response = await HttpPost(url, JSON.stringify(body), { "Content-Type": "application/json" })
         if (response.length < 1) return true;
         let jsonResponse: MCErrorResponse = JSON.parse(response);
         if (jsonResponse.error) {
@@ -355,7 +355,7 @@ export module MojangAPI {
         let body = {
             "metricKeys": options
         }
-        let response = await HttpPost(url, JSON.stringify(body), {"Content-Type": "application/json"})
+        let response = await HttpPost(url, JSON.stringify(body), { "Content-Type": "application/json" })
         let jsonResponse: StatisticsResponse = JSON.parse(response);
         return jsonResponse;
     }
@@ -381,7 +381,7 @@ export module MojangAPI {
             "url": url
         }
         let Rurl = "https://api.minecraftservices.com/minecraft/profile/skins";
-        let response = await HttpPost_BEARER(Rurl, JSON.stringify(body), token, {"Content-Type": "application/json"});
+        let response = await HttpPost_BEARER(Rurl, JSON.stringify(body), token, { "Content-Type": "application/json" });
         if (response.length > 0) throw response;
     }
 
@@ -400,18 +400,18 @@ export module MojangAPI {
 
     export async function getProfile(token: string) {
         let outboundProxy;
-        if ( process.env.OUTBOUND_PROXY_HOST != "" ){
+        if (process.env.OUTBOUND_PROXY_HOST != "") {
             outboundProxy = {
                 host: process.env.OUTBOUND_PROXY_HOST,
                 port: Number(process.env.OUTBOUND_PROXY_PORT),
                 auth: {
-                        username: process.env.OUTBOUND_PROXY_USERNAME,
-                        password: process.env.OUTBOUND_PROXY_PASSWORD
+                    username: process.env.OUTBOUND_PROXY_USERNAME,
+                    password: process.env.OUTBOUND_PROXY_PASSWORD
                 }
             }
         }
         let response = await axios({
-            url: 'https://api.minecraftservices.com/minecraft/profile', 
+            url: 'https://api.minecraftservices.com/minecraft/profile',
             method: 'get',
             headers: {
                 Authorization: `Bearer ${token}`
@@ -786,7 +786,7 @@ export async function HttpGet_BEARER(url: string, token: string, headers?: {}, o
     return await HttpCustom_BEARER("get", url, token, undefined, headers, objectResponse);
 }
 
-export async function HttpCustom_BEARER(method: string, url: string, token: string, body?: string, headers?: {[key: string]: any}, objectResponse = false) {
+export async function HttpCustom_BEARER(method: string, url: string, token: string, body?: string, headers?: { [key: string]: any }, objectResponse = false) {
     if (!headers) headers = {};
     headers["Authorization"] = `Bearer ${token}`
     return HttpCustom(method, url, body, headers, objectResponse);

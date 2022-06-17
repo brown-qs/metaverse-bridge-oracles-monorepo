@@ -2,7 +2,7 @@ import {
     IsNumber,
     IsString,
 } from 'class-validator';
-import { UserEntity } from '../user/user.entity';
+import { MinecraftUserEntity } from '../user/minecraft-user/minecraft-user.entity';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { PlaySessionStatEntity } from './playsessionstat.entity';
 import { GameEntity } from '../game/game.entity';
@@ -30,8 +30,8 @@ export class PlaySessionEntity {
     @IsString()
     identifier?: string;
 
-    @ManyToOne(() => UserEntity, (player) => player.playSessions)
-    player: UserEntity
+    @ManyToOne(() => MinecraftUserEntity, (player) => player.playSessions)
+    player: MinecraftUserEntity
 
     @ManyToOne(() => PlaySessionStatEntity, (stat) => stat.sessions)
     stat?: PlaySessionStatEntity

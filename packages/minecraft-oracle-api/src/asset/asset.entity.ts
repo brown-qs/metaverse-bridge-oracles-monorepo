@@ -5,7 +5,7 @@ import {
     IsNumber,
     IsString
 } from 'class-validator';
-import { UserEntity } from '../user/user.entity';
+import { MinecraftUserEntity } from '../user/minecraft-user/minecraft-user.entity';
 import { Column, Entity, Index, ManyToOne, PrimaryColumn } from 'typeorm';
 import { RecognizedAssetType } from '../config/constants';
 import { CompositeAssetEntity } from '../compositeasset/compositeasset.entity';
@@ -76,8 +76,8 @@ export class AssetEntity {
     @Column({ type: 'json', nullable: true })
     metadata?: unknown;
 
-    @ManyToOne(() => UserEntity, (user) => user.assets)
-    owner?: UserEntity
+    @ManyToOne(() => MinecraftUserEntity, (user) => user.assets)
+    owner?: MinecraftUserEntity
 
     @ManyToOne(() => CompositeAssetEntity, (compositeAsset) => compositeAsset.children, {onDelete: 'SET NULL', nullable: true})
     compositeAsset?: CompositeAssetEntity

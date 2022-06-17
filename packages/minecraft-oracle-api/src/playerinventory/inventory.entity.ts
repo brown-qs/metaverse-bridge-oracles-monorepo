@@ -3,7 +3,7 @@ import {
     IsString
 } from 'class-validator';
 import { Column, Entity, Index, ManyToOne, PrimaryColumn } from 'typeorm';
-import { UserEntity } from '../user/user.entity';
+import { MinecraftUserEntity } from '../user/minecraft-user/minecraft-user.entity';
 import { MaterialEntity } from '../material/material.entity';
 
 @Entity()
@@ -33,6 +33,6 @@ export class InventoryEntity {
     @ManyToOne(() => MaterialEntity, (material) => material.inventoryItems)
     material: MaterialEntity;
 
-    @ManyToOne(() => UserEntity, (user) => user.inventoryItems)
-    owner: UserEntity;
+    @ManyToOne(() => MinecraftUserEntity, (user) => user.inventoryItems)
+    owner: MinecraftUserEntity;
 }

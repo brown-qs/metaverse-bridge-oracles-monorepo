@@ -14,7 +14,7 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { GameApiService } from './gameapi.service';
-import { UserService } from '../user/user.service';
+import { MinecraftUserService } from '../user/minecraft-user/minecraft-user.service';
 import { ProfileDto } from '../profileapi/dtos/profile.dto';
 import { SnapshotsDto } from './dtos/snapshot.dto';
 import { PlayerSkinDto } from './dtos/texturemap.dto';
@@ -38,7 +38,7 @@ import { AchievementService } from '../achievement/achievement.service';
 import { AchievementEntity } from '../achievement/achievement.entity';
 import { SetPlayerAchievementsDto } from '../playerachievement/dtos/playerachievement.dto';
 import { PlayerAchievementEntity } from '../playerachievement/playerachievement.entity';
-import { UserEntity } from '../user/user.entity';
+import { MinecraftUserEntity } from '../user/minecraft-user/minecraft-user.entity';
 import { SetGameScoreTypeDto } from '../gamescoretype/dtos/gamescoretype.dto';
 import { GameItemTypeDto, SetGameItemTypesDto } from '../gameitemtype/dtos/gameitemtype.dto';
 import { PlayerGameItemsDto, QueryGameItemsDto, SetPlayerGameItemsDto } from '../playergameitem/dtos/playergameitem.dto';
@@ -55,14 +55,14 @@ export class GameApiController {
     private readonly context: string;
 
     constructor(
-        private readonly userService: UserService,
+        private readonly userService: MinecraftUserService,
         private readonly achievementService: AchievementService,
         private readonly gameApiService: GameApiService,
         private readonly gameTypeService: GameTypeService,
         private readonly profileService: ProfileApiService,
         private readonly gameService: GameService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
-    ) { 
+    ) {
         this.context = GameApiController.name;
     }
 
@@ -73,12 +73,12 @@ export class GameApiController {
     @UseGuards(SharedSecretGuard)
     async profile(@Param('uuid') uuid: string): Promise<ProfileDto> {
         let user = await this.userService.findByUuid(uuid)
-        if ( !user ){
-            const userData: UserEntity = {
+        if (!user) {
+            const userData: MinecraftUserEntity = {
                 uuid: uuid,
                 hasGame: false
             }
-            let newUser: UserEntity
+            let newUser: MinecraftUserEntity
             try {
                 newUser = await this.userService.create(userData)
                 user = await this.userService.findByUuid(uuid)
@@ -162,7 +162,7 @@ export class GameApiController {
         @Body() snapshots: SnapshotsDto,
     ): Promise<boolean[]> {
         const user = await this.userService.findByUuid(uuid)
-        
+
         if (!user) {
             throw new UnprocessableEntityException('No player found')
         }
@@ -178,7 +178,7 @@ export class GameApiController {
     @UseGuards(SharedSecretGuard)
     async setServerId(
         @Param('uuid') uuid: string,
-        @Body() {serverId}: ServerIdDto
+        @Body() { serverId }: ServerIdDto
     ): Promise<boolean> {
         const user = await this.userService.findByUuid(uuid)
         await this.userService.update(user.uuid, {
@@ -272,7 +272,7 @@ export class GameApiController {
         @Query() gganbus: GganbuDto,
     ): Promise<AreGganbusDto> {
         const success = await this.gameApiService.getGganbu(gganbus.player1, gganbus.player2)
-        return {areGganbus:success}
+        return { areGganbus: success }
     }
 
     @Delete('gganbus')
@@ -294,7 +294,7 @@ export class GameApiController {
         @Param('uuid') uuid: string,
         @Param('gameId') gameId: string
     ): Promise<boolean> {
-        const success = await this.gameApiService.setPlayerGameSession(uuid, gameId,true)
+        const success = await this.gameApiService.setPlayerGameSession(uuid, gameId, true)
         return success
     }
 
@@ -330,14 +330,14 @@ export class GameApiController {
         @Query() dto: FetchGameDto,
     ) {
         if (!dto?.gameTypeId) {
-            const entities = await this.gameService.findMany({relations: ['gameType']})
+            const entities = await this.gameService.findMany({ relations: ['gameType'] })
             return (entities ?? [])
         }
 
-        const entities = await this.gameService.findMany({where: {gameType: {id: dto.gameTypeId}}, relations: ['gameType']})
+        const entities = await this.gameService.findMany({ where: { gameType: { id: dto.gameTypeId } }, relations: ['gameType'] })
         return (entities ?? [])
     }
-    
+
     @Put('gametype/:typeId')
     @HttpCode(200)
     @ApiOperation({ summary: 'Upserts a game type entry' })
@@ -395,7 +395,7 @@ export class GameApiController {
 
     @Get('game/:gameId/scoretypes')
     @HttpCode(200)
-    @ApiOperation({ summary: 'Fetches score types of a game'})
+    @ApiOperation({ summary: 'Fetches score types of a game' })
     //@ApiBearerAuth('AuthenticationHeader')
     //@UseGuards(SharedSecretGuard)
     async getScoreTypes(
@@ -435,9 +435,9 @@ export class GameApiController {
     @HttpCode(200)
     @ApiOperation({ summary: 'Queries available achievemenets for a game' })
     async getAchievements(
-         @Param('gameId') gameId: string
+        @Param('gameId') gameId: string
     ): Promise<AchievementEntity[]> {
-        const entities = await this.achievementService.findMany({where: {game: {id: gameId}}, relations: ['game']})
+        const entities = await this.achievementService.findMany({ where: { game: { id: gameId } }, relations: ['game'] })
         return entities
     }
 
@@ -483,7 +483,7 @@ export class GameApiController {
         const entities = await this.gameApiService.getGameItemTypes(gameId)
         return entities
     }
-    
+
     @Get('game/:gameId/player/:uuid/items')
     @HttpCode(200)
     @ApiOperation({ summary: 'Fetches all items for given game and player' })
@@ -496,7 +496,7 @@ export class GameApiController {
         const data = await this.gameApiService.getPlayerGameItems(gameId, uuid)
         return data
     }
-    
+
     @Get('game/:gameId/items')
     @HttpCode(200)
     @ApiOperation({ summary: 'Fetches players itmes.' })
@@ -554,7 +554,7 @@ export class GameApiController {
     async getAssetFingerprintForPlayer(
         @Param('trimmedUuid') uuid: string
     ): Promise<UserAssetFingerprint> {
-        const user = await this.userService.findOne({uuid}, { relations: ['assets'] })
+        const user = await this.userService.findOne({ uuid }, { relations: ['assets'] })
         const result = await this.gameApiService.getAssetFingerprintForPlayer(user)
         return result
     }
@@ -567,7 +567,7 @@ export class GameApiController {
     async getResourceInventoryPlayer(
         @Param('trimmedUuid') uuid: string
     ): Promise<ResourceInventoryQueryResult[]> {
-        const user = await this.userService.findOne({uuid}, { relations: ['assets'] })
+        const user = await this.userService.findOne({ uuid }, { relations: ['assets'] })
         const result = await this.gameApiService.getResourceInventoryPlayer(user)
         return result
     }
@@ -581,7 +581,7 @@ export class GameApiController {
         @Param('trimmedUuid') uuid: string,
         @Body() dto: SetResourceInventoryItems
     ): Promise<boolean> {
-        const user = await this.userService.findOne({uuid}, { relations: ['assets'] })
+        const user = await this.userService.findOne({ uuid }, { relations: ['assets'] })
         const result = await this.gameApiService.setResourceInventoryPlayer(user, dto)
         return result
     }
@@ -594,7 +594,7 @@ export class GameApiController {
     async getResourceInventoryOffsetPlayer(
         @Param('trimmedUuid') uuid: string
     ): Promise<ResourceInventoryQueryResult[]> {
-        const user = await this.userService.findOne({uuid}, { relations: ['assets'] })
+        const user = await this.userService.findOne({ uuid }, { relations: ['assets'] })
         const result = await this.gameApiService.getResourceInventoryOffsetPlayer(user)
         return result
     }
@@ -608,7 +608,7 @@ export class GameApiController {
         @Param('trimmedUuid') uuid: string,
         @Body() dto: SetResourceInventoryOffsetItems
     ): Promise<boolean> {
-        const user = await this.userService.findOne({uuid}, { relations: ['assets'] })
+        const user = await this.userService.findOne({ uuid }, { relations: ['assets'] })
         const result = await this.gameApiService.setResourceInventoryPlayer(user, dto)
         return result
     }
@@ -621,7 +621,7 @@ export class GameApiController {
     async getFungibleBalancesForPlayer(
         @Param('trimmedUuid') uuid: string
     ): Promise<GetFungibleBalancesResultDto> {
-        const user = await this.userService.findOne({uuid}, { relations: ['assets'] })
+        const user = await this.userService.findOne({ uuid }, { relations: ['assets'] })
         const result = await this.gameApiService.getFungibleBalancesForPlayer(user)
         return result
     }

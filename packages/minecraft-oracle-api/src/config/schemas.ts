@@ -54,6 +54,9 @@ export const envValidationSchema = () => {
         KILT_VERIFIER_ADDRESS: Joi.string().required(),
         KILT_VERIFIER_DID_URI: Joi.string().required(),
         KILT_DAPP_NAME: Joi.string().required(),
+        // RECAPTCHA
+        RECAPTCHA_SITEKEY: Joi.string().required(),
+        RECAPTCHA_SECRETKEY: Joi.string().required(),
         // COMPOSITE
         COMPOSITE_URI_PREFIX: Joi.string().optional().default('https://static.moonsama.com'),
         COMPOSITE_URI_POSTFIX: Joi.string().optional().default('.png'),
@@ -63,5 +66,8 @@ export const envValidationSchema = () => {
         OUTBOUND_PROXY_PORT: Joi.string().default("20000"),
         OUTBOUND_PROXY_USERNAME: Joi.string().default(""),
         OUTBOUND_PROXY_PASSWORD: Joi.string().default(""),
+
+        FRONTEND_URL: Joi.string().required(),
+
     });
 };

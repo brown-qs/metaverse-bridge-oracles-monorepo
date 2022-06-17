@@ -1,10 +1,10 @@
 import { Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { getRepository, ILike } from 'typeorm';
-import { UserService } from '../user/user.service';
+import { MinecraftUserService } from '../user/minecraft-user/minecraft-user.service';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { TextureService } from '../texture/texture.service';
-import { UserEntity } from '../user/user.entity';
+import { MinecraftUserEntity } from '../user/minecraft-user/minecraft-user.entity';
 import { TextureType } from '../texture/texturetype.enum';
 import { RecognizedAssetType } from '../config/constants';
 import { PlayerSkinDto } from './dtos/texturemap.dto';
@@ -70,7 +70,7 @@ export class GameApiService {
     private locks: Map<string, MutexInterface>;
 
     constructor(
-        private readonly userService: UserService,
+        private readonly userService: MinecraftUserService,
         private readonly textureService: TextureService,
         private readonly skinService: SkinService,
         private readonly materialService: MaterialService,
@@ -99,7 +99,7 @@ export class GameApiService {
         this.locks = new Map();
     }
 
-    public async getUserSkins(user: UserEntity): Promise<PlayerSkinDto[]> {
+    public async getUserSkins(user: MinecraftUserEntity): Promise<PlayerSkinDto[]> {
         const skins = await this.skinService.findMany({ where: { owner: { uuid: user.uuid } }, relations: ['texture'] })
 
         const results: PlayerSkinDto[] = skins.map(skin => {
@@ -125,7 +125,7 @@ export class GameApiService {
         }
     }
 
-    public async processSnapshots(user: UserEntity, dto: SnapshotsDto): Promise<[SnapshotItemEntity[], boolean[], number, number]> {
+    public async processSnapshots(user: MinecraftUserEntity, dto: SnapshotsDto): Promise<[SnapshotItemEntity[], boolean[], number, number]> {
 
         if (!user || !dto || !dto.snapshots || dto.snapshots.length == 0) {
             return [[], [], 0, 0]
@@ -267,8 +267,8 @@ export class GameApiService {
     }
 
     public async setGganbu(player1UUID: string, player2UUID: string): Promise<boolean> {
-        let players: UserEntity[]
-        let player1: UserEntity, player2: UserEntity
+        let players: MinecraftUserEntity[]
+        let player1: MinecraftUserEntity, player2: MinecraftUserEntity
         try {
             //console.log(1)
             players = await this.userService.findMany({
@@ -304,8 +304,8 @@ export class GameApiService {
     }
 
     public async getGganbu(player1UUID: string, player2UUID: string): Promise<boolean> {
-        let players: UserEntity[]
-        let player1: UserEntity, player2: UserEntity
+        let players: MinecraftUserEntity[]
+        let player1: MinecraftUserEntity, player2: MinecraftUserEntity
         try {
             players = await this.userService.findMany({
                 where: [
@@ -335,7 +335,7 @@ export class GameApiService {
     }
 
     public async clearGganbus(): Promise<boolean> {
-        let players: UserEntity[]
+        let players: MinecraftUserEntity[]
 
         const take = 2;
         let skip = 0;
@@ -381,7 +381,7 @@ export class GameApiService {
     }
 
 
-    private async assignSnapshot(user: UserEntity, game: GameEntity | null, snapshot: SnapshotDto, half = false, validate = true): Promise<SnapshotItemEntity> {
+    private async assignSnapshot(user: MinecraftUserEntity, game: GameEntity | null, snapshot: SnapshotDto, half = false, validate = true): Promise<SnapshotItemEntity> {
         if (!snapshot.materialName) {
             this.logger.error(`processSnapshots-${user.uuid}:: materialName was not received. Got: ${snapshot.materialName}.`, null, this.context)
             return undefined
@@ -1179,7 +1179,7 @@ export class GameApiService {
         return entities;
     }
 
-    getAssetFingerprintForPlayer(user: UserEntity): UserAssetFingerprint {
+    getAssetFingerprintForPlayer(user: MinecraftUserEntity): UserAssetFingerprint {
 
         if (!user) {
             return undefined
@@ -1213,7 +1213,7 @@ export class GameApiService {
         };
     }
 
-    async getResourceInventoryPlayer(user: UserEntity): Promise<ResourceInventoryQueryResult[]> {
+    async getResourceInventoryPlayer(user: MinecraftUserEntity): Promise<ResourceInventoryQueryResult[]> {
         const res = await this.resourceInventoryService.findMany({ where: { owner: { uuid: user.uuid } }, relations: ['owner', 'collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
 
         return res.map(x => {
@@ -1227,7 +1227,7 @@ export class GameApiService {
         })
     }
 
-    async setResourceInventoryPlayer(user: UserEntity, dto: SetResourceInventoryItems): Promise<boolean> {
+    async setResourceInventoryPlayer(user: MinecraftUserEntity, dto: SetResourceInventoryItems): Promise<boolean> {
         const res = await this.resourceInventoryService.findMany({ where: { owner: { uuid: user.uuid } }, relations: ['owner'] })
 
         await Promise.all(dto.items.map(async (x) => {
@@ -1245,7 +1245,7 @@ export class GameApiService {
         return true
     }
 
-    async getResourceInventoryOffsetPlayer(user: UserEntity): Promise<ResourceInventoryOffsetQueryResult[]> {
+    async getResourceInventoryOffsetPlayer(user: MinecraftUserEntity): Promise<ResourceInventoryOffsetQueryResult[]> {
         const res = await this.resourceInventoryOffsetService.findMany({ where: { owner: { uuid: user.uuid } }, relations: ['owner', 'resourceInventory', 'resourceInventory.collectionFragment', 'resourceInventory.collectionFragment.collection'], loadEagerRelations: true })
 
         return res.map(x => {
@@ -1259,7 +1259,7 @@ export class GameApiService {
         })
     }
 
-    async setResourceInventoryOffsetPlayer(user: UserEntity, dto: SetResourceInventoryOffsetItems): Promise<boolean> {
+    async setResourceInventoryOffsetPlayer(user: MinecraftUserEntity, dto: SetResourceInventoryOffsetItems): Promise<boolean> {
         await Promise.all(dto.items.map(async (x) => {
             const id = ResourceInventoryOffsetService.calculateId({ ...x, uuid: user.uuid })
 
@@ -1279,12 +1279,12 @@ export class GameApiService {
         return true
     }
 
-    async getFungibleBalancesForPlayer(user: UserEntity): Promise<GetFungibleBalancesResultDto> {
+    async getFungibleBalancesForPlayer(user: MinecraftUserEntity): Promise<GetFungibleBalancesResultDto> {
 
         const res = await this.resourceInventoryService.findMany({ where: { owner: { uuid: user.uuid } }, relations: ['owner', 'offset', 'collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
 
         if (!res) {
-            return {balances: [], uuid: user.uuid}
+            return { balances: [], uuid: user.uuid }
         }
         const results = await Promise.all(res.map(async (x) => {
             return {
@@ -1296,6 +1296,6 @@ export class GameApiService {
             }
         }))
 
-        return {balances: results, uuid: user.uuid}
+        return { balances: results, uuid: user.uuid }
     }
 }

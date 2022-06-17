@@ -1,6 +1,6 @@
-import {Inject, Injectable} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { UserService } from '../user/user.service';
+import { MinecraftUserService } from '../user/minecraft-user/minecraft-user.service';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { TextureService } from '../texture/texture.service';
 import { MaterialService } from '../material/material.service';
@@ -14,7 +14,7 @@ export class AdminApiService {
 
     private readonly context: string;
     constructor(
-        private readonly userService: UserService,
+        private readonly userService: MinecraftUserService,
         private readonly textureService: TextureService,
         private readonly materialService: MaterialService,
         private readonly snapshotService: SnapshotService,
@@ -108,17 +108,17 @@ export class AdminApiService {
         return entities;
     }
 
-    public async setVIP(user: {uuid: string}, vip: boolean) {
+    public async setVIP(user: { uuid: string }, vip: boolean) {
 
         //console.log(user, vip, typeof vip)
-        const res = await this.userService.update(user.uuid, {vip})
+        const res = await this.userService.update(user.uuid, { vip })
         //console.log(res)
 
         return (res.affected ?? 1) > 0
     }
 
-    public async blacklist(user: {uuid: string}, blacklisted: boolean) {
-        const res = await this.userService.update(user.uuid, {blacklisted})
+    public async blacklist(user: { uuid: string }, blacklisted: boolean) {
+        const res = await this.userService.update(user.uuid, { blacklisted })
         return (res.affected ?? 1) > 0
     }
 }

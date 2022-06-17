@@ -18,7 +18,7 @@ import { JwtAuthGuard } from '../authapi/jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt';
 import { ProfileDto } from './dtos/profile.dto';
 import { User } from '../utils/decorators';
-import { UserEntity } from '../user/user.entity';
+import { MinecraftUserEntity } from '../user/minecraft-user/minecraft-user.entity';
 import { ProfileApiService } from './profileapi.service';
 import { ThingsDto } from './dtos/things.dto';
 import { SkinselectDto } from './dtos/skinselect.dto';
@@ -48,7 +48,7 @@ export class ProfileApiController {
     @ApiOperation({ summary: 'Fetches user profile' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    async profile(@User() user: UserEntity): Promise<ProfileDto> {
+    async profile(@User() user: MinecraftUserEntity): Promise<ProfileDto> {
         return this.profileService.userProfile(user)
     }
 
@@ -57,7 +57,7 @@ export class ProfileApiController {
     @ApiOperation({ summary: 'User resources available to summon from the Metaverse' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    async resources(@User() user: UserEntity): Promise<ThingsDto> {
+    async resources(@User() user: MinecraftUserEntity): Promise<ThingsDto> {
         const playerItems = await this.profileService.getPlayerItems(user)
         return playerItems
     }
@@ -90,7 +90,7 @@ export class ProfileApiController {
     @ApiOperation({ summary: 'Sets active user skin.' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    async skinselect(@User() user: UserEntity, @Body() dto: SkinselectDto): Promise<boolean> {
+    async skinselect(@User() user: MinecraftUserEntity, @Body() dto: SkinselectDto): Promise<boolean> {
         const success = await this.profileService.skinSelect(user, dto)
         return success
     }

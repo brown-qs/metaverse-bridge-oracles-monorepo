@@ -2,7 +2,7 @@ import {
     IsBoolean,
     IsString
 } from 'class-validator';
-import { UserEntity } from '../user/user.entity';
+import { MinecraftUserEntity } from '../user/minecraft-user/minecraft-user.entity';
 import { Column, Entity, Index, ManyToOne, PrimaryColumn } from 'typeorm';
 import { TextureEntity } from '../texture/texture.entity';
 
@@ -28,6 +28,6 @@ export class SkinEntity {
     @ManyToOne(() => TextureEntity, (texture: TextureEntity) => texture.skins, {nullable: false})
     texture: TextureEntity;
 
-    @ManyToOne(() => UserEntity, (owner: UserEntity) => owner.skins, {nullable: false})
-    owner: UserEntity;
+    @ManyToOne(() => MinecraftUserEntity, (owner: MinecraftUserEntity) => owner.skins, {nullable: false})
+    owner: MinecraftUserEntity;
 }

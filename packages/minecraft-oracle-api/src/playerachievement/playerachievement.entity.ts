@@ -6,7 +6,7 @@ import {
 import { GameEntity } from '../game/game.entity';
 import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 import { AchievementEntity } from '../achievement/achievement.entity';
-import { UserEntity } from '../user/user.entity';
+import { MinecraftUserEntity } from '../user/minecraft-user/minecraft-user.entity';
 
 @Entity()
 export class PlayerAchievementEntity {
@@ -25,8 +25,8 @@ export class PlayerAchievementEntity {
     @ManyToOne(() => AchievementEntity, (achievement) => achievement.playerAchievements)
     achievement: AchievementEntity;
 
-    @ManyToOne(() => UserEntity, (user) => user.achievements)
-    player: UserEntity;
+    @ManyToOne(() => MinecraftUserEntity, (user) => user.achievements)
+    player: MinecraftUserEntity;
 
     @Column({default: false})
     @IsBoolean()

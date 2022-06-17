@@ -1,9 +1,9 @@
 import { Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { UserService } from '../user/user.service';
+import { MinecraftUserService } from '../user/minecraft-user/minecraft-user.service';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { TextureService } from '../texture/texture.service';
-import { UserEntity } from '../user/user.entity';
+import { MinecraftUserEntity } from '../user/minecraft-user/minecraft-user.entity';
 import { GameService } from '../game/game.service';
 import { ImportDto } from './dtos/import.dto';
 import { CALLDATA_EXPIRATION_MS, CALLDATA_EXPIRATION_THRESHOLD, METAVERSE, RecognizedAssetType } from '../config/constants';
@@ -44,7 +44,7 @@ export class OracleApiService {
     private readonly defaultChainId: number;
 
     constructor(
-        private readonly userService: UserService,
+        private readonly userService: MinecraftUserService,
         private readonly textureService: TextureService,
         private readonly skinService: SkinService,
         private readonly gameService: GameService,
@@ -67,7 +67,7 @@ export class OracleApiService {
         this.defaultChainId = this.configService.get<number>('network.defaultChainId')
     }
 
-    public async userInRequest(user: UserEntity, data: ImportDto, enraptured: boolean): Promise<[string, string, string, boolean]> {
+    public async userInRequest(user: MinecraftUserEntity, data: ImportDto, enraptured: boolean): Promise<[string, string, string, boolean]> {
         this.logger.debug(`userInRequest: ${JSON.stringify(data)}, enraptured: ${enraptured}`, this.context)
         const sanitizedChainId = !!data.chainId ? data.chainId : this.defaultChainId;
         const collectionFragment = enraptured ?
@@ -170,7 +170,7 @@ export class OracleApiService {
         return [hash, payload, signature, false]
     }
 
-    public async userOutRequest(user: UserEntity, { hash, chainId }: ExportDto): Promise<[string, string, string, boolean]> {
+    public async userOutRequest(user: MinecraftUserEntity, { hash, chainId }: ExportDto): Promise<[string, string, string, boolean]> {
         this.logger.debug(`userOutRequest: ${hash}`, this.context)
 
         if (user.blacklisted) {
@@ -225,7 +225,7 @@ export class OracleApiService {
         return [hash, payload, signature, false]
     }
 
-    public async userSummonRequest(user: UserEntity, { recipient, chainId }: SummonDto): Promise<boolean> {
+    public async userSummonRequest(user: MinecraftUserEntity, { recipient, chainId }: SummonDto): Promise<boolean> {
         this.logger.debug(`userSummonRequest user ${user.uuid} to ${recipient} ID is ${chainId}`, this.context)
 
         if (!recipient || recipient.length !== 42 || !recipient.startsWith('0x')) {
@@ -342,7 +342,7 @@ export class OracleApiService {
         return res
     }
 
-    public async userImportConfirm(user: UserEntity, data: { hash: string, chainId: number }, asset?: AssetEntity): Promise<boolean> {
+    public async userImportConfirm(user: MinecraftUserEntity, data: { hash: string, chainId: number }, asset?: AssetEntity): Promise<boolean> {
         const hash = data.hash;
         this.logger.log(`ImportConfirm: started ${user.uuid}: ${hash}`, this.context)
 
@@ -459,7 +459,7 @@ export class OracleApiService {
         return true
     }
 
-    public async userEnraptureConfirm(user: UserEntity, data: { hash: string, chainId: number }, asset?: AssetEntity): Promise<boolean> {
+    public async userEnraptureConfirm(user: MinecraftUserEntity, data: { hash: string, chainId: number }, asset?: AssetEntity): Promise<boolean> {
         const hash = data.hash
         this.logger.log(`EnraptureConfirm: started ${user.uuid}: ${hash}`, this.context)
 
@@ -551,7 +551,7 @@ export class OracleApiService {
         const finalentry = await this.assetService.create({ ...assetEntry, pendingIn: false });
 
         // TODO proper sideffects
-        
+
         (async () => {
             let metadata = null
             let world = null
@@ -569,8 +569,8 @@ export class OracleApiService {
         // TODO disgustang
 
         if (assetEntry.recognizedAssetType.valueOf() === RecognizedAssetType.RESOURCE.valueOf()) {
-            const cid = ResourceInventoryService.calculateId({chainId, assetAddress, assetId, uuid: user.uuid})
-            const inv = await this.resourceInventoryService.findOne({id: cid}, {relations: ['assets']})
+            const cid = ResourceInventoryService.calculateId({ chainId, assetAddress, assetId, uuid: user.uuid })
+            const inv = await this.resourceInventoryService.findOne({ id: cid }, { relations: ['assets'] })
             if (!inv) {
                 await this.resourceInventoryService.create({
                     amount: assetEntry.amount,
@@ -582,7 +582,7 @@ export class OracleApiService {
                 })
             } else {
                 const newAmount = (BigNumber.from(inv.amount).add(assetEntry.amount)).toString()
-                const entry: ResourceInventoryEntity = {...inv, amount: newAmount, assets: (inv.assets ?? []).concat([finalentry])}
+                const entry: ResourceInventoryEntity = { ...inv, amount: newAmount, assets: (inv.assets ?? []).concat([finalentry]) }
                 console.log(entry)
                 await this.resourceInventoryService.create(entry)
             }
@@ -602,7 +602,7 @@ export class OracleApiService {
         return true
     }
 
-    public async userExportConfirm(user: UserEntity, data: { hash: string, chainId: number }, asset?: AssetEntity): Promise<boolean> {
+    public async userExportConfirm(user: MinecraftUserEntity, data: { hash: string, chainId: number }, asset?: AssetEntity): Promise<boolean> {
 
         const hash = data.hash
         if (!hash) {
@@ -691,26 +691,26 @@ export class OracleApiService {
         const compositeAsset = assetEntry.compositeAsset
         await this.assetService.remove(assetEntry)
 
-        ;(async () => {
-            if (!!compositeAsset) {
-                try {
-                    await this.compositeApiService.reevaluate(compositeAsset, user)
-                    return
-                } catch {
-                    this.logger.error(`userExportConfirm:: composite reevaluation as child failed`, undefined, this.context)
+            ; (async () => {
+                if (!!compositeAsset) {
+                    try {
+                        await this.compositeApiService.reevaluate(compositeAsset, user)
+                        return
+                    } catch {
+                        this.logger.error(`userExportConfirm:: composite reevaluation as child failed`, undefined, this.context)
+                    }
                 }
-            }
 
-            const cas = await this.compositeAssetService.findOne({assetId, compositeCollectionFragment: {collection: {assetAddress, chainId}}}, {relations: ['compositeCollectionFragment', 'compositeCollectionFragment.collection'], loadEagerRelations: true})
-            if (!!cas) {
-                try {
-                    await this.compositeApiService.reevaluate(cas, user)
-                    return
-                } catch {
-                    this.logger.error(`userExportConfirm:: composite reevaluation as parent failed`, undefined, this.context)
+                const cas = await this.compositeAssetService.findOne({ assetId, compositeCollectionFragment: { collection: { assetAddress, chainId } } }, { relations: ['compositeCollectionFragment', 'compositeCollectionFragment.collection'], loadEagerRelations: true })
+                if (!!cas) {
+                    try {
+                        await this.compositeApiService.reevaluate(cas, user)
+                        return
+                    } catch {
+                        this.logger.error(`userExportConfirm:: composite reevaluation as parent failed`, undefined, this.context)
+                    }
                 }
-            }
-        })();
+            })();
         return true
     }
 

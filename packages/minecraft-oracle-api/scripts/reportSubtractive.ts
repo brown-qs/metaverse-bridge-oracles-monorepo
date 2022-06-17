@@ -3,7 +3,7 @@ import { Connection, createConnection, getConnection } from 'typeorm'
 
 import { config } from 'dotenv'
 import { SnapshotItemEntity } from '../src/snapshot/snapshotItem.entity'
-import { UserEntity } from '../src/user/user.entity'
+import { MinecraftUserEntity } from '../src/user/minecraft-user/minecraft-user.entity'
 import { TextureEntity } from '../src/texture/texture.entity'
 import { AssetEntity } from '../src/asset/asset.entity'
 import { SummonEntity } from '../src/summon/summon.entity'
@@ -95,7 +95,7 @@ async function main() {
             port: Number.parseInt(process.env.TYPEORM_PORT),
             database: process.env.TYPEORM_DATABASE,
             entities: [
-                UserEntity,
+                MinecraftUserEntity,
                 SnapshotItemEntity,
                 InventoryEntity,
                 TextureEntity,
@@ -161,7 +161,7 @@ async function main() {
             continue
         }
 
-        const user = await connection.manager.getRepository(UserEntity).findOne({ uuid: userId })
+        const user = await connection.manager.getRepository(MinecraftUserEntity).findOne({ uuid: userId })
         if (!user) {
             console.error(`Non existant user: ${userName}-${userId}`)
             continue
@@ -273,7 +273,7 @@ async function main() {
             }
         }
 
-        await connection.manager.getRepository(UserEntity).update(user.uuid, { blacklisted: blacklist })
+        await connection.manager.getRepository(MinecraftUserEntity).update(user.uuid, { blacklisted: blacklist })
     }
     console.log('Getting fucked: ', assetDeleteList)
     await connection.close()
