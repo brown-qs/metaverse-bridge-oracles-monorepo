@@ -33,6 +33,7 @@ export function useProfile() {
     const blocknumber = useBlockNumber()
 
     const { jwt } = authData ?? {}
+    const minecraftUuid = authData?.emailUser?.minecraftUuid
 
     const cb = useCallback(async () => {
         if (!jwt) {
@@ -63,11 +64,11 @@ export function useProfile() {
             };
             console.error('Error fetching user profile', e);
         }
-    }, [jwt, blocknumber])
+    }, [jwt, blocknumber, minecraftUuid])
 
     useEffect(() => {
         cb()
-    }, [jwt, blocknumber])
+    }, [jwt, blocknumber, minecraftUuid])
 
     return authData?.userProfile
 }

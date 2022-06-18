@@ -1,11 +1,14 @@
 import { Body, Controller, Get, HttpCode, Inject, Patch, UseGuards } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { Email } from 'aws-sdk/clients/codecommit';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { JwtAuthGuard } from 'src/authapi/jwt-auth.guard';
+import { AuthProvider } from 'src/authapi/jwt.strategy';
 import { GameApiService } from 'src/gameapi/gameapi.service';
 import { ProfileDto } from 'src/profileapi/dtos/profile.dto';
 import { ProfileApiService } from 'src/profileapi/profileapi.service';
+import { EmailUserEntity } from 'src/user/email-user/email-user.entity';
 import { MinecraftUserEntity } from 'src/user/minecraft-user/minecraft-user.entity';
 import { User } from 'src/utils/decorators';
 import { AccountDto } from './dtos/account.dto';
@@ -22,22 +25,13 @@ export class AccountController {
     @ApiOperation({ summary: 'Fetches user account' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    async account(@User() user: any): Promise<AccountDto> {
+    async account(@User() user: EmailUserEntity): Promise<AccountDto> {
         const account = {
-            provider: user.provider,
+            id: user.id,
+            provider: AuthProvider.Email,
             email: user.email,
             minecraftUuid: user.minecraftUuid
         }
         return account
-    }
-
-    @Patch('link_minecraft')
-    @ApiOperation({ summary: 'Binds minecraft uuid to user' })
-    @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard)
-    async linkMinecraft(@Body() dto: any) {
-        const jwt = dto.minecraftJwt
-        console.log("jwt: " + jwt)
-        return { success: true }
     }
 }

@@ -19,7 +19,6 @@ import AccountLink from './account/link';
 
 export const Routing = () => {
     const { authData } = useAuth();
-
     return (
         <Switch>
             <Route exact path="/">
@@ -60,7 +59,7 @@ export const Routing = () => {
             </Route>
 
             <Route path="/bridge">
-                {!!authData?.jwt ? (
+                {!!authData?.jwt && !!authData?.emailUser?.minecraftUuid ? (
                     <>
                         <ImportDialog />
                         <ExportDialog />

@@ -16,7 +16,7 @@ import { ReCAPTCHA } from 'components/Recaptcha';
 
 const EmailLoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState("asfdadf@asdf.com");
+  const [email, setEmail] = useState("");
   const [dirtyTextField, setDirtyTextField] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false)
   const [failureReason, setFailureReason] = useState("")

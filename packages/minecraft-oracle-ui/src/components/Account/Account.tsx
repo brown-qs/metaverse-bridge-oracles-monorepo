@@ -10,7 +10,7 @@ import { useAccountDialog, useActiveWeb3React, useAuth } from 'hooks';
 import { truncateAddress } from 'utils';
 import Identicon from 'components/Identicon/Identicon';
 import PersonSharpIcon from '@mui/icons-material/PersonSharp';
-import { Activity, Key } from 'react-feather';
+import { Activity } from 'react-feather';
 import { useMediaQuery } from 'beautiful-react-hooks';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWalletSharp';
 import { styles as accountStyles } from './Account.styles';
