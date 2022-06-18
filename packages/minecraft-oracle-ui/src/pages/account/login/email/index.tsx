@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Loader } from 'ui';
 import { useClasses } from 'hooks';
 import Tooltip from '@mui/material/Tooltip';
@@ -12,25 +12,46 @@ import "@fontsource/orbitron/500.css";
 import { Alert, Button, Collapse, IconButton, Input, Stack, TextField, Typography, useMediaQuery } from '@mui/material';
 import { theme } from 'theme/Theme';
 import LoadingButton from '@mui/lab/LoadingButton';
+import { ReCAPTCHA } from 'components/Recaptcha';
 
 const EmailLoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState("asfdadf@asdf.com");
   const [dirtyTextField, setDirtyTextField] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false)
   const [failureReason, setFailureReason] = useState("")
   const [showFailure, setShowFailure] = useState(false)
+  const recaptchaEl = useRef<any>(null)
 
-  const captchaSuccess = async (result: string) => {
-    //component re-renders and we get a stale email
-    const latestEmail = await new Promise((resolve, reject) => {
-      setEmail(email => {
-        resolve(email)
-        return email
-      })
+
+
+
+
+
+
+  //called once
+  const submitEmail = async (ema: string) => {
+    console.log("email: " + email)
+    setIsLoading(true)
+
+    let token
+    try {
+      if (recaptchaEl.current) {
+        console.log("before captcha")
+        token = await recaptchaEl.current.executeAsync();
+      }
+    } catch (e) {
+      setDirtyTextField(false)
+      setEmail("")
+      setIsLoading(false)
+      setFailureReason("Invalid captcha")
+      setShowFailure(true)
+    }
+
+    setImmediate(() => {
+      recaptchaEl.current.reset()
+
     })
-
-    window.grecaptcha.reset()
     let failed = false
 
     try {
@@ -40,7 +61,7 @@ const EmailLoginPage = () => {
           'Content-Type': 'application/json'
         },
         method: "POST",
-        body: JSON.stringify({ email: latestEmail, "g-recaptcha-response": result })
+        body: JSON.stringify({ email: ema, "g-recaptcha-response": token })
       })
       const json = await response.json()
 
@@ -60,34 +81,7 @@ const EmailLoginPage = () => {
     if (failed) {
       setShowFailure(true)
     }
-  }
-
-  const captchaFailure = async (error: string) => {
-
-    window.grecaptcha.reset()
-    //handle captcha error
-    setDirtyTextField(false)
-    setEmail("")
-    setIsLoading(false)
-    setFailureReason("Invalid captcha")
-    setShowFailure(true)
-  }
-
-  useEffect(() => {
-    try {
-      window.grecaptcha.render("#recaptcha", { "sitekey": process.env.REACT_APP_RECAPTCHA_SITEKEY, "theme": "light", size: "invisible", callback: (response) => { captchaSuccess(response) }, "expired-callback": () => { captchaFailure("expired") }, "error-callback": () => { captchaFailure("error") } }, false)
-    } catch (e) {
-      //if rendered more than once, will throw
-    }
-
-  }, [])
-
-
-  //called once
-  const kickOffCaptcha = async () => {
-    setIsLoading(true)
-    await new Promise<void>(resolve => { window.grecaptcha.ready(resolve) })
-    window.grecaptcha.execute()
+    //async captcha
   }
 
   const isValidEmail = (email: string) => {
@@ -116,10 +110,10 @@ const EmailLoginPage = () => {
 
       <TextField disabled={isLoading} inputProps={{ spellCheck: false, autoCapitalize: "off", autoCorrect: "off", onFocus: () => setDirtyTextField(true) }} value={email} error={dirtyTextField && !isValidEmail(email)} onKeyPress={(e) => {
         if (e.key === 'Enter' && !isLoading && isValidEmail(email)) {
-          kickOffCaptcha()
+          submitEmail(email)
         }
       }} onChange={(event) => { setEmail(event.target.value) }} label="Email" variant="standard" />
-      <LoadingButton loading={isLoading} disabled={!isValidEmail(email)} onClick={() => kickOffCaptcha()} disableRipple variant="contained">Send Login Link</LoadingButton></>)
+      <LoadingButton loading={isLoading} disabled={!isValidEmail(email)} onClick={(e) => submitEmail(email)} disableRipple variant="contained">Send Login Link</LoadingButton></>)
   }
 
   return (
@@ -131,7 +125,7 @@ const EmailLoginPage = () => {
           ? failureAlert()
           : loginControls()
       }
-      <div id="#recaptcha"></div>
+      <ReCAPTCHA ref={recaptchaEl} grecaptcha={window.grecaptcha} sitekey={process.env.REACT_APP_RECAPTCHA_SITEKEY || ""} size="invisible" theme="dark" />
     </Stack >
   );
 
