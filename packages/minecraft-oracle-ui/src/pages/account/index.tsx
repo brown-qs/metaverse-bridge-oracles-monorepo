@@ -19,7 +19,7 @@ const AccountPage = () => {
   const { authData, setAuthData } = useAuth();
   const [isLoading, setIsLoading] = useState(true)
   const [failureMessage, setFailureMessage] = useState("")
-
+  console.log(`authData: ${JSON.stringify(authData)}`)
   const authed = !!authData?.jwt
 
   useEffect(() => {
@@ -35,6 +35,7 @@ const AccountPage = () => {
               "Content-Type": "application/json"
             },
           });
+          console.log("SETTING AUTH DATA")
           setAuthData({ ...authData, emailUser: result.data })
 
         } catch (e) {
@@ -51,11 +52,15 @@ const AccountPage = () => {
       }
       getAccount()
     }
-  }, [])
-
+  }, [authData?.jwt])
   const handleMinecraftLink = () => {
     window.sessionStorage.setItem('authSuccessRedirect', window.location.pathname);
     window.location.href = `${process.env.REACT_APP_BACKEND_API_URL}/auth/minecraft/login?jwt=${authData?.jwt}`;
+  }
+
+  const handleLogout = () => {
+    window.localStorage.removeItem('authData');
+    setAuthData({ jwt: undefined })
   }
 
   const handleMinecraftUnlink = async () => {
@@ -69,6 +74,10 @@ const AccountPage = () => {
         },
       });
       if (result?.data?.jwt) {
+        if (authData && authData.emailUser) {
+          //remove minecraft uuid
+          setAuthData({ ...authData, emailUser: { ...authData.emailUser, minecraftUuid: null } })
+        }
         window.location.href = `/auth/${result?.data?.jwt}`
       }
     } catch (e) {
@@ -93,7 +102,11 @@ const AccountPage = () => {
 
     return <Stack direction="column" alignItems='center' textAlign='center' spacing={0}>
       <Chip color="info" icon={<PersonIcon />} label={authData?.emailUser?.email} ></Chip>
-
+      <Stack direction="column" alignItems='center' textAlign='center' spacing={1} marginTop={2}>
+        <Box>
+          <Button disableRipple style={{ maxWidth: '175px', width: '175px', minWidth: '175px' }} onClick={() => { handleLogout() }} variant="contained">Logout</Button>
+        </Box>
+      </Stack>
       <Stack direction="column" alignItems='center' textAlign='center' spacing={1} marginTop={5}>
         <Box>Linked Minecraft Account</Box>
         <Box>{authData.emailUser?.minecraftUuid
@@ -101,6 +114,7 @@ const AccountPage = () => {
           : <Button disableRipple style={{ maxWidth: '175px', width: '175px', minWidth: '175px' }} onClick={() => { handleMinecraftLink() }} variant="contained">Link Minecraft</Button>}
         </Box>
       </Stack>
+
     </Stack>
   }
 

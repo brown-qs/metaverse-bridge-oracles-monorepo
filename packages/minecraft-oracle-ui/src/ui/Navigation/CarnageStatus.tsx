@@ -10,6 +10,7 @@ export default function CarnageStatus() {
     BoxStyle: {
       backgroundColor: isGameActive ? 'rgba(14, 235, 168, 0.2)' : 'rgba(251, 122, 111, 0.2)',
       textTransform: 'uppercase',
+      whiteSpace: "nowrap",
       padding: '12px 24px 12px 16px',
       fontFamily: 'Orbitron',
       fontSize: '12px',
@@ -44,7 +45,7 @@ export default function CarnageStatus() {
         strokeWidth="1.5"
         className="icon icon-tabler icon-tabler-device-gamepad"
         viewBox="0 0 24 24"
-        style={{marginRight: '8px'}}
+        style={{ marginRight: '8px' }}
       >
         <path stroke="none" d="M0 0h24v24H0z"></path>
         <rect width="20" height="12" x="2" y="6" rx="2"></rect>

@@ -107,8 +107,8 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const assetCounter = countGamePassAssets(inGameAssets)
     const hasImportedTicket = assetCounter.ticketNum > 0
     return (
-        <Container className={profileContainer} maxWidth='xl'>
-            <Stack justifyContent="center" style={{ marginTop: '30px', minWidth: '90%', maxWidth: '90%'}} spacing={theme.spacing(4)}>
+        <Container className={profileContainer} maxWidth='xl' sx={{ backgroundColor: "black", height: "100vh" }}>
+            <Stack justifyContent="center" style={{ marginTop: '30px', minWidth: '90%', maxWidth: '90%' }} spacing={theme.spacing(4)}>
                 <Stack direction='row' display='flex' justifyContent='space-between' alignItems={'baseline'}>
                     <div style={{ fontSize: '38px', fontFamily: `VT323, 'arial'`, textAlign: 'left' }}>Available skins</div>
                     <div style={{ textAlign: 'right' }}>
@@ -153,23 +153,23 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                     </a>
                                 </Tooltip>}
                                 {!value.equipped ? (
-                                        <button
-                                            className={transferButtonMid}
-                                            disabled={value.equipped}
-                                            onClick={async () => {
-                                                const success = await callbackSkinEquip({
-                                                    assetAddress: value.assetAddress,
-                                                    assetId: value.assetId,
-                                                    assetType: value.assetType
-                                                })
-                                                if (success) {
-                                                    setFetchtrigger(Date.now().toString())
-                                                }
-                                            }}
-                                        >
-                                            Equip
-                                        </button>
-                                    ): <div style={{display: 'block'}}>Equipped</div>
+                                    <button
+                                        className={transferButtonMid}
+                                        disabled={value.equipped}
+                                        onClick={async () => {
+                                            const success = await callbackSkinEquip({
+                                                assetAddress: value.assetAddress,
+                                                assetId: value.assetId,
+                                                assetType: value.assetType
+                                            })
+                                            if (success) {
+                                                setFetchtrigger(Date.now().toString())
+                                            }
+                                        }}
+                                    >
+                                        Equip
+                                    </button>
+                                ) : <div style={{ display: 'block' }}>Equipped</div>
                                 }
                             </Stack>
                         );

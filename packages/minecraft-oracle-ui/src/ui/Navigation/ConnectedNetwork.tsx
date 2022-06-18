@@ -39,7 +39,7 @@ export default function CarnageStatus() {
 
   return (
     <Box onClick={() => setAccountDialogOpen(true)} className={BoxStyle}>
-      {errorState ? 'Wrong Network' : NETWORK_NAME[chainId]}
+      <span>{errorState ? 'Wrong Network' : NETWORK_NAME[chainId]}</span>
     </Box>
   );
 };

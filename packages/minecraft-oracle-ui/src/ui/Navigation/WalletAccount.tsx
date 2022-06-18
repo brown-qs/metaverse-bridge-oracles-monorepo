@@ -15,6 +15,7 @@ export default function WalletAccount() {
       backgroundColor: 'rgba(14, 235, 168, 0.2)',
       textTransform: 'uppercase',
       padding: '12px 24px 12px 16px',
+      whiteSpace: "nowrap",
       fontFamily: 'Orbitron',
       fontSize: '12px',
       lineHeight: '24px',
