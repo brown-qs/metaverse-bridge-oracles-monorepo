@@ -6,10 +6,13 @@ import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { EmailUserEntity } from 'src/user/email-user/email-user.entity';
 import { EmailUserService } from 'src/user/email-user/email-user.service';
 import { Repository } from 'typeorm';
-
+import formData from "form-data"
+import Mailgun from "mailgun.js"
 @Injectable()
 export class EmailAuthService {
     private readonly context: string;
+    mailgun: any;
+    mg: any;
 
     constructor(
         private emailUserService: EmailUserService,
@@ -65,8 +68,28 @@ export class EmailAuthService {
             serverPort = ""
         }
 
-        const loginLink = `${serverScheme}://${serverHost}${serverPort}/api/v1/auth/email/verify?loginKey=${uuid}`
-        console.log("login link: " + loginLink)
+        const loginLink = `${this.configService.get<string>('frontend.url')}/account/login/email/verify/${uuid}`
+        const mailgun = new Mailgun(formData);
+        const mg = mailgun.client({ username: 'api', key: process.env.MAILGUN_API_KEY, url: 'https://api.eu.mailgun.net' });
+
+        const mailOptions = {
+            from: 'Moonsama <no-reply@sp.moonsama.com>',
+            to: [email], // list of receivers
+            subject: "Moonsama one time signin link", // Subject line
+            text: `Use this link to sign into your Moonsama account: ${loginLink}`, // plaintext body
+        };
+        console.log(JSON.stringify(mailOptions))
+
+        // send mail with defined transport object
+        let result
+        try {
+            result = await mg.messages.create('sp.moonsama.com', mailOptions)
+            console.log(result);
+        } catch (e) {
+            console.log(e)
+            this.logger.error(`sendAuthEmail: unable to send email`, e, this.context)
+            throw new UnprocessableEntityException(`Error sending email`)
+        }
     }
 
     async verifyAuthLink(loginKey: string): Promise<EmailUserEntity> {

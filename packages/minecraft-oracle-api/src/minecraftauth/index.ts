@@ -15,13 +15,18 @@ export module MicrosoftAuth {
     let compiledUrl: string;
     let compiledSecret: string;
 
-    export function setup(_appID: string, _appSecret: string, _redirectURL: string) {
+    export function setup(_appID: string, _appSecret: string, _redirectURL: string, jwt?: string) {
+        let rUrl = _redirectURL
+        if (jwt) {
+            rUrl += `?jwt=${jwt}`
+        }
+        console.log(`sentUrl: ${rUrl}`)
         appID = _appID
         appSecret = _appSecret
         redirectURL = _redirectURL
         compiledID = encodeURIComponent(appID);
         compiledScope = encodeURIComponent(scope);
-        compiledUrl = encodeURIComponent(redirectURL);
+        compiledUrl = encodeURIComponent(rUrl);
         compiledSecret = encodeURIComponent(appSecret);
     }
 

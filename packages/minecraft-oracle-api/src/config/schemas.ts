@@ -69,5 +69,7 @@ export const envValidationSchema = () => {
 
         FRONTEND_URL: Joi.string().required(),
 
+        // MAILGUN
+        MAILGUN_API_KEY: Joi.string().required()
     });
 };

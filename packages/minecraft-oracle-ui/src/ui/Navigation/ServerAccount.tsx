@@ -14,11 +14,10 @@ export default function CarnageStatus() {
   };
 
   const handleLogin = () => {
-    window.sessionStorage.setItem('authSuccessRedirect', window.location.pathname);
-    window.location.href = `${process.env.REACT_APP_BACKEND_API_URL}/auth/login`;
+    window.location.href = `/account/login`;
   };
 
-  const isLoggedIn = !!authData && !!authData.userProfile
+  const isLoggedIn = !!authData && !!authData?.jwt
 
   const styles = () => ({
     BoxStyle: {
@@ -41,9 +40,9 @@ export default function CarnageStatus() {
     }
   })
 
-    const {
-      BoxStyle,
-    } = useClasses(styles)
+  const {
+    BoxStyle,
+  } = useClasses(styles)
 
   return (
     <Box onClick={() => isLoggedIn ? handleLogout() : handleLogin()} className={BoxStyle}>

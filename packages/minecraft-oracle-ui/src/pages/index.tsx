@@ -14,6 +14,8 @@ import AccountPage from './account';
 import LoginPage from './account/login';
 import EmailLoginPage from './account/login/email';
 import KiltLoginPage from './account/login/kilt';
+import EmailVerifyPage from './account/login/email/verify';
+import AccountLink from './account/link';
 
 export const Routing = () => {
     const { authData } = useAuth();
@@ -25,19 +27,28 @@ export const Routing = () => {
             </Route>
 
             <Route exact path="/account">
-                <AccountPage></AccountPage>
+                {!!authData?.jwt ? <AccountPage></AccountPage> : <Redirect to="/account/login" />}
+            </Route>
+
+            <Route exact path="/account/link/:minecraftJwt">
+                {!!authData?.jwt ? <AccountLink></AccountLink> : <Redirect to="/account/login" />}
             </Route>
 
             <Route exact path="/account/login">
-                <LoginPage></LoginPage>
+                {!!authData?.jwt ? <Redirect to="/account" /> : <Redirect to="/account/login/email" />}
             </Route>
 
             <Route exact path="/account/login/email">
-                <EmailLoginPage></EmailLoginPage>
+                {!!authData?.jwt ? <Redirect to="/account" /> : <EmailLoginPage />}
             </Route>
 
+            <Route exact path="/account/login/email/verify/:loginKey">
+                {!!authData?.jwt ? <Redirect to="/account" /> : <EmailVerifyPage />}
+            </Route>
+
+
             <Route exact path="/account/login/kilt">
-                <KiltLoginPage></KiltLoginPage>
+                {!!authData?.jwt ? <Redirect to="/account" /> : <KiltLoginPage />}
             </Route>
 
             <Route exact path="/auth/:jwt">
@@ -68,6 +79,6 @@ export const Routing = () => {
             <Route exact path="/moonsama/customizer">
                 <MoonsamaCharacterDesignerPage authData={authData} />
             </Route>
-        </Switch>
+        </Switch >
     )
 };

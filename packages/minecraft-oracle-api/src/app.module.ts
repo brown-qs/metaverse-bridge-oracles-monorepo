@@ -75,7 +75,7 @@ import { ResourceInventoryOffsetEntity } from './resourceinventoryoffset/resourc
 import { ResourceInventoryOffsetModule } from './resourceinventoryoffset/resourceinventoryoffset.module';
 import { EmailAuthModule } from './authapi/email-auth/email-auth.module';
 import { KiltAuthModule } from './authapi/kilt-auth/kilt-auth.module';
-import { MicrosoftAuthModule } from './authapi/minecraft-auth/minecraft-auth.module';
+import { MinecraftAuthModule } from './authapi/minecraft-auth/minecraft-auth.module';
 import { KiltUserEntity } from './user/kilt-user/kilt-user.entity';
 import { EmailUserEntity } from './user/email-user/email-user.entity';
 import { KiltUserModule } from './user/kilt-user/kilt-user.module';
@@ -163,6 +163,7 @@ import { AccountModule } from './account/account.module';
             ],
             inject: [ConfigService]
         }),
+        AccountModule,
         PlaySessionModule,
         CronModule,
         ProviderModule,
@@ -175,7 +176,7 @@ import { AccountModule } from './account/account.module';
         ProfileApiModule,
         KiltAuthModule,
         EmailAuthModule,
-        MicrosoftAuthModule,
+        MinecraftAuthModule,
         TextureModule,
         SkinModule,
         MaterialModule,

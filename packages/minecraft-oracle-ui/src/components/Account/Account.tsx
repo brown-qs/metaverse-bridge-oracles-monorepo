@@ -17,7 +17,7 @@ import { styles as accountStyles } from './Account.styles';
 import { useClasses } from 'hooks';
 
 export const Account = () => {
-  const [ accountButton, setAccountButton ] = useState<HTMLButtonElement | null>(null);
+  const [accountButton, setAccountButton] = useState<HTMLButtonElement | null>(null);
   const { account, error } = useActiveWeb3React();
   const { setAccountDialogOpen } = useAccountDialog();
   const hideAddress = useMediaQuery(`(max-width: 500px)`);
@@ -30,25 +30,26 @@ export const Account = () => {
 
   const { authData, setAuthData } = useAuth()
 
-    const handleAccountPopoverClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-        setAccountButton(event.currentTarget);
-    };
+  const handleAccountPopoverClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAccountButton(event.currentTarget);
+  };
 
-    const handleAccountPopoverClose = () => {
-        setAccountButton(null);
-    };
+  const handleAccountPopoverClose = () => {
+    setAccountButton(null);
+  };
 
-    const handleLogout = () => {
-        setAuthData({
-            jwt: undefined,
-            userProfile: undefined
-        })
-    };
+  const handleLogout = () => {
+    setAuthData({
+      jwt: undefined,
+      emailUser: undefined,
+      userProfile: undefined
+    })
+  };
 
-    const open = Boolean(accountButton);
-    const id = open ? 'account-popover' : undefined;
+  const open = Boolean(accountButton);
+  const id = open ? 'account-popover' : undefined;
 
-  console.log({authData})
+  console.log({ authData })
 
   return (
     <>
@@ -84,43 +85,43 @@ export const Account = () => {
           'Connect Wallet'
         )}
       </Button>
-      {!!authData && !!authData.userProfile &&
-      (
+      {!!authData && !!authData.emailUser &&
+        (
           <>
-              <Button
-                className={button}
-                size="medium"
-                onClick={handleAccountPopoverClick}
-              >
-                <div style={{ fontSize: 0, margin: '0 8px' }}>
-                    <PersonSharpIcon />
-                </div>
-                {`${authData.userProfile.userName}`}
-              </Button>
-              <Popover
-                  id={id}
-                  open={open}
-                  anchorEl={accountButton}
-                  onClose={handleAccountPopoverClose}
-                  anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'right',
-                  }}
-                  transformOrigin={{
-                      vertical: 'top',
-                      horizontal: 'right',
-                  }}
-              >
-                  <List dense sx={{ width: '150px', bgcolor: '#111' }}>
-                      <ListItem className={popoverListItem} disablePadding>
-                          <ListItemButton onClick={handleLogout}>
-                              Logout
-                          </ListItemButton>
-                      </ListItem>
-                   </List>
-              </Popover>
+            <Button
+              className={button}
+              size="medium"
+              onClick={handleAccountPopoverClick}
+            >
+              <div style={{ fontSize: 0, margin: '0 8px' }}>
+                <PersonSharpIcon />
+              </div>
+              {`${authData?.emailUser?.email}`}
+            </Button>
+            <Popover
+              id={id}
+              open={open}
+              anchorEl={accountButton}
+              onClose={handleAccountPopoverClose}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+            >
+              <List dense sx={{ width: '150px', bgcolor: '#111' }}>
+                <ListItem className={popoverListItem} disablePadding>
+                  <ListItemButton onClick={handleLogout}>
+                    Logout
+                  </ListItemButton>
+                </ListItem>
+              </List>
+            </Popover>
           </>
-      )}
+        )}
     </>
   );
 };

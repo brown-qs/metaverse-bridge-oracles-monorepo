@@ -73,6 +73,14 @@ export const moonsamaTheme = (colors: PaletteOptions): ThemeOptions => {
     palette: moonsamaPalette,
     typography,
     components: {
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            backgroundColor: "#1b1a3a"
+
+          }
+        }
+      },
       MuiAlert: {
         styleOverrides: {
           //#5EB234 success

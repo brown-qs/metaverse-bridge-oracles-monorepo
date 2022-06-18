@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { EmailUserService } from 'src/user/email-user/email-user.service';
 import { MinecraftUserEntity } from '../user/minecraft-user/minecraft-user.entity';
 import { MinecraftUserService as MinecraftUserService } from '../user/minecraft-user/minecraft-user.service';
 
@@ -19,7 +20,6 @@ export type JwtPayload = {
     sub: string;
     provider: AuthProvider,
     minecraftUuid: string | null
-    minecraftUsername: string | null
 }
 
 @Injectable()
@@ -30,6 +30,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor(
         configService: ConfigService,
         private userService: MinecraftUserService,
+        private emailUsersService: EmailUserService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
         super({
@@ -40,15 +41,19 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         this.context = JwtStrategy.name
     }
 
-    async validate(payload: JwtPayload): Promise<MinecraftUserEntity> {
+    async validate(payload: JwtPayload): Promise<any> {
         this.logger.debug('validate:: called', this.context)
         //const token = req.headers.authorization.slice(7);
-
-        if (!payload || !payload.sub || !payload.minecraftUsername) {
-            this.logger.error('validate:: no uuid or username was received', null, this.context)
+        if (!payload || !payload.sub || !payload.provider) {
+            this.logger.error('validate:: sub (uuid) and provider required', null, this.context)
             throw new UnauthorizedException();
         }
-        const user = await this.userService.findByUuid(payload.sub)
+
+        let user
+        if (payload.provider === "email") {
+            user = await this.emailUsersService.findById(payload.sub)
+            user = { provider: AuthProvider.Email, ...user }
+        }
 
         if (!user) {
             throw new UnauthorizedException();
