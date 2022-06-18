@@ -21,6 +21,6 @@ import { EmailAuthService } from './email-auth.service';
     })],
   providers: [EmailAuthService],
   controllers: [EmailAuthController],
-  exports: []
+  exports: [EmailAuthService]
 })
 export class EmailAuthModule { }

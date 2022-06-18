@@ -29,21 +29,20 @@ export class MinecraftAuthService {
         return this.jwtService.sign(payload);
     }
 
-    public async getMicrosoftAuthUrl(): Promise<{ redirectUrl: string }> {
-
+    public async getMicrosoftAuthUrl(jwt?: string): Promise<{ redirectUrl: string }> {
         MicrosoftAuth.setup(
             this.microsoftSetupParams.appId,
             this.microsoftSetupParams.appSecret,
-            this.microsoftSetupParams.redirectUrl
+            this.microsoftSetupParams.redirectUrl,
+            jwt
         )
 
         const redirectUrl = MicrosoftAuth.createUrl()
         this.logger.debug(`getMicrosoftAuthUrl:: created URL: ${redirectUrl}`);
-
         return { redirectUrl }
     }
 
-    public async authLogin(code: string) {
+    public async authLogin(code: string, jwt?: string) {
 
         let account = new MicrosoftAccount();
 
@@ -51,10 +50,12 @@ export class MinecraftAuthService {
 
         const successfulAuthRedirect = this.configService.get<string>('app.redirect')
 
+
         MicrosoftAuth.setup(
             this.microsoftSetupParams.appId,
             this.microsoftSetupParams.appSecret,
-            this.microsoftSetupParams.redirectUrl
+            this.microsoftSetupParams.redirectUrl,
+            jwt
         )
 
         let accessToken: string

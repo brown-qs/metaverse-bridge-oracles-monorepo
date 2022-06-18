@@ -15,15 +15,24 @@ import LoadingButton from '@mui/lab/LoadingButton';
 
 const EmailLoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState("adfafsd@asd.com");
+  const [email, setEmail] = useState("");
   const [dirtyTextField, setDirtyTextField] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false)
   const [failureReason, setFailureReason] = useState("")
   const [showFailure, setShowFailure] = useState(false)
 
   const captchaSuccess = async (result: string) => {
+    //component re-renders and we get a stale email
+    const latestEmail = await new Promise((resolve, reject) => {
+      setEmail(email => {
+        resolve(email)
+        return email
+      })
+    })
+
     window.grecaptcha.reset()
     let failed = false
+
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_API_URL}/auth/email/login`, {
         headers: {
@@ -31,7 +40,7 @@ const EmailLoginPage = () => {
           'Content-Type': 'application/json'
         },
         method: "POST",
-        body: JSON.stringify({ email: email, "g-recaptcha-response": result })
+        body: JSON.stringify({ email: latestEmail, "g-recaptcha-response": result })
       })
       const json = await response.json()
 
@@ -54,6 +63,7 @@ const EmailLoginPage = () => {
   }
 
   const captchaFailure = async (error: string) => {
+
     window.grecaptcha.reset()
     //handle captcha error
     setDirtyTextField(false)
@@ -71,9 +81,12 @@ const EmailLoginPage = () => {
     }
 
   }, [])
+
+
   //called once
-  const kickOffCaptcha = () => {
+  const kickOffCaptcha = async () => {
     setIsLoading(true)
+    await new Promise<void>(resolve => { window.grecaptcha.ready(resolve) })
     window.grecaptcha.execute()
   }
 

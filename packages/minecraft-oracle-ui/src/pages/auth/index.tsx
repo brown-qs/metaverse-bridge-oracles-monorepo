@@ -14,6 +14,7 @@ const AuthPage = () => {
             console.log("set auth data: " + jwt)
             setAuthData({
                 jwt,
+                emailUser: authData?.emailUser,
                 userProfile: authData?.userProfile
             });
         }

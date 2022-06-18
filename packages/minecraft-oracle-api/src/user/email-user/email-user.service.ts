@@ -22,6 +22,17 @@ export class EmailUserService {
         await this.repository.update({ loginKey }, { loginKey: null, keyGenerationDate: null, lastLogin: new Date() })
     }
 
+    public async setMinecraftUuidById(id: string, minecraftUuid: string): Promise<void> {
+        //remove minecraft account from users who have used it before
+        await this.repository.createQueryBuilder().update(EmailUserEntity).set({ minecraftUuid: null }).where("minecraftUuid = :id", { id: minecraftUuid }).execute()
+        await this.repository.update({ id }, { minecraftUuid })
+    }
+
+    public async unsetMinecraftUuidById(id: string): Promise<void> {
+        await this.repository.update({ id }, { minecraftUuid: null })
+    }
+
+
     public async remove(user: EmailUserEntity): Promise<EmailUserEntity> {
         const u = await this.repository.remove(user);
         return u;

@@ -2,7 +2,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { MinecraftAuthService } from './minecraft-auth.service';
-import { MicrosoftAuthController } from './minecraft-auth.controller';
+import { MinecraftAuthController } from './minecraft-auth.controller';
 import { JwtStrategy } from '../jwt.strategy';
 import { MinecraftUserModule } from '../../user/minecraft-user/minecraft-user.module';
 import { MicrosoftSetupParamsProvider } from '../../provider';
@@ -11,9 +11,11 @@ import { Module } from '@nestjs/common';
 import { SecretModule } from '../../secret/secret.module';
 import { SkinModule } from '../../skin/skin.module';
 import { TextureModule } from '../../texture/texture.module';
+import { EmailUserModule } from 'src/user/email-user/email-user.module';
 
 @Module({
     imports: [
+        EmailUserModule,
         MinecraftUserModule,
         SecretModule,
         CacheModule,
@@ -33,7 +35,7 @@ import { TextureModule } from '../../texture/texture.module';
         })
     ],
     providers: [MicrosoftSetupParamsProvider, MinecraftAuthService, JwtStrategy],
-    controllers: [MicrosoftAuthController],
+    controllers: [MinecraftAuthController],
     exports: [MinecraftAuthService]
 })
-export class MicrosoftAuthModule { }
+export class MinecraftAuthModule { }

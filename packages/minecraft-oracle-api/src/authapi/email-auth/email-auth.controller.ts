@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Post, Query, Redirect } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { ApiOperation } from '@nestjs/swagger';
@@ -28,11 +28,11 @@ export class EmailAuthController {
 
     @Get('verify')
     @ApiOperation({ summary: 'Verify login link' })
-    async verify(@Query("loginKey") loginKey: string): Promise<void> {
+    async verify(@Query("loginKey") loginKey: string) {
         const user = await this.emailAuthService.verifyAuthLink(loginKey)
-        const payload: JwtPayload = { sub: user.id, provider: AuthProvider.Email, minecraftUuid: null, minecraftUsername: null };
+        const payload: JwtPayload = { sub: user.id, provider: AuthProvider.Email, minecraftUuid: null };
         const jwtToken = this.jwtService.sign(payload);
-        const jwtLink = `${this.configService.get<string>('frontend.url')}/auth/${jwtToken}`
-        console.log("jwt: " + jwtLink)
+
+        return { success: true, jwt: jwtToken }
     }
 }
