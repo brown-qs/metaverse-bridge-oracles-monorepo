@@ -166,6 +166,17 @@ export const moonsamaTheme = (colors: PaletteOptions): ThemeOptions => {
           }
         }
       },
+      MuiInputBase: {
+        styleOverrides: {
+          //prevent autofill weird background colors
+          input: {
+            "&:-webkit-autofill": {
+              transitionDelay: "9999s",
+              transitionProperty: "background-color, color",
+            },
+          },
+        },
+      },
       MuiButton: {
         defaultProps: {
           disableRipple: true,

@@ -10,13 +10,14 @@ import Box from '@mui/material/Box';
 import "@fontsource/orbitron/500.css";
 import { Button, Stack, Typography, useMediaQuery } from '@mui/material';
 import { theme } from 'theme/Theme';
+import KiltAccount from 'ui/Navigation/KiltAccount';
 
 const KiltLoginPage = () => {
 
   return (
     <Stack direction="column" alignItems='center' textAlign='center' spacing={2}>
       <h1>Kilt Login</h1>
-      <Button disableRipple variant="contained">Connect KILT Wallet</Button>
+      <KiltAccount></KiltAccount>
     </Stack >
   );
 };
