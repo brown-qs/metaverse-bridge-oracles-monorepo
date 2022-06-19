@@ -12,7 +12,7 @@ export async function getKilExtension(): Promise<InjectedWindowProvider> {
 
 export async function walletLogin(extension: InjectedWindowProvider) {
   //get wallet session from server
-  const values = await fetch(`http://localhost:3030/api/v1/kiltauth/wallet_session`);
+  const values = await fetch(`http://localhost:3030/api/v1/auth/kilt/wallet_session`);
   const parsedValues = await values.json()
 
   console.log(JSON.stringify(parsedValues))
@@ -44,13 +44,13 @@ export async function walletLogin(extension: InjectedWindowProvider) {
   const newSess: any = { ...session }
   newSess.encryptedWalletSessionChallenge = newSess.encryptedChallenge
   delete newSess.encryptedChallenge
-  await fetch(`http://localhost:3030/api/v1/kiltauth/wallet_session`, {
+  await fetch(`http://localhost:3030/api/v1/auth/kilt/wallet_session`, {
     method: 'POST',
     headers: { "Content-Type": 'application/json' },
     body: JSON.stringify({ ...newSess, sessionId }),
   });
 
-  const result = await fetch(`http://localhost:3030/api/v1/kiltauth/wallet_login?sessionId=${sessionId}`);
+  const result = await fetch(`http://localhost:3030/api/v1/auth/kilt/wallet_login?sessionId=${sessionId}`);
   const message = await result.json();
   await session.send(message);
 
@@ -58,7 +58,7 @@ export async function walletLogin(extension: InjectedWindowProvider) {
   await new Promise<void>((resolve, reject) => {
     session.listen(async message => {
       try {
-        const loginResult = await fetch(`http://localhost:3030/api/v1/kiltauth/wallet_login`, {
+        const loginResult = await fetch(`http://localhost:3030/api/v1/auth/kilt/wallet_login`, {
           method: 'POST',
           headers: { "Content-Type": 'application/json' },
           body: JSON.stringify({ sessionId, message }),

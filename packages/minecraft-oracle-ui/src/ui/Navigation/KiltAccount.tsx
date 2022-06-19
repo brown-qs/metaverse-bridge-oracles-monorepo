@@ -11,32 +11,7 @@ export default function KiltAccount() {
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
 
   const errorState = false
-  const styles = () => ({
-    BoxStyle: {
-      backgroundColor: errorState ? 'rgba(255, 201, 20, 0.2)' : 'rgba(14, 235, 168, 0.2)',
-      textTransform: 'uppercase',
-      padding: '16px',
-      fontFamily: 'Orbitron',
-      fontSize: '12px',
-      lineHeight: '16px',
-      letterSpacing: '0.032em',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      border: '1px solid transparent',
-      cursor: 'pointer',
-      borderRadius: '4px',
-      '&:hover': {
-        border: `1px solid ${errorState ? '#FFC914' : '#0EEBA8'}`,
-      }
-    }
-  })
 
-  //border: `1px solid ${errorState ? '#FFC914' : '#0EEBA8'}`,
-
-  const {
-    BoxStyle
-  } = useClasses(styles)
 
   let internalLoading: boolean = false
 
@@ -72,16 +47,17 @@ export default function KiltAccount() {
 
   if (loading) {
     return (
-      <LoadingButton loading loadingPosition="end" variant="contained" onClick={() => handleLogin()}>KILT Login&nbsp;&nbsp;&nbsp;</LoadingButton>
+      <LoadingButton disableRipple loading variant="contained" onClick={() => handleLogin()}>KILT Login</LoadingButton>
     );
   } else if (loggedIn) {
     return (
-      <LoadingButton variant="contained" onClick={() => handleLogin()}>KILT Logout</LoadingButton>
+      <LoadingButton disableRipple variant="contained" onClick={() => handleLogin()}>KILT Logout</LoadingButton>
 
     );
   } else {
     return (
-      <LoadingButton variant="contained" onClick={() => handleLogin()}>KILT Login</LoadingButton>
+
+      <LoadingButton disableRipple variant="contained" onClick={() => handleLogin()}>KILT Login</LoadingButton>
     );
   }
 
