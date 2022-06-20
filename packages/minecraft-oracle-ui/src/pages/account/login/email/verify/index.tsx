@@ -17,8 +17,8 @@ import axios from 'axios';
 
 const EmailVerifyPage = () => {
   const [failureMessage, setFailureMessage] = useState("")
-  const params = useParams<{ loginKey: string }>();
   let history = useHistory();
+  const params = useParams<{ loginKey: string }>();
   const loginKey = params?.loginKey
 
   useEffect(() => {

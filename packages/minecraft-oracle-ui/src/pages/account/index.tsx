@@ -19,6 +19,7 @@ const AccountPage = () => {
   const { authData, setAuthData } = useAuth();
   const [isLoading, setIsLoading] = useState(false)
   const [failureMessage, setFailureMessage] = useState("")
+  let history = useHistory();
   const authed = !!authData?.jwt
 
   const getAccount = async () => {
@@ -78,7 +79,7 @@ const AccountPage = () => {
           //remove minecraft uuid
           setAuthData({ ...authData, emailUser: { ...authData.emailUser, minecraftUuid: null } })
         }
-        window.location.href = `/auth/${result?.data?.jwt}`
+        history.push(`/auth/${result?.data?.jwt}`)
       }
     } catch (e) {
       const err = e as AxiosError;
