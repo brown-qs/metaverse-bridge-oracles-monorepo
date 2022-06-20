@@ -12,9 +12,6 @@ export interface AuthLayoutProps {
 }
 
 export const AuthLayout = ({ children, ...props }: React.PropsWithChildren<AuthLayoutProps>) => {
-
-
-
   return (
     <Stack direction="column" alignItems='stretch' textAlign='center' spacing={2}>
       {!!props?.alert && !props.loading

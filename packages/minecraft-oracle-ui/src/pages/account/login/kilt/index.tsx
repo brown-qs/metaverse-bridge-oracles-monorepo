@@ -44,9 +44,6 @@ const KiltLoginPage = () => {
       setIsLoading(false)
       return
     }
-
-    console.log(result)
-
     if (!!result?.jwt) {
       history.push(`/auth/${result.jwt}`)
     } else if (!!result?.message) {

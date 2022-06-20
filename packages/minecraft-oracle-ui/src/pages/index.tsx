@@ -15,7 +15,6 @@ import LoginPage from './account/login';
 import EmailLoginPage from './account/login/email';
 import KiltLoginPage from './account/login/kilt';
 import EmailVerifyPage from './account/login/email/verify';
-import AccountLink from './account/link';
 
 export const Routing = () => {
     const { authData } = useAuth();
@@ -73,6 +72,10 @@ export const Routing = () => {
 
             <Route exact path="/moonsama/customizer">
                 <MoonsamaCharacterDesignerPage authData={authData} />
+            </Route>
+
+            <Route path="*">
+                <Redirect to="/bridge" />
             </Route>
         </Switch >
     )

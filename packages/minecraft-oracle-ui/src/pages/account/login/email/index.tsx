@@ -22,15 +22,11 @@ const EmailLoginPage = () => {
   const [failureMessage, setFailureMessage] = useState("")
   const recaptchaEl = useRef<any>(null)
 
+  const isValidEmail = (email: string) => {
+    return /\S+@\S+\.\S+/.test(email)
+  }
 
-
-
-
-
-
-  //called once
   const submitEmail = async (ema: string) => {
-    console.log("email: " + email)
     setIsLoading(true)
     await new Promise((resolve) => { setTimeout(resolve, 1000) })
     let token
@@ -74,14 +70,12 @@ const EmailLoginPage = () => {
     setDirtyTextField(false)
     setEmail("")
     setIsLoading(false)
-
-    //async captcha
   }
 
-  const isValidEmail = (email: string) => {
-    return /\S+@\S+\.\S+/.test(email)
+  const handleAlertClose = () => {
+    setFailureMessage("")
+    setShowSuccess(false)
   }
-
 
   const loginControls = () => {
     return <Stack alignItems="center" spacing={2}>
@@ -92,10 +86,6 @@ const EmailLoginPage = () => {
       }} onChange={(event) => { setEmail(event.target.value) }} label="Email" variant="standard" />
       <LoadingButton loading={isLoading} disabled={!isValidEmail(email)} onClick={(e) => submitEmail(email)} disableRipple variant="contained">Send Login Link</LoadingButton>
     </Stack >
-  }
-  const handleAlertClose = () => {
-    setFailureMessage("")
-    setShowSuccess(false)
   }
 
   let alert
