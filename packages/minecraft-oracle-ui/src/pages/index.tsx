@@ -29,12 +29,8 @@ export const Routing = () => {
                 {!!authData?.jwt ? <AccountPage></AccountPage> : <Redirect to="/account/login" />}
             </Route>
 
-            <Route exact path="/account/link/:minecraftJwt">
-                {!!authData?.jwt ? <AccountLink></AccountLink> : <Redirect to="/account/login" />}
-            </Route>
-
             <Route exact path="/account/login">
-                {!!authData?.jwt ? <Redirect to="/account" /> : <Redirect to="/account/login/email" />}
+                {!!authData?.jwt ? <Redirect to="/account" /> : <LoginPage />}
             </Route>
 
             <Route exact path="/account/login/email">

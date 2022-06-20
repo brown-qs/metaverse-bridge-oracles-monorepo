@@ -21,7 +21,7 @@ import { JwtAuthGuard } from '../jwt-auth.guard';
 import { MinecraftAuthService } from './minecraft-auth.service';
 import jwt_decode from 'jwt-decode';
 import { JwtService } from '@nestjs/jwt';
-import { AuthProvider, JwtPayload } from '../jwt.strategy';
+import { EmailUserJwtPayload } from '../jwt.strategy';
 import { ConfigService } from '@nestjs/config';
 
 @ApiTags('auth')
@@ -76,7 +76,7 @@ export class MinecraftAuthController {
             throw new UnprocessableEntityException()
         }
 
-        const payload: JwtPayload = { sub: emailUserId, provider: AuthProvider.Email, minecraftUuid };
+        const payload: EmailUserJwtPayload = { sub: emailUserId, minecraftUuid };
         const jwtToken = this.jwtService.sign(payload);
 
         const redirectUrl = `${this.configService.get<number>('frontend.url')}/auth/${jwtToken}`
@@ -98,7 +98,7 @@ export class MinecraftAuthController {
             throw new UnprocessableEntityException()
         }
 
-        const payload: JwtPayload = { sub: user.id, provider: AuthProvider.Email, minecraftUuid: null };
+        const payload: EmailUserJwtPayload = { sub: user.id, minecraftUuid: null };
         const jwtToken = this.jwtService.sign(payload);
 
         const redirectUrl = `${this.configService.get<number>('frontend.url')}/auth/${jwtToken}`

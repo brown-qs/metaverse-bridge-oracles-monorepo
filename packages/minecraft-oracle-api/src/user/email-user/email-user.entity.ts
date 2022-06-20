@@ -16,12 +16,6 @@ export class EmailUserEntity {
     @Column({ unique: true })
     email: string;
 
-    @Column({ nullable: true })
-    loginKey: string;
-
-    @Column({ nullable: true })
-    keyGenerationDate: Date;
-
     @CreateDateColumn()
     createdAt: Date;
 

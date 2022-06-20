@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Loader } from 'ui';
+import { AuthLayout, Loader } from 'ui';
 import { useClasses } from 'hooks';
 import Tooltip from '@mui/material/Tooltip';
 
@@ -13,12 +13,12 @@ import { theme } from 'theme/Theme';
 import { Link } from 'react-router-dom'
 const LoginPage = () => {
   return (
-    <Stack direction="column" alignItems='center' textAlign='center' spacing={2}>
-      <h1>Login Method</h1>
-      <Button disableRipple style={{ maxWidth: '175px', width: '175px', minWidth: '175px' }} variant="contained" component={Link} to="/account/login/email">Email Login</Button>
-      <Button disableRipple style={{ maxWidth: '175px', width: '175px', minWidth: '175px' }} variant="contained" component={Link} to="/account/login/kilt">KILT Login</Button>
-    </Stack >
-  );
+    <AuthLayout title="Login Method" loading={false} >
+      <Stack direction="column" alignItems='center' textAlign='center' spacing={2}>
+        <Button disableRipple style={{ maxWidth: '175px', width: '175px', minWidth: '175px' }} variant="contained" component={Link} to="/account/login/email">Email Login</Button>
+        <Button disableRipple style={{ maxWidth: '175px', width: '175px', minWidth: '175px' }} variant="contained" component={Link} to="/account/login/kilt">KILT Login</Button>
+      </Stack >
+    </AuthLayout>)
 };
 
 export default LoginPage;

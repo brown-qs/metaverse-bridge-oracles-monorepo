@@ -6,14 +6,18 @@ import { ConfigService } from '@nestjs/config';
 import { SecretModule } from 'src/secret/secret.module';
 import { SkinModule } from 'src/skin/skin.module';
 import { TextureModule } from 'src/texture/texture.module';
-import { KiltUserModule } from 'src/user/kilt-user/kilt-user.module';
 import { KiltAuthService } from './kilt-auth.service';
 import { KiltAuthController } from './kilt-auth.controller';
+import { KiltSessionModule } from 'src/kilt-session/kilt-session.module';
+import { KiltDidEmailModule } from 'src/user/kilt-did-email/kilt-did-email.module';
+import { EmailUserModule } from 'src/user/email-user/email-user.module';
 
 @Module({
   providers: [KiltAuthService],
   imports: [
-    KiltUserModule,
+    EmailUserModule,
+    KiltDidEmailModule,
+    KiltSessionModule,
     SecretModule,
     CacheModule,
     PassportModule,

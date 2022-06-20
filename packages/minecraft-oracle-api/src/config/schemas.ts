@@ -54,6 +54,9 @@ export const envValidationSchema = () => {
         KILT_VERIFIER_ADDRESS: Joi.string().required(),
         KILT_VERIFIER_DID_URI: Joi.string().required(),
         KILT_DAPP_NAME: Joi.string().required(),
+        KILT_CTYPE_NAME: Joi.string().required(),
+        KILT_CTYPE_HASH: Joi.string().required(),
+
         // RECAPTCHA
         RECAPTCHA_SITEKEY: Joi.string().required(),
         RECAPTCHA_SECRETKEY: Joi.string().required(),

@@ -8,6 +8,8 @@ import { EmailUserService } from 'src/user/email-user/email-user.service';
 import { Repository } from 'typeorm';
 import formData from "form-data"
 import Mailgun from "mailgun.js"
+import { EmailLoginKeyService } from 'src/user/email-login-key/email-login-key.service';
+import { EmailLoginKeyEntity } from 'src/user/email-login-key/email-login-key.entity';
 @Injectable()
 export class EmailAuthService {
     private readonly context: string;
@@ -16,6 +18,7 @@ export class EmailAuthService {
 
     constructor(
         private emailUserService: EmailUserService,
+        private emailLoginKeyService: EmailLoginKeyService,
         private configService: ConfigService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
@@ -53,7 +56,7 @@ export class EmailAuthService {
 
         const uuid = makeUuid() + makeUuid()
         try {
-            await this.emailUserService.createLogin(email.toLowerCase().trim(), uuid, new Date())
+            await this.emailLoginKeyService.createLogin(email.toLowerCase().trim(), uuid, new Date())
         } catch (err) {
             this.logger.error(`sendAuthEmail: error upserting user into database: ${email}`, err, this.context)
             throw new UnprocessableEntityException(`Error upserting user into database`)
@@ -72,13 +75,13 @@ export class EmailAuthService {
         const mailgun = new Mailgun(formData);
         const mg = mailgun.client({ username: 'api', key: process.env.MAILGUN_API_KEY, url: 'https://api.eu.mailgun.net' });
 
+
         const mailOptions = {
             from: 'Moonsama <no-reply@sp.moonsama.com>',
             to: [email], // list of receivers
-            subject: "Moonsama one time signin link", // Subject line
-            text: `Use this link to sign into your Moonsama account: ${loginLink}`, // plaintext body
+            subject: "Your Moonsama single-use login link", // Subject line
+            text: `We received your request for a single-use login link to use with Moonsama.\n\nYour single-use login link is: ${loginLink}`, // plaintext body
         };
-        console.log(JSON.stringify(mailOptions))
 
         // send mail with defined transport object
         let result
@@ -93,10 +96,10 @@ export class EmailAuthService {
     }
 
     async verifyAuthLink(loginKey: string): Promise<EmailUserEntity> {
-        let user: EmailUserEntity
+        let loginKeyEntity: EmailLoginKeyEntity
         try {
-            user = await this.emailUserService.findByLoginKey(loginKey)
-            if (!user) {
+            loginKeyEntity = await this.emailLoginKeyService.findByLoginKey(loginKey)
+            if (!loginKeyEntity) {
                 throw new Error("User with login key not found")
             }
         } catch (err) {
@@ -104,7 +107,7 @@ export class EmailAuthService {
             throw new UnprocessableEntityException(`loginKey invalid`)
         }
 
-        const keyGenerationTime = user.keyGenerationDate.getTime()
+        const keyGenerationTime = loginKeyEntity.keyGenerationDate.getTime()
 
         //login links last for 10 mins
         const expirationTime = 1000 * 60 * 10
@@ -116,13 +119,14 @@ export class EmailAuthService {
 
         //invalidate login key
         try {
-            await this.emailUserService.spendLoginKey(loginKey)
+            await this.emailLoginKeyService.spendLoginKey(loginKey)
         } catch (err) {
             this.logger.error(`verifyAuthLink: failed to invalidate login key`, err, this.context)
             throw new UnprocessableEntityException(`loginKey failure`)
         }
-        return user
 
+        const user = this.emailUserService.create(loginKeyEntity.email.toLowerCase().trim())
+        return user
     }
 }
 

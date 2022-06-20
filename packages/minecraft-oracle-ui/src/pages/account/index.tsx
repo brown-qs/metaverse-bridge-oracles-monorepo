@@ -1,58 +1,58 @@
 import React, { useEffect, useState } from 'react';
-import { Loader } from 'ui';
+import { AuthLayout, Loader } from 'ui';
 import { useAuth, useClasses } from 'hooks';
 import Tooltip from '@mui/material/Tooltip';
+import { useHistory } from 'react-router-dom';
 
 import WhiteLogo from 'assets/images/moonsama-glitch-white.svg';
 import LeftImage from 'assets/images/home/left.png';
 import RightImageFlip from 'assets/images/home/right.png';
 import Box from '@mui/material/Box';
 import "@fontsource/orbitron/500.css";
-import { Alert, Avatar, Button, Card, CardContent, CardHeader, Chip, CircularProgress, Collapse, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, useMediaQuery } from '@mui/material';
+import { Alert, AlertColor, Avatar, Button, Card, CardContent, CardHeader, Chip, CircularProgress, Collapse, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, useMediaQuery } from '@mui/material';
 import { theme } from 'theme/Theme';
 import { ExpandLess, ExpandMore, StarBorder } from '@mui/icons-material';
 import PersonIcon from '@mui/icons-material/Person';
 import { Redirect } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
-
 const AccountPage = () => {
   const { authData, setAuthData } = useAuth();
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const [failureMessage, setFailureMessage] = useState("")
-  console.log(`authData: ${JSON.stringify(authData)}`)
   const authed = !!authData?.jwt
+
+  const getAccount = async () => {
+    setIsLoading(true)
+    try {
+      const result = await axios({
+        method: 'get',
+        url: `${process.env.REACT_APP_BACKEND_API_URL}/account`,
+        headers: {
+          "Authorization": `Bearer ${authData?.jwt}`,
+          "Content-Type": "application/json"
+        },
+      });
+      console.log("SETTING AUTH DATA")
+      setAuthData({ ...authData, emailUser: result.data })
+    } catch (e) {
+      const err = e as AxiosError;
+
+      if (err?.response?.data.statusCode === 401) {
+        window.localStorage.removeItem('authData');
+        setAuthData(undefined);
+      };
+      setFailureMessage(`Failed to load account: ${e}`)
+    }
+    setIsLoading(false)
+  }
 
   useEffect(() => {
     if (authed) {
-      const getAccount = async () => {
-        setIsLoading(true)
-        try {
-          const result = await axios({
-            method: 'get',
-            url: `${process.env.REACT_APP_BACKEND_API_URL}/account`,
-            headers: {
-              "Authorization": `Bearer ${authData?.jwt}`,
-              "Content-Type": "application/json"
-            },
-          });
-          console.log("SETTING AUTH DATA")
-          setAuthData({ ...authData, emailUser: result.data })
-
-        } catch (e) {
-          const err = e as AxiosError;
-
-          if (err?.response?.data.statusCode === 401) {
-            window.localStorage.removeItem('authData');
-            setAuthData(undefined);
-          };
-          setFailureMessage(`Failed to load account: ${e}`)
-        }
-        setIsLoading(false)
-
-      }
       getAccount()
     }
   }, [authData?.jwt])
+
+
   const handleMinecraftLink = () => {
     window.sessionStorage.setItem('authSuccessRedirect', window.location.pathname);
     window.location.href = `${process.env.REACT_APP_BACKEND_API_URL}/auth/minecraft/login?jwt=${authData?.jwt}`;
@@ -91,6 +91,11 @@ const AccountPage = () => {
     }
   }
 
+  const handleAlertClose = () => {
+    setFailureMessage("")
+    getAccount()
+  }
+
   if (!authed) {
     return <Redirect to={'/account/login'} />;
   }
@@ -118,18 +123,12 @@ const AccountPage = () => {
     </Stack>
   }
 
-
+  let alert
+  if (failureMessage) {
+    alert = { severity: "error", text: failureMessage }
+  }
   return (
-    <Stack direction="column" alignItems='center' textAlign='center' spacing={2}>
-      {failureMessage
-        ? <Stack spacing={6} margin={2} alignItems='center' textAlign='center'><Alert severity="error" onClose={() => { }}>{failureMessage}</Alert></Stack>
-        : <>
-          <h1>Account Page</h1>
-          {isLoading ? <CircularProgress /> : accountView()}</>
-
-      }
-
-    </Stack >
+    <AuthLayout title="Account" loading={isLoading} alert={alert} handleAlertClose={handleAlertClose}> {accountView()}</AuthLayout >
   );
 };
 

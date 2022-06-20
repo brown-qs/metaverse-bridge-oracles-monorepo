@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { ApiOperation } from '@nestjs/swagger';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
-import { AuthProvider, JwtPayload } from '../jwt.strategy';
-import { LoginDto } from './dtos';
+import { EmailUserJwtPayload } from '../jwt.strategy';
+import { LoginDto, VerifyDto } from './dtos';
 import { EmailAuthService } from './email-auth.service';
 
 @Controller('auth/email')
@@ -28,11 +28,10 @@ export class EmailAuthController {
 
     @Get('verify')
     @ApiOperation({ summary: 'Verify login link' })
-    async verify(@Query("loginKey") loginKey: string) {
+    async verify(@Query("loginKey") loginKey: string): Promise<VerifyDto> {
         const user = await this.emailAuthService.verifyAuthLink(loginKey)
-        const payload: JwtPayload = { sub: user.id, provider: AuthProvider.Email, minecraftUuid: null };
+        const payload: EmailUserJwtPayload = { sub: user.id, minecraftUuid: null };
         const jwtToken = this.jwtService.sign(payload);
-
         return { success: true, jwt: jwtToken }
     }
 }

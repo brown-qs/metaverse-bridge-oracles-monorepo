@@ -4,7 +4,6 @@ import { ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { Email } from 'aws-sdk/clients/codecommit';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { JwtAuthGuard } from 'src/authapi/jwt-auth.guard';
-import { AuthProvider } from 'src/authapi/jwt.strategy';
 import { GameApiService } from 'src/gameapi/gameapi.service';
 import { ProfileDto } from 'src/profileapi/dtos/profile.dto';
 import { ProfileApiService } from 'src/profileapi/profileapi.service';
@@ -28,7 +27,6 @@ export class AccountController {
     async account(@User() user: EmailUserEntity): Promise<AccountDto> {
         const account = {
             id: user.id,
-            provider: AuthProvider.Email,
             email: user.email,
             minecraftUuid: user.minecraftUuid
         }

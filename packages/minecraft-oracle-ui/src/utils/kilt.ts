@@ -55,7 +55,7 @@ export async function walletLogin(extension: InjectedWindowProvider) {
   await session.send(message);
 
 
-  await new Promise<void>((resolve, reject) => {
+  return await new Promise((resolve, reject) => {
     session.listen(async message => {
       try {
         const loginResult = await fetch(`http://localhost:3030/api/v1/auth/kilt/wallet_login`, {
@@ -63,7 +63,8 @@ export async function walletLogin(extension: InjectedWindowProvider) {
           headers: { "Content-Type": 'application/json' },
           body: JSON.stringify({ sessionId, message }),
         });
-        resolve()
+        const json = await loginResult.json()
+        resolve(json)
       } catch (e) {
         reject(e)
       }
