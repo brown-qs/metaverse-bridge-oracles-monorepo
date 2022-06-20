@@ -80,7 +80,9 @@ export const loadEnv = () => {
             verifierMnemonic: process.env.KILT_VERIFIER_MNEMONIC,
             verifierAddress: process.env.KILT_VERIFIER_ADDRESS,
             verifierDidUri: process.env.KILT_VERIFIER_DID_URI,
-            dappName: process.env.KILT_DAPP_NAME
+            dappName: process.env.KILT_DAPP_NAME,
+            cTypeName: process.env.KILT_CTYPE_NAME,
+            cTypeHash: process.env.KILT_CTYPE_HASH
         },
         recaptcha: {
             sitekey: process.env.RECAPTCHA_SITEKEY,

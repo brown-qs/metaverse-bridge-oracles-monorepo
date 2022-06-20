@@ -13,14 +13,13 @@ export class EmailUserService {
         private configService: ConfigService
     ) { }
 
-    public async createLogin(email: string, loginKey: string, keyGenerationDate: Date): Promise<void> {
-        const user = this.repository.create({ email, loginKey, keyGenerationDate })
+    public async create(email: string): Promise<EmailUserEntity> {
+        const em = email.toLowerCase().trim()
+        const user = this.repository.create({ email: em, lastLogin: new Date() })
         await this.repository.upsert(user, ["email"]);
+        return await this.findByEmail(em)
     }
 
-    public async spendLoginKey(loginKey: string): Promise<void> {
-        await this.repository.update({ loginKey }, { loginKey: null, keyGenerationDate: null, lastLogin: new Date() })
-    }
 
     public async setMinecraftUuidById(id: string, minecraftUuid: string): Promise<void> {
         //remove minecraft account from users who have used it before
@@ -39,12 +38,7 @@ export class EmailUserService {
     }
 
     public async findByEmail(email: string): Promise<EmailUserEntity> {
-        const result = await this.repository.findOne({ email });
-        return result;
-    }
-
-    public async findByLoginKey(loginKey: string): Promise<EmailUserEntity> {
-        const result = await this.repository.findOne({ loginKey });
+        const result = await this.repository.findOne({ email: email.toLowerCase().trim() });
         return result;
     }
 

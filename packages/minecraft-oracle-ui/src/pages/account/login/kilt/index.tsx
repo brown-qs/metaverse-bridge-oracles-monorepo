@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Loader } from 'ui';
+import { AuthLayout, Loader } from 'ui';
 import { useClasses } from 'hooks';
 import Tooltip from '@mui/material/Tooltip';
 
@@ -10,15 +10,68 @@ import Box from '@mui/material/Box';
 import "@fontsource/orbitron/500.css";
 import { Button, Stack, Typography, useMediaQuery } from '@mui/material';
 import { theme } from 'theme/Theme';
-import KiltAccount from 'ui/Navigation/KiltAccount';
+import { getKilExtension, walletLogin } from 'utils/kilt';
+import { useHistory } from 'react-router-dom';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 const KiltLoginPage = () => {
+  const [isLoading, setIsLoading] = useState(false)
+  const [failureMessage, setFailureMessage] = useState("")
+  let history = useHistory();
 
+
+
+  const handleLogin = async () => {
+    if (isLoading) {
+      return
+    }
+    setIsLoading(true)
+
+    let kiltExtension
+    try {
+      kiltExtension = await getKilExtension()
+    } catch (e) {
+      setFailureMessage("Failed: No KILT wallet!")
+      setIsLoading(false)
+      return
+    }
+
+    let result: any
+    try {
+      result = await walletLogin(kiltExtension)
+    } catch (e) {
+      setFailureMessage(String(e))
+      setIsLoading(false)
+      return
+    }
+
+    console.log(result)
+
+    if (!!result?.jwt) {
+      history.push(`/auth/${result.jwt}`)
+    } else if (!!result?.message) {
+      setFailureMessage(`Failed: ${result.message}`)
+    } else {
+      setFailureMessage("Failed: Unable to get auth token")
+    }
+    setIsLoading(false)
+  }
+
+  const handleAlertClose = () => {
+    setFailureMessage("")
+    setIsLoading(false)
+  }
+
+  let alert
+  if (failureMessage) {
+    alert = { severity: "error", text: failureMessage }
+  }
   return (
-    <Stack direction="column" alignItems='center' textAlign='center' spacing={2}>
-      <h1>Kilt Login</h1>
-      <KiltAccount></KiltAccount>
-    </Stack >
+    <AuthLayout title="Kilt Login" loading={false} alert={alert} handleAlertClose={handleAlertClose}>
+      <Stack alignItems="center">
+        <LoadingButton disableRipple loading={isLoading} variant="contained" onClick={() => handleLogin()}>KILT Login</LoadingButton>
+      </Stack>
+    </AuthLayout >
   );
 };
 

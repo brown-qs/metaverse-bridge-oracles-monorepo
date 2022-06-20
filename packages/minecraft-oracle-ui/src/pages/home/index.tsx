@@ -11,7 +11,6 @@ import Box from '@mui/material/Box';
 import "@fontsource/orbitron/500.css";
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Stack, Typography, useMediaQuery } from '@mui/material';
 import { theme } from 'theme/Theme';
-import KiltAccount from 'ui/Navigation/KiltAccount';
 import { useHistory } from 'react-router-dom';
 
 const HomePage = () => {

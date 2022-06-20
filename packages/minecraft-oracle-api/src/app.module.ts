@@ -76,11 +76,15 @@ import { ResourceInventoryOffsetModule } from './resourceinventoryoffset/resourc
 import { EmailAuthModule } from './authapi/email-auth/email-auth.module';
 import { KiltAuthModule } from './authapi/kilt-auth/kilt-auth.module';
 import { MinecraftAuthModule } from './authapi/minecraft-auth/minecraft-auth.module';
-import { KiltUserEntity } from './user/kilt-user/kilt-user.entity';
 import { EmailUserEntity } from './user/email-user/email-user.entity';
-import { KiltUserModule } from './user/kilt-user/kilt-user.module';
 import { EmailUserModule } from './user/email-user/email-user.module';
 import { AccountModule } from './account/account.module';
+import { KiltSessionModule } from './kilt-session/kilt-session.module';
+import { KiltSessionEntity } from './kilt-session/kilt-session.entity';
+import { EmailLoginKeyEntity } from './user/email-login-key/email-login-key.entity';
+import { EmailLoginKeyModule } from './user/email-login-key/email-login-key.module';
+import { KiltDidEmailModule } from './user/kilt-did-email/kilt-did-email.module';
+import { KiltDidEmailEntity } from './user/kilt-did-email/kilt-did-email.entity';
 @Module({
     imports: [
         ConfigModule.forRoot({
@@ -112,7 +116,9 @@ import { AccountModule } from './account/account.module';
                 password: configService.get<string>('typeorm.password'),
                 database: configService.get<string>('typeorm.database'),
                 entities: [
-                    KiltUserEntity,
+                    KiltDidEmailEntity,
+                    KiltSessionEntity,
+                    EmailLoginKeyEntity,
                     EmailUserEntity,
                     MinecraftUserEntity,
                     SnapshotItemEntity,
@@ -170,7 +176,7 @@ import { AccountModule } from './account/account.module';
         CacheModule,
         SecretModule,
         AssetModule,
-        KiltUserModule,
+        EmailLoginKeyModule,
         EmailUserModule,
         MinecraftUserModule,
         ProfileApiModule,
@@ -206,8 +212,10 @@ import { AccountModule } from './account/account.module';
         ResourceInventoryOffsetModule,
         CompositeApiModule,
         AccountModule,
-
+        KiltSessionModule,
+        KiltDidEmailModule
     ],
-    controllers: []
+    controllers: [],
+    providers: []
 })
 export class AppModule { }

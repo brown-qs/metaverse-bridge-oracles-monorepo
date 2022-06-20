@@ -11,14 +11,10 @@ export type AuthenticatedUser = {
     player: MinecraftUserEntity
 }
 
-export enum AuthProvider {
-    Email = "email",
-    Kilt = "kilt",
-}
 
-export type JwtPayload = {
+
+export type EmailUserJwtPayload = {
     sub: string;
-    provider: AuthProvider,
     minecraftUuid: string | null
 }
 
@@ -41,19 +37,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         this.context = JwtStrategy.name
     }
 
-    async validate(payload: JwtPayload): Promise<any> {
+    async validate(payload: EmailUserJwtPayload): Promise<any> {
         this.logger.debug('validate:: called', this.context)
         //const token = req.headers.authorization.slice(7);
-        if (!payload || !payload.sub || !payload.provider) {
-            this.logger.error('validate:: sub (uuid) and provider required', null, this.context)
+        if (!payload || !payload.sub) {
+            this.logger.error('validate:: sub (uuid) required', null, this.context)
             throw new UnauthorizedException();
         }
 
-        let user
-        if (payload.provider === "email") {
-            user = await this.emailUsersService.findById(payload.sub)
-            user = { provider: AuthProvider.Email, ...user }
-        }
+        let user = await this.emailUsersService.findById(payload.sub)
+        user = { ...user }
 
         if (!user) {
             throw new UnauthorizedException();

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Loader } from 'ui';
+import { AuthLayout, Loader } from 'ui';
 import { useClasses } from 'hooks';
 import Tooltip from '@mui/material/Tooltip';
 import CloseIcon from '@mui/icons-material/Close';
@@ -19,8 +19,7 @@ const EmailLoginPage = () => {
   const [email, setEmail] = useState("");
   const [dirtyTextField, setDirtyTextField] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false)
-  const [failureReason, setFailureReason] = useState("")
-  const [showFailure, setShowFailure] = useState(false)
+  const [failureMessage, setFailureMessage] = useState("")
   const recaptchaEl = useRef<any>(null)
 
 
@@ -33,7 +32,7 @@ const EmailLoginPage = () => {
   const submitEmail = async (ema: string) => {
     console.log("email: " + email)
     setIsLoading(true)
-
+    await new Promise((resolve) => { setTimeout(resolve, 1000) })
     let token
     try {
       if (recaptchaEl.current) {
@@ -44,13 +43,11 @@ const EmailLoginPage = () => {
       setDirtyTextField(false)
       setEmail("")
       setIsLoading(false)
-      setFailureReason("Invalid captcha")
-      setShowFailure(true)
+      setFailureMessage("Invalid captcha")
     }
 
     setImmediate(() => {
       recaptchaEl.current.reset()
-
     })
     let failed = false
 
@@ -64,7 +61,6 @@ const EmailLoginPage = () => {
         body: JSON.stringify({ email: ema, "g-recaptcha-response": token })
       })
       const json = await response.json()
-
       if (json.success) {
         setShowSuccess(true)
       } else {
@@ -72,15 +68,13 @@ const EmailLoginPage = () => {
       }
       //success
     } catch (e) {
-      setFailureReason(String(e))
+      setFailureMessage(String(e))
       failed = true
     }
     setDirtyTextField(false)
     setEmail("")
     setIsLoading(false)
-    if (failed) {
-      setShowFailure(true)
-    }
+
     //async captcha
   }
 
@@ -88,45 +82,36 @@ const EmailLoginPage = () => {
     return /\S+@\S+\.\S+/.test(email)
   }
 
-  const successAlert = () => {
-    return (
-      <Stack spacing={2} margin={2}>
-        <Alert severity="success" onClose={() => { setShowSuccess(false) }}>A temporary login link has been emailed to you!</Alert>
-      </Stack>
-    );
-  }
-
-  const failureAlert = () => {
-    return (
-      <Stack spacing={2} margin={2}>
-        <Alert severity="error" onClose={() => { setShowFailure(false) }}>Login failed: {failureReason} </Alert>
-      </Stack>
-    );
-  }
 
   const loginControls = () => {
-    return (<>
-      <h1>Email Login</h1>
-
+    return <Stack alignItems="center" spacing={2}>
       <TextField disabled={isLoading} inputProps={{ spellCheck: false, autoCapitalize: "off", autoCorrect: "off", onFocus: () => setDirtyTextField(true) }} value={email} error={dirtyTextField && !isValidEmail(email)} onKeyPress={(e) => {
         if (e.key === 'Enter' && !isLoading && isValidEmail(email)) {
           submitEmail(email)
         }
       }} onChange={(event) => { setEmail(event.target.value) }} label="Email" variant="standard" />
-      <LoadingButton loading={isLoading} disabled={!isValidEmail(email)} onClick={(e) => submitEmail(email)} disableRipple variant="contained">Send Login Link</LoadingButton></>)
+      <LoadingButton loading={isLoading} disabled={!isValidEmail(email)} onClick={(e) => submitEmail(email)} disableRipple variant="contained">Send Login Link</LoadingButton>
+    </Stack >
+  }
+  const handleAlertClose = () => {
+    setFailureMessage("")
+    setShowSuccess(false)
+  }
+
+  let alert
+  if (failureMessage) {
+    alert = { severity: "error", text: failureMessage }
+  } else if (showSuccess) {
+    alert = { severity: "success", text: "A temporary login link has been emailed to you!" }
+
   }
 
   return (
-    <Stack direction="column" alignItems='center' textAlign='center' spacing={2}>
-      {showSuccess
-        ? successAlert()
-        :
-        showFailure
-          ? failureAlert()
-          : loginControls()
-      }
+    <>
+      <AuthLayout title="Email Login" loading={false} alert={alert} handleAlertClose={handleAlertClose}> {loginControls()}
+      </AuthLayout >
       <ReCAPTCHA ref={recaptchaEl} grecaptcha={window.grecaptcha} sitekey={process.env.REACT_APP_RECAPTCHA_SITEKEY || ""} size="invisible" theme="dark" />
-    </Stack >
+    </>
   );
 
 };
