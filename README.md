@@ -41,3 +41,19 @@ yarn add -D <package>
 cd <subrepo folder>
 yarn <script>
 ```
+
+### KILT Sporran Dev Wallet
+```bash
+git clone https://github.com/KILTprotocol/sporran-extension.git
+cd sporran-extension
+yarn install && yarn dev
+```
+- Navigate to chrome://extensions
+- Enable developer mode
+- Click "Load Unpacked"
+- Load /dist folder from built extension
+- Setup wallet using existing seed phrase: "rural legal price degree hole coin park rude wheat knock tent ten"
+- Import email credential into sporran from:
+```
+<mono repo>/packages/minecraft-oracle-api/kilt_test_claimer_credentials/peregrine email.json
+```
