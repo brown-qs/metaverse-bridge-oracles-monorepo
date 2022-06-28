@@ -3,7 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { EmailUserService } from 'src/user/email-user/email-user.service';
 import { UserEntity } from '../user/user/user.entity';
 import { UserService as UserService } from '../user/user/user.service';
 
@@ -13,7 +12,7 @@ export type AuthenticatedUser = {
 
 
 
-export type EmailUserJwtPayload = {
+export type UserJwtPayload = {
     sub: string;
     minecraftUuid: string | null
 }
@@ -26,7 +25,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor(
         configService: ConfigService,
         private userService: UserService,
-        private emailUsersService: EmailUserService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
         super({
@@ -37,7 +35,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         this.context = JwtStrategy.name
     }
 
-    async validate(payload: EmailUserJwtPayload): Promise<any> {
+    async validate(payload: UserJwtPayload): Promise<any> {
         this.logger.debug('validate:: called', this.context)
         //const token = req.headers.authorization.slice(7);
         if (!payload || !payload.sub) {
@@ -45,7 +43,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             throw new UnauthorizedException();
         }
 
-        let user = await this.emailUsersService.findById(payload.sub)
+        let user = await this.userService.findByUuid(payload.sub)
         user = { ...user }
 
         if (!user) {

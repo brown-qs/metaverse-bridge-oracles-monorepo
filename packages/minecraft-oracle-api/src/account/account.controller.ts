@@ -7,7 +7,6 @@ import { JwtAuthGuard } from 'src/authapi/jwt-auth.guard';
 import { GameApiService } from 'src/gameapi/gameapi.service';
 import { ProfileDto } from 'src/profileapi/dtos/profile.dto';
 import { ProfileApiService } from 'src/profileapi/profileapi.service';
-import { EmailUserEntity } from 'src/user/email-user/email-user.entity';
 import { UserEntity } from 'src/user/user/user.entity';
 import { User } from 'src/utils/decorators';
 import { AccountDto } from './dtos/account.dto';
@@ -24,9 +23,9 @@ export class AccountController {
     @ApiOperation({ summary: 'Fetches user account' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    async account(@User() user: EmailUserEntity): Promise<AccountDto> {
+    async account(@User() user: UserEntity): Promise<AccountDto> {
         const account = {
-            id: user.id,
+            id: user.uuid,
             email: user.email,
             minecraftUuid: user.minecraftUuid
         }

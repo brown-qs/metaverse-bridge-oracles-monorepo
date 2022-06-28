@@ -1,7 +1,7 @@
 import { Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { UserService } from '../../user/user/user.service';
-
+import jwt_decode from 'jwt-decode';
 import { MicrosoftAccount, MicrosoftAuth } from '../../minecraftauth'
 import { ConfigService } from '@nestjs/config';
 import { ProviderToken } from '../../provider/token';
@@ -79,22 +79,24 @@ export class MinecraftAuthService {
         }
 
         if (!!account.uuid && !!account.username) {
-            const userData: UserEntity = {
-                uuid: account.uuid,
-                userName: account.username,
-                hasGame: account.ownership ?? false
-            }
+            //account.uuid > minecraft uuid
+            //account.username > minecraft username
+            //hasGame: account.ownership ?? false
+
+            const decodedJwt: any = jwt_decode(jwt)
+            const userUuid = decodedJwt.sub
+
             let user: UserEntity
             try {
-                user = await this.userService.create(userData)
+                user = await this.userService.linkMinecraftByUserUuid(userUuid, account.uuid, account.username, account.ownership ?? false)
             } catch (err) {
-                this.logger.error(`authLogin: error upserting user into database: ${JSON.stringify(userData)}`, err, this.context)
-                throw new UnprocessableEntityException(`Error upserting user into database: ${JSON.stringify(userData)}`)
+                this.logger.error(`authLogin: error merging minecraft user into database: mc uuid: ${account.uuid}`, err, this.context)
+                throw new UnprocessableEntityException(`Error linking minecraft account`)
             }
             this.logger.log(`Account: ${JSON.stringify(account)}`, this.context);
 
-            const jwt = this.generateJwtToken(user.uuid, user.userName);
-            const redirectLink = `${successfulAuthRedirect}/${jwt}`;
+            const newJwt = this.generateJwtToken(user.uuid, user.userName);
+            const redirectLink = `${successfulAuthRedirect}/${newJwt}`;
 
             // check default skins
             /*

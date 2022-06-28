@@ -13,16 +13,14 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
-import { EmailUserModule } from 'src/user/email-user/email-user.module';
-import { EmailUserService } from 'src/user/email-user/email-user.service';
 import { User } from 'src/utils/decorators';
 import { error, query } from 'winston';
 import { JwtAuthGuard } from '../jwt-auth.guard';
 import { MinecraftAuthService } from './minecraft-auth.service';
-import jwt_decode from 'jwt-decode';
 import { JwtService } from '@nestjs/jwt';
-import { EmailUserJwtPayload } from '../jwt.strategy';
+import { UserJwtPayload } from '../jwt.strategy';
 import { ConfigService } from '@nestjs/config';
+import { UserService } from 'src/user/user/user.service';
 
 @ApiTags('auth')
 @Controller('auth/minecraft')
@@ -32,7 +30,7 @@ export class MinecraftAuthController {
 
     constructor(
         private readonly authApiService: MinecraftAuthService,
-        private readonly emailUserService: EmailUserService,
+        private readonly userService: UserService,
         private jwtService: JwtService,
         private configService: ConfigService,
 
@@ -66,17 +64,16 @@ export class MinecraftAuthController {
         this.logger.debug(`Response query: ${query?.code}`, this.context)
         const result = await this.authApiService.authLogin(query.code, query.jwt);
         this.logger.debug(`Response result: ${JSON.stringify(result)}`, this.context)
-        const decodedJwt: any = jwt_decode(query.jwt)
-        const emailUserId = decodedJwt.sub
-        const minecraftUuid = result.user.uuid
+
         try {
-            await this.emailUserService.setMinecraftUuidById(emailUserId, minecraftUuid)
+            //TO DO MIGRATE MINECRAFT ACCOUNT TO EMAIL
+            //  await this.userService.setMinecraftUuidById(emailUserId, minecraftUuid)
 
         } catch (e) {
             throw new UnprocessableEntityException()
         }
 
-        const payload: EmailUserJwtPayload = { sub: emailUserId, minecraftUuid };
+        const payload: UserJwtPayload = { sub: result.user.uuid, minecraftUuid: result.user.minecraftUuid };
         const jwtToken = this.jwtService.sign(payload);
 
         const redirectUrl = `${this.configService.get<number>('frontend.url')}/auth/${jwtToken}`
@@ -89,7 +86,7 @@ export class MinecraftAuthController {
     @UseGuards(JwtAuthGuard)
     async unlink(@User() user: any) {
         try {
-            await this.emailUserService.unsetMinecraftUuidById(user.id)
+            await this.userService.unlinkMinecraftByUserUuid(user.uuid)
 
         } catch (err) {
             console.log(err)
@@ -98,7 +95,7 @@ export class MinecraftAuthController {
             throw new UnprocessableEntityException()
         }
 
-        const payload: EmailUserJwtPayload = { sub: user.id, minecraftUuid: null };
+        const payload: UserJwtPayload = { sub: user.uuid, minecraftUuid: null };
         const jwtToken = this.jwtService.sign(payload);
 
         const redirectUrl = `${this.configService.get<number>('frontend.url')}/auth/${jwtToken}`
