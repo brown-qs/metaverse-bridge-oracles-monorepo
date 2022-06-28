@@ -2,7 +2,7 @@ import { PaletteOptions, ThemeOptions, colors, createTheme, InputBaseClasses } f
 import { purple } from "@mui/material/colors";
 import { OverridesStyleRules } from "@mui/material/styles/overrides";
 import { color } from "@mui/system";
-
+import type { } from '@mui/lab/themeAugmentation';
 export const fontWeight = {
   regular: 400,
   semiBold: 400,
@@ -128,7 +128,7 @@ export const moonsamaTheme = (colors: PaletteOptions): ThemeOptions => {
               cursor: 'pointer',
             },
             '*::-webkit-scrollbar-track': {
-              '-webkit-box-shadow': 'inset 0 0 6px rgba(0,0,0,0.00)',
+              'WebkitBoxShadow': 'inset 0 0 6px rgba(0,0,0,0.00)',
             },
             '*::-webkit-scrollbar-thumb': {
               backgroundColor: 'rgba(210, 2, 62, 0.6)',
@@ -176,6 +176,15 @@ export const moonsamaTheme = (colors: PaletteOptions): ThemeOptions => {
             },
           },
         },
+      },
+      MuiLoadingButton: {
+        styleOverrides: {
+          root: {
+            loadingIndicator: {
+
+            }
+          }
+        }
       },
       MuiButton: {
         defaultProps: {
