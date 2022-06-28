@@ -1,5 +1,5 @@
 import { Column, Entity, Index, ManyToOne, PrimaryColumn } from 'typeorm';
-import { MinecraftUserEntity } from '../user/minecraft-user/minecraft-user.entity';
+import { UserEntity } from '../user/user/user.entity';
 import { MaterialEntity } from '../material/material.entity';
 import { GameEntity } from '../game/game.entity';
 
@@ -26,8 +26,8 @@ export class SnaplogEntity {
     @ManyToOne(() => MaterialEntity, (material) => material.snaplogs)
     material: MaterialEntity;
 
-    @ManyToOne(() => MinecraftUserEntity, (user) => user.snaplogs)
-    owner: MinecraftUserEntity;
+    @ManyToOne(() => UserEntity, (user) => user.snaplogs)
+    owner: UserEntity;
 
     @ManyToOne(() => GameEntity, (game) => game.snaplogs)
     game?: GameEntity;

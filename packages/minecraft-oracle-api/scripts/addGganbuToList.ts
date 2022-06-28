@@ -3,7 +3,7 @@ import { Connection, createConnection, getConnection, In } from 'typeorm'
 
 import { config } from 'dotenv'
 import { SnapshotItemEntity } from '../src/snapshot/snapshotItem.entity'
-import { MinecraftUserEntity } from '../src/user/minecraft-user/minecraft-user.entity'
+import { UserEntity } from '../src/user/user/user.entity'
 import { TextureEntity } from '../src/texture/texture.entity'
 import { AssetEntity } from '../src/asset/asset.entity'
 import { SummonEntity } from '../src/summon/summon.entity'
@@ -64,7 +64,7 @@ async function main() {
             host: process.env.TYPEORM_HOST,
             port: Number.parseInt(process.env.TYPEORM_PORT),
             database: process.env.TYPEORM_DATABASE,
-            entities: [GameScoreTypeEntity, GameItemTypeEntity, PlayerGameItemEntity, MaterialEntity, SnapshotItemEntity, MinecraftUserEntity, TextureEntity, AssetEntity, SummonEntity, InventoryEntity, PlaySessionEntity, PlaySessionStatEntity, SkinEntity, GameEntity, GameTypeEntity, AchievementEntity, PlayerAchievementEntity, PlayerScoreEntity, GganbuEntity, SnaplogEntity],
+            entities: [GameScoreTypeEntity, GameItemTypeEntity, PlayerGameItemEntity, MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity, AssetEntity, SummonEntity, InventoryEntity, PlaySessionEntity, PlaySessionStatEntity, SkinEntity, GameEntity, GameTypeEntity, AchievementEntity, PlayerAchievementEntity, PlayerScoreEntity, GganbuEntity, SnaplogEntity],
             synchronize: true
         })
     } catch (err) {
@@ -77,7 +77,7 @@ async function main() {
 
     // Check user exists
     // 
-    const game = await connection.manager.getRepository(GameEntity).findOne({ where: { id: gameId} })
+    const game = await connection.manager.getRepository(GameEntity).findOne({ where: { id: gameId } })
 
     if (!game) {
         console.log('game not found')
@@ -92,7 +92,7 @@ async function main() {
     //console.log(gganbus)
     for (let i = 0; i < users.length; i++) {
         console.log('Processing:', list[users[i]])
-        const user = await connection.manager.getRepository(MinecraftUserEntity).findOne({ uuid: users[i] })
+        const user = await connection.manager.getRepository(UserEntity).findOne({ uuid: users[i] })
         if (!user) {
             console.error(`Non existant user: ${list[i]}`)
             continue
@@ -101,7 +101,7 @@ async function main() {
         }
 
         let adjustedPower = 0
-        
+
         const stat = await connection.manager.getRepository(PlaySessionStatEntity).findOne({ where: { id: PlaySessionStatService.calculateId({ uuid: user.uuid, gameId: game.id }) } })
 
         if (!stat) {

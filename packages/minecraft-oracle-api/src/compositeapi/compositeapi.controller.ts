@@ -13,7 +13,7 @@ import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { User } from '../utils/decorators';
 import { CompositeApiService } from './compositeapi.service';
 import { SaveCompositeConfigDto } from './dtos/save.dto';
-import { MinecraftUserEntity } from '../user/minecraft-user/minecraft-user.entity';
+import { UserEntity } from '../user/user/user.entity';
 import { CompositeMetadataType } from '../compositeasset/types';
 import { JwtAuthGuard } from '../authapi/jwt-auth.guard';
 
@@ -36,7 +36,7 @@ export class CompositeApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async saveCompositeConfig(
-        @User() user: MinecraftUserEntity,
+        @User() user: UserEntity,
         @Body() dto: SaveCompositeConfigDto
     ): Promise<CompositeMetadataType> {
         const data = await this.compositeApiService.saveCompositeConfig(dto, user)

@@ -1,9 +1,9 @@
 import { Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { MinecraftUserService } from '../user/minecraft-user/minecraft-user.service';
+import { UserService } from '../user/user/user.service';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { TextureService } from '../texture/texture.service';
-import { MinecraftUserEntity } from '../user/minecraft-user/minecraft-user.entity';
+import { UserEntity } from '../user/user/user.entity';
 import { GameService } from '../game/game.service';
 import { ImportDto } from './dtos/import.dto';
 import { CALLDATA_EXPIRATION_MS, CALLDATA_EXPIRATION_THRESHOLD, METAVERSE, RecognizedAssetType } from '../config/constants';
@@ -44,7 +44,7 @@ export class OracleApiService {
     private readonly defaultChainId: number;
 
     constructor(
-        private readonly userService: MinecraftUserService,
+        private readonly userService: UserService,
         private readonly textureService: TextureService,
         private readonly skinService: SkinService,
         private readonly gameService: GameService,
@@ -67,7 +67,7 @@ export class OracleApiService {
         this.defaultChainId = this.configService.get<number>('network.defaultChainId')
     }
 
-    public async userInRequest(user: MinecraftUserEntity, data: ImportDto, enraptured: boolean): Promise<[string, string, string, boolean]> {
+    public async userInRequest(user: UserEntity, data: ImportDto, enraptured: boolean): Promise<[string, string, string, boolean]> {
         this.logger.debug(`userInRequest: ${JSON.stringify(data)}, enraptured: ${enraptured}`, this.context)
         const sanitizedChainId = !!data.chainId ? data.chainId : this.defaultChainId;
         const collectionFragment = enraptured ?
@@ -170,7 +170,7 @@ export class OracleApiService {
         return [hash, payload, signature, false]
     }
 
-    public async userOutRequest(user: MinecraftUserEntity, { hash, chainId }: ExportDto): Promise<[string, string, string, boolean]> {
+    public async userOutRequest(user: UserEntity, { hash, chainId }: ExportDto): Promise<[string, string, string, boolean]> {
         this.logger.debug(`userOutRequest: ${hash}`, this.context)
 
         if (user.blacklisted) {
@@ -225,7 +225,7 @@ export class OracleApiService {
         return [hash, payload, signature, false]
     }
 
-    public async userSummonRequest(user: MinecraftUserEntity, { recipient, chainId }: SummonDto): Promise<boolean> {
+    public async userSummonRequest(user: UserEntity, { recipient, chainId }: SummonDto): Promise<boolean> {
         this.logger.debug(`userSummonRequest user ${user.uuid} to ${recipient} ID is ${chainId}`, this.context)
 
         if (!recipient || recipient.length !== 42 || !recipient.startsWith('0x')) {
@@ -342,7 +342,7 @@ export class OracleApiService {
         return res
     }
 
-    public async userImportConfirm(user: MinecraftUserEntity, data: { hash: string, chainId: number }, asset?: AssetEntity): Promise<boolean> {
+    public async userImportConfirm(user: UserEntity, data: { hash: string, chainId: number }, asset?: AssetEntity): Promise<boolean> {
         const hash = data.hash;
         this.logger.log(`ImportConfirm: started ${user.uuid}: ${hash}`, this.context)
 
@@ -459,7 +459,7 @@ export class OracleApiService {
         return true
     }
 
-    public async userEnraptureConfirm(user: MinecraftUserEntity, data: { hash: string, chainId: number }, asset?: AssetEntity): Promise<boolean> {
+    public async userEnraptureConfirm(user: UserEntity, data: { hash: string, chainId: number }, asset?: AssetEntity): Promise<boolean> {
         const hash = data.hash
         this.logger.log(`EnraptureConfirm: started ${user.uuid}: ${hash}`, this.context)
 
@@ -602,7 +602,7 @@ export class OracleApiService {
         return true
     }
 
-    public async userExportConfirm(user: MinecraftUserEntity, data: { hash: string, chainId: number }, asset?: AssetEntity): Promise<boolean> {
+    public async userExportConfirm(user: UserEntity, data: { hash: string, chainId: number }, asset?: AssetEntity): Promise<boolean> {
 
         const hash = data.hash
         if (!hash) {

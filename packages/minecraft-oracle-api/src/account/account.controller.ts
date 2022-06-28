@@ -8,7 +8,7 @@ import { GameApiService } from 'src/gameapi/gameapi.service';
 import { ProfileDto } from 'src/profileapi/dtos/profile.dto';
 import { ProfileApiService } from 'src/profileapi/profileapi.service';
 import { EmailUserEntity } from 'src/user/email-user/email-user.entity';
-import { MinecraftUserEntity } from 'src/user/minecraft-user/minecraft-user.entity';
+import { UserEntity } from 'src/user/user/user.entity';
 import { User } from 'src/utils/decorators';
 import { AccountDto } from './dtos/account.dto';
 

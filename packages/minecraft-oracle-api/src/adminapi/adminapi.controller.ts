@@ -13,11 +13,11 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
-import { MinecraftUserService } from '../user/minecraft-user/minecraft-user.service';
+import { UserService } from '../user/user/user.service';
 import { ProfileDto } from '../profileapi/dtos/profile.dto';
 import { JwtAuthGuard } from '../authapi/jwt-auth.guard';
 import { User } from '../utils/decorators';
-import { MinecraftUserEntity } from '../user/minecraft-user/minecraft-user.entity';
+import { UserEntity } from '../user/user/user.entity';
 import { UserRole } from '../common/enums/UserRole';
 import { PlayerSkinDto } from '../gameapi/dtos/texturemap.dto';
 import { GameApiService } from '../gameapi/gameapi.service';
@@ -48,7 +48,7 @@ export class AdminApiController {
     private readonly context: string;
 
     constructor(
-        private readonly userService: MinecraftUserService,
+        private readonly userService: UserService,
         private readonly profileService: ProfileApiService,
         private readonly gameApiService: GameApiService,
         private readonly gameTypeService: GameTypeService,
@@ -65,7 +65,7 @@ export class AdminApiController {
     @ApiOperation({ summary: 'Fetches user profile' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    async profile(@User() caller: MinecraftUserEntity, @Param('uuid') uuid: string): Promise<ProfileDto> {
+    async profile(@User() caller: UserEntity, @Param('uuid') uuid: string): Promise<ProfileDto> {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
         }
@@ -78,7 +78,7 @@ export class AdminApiController {
     @ApiOperation({ summary: 'Fetches player skins' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    async textures(@User() caller: MinecraftUserEntity, @Param('uuid') uuid: string): Promise<PlayerSkinDto[]> {
+    async textures(@User() caller: UserEntity, @Param('uuid') uuid: string): Promise<PlayerSkinDto[]> {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
         }
@@ -96,7 +96,7 @@ export class AdminApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async snapshot(
-        @User() caller: MinecraftUserEntity,
+        @User() caller: UserEntity,
         @Param('uuid') uuid: string,
         @Body() snapshots: SnapshotsDto,
     ): Promise<boolean[]> {
@@ -120,7 +120,7 @@ export class AdminApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async vip(
-        @User() caller: MinecraftUserEntity,
+        @User() caller: UserEntity,
         @Param('uuid') uuid: string,
         @Param('vip') vip: boolean
     ): Promise<boolean> {
@@ -138,7 +138,7 @@ export class AdminApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async addMaterials(
-        @User() caller: MinecraftUserEntity,
+        @User() caller: UserEntity,
         @Body() materials: MaterialsDto,
     ): Promise<boolean> {
         if (caller.role !== UserRole.ADMIN) {
@@ -154,7 +154,7 @@ export class AdminApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async deleteMaterials(
-        @User() caller: MinecraftUserEntity,
+        @User() caller: UserEntity,
         @Body() materials: MaterialsDto,
     ): Promise<boolean> {
         if (caller.role !== UserRole.ADMIN) {
@@ -170,7 +170,7 @@ export class AdminApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async addTextures(
-        @User() caller: MinecraftUserEntity,
+        @User() caller: UserEntity,
         @Body() textures: TexturesDto,
     ): Promise<boolean> {
         if (caller.role !== UserRole.ADMIN) {
@@ -186,7 +186,7 @@ export class AdminApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async deleteTextures(
-        @User() caller: MinecraftUserEntity,
+        @User() caller: UserEntity,
         @Body() textures: TexturesDto,
     ): Promise<boolean> {
         if (caller.role !== UserRole.ADMIN) {
@@ -202,7 +202,7 @@ export class AdminApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async setSecret(
-        @User() caller: MinecraftUserEntity,
+        @User() caller: UserEntity,
         @Body() sdto: SecretDto,
     ): Promise<boolean> {
         if (caller.role !== UserRole.ADMIN) {
@@ -218,7 +218,7 @@ export class AdminApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async getSecret(
-        @User() caller: MinecraftUserEntity,
+        @User() caller: UserEntity,
         @Param('name') name: string
     ): Promise<SecretDto> {
         if (caller.role !== UserRole.ADMIN) {
@@ -237,7 +237,7 @@ export class AdminApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async getSecrets(
-        @User() caller: MinecraftUserEntity,
+        @User() caller: UserEntity,
     ): Promise<SecretsDto> {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
@@ -253,7 +253,7 @@ export class AdminApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async setPerferredServer(
-        @User() caller: MinecraftUserEntity,
+        @User() caller: UserEntity,
         @Body() psDto: PreferredServersDto
     ): Promise<boolean> {
         if (caller.role !== UserRole.ADMIN) {
@@ -273,7 +273,7 @@ export class AdminApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async getConfirmations(
-        @User() caller: MinecraftUserEntity,
+        @User() caller: UserEntity,
         @Body() dto: AdminConfirmDto
     ): Promise<boolean> {
         if (caller.role !== UserRole.ADMIN) {
@@ -300,7 +300,7 @@ export class AdminApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async manualRequest(
-        @User() caller: MinecraftUserEntity,
+        @User() caller: UserEntity,
         @Body() dto: OracleRequestDto
     ): Promise<CallparamDto | boolean> {
         if (caller.role !== UserRole.ADMIN) {
@@ -337,7 +337,7 @@ export class AdminApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async communism(
-        @User() caller: MinecraftUserEntity,
+        @User() caller: UserEntity,
         @Body() dto: CommunismDto
     ): Promise<boolean> {
         if (caller.role !== UserRole.ADMIN) {
@@ -353,7 +353,7 @@ export class AdminApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async bank(
-        @User() caller: MinecraftUserEntity,
+        @User() caller: UserEntity,
         @Body() dto: BankDto
     ): Promise<boolean> {
         if (caller.role !== UserRole.ADMIN) {
@@ -369,7 +369,7 @@ export class AdminApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async blacklist(
-        @User() caller: MinecraftUserEntity,
+        @User() caller: UserEntity,
         @Param('uuid') uuid: string,
         @Body() dto: BlacklistDto
     ): Promise<boolean> {
@@ -386,7 +386,7 @@ export class AdminApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async gameTypes(
-        @User() caller: MinecraftUserEntity,
+        @User() caller: UserEntity,
     ) {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
@@ -401,7 +401,7 @@ export class AdminApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async setGame(
-        @User() caller: MinecraftUserEntity,
+        @User() caller: UserEntity,
     ) {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')

@@ -3,7 +3,7 @@ import { Connection, createConnection, getConnection } from 'typeorm'
 
 import { config } from 'dotenv'
 import { SnapshotItemEntity } from '../src/snapshot/snapshotItem.entity'
-import { MinecraftUserEntity } from '../src/user/minecraft-user/minecraft-user.entity'
+import { UserEntity } from '../src/user/user/user.entity'
 import { TextureEntity } from '../src/texture/texture.entity'
 import { AssetEntity } from '../src/asset/asset.entity'
 import { SummonEntity } from '../src/summon/summon.entity'
@@ -96,7 +96,7 @@ async function main() {
             port: Number.parseInt(process.env.TYPEORM_PORT),
             database: process.env.TYPEORM_DATABASE,
             entities: [
-                MinecraftUserEntity,
+                UserEntity,
                 SnapshotItemEntity,
                 InventoryEntity,
                 TextureEntity,
@@ -137,7 +137,7 @@ async function main() {
     if (!connection.isConnected) {
         connection = await connection.connect()
     }
-    const users = await connection.manager.getRepository(MinecraftUserEntity).find({relations: ['assets', 'assets.collectionFragment', 'assets.collectionFragment.collection'], loadEagerRelations: true})
+    const users = await connection.manager.getRepository(UserEntity).find({relations: ['assets', 'assets.collectionFragment', 'assets.collectionFragment.collection'], loadEagerRelations: true})
 
     const unmatches = []
     for (let i = 0; i < users.length; i++) {

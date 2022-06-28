@@ -2,11 +2,11 @@ import { Injectable, Inject, UnprocessableEntityException } from "@nestjs/common
 import { ConfigService } from "@nestjs/config/dist/config.service";
 import MutexInterface from "async-mutex/lib/MutexInterface";
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from "nest-winston";
-import { MinecraftUserEntity } from "../user/minecraft-user/minecraft-user.entity";
+import { UserEntity } from "../user/user/user.entity";
 import { AssetService } from "../asset/asset.service";
 import { CollectionFragmentService } from "../collectionfragment/collectionfragment.service";
 import { CompositeCollectionFragmentService } from "../compositecollectionfragment/compositecollectionfragment.service";
-import { MinecraftUserService } from "../user/minecraft-user/minecraft-user.service";
+import { UserService } from "../user/user/user.service";
 import { CompositeAssetService } from "../compositeasset/compositeasset.service";
 import { ChainId } from "../config/constants";
 import { NftApiService } from "../nftapi/nftapi.service";
@@ -51,7 +51,7 @@ export class CompositeApiService {
     private readonly metadataPublicPath: string;
 
     constructor(
-        private readonly userService: MinecraftUserService,
+        private readonly userService: UserService,
         private readonly assetService: AssetService,
         private readonly collectionService: CollectionService,
         private readonly compositeAssetService: CompositeAssetService,
@@ -77,7 +77,7 @@ export class CompositeApiService {
         this.metadataPublicPath = this.configService.get<string>('composite.metadataPublicPath')
     }
 
-    public async saveCompositeConfig(dto: SaveCompositeConfigDto, user: MinecraftUserEntity): Promise<CompositeMetadataType> {
+    public async saveCompositeConfig(dto: SaveCompositeConfigDto, user: UserEntity): Promise<CompositeMetadataType> {
         const compositeParent = dto.compositeParent
         const compositeChildren = dto.compositeChildren
 
@@ -442,7 +442,7 @@ export class CompositeApiService {
         }
     }
 
-    public async reevaluate(compositeAsset: CompositeAssetEntity, user: MinecraftUserEntity) {
+    public async reevaluate(compositeAsset: CompositeAssetEntity, user: UserEntity) {
         const ca = await this.compositeAssetService.findOne(
             { id: compositeAsset.id },
             { relations: ['compositeCollectionFragment', 'compositeCollectionFragment.collection', 'children', 'children.collectionFragment', 'children.collectionFragment.collection', 'syntheticChildren', 'syntheticChildren.syntheticPart', 'syntheticChildren.syntheticPart.compositeCollectionFragment', 'syntheticChildren.syntheticPart.compositeCollectionFragment.collection'], loadEagerRelations: true })

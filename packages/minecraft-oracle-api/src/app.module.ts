@@ -8,7 +8,7 @@ import { ProviderModule } from './provider/provider.module';
 import { RedisModule } from 'nestjs-redis';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TextureEntity } from './texture/texture.entity';
-import { MinecraftUserEntity } from './user/minecraft-user/minecraft-user.entity';
+import { UserEntity } from './user/user/user.entity';
 import { SnapshotItemEntity } from './snapshot/snapshotItem.entity';
 import { CacheModule } from './cache/cache.module';
 import { GameApiModule } from './gameapi/gameapi.module';
@@ -26,7 +26,7 @@ import { AssetModule } from './asset/asset.module';
 import { AssetEntity } from './asset/asset.entity';
 import { SummonEntity } from './summon/summon.entity';
 import { SummonModule } from './summon/summon.module';
-import { MinecraftUserModule } from './user/minecraft-user/minecraft-user.module';
+import { UserModule } from './user/user/user.module';
 import { ProfileApiModule } from './profileapi/profileapi.module';
 import { CronModule } from './cron/cron.module';
 import { PlaySessionModule } from './playsession/playsession.module';
@@ -120,7 +120,7 @@ import { KiltDidEmailEntity } from './user/kilt-did-email/kilt-did-email.entity'
                     KiltSessionEntity,
                     EmailLoginKeyEntity,
                     EmailUserEntity,
-                    MinecraftUserEntity,
+                    UserEntity,
                     SnapshotItemEntity,
                     InventoryEntity,
                     TextureEntity,
@@ -178,7 +178,7 @@ import { KiltDidEmailEntity } from './user/kilt-did-email/kilt-did-email.entity'
         AssetModule,
         EmailLoginKeyModule,
         EmailUserModule,
-        MinecraftUserModule,
+        UserModule,
         ProfileApiModule,
         KiltAuthModule,
         EmailAuthModule,

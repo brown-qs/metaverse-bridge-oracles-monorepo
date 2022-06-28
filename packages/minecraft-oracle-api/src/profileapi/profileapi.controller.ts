@@ -18,7 +18,7 @@ import { JwtAuthGuard } from '../authapi/jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt';
 import { ProfileDto } from './dtos/profile.dto';
 import { User } from '../utils/decorators';
-import { MinecraftUserEntity } from '../user/minecraft-user/minecraft-user.entity';
+import { UserEntity } from '../user/user/user.entity';
 import { ProfileApiService } from './profileapi.service';
 import { ThingsDto } from './dtos/things.dto';
 import { SkinselectDto } from './dtos/skinselect.dto';
@@ -28,7 +28,7 @@ import { PlayerAchievementEntity } from '../playerachievement/playerachievement.
 import { QueryPlayerScoreDto } from '../playerscore/dtos/playerscore.dto';
 import { EmailUserEntity } from 'src/user/email-user/email-user.entity';
 import { EmailUserService } from 'src/user/email-user/email-user.service';
-import { MinecraftUserService } from 'src/user/minecraft-user/minecraft-user.service';
+import { UserService } from 'src/user/user/user.service';
 
 
 @ApiTags('user')
@@ -40,7 +40,7 @@ export class ProfileApiController {
     constructor(
         private readonly profileService: ProfileApiService,
         private readonly emailUserService: EmailUserService,
-        private readonly minecraftUserService: MinecraftUserService,
+        private readonly UserService: UserService,
         private readonly gameApiService: GameApiService,
         private readonly jwtService: JwtService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
@@ -57,7 +57,7 @@ export class ProfileApiController {
         if (!user.minecraftUuid) {
             throw new UnprocessableEntityException("No minecraft account linked")
         }
-        const minecraftUser = await this.minecraftUserService.findByUuid(user.minecraftUuid)
+        const minecraftUser = await this.UserService.findByUuid(user.minecraftUuid)
         return this.profileService.userProfile(minecraftUser)
     }
 
@@ -70,7 +70,7 @@ export class ProfileApiController {
         if (!user.minecraftUuid) {
             throw new UnprocessableEntityException("No minecraft account linked")
         }
-        const minecraftUser = await this.minecraftUserService.findByUuid(user.minecraftUuid)
+        const minecraftUser = await this.UserService.findByUuid(user.minecraftUuid)
         const playerItems = await this.profileService.getPlayerItems(minecraftUser)
         return playerItems
     }
@@ -103,7 +103,7 @@ export class ProfileApiController {
     @ApiOperation({ summary: 'Sets active user skin.' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    async skinselect(@User() user: MinecraftUserEntity, @Body() dto: SkinselectDto): Promise<boolean> {
+    async skinselect(@User() user: UserEntity, @Body() dto: SkinselectDto): Promise<boolean> {
         const success = await this.profileService.skinSelect(user, dto)
         return success
     }

@@ -8,7 +8,7 @@ import { SecretModule } from '../secret/secret.module';
 import { SummonModule } from '../summon/summon.module';
 import { MaterialModule } from '../material/material.module';
 import { TextureModule } from '../texture/texture.module';
-import { MinecraftUserModule } from '../user/minecraft-user/minecraft-user.module';
+import { UserModule } from '../user/user/user.module';
 import { ProfileApiController } from './profileapi.controller';
 import { ProfileApiService } from './profileapi.service';
 import { InventoryModule } from '../playerinventory/inventory.module';
@@ -30,14 +30,14 @@ import { EmailUserModule } from 'src/user/email-user/email-user.module';
             inject: [ConfigService]
         }),
         AssetModule,
-        MinecraftUserModule,
+        UserModule,
         SecretModule,
         TextureModule,
         SkinModule,
         MaterialModule,
         InventoryModule,
         EmailUserModule,
-        MinecraftUserModule,
+        UserModule,
         forwardRef(() => GameApiModule),
         SummonModule,
         ProviderModule,

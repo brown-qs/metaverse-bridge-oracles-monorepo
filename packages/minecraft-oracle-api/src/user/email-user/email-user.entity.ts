@@ -5,7 +5,6 @@ import {
     IsString
 } from 'class-validator';
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
-import { MinecraftUserEntity } from '../minecraft-user/minecraft-user.entity';
 
 @Entity()
 @Index(['minecraftUuid'], { unique: true })

@@ -20,8 +20,8 @@ import { ResourceInventoryEntity } from '../../resourceinventory/resourceinvento
 
 @Entity()
 @Index(['uuid'], { unique: true })
-export class MinecraftUserEntity {
-    constructor(user: Partial<MinecraftUserEntity>) {
+export class UserEntity {
+    constructor(user: Partial<UserEntity>) {
         Object.assign(this, user);
     }
 
@@ -106,9 +106,9 @@ export class MinecraftUserEntity {
     @OneToMany(() => ResourceInventoryEntity, (resourceInventoryItem) => resourceInventoryItem.owner)
     resourceInventoryItems?: ResourceInventoryEntity[];
 
-    @OneToOne(() => MinecraftUserEntity, (user) => user.gganbu)
+    @OneToOne(() => UserEntity, (user) => user.gganbu)
     @JoinColumn()
-    gganbu?: MinecraftUserEntity;
+    gganbu?: UserEntity;
 
     @OneToMany(() => PlayerScoreEntity, (score) => score.player)
     scores?: PlayerScoreEntity[];

@@ -1,12 +1,12 @@
 import { Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
-import { MinecraftUserService } from '../../user/minecraft-user/minecraft-user.service';
+import { UserService } from '../../user/user/user.service';
 
 import { MicrosoftAccount, MicrosoftAuth } from '../../minecraftauth'
 import { ConfigService } from '@nestjs/config';
 import { ProviderToken } from '../../provider/token';
 import { MicrosoftSetupParams } from '../../provider';
-import { MinecraftUserEntity } from '../../user/minecraft-user/minecraft-user.entity';
+import { UserEntity } from '../../user/user/user.entity';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -15,7 +15,7 @@ export class MinecraftAuthService {
     private readonly context: string;
 
     constructor(
-        private userService: MinecraftUserService,
+        private userService: UserService,
         private configService: ConfigService,
         private jwtService: JwtService,
         @Inject(ProviderToken.MICROSOFT_SETUP) private readonly microsoftSetupParams: MicrosoftSetupParams,
@@ -79,12 +79,12 @@ export class MinecraftAuthService {
         }
 
         if (!!account.uuid && !!account.username) {
-            const userData: MinecraftUserEntity = {
+            const userData: UserEntity = {
                 uuid: account.uuid,
                 userName: account.username,
                 hasGame: account.ownership ?? false
             }
-            let user: MinecraftUserEntity
+            let user: UserEntity
             try {
                 user = await this.userService.create(userData)
             } catch (err) {

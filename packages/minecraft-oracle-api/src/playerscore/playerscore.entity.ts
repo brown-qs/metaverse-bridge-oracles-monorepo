@@ -3,7 +3,7 @@ import {
 } from 'class-validator';
 import { GameEntity } from '../game/game.entity';
 import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
-import { MinecraftUserEntity } from '../user/minecraft-user/minecraft-user.entity';
+import { UserEntity } from '../user/user/user.entity';
 
 @Entity()
 export class PlayerScoreEntity {
@@ -19,8 +19,8 @@ export class PlayerScoreEntity {
     @ManyToOne(() => GameEntity, (game) => game.achievements)
     game: GameEntity;
 
-    @ManyToOne(() => MinecraftUserEntity, (user) => user.achievements)
-    player: MinecraftUserEntity;
+    @ManyToOne(() => UserEntity, (user) => user.achievements)
+    player: UserEntity;
 
     @Column({ type: 'bigint' })
     @IsString()

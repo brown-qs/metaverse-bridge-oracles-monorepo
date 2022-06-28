@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { MinecraftUserService } from '../user/minecraft-user/minecraft-user.service';
+import { UserService } from '../user/user/user.service';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { TextureService } from '../texture/texture.service';
 import { MaterialService } from '../material/material.service';
@@ -14,7 +14,7 @@ export class AdminApiService {
 
     private readonly context: string;
     constructor(
-        private readonly userService: MinecraftUserService,
+        private readonly userService: UserService,
         private readonly textureService: TextureService,
         private readonly materialService: MaterialService,
         private readonly snapshotService: SnapshotService,
