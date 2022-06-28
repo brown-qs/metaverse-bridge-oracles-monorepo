@@ -16,6 +16,7 @@ import LoadingButton from '@mui/lab/LoadingButton';
 
 const KiltLoginPage = () => {
   const [isLoading, setIsLoading] = useState(false)
+  const [statusMessage, setStatusMessage] = useState("")
   const [failureMessage, setFailureMessage] = useState("")
   let history = useHistory();
 
@@ -26,7 +27,7 @@ const KiltLoginPage = () => {
       return
     }
     setIsLoading(true)
-
+    setStatusMessage("Looking for KILT wallet")
     let kiltExtension
     try {
       kiltExtension = await getKilExtension()
