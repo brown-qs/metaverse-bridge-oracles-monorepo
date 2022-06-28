@@ -18,6 +18,13 @@ export class UserService {
         return u;
     }
 
+    public async createEmail(email: string): Promise<UserEntity> {
+        const em = email.toLowerCase().trim()
+        const user = this.repository.create({ email: em, lastLogin: new Date() })
+        await this.repository.upsert(user, ["email"]);
+        return await this.findByEmail(em)
+    }
+
     public async createMany(users: UserEntity[]): Promise<UserEntity[]> {
         const u = await this.repository.save(users);
         return u;
@@ -42,6 +49,11 @@ export class UserService {
         return result;
     }
 
+    public async findByEmail(email: string): Promise<UserEntity> {
+        const result = await this.repository.findOne({ email: email.toLowerCase().trim() });
+        return result;
+    }
+
     public async findByUuid(uuid: string): Promise<UserEntity> {
         const result: UserEntity = (await this.repository.findOne({ uuid }));
         return result;
@@ -60,5 +72,13 @@ export class UserService {
     public async findByIds(uuids: string[]) {
         const entities: UserEntity[] = await this.repository.findByIds(uuids);
         return entities;
+    }
+
+    public async linkMinecraftByUserUuid(userUuid: string, minecraftUuid: string, minecraftUsername: string, hasGame: boolean) {
+        return await this.findByUuid(userUuid)
+    }
+
+    public async unlinkMinecraftByUserUuid(uuid: string) {
+        await this.repository.update({ uuid }, { minecraftUuid: null })
     }
 }

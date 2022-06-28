@@ -74,6 +74,11 @@ export class GameApiController {
     async profile(@Param('uuid') uuid: string): Promise<ProfileDto> {
         let user = await this.userService.findByUuid(uuid)
         if (!user) {
+            throw new UnprocessableEntityException('Player was not found')
+        }
+        //no longer able to lazily create users like this because new users are only created with an email
+        /*
+        if (!user) {
             const userData: UserEntity = {
                 uuid: uuid,
                 hasGame: false
@@ -86,7 +91,7 @@ export class GameApiController {
                 this.logger.error(`authLogin: error upserting user into database: ${JSON.stringify(userData)}`, err, this.context)
                 throw new UnprocessableEntityException(`Error upserting user into database: ${JSON.stringify(userData)}`)
             }
-        }
+        }*/
         return this.profileService.userProfile(user)
     }
 

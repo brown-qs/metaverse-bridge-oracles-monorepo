@@ -14,7 +14,6 @@ import { ProfileApiService } from './profileapi.service';
 import { InventoryModule } from '../playerinventory/inventory.module';
 import { SkinModule } from '../skin/skin.module';
 import { ResourceInventoryModule } from '../resourceinventory/resourceinventory.module';
-import { EmailUserModule } from 'src/user/email-user/email-user.module';
 
 @Module({
     imports: [
@@ -36,7 +35,6 @@ import { EmailUserModule } from 'src/user/email-user/email-user.module';
         SkinModule,
         MaterialModule,
         InventoryModule,
-        EmailUserModule,
         UserModule,
         forwardRef(() => GameApiModule),
         SummonModule,

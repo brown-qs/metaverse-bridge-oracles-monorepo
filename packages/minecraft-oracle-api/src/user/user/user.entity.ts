@@ -4,7 +4,7 @@ import {
     IsNumber,
     IsString
 } from 'class-validator';
-import { Column, Entity, Index, JoinColumn, OneToMany, OneToOne, PrimaryColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { UserRole } from '../../common/enums/UserRole';
 import { SnapshotItemEntity } from '../../snapshot/snapshotItem.entity';
 import { AssetEntity } from '../../asset/asset.entity';
@@ -19,15 +19,28 @@ import { PlayerGameItemEntity } from '../../playergameitem/playergameitem.entity
 import { ResourceInventoryEntity } from '../../resourceinventory/resourceinventory.entity';
 
 @Entity()
-@Index(['uuid'], { unique: true })
+@Index(['minecraftUuid'], { unique: true })
 export class UserEntity {
     constructor(user: Partial<UserEntity>) {
         Object.assign(this, user);
     }
 
-    @PrimaryColumn()
+    @PrimaryGeneratedColumn("uuid")
     @IsString()
     uuid: string;
+
+    @Column({ unique: true, default: null, nullable: true })
+    email: string;
+
+    @CreateDateColumn()
+    createdAt: Date;
+
+    @Column({ default: null, nullable: true })
+    lastLogin?: Date;
+
+    @Column({ unique: true, default: null, nullable: true })
+    @IsString()
+    minecraftUuid?: string;
 
     @IsEnum(UserRole)
     @Column({

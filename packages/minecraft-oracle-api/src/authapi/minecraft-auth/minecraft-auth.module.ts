@@ -11,11 +11,9 @@ import { Module } from '@nestjs/common';
 import { SecretModule } from '../../secret/secret.module';
 import { SkinModule } from '../../skin/skin.module';
 import { TextureModule } from '../../texture/texture.module';
-import { EmailUserModule } from 'src/user/email-user/email-user.module';
 
 @Module({
     imports: [
-        EmailUserModule,
         UserModule,
         SecretModule,
         CacheModule,

@@ -4,7 +4,7 @@ import { ApiOperation } from '@nestjs/swagger';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { KiltAuthService } from './kilt-auth.service';
 import { WalletSessionDto, WalletLoginDto } from './dtos';
-import { EmailUserJwtPayload } from '../jwt.strategy';
+import { UserJwtPayload } from '../jwt.strategy';
 import { JwtService } from '@nestjs/jwt';
 
 @Controller('auth/kilt')
@@ -44,7 +44,7 @@ export class KiltAuthController {
     async validateWalletCredential(@Body() dto: WalletLoginDto) {
         const user = await this.kiltAuthApiService.verifyWalletLoginChallenge(dto.sessionId, dto.message)
 
-        const payload: EmailUserJwtPayload = { sub: user.id, minecraftUuid: null };
+        const payload: UserJwtPayload = { sub: user.uuid, minecraftUuid: user.minecraftUuid };
         const jwtToken = this.jwtService.sign(payload);
         return { success: true, jwt: jwtToken }
     }

@@ -3,13 +3,13 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
-import { EmailUserEntity } from 'src/user/email-user/email-user.entity';
-import { EmailUserService } from 'src/user/email-user/email-user.service';
 import { Repository } from 'typeorm';
 import formData from "form-data"
 import Mailgun from "mailgun.js"
 import { EmailLoginKeyService } from 'src/user/email-login-key/email-login-key.service';
 import { EmailLoginKeyEntity } from 'src/user/email-login-key/email-login-key.entity';
+import { UserService } from 'src/user/user/user.service';
+import { UserEntity } from 'src/user/user/user.entity';
 @Injectable()
 export class EmailAuthService {
     private readonly context: string;
@@ -17,7 +17,7 @@ export class EmailAuthService {
     mg: any;
 
     constructor(
-        private emailUserService: EmailUserService,
+        private userService: UserService,
         private emailLoginKeyService: EmailLoginKeyService,
         private configService: ConfigService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
@@ -95,7 +95,7 @@ export class EmailAuthService {
         }
     }
 
-    async verifyAuthLink(loginKey: string): Promise<EmailUserEntity> {
+    async verifyAuthLink(loginKey: string): Promise<UserEntity> {
         let loginKeyEntity: EmailLoginKeyEntity
         try {
             loginKeyEntity = await this.emailLoginKeyService.findByLoginKey(loginKey)
@@ -125,7 +125,7 @@ export class EmailAuthService {
             throw new UnprocessableEntityException(`loginKey failure`)
         }
 
-        const user = this.emailUserService.create(loginKeyEntity.email.toLowerCase().trim())
+        const user = this.userService.createEmail(loginKeyEntity.email.toLowerCase().trim())
         return user
     }
 }

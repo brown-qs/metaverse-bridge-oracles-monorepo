@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { EmailUserEntity } from 'src/user/email-user/email-user.entity';
-import { EmailUserModule } from 'src/user/email-user/email-user.module';
 import { EmailAuthController } from './email-auth.controller';
 import { EmailAuthService } from './email-auth.service';
 import { EmailLoginKeyModule } from 'src/user/email-login-key/email-login-key.module';
+import { UserModule } from 'src/user/user/user.module';
 
 @Module({
-  imports: [EmailUserModule, EmailLoginKeyModule,
+  imports: [UserModule, EmailLoginKeyModule,
     JwtModule.registerAsync({
       useFactory: async (configService: ConfigService) => {
         const expiration = configService.get<number>('jwt.expiration')

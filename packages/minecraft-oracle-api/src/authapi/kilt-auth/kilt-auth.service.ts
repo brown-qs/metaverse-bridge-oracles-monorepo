@@ -9,8 +9,8 @@ import { KiltSessionService } from 'src/kilt-session/kilt-session.service';
 import { KiltSessionEntity } from 'src/kilt-session/kilt-session.entity';
 import { decryptChallenge, encryptionKeystore, getEncryptionKey, getFullDid } from 'src/kilt-session/helpers';
 import { KiltDidEmailService } from 'src/user/kilt-did-email/kilt-did-email.service';
-import { EmailUserService } from 'src/user/email-user/email-user.service';
-import { EmailUserEntity } from 'src/user/email-user/email-user.entity';
+import { UserService } from 'src/user/user/user.service';
+import { UserEntity } from 'src/user/user/user.entity';
 
 
 @Injectable()
@@ -20,7 +20,7 @@ export class KiltAuthService {
     constructor(
         private kiltDidEmailService: KiltDidEmailService,
         private kiltSessionService: KiltSessionService,
-        private emailUserService: EmailUserService,
+        private userService: UserService,
         private configService: ConfigService,
         private jwtService: JwtService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
@@ -127,7 +127,7 @@ export class KiltAuthService {
 
         return output
     }
-    async verifyWalletLoginChallenge(sessionId: string, rawMessage: WalletLoginMessage): Promise<EmailUserEntity> {
+    async verifyWalletLoginChallenge(sessionId: string, rawMessage: WalletLoginMessage): Promise<UserEntity> {
 
         const session = await this.kiltSessionService.findBySessionId(sessionId)
         if (!session) {
@@ -185,7 +185,7 @@ export class KiltAuthService {
         await this.kiltSessionService.remove(session)
         //log did/email association
         await this.kiltDidEmailService.create(email.toLowerCase().trim(), did)
-        return await this.emailUserService.create(email.toLowerCase().trim())
+        return await this.userService.createEmail(email.toLowerCase().trim())
     }
 }
 

@@ -26,8 +26,6 @@ import { GameKindInProgressDto } from '../gameapi/dtos/gamekndinprogress.dto';
 import { GameApiService } from '../gameapi/gameapi.service';
 import { PlayerAchievementEntity } from '../playerachievement/playerachievement.entity';
 import { QueryPlayerScoreDto } from '../playerscore/dtos/playerscore.dto';
-import { EmailUserEntity } from 'src/user/email-user/email-user.entity';
-import { EmailUserService } from 'src/user/email-user/email-user.service';
 import { UserService } from 'src/user/user/user.service';
 
 
@@ -39,8 +37,7 @@ export class ProfileApiController {
 
     constructor(
         private readonly profileService: ProfileApiService,
-        private readonly emailUserService: EmailUserService,
-        private readonly UserService: UserService,
+        private readonly userService: UserService,
         private readonly gameApiService: GameApiService,
         private readonly jwtService: JwtService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
@@ -53,12 +50,11 @@ export class ProfileApiController {
     @ApiOperation({ summary: 'Fetches user profile' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    async profile(@User() user: EmailUserEntity): Promise<ProfileDto> {
+    async profile(@User() user: UserEntity): Promise<ProfileDto> {
         if (!user.minecraftUuid) {
             throw new UnprocessableEntityException("No minecraft account linked")
         }
-        const minecraftUser = await this.UserService.findByUuid(user.minecraftUuid)
-        return this.profileService.userProfile(minecraftUser)
+        return this.profileService.userProfile(user)
     }
 
     @Get('resources')
@@ -66,12 +62,11 @@ export class ProfileApiController {
     @ApiOperation({ summary: 'User resources available to summon from the Metaverse' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    async resources(@User() user: EmailUserEntity): Promise<ThingsDto> {
+    async resources(@User() user: UserEntity): Promise<ThingsDto> {
         if (!user.minecraftUuid) {
             throw new UnprocessableEntityException("No minecraft account linked")
         }
-        const minecraftUser = await this.UserService.findByUuid(user.minecraftUuid)
-        const playerItems = await this.profileService.getPlayerItems(minecraftUser)
+        const playerItems = await this.profileService.getPlayerItems(user)
         return playerItems
     }
 
