@@ -1,5 +1,5 @@
 import { Column, Entity, Index, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
-import { MinecraftUserEntity } from '../user/minecraft-user/minecraft-user.entity';
+import { UserEntity } from '../user/user/user.entity';
 import { GameEntity } from '../game/game.entity';
 
 @Entity()
@@ -25,6 +25,6 @@ export class PlayerGameItemEntity {
     @ManyToOne(() => GameEntity, (game) => game.playerGameItems)
     game: GameEntity;
 
-    @ManyToOne(() => MinecraftUserEntity, (user) => user.playerGameItems)
-    player: MinecraftUserEntity;
+    @ManyToOne(() => UserEntity, (user) => user.playerGameItems)
+    player: UserEntity;
 }

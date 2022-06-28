@@ -5,7 +5,7 @@ import { Connection, createConnection, getConnection} from 'typeorm'
 
 import {config} from 'dotenv'
 import { SnapshotItemEntity } from '../src/snapshot/snapshotItem.entity'
-import { MinecraftUserEntity } from '../src/user/minecraft-user/minecraft-user.entity'
+import { UserEntity } from '../src/user/user/user.entity'
 import { TextureEntity } from '../src/texture/texture.entity'
 import { AssetEntity } from '../src/asset/asset.entity'
 import { SummonEntity } from '../src/summon/summon.entity'
@@ -30,7 +30,7 @@ async function main () {
             host: process.env.TYPEORM_HOST,
             port: Number.parseInt(process.env.TYPEORM_PORT),
             database: process.env.TYPEORM_DATABASE,
-            entities: [MaterialEntity, SnapshotItemEntity, MinecraftUserEntity, TextureEntity, SkinEntity, AssetEntity, SummonEntity, InventoryEntity, PlaySessionEntity, PlaySessionStatEntity],
+            entities: [MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity, SkinEntity, AssetEntity, SummonEntity, InventoryEntity, PlaySessionEntity, PlaySessionStatEntity],
             synchronize: true
         })
     } catch (err) {

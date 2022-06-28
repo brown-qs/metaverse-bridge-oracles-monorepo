@@ -4,11 +4,11 @@ import { PassportStrategy } from '@nestjs/passport';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { EmailUserService } from 'src/user/email-user/email-user.service';
-import { MinecraftUserEntity } from '../user/minecraft-user/minecraft-user.entity';
-import { MinecraftUserService as MinecraftUserService } from '../user/minecraft-user/minecraft-user.service';
+import { UserEntity } from '../user/user/user.entity';
+import { UserService as UserService } from '../user/user/user.service';
 
 export type AuthenticatedUser = {
-    player: MinecraftUserEntity
+    player: UserEntity
 }
 
 
@@ -25,7 +25,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     constructor(
         configService: ConfigService,
-        private userService: MinecraftUserService,
+        private userService: UserService,
         private emailUsersService: EmailUserService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {

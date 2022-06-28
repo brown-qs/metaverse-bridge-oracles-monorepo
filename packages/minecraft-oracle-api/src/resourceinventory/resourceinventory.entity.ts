@@ -3,7 +3,7 @@ import {
     IsString
 } from 'class-validator';
 import { Column, Entity, Index, ManyToOne, OneToMany, OneToOne, PrimaryColumn } from 'typeorm';
-import { MinecraftUserEntity } from '../user/minecraft-user/minecraft-user.entity';
+import { UserEntity } from '../user/user/user.entity';
 import { CollectionFragmentEntity } from '../collectionfragment/collectionfragment.entity';
 import { AssetEntity } from '../asset/asset.entity';
 import { ResourceInventoryOffsetEntity } from '../resourceinventoryoffset/resourceinventoryoffset.entity';
@@ -31,8 +31,8 @@ export class ResourceInventoryEntity {
     @OneToOne(() => ResourceInventoryOffsetEntity, (offset) => offset.resourceInventory)
     offset?: ResourceInventoryOffsetEntity;
 
-    @ManyToOne(() => MinecraftUserEntity, (user) => user.resourceInventoryItems)
-    owner: MinecraftUserEntity;
+    @ManyToOne(() => UserEntity, (user) => user.resourceInventoryItems)
+    owner: UserEntity;
 
     @ManyToOne(() => CollectionFragmentEntity, (collectionFragment) => collectionFragment.resourceInventoryItems)
     collectionFragment?: CollectionFragmentEntity

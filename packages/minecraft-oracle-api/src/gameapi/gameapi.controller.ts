@@ -14,7 +14,7 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { GameApiService } from './gameapi.service';
-import { MinecraftUserService } from '../user/minecraft-user/minecraft-user.service';
+import { UserService } from '../user/user/user.service';
 import { ProfileDto } from '../profileapi/dtos/profile.dto';
 import { SnapshotsDto } from './dtos/snapshot.dto';
 import { PlayerSkinDto } from './dtos/texturemap.dto';
@@ -38,7 +38,7 @@ import { AchievementService } from '../achievement/achievement.service';
 import { AchievementEntity } from '../achievement/achievement.entity';
 import { SetPlayerAchievementsDto } from '../playerachievement/dtos/playerachievement.dto';
 import { PlayerAchievementEntity } from '../playerachievement/playerachievement.entity';
-import { MinecraftUserEntity } from '../user/minecraft-user/minecraft-user.entity';
+import { UserEntity } from '../user/user/user.entity';
 import { SetGameScoreTypeDto } from '../gamescoretype/dtos/gamescoretype.dto';
 import { GameItemTypeDto, SetGameItemTypesDto } from '../gameitemtype/dtos/gameitemtype.dto';
 import { PlayerGameItemsDto, QueryGameItemsDto, SetPlayerGameItemsDto } from '../playergameitem/dtos/playergameitem.dto';
@@ -55,7 +55,7 @@ export class GameApiController {
     private readonly context: string;
 
     constructor(
-        private readonly userService: MinecraftUserService,
+        private readonly userService: UserService,
         private readonly achievementService: AchievementService,
         private readonly gameApiService: GameApiService,
         private readonly gameTypeService: GameTypeService,
@@ -74,11 +74,11 @@ export class GameApiController {
     async profile(@Param('uuid') uuid: string): Promise<ProfileDto> {
         let user = await this.userService.findByUuid(uuid)
         if (!user) {
-            const userData: MinecraftUserEntity = {
+            const userData: UserEntity = {
                 uuid: uuid,
                 hasGame: false
             }
-            let newUser: MinecraftUserEntity
+            let newUser: UserEntity
             try {
                 newUser = await this.userService.create(userData)
                 user = await this.userService.findByUuid(uuid)

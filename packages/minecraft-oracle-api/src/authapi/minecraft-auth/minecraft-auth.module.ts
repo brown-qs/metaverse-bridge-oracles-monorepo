@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { MinecraftAuthService } from './minecraft-auth.service';
 import { MinecraftAuthController } from './minecraft-auth.controller';
 import { JwtStrategy } from '../jwt.strategy';
-import { MinecraftUserModule } from '../../user/minecraft-user/minecraft-user.module';
+import { UserModule } from '../../user/user/user.module';
 import { MicrosoftSetupParamsProvider } from '../../provider';
 import { CacheModule } from '../../cache/cache.module';
 import { Module } from '@nestjs/common';
@@ -16,7 +16,7 @@ import { EmailUserModule } from 'src/user/email-user/email-user.module';
 @Module({
     imports: [
         EmailUserModule,
-        MinecraftUserModule,
+        UserModule,
         SecretModule,
         CacheModule,
         PassportModule,
