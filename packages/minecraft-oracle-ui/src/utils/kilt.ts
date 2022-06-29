@@ -12,6 +12,7 @@ export async function getKilExtension(): Promise<InjectedWindowProvider> {
 
 export async function walletLogin(extension: InjectedWindowProvider) {
   //get wallet session from server
+  console.log("fetching wallet session from server...")
   const values = await fetch(`http://localhost:3030/api/v1/auth/kilt/wallet_session`);
   const parsedValues = await values.json()
 
@@ -27,6 +28,7 @@ export async function walletLogin(extension: InjectedWindowProvider) {
   console.log(`dappName: ${dappName} dAppEncryptionKeyId: ${dAppEncryptionKeyId} walletSessionChallenge: ${walletSessionChallenge}`
   )
   //sporran expects to load didConfiguration.json from root directory of host localhost:3000/didConfiguration.json, it will error out if it's not there
+  console.log("starting session with extension...")
   let session: PubSubSession
   try {
     session = await extension.startSession(dappName, dAppEncryptionKeyId, walletSessionChallenge);
@@ -44,19 +46,30 @@ export async function walletLogin(extension: InjectedWindowProvider) {
   const newSess: any = { ...session }
   newSess.encryptedWalletSessionChallenge = newSess.encryptedChallenge
   delete newSess.encryptedChallenge
+  console.log("POSTing session")
   await fetch(`http://localhost:3030/api/v1/auth/kilt/wallet_session`, {
     method: 'POST',
     headers: { "Content-Type": 'application/json' },
     body: JSON.stringify({ ...newSess, sessionId }),
   });
 
+  console.log("Starting wallet login...")
   const result = await fetch(`http://localhost:3030/api/v1/auth/kilt/wallet_login?sessionId=${sessionId}`);
   const message = await result.json();
-  await session.send(message);
+
+  console.log("sending wallet login to extension session...")
+  console.log(message)
+  try {
+    await session.send(message);
+  } catch (e) {
+    console.log(e)
+    throw e
+  }
 
 
   return await new Promise((resolve, reject) => {
     session.listen(async message => {
+      console.log("extension session responded with message...")
       try {
         const loginResult = await fetch(`http://localhost:3030/api/v1/auth/kilt/wallet_login`, {
           method: 'POST',
