@@ -56,36 +56,36 @@ async function main() {
     // 
 
 
-    const gganbus = await connection.manager.getRepository(GganbuEntity).find({ where: {game: {id: gameId}}, relations: ['material']})
+    const gganbus = await connection.manager.getRepository(GganbuEntity).find({ where: { game: { id: gameId } }, relations: ['material'] })
     //console.log(gganbus)
-    for(let i = 0; i< list.length; i++) {
-        const user = await connection.manager.getRepository(UserEntity).findOne({ userName: list[i] })
+    for (let i = 0; i < list.length; i++) {
+        const user = await connection.manager.getRepository(UserEntity).findOne({ minecraftUserName: list[i] })
 
-        
+
         if (!user) {
             console.error(`Non existant user: ${list[i]}`)
             continue
         } else {
-            console.log(user?.userName)
+            console.log(user?.minecraftUserName)
         }
 
-        const statId = PlaySessionStatService.calculateId({uuid: user.uuid, gameId})
-        const playSessionStat = await connection.manager.getRepository(PlaySessionStatEntity).findOne({where: {id: statId}})
+        const statId = PlaySessionStatService.calculateId({ uuid: user.uuid, gameId })
+        const playSessionStat = await connection.manager.getRepository(PlaySessionStatEntity).findOne({ where: { id: statId } })
 
-        if(!!playSessionStat) {
+        if (!!playSessionStat) {
             if (Number.parseInt(playSessionStat.timePlayed) < targetTime) {
-                console.log('skip', user.userName)
+                console.log('skip', user.minecraftUserName)
                 continue
             }
 
-            for(let j = 0; j<gganbus.length; j++) {
+            for (let j = 0; j < gganbus.length; j++) {
                 const gganbu = gganbus[j]
-                const inv = await connection.manager.getRepository(InventoryEntity).findOne({where: {owner: {uuid: user.uuid}, material: {name: gganbu.material.mapsTo}}, relations: ['owner', 'material']})
+                const inv = await connection.manager.getRepository(InventoryEntity).findOne({ where: { owner: { uuid: user.uuid }, material: { name: gganbu.material.mapsTo } }, relations: ['owner', 'material'] })
                 if (!inv) {
-                    const mat = await connection.manager.getRepository(MaterialEntity).findOne({where: {name: gganbu.material.mapsTo}})
-                    
+                    const mat = await connection.manager.getRepository(MaterialEntity).findOne({ where: { name: gganbu.material.mapsTo } })
+
                     const ent = await connection.manager.getRepository(InventoryEntity).create({
-                        id: InventoryService.calculateId({uuid: user.uuid, materialName: gganbu.material.mapsTo}),
+                        id: InventoryService.calculateId({ uuid: user.uuid, materialName: gganbu.material.mapsTo }),
                         amount: (Number.parseFloat(gganbu.amount) * gganbu.material.multiplier).toString(),
                         material: mat,
                         owner: user,
@@ -98,7 +98,7 @@ async function main() {
                 } else {
                     const newNum = (Number.parseFloat(inv.amount) + (Number.parseFloat(gganbu.amount) * gganbu.material.multiplier)).toString()
                     console.log(`   old nums`, inv.material.name, inv.amount, newNum)
-                    await connection.manager.getRepository(InventoryEntity).update(inv.id, {amount: newNum})
+                    await connection.manager.getRepository(InventoryEntity).update(inv.id, { amount: newNum })
                 }
             }
         }

@@ -95,7 +95,7 @@ export class MinecraftAuthService {
             }
             this.logger.log(`Account: ${JSON.stringify(account)}`, this.context);
 
-            const newJwt = this.generateJwtToken(user.uuid, user.userName);
+            const newJwt = this.generateJwtToken(user.uuid, user.minecraftUserName);
             const redirectLink = `${successfulAuthRedirect}/${newJwt}`;
 
             // check default skins
@@ -125,7 +125,7 @@ export class MinecraftAuthService {
             })()
             */
 
-            this.logger.log(`authLogin:: successful login for user (${user.uuid}, ${user.userName}). Redirect link: ${redirectLink}`, this.context)
+            this.logger.log(`authLogin:: successful login for user (${user.uuid}, ${user.minecraftUserName}). Redirect link: ${redirectLink}`, this.context)
 
             return {
                 jwt,

@@ -85,7 +85,7 @@ export class CompositeApiService {
         const parentChainId = compositeParent.chainId ?? ChainId.MOONRIVER
         const parentAssetId = compositeParent.assetId
 
-        this.logger.log(`saveCompositeConfig:: started for ${parentChainId}-${parentAssetAddress}-${parentAssetId} owned by ${user.userName}`, this.context)
+        this.logger.log(`saveCompositeConfig:: started for ${parentChainId}-${parentAssetAddress}-${parentAssetId} owned by ${user.minecraftUserName}`, this.context)
         //console.log(compositeChildren)
 
         let parentAsset: CompositeEnrichedAssetEntity | AssetEntity = await this.assetService.findOne({
@@ -95,7 +95,7 @@ export class CompositeApiService {
         }, { relations: ['collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
 
         if (!parentAsset) {
-            this.logger.error(`saveCompositeConfig:: Parent asset ${parentChainId}-${parentAssetAddress} is not owned by ${user.userName}`, undefined, this.context)
+            this.logger.error(`saveCompositeConfig:: Parent asset ${parentChainId}-${parentAssetAddress} is not owned by ${user.minecraftUserName}`, undefined, this.context)
 
             // we clean up faulty composite asset
             const existingCompositeAsset = await this.compositeAssetService.findOne({ assetId: parentAssetId, compositeCollectionFragment: { collection: { assetAddress: parentAssetAddress, chainId: parentChainId } } }, { relations: ['compositeCollectionFragment', 'compositeCollectionFragment.collection', 'syntheticChildren'], loadEagerRelations: true })
@@ -147,7 +147,7 @@ export class CompositeApiService {
                 }, { relations: ['collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
 
                 if (!childAsset) {
-                    this.logger.error(`saveCompositeConfig:: child asset ${childChainId}-${childAssetAddress}-${childAssetId} not owned by ${user.userName}`, undefined, this.context)
+                    this.logger.error(`saveCompositeConfig:: child asset ${childChainId}-${childAssetAddress}-${childAssetId} not owned by ${user.minecraftUserName}`, undefined, this.context)
                     throw new UnprocessableEntityException('Child asset is not owned by user.')
                 }
 

@@ -1,17 +1,35 @@
 import { InjectConnection, InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Connection, EntityManager, FindConditions, FindManyOptions, FindOneOptions, ObjectID, Repository, UpdateResult } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import { exist } from 'joi';
+import { AssetEntity } from 'src/asset/asset.entity';
+import { SummonEntity } from 'src/summon/summon.entity';
+import { SnapshotItemEntity } from 'src/snapshot/snapshotItem.entity';
+import { SnaplogEntity } from 'src/snaplog/snaplog.entity';
+import { InventoryEntity } from 'src/playerinventory/inventory.entity';
+import { SkinEntity } from 'src/skin/skin.entity';
+import { ResourceInventory } from 'src/gameapi/dtos/resourceinventory.dto';
+import { ResourceInventoryEntity } from 'src/resourceinventory/resourceinventory.entity';
+import { PlaySessionEntity } from 'src/playsession/playsession.entity';
+import { PlayerAchievementEntity } from 'src/playerachievement/playerachievement.entity';
+import { PlayerGameItemEntity } from 'src/playergameitem/playergameitem.entity';
+import { PlayerScoreEntity } from 'src/playerscore/playerscore.entity';
+import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 @Injectable()
 export class UserService {
+    context: string;
     constructor(
+        @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger,
         @InjectConnection() private connection: Connection,
         @InjectRepository(UserEntity)
         private readonly repository: Repository<UserEntity>,
         private configService: ConfigService
-    ) { }
+    ) {
+        this.context = UserService.name
+    }
 
     public async create(user: UserEntity): Promise<UserEntity> {
         const u = await this.repository.save(user);
@@ -44,8 +62,8 @@ export class UserService {
         return (await this.repository.findOne(conditions)) !== undefined;
     }
 
-    public async findByUserName(userName: string): Promise<UserEntity> {
-        const result: UserEntity = await this.repository.findOne({ userName });
+    public async findByMinecraftUserName(minecraftUserName: string): Promise<UserEntity> {
+        const result: UserEntity = await this.repository.findOne({ minecraftUserName });
         return result;
     }
 
@@ -74,8 +92,8 @@ export class UserService {
         return entities;
     }
 
-    public async linkMinecraftByUserUuid(userUuid: string, minecraftUuid: string, minecraftUsername: string, hasGame: boolean) {
-
+    public async linkMinecraftByUserUuid(userUuid: string, minecraftUuid: string, minecraftUserName: string, hasGame: boolean) {
+        let err;
         //typeorm 0.2.45 and @nestjs/typeorm@8.0.3
         //https://github.com/typeorm/typeorm/blob/0.2.45/docs/transactions.md
 
@@ -100,21 +118,75 @@ export class UserService {
             3. minecraft account is already associated with an email
                 -relationships have already been migrated over to first email, can null out minecraftUuid on old user and put it on new user
             */
-            //await queryRunner.manager.save(users[0]);
 
+            const existingMinecraft = await queryRunner.manager.findOne(UserEntity, { minecraftUuid })
+            console.log("Existing minecraft: " + JSON.stringify(existingMinecraft))
+
+            //minecraft account has never been used on moonsama
+            if (!existingMinecraft) {
+                this.logger.debug(`user.service::linkMinecraftByUserUuid userUuid: ${userUuid} minecraftUuid: ${minecraftUuid}, MC account new to moonsama, can just add to email row`, this.context)
+
+                //
+            } else {
+                //minecraft user has been migrated to an email
+                if (typeof existingMinecraft.email === "string") {
+                    //safety check, uuid and minecraftUuid should be different
+                    if (existingMinecraft.uuid === existingMinecraft.minecraftUuid) {
+                        throw new Error("If user has an email defined, uuid !== minecraftUuid")
+                    }
+                    this.logger.debug(`user.service::linkMinecraftByUserUuid userUuid: ${userUuid} minecraftUuid: ${minecraftUuid}, MC account already been migrated to email before, removing MC account from prev email, and assigning to new`, this.context)
+
+                    //no need to migrate anything, just remove from existing user 
+                    await queryRunner.manager.update(UserEntity, { minecraftUuid }, { minecraftUuid: null, minecraftUserName: null, hasGame: false })
+
+                    //minecraft user has never been migrated
+                } else {
+                    //safety check, uuid and minecraftUuid should be same for unmigrated minecraft users
+                    if (existingMinecraft.uuid !== existingMinecraft.minecraftUuid) {
+                        throw new Error("If old minecraft account, uuid === minecraftUuid")
+                    }
+                    this.logger.debug(`user.service::linkMinecraftByUserUuid userUuid: ${userUuid} minecraftUuid: ${minecraftUuid}, MC account has never been migrated to email before, moving relationships`, this.context)
+
+                    //move all relationships to email user
+                    const relationships = [{ entity: AssetEntity, fk: "owner" }, { entity: SummonEntity, fk: "owner" }, { entity: SnapshotItemEntity, fk: "owner" }, { entity: SnaplogEntity, fk: "owner" }, { entity: InventoryEntity, fk: "owner" }, { entity: SkinEntity, fk: "owner" }, { entity: ResourceInventoryEntity, fk: "owner" }, { entity: PlaySessionEntity, fk: "player" }, { entity: PlayerAchievementEntity, fk: "player" }, { entity: PlayerGameItemEntity, fk: "player" }, { entity: PlayerScoreEntity, fk: "player" }]
+                    for (const { entity, fk } of relationships) {
+                        await queryRunner.manager.update(entity, { [fk]: minecraftUuid }, { [fk]: userUuid })
+                    }
+
+                    //move
+                    //move other fields to email user
+                    await queryRunner.manager.update(UserEntity, { uuid: userUuid }, { role: existingMinecraft.role, allowedToPlay: existingMinecraft.allowedToPlay, blacklisted: existingMinecraft.blacklisted, vip: existingMinecraft.vip, numGamePassAsset: existingMinecraft.numGamePassAsset, serverId: existingMinecraft.serverId, preferredServer: existingMinecraft.preferredServer, lastUsedAddress: existingMinecraft.lastUsedAddress, usedAddresses: existingMinecraft.usedAddresses })
+
+                    //TODO: gganbu
+
+                    //remove old minecraft user
+                    await queryRunner.manager.remove(UserEntity, existingMinecraft)
+                }
+            }
+
+            await queryRunner.manager.update(UserEntity, { uuid: userUuid }, { minecraftUuid: minecraftUuid, minecraftUserName, hasGame })
+            //TODO: add log of minecraft link/unlinks + relationship moves
             await queryRunner.commitTransaction();
-        } catch (err) {
+
+        } catch (e) {
+            err = e
+            this.logger.error(`user.service::linkMinecraftByUserUuid, error linking minecraft account`, e, this.context)
             // since we have errors lets rollback the changes we made
             await queryRunner.rollbackTransaction();
         } finally {
             // you need to release a queryRunner which was manually instantiated
             await queryRunner.release();
+            //rethrow
+            if (err) {
+                throw err
+            }
         }
-
+        this.logger.debug(`user.service::linkMinecraftByUserUuid userUuid: ${userUuid} minecraftUuid: ${minecraftUuid} successful link`, this.context)
         return await this.findByUuid(userUuid)
+
     }
 
     public async unlinkMinecraftByUserUuid(uuid: string) {
-        await this.repository.update({ uuid }, { minecraftUuid: null })
+        await this.repository.update({ uuid }, { minecraftUuid: null, minecraftUserName: null, hasGame: false })
     }
 }

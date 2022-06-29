@@ -20,12 +20,15 @@ import { ResourceInventoryEntity } from '../../resourceinventory/resourceinvento
 
 @Entity()
 @Index(['minecraftUuid'], { unique: true })
+@Index(['email'], { unique: true })
+
 export class UserEntity {
     constructor(user: Partial<UserEntity>) {
         Object.assign(this, user);
     }
 
-    @PrimaryGeneratedColumn("uuid")
+    //cannot use uuid type or postgres will insert hyphens and screw up our existing minecraft uuids
+    @PrimaryColumn('varchar', { length: 256, default: () => `'${guid()}'` })
     @IsString()
     uuid: string;
 
@@ -52,7 +55,7 @@ export class UserEntity {
 
     @IsString()
     @Column({ default: null, nullable: true })
-    userName?: string;
+    minecraftUserName?: string;
 
     @IsBoolean()
     @Column({ default: false })
@@ -126,3 +129,5 @@ export class UserEntity {
     @OneToMany(() => PlayerScoreEntity, (score) => score.player)
     scores?: PlayerScoreEntity[];
 }
+
+function guid() { function s4() { return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1); } return s4() + s4() + "-" + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4(); }

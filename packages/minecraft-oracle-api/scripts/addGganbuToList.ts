@@ -97,7 +97,7 @@ async function main() {
             console.error(`Non existant user: ${list[i]}`)
             continue
         } else {
-            console.log(user?.userName)
+            console.log(user?.minecraftUserName)
         }
 
         let adjustedPower = 0

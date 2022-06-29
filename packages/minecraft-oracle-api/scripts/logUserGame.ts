@@ -61,7 +61,7 @@ async function main() {
 
 
     for (let i = 0; i < list.length; i++) {
-        const user = await connection.manager.getRepository(UserEntity).findOne({ userName: list[i] })
+        const user = await connection.manager.getRepository(UserEntity).findOne({ minecraftUserName: list[i] })
 
         console.log(user)
         if (!user) {
