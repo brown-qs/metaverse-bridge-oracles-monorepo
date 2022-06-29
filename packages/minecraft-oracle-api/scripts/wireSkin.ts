@@ -154,7 +154,7 @@ async function main() {
             const asset = user.assets[j]
 
             if (asset.collectionFragment.collection.assetAddress === '0x0a54845ac3743c96e582e03f26c3636ea9c00c8a' && asset.assetId === '11') {
-                console.log('found', user.userName)
+                console.log('found', user.minecraftUserName)
                 await connection.manager.getRepository(SkinEntity).save(
                     { id: SkinEntity.toId(user.uuid, '0x0a54845ac3743c96e582e03f26c3636ea9c00c8a', '11'), owner: user, texture: await connection.manager.getRepository(TextureEntity).findOne({ where: { assetAddress: '0x0a54845ac3743c96e582e03f26c3636ea9c00c8a', assetId: '11' } }) }
                 )

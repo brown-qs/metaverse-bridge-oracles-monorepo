@@ -175,7 +175,7 @@ export class ProfileApiService {
         return {
             uuid: user.uuid,
             hasGame: user.hasGame,
-            userName: user.userName,
+            userName: user.minecraftUserName,
             role: user.role,
             allowedToPlay: user.allowedToPlay,
             serverId: user.serverId,

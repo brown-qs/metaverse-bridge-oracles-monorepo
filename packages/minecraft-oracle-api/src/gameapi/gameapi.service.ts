@@ -960,10 +960,10 @@ export class GameApiService {
             if (!r) {
                 r = {
                     playerId: x.player.uuid,
-                    username: x.player.userName,
+                    username: x.player.minecraftUserName,
                     scores: [],
                 };
-                if (dto.sortBy === 'name') r.username = x.player.userName;
+                if (dto.sortBy === 'name') r.username = x.player.minecraftUserName;
                 else { r.score = 0; r.updatedAt = 0; }
                 rv.push(r);
             }

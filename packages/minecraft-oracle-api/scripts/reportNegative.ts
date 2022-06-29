@@ -122,7 +122,7 @@ async function main() {
             console.error(`Non existant user: ${userName}-${userId}`)
             continue
         } else {
-            console.log(user?.userName)
+            console.log(user?.minecraftUserName)
         }
 
         if (gganbuOn) {
