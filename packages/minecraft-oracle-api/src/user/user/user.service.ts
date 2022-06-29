@@ -1,13 +1,13 @@
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectConnection, InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { FindConditions, FindManyOptions, FindOneOptions, ObjectID, Repository, UpdateResult } from 'typeorm';
+import { Connection, EntityManager, FindConditions, FindManyOptions, FindOneOptions, ObjectID, Repository, UpdateResult } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
-
 @Injectable()
 export class UserService {
     constructor(
+        @InjectConnection() private connection: Connection,
         @InjectRepository(UserEntity)
         private readonly repository: Repository<UserEntity>,
         private configService: ConfigService
@@ -75,6 +75,42 @@ export class UserService {
     }
 
     public async linkMinecraftByUserUuid(userUuid: string, minecraftUuid: string, minecraftUsername: string, hasGame: boolean) {
+
+        //typeorm 0.2.45 and @nestjs/typeorm@8.0.3
+        //https://github.com/typeorm/typeorm/blob/0.2.45/docs/transactions.md
+
+        //From Nest.js: There are many different strategies to handle TypeORM transactions. We recommend using the QueryRunner class because it gives full control over the transaction.
+
+        const queryRunner = this.connection.createQueryRunner()
+
+        // establish real database connection using our new query runner
+        await queryRunner.connect();
+
+        //can do non-transactional queries here
+
+        await queryRunner.startTransaction();
+        try {
+            /*
+            Cases: 
+            1. minecraft account has never been used on moonsama
+                -can just set fields (minecraftUuid, minecraftUsername, hasGame) on email row 
+            2. minecraft account has been used on moonsama but has never been associated with an email
+                -need to move all relationships to new userUuid and delete old minecraft row after finish
+                -if userUuid already has relationships from having relationships migrated from a different minecraft account, need to combine relationships from new minecraft account
+            3. minecraft account is already associated with an email
+                -relationships have already been migrated over to first email, can null out minecraftUuid on old user and put it on new user
+            */
+            //await queryRunner.manager.save(users[0]);
+
+            await queryRunner.commitTransaction();
+        } catch (err) {
+            // since we have errors lets rollback the changes we made
+            await queryRunner.rollbackTransaction();
+        } finally {
+            // you need to release a queryRunner which was manually instantiated
+            await queryRunner.release();
+        }
+
         return await this.findByUuid(userUuid)
     }
 
