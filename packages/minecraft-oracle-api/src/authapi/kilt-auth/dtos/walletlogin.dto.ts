@@ -1,3 +1,4 @@
+import { DidPublicKey } from '@kiltprotocol/sdk-js';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class WalletLoginDto {
@@ -14,8 +15,8 @@ export class WalletLoginMessage {
     nonce: string;
 
     @ApiProperty({ description: 'senderKeyId' })
-    senderKeyId: string;
+    senderKeyUri: DidPublicKey['uri'];
 
-    @ApiProperty({ description: 'receiverKeyId' })
-    receiverKeyId: string;
+    @ApiProperty({ description: 'receiverKeyUri' })
+    receiverKeyUri: DidPublicKey['uri'];
 }

@@ -1,4 +1,4 @@
-export async function getKilExtension(): Promise<InjectedWindowProvider> {
+export async function getKiltExtension(): Promise<InjectedWindowProvider> {
   if (!window.hasOwnProperty("kilt")) {
     throw new Error("kilt is not exposed on window object")
   }
@@ -21,17 +21,17 @@ export async function walletLogin(extension: InjectedWindowProvider) {
     sessionId,
     walletSessionChallenge,
     dappName,
-    dAppEncryptionKeyId,
+    dAppEncryptionKeyUri,
   } = parsedValues;
 
   //extension signs challenge and sends back to server
-  console.log(`dappName: ${dappName} dAppEncryptionKeyId: ${dAppEncryptionKeyId} walletSessionChallenge: ${walletSessionChallenge}`
+  console.log(`dappName: ${dappName} dAppEncryptionKeyUri: ${dAppEncryptionKeyUri} walletSessionChallenge: ${walletSessionChallenge}`
   )
   //sporran expects to load didConfiguration.json from root directory of host localhost:3000/didConfiguration.json, it will error out if it's not there
   console.log("starting session with extension...")
   let session: PubSubSession
   try {
-    session = await extension.startSession(dappName, dAppEncryptionKeyId, walletSessionChallenge);
+    session = await extension.startSession(dappName, dAppEncryptionKeyUri, walletSessionChallenge);
 
   } catch (e: any) {
     const errStr = e.toString()

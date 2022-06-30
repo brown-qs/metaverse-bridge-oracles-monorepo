@@ -10,7 +10,7 @@ import Box from '@mui/material/Box';
 import "@fontsource/orbitron/500.css";
 import { Button, Stack, Typography, useMediaQuery } from '@mui/material';
 import { theme } from 'theme/Theme';
-import { getKilExtension, walletLogin } from 'utils/kilt';
+import { getKiltExtension, walletLogin } from 'utils/kilt';
 import { useHistory } from 'react-router-dom';
 import LoadingButton from '@mui/lab/LoadingButton';
 
@@ -30,7 +30,7 @@ const KiltLoginPage = () => {
     setStatusMessage("Looking for KILT wallet")
     let kiltExtension
     try {
-      kiltExtension = await getKilExtension()
+      kiltExtension = await getKiltExtension()
     } catch (e) {
       setFailureMessage("Failed: No KILT wallet!")
       setIsLoading(false)

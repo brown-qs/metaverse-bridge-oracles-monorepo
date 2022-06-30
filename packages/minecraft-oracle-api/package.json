@@ -31,7 +31,7 @@
     "seed:run": "ts-node ./node_modules/typeorm-seeding/dist/cli.js seed"
   },
   "dependencies": {
-    "@kiltprotocol/sdk-js": "^0.27.0",
+    "@kiltprotocol/sdk-js": "0.28",
     "@nestjs/common": "^8.0.6",
     "@nestjs/config": "^1.0.2",
     "@nestjs/core": "^8.0.6",

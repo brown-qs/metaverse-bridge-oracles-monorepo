@@ -9,7 +9,7 @@ import {
   mnemonicToMiniSecret,
   cryptoWaitReady,
 } from '@polkadot/util-crypto'
-import { Utils, Did, KeyRelationship, init } from '@kiltprotocol/sdk-js'
+import { Utils, Did, KeyRelationship, init, DidUri } from '@kiltprotocol/sdk-js'
 
 export interface IKiltCtype {
   name: string,
@@ -55,7 +55,7 @@ export function findCtypeByName(name: string): IKiltCtype {
 export async function getEncryptionKey(encryptionKeyId: string) {
   await cryptoWaitReady();
   await init({ address: process.env.KILT_WSS_ADDRESS });
-  const encryptionKey = await Did.DidResolver.resolveKey(encryptionKeyId);
+  const encryptionKey = await Did.DidResolver.resolveKey(encryptionKeyId as any);
   return encryptionKey
 }
 
@@ -98,8 +98,8 @@ export async function relationships() {
 }
 */
 export async function getFullDid() {
-  const { identifier } = Did.DidUtils.parseDidUri(process.env.KILT_VERIFIER_DID_URI)
-  const fullDid = await Did.FullDidDetails.fromChainInfo(identifier)
+  //TODO: don't cast as DidUri, do proper checks to make sure it is a the valid string format
+  const fullDid = await Did.FullDidDetails.fromChainInfo(process.env.KILT_VERIFIER_DID_URI as DidUri)
   return fullDid
 }
 
