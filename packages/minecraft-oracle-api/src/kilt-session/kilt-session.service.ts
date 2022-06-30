@@ -13,8 +13,8 @@ export class KiltSessionService {
         private configService: ConfigService
     ) { }
 
-    public async create(sessionId: string, walletSessionChallenge: string, dappName: string, dAppEncryptionKeyId: string): Promise<KiltSessionEntity> {
-        const sess = await this.repository.save({ sessionId, walletSessionChallenge, dappName, dAppEncryptionKeyId });
+    public async create(sessionId: string, walletSessionChallenge: string, dappName: string, dAppEncryptionKeyUri: string): Promise<KiltSessionEntity> {
+        const sess = await this.repository.save({ sessionId, walletSessionChallenge, dappName, dAppEncryptionKeyUri });
         return sess;
     }
 

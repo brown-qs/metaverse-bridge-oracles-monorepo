@@ -22,7 +22,7 @@ export class KiltSessionEntity {
     dappName: string;
 
     @Column()
-    dAppEncryptionKeyId: string;
+    dAppEncryptionKeyUri: string;
 
     @Column({ default: null, nullable: true })
     walletLoginChallenge?: string;

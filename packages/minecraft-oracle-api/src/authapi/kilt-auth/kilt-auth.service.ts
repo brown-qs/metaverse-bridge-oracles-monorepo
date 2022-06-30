@@ -1,4 +1,4 @@
-import { init, IEncryptedMessage, Utils, MessageBodyType, Message, ICredential, Did, Credential } from '@kiltprotocol/sdk-js';
+import { init, IEncryptedMessage, Utils, MessageBodyType, Message, ICredential, Did, Credential, DidUri } from '@kiltprotocol/sdk-js';
 import { GoneException, Inject, Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { blake2AsU8a, cryptoWaitReady, keyExtractPath, keyFromPath, mnemonicToMiniSecret, naclBoxPairFromSecret, naclOpen, naclSeal, randomAsHex, sr25519PairFromSeed } from '@polkadot/util-crypto';
@@ -35,10 +35,10 @@ export class KiltAuthService {
         // create session data
         const fullDid = await getFullDid()
 
-        const dAppEncryptionKeyId = fullDid.assembleKeyId(fullDid.encryptionKey.id);
+        const dAppEncryptionKeyUri = fullDid.assembleKeyUri(fullDid.encryptionKey.id);
 
 
-        return await this.kiltSessionService.create(randomAsHex(), randomAsHex(), this.configService.get<string>('kilt.dappName'), dAppEncryptionKeyId)
+        return await this.kiltSessionService.create(randomAsHex(), randomAsHex(), this.configService.get<string>('kilt.dappName'), dAppEncryptionKeyUri)
     }
 
 
@@ -97,10 +97,10 @@ export class KiltAuthService {
             cTypeHash: this.configService.get<string>('kilt.cTypeHash')
         }
         const cTypes = [cType]
-        const content = { cTypes, challenge: walletLoginChallenge };
+        const content = { cTypes, challenge: walletLoginChallenge } as any;
         const type = MessageBodyType.REQUEST_CREDENTIAL;
-        const didUri = process.env.KILT_VERIFIER_DID_URI;
-        const keyDid = encryptionKeyId.replace(/#.*$/, '');
+        const didUri = process.env.KILT_VERIFIER_DID_URI as DidUri;
+        const keyDid = encryptionKeyId.replace(/#.*$/, '') as DidUri;
         const message = new Message({ content, type }, didUri, keyDid);
         if (!message) {
             this.logger.error(`walletCredentialMessage:: failed to construct message`, null, this.context)
@@ -110,7 +110,7 @@ export class KiltAuthService {
         // encrypt the message
         let output
         try {
-            output = await message.encrypt(fullDid.encryptionKey.id, fullDid, encryptionKeystore, encryptionKeyId);
+            output = await message.encrypt(fullDid.encryptionKey.id, fullDid, encryptionKeystore, encryptionKeyId as any);
 
         } catch (e) {
             this.logger.error(`walletCredentialMessage:: unable to encrypt challege`, null, this.context)

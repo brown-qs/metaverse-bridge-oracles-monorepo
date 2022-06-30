@@ -36,7 +36,7 @@ interface InjectedWindowProvider {
     dAppName: string,
 
     /** ID of the key agreement key of the dApp DID to be used to encrypt the session messages */
-    dAppEncryptionKeyId: string,
+    dAppEncryptionKeyUri: string,
 
     /** 24 random bytes as hexadecimal */
     challenge: string
