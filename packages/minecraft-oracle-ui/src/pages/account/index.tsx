@@ -11,7 +11,7 @@ import Box from '@mui/material/Box';
 import "@fontsource/orbitron/500.css";
 import { Alert, AlertColor, Avatar, Button, Card, CardContent, CardHeader, Chip, CircularProgress, Collapse, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, useMediaQuery } from '@mui/material';
 import { theme } from 'theme/Theme';
-import { ExpandLess, ExpandMore, StarBorder } from '@mui/icons-material';
+import { Edit, ExpandLess, ExpandMore, StarBorder } from '@mui/icons-material';
 import PersonIcon from '@mui/icons-material/Person';
 import { Redirect } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
@@ -20,7 +20,6 @@ const AccountPage = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [failureMessage, setFailureMessage] = useState("")
   let history = useHistory();
-  const authed = !!authData?.jwt
 
   const getAccount = async () => {
     setIsLoading(true)
@@ -48,7 +47,7 @@ const AccountPage = () => {
   }
 
   useEffect(() => {
-    if (authed) {
+    if (!!authData?.jwt) {
       getAccount()
     }
   }, [authData?.jwt])
@@ -97,7 +96,7 @@ const AccountPage = () => {
     getAccount()
   }
 
-  if (!authed) {
+  if (!authData?.jwt) {
     return <Redirect to={'/account/login'} />;
   }
 
@@ -107,7 +106,10 @@ const AccountPage = () => {
     }
 
     return <Stack direction="column" alignItems='center' textAlign='center' spacing={0}>
-      <Chip color="info" icon={<PersonIcon />} label={authData?.emailUser?.email} ></Chip>
+      <Chip color="info" icon={<PersonIcon />} label={authData?.emailUser?.email} onDelete={() => { history.push(`/account/login/email/change`) }}
+        deleteIcon={<Edit />}></Chip>
+
+
       <Stack direction="column" alignItems='center' textAlign='center' spacing={1} marginTop={2}>
         <Box>
           <Button disableRipple style={{ maxWidth: '175px', width: '175px', minWidth: '175px' }} onClick={() => { handleLogout() }} variant="contained">Logout</Button>

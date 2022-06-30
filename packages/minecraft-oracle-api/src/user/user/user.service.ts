@@ -183,7 +183,6 @@ export class UserService {
         }
         this.logger.debug(`user.service::linkMinecraftByUserUuid userUuid: ${userUuid} minecraftUuid: ${minecraftUuid} successful link`, this.context)
         return await this.findByUuid(userUuid)
-
     }
 
     public async unlinkMinecraftByUserUuid(uuid: string) {

@@ -62,15 +62,6 @@ export class EmailAuthService {
             throw new UnprocessableEntityException(`Error upserting user into database`)
         }
 
-        const serverScheme = this.configService.get<string>('server.scheme')
-        const serverHost = this.configService.get<string>('server.host')
-        let serverPort = this.configService.get<string>('server.port')
-        if (serverPort && serverPort !== "80") {
-            serverPort = ":" + serverPort
-        } else {
-            serverPort = ""
-        }
-
         const loginLink = `${this.configService.get<string>('frontend.url')}/account/login/email/verify/${uuid}`
         const mailgun = new Mailgun(formData);
         const mg = mailgun.client({ username: 'api', key: process.env.MAILGUN_API_KEY, url: 'https://api.eu.mailgun.net' });
@@ -91,6 +82,73 @@ export class EmailAuthService {
         } catch (e) {
             console.log(e)
             this.logger.error(`sendAuthEmail: unable to send email`, e, this.context)
+            throw new UnprocessableEntityException(`Error sending email`)
+        }
+    }
+
+    async sendAuthChangeEmail(userUuid: string, email: string, gRecaptchaResponse: string) {
+        const recaptchaSecret = this.configService.get<string>('recaptcha.secret')
+
+        if (recaptchaSecret === "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe") {
+            this.logger.warn(`sendAuthChangeEmail: using test recaptcha secret! Don't use in production!`, this.context)
+        }
+
+        try {
+            let result = await axios({
+                method: 'post',
+                url: 'https://www.google.com/recaptcha/api/siteverify',
+                params: {
+                    secret: recaptchaSecret,
+                    response: gRecaptchaResponse
+                }
+            });
+            let data = result.data || {};
+
+            //TO DO: check data.hostname
+            if (data.success !== true) {
+                throw new Error("captcha rejected")
+            }
+        } catch (err) {
+            this.logger.error(`sendAuthChangeEmail: captcha did verify`, err, this.context)
+            throw new UnprocessableEntityException(`Invalid captcha`)
+        }
+
+        //check that email is not already in use
+        const existingUserWithEmail = await this.userService.findByEmail(email.toLowerCase().trim())
+        if (existingUserWithEmail) {
+            //if email already exists just pretend like link is being sent
+            this.logger.error(`sendAuthChangeEmail: uuid: ${userUuid} wants to change to email ${email}, but that email already exists`, this.context)
+            return
+        }
+
+        const uuid = makeUuid() + makeUuid()
+        try {
+            await this.emailLoginKeyService.createChangeEmailLogin(userUuid, email.toLowerCase().trim(), uuid, new Date())
+        } catch (err) {
+            this.logger.error(`sendAuthChangeEmail: error upserting user into database: ${email}`, err, this.context)
+            throw new UnprocessableEntityException(`Error upserting user into database`)
+        }
+
+        const loginLink = `${this.configService.get<string>('frontend.url')}/account/login/email/verify/${uuid}`
+        const mailgun = new Mailgun(formData);
+        const mg = mailgun.client({ username: 'api', key: process.env.MAILGUN_API_KEY, url: 'https://api.eu.mailgun.net' });
+
+
+        const mailOptions = {
+            from: 'Moonsama <no-reply@sp.moonsama.com>',
+            to: [email], // list of receivers
+            subject: "Moonsama change email request", // Subject line
+            text: `We received your request to change your email used with Moonsama.\n\nPlease use this single-use login link: ${loginLink}`, // plaintext body
+        };
+
+        // send mail with defined transport object
+        let result
+        try {
+            result = await mg.messages.create('sp.moonsama.com', mailOptions)
+            console.log(result);
+        } catch (e) {
+            console.log(e)
+            this.logger.error(`sendAuthChangeEmail: unable to send email`, e, this.context)
             throw new UnprocessableEntityException(`Error sending email`)
         }
     }
@@ -125,7 +183,19 @@ export class EmailAuthService {
             throw new UnprocessableEntityException(`loginKey failure`)
         }
 
-        const user = this.userService.createEmail(loginKeyEntity.email.toLowerCase().trim())
+        let user
+        if (loginKeyEntity.changeUuid) {
+            this.logger.debug(`verifyAuthLink: change uuid ${loginKeyEntity.changeUuid} to email ${loginKeyEntity.email}`, this.context)
+            try {
+                await this.userService.update({ uuid: loginKeyEntity.changeUuid }, { email: loginKeyEntity.email.toLowerCase().trim() })
+            } catch (err) {
+                this.logger.error(`sendAuthChangeEmail: failed to update uuid: ${loginKeyEntity.changeUuid} to email: ${loginKeyEntity.email.toLowerCase().trim()}`, err, this.context)
+                throw new UnprocessableEntityException(`loginKey failure`)
+            }
+            user = await this.userService.findByEmail(loginKeyEntity.email.toLowerCase().trim())
+        } else {
+            user = await this.userService.createEmail(loginKeyEntity.email.toLowerCase().trim())
+        }
         return user
     }
 }

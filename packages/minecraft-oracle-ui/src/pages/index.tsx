@@ -15,6 +15,7 @@ import LoginPage from './account/login';
 import EmailLoginPage from './account/login/email';
 import KiltLoginPage from './account/login/kilt';
 import EmailVerifyPage from './account/login/email/verify';
+import EmailChangePage from './account/login/email/change';
 
 export const Routing = () => {
     const { authData } = useAuth();
@@ -36,8 +37,12 @@ export const Routing = () => {
                 {!!authData?.jwt ? <Redirect to="/account" /> : <EmailLoginPage />}
             </Route>
 
+            <Route exact path="/account/login/email/change">
+                {!!authData?.jwt ? <EmailChangePage /> : <Redirect to="/account/login" />}
+            </Route>
+
             <Route exact path="/account/login/email/verify/:loginKey">
-                {!!authData?.jwt ? <Redirect to="/account" /> : <EmailVerifyPage />}
+                <EmailVerifyPage />
             </Route>
 
 

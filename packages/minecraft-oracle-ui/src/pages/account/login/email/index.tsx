@@ -45,7 +45,6 @@ const EmailLoginPage = () => {
     setImmediate(() => {
       recaptchaEl.current.reset()
     })
-    let failed = false
 
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_API_URL}/auth/email/login`, {
@@ -65,7 +64,6 @@ const EmailLoginPage = () => {
       //success
     } catch (e) {
       setFailureMessage(String(e))
-      failed = true
     }
     setDirtyTextField(false)
     setEmail("")
