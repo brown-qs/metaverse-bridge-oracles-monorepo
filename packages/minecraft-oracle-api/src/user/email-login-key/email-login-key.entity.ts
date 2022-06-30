@@ -25,4 +25,8 @@ export class EmailLoginKeyEntity {
 
     @Column({ default: null, nullable: true })
     lastLogin: Date;
+
+    //will change existing user with this uuid if login successful
+    @Column({ default: null, nullable: true })
+    changeUuid: string;
 }

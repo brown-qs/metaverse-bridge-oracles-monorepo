@@ -1,8 +1,11 @@
-import { Body, Controller, Get, Inject, Post, Query, Redirect } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Post, Put, Query, Redirect, UseGuards } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
+import { UserEntity } from 'src/user/user/user.entity';
+import { User } from 'src/utils/decorators';
+import { JwtAuthGuard } from '../jwt-auth.guard';
 import { UserJwtPayload } from '../jwt.strategy';
 import { LoginDto, VerifyDto } from './dtos';
 import { EmailAuthService } from './email-auth.service';
@@ -19,10 +22,20 @@ export class EmailAuthController {
         this.context = EmailAuthController.name;
 
     }
+
     @Post('login')
     @ApiOperation({ summary: 'Post email and sends login link' })
     async login(@Body() dto: LoginDto): Promise<{ success: boolean }> {
         await this.emailAuthService.sendAuthEmail(dto.email, dto["g-recaptcha-response"])
+        return { success: true }
+    }
+
+    @Put('change')
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    @ApiOperation({ summary: 'Change email address and send login link to new email' })
+    async change(@User() user: UserEntity, @Body() dto: LoginDto): Promise<{ success: boolean }> {
+        await this.emailAuthService.sendAuthChangeEmail(user.uuid, dto.email, dto["g-recaptcha-response"])
         return { success: true }
     }
 
