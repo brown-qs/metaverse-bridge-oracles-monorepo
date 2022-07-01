@@ -37,7 +37,7 @@ export class KiltSessionEntity {
     didConfirmed?: boolean;
 
     @Column({ default: null, nullable: true })
-    encryptionKeyId?: string;
+    encryptionKeyUri?: string;
 
     @Column({ default: false, nullable: false })
     verified?: boolean;
