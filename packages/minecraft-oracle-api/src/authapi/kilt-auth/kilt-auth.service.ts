@@ -125,7 +125,7 @@ export class KiltAuthService {
         // encrypt the message
         let output
         try {
-            output = await message.encrypt(fullDid.encryptionKey.id, fullDid, encryptionKeystore, encryptionKeyUri as any);
+            output = await message.encrypt(fullDid.encryptionKey.id, fullDid, encryptionKeystore, encryptionKeyUri);
 
         } catch (e) {
             this.logger.error(`walletCredentialMessage:: unable to encrypt challege`, null, this.context)

@@ -1,3 +1,4 @@
+import { DidResourceUri } from '@kiltprotocol/sdk-js';
 import {
     IsBoolean,
     IsEnum,
@@ -37,7 +38,7 @@ export class KiltSessionEntity {
     didConfirmed?: boolean;
 
     @Column({ default: null, nullable: true })
-    encryptionKeyUri?: string;
+    encryptionKeyUri?: DidResourceUri;
 
     @Column({ default: false, nullable: false })
     verified?: boolean;
