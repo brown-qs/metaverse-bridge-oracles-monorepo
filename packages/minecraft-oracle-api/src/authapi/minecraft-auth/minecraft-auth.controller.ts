@@ -21,6 +21,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserJwtPayload } from '../jwt.strategy';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from 'src/user/user/user.service';
+import { MinecraftLinkService } from 'src/user/minecraft-link/minecraft-link.service';
 
 @ApiTags('auth')
 @Controller('auth/minecraft')
@@ -31,6 +32,7 @@ export class MinecraftAuthController {
     constructor(
         private readonly authApiService: MinecraftAuthService,
         private readonly userService: UserService,
+        private readonly minecraftLinkServer: MinecraftLinkService,
         private jwtService: JwtService,
         private configService: ConfigService,
 
@@ -85,6 +87,10 @@ export class MinecraftAuthController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async unlink(@User() user: any) {
+        const minecraftUuid = user.minecraftUuid
+        if (!minecraftUuid) {
+            throw new UnprocessableEntityException('There is no Minecraft account to unlink')
+        }
         try {
             await this.userService.unlinkMinecraftByUserUuid(user.uuid)
 
@@ -92,8 +98,11 @@ export class MinecraftAuthController {
             console.log(err)
             this.logger.error(`Unlink from db failed`, err, this.context)
 
-            throw new UnprocessableEntityException()
+            throw new UnprocessableEntityException('Unlink failed')
         }
+
+        //log unlink
+        await this.minecraftLinkServer.unlink(user.uuid, minecraftUuid)
 
         const payload: UserJwtPayload = { sub: user.uuid, minecraftUuid: null };
         const jwtToken = this.jwtService.sign(payload);
