@@ -256,40 +256,6 @@ export class GameApiController {
         return skins
     }
 
-    @Put('gganbu')
-    @HttpCode(200)
-    @ApiOperation({ summary: 'Makes players gganbu' })
-    @ApiBearerAuth('AuthenticationHeader')
-    @UseGuards(SharedSecretGuard)
-    async setGganbu(
-        @Body() gganbus: GganbuDto,
-    ): Promise<boolean> {
-        const success = await this.gameApiService.setGganbu(gganbus.player1, gganbus.player2)
-        return success
-    }
-
-    @Get('gganbu')
-    @HttpCode(200)
-    @ApiOperation({ summary: 'Gets if players are gganbu' })
-    @ApiBearerAuth('AuthenticationHeader')
-    @UseGuards(SharedSecretGuard)
-    async getGganbu(
-        @Query() gganbus: GganbuDto,
-    ): Promise<AreGganbusDto> {
-        const success = await this.gameApiService.getGganbu(gganbus.player1, gganbus.player2)
-        return { areGganbus: success }
-    }
-
-    @Delete('gganbus')
-    @HttpCode(200)
-    @ApiOperation({ summary: 'Gets if players are gganbu' })
-    @ApiBearerAuth('AuthenticationHeader')
-    @UseGuards(SharedSecretGuard)
-    async clearGganbus(): Promise<boolean> {
-        const success = await this.gameApiService.clearGganbus()
-        return success
-    }
-
     @Put('game/:gameId/session/:uuid/end')
     @HttpCode(200)
     @ApiOperation({ summary: 'Logs an ongoing game session end' })

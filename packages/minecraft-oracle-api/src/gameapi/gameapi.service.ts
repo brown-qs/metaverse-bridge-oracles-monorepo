@@ -135,7 +135,7 @@ export class GameApiService {
         // if user is alone, add all the items to user
         // if user is gganbu, write half to user, half to gganbu
 
-        const userAll = await this.userService.findOne({ uuid: user.uuid }, { relations: ['gganbu'] })
+        const userAll = await this.userService.findOne({ uuid: user.uuid })
 
         //console.log(userAll)
 
@@ -177,33 +177,17 @@ export class GameApiService {
         const userlock = this.locks.get(userAll.uuid)
 
         const promises = await userlock.runExclusive(async () => {
-            if (!userAll.gganbu) {
-                const promises = await dto.snapshots.map(async (snapshot: SnapshotDto, i) => {
-                    const savedS = await this.assignSnapshot(userAll, game, snapshot)
+            const promises = await dto.snapshots.map(async (snapshot: SnapshotDto, i) => {
+                const savedS = await this.assignSnapshot(userAll, game, snapshot)
 
-                    if (!!savedS) {
-                        saved += 1
-                        snapshotSuccessArray[i] = true
-                    }
+                if (!!savedS) {
+                    saved += 1
+                    snapshotSuccessArray[i] = true
+                }
 
-                    return savedS
-                })
-                return promises
-            } else {
-                const promises = await dto.snapshots.map(async (snapshot: SnapshotDto, i) => {
-                    const gganbu = await this.userService.findOne({ uuid: userAll.gganbu.uuid }, { relations: ['snapshotItems'] })
-
-                    const savedU = await this.assignSnapshot(userAll, game, snapshot, true, true)
-                    const savedG = await this.assignSnapshot(gganbu, game, snapshot, true, false)
-
-                    if (!!savedU && !!savedG) {
-                        saved += 1
-                        snapshotSuccessArray[i] = true
-                    }
-                    return savedU
-                })
-                return promises
-            }
+                return savedS
+            })
+            return promises
         })
 
         const snapshotItems = await Promise.all(promises)
@@ -266,119 +250,9 @@ export class GameApiService {
         return true
     }
 
-    public async setGganbu(player1UUID: string, player2UUID: string): Promise<boolean> {
-        let players: UserEntity[]
-        let player1: UserEntity, player2: UserEntity
-        try {
-            //console.log(1)
-            players = await this.userService.findMany({
-                where: [{ uuid: player1UUID }, { uuid: player2UUID }],
-                relations: ['gganbu']
-            })
-            //console.log(2)
-            if (!players || players.length !== 2) {
-                //console.log(players)
-                throw new Error()
-            }
-            player1 = players.find(x => x.uuid === player1UUID)
-            player2 = players.find(x => x.uuid === player2UUID)
 
-            if (!player1 || !player2) {
-                //console.log(player1, player2)
-                throw new Error()
-            }
-        } catch (err) {
-            this.logger.error(`setGganbu::player data could not be fetched for player1:${player1UUID} or player2:${player2UUID}`, err, this.context)
-            throw new UnprocessableEntityException('Players were not found')
-        }
 
-        if (!!player1.gganbu || !!player2.gganbu) {
-            this.logger.error(`setGganbu:: on of the players already has a gganbu. player1HasGanbu:${!!player1.gganbu}, player2HasGanbu:${!!player2.gganbu}`, null, this.context)
-            throw new UnprocessableEntityException('One of the players already have a gganbu')
-        }
 
-        player1.gganbu = player2
-        player2.gganbu = player1
-        await this.userService.createMany([player1, player2])
-        return true;
-    }
-
-    public async getGganbu(player1UUID: string, player2UUID: string): Promise<boolean> {
-        let players: UserEntity[]
-        let player1: UserEntity, player2: UserEntity
-        try {
-            players = await this.userService.findMany({
-                where: [
-                    { uuid: player1UUID },
-                    { uuid: player2UUID }
-                ],
-                relations: ['gganbu']
-            })
-            if (!players || players.length !== 2) {
-                //console.log(players)
-                throw new Error()
-            }
-            player1 = players.find(x => x.uuid === player1UUID)
-            player2 = players.find(x => x.uuid === player2UUID)
-
-            if (!player1 || !player2) {
-                //console.log(player1, player2)
-                throw new Error()
-            }
-
-        } catch (err) {
-            this.logger.error(`setGganbu::player data could not be fetched for player1:${player1UUID} or player2:${player2UUID}`, err, this.context)
-            throw new UnprocessableEntityException('Players were not found')
-        }
-
-        return (!!player1.gganbu && player1.gganbu.uuid === player2UUID) && (!!player2.gganbu && player2.gganbu.uuid === player1UUID)
-    }
-
-    public async clearGganbus(): Promise<boolean> {
-        let players: UserEntity[]
-
-        const take = 2;
-        let skip = 0;
-        let stop = false
-        while (!stop) {
-            try {
-                players = await this.userService.findMany({
-                    take,
-                    skip,
-                    relations: ['gganbu']
-                })
-                if (!players || (!!players && players.length == 0)) {
-                    this.logger.debug(`clearGganbu:: stopped at skip:${skip} take:${take}`, this.context)
-                    break;
-                }
-
-            } catch (err) {
-                this.logger.error(`clearGganbu:: error fetching players at skip:${skip} take:${take}`, err, this.context)
-                throw new UnprocessableEntityException('Players were not found')
-            }
-
-            const pnew = players.map(x => {
-                return {
-                    ...x,
-                    gganbu: null
-                }
-            })
-
-            try {
-                await this.userService.createMany(pnew)
-                this.logger.debug(`clearGganbu:: success. skip:${skip} take:${take}`, this.context)
-
-            } catch (err) {
-                this.logger.error(`clearGganbu:: error updating players at skip:${skip} take:${take}`, err, this.context)
-                throw new UnprocessableEntityException('Error updating players')
-            }
-
-            skip += take
-
-        }
-
-        return true
-    }
 
 
     private async assignSnapshot(user: UserEntity, game: GameEntity | null, snapshot: SnapshotDto, half = false, validate = true): Promise<SnapshotItemEntity> {

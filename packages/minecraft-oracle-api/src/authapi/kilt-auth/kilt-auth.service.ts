@@ -51,11 +51,15 @@ export class KiltAuthService {
         }
 
         // load the encryption key
-        const encryptionKey = await getEncryptionKey(encryptionKeyId)
-        if (!session) {
-            this.logger.error(`kiltAuthVerifyChallenge:: failed resolving ${encryptionKeyId}`, null, this.context)
+        let encryptionKey
+        try {
+            encryptionKey = await getEncryptionKey(encryptionKeyId)
+
+        } catch (err) {
+            this.logger.error(`kiltAuthVerifyChallenge:: failed resolving ${encryptionKeyId}`, err, this.context)
             throw new UnprocessableEntityException
         }
+
 
         // decrypt the message
         const decrypted = await decryptChallenge(encryptedWalletSessionChallenge, encryptionKey, nonce);
