@@ -19,6 +19,7 @@ import { PlayerGameItemEntity } from '../../playergameitem/playergameitem.entity
 import { ResourceInventoryEntity } from '../../resourceinventory/resourceinventory.entity';
 
 @Entity()
+@Index(['uuid'], { unique: true })
 @Index(['minecraftUuid'], { unique: true })
 @Index(['email'], { unique: true })
 
@@ -28,7 +29,7 @@ export class UserEntity {
     }
 
     //cannot use uuid type or postgres will insert hyphens and screw up our existing minecraft uuids
-    @PrimaryColumn('varchar', { length: 256, default: () => `'${guid()}'` })
+    @PrimaryColumn({ default: () => `'${guid()}'`, nullable: false })
     @IsString()
     uuid: string;
 
@@ -52,6 +53,11 @@ export class UserEntity {
         default: UserRole.NONE
     })
     role?: UserRole;
+
+    //delete this after migration
+    @IsString()
+    @Column({ default: null, nullable: true })
+    userName?: string;
 
     @IsString()
     @Column({ default: null, nullable: true })

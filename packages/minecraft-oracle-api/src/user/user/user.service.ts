@@ -132,7 +132,7 @@ export class UserService {
                 if (typeof existingMinecraft.email === "string") {
                     //safety check, uuid and minecraftUuid should be different
                     if (existingMinecraft.uuid === existingMinecraft.minecraftUuid) {
-                        throw new Error("If user has an email defined, uuid !== minecraftUuid")
+                        throw new Error("If user has an email defined, uuid !== minecraftUuid, condition not met")
                     }
                     this.logger.debug(`user.service::linkMinecraftByUserUuid userUuid: ${userUuid} minecraftUuid: ${minecraftUuid}, MC account already been migrated to email before, removing MC account from prev email, and assigning to new`, this.context)
 
@@ -143,7 +143,7 @@ export class UserService {
                 } else {
                     //safety check, uuid and minecraftUuid should be same for unmigrated minecraft users
                     if (existingMinecraft.uuid !== existingMinecraft.minecraftUuid) {
-                        throw new Error("If old minecraft account, uuid === minecraftUuid")
+                        throw new Error("If old minecraft account, uuid === minecraftUuid, condition not met")
                     }
                     this.logger.debug(`user.service::linkMinecraftByUserUuid userUuid: ${userUuid} minecraftUuid: ${minecraftUuid}, MC account has never been migrated to email before, moving relationships`, this.context)
 
@@ -170,7 +170,7 @@ export class UserService {
 
         } catch (e) {
             err = e
-            this.logger.error(`user.service::linkMinecraftByUserUuid, error linking minecraft account`, e, this.context)
+            this.logger.error(`user.service::linkMinecraftByUserUuid, error linking minecraft account ${e}`, e, this.context)
             // since we have errors lets rollback the changes we made
             await queryRunner.rollbackTransaction();
         } finally {
