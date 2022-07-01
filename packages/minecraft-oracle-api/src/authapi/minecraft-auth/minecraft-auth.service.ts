@@ -8,6 +8,8 @@ import { ProviderToken } from '../../provider/token';
 import { MicrosoftSetupParams } from '../../provider';
 import { UserEntity } from '../../user/user/user.entity';
 import { JwtService } from '@nestjs/jwt';
+import { MinecraftLinkService } from 'src/user/minecraft-link/minecraft-link.service';
+import { MinecraftUuidUserNameService } from 'src/user/minecraft-uuid-user-name/minecraft-uuid-user-name.service';
 
 @Injectable()
 export class MinecraftAuthService {
@@ -18,6 +20,8 @@ export class MinecraftAuthService {
         private userService: UserService,
         private configService: ConfigService,
         private jwtService: JwtService,
+        private minecraftUuidUserNameService: MinecraftUuidUserNameService,
+        private minecraftLinkService: MinecraftLinkService,
         @Inject(ProviderToken.MICROSOFT_SETUP) private readonly microsoftSetupParams: MicrosoftSetupParams,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
@@ -93,6 +97,11 @@ export class MinecraftAuthService {
                 this.logger.error(`authLogin: error merging minecraft user into database: mc uuid: ${account.uuid}`, err, this.context)
                 throw new UnprocessableEntityException(`Error linking minecraft account`)
             }
+
+            //log mc account linked & log mc name/uuid pair
+            await this.minecraftLinkService.link(userUuid, account.uuid)
+            await this.minecraftUuidUserNameService.create(account.uuid, account.username)
+
             this.logger.log(`Account: ${JSON.stringify(account)}`, this.context);
 
             const newJwt = this.generateJwtToken(user.uuid, user.minecraftUserName);

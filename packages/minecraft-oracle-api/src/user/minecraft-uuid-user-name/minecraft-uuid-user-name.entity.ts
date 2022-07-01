@@ -16,6 +16,6 @@ export class MinecraftUuidUserNameEntity {
     @Column()
     minecraftUserName: string;
 
-    @UpdateDateColumn()
+    @Column()
     updatedAt: Date;
 }
