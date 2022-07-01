@@ -51,9 +51,6 @@ export class ProfileApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async profile(@User() user: UserEntity): Promise<ProfileDto> {
-        if (!user.minecraftUuid) {
-            throw new UnprocessableEntityException("No minecraft account linked")
-        }
         return this.profileService.userProfile(user)
     }
 
@@ -63,9 +60,6 @@ export class ProfileApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async resources(@User() user: UserEntity): Promise<ThingsDto> {
-        if (!user.minecraftUuid) {
-            throw new UnprocessableEntityException("No minecraft account linked")
-        }
         const playerItems = await this.profileService.getPlayerItems(user)
         return playerItems
     }

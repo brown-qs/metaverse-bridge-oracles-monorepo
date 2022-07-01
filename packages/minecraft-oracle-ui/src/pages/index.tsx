@@ -59,7 +59,7 @@ export const Routing = () => {
             </Route>
 
             <Route path="/bridge">
-                {!!authData?.jwt && !!authData?.emailUser?.minecraftUuid ? (
+                {!!authData?.jwt ? (
                     <>
                         <ImportDialog />
                         <ExportDialog />
