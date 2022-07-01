@@ -9,13 +9,14 @@ import {
   mnemonicToMiniSecret,
   cryptoWaitReady,
 } from '@polkadot/util-crypto'
-import { Utils, Did, KeyRelationship, init, DidUri } from '@kiltprotocol/sdk-js'
+import { Utils, Did, KeyRelationship, init, DidUri, connect, DidResourceUri } from '@kiltprotocol/sdk-js'
 
 
-export async function getEncryptionKey(encryptionKeyId: string) {
+export async function getEncryptionKey(encryptionKeyId: DidResourceUri) {
   await cryptoWaitReady();
   await init({ address: process.env.KILT_WSS_ADDRESS });
-  const encryptionKey = await Did.DidResolver.resolveKey(encryptionKeyId as any);
+  await connect()
+  const encryptionKey = await Did.DidResolver.resolveKey(encryptionKeyId);
   return encryptionKey
 }
 

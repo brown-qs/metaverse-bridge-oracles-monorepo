@@ -1,8 +1,9 @@
+import { DidResourceUri } from '@kiltprotocol/sdk-js';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class WalletSessionDto {
     @ApiProperty({ description: 'encryptionKeyId' })
-    encryptionKeyId: string;
+    encryptionKeyId: DidResourceUri;
 
     @ApiProperty({ description: 'nonce' })
     nonce: string;

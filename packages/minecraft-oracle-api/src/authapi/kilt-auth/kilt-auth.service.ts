@@ -1,4 +1,4 @@
-import { init, IEncryptedMessage, Utils, MessageBodyType, Message, ICredential, Did, Credential, DidUri } from '@kiltprotocol/sdk-js';
+import { init, IEncryptedMessage, Utils, MessageBodyType, Message, ICredential, Did, Credential, DidUri, connect, DidResourceUri } from '@kiltprotocol/sdk-js';
 import { GoneException, Inject, Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { blake2AsU8a, cryptoWaitReady, keyExtractPath, keyFromPath, mnemonicToMiniSecret, naclBoxPairFromSecret, naclOpen, naclSeal, randomAsHex, sr25519PairFromSeed } from '@polkadot/util-crypto';
@@ -29,7 +29,14 @@ export class KiltAuthService {
 
     }
 
+    async initKilt() {
+        await cryptoWaitReady()
+        await init({ address: this.configService.get<string>('kilt.wssAddress') })
+        await connect()
+    }
+
     async getWalletSessionChallenge(): Promise<KiltSessionEntity> {
+        await this.initKilt()
         await cryptoWaitReady()
         await init({ address: this.configService.get<string>('kilt.wssAddress') })
         // create session data
@@ -42,7 +49,9 @@ export class KiltAuthService {
     }
 
 
-    async verifyWalletSessionChallenge(encryptionKeyId: string, encryptedWalletSessionChallenge: string, nonce: string, sessionId: string) {
+    async verifyWalletSessionChallenge(encryptionKeyUri: DidResourceUri, encryptedWalletSessionChallenge: string, nonce: string, sessionId: string) {
+        await this.initKilt()
+
 
         const session = await this.kiltSessionService.findBySessionId(sessionId)
         if (!session) {
@@ -53,10 +62,10 @@ export class KiltAuthService {
         // load the encryption key
         let encryptionKey
         try {
-            encryptionKey = await getEncryptionKey(encryptionKeyId)
+            encryptionKey = await getEncryptionKey(encryptionKeyUri)
 
         } catch (err) {
-            this.logger.error(`kiltAuthVerifyChallenge:: failed resolving ${encryptionKeyId}`, err, this.context)
+            this.logger.error(`kiltAuthVerifyChallenge:: failed resolving ${encryptionKeyUri}`, err, this.context)
             throw new UnprocessableEntityException
         }
 
@@ -68,10 +77,12 @@ export class KiltAuthService {
             throw new UnprocessableEntityException
         }
 
-        await this.kiltSessionService.update({ sessionId }, { encryptedDid: encryptionKey.controller, encryptionKeyId, didConfirmed: true })
+        await this.kiltSessionService.update({ sessionId }, { encryptedDid: encryptionKey.controller, encryptionKeyUri, didConfirmed: true })
     }
 
     async getWalletLoginChallenge(sessionId: string): Promise<IEncryptedMessage> {
+        await this.initKilt()
+
         const session = await this.kiltSessionService.findBySessionId(sessionId)
         if (!session) {
             this.logger.error(`walletCredentialMessage:: sessionId: ${sessionId} not found`, null, this.context)
@@ -79,13 +90,13 @@ export class KiltAuthService {
         }
 
         // load encryptionKeyId and the did, making sure it's confirmed
-        const { encryptedDid, didConfirmed, encryptionKeyId } = session;
+        const { encryptedDid, didConfirmed, encryptionKeyUri } = session;
         if (!encryptedDid || !didConfirmed) {
             this.logger.error(`walletCredentialMessage:: unconfirmed did`, null, this.context)
             throw new UnprocessableEntityException
         }
-        if (!encryptionKeyId) {
-            this.logger.error(`walletCredentialMessage:: missing encryptionKeyId`, null, this.context)
+        if (!encryptionKeyUri) {
+            this.logger.error(`walletCredentialMessage:: missing encryptionKeyUri`, null, this.context)
             throw new UnprocessableEntityException
         }
 
@@ -104,7 +115,7 @@ export class KiltAuthService {
         const content = { cTypes, challenge: walletLoginChallenge } as any;
         const type = MessageBodyType.REQUEST_CREDENTIAL;
         const didUri = process.env.KILT_VERIFIER_DID_URI as DidUri;
-        const keyDid = encryptionKeyId.replace(/#.*$/, '') as DidUri;
+        const keyDid = encryptionKeyUri.replace(/#.*$/, '') as DidUri;
         const message = new Message({ content, type }, didUri, keyDid);
         if (!message) {
             this.logger.error(`walletCredentialMessage:: failed to construct message`, null, this.context)
@@ -114,7 +125,7 @@ export class KiltAuthService {
         // encrypt the message
         let output
         try {
-            output = await message.encrypt(fullDid.encryptionKey.id, fullDid, encryptionKeystore, encryptionKeyId as any);
+            output = await message.encrypt(fullDid.encryptionKey.id, fullDid, encryptionKeystore, encryptionKeyUri as any);
 
         } catch (e) {
             this.logger.error(`walletCredentialMessage:: unable to encrypt challege`, null, this.context)
@@ -132,6 +143,7 @@ export class KiltAuthService {
         return output
     }
     async verifyWalletLoginChallenge(sessionId: string, rawMessage: WalletLoginMessage): Promise<UserEntity> {
+        await this.initKilt()
 
         const session = await this.kiltSessionService.findBySessionId(sessionId)
         if (!session) {
@@ -168,6 +180,8 @@ export class KiltAuthService {
         }
 
         const { owner } = credential.request.claim
+        //TODO: use kilt sdk parse this out
+        //
         const did = owner.includes(':light:') ? `did:kilt:${owner.split(':')[3]}` : owner
         if (credential.request.claim.cTypeHash !== this.configService.get<string>('kilt.cTypeHash')) {
             this.logger.error(`cTypeHash mismatch, probably will never happen`, null, this.context)
