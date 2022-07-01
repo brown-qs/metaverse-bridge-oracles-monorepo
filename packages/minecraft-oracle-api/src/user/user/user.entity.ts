@@ -128,10 +128,6 @@ export class UserEntity {
     @OneToMany(() => ResourceInventoryEntity, (resourceInventoryItem) => resourceInventoryItem.owner)
     resourceInventoryItems?: ResourceInventoryEntity[];
 
-    @OneToOne(() => UserEntity, (user) => user.gganbu)
-    @JoinColumn()
-    gganbu?: UserEntity;
-
     @OneToMany(() => PlayerScoreEntity, (score) => score.player)
     scores?: PlayerScoreEntity[];
 }
