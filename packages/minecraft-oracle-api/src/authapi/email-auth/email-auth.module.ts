@@ -5,9 +5,10 @@ import { EmailAuthController } from './email-auth.controller';
 import { EmailAuthService } from './email-auth.service';
 import { EmailLoginKeyModule } from 'src/user/email-login-key/email-login-key.module';
 import { UserModule } from 'src/user/user/user.module';
+import { EmailChangeModule } from 'src/user/email-change/email-change.module';
 
 @Module({
-  imports: [UserModule, EmailLoginKeyModule,
+  imports: [UserModule, EmailLoginKeyModule, EmailChangeModule,
     JwtModule.registerAsync({
       useFactory: async (configService: ConfigService) => {
         const expiration = configService.get<number>('jwt.expiration')

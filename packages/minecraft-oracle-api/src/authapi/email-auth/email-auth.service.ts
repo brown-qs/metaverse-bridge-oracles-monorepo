@@ -10,6 +10,7 @@ import { EmailLoginKeyService } from 'src/user/email-login-key/email-login-key.s
 import { EmailLoginKeyEntity } from 'src/user/email-login-key/email-login-key.entity';
 import { UserService } from 'src/user/user/user.service';
 import { UserEntity } from 'src/user/user/user.entity';
+import { EmailChangeService } from 'src/user/email-change/email-change.service';
 @Injectable()
 export class EmailAuthService {
     private readonly context: string;
@@ -19,6 +20,7 @@ export class EmailAuthService {
     constructor(
         private userService: UserService,
         private emailLoginKeyService: EmailLoginKeyService,
+        private emailChangeService: EmailChangeService,
         private configService: ConfigService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
@@ -161,9 +163,12 @@ export class EmailAuthService {
                 throw new Error("User with login key not found")
             }
         } catch (err) {
-            this.logger.error(`sendAuthEmail: login key is not in database: ${loginKey}`, err, this.context)
+            this.logger.error(`verifyAuthLink: login key is not in database: ${loginKey}`, err, this.context)
             throw new UnprocessableEntityException(`loginKey invalid`)
         }
+
+
+
 
         const keyGenerationTime = loginKeyEntity.keyGenerationDate.getTime()
 
@@ -185,13 +190,26 @@ export class EmailAuthService {
 
         let user
         if (loginKeyEntity.changeUuid) {
-            this.logger.debug(`verifyAuthLink: change uuid ${loginKeyEntity.changeUuid} to email ${loginKeyEntity.email}`, this.context)
+            let userBeforeUpdate
+            try {
+                userBeforeUpdate = await this.userService.findByUuid(loginKeyEntity.changeUuid)
+            } catch (err) {
+                this.logger.error(`verifyAuthLink: cant find user uuid ${loginKeyEntity.changeUuid} in database`, err, this.context)
+                throw new UnprocessableEntityException(`Can't find existing user with uuid`)
+
+            }
+            const oldEmail = userBeforeUpdate.email.toLowerCase().trim()
+
+            this.logger.debug(`verifyAuthLink: change uuid email ${loginKeyEntity.changeUuid} ${oldEmail} > ${loginKeyEntity.email}`, this.context)
             try {
                 await this.userService.update({ uuid: loginKeyEntity.changeUuid }, { email: loginKeyEntity.email.toLowerCase().trim() })
             } catch (err) {
                 this.logger.error(`sendAuthChangeEmail: failed to update uuid: ${loginKeyEntity.changeUuid} to email: ${loginKeyEntity.email.toLowerCase().trim()}`, err, this.context)
                 throw new UnprocessableEntityException(`loginKey failure`)
             }
+
+            //log email change
+            await this.emailChangeService.create(loginKeyEntity.changeUuid, oldEmail, loginKeyEntity.email.toLowerCase().trim())
             user = await this.userService.findByEmail(loginKeyEntity.email.toLowerCase().trim())
         } else {
             user = await this.userService.createEmail(loginKeyEntity.email.toLowerCase().trim())

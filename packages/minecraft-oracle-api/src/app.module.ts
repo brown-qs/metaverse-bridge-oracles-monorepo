@@ -83,6 +83,12 @@ import { EmailLoginKeyEntity } from './user/email-login-key/email-login-key.enti
 import { EmailLoginKeyModule } from './user/email-login-key/email-login-key.module';
 import { KiltDidEmailModule } from './user/kilt-did-email/kilt-did-email.module';
 import { KiltDidEmailEntity } from './user/kilt-did-email/kilt-did-email.entity';
+import { MinecraftUuidUserNameEntity } from './user/minecraft-uuid-user-name/minecraft-uuid-user-name.entity';
+import { MinecraftUuidUserNameModule } from './user/minecraft-uuid-user-name/minecraft-uuid-user-name.module';
+import { EmailChangeModule } from './user/email-change/email-change.module';
+import { MinecraftLinkModule } from './user/minecraft-link/minecraft-link.module';
+import { MinecraftLinkEntity } from './user/minecraft-link/minecraft-link.entity';
+import { EmailChangeEntity } from './user/email-change/email-change.entity';
 @Module({
     imports: [
         ConfigModule.forRoot({
@@ -114,6 +120,9 @@ import { KiltDidEmailEntity } from './user/kilt-did-email/kilt-did-email.entity'
                 password: configService.get<string>('typeorm.password'),
                 database: configService.get<string>('typeorm.database'),
                 entities: [
+                    EmailChangeEntity,
+                    MinecraftLinkEntity,
+                    MinecraftUuidUserNameEntity,
                     KiltDidEmailEntity,
                     KiltSessionEntity,
                     EmailLoginKeyEntity,
@@ -166,6 +175,9 @@ import { KiltDidEmailEntity } from './user/kilt-did-email/kilt-did-email.entity'
             ],
             inject: [ConfigService]
         }),
+        EmailChangeModule,
+        MinecraftLinkModule,
+        MinecraftUuidUserNameModule,
         AccountModule,
         PlaySessionModule,
         CronModule,
