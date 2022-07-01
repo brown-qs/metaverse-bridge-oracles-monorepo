@@ -19,4 +19,7 @@ export class KiltDidEmailEntity {
 
     @Column()
     email: string;
+
+    @CreateDateColumn()
+    createdAt: Date;
 }
