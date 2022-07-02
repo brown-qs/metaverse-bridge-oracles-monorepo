@@ -17,7 +17,7 @@ import { Redirect } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
 const AccountPage = () => {
   const { authData, setAuthData } = useAuth();
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [failureMessage, setFailureMessage] = useState("")
   let history = useHistory();
 
@@ -33,7 +33,7 @@ const AccountPage = () => {
         },
       });
       console.log("SETTING AUTH DATA")
-      setAuthData({ ...authData, emailUser: result.data })
+      setAuthData(oldAuthData => ({ ...oldAuthData, emailUser: result.data }))
     } catch (e) {
       const err = e as AxiosError;
 
