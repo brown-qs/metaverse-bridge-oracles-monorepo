@@ -406,9 +406,8 @@ export const useTokenStaticDataCallbackArrayWithChains = () => {
         : undefined;
         if (!address) return;
         if (calls[chainId]?.length && RPC_URLS[chainId]) {
-          const result = await tryMultiCallCore(multi(address, chainId), calls[chainId]);
+          const result = await tryMultiCallCore(multi(address, chainId), calls[chainId], false);
           if (result) results = [...results, ...result];
-
         }
       })
     );

@@ -81,7 +81,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
     //In Game Items
     const inGameItems = useInGameItems(fetchtrigger);
-    const inGameAssets = inGameItems?.assets ?? [];
+    const inGameAssets = (inGameItems?.assets ?? []).filter(x => x.assetAddress.length === 42);
     const inGameResources = inGameItems?.resources ?? []
     const inGameTextures: InGameTexture[] = inGameItems?.textures ?? []
 
