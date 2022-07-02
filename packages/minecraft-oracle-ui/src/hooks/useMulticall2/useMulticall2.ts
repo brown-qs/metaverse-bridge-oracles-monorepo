@@ -131,7 +131,14 @@ export const tryMultiCallCore = async (
         return undefined;
       }
       const itfinnter = new Interface(calls[i][0]);
-      return itfinnter.decodeFunctionResult(calls[i][2], resfrag[1]);
+      //console.log('resfrag', i, resfrag)
+
+      if (resfrag[1] !== '0x') {
+        return itfinnter.decodeFunctionResult(calls[i][2], resfrag[1]);
+      }
+
+      return undefined;
+      
     });
     return retval;
   } catch (e) {
