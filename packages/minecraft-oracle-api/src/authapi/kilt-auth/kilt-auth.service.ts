@@ -7,7 +7,6 @@ import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { WalletLoginMessage } from './dtos';
 import { KiltSessionService } from 'src/kilt-session/kilt-session.service';
 import { KiltSessionEntity } from 'src/kilt-session/kilt-session.entity';
-import { decryptChallenge, encryptionKeystore, getEncryptionKey, getFullDid } from 'src/kilt-session/helpers';
 import { KiltDidEmailService } from 'src/user/kilt-did-email/kilt-did-email.service';
 import { UserService } from 'src/user/user/user.service';
 import { UserEntity } from 'src/user/user/user.entity';
@@ -16,6 +15,17 @@ import { UserEntity } from 'src/user/user/user.entity';
 @Injectable()
 export class KiltAuthService {
     private readonly context: string;
+    private encryptionKeyStore: {
+        encrypt({ data, alg, peerPublicKey }: any): Promise<{
+            data: Uint8Array;
+            alg: any;
+            nonce: Uint8Array;
+        }>, decrypt({ data, alg, nonce, peerPublicKey }: any): Promise<{
+            data: Uint8Array;
+            alg: any;
+        }>
+    };
+    initKiltPromise: Promise<void>;
 
     constructor(
         private kiltDidEmailService: KiltDidEmailService,
@@ -26,21 +36,115 @@ export class KiltAuthService {
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
         this.context = KiltAuthService.name;
-
+        this.initKiltPromise = this.initKilt()
     }
 
-    async initKilt() {
+    private async initKilt() {
         await cryptoWaitReady()
         await init({ address: this.configService.get<string>('kilt.wssAddress') })
         await connect()
     }
 
+
+    //calling this.keypairs() doesn't work but calling the exact same function defined outside the class works ???
+    private async keypairs() {
+        await cryptoWaitReady()
+        const signingKeyPairType = 'sr25519'
+        const keyring = new Utils.Keyring({
+            ss58Format: 38,
+            type: signingKeyPairType,
+        })
+        const account = keyring.addFromMnemonic(process.env.KILT_VERIFIER_MNEMONIC)
+        const keypairs = {
+            authentication: account.derive('//did//0'),
+            assertion: account.derive('//did//assertion//0'),
+            keyAgreement: (function () {
+                const secretKeyPair = sr25519PairFromSeed(mnemonicToMiniSecret(process.env.KILT_VERIFIER_MNEMONIC))
+                const { path } = keyExtractPath('//did//keyAgreement//0')
+                const { secretKey } = keyFromPath(secretKeyPair, path, 'sr25519')
+                const blake = blake2AsU8a(secretKey)
+                const boxPair = naclBoxPairFromSecret(blake)
+                return {
+                    ...boxPair,
+                    type: 'x25519',
+                }
+            })(),
+        }
+        return keypairs
+    }
+
+    private async getEncrpytionKeyStore() {
+        if (!this.encryptionKeyStore) {
+            this.encryptionKeyStore = {
+                async encrypt({ data, alg, peerPublicKey }: any) {
+                    const keypair = await keypairs()
+                    const { sealed, nonce } = naclSeal(
+                        data,
+                        keypair.keyAgreement.secretKey,
+                        peerPublicKey
+                    )
+                    return { data: sealed, alg, nonce }
+                },
+                async decrypt({ data, alg, nonce, peerPublicKey }: any) {
+                    const keypair = await keypairs()
+
+                    const decrypted = naclOpen(
+                        data,
+                        nonce,
+                        peerPublicKey,
+                        keypair.keyAgreement.secretKey
+                    )
+                    if (!decrypted) throw new Error('Failed to decrypt with given key')
+                    return { data: decrypted, alg }
+                },
+            }
+        }
+
+        return this.encryptionKeyStore
+    }
+
+    private async decryptChallenge(
+        encryptedChallenge: string,
+        encryptionKey: { publicKey: Uint8Array },
+        nonce: string
+    ) {
+        // decrypt the challenge
+        const data = Utils.Crypto.coToUInt8(encryptedChallenge)
+        const nonced = Utils.Crypto.coToUInt8(nonce)
+
+        const peerPublicKey = encryptionKey.publicKey
+
+        const keypair = await keypairs()
+        const decrypted = naclOpen(
+            data,
+            nonced,
+            peerPublicKey,
+            keypair.keyAgreement.secretKey
+        )
+        // compare hex strings, fail if mismatch
+        return Utils.Crypto.u8aToHex(decrypted)
+    }
+
+    private async getFullDid() {
+        //TODO: don't cast as DidUri, do proper checks to make sure it is a the valid string format
+        const fullDid = await Did.FullDidDetails.fromChainInfo(process.env.KILT_VERIFIER_DID_URI as DidUri)
+        return fullDid
+    }
+
+
+    private async getEncryptionKey(encryptionKeyId: DidResourceUri) {
+        await this.initKiltPromise
+        const encryptionKey = await Did.DidResolver.resolveKey(encryptionKeyId);
+        return encryptionKey
+    }
+
+
     async getWalletSessionChallenge(): Promise<KiltSessionEntity> {
-        await this.initKilt()
+        await this.initKiltPromise
         await cryptoWaitReady()
         await init({ address: this.configService.get<string>('kilt.wssAddress') })
         // create session data
-        const fullDid = await getFullDid()
+        const fullDid = await this.getFullDid()
 
         const dAppEncryptionKeyUri = fullDid.assembleKeyUri(fullDid.encryptionKey.id);
 
@@ -50,7 +154,7 @@ export class KiltAuthService {
 
 
     async verifyWalletSessionChallenge(encryptionKeyUri: DidResourceUri, encryptedWalletSessionChallenge: string, nonce: string, sessionId: string) {
-        await this.initKilt()
+        await this.initKiltPromise
 
 
         const session = await this.kiltSessionService.findBySessionId(sessionId)
@@ -62,7 +166,7 @@ export class KiltAuthService {
         // load the encryption key
         let encryptionKey
         try {
-            encryptionKey = await getEncryptionKey(encryptionKeyUri)
+            encryptionKey = await this.getEncryptionKey(encryptionKeyUri)
 
         } catch (err) {
             this.logger.error(`kiltAuthVerifyChallenge:: failed resolving ${encryptionKeyUri}`, err, this.context)
@@ -71,7 +175,7 @@ export class KiltAuthService {
 
 
         // decrypt the message
-        const decrypted = await decryptChallenge(encryptedWalletSessionChallenge, encryptionKey, nonce);
+        const decrypted = await this.decryptChallenge(encryptedWalletSessionChallenge, encryptionKey, nonce);
         if (decrypted !== session.walletSessionChallenge) {
             this.logger.error(`kiltAuthVerifyChallenge:: challenge mismatch`, null, this.context)
             throw new UnprocessableEntityException
@@ -81,7 +185,7 @@ export class KiltAuthService {
     }
 
     async getWalletLoginChallenge(sessionId: string): Promise<IEncryptedMessage> {
-        await this.initKilt()
+        await this.initKiltPromise
 
         const session = await this.kiltSessionService.findBySessionId(sessionId)
         if (!session) {
@@ -114,18 +218,19 @@ export class KiltAuthService {
         const cTypes = [cType]
         const content = { cTypes, challenge: walletLoginChallenge } as any;
         const type = MessageBodyType.REQUEST_CREDENTIAL;
-        const didUri = process.env.KILT_VERIFIER_DID_URI as DidUri;
+        const didUri = this.configService.get<DidUri>('kilt.verifierDidUri');
         const keyDid = encryptionKeyUri.replace(/#.*$/, '') as DidUri;
         const message = new Message({ content, type }, didUri, keyDid);
         if (!message) {
             this.logger.error(`walletCredentialMessage:: failed to construct message`, null, this.context)
             throw new UnprocessableEntityException
         }
-        const fullDid = await getFullDid();
+        const fullDid = await this.getFullDid();
+        const encryptionKeyStore = await this.getEncrpytionKeyStore()
         // encrypt the message
         let output
         try {
-            output = await message.encrypt(fullDid.encryptionKey.id, fullDid, encryptionKeystore, encryptionKeyUri);
+            output = await message.encrypt(fullDid.encryptionKey.id, fullDid, encryptionKeyStore, encryptionKeyUri);
 
         } catch (e) {
             this.logger.error(`walletCredentialMessage:: unable to encrypt challege`, null, this.context)
@@ -143,7 +248,7 @@ export class KiltAuthService {
         return output
     }
     async verifyWalletLoginChallenge(sessionId: string, rawMessage: WalletLoginMessage): Promise<UserEntity> {
-        await this.initKilt()
+        await this.initKiltPromise
 
         const session = await this.kiltSessionService.findBySessionId(sessionId)
         if (!session) {
@@ -159,8 +264,9 @@ export class KiltAuthService {
         }
 
         // get decrypted message
-        const fullDid = await getFullDid();
-        const message = await Message.decrypt(rawMessage, encryptionKeystore, fullDid);
+        const fullDid = await this.getFullDid();
+        const encryptionKeyStore = await this.getEncrpytionKeyStore()
+        const message = await Message.decrypt(rawMessage, encryptionKeyStore, fullDid);
         const messageBody = message.body;
         const type = messageBody.type
         const content = messageBody.content as ICredential[]
@@ -207,5 +313,29 @@ export class KiltAuthService {
     }
 }
 
-
+async function keypairs() {
+    await cryptoWaitReady()
+    const signingKeyPairType = 'sr25519'
+    const keyring = new Utils.Keyring({
+        ss58Format: 38,
+        type: signingKeyPairType,
+    })
+    const account = keyring.addFromMnemonic(process.env.KILT_VERIFIER_MNEMONIC)
+    const keypairs = {
+        authentication: account.derive('//did//0'),
+        assertion: account.derive('//did//assertion//0'),
+        keyAgreement: (function () {
+            const secretKeyPair = sr25519PairFromSeed(mnemonicToMiniSecret(process.env.KILT_VERIFIER_MNEMONIC))
+            const { path } = keyExtractPath('//did//keyAgreement//0')
+            const { secretKey } = keyFromPath(secretKeyPair, path, 'sr25519')
+            const blake = blake2AsU8a(secretKey)
+            const boxPair = naclBoxPairFromSecret(blake)
+            return {
+                ...boxPair,
+                type: 'x25519',
+            }
+        })(),
+    }
+    return keypairs
+}
 
