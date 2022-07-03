@@ -111,14 +111,14 @@ const AccountPage = () => {
 
       <Stack direction="column" alignItems='center' textAlign='center' spacing={1} marginTop={2}>
         <Box>
-          <Button disableRipple style={{ maxWidth: '175px', width: '175px', minWidth: '175px' }} onClick={() => { handleLogout() }} variant="contained">Logout</Button>
+          <Button disableElevation disableRipple style={{ maxWidth: '175px', width: '175px', minWidth: '175px' }} onClick={() => { handleLogout() }} variant="contained">Logout</Button>
         </Box>
       </Stack>
       <Stack direction="column" alignItems='center' textAlign='center' spacing={1} marginTop={5}>
         <Box>Linked Minecraft Account</Box>
         <Box>{authData.userProfile?.minecraftUuid
-          ? <Button disableRipple style={{ maxWidth: '175px', width: '175px', minWidth: '175px' }} onClick={() => { handleMinecraftUnlink() }} variant="contained">Unlink Minecraft</Button>
-          : <Button disableRipple style={{ maxWidth: '175px', width: '175px', minWidth: '175px' }} onClick={() => { handleMinecraftLink() }} variant="contained">Link Minecraft</Button>}
+          ? <Button disableElevation disableRipple style={{ maxWidth: '175px', width: '175px', minWidth: '175px' }} onClick={() => { handleMinecraftUnlink() }} variant="contained">Unlink Minecraft</Button>
+          : <Button disableElevation disableRipple style={{ maxWidth: '175px', width: '175px', minWidth: '175px' }} onClick={() => { handleMinecraftLink() }} variant="contained">Link Minecraft</Button>}
         </Box>
       </Stack>
 

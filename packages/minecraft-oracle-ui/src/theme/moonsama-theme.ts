@@ -187,32 +187,8 @@ export const moonsamaTheme = (colors: PaletteOptions): ThemeOptions => {
         }
       },
       MuiButton: {
-        defaultProps: {
-          disableRipple: true,
-        },
         styleOverrides: {
           root: {
-
-            boxShadow: 'none',
-            borderRadius: 4,
-            textTransform: 'none',
-            height: defaultTheme.spacing(5),
-            fontSize: defaultTheme.typography.fontSize,
-            background: "#234b52",
-            border: "1px solid #234b52",
-            "&:hover": {
-              transition: "none",
-              boxShadow: 'none',
-              border: "1px solid #0EEBA8",
-              background: "#234b52"
-            },
-
-            "&.Mui-focusVisible": {
-              boxShadow: "none"
-            },
-            "&.Mui-active": {
-              boxShadow: "none"
-            }
           },
           outlinedPrimary: {
             color: 'white',
@@ -224,10 +200,22 @@ export const moonsamaTheme = (colors: PaletteOptions): ThemeOptions => {
             },
           },
           contained: {
+            borderRadius: 4,
+            textTransform: 'none',
+            height: defaultTheme.spacing(5),
+            fontSize: defaultTheme.typography.fontSize,
+            background: "#234b52",
+            border: "1px solid #234b52",
             '&.Mui-disabled': {
               backgroundColor: "#162e32",
               border: "1px solid #162e32",
               color: "#a9a9a9"
+            },
+            "&:hover": {
+              transition: "none",
+              boxShadow: 'none',
+              border: "1px solid #0EEBA8",
+              background: "#234b52"
             },
           },
         },
