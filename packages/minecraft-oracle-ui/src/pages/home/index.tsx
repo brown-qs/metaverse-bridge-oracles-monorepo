@@ -18,7 +18,7 @@ const HomePage = () => {
   const [minecraftWarningOpen, setMinecraftWarningOpen] = React.useState(false);
   const { authData } = useAuth();
   const hasAuth = !!authData?.jwt
-  const hasMinecraft = !!authData?.emailUser?.minecraftUuid
+  const hasMinecraft = !!authData?.userProfile?.minecraftUuid
   let history = useHistory();
 
   const {

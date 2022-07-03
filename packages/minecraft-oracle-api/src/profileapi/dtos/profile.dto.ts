@@ -8,13 +8,13 @@ export class ProfileDto {
     uuid: string
 
     @ApiProperty({ description: 'Email' })
-    email?: string
+    email: string | null
 
     @ApiProperty({ description: 'Mincraft UUID' })
-    minecraftUuid?: string
+    minecraftUuid: string | null
 
     @ApiProperty({ description: 'Minecraft user name' })
-    minecraftUserName?: string
+    minecraftUserName: string | null
 
     @ApiProperty({ description: 'Server Id' })
     serverId: string

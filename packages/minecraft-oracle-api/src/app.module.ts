@@ -76,7 +76,6 @@ import { ResourceInventoryOffsetModule } from './resourceinventoryoffset/resourc
 import { EmailAuthModule } from './authapi/email-auth/email-auth.module';
 import { KiltAuthModule } from './authapi/kilt-auth/kilt-auth.module';
 import { MinecraftAuthModule } from './authapi/minecraft-auth/minecraft-auth.module';
-import { AccountModule } from './account/account.module';
 import { KiltSessionModule } from './kilt-session/kilt-session.module';
 import { KiltSessionEntity } from './kilt-session/kilt-session.entity';
 import { EmailLoginKeyEntity } from './user/email-login-key/email-login-key.entity';
@@ -178,7 +177,6 @@ import { EmailChangeEntity } from './user/email-change/email-change.entity';
         EmailChangeModule,
         MinecraftLinkModule,
         MinecraftUuidUserNameModule,
-        AccountModule,
         PlaySessionModule,
         CronModule,
         ProviderModule,
@@ -219,7 +217,6 @@ import { EmailChangeEntity } from './user/email-change/email-change.entity';
         ResourceInventoryModule,
         ResourceInventoryOffsetModule,
         CompositeApiModule,
-        AccountModule,
         KiltSessionModule,
         KiltDidEmailModule
     ],
