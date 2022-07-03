@@ -5,35 +5,11 @@ import { useActiveWeb3React, useAuth } from 'hooks';
 import { useBlockNumber } from 'state/application/hooks';
 
 
-export function useProfileCallback() {
-    const { authData, setAuthData } = useAuth()
-    return useCallback(async (jwt: string) => {
-        const headers = { Authorization: `Bearer ${jwt}` }
-        try {
-            const resp = await axios.request<ProfileContextType>({
-                method: 'get',
-                url: `${process.env.REACT_APP_BACKEND_API_URL}/user/profile`,
-                headers: headers
-            });
-            setAuthData({
-                jwt: authData?.jwt,
-                emailUser: authData?.emailUser,
-                userProfile: authData?.userProfile
-            })
-            return resp.data
-        } catch (e) {
-            console.error('Error fetching user profile', e);
-            return undefined
-        }
-    }, [authData?.jwt])
-}
-
 export function useProfile() {
     const { authData, setAuthData } = useAuth()
     const blocknumber = useBlockNumber()
 
     const { jwt } = authData ?? {}
-    const minecraftUuid = authData?.emailUser?.minecraftUuid
 
     const cb = useCallback(async () => {
         if (!jwt) {
@@ -52,7 +28,6 @@ export function useProfile() {
             });
             setAuthData({
                 jwt: authData?.jwt,
-                emailUser: authData?.emailUser,
                 userProfile: resp?.data
             })
         } catch (e) {
@@ -64,11 +39,11 @@ export function useProfile() {
             };
             console.error('Error fetching user profile', e);
         }
-    }, [jwt, blocknumber, minecraftUuid])
+    }, [jwt, blocknumber])
 
     useEffect(() => {
         cb()
-    }, [jwt, blocknumber, minecraftUuid])
+    }, [jwt, blocknumber])
 
     return authData?.userProfile
 }
