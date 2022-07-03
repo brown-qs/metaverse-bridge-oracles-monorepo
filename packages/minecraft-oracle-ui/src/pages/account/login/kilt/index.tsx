@@ -67,7 +67,7 @@ const KiltLoginPage = () => {
   return (
     <AuthLayout title="Kilt Login" loading={false} alert={alert} handleAlertClose={handleAlertClose}>
       <Stack alignItems="center">
-        <LoadingButton disableRipple loading={isLoading} variant="contained" onClick={() => handleLogin()}>KILT Login</LoadingButton>
+        <LoadingButton disableElevation disableRipple loading={isLoading} variant="contained" onClick={() => handleLogin()}>KILT Login</LoadingButton>
       </Stack>
     </AuthLayout >
   );

@@ -85,7 +85,7 @@ const EmailChangePage = () => {
           submitEmail(email)
         }
       }} onChange={(event) => { setEmail(event.target.value) }} label="New Email" variant="standard" />
-      <LoadingButton loading={isLoading} disabled={!isValidEmail(email)} onClick={(e) => submitEmail(email)} disableRipple variant="contained">Change Email</LoadingButton>
+      <LoadingButton disableRipple disableElevation loading={isLoading} disabled={!isValidEmail(email)} onClick={(e) => submitEmail(email)} variant="contained">Change Email</LoadingButton>
     </Stack >
   }
 
