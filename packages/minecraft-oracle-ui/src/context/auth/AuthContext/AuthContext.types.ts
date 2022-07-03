@@ -6,10 +6,10 @@ export enum UserRole {
 
 export type ProfileContextType = {
   uuid: string,
-  email?: string,
-  minecraftUuid?: string,
+  email: string | null,
+  minecraftUuid: string | null,
   hasGame: boolean,
-  minecraftUserName?: string,
+  minecraftUserName: string | null,
   role: UserRole,
   allowedToPlay: boolean,
   serverId: boolean | null,
@@ -18,13 +18,6 @@ export type ProfileContextType = {
   numMoonsama: number,
   allowedToPlayReason: string,
   blacklisted: boolean
-}
-
-export type AccountContextType = {
-  id: string,
-  provider: string,
-  email?: string,
-  minecraftUuid: string | null,
 }
 
 export type AuthData = { jwt?: string, userProfile?: ProfileContextType } | undefined

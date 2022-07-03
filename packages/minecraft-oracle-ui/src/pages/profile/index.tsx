@@ -112,7 +112,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                 <Stack direction='row' display='flex' justifyContent='space-between' alignItems={'baseline'}>
                     <div style={{ fontSize: '38px', fontFamily: `VT323, 'arial'`, textAlign: 'left' }}>Available skins</div>
                     <div style={{ textAlign: 'right' }}>
-                        <span style={{ fontSize: '22px' }}>Welcome back {authData?.userProfile?.userName},</span>
+                        <span style={{ fontSize: '22px' }}>Welcome back {authData?.userProfile?.email},</span>
                         <br />
                         {profile?.allowedToPlay ? (
                             <Tooltip placement='bottom' title={playAllowedReasonTexts[profile.allowedToPlayReason] ?? playAllowedReasonTexts['DEFAULT']}>

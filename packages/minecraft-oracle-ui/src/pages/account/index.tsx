@@ -26,14 +26,13 @@ const AccountPage = () => {
     try {
       const result = await axios({
         method: 'get',
-        url: `${process.env.REACT_APP_BACKEND_API_URL}/account`,
+        url: `${process.env.REACT_APP_BACKEND_API_URL}/user/profile`,
         headers: {
           "Authorization": `Bearer ${authData?.jwt}`,
           "Content-Type": "application/json"
         },
       });
-      console.log("SETTING AUTH DATA")
-      setAuthData(oldAuthData => ({ ...oldAuthData, emailUser: result.data }))
+      setAuthData(oldAuthData => ({ jwt: oldAuthData?.jwt, userProfile: result.data }))
     } catch (e) {
       const err = e as AxiosError;
 
@@ -74,9 +73,9 @@ const AccountPage = () => {
         },
       });
       if (result?.data?.jwt) {
-        if (authData && authData.emailUser) {
+        if (authData && authData.userProfile) {
           //remove minecraft uuid
-          setAuthData({ ...authData, emailUser: { ...authData.emailUser, minecraftUuid: null } })
+          setAuthData({ ...authData, userProfile: { ...authData.userProfile, minecraftUuid: null } })
         }
         history.push(`/auth/${result?.data?.jwt}`)
       }
@@ -106,7 +105,7 @@ const AccountPage = () => {
     }
 
     return <Stack direction="column" alignItems='center' textAlign='center' spacing={0}>
-      <Chip color="info" icon={<PersonIcon />} label={authData?.emailUser?.email} onDelete={() => { history.push(`/account/login/email/change`) }}
+      <Chip color="info" icon={<PersonIcon />} label={authData?.userProfile?.email} onDelete={() => { history.push(`/account/login/email/change`) }}
         deleteIcon={<Edit />}></Chip>
 
 
@@ -117,7 +116,7 @@ const AccountPage = () => {
       </Stack>
       <Stack direction="column" alignItems='center' textAlign='center' spacing={1} marginTop={5}>
         <Box>Linked Minecraft Account</Box>
-        <Box>{authData.emailUser?.minecraftUuid
+        <Box>{authData.userProfile?.minecraftUuid
           ? <Button disableRipple style={{ maxWidth: '175px', width: '175px', minWidth: '175px' }} onClick={() => { handleMinecraftUnlink() }} variant="contained">Unlink Minecraft</Button>
           : <Button disableRipple style={{ maxWidth: '175px', width: '175px', minWidth: '175px' }} onClick={() => { handleMinecraftLink() }} variant="contained">Link Minecraft</Button>}
         </Box>

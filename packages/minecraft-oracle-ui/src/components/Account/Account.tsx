@@ -41,7 +41,6 @@ export const Account = () => {
   const handleLogout = () => {
     setAuthData({
       jwt: undefined,
-      emailUser: undefined,
       userProfile: undefined
     })
   };
@@ -85,7 +84,7 @@ export const Account = () => {
           'Connect Wallet'
         )}
       </Button>
-      {!!authData && !!authData.emailUser &&
+      {!!authData && !!authData.userProfile &&
         (
           <>
             <Button
@@ -96,7 +95,7 @@ export const Account = () => {
               <div style={{ fontSize: 0, margin: '0 8px' }}>
                 <PersonSharpIcon />
               </div>
-              {`${authData?.emailUser?.email}`}
+              {`${authData?.userProfile?.email}`}
             </Button>
             <Popover
               id={id}
