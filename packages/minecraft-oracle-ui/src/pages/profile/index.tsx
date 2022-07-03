@@ -107,7 +107,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const assetCounter = countGamePassAssets(inGameAssets)
     const hasImportedTicket = assetCounter.ticketNum > 0
     return (
-        <Container className={profileContainer} maxWidth='xl' sx={{ backgroundColor: "black", height: "100vh" }}>
+        <Container className={profileContainer} maxWidth={false} sx={{ backgroundColor: "black", height: "100vh" }}>
             <Stack justifyContent="center" style={{ marginTop: '30px', minWidth: '90%', maxWidth: '90%' }} spacing={theme.spacing(4)}>
                 <Stack direction='row' display='flex' justifyContent='space-between' alignItems={'baseline'}>
                     <div style={{ fontSize: '38px', fontFamily: `VT323, 'arial'`, textAlign: 'left' }}>Available skins</div>
