@@ -67,14 +67,6 @@ export class MinecraftAuthController {
         const result = await this.authApiService.authLogin(query.code, query.jwt);
         this.logger.debug(`Response result: ${JSON.stringify(result)}`, this.context)
 
-        try {
-            //TO DO MIGRATE MINECRAFT ACCOUNT TO EMAIL
-            //  await this.userService.setMinecraftUuidById(emailUserId, minecraftUuid)
-
-        } catch (e) {
-            throw new UnprocessableEntityException()
-        }
-
         const payload: UserJwtPayload = { sub: result.user.uuid, minecraftUuid: result.user.minecraftUuid };
         const jwtToken = this.jwtService.sign(payload);
 
