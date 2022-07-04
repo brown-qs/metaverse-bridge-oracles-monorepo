@@ -18,6 +18,8 @@ import { PlayerAchievementEntity } from 'src/playerachievement/playerachievement
 import { PlayerGameItemEntity } from 'src/playergameitem/playergameitem.entity';
 import { PlayerScoreEntity } from 'src/playerscore/playerscore.entity';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
+import { MinecraftLinkEntity } from '../minecraft-link/minecraft-link.entity';
+import { MinecraftLinkEvent } from 'src/common/enums/MinecraftLinkEvent';
 @Injectable()
 export class UserService {
     context: string;
@@ -128,7 +130,7 @@ export class UserService {
 
                 //
             } else {
-                //minecraft user has been migrated to an email
+                //minecraft user has been migrated to an email before
                 if (typeof existingMinecraft.email === "string") {
                     //safety check, uuid and minecraftUuid should be different
                     if (existingMinecraft.uuid === existingMinecraft.minecraftUuid) {
@@ -138,7 +140,12 @@ export class UserService {
 
                     //no need to migrate anything, just remove from existing user 
                     await queryRunner.manager.update(UserEntity, { minecraftUuid }, { minecraftUuid: null, minecraftUserName: null, hasGame: false })
+                    const newUser = await queryRunner.manager.findOne(UserEntity, { uuid: userUuid })
 
+                    //log the mc unlink, the user is old user who had the mc account linked, and the initiator is the new user who is linking
+                    const mcLink = queryRunner.manager.create(MinecraftLinkEntity, { minecraftUuid, user: existingMinecraft, initiator: newUser, event: MinecraftLinkEvent.UNLINK })
+                    await queryRunner.manager.save(MinecraftLinkEntity, mcLink)
+                    queryRunner.manager.create(MinecraftLinkEntity, { minecraftUuid, user: existingMinecraft, initiator: newUser, event: MinecraftLinkEvent.UNLINK })
                     //minecraft user has never been migrated
                 } else {
                     //safety check, uuid and minecraftUuid should be same for unmigrated minecraft users
