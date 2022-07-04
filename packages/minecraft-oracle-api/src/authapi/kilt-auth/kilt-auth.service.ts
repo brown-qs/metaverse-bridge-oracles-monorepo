@@ -305,11 +305,11 @@ export class KiltAuthService {
 
         this.logger.debug(`"successfully logged in kilt as: ${email}`, this.context)
 
-        //clean up session
-        await this.kiltSessionService.remove(session)
         //log did/email association
         await this.kiltDidEmailService.create(email.toLowerCase().trim(), did)
-        return await this.userService.createEmail(email.toLowerCase().trim())
+        const user = await this.userService.createEmail(email.toLowerCase().trim())
+        await this.kiltSessionService.update({ sessionId }, { user, email: email.toLowerCase().trim() })
+        return user
     }
 }
 

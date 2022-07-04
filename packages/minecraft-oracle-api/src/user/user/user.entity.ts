@@ -19,6 +19,7 @@ import { PlayerGameItemEntity } from '../../playergameitem/playergameitem.entity
 import { ResourceInventoryEntity } from '../../resourceinventory/resourceinventory.entity';
 import { EmailChangeEntity } from '../email-change/email-change.entity';
 import { MinecraftLinkEntity } from '../minecraft-link/minecraft-link.entity';
+import { KiltSessionEntity } from 'src/kilt-session/kilt-session.entity';
 
 @Entity()
 export class UserEntity {
@@ -140,6 +141,9 @@ export class UserEntity {
 
     @OneToMany(() => MinecraftLinkEntity, (minecraftLink) => minecraftLink.initiator)
     minecraftLinkInitiations: MinecraftLinkEntity[]
+
+    @OneToMany(() => KiltSessionEntity, (kiltSession) => kiltSession.user)
+    kiltSessions: KiltSessionEntity[]
 }
 
 function guid() { function s4() { return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1); } return s4() + s4() + "-" + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4(); }
