@@ -4,15 +4,19 @@ import {
     IsNumber,
     IsString
 } from 'class-validator';
-import { Column, CreateDateColumn, Entity, Index, JoinColumn, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { UserEntity } from '../user/user.entity';
 
 @Entity()
 export class EmailChangeEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
-    userUuid: string;
+    @ManyToOne(() => UserEntity, (user) => user.emailChanges)
+    user: UserEntity
+
+    @ManyToOne(() => UserEntity, (user) => user.emailChangeInitiations)
+    initiator: UserEntity
 
     @Column()
     oldEmail: string;

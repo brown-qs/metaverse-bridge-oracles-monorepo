@@ -5,15 +5,19 @@ import {
     IsString
 } from 'class-validator';
 import { MinecraftLinkEvent } from 'src/common/enums/MinecraftLinkEvent';
-import { Column, CreateDateColumn, Entity, Index, JoinColumn, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { UserEntity } from '../user/user.entity';
 
 @Entity()
 export class MinecraftLinkEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
-    userUuid: string;
+    @ManyToOne(() => UserEntity, (user) => user.minecraftLinks)
+    user: UserEntity
+
+    @ManyToOne(() => UserEntity, (user) => user.minecraftLinkInitiations)
+    initiator: UserEntity
 
     @Column()
     minecraftUuid: string;
@@ -24,6 +28,9 @@ export class MinecraftLinkEntity {
         enum: MinecraftLinkEvent,
     })
     event: MinecraftLinkEvent;
+
+    @Column()
+    initiatorUuid: string
 
     @CreateDateColumn()
     createdAt: Date;

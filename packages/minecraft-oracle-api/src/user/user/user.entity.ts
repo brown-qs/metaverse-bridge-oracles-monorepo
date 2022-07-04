@@ -17,12 +17,10 @@ import { SnaplogEntity } from '../../snaplog/snaplog.entity';
 import { PlayerScoreEntity } from '../../playerscore/playerscore.entity';
 import { PlayerGameItemEntity } from '../../playergameitem/playergameitem.entity';
 import { ResourceInventoryEntity } from '../../resourceinventory/resourceinventory.entity';
+import { EmailChangeEntity } from '../email-change/email-change.entity';
+import { MinecraftLinkEntity } from '../minecraft-link/minecraft-link.entity';
 
 @Entity()
-@Index(['uuid'], { unique: true })
-@Index(['minecraftUuid'], { unique: true })
-@Index(['email'], { unique: true })
-
 export class UserEntity {
     constructor(user: Partial<UserEntity>) {
         Object.assign(this, user);
@@ -130,6 +128,18 @@ export class UserEntity {
 
     @OneToMany(() => PlayerScoreEntity, (score) => score.player)
     scores?: PlayerScoreEntity[];
+
+    @OneToMany(() => EmailChangeEntity, (emailChange) => emailChange.user)
+    emailChanges: EmailChangeEntity[]
+
+    @OneToMany(() => EmailChangeEntity, (emailChange) => emailChange.initiator)
+    emailChangeInitiations: EmailChangeEntity[]
+
+    @OneToMany(() => MinecraftLinkEntity, (minecraftLink) => minecraftLink.user)
+    minecraftLinks: MinecraftLinkEntity[]
+
+    @OneToMany(() => MinecraftLinkEntity, (minecraftLink) => minecraftLink.initiator)
+    minecraftLinkInitiations: MinecraftLinkEntity[]
 }
 
 function guid() { function s4() { return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1); } return s4() + s4() + "-" + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4(); }
