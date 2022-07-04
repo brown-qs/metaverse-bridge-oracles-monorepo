@@ -79,6 +79,11 @@ export class UserService {
         return result;
     }
 
+    public async findByMinecraftUuid(minecraftUuid: string): Promise<UserEntity> {
+        const result: UserEntity = (await this.repository.findOne({ minecraftUuid }));
+        return result;
+    }
+
     public async findOne(params: FindConditions<UserEntity>, options?: FindOneOptions<UserEntity>): Promise<UserEntity> {
         const result: UserEntity = await this.repository.findOne(params, options);
         return result;

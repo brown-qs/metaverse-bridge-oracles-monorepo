@@ -65,33 +65,30 @@ export class GameApiController {
     ) {
         this.context = GameApiController.name;
     }
+    @Get('player/:minecraftUuid/profileByMinecraftUuid')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Fetches user profile by minecraftUuid' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async profileByMinecraftUuid(@Param('minecraftUuid') minecraftUuid: string): Promise<ProfileDto> {
+        let user = await this.userService.findByMinecraftUuid(minecraftUuid)
+        if (!user) {
+            throw new UnprocessableEntityException('User was not found')
+        }
+        return this.profileService.userProfile(user)
+    }
+
 
     @Get('player/:uuid/profile')
     @HttpCode(200)
-    @ApiOperation({ summary: 'Fetches user profile' })
+    @ApiOperation({ summary: 'Fetches user profile by uuid' })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
     async profile(@Param('uuid') uuid: string): Promise<ProfileDto> {
         let user = await this.userService.findByUuid(uuid)
         if (!user) {
-            throw new UnprocessableEntityException('Player was not found')
+            throw new UnprocessableEntityException('User was not found')
         }
-        //no longer able to lazily create users like this because new users are only created with an email
-        /*
-        if (!user) {
-            const userData: UserEntity = {
-                uuid: uuid,
-                hasGame: false
-            }
-            let newUser: UserEntity
-            try {
-                newUser = await this.userService.create(userData)
-                user = await this.userService.findByUuid(uuid)
-            } catch (err) {
-                this.logger.error(`authLogin: error upserting user into database: ${JSON.stringify(userData)}`, err, this.context)
-                throw new UnprocessableEntityException(`Error upserting user into database: ${JSON.stringify(userData)}`)
-            }
-        }*/
         return this.profileService.userProfile(user)
     }
 
@@ -103,7 +100,7 @@ export class GameApiController {
     async textures(@Param('uuid') uuid: string): Promise<PlayerSkinDto[]> {
         const user = await this.userService.findByUuid(uuid)
         if (!user) {
-            throw new UnprocessableEntityException('Player was not found')
+            throw new UnprocessableEntityException('User was not found')
         }
         const skins = await this.gameApiService.getUserSkins(user)
         return skins
@@ -120,7 +117,7 @@ export class GameApiController {
     ): Promise<boolean> {
         const user = await this.userService.findByUuid(uuid)
         if (!user) {
-            throw new UnprocessableEntityException('Player was not found')
+            throw new UnprocessableEntityException('User was not found')
         }
         const success = await this.profileService.skinSelect(user, dto)
         return success
