@@ -99,7 +99,7 @@ export class MinecraftAuthService {
             }
 
             //log mc account linked & log mc name/uuid pair
-            await this.minecraftLinkService.link(userUuid, account.uuid)
+            await this.minecraftLinkService.link(userUuid, userUuid, account.uuid)
             await this.minecraftUuidUserNameService.create(account.uuid, account.username)
 
             this.logger.log(`Account: ${JSON.stringify(account)}`, this.context);
