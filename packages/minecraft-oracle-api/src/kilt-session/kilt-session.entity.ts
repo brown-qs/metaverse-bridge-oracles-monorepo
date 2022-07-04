@@ -5,7 +5,8 @@ import {
     IsNumber,
     IsString
 } from 'class-validator';
-import { Column, CreateDateColumn, Entity, Index, JoinColumn, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { UserEntity } from 'src/user/user/user.entity';
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 
 
@@ -42,6 +43,12 @@ export class KiltSessionEntity {
 
     @Column({ default: false, nullable: false })
     verified?: boolean;
+
+    @ManyToOne(() => UserEntity, (user) => user.kiltSessions, { nullable: true })
+    user: UserEntity
+
+    @Column({ default: null, nullable: true })
+    email: string;
 
     @CreateDateColumn()
     createdAt?: Date;
