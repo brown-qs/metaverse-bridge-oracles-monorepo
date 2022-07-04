@@ -17,6 +17,7 @@ export class MinecraftLinkEntity {
     user: UserEntity
 
     //typeorm will error out with constraint "FK_3d1d94c5f8343369466833a0b05" for relation "" already exists... if we have two relations to user on this table
+    //https://github.com/typeorm/typeorm/issues/9171
     @ManyToOne(() => UserEntity, (user) => user.minecraftLinkInitiations, { createForeignKeyConstraints: false })
     initiator: UserEntity
 
