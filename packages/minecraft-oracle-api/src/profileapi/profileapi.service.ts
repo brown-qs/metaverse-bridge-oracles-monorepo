@@ -79,6 +79,7 @@ export class ProfileApiService {
             const assetAddress = asset.collectionFragment.collection.assetAddress.toLowerCase()
             const recongizedEnraptureAsset = findRecognizedAsset(enrapturableAssets, { assetAddress, assetId: asset.assetId })
 
+            //an enraptured asset that is not a resource ... ie bait
             if (!!recongizedEnraptureAsset && recongizedEnraptureAsset.recognizedAssetType.valueOf() !== RecognizedAssetType.RESOURCE.valueOf()) {
                 assets.push({
                     amount: asset.amount,
@@ -97,6 +98,7 @@ export class ProfileApiService {
                 continue
             }
 
+            //assets that can be exported back to wallet
             const recongizedImportAsset = findRecognizedAsset(importableAssets, { assetAddress, assetId: asset.assetId })
 
             if (!!recongizedImportAsset) {
@@ -133,6 +135,7 @@ export class ProfileApiService {
 
 
         // TODO fixme
+        // James TODO: multiple minecraft accounts can be merged in, find one will hide further merges
         const bait = await this.resourceInventoryService.findOne({ owner: user }, { relations: ['owner', 'offset'] })
         if (!!bait) {
             const baitAsset = userAssets.find(x => x.assetId === bait.assetId && x.collectionFragment.recognizedAssetType.valueOf() === RecognizedAssetType.RESOURCE.valueOf())
