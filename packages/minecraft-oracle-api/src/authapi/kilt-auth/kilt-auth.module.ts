@@ -9,14 +9,12 @@ import { TextureModule } from 'src/texture/texture.module';
 import { KiltAuthService } from './kilt-auth.service';
 import { KiltAuthController } from './kilt-auth.controller';
 import { KiltSessionModule } from 'src/kilt-session/kilt-session.module';
-import { KiltDidEmailModule } from 'src/user/kilt-did-email/kilt-did-email.module';
 import { UserModule } from 'src/user/user/user.module';
 
 @Module({
   providers: [KiltAuthService],
   imports: [
     UserModule,
-    KiltDidEmailModule,
     KiltSessionModule,
     SecretModule,
     CacheModule,
