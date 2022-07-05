@@ -154,7 +154,7 @@ import { KiltSessionModule } from './user/kilt-session/kilt-session.module';
                     SyntheticItemEntity,
                     ResourceInventoryEntity,
                     ResourceInventoryOffsetEntity,
-                    UserAssetView
+                    UserAssetView,
                 ],
                 synchronize: configService.get<boolean>('typeorm.synchronize'),
                 logging: configService.get<boolean>('typeorm.logging'),
