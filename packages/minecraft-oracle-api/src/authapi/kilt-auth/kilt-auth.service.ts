@@ -179,7 +179,7 @@ export class KiltAuthService {
             throw new UnprocessableEntityException
         }
 
-        await this.kiltSessionService.update({ sessionId }, { encryptedDid: encryptionKey.controller, encryptionKeyUri, didConfirmed: true, updatedAt: new Date().getTime() })
+        await this.kiltSessionService.update({ sessionId }, { encryptedDid: encryptionKey.controller, encryptionKeyUri, didConfirmed: true, updatedAt: new Date() })
     }
 
     async getWalletLoginChallenge(sessionId: string): Promise<IEncryptedMessage> {
@@ -206,7 +206,7 @@ export class KiltAuthService {
         // set the challenge
         const walletLoginChallenge = Utils.UUID.generate();
         //TODO: i
-        await this.kiltSessionService.update({ sessionId }, { walletLoginChallenge, updatedAt: new Date().getTime() })
+        await this.kiltSessionService.update({ sessionId }, { walletLoginChallenge, updatedAt: new Date() })
 
         // construct the message
         const cType = {
@@ -299,12 +299,12 @@ export class KiltAuthService {
         }
 
 
-        await this.kiltSessionService.update({ sessionId }, { verified: true, did, updatedAt: new Date().getTime() })
+        await this.kiltSessionService.update({ sessionId }, { verified: true, did, updatedAt: new Date() })
 
         this.logger.debug(`"successfully logged in kilt as: ${email}`, this.context)
 
         const user = await this.userService.createEmail(email.toLowerCase().trim())
-        await this.kiltSessionService.update({ sessionId }, { user, email: email.toLowerCase().trim(), updatedAt: new Date().getTime() })
+        await this.kiltSessionService.update({ sessionId }, { user, email: email.toLowerCase().trim(), updatedAt: new Date() })
         return user
     }
 }
