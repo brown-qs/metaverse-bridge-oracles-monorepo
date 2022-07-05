@@ -146,5 +146,7 @@ export class UserEntity {
     kiltSessions: KiltSessionEntity[]
 }
 
+//resource_inventory_entity id example: 92e1e5635d684e1294c6c6cceb8c9b71-1285-0x1b30a3b5744e733d8d2f19f0812e3f79152a8777-14
+//first part is uuid, if we use hyphens in our uuids, we are screwing up hyphens as a separator in these ids
 const separator = ""
 function guid() { function s4() { return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1); } return s4() + s4() + separator + s4() + separator + s4() + separator + s4() + separator + s4() + s4() + s4(); }
