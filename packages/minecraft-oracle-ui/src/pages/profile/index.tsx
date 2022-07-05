@@ -124,6 +124,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                         }
                     </div>
                 </Stack>
+                {/* Start Skins */}
                 <Stack
                     style={{ marginTop: '20px', background: '#111' }}
                     maxWidth='100%'
@@ -179,9 +180,12 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                         </div>
                     )}
                 </Stack>
+                {/* End Skins */}
+
                 <div style={{ width: '100%', marginTop: '40px', textAlign: 'left' }}>
                     <span style={{ fontSize: '38px', fontFamily: `VT323, 'arial'`, }}>Multiverse bridge</span>
                 </div>
+                {/* Start Items Stack both on-chain/in-game */}
                 <Stack
                     direction={{ xs: 'column', sm: 'row' }}
                     justifyContent="space-between"
@@ -189,6 +193,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     style={{ marginTop: '20px', textAlign: 'center' }}
                     spacing={theme.spacing(4)}
                 >
+                    {/* Start In Game Items */}
                     <Box flexGrow={1}>
                         <div className={columnTitle}><span className={columnTitleText}>In-game items: Metaverse</span></div>
                         <List dense sx={{ width: '100%', bgcolor: '#111' }}>
@@ -288,6 +293,9 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                             </div>
                         </Dialog>
                     </Box>
+                    {/* End In Game Items */}
+
+                    {/* Start On Chain Items */}
                     <Box flexGrow={1}>
                         <div className={columnTitle}><span className={columnTitleText}>On-chain items: {NETWORK_NAME[chainId ?? DEFAULT_CHAIN]} account</span></div>
                         <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
@@ -364,7 +372,12 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                             )}
                         </List>
                     </Box>
+                    {/* End On Chain Items */}
+
                 </Stack>
+                {/* End Items Stack both on-chain/in-game */}
+
+                {/* Start Resources Stack both on-chain/in-game */}
                 <Stack
                     direction={{ xs: 'column', sm: 'row' }}
                     justifyContent="space-between"
@@ -372,6 +385,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     spacing={theme.spacing(4)}
                     style={{ textAlign: 'center', marginTop: '30px' }}
                 >
+                    {/* Start In Game Resources */}
                     <Box flexGrow={1}>
                         <div className={columnTitle}><span className={columnTitleText}>In-game resources: Metaverse</span></div>
                         <List dense sx={{ width: '100%', bgcolor: '#111' }}>
@@ -413,6 +427,9 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                             disabled={!canSummon}
                         >Summon resources</Button>
                     </Box>
+                    {/* End In Game Resources */}
+
+                    {/* Start On Chain Resources */}
                     <Box flexGrow={1}>
                         <div className={columnTitle}><span className={columnTitleText}>On-chain resources: {NETWORK_NAME[chainId ?? DEFAULT_CHAIN]} account</span></div>
                         <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
@@ -427,6 +444,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                         }
                                         disablePadding
                                         onClick={() => {
+                                            //user will be able to see resources in their metamask wallet as under assets, nothing is moving
                                             setAssetDialogOpen(true)
                                             setAssetDialogData({
                                                 title: value?.staticData?.name,
@@ -448,7 +466,11 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                             }) : <ListItem>No resources found in wallet.</ListItem>}
                         </List>
                     </Box>
+                    {/* End On Chain Resources */}
+
                 </Stack>
+                {/* End Resources Stack both on-chain/in-game */}
+
             </Stack>
         </Container>
     );
