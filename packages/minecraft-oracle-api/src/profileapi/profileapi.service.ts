@@ -69,7 +69,6 @@ export class ProfileApiService {
         const importableAssets = await this.getRecognizedAssets(BridgeAssetType.IMPORTED)
         const enrapturableAssets = await this.getRecognizedAssets(BridgeAssetType.ENRAPTURED)
 
-        //console.log(userSkins)
 
         const assets: AssetDto[] = []
 
@@ -79,7 +78,6 @@ export class ProfileApiService {
             const assetAddress = asset.collectionFragment.collection.assetAddress.toLowerCase()
             const recongizedEnraptureAsset = findRecognizedAsset(enrapturableAssets, { assetAddress, assetId: asset.assetId })
 
-            //an enraptured asset that is not a resource ... ie bait
             if (!!recongizedEnraptureAsset && recongizedEnraptureAsset.recognizedAssetType.valueOf() !== RecognizedAssetType.RESOURCE.valueOf()) {
                 assets.push({
                     amount: asset.amount,
@@ -98,7 +96,6 @@ export class ProfileApiService {
                 continue
             }
 
-            //assets that can be exported back to wallet
             const recongizedImportAsset = findRecognizedAsset(importableAssets, { assetAddress, assetId: asset.assetId })
 
             if (!!recongizedImportAsset) {
