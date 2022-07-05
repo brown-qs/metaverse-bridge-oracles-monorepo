@@ -132,7 +132,6 @@ export class ProfileApiService {
 
 
         // TODO fixme
-        // James TODO: multiple minecraft accounts can be merged in, find one will hide further merges
         const bait = await this.resourceInventoryService.findOne({ owner: user }, { relations: ['owner', 'offset'] })
         if (!!bait) {
             const baitAsset = userAssets.find(x => x.assetId === bait.assetId && x.collectionFragment.recognizedAssetType.valueOf() === RecognizedAssetType.RESOURCE.valueOf())
