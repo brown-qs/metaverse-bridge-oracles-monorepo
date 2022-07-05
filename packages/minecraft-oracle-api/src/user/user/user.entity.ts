@@ -19,7 +19,7 @@ import { PlayerGameItemEntity } from '../../playergameitem/playergameitem.entity
 import { ResourceInventoryEntity } from '../../resourceinventory/resourceinventory.entity';
 import { EmailChangeEntity } from '../email-change/email-change.entity';
 import { MinecraftLinkEntity } from '../minecraft-link/minecraft-link.entity';
-import { KiltSessionEntity } from 'src/kilt-session/kilt-session.entity';
+import { KiltSessionEntity } from '../kilt-session/kilt-session.entity';
 
 @Entity()
 export class UserEntity {
