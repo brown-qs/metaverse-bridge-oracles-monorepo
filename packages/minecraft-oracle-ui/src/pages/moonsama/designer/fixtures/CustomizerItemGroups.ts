@@ -58,7 +58,7 @@ const x = [
     "assetAddress": "0x1974eeaf317ecf792ff307f25a3521c35eecde86",
     "assetIDRanges": [
       [
-        11,
+        10,
         58
       ],
       [
