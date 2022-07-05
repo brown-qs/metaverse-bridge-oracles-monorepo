@@ -86,6 +86,7 @@ import { EmailChangeModule } from './user/email-change/email-change.module';
 import { MinecraftLinkModule } from './user/minecraft-link/minecraft-link.module';
 import { MinecraftLinkEntity } from './user/minecraft-link/minecraft-link.entity';
 import { EmailChangeEntity } from './user/email-change/email-change.entity';
+import { UserAssetView } from './views';
 @Module({
     imports: [
         ConfigModule.forRoot({
@@ -152,7 +153,8 @@ import { EmailChangeEntity } from './user/email-change/email-change.entity';
                     SyntheticPartEntity,
                     SyntheticItemEntity,
                     ResourceInventoryEntity,
-                    ResourceInventoryOffsetEntity
+                    ResourceInventoryOffsetEntity,
+                    UserAssetView
                 ],
                 synchronize: configService.get<boolean>('typeorm.synchronize'),
                 logging: configService.get<boolean>('typeorm.logging'),
