@@ -7,7 +7,6 @@ import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { WalletLoginMessage } from './dtos';
 import { KiltSessionService } from 'src/kilt-session/kilt-session.service';
 import { KiltSessionEntity } from 'src/kilt-session/kilt-session.entity';
-import { KiltDidEmailService } from 'src/user/kilt-did-email/kilt-did-email.service';
 import { UserService } from 'src/user/user/user.service';
 import { UserEntity } from 'src/user/user/user.entity';
 
@@ -28,7 +27,6 @@ export class KiltAuthService {
     initKiltPromise: Promise<void>;
 
     constructor(
-        private kiltDidEmailService: KiltDidEmailService,
         private kiltSessionService: KiltSessionService,
         private userService: UserService,
         private configService: ConfigService,
@@ -305,8 +303,6 @@ export class KiltAuthService {
 
         this.logger.debug(`"successfully logged in kilt as: ${email}`, this.context)
 
-        //log did/email association
-        await this.kiltDidEmailService.create(email.toLowerCase().trim(), did)
         const user = await this.userService.createEmail(email.toLowerCase().trim())
         await this.kiltSessionService.update({ sessionId }, { user, email: email.toLowerCase().trim(), updatedAt: new Date().getTime() })
         return user

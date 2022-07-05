@@ -80,8 +80,6 @@ import { KiltSessionModule } from './kilt-session/kilt-session.module';
 import { KiltSessionEntity } from './kilt-session/kilt-session.entity';
 import { EmailLoginKeyEntity } from './user/email-login-key/email-login-key.entity';
 import { EmailLoginKeyModule } from './user/email-login-key/email-login-key.module';
-import { KiltDidEmailModule } from './user/kilt-did-email/kilt-did-email.module';
-import { KiltDidEmailEntity } from './user/kilt-did-email/kilt-did-email.entity';
 import { MinecraftUuidUserNameEntity } from './user/minecraft-uuid-user-name/minecraft-uuid-user-name.entity';
 import { MinecraftUuidUserNameModule } from './user/minecraft-uuid-user-name/minecraft-uuid-user-name.module';
 import { EmailChangeModule } from './user/email-change/email-change.module';
@@ -122,7 +120,6 @@ import { EmailChangeEntity } from './user/email-change/email-change.entity';
                     EmailChangeEntity,
                     MinecraftLinkEntity,
                     MinecraftUuidUserNameEntity,
-                    KiltDidEmailEntity,
                     KiltSessionEntity,
                     EmailLoginKeyEntity,
                     UserEntity,
@@ -218,7 +215,6 @@ import { EmailChangeEntity } from './user/email-change/email-change.entity';
         ResourceInventoryOffsetModule,
         CompositeApiModule,
         KiltSessionModule,
-        KiltDidEmailModule
     ],
     controllers: [],
     providers: []
