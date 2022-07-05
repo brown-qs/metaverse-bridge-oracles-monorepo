@@ -94,7 +94,7 @@ export class MinecraftAuthController {
         }
 
         //log unlink
-        await this.minecraftLinkServer.unlink(user.uuid, user.uuid, minecraftUuid)
+        await this.minecraftLinkServer.unlink(user, user, minecraftUuid)
 
         const payload: UserJwtPayload = { sub: user.uuid, minecraftUuid: null };
         const jwtToken = this.jwtService.sign(payload);

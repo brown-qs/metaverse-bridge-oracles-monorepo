@@ -209,8 +209,9 @@ export class EmailAuthService {
             }
 
             //log email change
-            await this.emailChangeService.create(loginKeyEntity.changeUuid, loginKeyEntity.changeUuid, oldEmail, loginKeyEntity.email.toLowerCase().trim())
             user = await this.userService.findByEmail(loginKeyEntity.email.toLowerCase().trim())
+            await this.emailChangeService.create(user, user, oldEmail, loginKeyEntity.email.toLowerCase().trim())
+
         } else {
             user = await this.userService.createEmail(loginKeyEntity.email.toLowerCase().trim())
         }

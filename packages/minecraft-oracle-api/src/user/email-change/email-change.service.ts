@@ -13,12 +13,9 @@ export class EmailChangeService {
 
     ) { }
 
-    public async create(userUuid: string, initiatorUuid: string, oldEmail: string, newEmail: string): Promise<void> {
+    public async create(user: UserEntity, initiator: UserEntity, oldEmail: string, newEmail: string): Promise<void> {
         const oldEm = oldEmail.toLowerCase().trim()
         const newEm = newEmail.toLowerCase().trim()
-
-        const user = await this.userService.findByUuid(userUuid)
-        const initiator = await this.userService.findByUuid(initiatorUuid)
 
         const emailChange = this.repository.create({ user, initiator, oldEmail: oldEm, newEmail: newEm })
         await this.repository.insert(emailChange);
