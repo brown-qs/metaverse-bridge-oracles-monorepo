@@ -8,8 +8,8 @@ import { SkinModule } from 'src/skin/skin.module';
 import { TextureModule } from 'src/texture/texture.module';
 import { KiltAuthService } from './kilt-auth.service';
 import { KiltAuthController } from './kilt-auth.controller';
-import { KiltSessionModule } from 'src/kilt-session/kilt-session.module';
 import { UserModule } from 'src/user/user/user.module';
+import { KiltSessionModule } from 'src/user/kilt-session/kilt-session.module';
 
 @Module({
   providers: [KiltAuthService],

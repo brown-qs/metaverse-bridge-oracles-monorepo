@@ -5,10 +5,10 @@ import { blake2AsU8a, cryptoWaitReady, keyExtractPath, keyFromPath, mnemonicToMi
 import { ConfigService } from '@nestjs/config';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { WalletLoginMessage } from './dtos';
-import { KiltSessionService } from 'src/kilt-session/kilt-session.service';
-import { KiltSessionEntity } from 'src/kilt-session/kilt-session.entity';
 import { UserService } from 'src/user/user/user.service';
 import { UserEntity } from 'src/user/user/user.entity';
+import { KiltSessionEntity } from 'src/user/kilt-session/kilt-session.entity';
+import { KiltSessionService } from 'src/user/kilt-session/kilt-session.service';
 
 
 @Injectable()
