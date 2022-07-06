@@ -44,9 +44,9 @@ const HomePage = () => {
 
   const buttonRender = () => {
     if (hasAuth && !hasMinecraft) {
-      return <Button onClick={() => { handleLinkMinecraft() }} sx={{ zIndex: 100 }} disableRipple variant="contained">Link Minecraft Account</Button>
+      return <Button onClick={() => { handleLinkMinecraft() }} sx={{ zIndex: 100 }} disableElevation disableRipple variant="contained">Link Minecraft Account</Button>
     } else {
-      return <Button onClick={() => { handleLogin() }} sx={{ zIndex: 100 }} disableRipple variant="contained">Login</Button>
+      return <Button onClick={() => { handleLogin() }} sx={{ zIndex: 100 }} disableElevation disableRipple variant="contained">Login</Button>
     }
   }
   return (
