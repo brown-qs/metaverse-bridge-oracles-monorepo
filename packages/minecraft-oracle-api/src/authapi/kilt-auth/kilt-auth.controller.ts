@@ -53,7 +53,14 @@ export class KiltAuthController {
     @HttpCode(200)
     @ApiOperation({ summary: 'Dynamically generated did-configuration.json' })
     async didConfiguration() {
-        return await this.kiltAuthApiService.didConfiguration()
+        let result
+        try {
+            result = await this.kiltAuthApiService.didConfiguration()
+        } catch (e) {
+            console.log(e.stack)
+            throw e
+        }
 
+        return result
     }
 }
