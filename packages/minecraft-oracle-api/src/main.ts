@@ -16,7 +16,7 @@ async function bootstrap() {
       transports: [new winston.transports.Console()]
     })
   });
-  app.useGlobalFilters(new StackTraceErrorFilter())
+  //app.useGlobalFilters(new StackTraceErrorFilter())
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors();
   app.setGlobalPrefix('/api/v1');
