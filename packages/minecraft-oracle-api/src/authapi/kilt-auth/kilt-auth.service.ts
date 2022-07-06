@@ -1,4 +1,4 @@
-import { init, IEncryptedMessage, Utils, MessageBodyType, Message, ICredential, Did, Credential, DidUri, connect, DidResourceUri, CType, Claim, RequestForAttestation, Attestation, KeyringPair } from '@kiltprotocol/sdk-js';
+import { init, IEncryptedMessage, Utils, MessageBodyType, Message, ICredential, Did, Credential, DidUri, connect, DidResourceUri, CType, Claim, RequestForAttestation, Attestation, KeyringPair, KeystoreSigner } from '@kiltprotocol/sdk-js';
 import { GoneException, Inject, Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { blake2AsU8a, cryptoWaitReady, keyExtractPath, keyFromPath, mnemonicToMiniSecret, naclBoxPairFromSecret, naclOpen, naclSeal, randomAsHex, sr25519PairFromSeed } from '@polkadot/util-crypto';
@@ -356,10 +356,10 @@ export class KiltAuthService {
             throw new Error('The attestation key is not defined?!?');
         }
 
-        const kpairs: any = await keypairs()
+        const kpairs = await keypairs()
         const { signature, keyUri } = await fullDid.signPayload(
             Utils.Crypto.coToUInt8(requestForAttestation.rootHash),
-            kpairs,
+            assertionKeystore,
             attestationKey.id
         );
 
@@ -408,3 +408,13 @@ async function keypairs() {
     return keypairs
 }
 
+const assertionKeystore: KeystoreSigner = {
+    async sign({ data, alg }) {
+        const { assertion } = await keypairs();
+
+        return {
+            data: assertion.sign(data, { withType: false }),
+            alg,
+        };
+    },
+};
