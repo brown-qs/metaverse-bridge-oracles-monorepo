@@ -1,4 +1,4 @@
-import { init, IEncryptedMessage, Utils, MessageBodyType, Message, ICredential, Did, Credential, DidUri, connect, DidResourceUri } from '@kiltprotocol/sdk-js';
+import { init, IEncryptedMessage, Utils, MessageBodyType, Message, ICredential, Did, Credential, DidUri, connect, DidResourceUri, CType, Claim, RequestForAttestation, Attestation, KeyringPair } from '@kiltprotocol/sdk-js';
 import { GoneException, Inject, Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { blake2AsU8a, cryptoWaitReady, keyExtractPath, keyFromPath, mnemonicToMiniSecret, naclBoxPairFromSecret, naclOpen, naclSeal, randomAsHex, sr25519PairFromSeed } from '@polkadot/util-crypto';
@@ -306,6 +306,79 @@ export class KiltAuthService {
         const user = await this.userService.createEmail(email.toLowerCase().trim())
         await this.kiltSessionService.update({ sessionId }, { user, email: email.toLowerCase().trim(), updatedAt: new Date() })
         return user
+    }
+
+    async didConfiguration() {
+        await this.initKiltPromise
+        let port = `:${this.configService.get<string>('server.port')}`;
+        if (port === "80") {
+            port = ""
+        }
+        const host = this.configService.get<string>('server.host');
+        const scheme = this.configService.get<string>('server.scheme');
+
+        const origin = `${scheme}://${host}${port}`
+        const claimContents = {
+            id: this.configService.get<DidUri>('kilt.verifierDidUri'),
+            origin: origin,
+        };
+
+        const domainLinkageCType = CType.fromCType({
+            schema: {
+                $schema: 'http://kilt-protocol.org/draft-01/ctype#',
+                title: 'Domain Linkage Credential',
+                properties: {
+                    id: {
+                        type: 'string',
+                    },
+                    origin: {
+                        type: 'string',
+                    },
+                },
+                type: 'object',
+                $id: 'kilt:ctype:0x9d271c790775ee831352291f01c5d04c7979713a5896dcf5e81708184cc5c643',
+            },
+            owner: null,
+            hash: '0x9d271c790775ee831352291f01c5d04c7979713a5896dcf5e81708184cc5c643',
+        });
+
+        const claim = Claim.fromCTypeAndClaimContents(
+            domainLinkageCType,
+            claimContents,
+            this.configService.get<DidUri>('kilt.verifierDidUri'),
+        );
+
+        const requestForAttestation = RequestForAttestation.fromClaim(claim);
+
+        const fullDid = await this.getFullDid()
+        const attestationKey = fullDid.attestationKey;
+        if (!attestationKey) {
+            throw new Error('The attestation key is not defined?!?');
+        }
+
+        const kpairs: any = await keypairs()
+        const { signature, keyUri } = await fullDid.signPayload(
+            Utils.Crypto.coToUInt8(requestForAttestation.rootHash),
+            kpairs,
+            attestationKey.id
+        );
+
+        const selfSignedRequest = await requestForAttestation.addSignature(
+            signature,
+            keyUri,
+        );
+
+        const attestation = Attestation.fromRequestAndDid(
+            selfSignedRequest,
+            this.configService.get<DidUri>('kilt.verifierDidUri'),
+        );
+
+        const domainLinkageCredential = Credential.fromRequestAndAttestation(selfSignedRequest, attestation);
+
+        return {
+            '@context': 'https://identity.foundation/.well-known/did-configuration/v1',
+            linked_dids: [domainLinkageCredential],
+        }
     }
 }
 

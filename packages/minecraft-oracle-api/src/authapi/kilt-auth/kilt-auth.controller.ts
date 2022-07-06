@@ -48,4 +48,12 @@ export class KiltAuthController {
         const jwtToken = this.jwtService.sign(payload);
         return { success: true, jwt: jwtToken }
     }
+
+    @Get('did_configuration')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Dynamically generated did-configuration.json' })
+    async didConfiguration() {
+        return await this.kiltAuthApiService.didConfiguration()
+
+    }
 }
