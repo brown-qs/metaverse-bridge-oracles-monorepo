@@ -1,4 +1,4 @@
-import { init, IEncryptedMessage, Utils, MessageBodyType, Message, ICredential, Did, Credential, DidUri, connect, DidResourceUri, CType, Claim, RequestForAttestation, Attestation, KeyringPair, KeystoreSigner } from '@kiltprotocol/sdk-js';
+import { init, IEncryptedMessage, Utils, MessageBodyType, Message, ICredential, Did, Credential, DidUri, connect, DidResourceUri, CType, Claim, RequestForAttestation, Attestation, KeyringPair, KeystoreSigner, DidSignature, IClaimContents } from '@kiltprotocol/sdk-js';
 import { GoneException, Inject, Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { blake2AsU8a, cryptoWaitReady, keyExtractPath, keyFromPath, mnemonicToMiniSecret, naclBoxPairFromSecret, naclOpen, naclSeal, randomAsHex, sr25519PairFromSeed } from '@polkadot/util-crypto';
@@ -314,10 +314,7 @@ export class KiltAuthService {
         if (port === "80") {
             port = ""
         }
-        const host = this.configService.get<string>('server.host');
-        const scheme = this.configService.get<string>('server.scheme');
-
-        const origin = `${scheme}://${host}${port}`
+        const origin = this.configService.get<string>('frontend.url');
         const claimContents = {
             id: this.configService.get<DidUri>('kilt.verifierDidUri'),
             origin: origin,
@@ -373,8 +370,8 @@ export class KiltAuthService {
             this.configService.get<DidUri>('kilt.verifierDidUri'),
         );
 
-        const domainLinkageCredential = Credential.fromRequestAndAttestation(selfSignedRequest, attestation);
-
+        const credential = Credential.fromRequestAndAttestation(selfSignedRequest, attestation);
+        const domainLinkageCredential = fromCredential(credential);
         return {
             '@context': 'https://identity.foundation/.well-known/did-configuration/v1',
             linked_dids: [domainLinkageCredential],
@@ -418,3 +415,59 @@ const assertionKeystore: KeystoreSigner = {
         };
     },
 };
+
+const DEFAULT_VERIFIABLECREDENTIAL_CONTEXT =
+    'https://www.w3.org/2018/credentials/v1';
+const DEFAULT_VERIFIABLECREDENTIAL_TYPE = 'VerifiableCredential';
+const KILT_VERIFIABLECREDENTIAL_TYPE = 'KiltCredential2020';
+const KILT_SELF_SIGNED_PROOF_TYPE = 'KILTSelfSigned2020';
+
+// taken from https://github.com/KILTprotocol/sdk-js/blob/develop/packages/vc-export/src/exportToVerifiableCredential.ts
+
+const context = [
+    DEFAULT_VERIFIABLECREDENTIAL_CONTEXT,
+    'https://identity.foundation/.well-known/did-configuration/v1',
+];
+
+
+export function fromCredential(input: ICredential): any {
+    const credentialSubject = {
+        ...input.request.claim.contents,
+        rootHash: input.request.rootHash,
+    };
+    const issuer = input.attestation.owner;
+
+    // add current date bc we have no issuance date on credential
+    // TODO: could we get this from block time or something?
+    const issuanceDate = new Date().toISOString();
+    const expirationDate = new Date(
+        Date.now() + 1000 * 60 * 60 * 24 * 365 * 5,
+    ).toISOString(); // 5 years
+
+    const claimerSignature = input.request.claimerSignature as DidSignature & {
+        challenge: string;
+    };
+
+    // add self-signed proof
+    const proof = {
+        type: KILT_SELF_SIGNED_PROOF_TYPE,
+        proofPurpose: 'assertionMethod',
+        verificationMethod: claimerSignature.keyUri,
+        signature: claimerSignature.signature,
+        challenge: claimerSignature.challenge,
+    };
+
+    return {
+        '@context': context,
+        issuer,
+        issuanceDate,
+        expirationDate,
+        type: [
+            DEFAULT_VERIFIABLECREDENTIAL_TYPE,
+            'DomainLinkageCredential',
+            KILT_VERIFIABLECREDENTIAL_TYPE,
+        ],
+        credentialSubject,
+        proof,
+    };
+}
