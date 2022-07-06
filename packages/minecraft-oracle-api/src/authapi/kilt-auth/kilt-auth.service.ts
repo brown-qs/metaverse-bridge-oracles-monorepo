@@ -1,7 +1,7 @@
-import { init, IEncryptedMessage, Utils, MessageBodyType, Message, ICredential, Did, Credential, DidUri, connect, DidResourceUri, CType, Claim, RequestForAttestation, Attestation, KeyringPair, KeystoreSigner, DidSignature, IClaimContents } from '@kiltprotocol/sdk-js';
+import { BlockchainUtils, VerificationKeyType, init, IEncryptedMessage, Utils, MessageBodyType, Message, ICredential, Did, Credential, DidUri, connect, DidResourceUri, CType, Claim, RequestForAttestation, Attestation, KeyringPair, KeystoreSigner, DidSignature, IClaimContents } from '@kiltprotocol/sdk-js';
 import { GoneException, Inject, Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { blake2AsU8a, cryptoWaitReady, keyExtractPath, keyFromPath, mnemonicToMiniSecret, naclBoxPairFromSecret, naclOpen, naclSeal, randomAsHex, sr25519PairFromSeed } from '@polkadot/util-crypto';
+import { blake2AsHex, blake2AsU8a, cryptoWaitReady, keyExtractPath, keyFromPath, mnemonicToMiniSecret, naclBoxPairFromSecret, naclOpen, naclSeal, randomAsHex, sr25519PairFromSeed } from '@polkadot/util-crypto';
 import { ConfigService } from '@nestjs/config';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { WalletLoginMessage } from './dtos';
@@ -9,7 +9,7 @@ import { UserService } from 'src/user/user/user.service';
 import { UserEntity } from 'src/user/user/user.entity';
 import { KiltSessionEntity } from 'src/user/kilt-session/kilt-session.entity';
 import { KiltSessionService } from 'src/user/kilt-session/kilt-session.service';
-
+import { ApiPromise, WsProvider } from '@polkadot/api'
 
 @Injectable()
 export class KiltAuthService {
@@ -372,12 +372,61 @@ export class KiltAuthService {
 
         const credential = Credential.fromRequestAndAttestation(selfSignedRequest, attestation);
         const domainLinkageCredential = fromCredential(credential);
-        return {
+        const result = {
             '@context': 'https://identity.foundation/.well-known/did-configuration/v1',
             linked_dids: [domainLinkageCredential],
         }
+        return result
     }
+    /*
+    //only run this once for a DID to add an attestation key
+    async addAttestationKey() {
+        console.log("addAttestationKey()")
+        await this.initKiltPromise
+        const keyring = new Utils.Keyring({
+            ss58Format: 38,
+            type: "sr25519",
+        })
+        const account = keyring.addFromMnemonic(process.env.KILT_VERIFIER_MNEMONIC)
+
+        const keystore = new Did.DemoKeystore()
+        const authenticationKey = await keystore.generateKeypair({ alg: Did.SigningAlgorithms.Sr25519, seed: `${process.env.KILT_VERIFIER_MNEMONIC}//did//0` })
+        const keyAgreementKey = await keystore.generateKeypair({ alg: Did.EncryptionAlgorithms.NaclBox, seed: `${process.env.KILT_VERIFIER_MNEMONIC}//did//keyAgreement//0` })
+
+
+        const provider = new WsProvider('wss://spiritnet.kilt.io');
+
+        // Create the API and wait until ready
+        const apiPromise = await ApiPromise.create({ provider });
+
+        const fullDid = await this.getFullDid()
+
+        // Retrieve the chain & node information information via rpc calls
+        const [chain, nodeName, nodeVersion] = await Promise.all([
+            apiPromise.rpc.system.chain(),
+            apiPromise.rpc.system.name(),
+            apiPromise.rpc.system.version()
+        ]);
+
+        console.log(`You are connected to chain ${chain} using ${nodeName} v${nodeVersion}`);
+        const attestationKeyPublicDetails = await keystore.generateKeypair({
+            seed: `${process.env.KILT_VERIFIER_MNEMONIC}//did//att//0`,
+            alg: Did.SigningAlgorithms.Sr25519
+        })
+
+        //submitterAccount is then the keypair generated from the mnemonic with no derivation path
+        console.log(`account.address: ${account.address}`)
+
+
+        const didUpdate = await new Did.FullDidUpdateBuilder(apiPromise, fullDid).setAttestationKey({
+            publicKey: attestationKeyPublicDetails.publicKey,
+            type: VerificationKeyType.Sr25519
+        }).build(keystore, account.address)
+        await BlockchainUtils.signAndSubmitTx(didUpdate, account)
+    }*/
 }
+
+
 
 async function keypairs() {
     await cryptoWaitReady()
