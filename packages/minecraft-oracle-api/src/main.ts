@@ -6,6 +6,7 @@ import { nestLikeConsoleFormat } from './utils';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
+import { StackTraceErrorFilter } from './filters/stack-trace-error.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -15,6 +16,7 @@ async function bootstrap() {
       transports: [new winston.transports.Console()]
     })
   });
+  app.useGlobalFilters(new StackTraceErrorFilter())
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors();
   app.setGlobalPrefix('/api/v1');
