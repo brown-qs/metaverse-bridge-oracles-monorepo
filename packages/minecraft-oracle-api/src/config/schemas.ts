@@ -51,7 +51,6 @@ export const envValidationSchema = () => {
         // KILT
         KILT_WSS_ADDRESS: Joi.string().required(),
         KILT_VERIFIER_MNEMONIC: Joi.string().required(),
-        KILT_VERIFIER_ADDRESS: Joi.string().required(),
         KILT_VERIFIER_DID_URI: Joi.string().required(),
         KILT_DAPP_NAME: Joi.string().required(),
         KILT_CTYPE_NAME: Joi.string().required(),

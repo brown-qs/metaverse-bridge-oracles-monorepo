@@ -78,7 +78,6 @@ export const loadEnv = () => {
         kilt: {
             wssAddress: process.env.KILT_WSS_ADDRESS,
             verifierMnemonic: process.env.KILT_VERIFIER_MNEMONIC,
-            verifierAddress: process.env.KILT_VERIFIER_ADDRESS,
             verifierDidUri: process.env.KILT_VERIFIER_DID_URI,
             dappName: process.env.KILT_DAPP_NAME,
             cTypeName: process.env.KILT_CTYPE_NAME,
