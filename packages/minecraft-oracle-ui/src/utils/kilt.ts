@@ -13,7 +13,7 @@ export async function getKiltExtension(): Promise<InjectedWindowProvider> {
 export async function walletLogin(extension: InjectedWindowProvider) {
   //get wallet session from server
   console.log("fetching wallet session from server...")
-  const values = await fetch(`http://localhost:3030/api/v1/auth/kilt/wallet_session`);
+  const values = await fetch(`${process.env.REACT_APP_BACKEND_API_URL}/auth/kilt/wallet_session`);
   const parsedValues = await values.json()
 
   console.log(JSON.stringify(parsedValues))
@@ -48,14 +48,14 @@ export async function walletLogin(extension: InjectedWindowProvider) {
   newSess.encryptedWalletSessionChallenge = newSess.encryptedChallenge
   delete newSess.encryptedChallenge
   console.log("POSTing session")
-  await fetch(`http://localhost:3030/api/v1/auth/kilt/wallet_session`, {
+  await fetch(`${process.env.REACT_APP_BACKEND_API_URL}/auth/kilt/wallet_session`, {
     method: 'POST',
     headers: { "Content-Type": 'application/json' },
     body: JSON.stringify({ ...newSess, sessionId }),
   });
 
   console.log("Starting wallet login...")
-  const result = await fetch(`http://localhost:3030/api/v1/auth/kilt/wallet_login?sessionId=${sessionId}`);
+  const result = await fetch(`${process.env.REACT_APP_BACKEND_API_URL}/auth/kilt/wallet_login?sessionId=${sessionId}`);
   let message = await result.json();
   //backwards compatibility with old sporran extensions, newer extensions switch from senderKeyId > senderKeyUri etc.
   message = { ...message, senderKeyId: message.senderKeyUri, receiverKeyId: message.receiverKeyUri }
@@ -74,9 +74,21 @@ export async function walletLogin(extension: InjectedWindowProvider) {
       console.log("extension session responded with message...")
       console.log(message)
 
-      let sMessage = { ...sporranMessage, receiverKeyUri: sporranMessage.receiverKeyId, senderKeyUri: sporranMessage.senderKeyId }
+      //backwards compatibility with old sporran extensions, newer extensions switch from senderKeyId > senderKeyUri etc.
+      let sMessage = { ...sporranMessage as any }
+
+      if (!sMessage.hasOwnProperty("receiverKeyUri") && sMessage.hasOwnProperty("receiverKeyId")) {
+        sMessage.receiverKeyUri = (sporranMessage as any).receiverKeyId
+        delete sMessage.receiverKeyId
+      }
+
+      if (!sMessage.hasOwnProperty("senderKeyUri") && sMessage.hasOwnProperty("senderKeyId")) {
+        sMessage.senderKeyUri = (sporranMessage as any).senderKeyId
+        delete sMessage.senderKeyId
+      }
+
       try {
-        const loginResult = await fetch(`http://localhost:3030/api/v1/auth/kilt/wallet_login`, {
+        const loginResult = await fetch(`${process.env.REACT_APP_BACKEND_API_URL}/auth/kilt/wallet_login`, {
           method: 'POST',
           headers: { "Content-Type": 'application/json' },
           body: JSON.stringify({ sessionId, message: sMessage }),
