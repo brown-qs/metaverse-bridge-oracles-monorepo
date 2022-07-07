@@ -144,8 +144,6 @@ export class KiltAuthService {
         // create session data
         const fullDid = await this.getFullDid()
 
-        console.log("fullDid: " + JSON.stringify(fullDid))
-
         const dAppEncryptionKeyUri = fullDid.assembleKeyUri(fullDid.encryptionKey.id);
 
 
@@ -346,6 +344,8 @@ export class KiltAuthService {
 
         const requestForAttestation = RequestForAttestation.fromClaim(claim);
 
+
+
         const fullDid = await this.getFullDid()
         const attestationKey = fullDid.attestationKey;
         if (!attestationKey) {
@@ -375,6 +375,9 @@ export class KiltAuthService {
             linked_dids: [domainLinkageCredential],
         }
 
+        console.log("=========== did-configuration.json ===========")
+        console.log(JSON.stringify(result, null, 4))
+        console.log("----------------------------------------------")
         //make sure it verifies
         const outputDid = result.linked_dids[0].issuer
         const outputSignature = result.linked_dids[0].proof.signature
@@ -395,7 +398,7 @@ export class KiltAuthService {
         });
 
         if (!verified) {
-            throw new UnprocessableEntityException("did_configuration.json failed to pass verification")
+            throw new UnprocessableEntityException("did-configuration.json failed to pass verification")
         }
 
         return result

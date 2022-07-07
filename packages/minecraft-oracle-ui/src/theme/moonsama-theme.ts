@@ -111,6 +111,9 @@ export const moonsamaTheme = (colors: PaletteOptions): ThemeOptions => {
           filledSuccess: {
             backgroundColor: '#5EB234',
             color: "white"
+          },
+          message: {
+            "wordBreak": "break-word"
           }
         }
       },
