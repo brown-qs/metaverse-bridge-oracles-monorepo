@@ -43,7 +43,7 @@ export class KiltAuthService {
         await connect()
     }
 
-
+    /*
     //calling this.keypairs() doesn't work but calling the exact same function defined outside the class works ???
     private async keypairs() {
         await cryptoWaitReady()
@@ -69,7 +69,7 @@ export class KiltAuthService {
             })(),
         }
         return keypairs
-    }
+    }*/
 
     private async getEncrpytionKeyStore() {
         if (!this.encryptionKeyStore) {
@@ -143,6 +143,8 @@ export class KiltAuthService {
         await init({ address: this.configService.get<string>('kilt.wssAddress') })
         // create session data
         const fullDid = await this.getFullDid()
+
+        console.log("fullDid: " + JSON.stringify(fullDid))
 
         const dAppEncryptionKeyUri = fullDid.assembleKeyUri(fullDid.encryptionKey.id);
 
@@ -310,10 +312,7 @@ export class KiltAuthService {
 
     async didConfiguration() {
         await this.initKiltPromise
-        let port = `:${this.configService.get<string>('server.port')}`;
-        if (port === "80") {
-            port = ""
-        }
+
         const origin = this.configService.get<string>('frontend.url');
         const claimContents = {
             id: this.configService.get<DidUri>('kilt.verifierDidUri'),
@@ -353,7 +352,6 @@ export class KiltAuthService {
             throw new Error('The attestation key is not defined?!?');
         }
 
-        const kpairs = await keypairs()
         const { signature, keyUri } = await fullDid.signPayload(
             Utils.Crypto.coToUInt8(requestForAttestation.rootHash),
             assertionKeystore,
@@ -376,9 +374,33 @@ export class KiltAuthService {
             '@context': 'https://identity.foundation/.well-known/did-configuration/v1',
             linked_dids: [domainLinkageCredential],
         }
+
+        //make sure it verifies
+        const outputDid = result.linked_dids[0].issuer
+        const outputSignature = result.linked_dids[0].proof.signature
+        const outputRootHash = result.linked_dids[0].credentialSubject.rootHash
+        console.log(`outputDid: ${outputDid} outputSignature: ${outputSignature} outputRootHash: ${outputRootHash}`)
+        const issuerDidDetails = await Did.FullDidDetails.fromChainInfo(outputDid as DidUri);
+        if (!issuerDidDetails) {
+            throw new Error(`Cannot resolve DID ${outputDid}`);
+        }
+        const { verified } = await Did.verifyDidSignature({
+            signature: {
+                keyUri: issuerDidDetails.assembleKeyUri(
+                    issuerDidDetails.attestationKey.id,
+                ),
+                signature: outputSignature as string,
+            },
+            message: Utils.Crypto.coToUInt8(outputRootHash),
+        });
+
+        if (!verified) {
+            throw new UnprocessableEntityException("did_configuration.json failed to pass verification")
+        }
+
         return result
     }
-    /*
+
     //only run this once for a DID to add an attestation key
     async addAttestationKey() {
         console.log("addAttestationKey()")
@@ -423,7 +445,7 @@ export class KiltAuthService {
             type: VerificationKeyType.Sr25519
         }).build(keystore, account.address)
         await BlockchainUtils.signAndSubmitTx(didUpdate, account)
-    }*/
+    }
 }
 
 

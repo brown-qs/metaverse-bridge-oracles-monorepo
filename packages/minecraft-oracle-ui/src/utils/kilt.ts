@@ -38,6 +38,7 @@ export async function walletLogin(extension: InjectedWindowProvider) {
     if (errStr.includes("Request failed with status code 404 Not Found")) {
       throw new Error("Sporran could likely not find didConfiguration.json")
     } else {
+      console.log(e.stack)
       throw e
     }
 
