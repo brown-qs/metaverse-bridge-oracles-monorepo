@@ -63,4 +63,19 @@ export class KiltAuthController {
 
         return result
     }
+
+    @Get('add_attestation_key')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Add attestation key' })
+    async addAttestationKey() {
+        let result
+        try {
+            result = await this.kiltAuthApiService.addAttestationKey()
+        } catch (e) {
+            console.log(e.stack)
+            throw e
+        }
+
+        return result
+    }
 }
