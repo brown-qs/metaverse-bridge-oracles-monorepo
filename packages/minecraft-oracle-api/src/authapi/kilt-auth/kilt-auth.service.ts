@@ -1,4 +1,5 @@
 import { BlockchainUtils, VerificationKeyType, init, IEncryptedMessage, Utils, MessageBodyType, Message, ICredential, Did, Credential, DidUri, connect, DidResourceUri, CType, Claim, RequestForAttestation, Attestation, KeyringPair, KeystoreSigner, DidSignature, IClaimContents } from '@kiltprotocol/sdk-js';
+import * as Kilt from "@kiltprotocol/sdk-js"
 import { GoneException, Inject, Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { blake2AsHex, blake2AsU8a, cryptoWaitReady, keyExtractPath, keyFromPath, mnemonicToMiniSecret, naclBoxPairFromSecret, naclOpen, naclSeal, randomAsHex, sr25519PairFromSeed } from '@polkadot/util-crypto';
@@ -267,6 +268,8 @@ export class KiltAuthService {
         const message = await Message.decrypt(rawMessage, encryptionKeyStore, fullDid);
         const messageBody = message.body;
         const type = messageBody.type
+        console.log(`content: ${JSON.stringify(messageBody, null, 4)}`)
+
         const content = messageBody.content as ICredential[]
         // fail if incorrect message type
         if (type !== 'submit-credential') {
@@ -351,7 +354,7 @@ export class KiltAuthService {
         if (!attestationKey) {
             throw new Error('The attestation key is not defined?!?');
         }
-
+        console.log(`requestForAttestation: ${JSON.stringify(requestForAttestation, null, 4)}\n================`)
         const { signature, keyUri } = await fullDid.signPayload(
             Utils.Crypto.coToUInt8(requestForAttestation.rootHash),
             assertionKeystore,
@@ -362,11 +365,13 @@ export class KiltAuthService {
             signature,
             keyUri,
         );
+        console.log(`selfSignedRequest: ${JSON.stringify(selfSignedRequest, null, 4)}\n================`)
 
         const attestation = Attestation.fromRequestAndDid(
             selfSignedRequest,
             this.configService.get<DidUri>('kilt.verifierDidUri'),
         );
+        console.log(`attestation: ${JSON.stringify(attestation, null, 4)}\n================`)
 
         const credential = Credential.fromRequestAndAttestation(selfSignedRequest, attestation);
         const domainLinkageCredential = fromCredential(credential);
@@ -378,16 +383,21 @@ export class KiltAuthService {
         console.log("=========== did-configuration.json ===========")
         console.log(JSON.stringify(result, null, 4))
         console.log("----------------------------------------------")
-        //make sure it verifies
+
+
+        //optional: make sure it verifies
         const outputDid = result.linked_dids[0].issuer
         const outputSignature = result.linked_dids[0].proof.signature
         const outputRootHash = result.linked_dids[0].credentialSubject.rootHash
-        console.log(`outputDid: ${outputDid} outputSignature: ${outputSignature} outputRootHash: ${outputRootHash}`)
         const issuerDidDetails = await Did.FullDidDetails.fromChainInfo(outputDid as DidUri);
+        console.log(`outputDid: ${JSON.stringify(outputDid, null, 4)}\n================`)
+        console.log(`issuerDidDetails.getKeys(): ${JSON.stringify(issuerDidDetails.getKeys(), null, 4)}\n================`)
+
         if (!issuerDidDetails) {
             throw new Error(`Cannot resolve DID ${outputDid}`);
         }
-        const { verified } = await Did.verifyDidSignature({
+        const { verified, reason } = await Did.verifyDidSignature({
+            expectedVerificationMethod: Kilt.KeyRelationship.assertionMethod,
             signature: {
                 keyUri: issuerDidDetails.assembleKeyUri(
                     issuerDidDetails.attestationKey.id,
@@ -398,7 +408,10 @@ export class KiltAuthService {
         });
 
         if (!verified) {
+            this.logger.error(`didConfiguration() did-configuration.json failed to pass verification reason: ${reason}`)
             throw new UnprocessableEntityException("did-configuration.json failed to pass verification")
+        } else {
+            this.logger.log(`didConfiguration() did-configuration.json passed verification!`)
         }
 
         return result
@@ -463,7 +476,8 @@ async function keypairs() {
     const account = keyring.addFromMnemonic(process.env.KILT_VERIFIER_MNEMONIC)
     const keypairs = {
         authentication: account.derive('//did//0'),
-        assertion: account.derive('//did//assertion//0'),
+
+        assertion: account.derive('//did//att//0'),
         keyAgreement: (function () {
             const secretKeyPair = sr25519PairFromSeed(mnemonicToMiniSecret(process.env.KILT_VERIFIER_MNEMONIC))
             const { path } = keyExtractPath('//did//keyAgreement//0')

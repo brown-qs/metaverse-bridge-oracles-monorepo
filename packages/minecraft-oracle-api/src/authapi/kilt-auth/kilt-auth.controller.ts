@@ -42,8 +42,9 @@ export class KiltAuthController {
     @HttpCode(200)
     @ApiOperation({ summary: 'Validate kilt wallet login challenge' })
     async validateWalletCredential(@Body() dto: WalletLoginDto) {
-        const user = await this.kiltAuthApiService.verifyWalletLoginChallenge(dto.sessionId, dto.message)
+        console.log(`verify credential: ${JSON.stringify(dto, null, 4)}`)
 
+        const user = await this.kiltAuthApiService.verifyWalletLoginChallenge(dto.sessionId, dto.message)
         const payload: UserJwtPayload = { sub: user.uuid, minecraftUuid: user.minecraftUuid };
         const jwtToken = this.jwtService.sign(payload);
         return { success: true, jwt: jwtToken }
