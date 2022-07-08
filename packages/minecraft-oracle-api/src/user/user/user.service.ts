@@ -1,8 +1,8 @@
 import { InjectConnection, InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Connection, EntityManager, FindConditions, FindManyOptions, FindOneOptions, ObjectID, Repository, UpdateResult } from 'typeorm';
-import { UserEntity } from './user.entity';
+import { Connection, DeepPartial, EntityManager, FindConditions, FindManyOptions, FindOneOptions, ObjectID, Repository, UpdateResult } from 'typeorm';
+import { UserEntity, userUuid } from './user.entity';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { exist } from 'joi';
 import { AssetEntity } from 'src/asset/asset.entity';
@@ -33,21 +33,20 @@ export class UserService {
         this.context = UserService.name
     }
 
-    public async create(user: UserEntity): Promise<UserEntity> {
-        const u = await this.repository.save(user);
-        return u;
-    }
 
     public async createEmail(email: string): Promise<UserEntity> {
         const em = email.toLowerCase().trim()
-        const user = this.repository.create({ email: em, lastLogin: new Date() })
-        await this.repository.upsert(user, ["email"]);
-        return await this.findByEmail(em)
-    }
 
-    public async createMany(users: UserEntity[]): Promise<UserEntity[]> {
-        const u = await this.repository.save(users);
-        return u;
+        const result = await this.repository.createQueryBuilder('users')
+            .insert()
+            .values({ uuid: userUuid(), email: em, lastLogin: new Date() })
+            .orUpdate(["lastLogin"], ["email"])
+            .returning('*')
+            .execute()
+
+        const user = this.repository.create(result.generatedMaps[0])
+        console.log(JSON.stringify(user, null, 4))
+        return user
     }
 
     public async remove(user: UserEntity): Promise<UserEntity> {

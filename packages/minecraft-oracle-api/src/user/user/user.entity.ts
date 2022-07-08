@@ -4,7 +4,7 @@ import {
     IsNumber,
     IsString
 } from 'class-validator';
-import { Column, CreateDateColumn, Entity, Index, JoinColumn, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { BeforeInsert, Column, CreateDateColumn, Entity, Index, JoinColumn, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { UserRole } from '../../common/enums/UserRole';
 import { SnapshotItemEntity } from '../../snapshot/snapshotItem.entity';
 import { AssetEntity } from '../../asset/asset.entity';
@@ -23,12 +23,8 @@ import { KiltSessionEntity } from '../kilt-session/kilt-session.entity';
 
 @Entity()
 export class UserEntity {
-    constructor(user: Partial<UserEntity>) {
-        Object.assign(this, user);
-    }
-
     //cannot use uuid type or postgres will insert hyphens and screw up our existing minecraft uuids
-    @PrimaryColumn({ default: () => `'${guid()}'`, nullable: false })
+    @PrimaryColumn()
     @IsString()
     uuid: string;
 
@@ -149,4 +145,4 @@ export class UserEntity {
 //resource_inventory_entity id example: 92e1e5635d684e1294c6c6cceb8c9b71-1285-0x1b30a3b5744e733d8d2f19f0812e3f79152a8777-14
 //first part is uuid, if we use hyphens in our uuids, we are screwing up hyphens as a separator in these ids
 const separator = ""
-function guid() { function s4() { return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1); } return s4() + s4() + separator + s4() + separator + s4() + separator + s4() + separator + s4() + s4() + s4(); }
+export function userUuid() { function s4() { return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1); } return s4() + s4() + separator + s4() + separator + s4() + separator + s4() + separator + s4() + s4() + s4(); }
