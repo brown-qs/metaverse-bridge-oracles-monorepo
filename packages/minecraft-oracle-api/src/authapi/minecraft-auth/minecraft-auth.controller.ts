@@ -67,7 +67,7 @@ export class MinecraftAuthController {
         const result = await this.authApiService.authLogin(query.code, query.jwt);
         this.logger.debug(`Response result: ${JSON.stringify(result)}`, this.context)
 
-        const payload: UserJwtPayload = { sub: result.user.uuid, minecraftUuid: result.user.minecraftUuid };
+        const payload: UserJwtPayload = { sub: result.user.uuid };
         const jwtToken = this.jwtService.sign(payload);
 
         const redirectUrl = `${this.configService.get<number>('frontend.url')}/auth/${jwtToken}`
@@ -96,7 +96,7 @@ export class MinecraftAuthController {
         //log unlink
         await this.minecraftLinkServer.unlink(user, user, minecraftUuid)
 
-        const payload: UserJwtPayload = { sub: user.uuid, minecraftUuid: null };
+        const payload: UserJwtPayload = { sub: user.uuid };
         const jwtToken = this.jwtService.sign(payload);
 
         const redirectUrl = `${this.configService.get<number>('frontend.url')}/auth/${jwtToken}`

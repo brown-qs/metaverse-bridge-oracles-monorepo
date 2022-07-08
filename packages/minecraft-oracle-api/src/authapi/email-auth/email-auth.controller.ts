@@ -24,7 +24,7 @@ export class EmailAuthController {
     }
 
     @Post('login')
-    @ApiOperation({ summary: 'Post email and sends login link' })
+    @ApiOperation({ summary: 'Post email and sends login code' })
     async login(@Body() dto: LoginDto): Promise<{ success: boolean }> {
         await this.emailAuthService.sendAuthEmail(dto.email, dto["g-recaptcha-response"])
         return { success: true }
@@ -33,17 +33,17 @@ export class EmailAuthController {
     @Put('change')
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    @ApiOperation({ summary: 'Change email address and send login link to new email' })
+    @ApiOperation({ summary: 'Change email address and send login code to new email' })
     async change(@User() user: UserEntity, @Body() dto: LoginDto): Promise<{ success: boolean }> {
         await this.emailAuthService.sendAuthChangeEmail(user.uuid, dto.email, dto["g-recaptcha-response"])
         return { success: true }
     }
 
     @Get('verify')
-    @ApiOperation({ summary: 'Verify login link' })
+    @ApiOperation({ summary: 'Verify login code' })
     async verify(@Query("loginKey") loginKey: string): Promise<VerifyDto> {
-        const user = await this.emailAuthService.verifyAuthLink(loginKey)
-        const payload: UserJwtPayload = { sub: user.uuid, minecraftUuid: user.minecraftUuid };
+        const user = await this.emailAuthService.verifyLoginKey(loginKey)
+        const payload: UserJwtPayload = { sub: user.uuid };
         const jwtToken = this.jwtService.sign(payload);
         return { success: true, jwt: jwtToken }
     }

@@ -41,7 +41,7 @@ export const Routing = () => {
                 {!!authData?.jwt ? <EmailChangePage /> : <Redirect to="/account/login" />}
             </Route>
 
-            <Route exact path="/account/login/email/verify/:loginKey">
+            <Route exact path="/account/login/email/verify">
                 <EmailVerifyPage />
             </Route>
 

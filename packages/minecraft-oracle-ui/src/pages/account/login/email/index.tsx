@@ -13,13 +13,15 @@ import { Alert, Button, Collapse, IconButton, Input, Stack, TextField, Typograph
 import { theme } from 'theme/Theme';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { ReCAPTCHA } from 'components/Recaptcha';
+import { useHistory } from 'react-router-dom';
 
 const EmailLoginPage = () => {
+  const history = useHistory();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [dirtyTextField, setDirtyTextField] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false)
   const [failureMessage, setFailureMessage] = useState("")
+
   const recaptchaEl = useRef<any>(null)
 
   const isValidEmail = (email: string) => {
@@ -57,7 +59,7 @@ const EmailLoginPage = () => {
       })
       const json = await response.json()
       if (json.success) {
-        setShowSuccess(true)
+        history.push('/account/login/email/verify')
       } else {
         throw new Error(json?.error)
       }
@@ -72,7 +74,6 @@ const EmailLoginPage = () => {
 
   const handleAlertClose = () => {
     setFailureMessage("")
-    setShowSuccess(false)
   }
 
   const loginControls = () => {
@@ -82,7 +83,7 @@ const EmailLoginPage = () => {
           submitEmail(email)
         }
       }} onChange={(event) => { setEmail(event.target.value) }} label="EMAIL" variant="standard" />
-      <LoadingButton disableElevation disableRipple loading={isLoading} disabled={!isValidEmail(email)} onClick={(e) => submitEmail(email)} variant="contained">SEND LOGIN LINK</LoadingButton>
+      <LoadingButton disableElevation disableRipple loading={isLoading} disabled={!isValidEmail(email)} onClick={(e) => submitEmail(email)} variant="contained">SEND LOGIN CODE</LoadingButton>
     </Stack >
   }
 
@@ -93,9 +94,6 @@ const EmailLoginPage = () => {
     alertClose = undefined
   } else if (failureMessage) {
     alert = { severity: "error", text: failureMessage }
-  } else if (showSuccess) {
-    alert = { severity: "success", text: "A temporary login link has been emailed to you!" }
-
   }
 
   return (
