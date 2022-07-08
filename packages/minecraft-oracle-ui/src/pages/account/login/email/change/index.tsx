@@ -90,7 +90,11 @@ const EmailChangePage = () => {
   }
 
   let alert
-  if (failureMessage) {
+  let alertClose: (() => void) | undefined = handleAlertClose
+  if (!process.env.REACT_APP_RECAPTCHA_SITEKEY) {
+    alert = { severity: "error", text: "No recaptcha sitekey defined. Please contact admins." }
+    alertClose = undefined
+  } else if (failureMessage) {
     alert = { severity: "error", text: failureMessage }
   } else if (showSuccess) {
     alert = { severity: "success", text: "A temporary login link has been emailed to you!" }
@@ -98,9 +102,9 @@ const EmailChangePage = () => {
 
   return (
     <>
-      <AuthLayout title="CHANGE EMAIL" loading={false} alert={alert} handleAlertClose={handleAlertClose}> {loginControls()}
+      <AuthLayout title="CHANGE EMAIL" loading={false} alert={alert} handleAlertClose={alertClose}> {loginControls()}
       </AuthLayout >
-      <ReCAPTCHA ref={recaptchaEl} grecaptcha={window.grecaptcha} sitekey={process.env.REACT_APP_RECAPTCHA_SITEKEY || ""} size="invisible" theme="dark" />
+      {!!process.env.REACT_APP_RECAPTCHA_SITEKEY && <ReCAPTCHA ref={recaptchaEl} grecaptcha={window.grecaptcha} sitekey={process.env.REACT_APP_RECAPTCHA_SITEKEY || ""} size="invisible" theme="dark" />}
     </>
   );
 };
