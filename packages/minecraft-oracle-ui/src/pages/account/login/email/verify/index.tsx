@@ -85,7 +85,7 @@ const EmailVerifyPage = () => {
   }
 
   return (
-    <AuthLayout title="Login Code" loading={false} alert={alert} handleAlertClose={handleAlertClose}>{verifyControls()} </AuthLayout >
+    <AuthLayout title="LOGIN CODE" loading={false} alert={alert} handleAlertClose={handleAlertClose}>{verifyControls()} </AuthLayout >
   );
 };
 
