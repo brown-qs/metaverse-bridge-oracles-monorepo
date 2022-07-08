@@ -30,7 +30,6 @@ const EmailChangePage = () => {
 
   const submitEmail = async (ema: string) => {
     setIsLoading(true)
-    await new Promise((resolve) => { setTimeout(resolve, 1000) })
     let token
     try {
       if (recaptchaEl.current) {

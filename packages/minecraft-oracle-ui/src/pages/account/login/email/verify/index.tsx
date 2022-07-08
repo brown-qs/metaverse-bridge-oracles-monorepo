@@ -24,7 +24,6 @@ const EmailVerifyPage = () => {
 
   const verifyLoginKey = async (loginKey: string) => {
     setIsLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
     try {
       const response = await axios({
         method: 'get',
