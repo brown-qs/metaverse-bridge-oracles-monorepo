@@ -101,6 +101,9 @@ export const loadEnv = () => {
         },
         frontend: {
             url: process.env.FRONTEND_URL
+        },
+        mailgun: {
+            apiKey: process.env.MAILGUN_API_KEY
         }
     };
 };

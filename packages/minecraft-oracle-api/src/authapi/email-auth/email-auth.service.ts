@@ -66,7 +66,7 @@ export class EmailAuthService {
 
         const loginLink = `${this.configService.get<string>('frontend.url')}/account/login/email/verify/${uuid}`
         const mailgun = new Mailgun(formData);
-        const mg = mailgun.client({ username: 'api', key: process.env.MAILGUN_API_KEY, url: 'https://api.eu.mailgun.net' });
+        const mg = mailgun.client({ username: 'api', key: this.configService.get<string>('mailgun.apiKey'), url: 'https://api.eu.mailgun.net' });
 
 
         const mailOptions = {
@@ -133,7 +133,7 @@ export class EmailAuthService {
 
         const loginLink = `${this.configService.get<string>('frontend.url')}/account/login/email/verify/${uuid}`
         const mailgun = new Mailgun(formData);
-        const mg = mailgun.client({ username: 'api', key: process.env.MAILGUN_API_KEY, url: 'https://api.eu.mailgun.net' });
+        const mg = mailgun.client({ username: 'api', key: this.configService.get<string>('mailgun.apiKey'), url: 'https://api.eu.mailgun.net' });
 
 
         const mailOptions = {

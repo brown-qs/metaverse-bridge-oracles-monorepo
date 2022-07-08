@@ -53,12 +53,12 @@ export class KiltAuthService {
             ss58Format: 38,
             type: signingKeyPairType,
         })
-        const account = keyring.addFromMnemonic(process.env.KILT_VERIFIER_MNEMONIC)
+        const account = keyring.addFromMnemonic(this.configService.get<DidUri>('kilt.verifierMnemonic'))
         const keypairs = {
             authentication: account.derive('//did//0'),
             assertion: account.derive('//did//assertion//0'),
             keyAgreement: (function () {
-                const secretKeyPair = sr25519PairFromSeed(mnemonicToMiniSecret(process.env.KILT_VERIFIER_MNEMONIC))
+                const secretKeyPair = sr25519PairFromSeed(mnemonicToMiniSecret(this.configService.get<DidUri>('kilt.verifierMnemonic')))
                 const { path } = keyExtractPath('//did//keyAgreement//0')
                 const { secretKey } = keyFromPath(secretKeyPair, path, 'sr25519')
                 const blake = blake2AsU8a(secretKey)
@@ -126,7 +126,8 @@ export class KiltAuthService {
 
     private async getFullDid() {
         //TODO: don't cast as DidUri, do proper checks to make sure it is a the valid string format
-        const fullDid = await Did.FullDidDetails.fromChainInfo(process.env.KILT_VERIFIER_DID_URI as DidUri)
+
+        const fullDid = await Did.FullDidDetails.fromChainInfo(this.configService.get<DidUri>('kilt.verifierDidUri'))
         return fullDid
     }
 
@@ -268,7 +269,6 @@ export class KiltAuthService {
         const message = await Message.decrypt(rawMessage, encryptionKeyStore, fullDid);
         const messageBody = message.body;
         const type = messageBody.type
-        console.log(`content: ${JSON.stringify(messageBody, null, 4)}`)
 
         const content = messageBody.content as ICredential[]
         // fail if incorrect message type
@@ -312,6 +312,8 @@ export class KiltAuthService {
     }
 
     async didConfiguration() {
+        console.log(`didConfiguration()\nprocess.env.KILT_WSS_ADDRESS: |${process.env.KILT_WSS_ADDRESS}|\nprocess.env.KILT_VERIFIER_MNEMONIC: |${process.env.KILT_VERIFIER_MNEMONIC}|\nprocess.env.KILT_VERIFIER_DID_URI: |${process.env.KILT_VERIFIER_DID_URI}|\nprocess.env.KILT_DAPP_NAME: |${process.env.KILT_DAPP_NAME}|\nprocess.env.KILT_CTYPE_NAME: |${process.env.KILT_CTYPE_NAME}|\nprocess.env.KILT_CTYPE_HASH: |${process.env.KILT_CTYPE_HASH}|\n\nthis.configService.get<string>('kilt.wssAddress'): |${this.configService.get<string>('kilt.wssAddress')}|\nthis.configService.get<string>('kilt.verifierMnemonic'): |${this.configService.get<string>('kilt.verifierMnemonic')}|\nthis.configService.get<string>('kilt.verifierDidUri'): |${this.configService.get<string>('kilt.verifierDidUri')}|\nthis.configService.get<string>('kilt.dappName'): |${this.configService.get<string>('kilt.dappName')}|\nthis.configService.get<string>('kilt.cTypeName'): |${this.configService.get<string>('kilt.cTypeName')}|\nthis.configService.get<string>('kilt.cTypeHash'): |${this.configService.get<string>('kilt.cTypeHash')}|\n`)
+
         await this.initKiltPromise
 
         const origin = this.configService.get<string>('frontend.url');
@@ -354,7 +356,6 @@ export class KiltAuthService {
         if (!attestationKey) {
             throw new Error('The attestation key is not defined?!?');
         }
-        console.log(`requestForAttestation: ${JSON.stringify(requestForAttestation, null, 4)}\n================`)
         const { signature, keyUri } = await fullDid.signPayload(
             Utils.Crypto.coToUInt8(requestForAttestation.rootHash),
             assertionKeystore,
@@ -365,13 +366,11 @@ export class KiltAuthService {
             signature,
             keyUri,
         );
-        console.log(`selfSignedRequest: ${JSON.stringify(selfSignedRequest, null, 4)}\n================`)
 
         const attestation = Attestation.fromRequestAndDid(
             selfSignedRequest,
             this.configService.get<DidUri>('kilt.verifierDidUri'),
         );
-        console.log(`attestation: ${JSON.stringify(attestation, null, 4)}\n================`)
 
         const credential = Credential.fromRequestAndAttestation(selfSignedRequest, attestation);
         const domainLinkageCredential = fromCredential(credential);
@@ -390,8 +389,6 @@ export class KiltAuthService {
         const outputSignature = result.linked_dids[0].proof.signature
         const outputRootHash = result.linked_dids[0].credentialSubject.rootHash
         const issuerDidDetails = await Did.FullDidDetails.fromChainInfo(outputDid as DidUri);
-        console.log(`outputDid: ${JSON.stringify(outputDid, null, 4)}\n================`)
-        console.log(`issuerDidDetails.getKeys(): ${JSON.stringify(issuerDidDetails.getKeys(), null, 4)}\n================`)
 
         if (!issuerDidDetails) {
             throw new Error(`Cannot resolve DID ${outputDid}`);
@@ -419,17 +416,17 @@ export class KiltAuthService {
 
     //only run this once for a DID to add an attestation key
     async addAttestationKey() {
-        console.log("addAttestationKey()")
+        console.log(`addAttestationKey()\nprocess.env.KILT_WSS_ADDRESS: |${process.env.KILT_WSS_ADDRESS}|\nprocess.env.KILT_VERIFIER_MNEMONIC: |${process.env.KILT_VERIFIER_MNEMONIC}|\nprocess.env.KILT_VERIFIER_DID_URI: |${process.env.KILT_VERIFIER_DID_URI}|\nprocess.env.KILT_DAPP_NAME: |${process.env.KILT_DAPP_NAME}|\nprocess.env.KILT_CTYPE_NAME: |${process.env.KILT_CTYPE_NAME}|\nprocess.env.KILT_CTYPE_HASH: |${process.env.KILT_CTYPE_HASH}|\n\nthis.configService.get<string>('kilt.wssAddress'): |${this.configService.get<string>('kilt.wssAddress')}|\nthis.configService.get<string>('kilt.verifierMnemonic'): |${this.configService.get<string>('kilt.verifierMnemonic')}|\nthis.configService.get<string>('kilt.verifierDidUri'): |${this.configService.get<string>('kilt.verifierDidUri')}|\nthis.configService.get<string>('kilt.dappName'): |${this.configService.get<string>('kilt.dappName')}|\nthis.configService.get<string>('kilt.cTypeName'): |${this.configService.get<string>('kilt.cTypeName')}|\nthis.configService.get<string>('kilt.cTypeHash'): |${this.configService.get<string>('kilt.cTypeHash')}|\n`)
         await this.initKiltPromise
         const keyring = new Utils.Keyring({
             ss58Format: 38,
             type: "sr25519",
         })
-        const account = keyring.addFromMnemonic(process.env.KILT_VERIFIER_MNEMONIC)
+        const account = keyring.addFromMnemonic(this.configService.get<DidUri>('kilt.verifierMnemonic'))
 
         const keystore = new Did.DemoKeystore()
-        const authenticationKey = await keystore.generateKeypair({ alg: Did.SigningAlgorithms.Sr25519, seed: `${process.env.KILT_VERIFIER_MNEMONIC}//did//0` })
-        const keyAgreementKey = await keystore.generateKeypair({ alg: Did.EncryptionAlgorithms.NaclBox, seed: `${process.env.KILT_VERIFIER_MNEMONIC}//did//keyAgreement//0` })
+        const authenticationKey = await keystore.generateKeypair({ alg: Did.SigningAlgorithms.Sr25519, seed: `${this.configService.get<DidUri>('kilt.verifierMnemonic')}//did//0` })
+        const keyAgreementKey = await keystore.generateKeypair({ alg: Did.EncryptionAlgorithms.NaclBox, seed: `${this.configService.get<DidUri>('kilt.verifierMnemonic')}//did//keyAgreement//0` })
 
 
         const provider = new WsProvider('wss://spiritnet.kilt.io');
@@ -446,27 +443,26 @@ export class KiltAuthService {
             apiPromise.rpc.system.version()
         ]);
 
-        console.log(`You are connected to chain ${chain} using ${nodeName} v${nodeVersion}`);
+        console.log(`You are connected to chain ${chain} using ${nodeName} v${nodeVersion}, please wait...`);
         const attestationKeyPublicDetails = await keystore.generateKeypair({
-            seed: `${process.env.KILT_VERIFIER_MNEMONIC}//did//att//0`,
+            seed: `${this.configService.get<DidUri>('kilt.verifierMnemonic')}//did//att//0`,
             alg: Did.SigningAlgorithms.Sr25519
         })
-
-        //submitterAccount is then the keypair generated from the mnemonic with no derivation path
-        console.log(`account.address: ${account.address}`)
-
 
         const didUpdate = await new Did.FullDidUpdateBuilder(apiPromise, fullDid).setAttestationKey({
             publicKey: attestationKeyPublicDetails.publicKey,
             type: VerificationKeyType.Sr25519
         }).build(keystore, account.address)
         await BlockchainUtils.signAndSubmitTx(didUpdate, account)
+        console.log("Finished adding attestation key!")
     }
 }
 
 
 
 async function keypairs() {
+    console.log(`keypairs()\nprocess.env.KILT_WSS_ADDRESS: |${process.env.KILT_WSS_ADDRESS}|\nprocess.env.KILT_VERIFIER_MNEMONIC: |${process.env.KILT_VERIFIER_MNEMONIC}|\nprocess.env.KILT_VERIFIER_DID_URI: |${process.env.KILT_VERIFIER_DID_URI}|\nprocess.env.KILT_DAPP_NAME: |${process.env.KILT_DAPP_NAME}|\nprocess.env.KILT_CTYPE_NAME: |${process.env.KILT_CTYPE_NAME}|\nprocess.env.KILT_CTYPE_HASH: |${process.env.KILT_CTYPE_HASH}|\n`)
+
     await cryptoWaitReady()
     const signingKeyPairType = 'sr25519'
     const keyring = new Utils.Keyring({
