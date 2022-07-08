@@ -83,6 +83,14 @@ export const moonsamaTheme = (colors: PaletteOptions): ThemeOptions => {
       },
       MuiAlert: {
         styleOverrides: {
+          root: {
+            [defaultTheme.breakpoints.up('sm')]: {
+              width: 500
+            },
+            [defaultTheme.breakpoints.down('sm')]: {
+              width: "100%"
+            }
+          },
           //#5EB234 success
           //#C91D2B error
           //warning #E8B130

@@ -17,7 +17,7 @@ export const AuthLayout = ({ children, ...props }: React.PropsWithChildren<AuthL
       {!!props?.alert && !props.loading
         ?
         <Stack direction="column" spacing={6} margin={2} alignContent='center' textAlign='center'>
-          <Alert sx={{ width: 500, margin: "auto" }} severity={props.alert.severity as AlertColor} onClose={props.handleAlertClose}>{props.alert.text}</Alert>
+          <Alert sx={{ margin: "auto" }} severity={props.alert.severity as AlertColor} onClose={props.handleAlertClose}>{props.alert.text}</Alert>
         </Stack>
 
         :
