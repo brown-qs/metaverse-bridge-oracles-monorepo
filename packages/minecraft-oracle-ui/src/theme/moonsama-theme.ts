@@ -155,7 +155,7 @@ export const moonsamaTheme = (colors: PaletteOptions): ThemeOptions => {
 
             color: "white",
             '&::before': {
-              "border-bottom": "2px solid #234b52"
+              "border-bottom": "2px solid #25434F"
             },
             '&::after': {
               "border-bottom": "2px solid #0EEBA8"
@@ -197,7 +197,7 @@ export const moonsamaTheme = (colors: PaletteOptions): ThemeOptions => {
             color: 'white',
             borderColor: colors.text?.disabled || 'white',
             '&:hover': {
-              backgroundColor: '#234b52',
+              backgroundColor: '#25434F',
               color: 'white',
               borderColor: 'inherit',
             },
@@ -207,8 +207,8 @@ export const moonsamaTheme = (colors: PaletteOptions): ThemeOptions => {
             textTransform: 'none',
             height: defaultTheme.spacing(5),
             fontSize: defaultTheme.typography.fontSize,
-            background: "#234b52",
-            border: "1px solid #234b52",
+            background: "#25434F",
+            border: "1px solid #25434F",
             '&.Mui-disabled': {
               backgroundColor: "#162e32",
               border: "1px solid #162e32",
@@ -218,7 +218,7 @@ export const moonsamaTheme = (colors: PaletteOptions): ThemeOptions => {
               transition: "none",
               boxShadow: 'none',
               border: "1px solid #0EEBA8",
-              background: "#234b52"
+              background: "#25434F"
             },
           },
         },
