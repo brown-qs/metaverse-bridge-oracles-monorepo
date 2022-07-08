@@ -13,10 +13,10 @@ import { theme } from 'theme/Theme';
 import { Link } from 'react-router-dom'
 const LoginPage = () => {
   return (
-    <AuthLayout title="Login Method" loading={false} >
+    <AuthLayout title="LOGIN METHOD" loading={false} >
       <Stack direction="column" alignItems='center' textAlign='center' spacing={2}>
-        <Button disableElevation disableRipple style={{ maxWidth: '175px', width: '175px', minWidth: '175px' }} variant="contained" component={Link} to="/account/login/email">Email Login</Button>
-        <Button disableElevation disableRipple style={{ maxWidth: '175px', width: '175px', minWidth: '175px' }} variant="contained" component={Link} to="/account/login/kilt">KILT Login</Button>
+        <Button disableElevation disableRipple style={{ maxWidth: '175px', width: '175px', minWidth: '175px' }} variant="contained" component={Link} to="/account/login/email">EMAIL LOGIN</Button>
+        <Button disableElevation disableRipple style={{ maxWidth: '175px', width: '175px', minWidth: '175px' }} variant="contained" component={Link} to="/account/login/kilt">KILT LOGIN</Button>
       </Stack >
     </AuthLayout>)
 };

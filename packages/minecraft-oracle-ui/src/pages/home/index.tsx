@@ -17,8 +17,6 @@ const HomePage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [minecraftWarningOpen, setMinecraftWarningOpen] = React.useState(false);
   const { authData } = useAuth();
-  const hasAuth = !!authData?.jwt
-  const hasMinecraft = !!authData?.userProfile?.minecraftUuid
   let history = useHistory();
 
   const {
@@ -42,13 +40,7 @@ const HomePage = () => {
   const isMobileViewport = useMediaQuery(theme.breakpoints.down('sm'));
 
 
-  const buttonRender = () => {
-    if (hasAuth && !hasMinecraft) {
-      return <Button onClick={() => { handleLinkMinecraft() }} sx={{ zIndex: 100 }} disableElevation disableRipple variant="contained">Link Minecraft Account</Button>
-    } else {
-      return <Button onClick={() => { handleLogin() }} sx={{ zIndex: 100 }} disableElevation disableRipple variant="contained">Login</Button>
-    }
-  }
+
   return (
 
     <Stack direction="column" className={homeContainer} alignItems='center' textAlign='center' style={{ height: `calc(100vh - ${isMobileViewport ? '58px' : '80px'})` }}>
@@ -58,7 +50,7 @@ const HomePage = () => {
           <img src={WhiteLogo} alt="" />
         </div>
         <Typography className={glitchText} fontSize={isMobileViewport ? '20px' : '50px'} fontFamily={'Orbitron'}>MULTIVERSE BRIDGE</Typography>
-        {buttonRender()}
+        <Button onClick={() => { handleLogin() }} sx={{ zIndex: 100 }} disableElevation disableRipple variant="contained">LOGIN</Button>
 
       </Stack>
 

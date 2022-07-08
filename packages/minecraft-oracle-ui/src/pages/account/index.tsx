@@ -111,14 +111,14 @@ const AccountPage = () => {
 
       <Stack direction="column" alignItems='center' textAlign='center' spacing={1} marginTop={2}>
         <Box>
-          <Button disableElevation disableRipple style={{ maxWidth: '175px', width: '175px', minWidth: '175px' }} onClick={() => { handleLogout() }} variant="contained">Logout</Button>
+          <Button disableElevation disableRipple style={{ maxWidth: '175px', width: '175px', minWidth: '175px' }} onClick={() => { handleLogout() }} variant="contained">LOGOUT</Button>
         </Box>
       </Stack>
       <Stack direction="column" alignItems='center' textAlign='center' spacing={1} marginTop={5}>
-        <Box>Linked Minecraft Account</Box>
+        <Box>LINKED MINECRAFT ACCOUNT</Box>
         <Box>{authData.userProfile?.minecraftUuid
-          ? <Button disableElevation disableRipple style={{ maxWidth: '175px', width: '175px', minWidth: '175px' }} onClick={() => { handleMinecraftUnlink() }} variant="contained">Unlink Minecraft</Button>
-          : <Button disableElevation disableRipple style={{ maxWidth: '175px', width: '175px', minWidth: '175px' }} onClick={() => { handleMinecraftLink() }} variant="contained">Link Minecraft</Button>}
+          ? <Button disableElevation disableRipple style={{ maxWidth: '175px', width: '175px', minWidth: '175px' }} onClick={() => { handleMinecraftUnlink() }} variant="contained">UNLINK MINECRAFT</Button>
+          : <Button disableElevation disableRipple style={{ maxWidth: '175px', width: '175px', minWidth: '175px' }} onClick={() => { handleMinecraftLink() }} variant="contained">LINK MINECRAFT</Button>}
         </Box>
       </Stack>
 
@@ -130,7 +130,7 @@ const AccountPage = () => {
     alert = { severity: "error", text: failureMessage }
   }
   return (
-    <AuthLayout title="Account" loading={isLoading} alert={alert} handleAlertClose={handleAlertClose}> {accountView()}</AuthLayout >
+    <AuthLayout title="ACCOUNT" loading={isLoading} alert={alert} handleAlertClose={handleAlertClose}> {accountView()}</AuthLayout >
   );
 };
 
