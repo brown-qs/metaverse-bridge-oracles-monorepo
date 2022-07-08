@@ -99,7 +99,11 @@ export class MinecraftAuthService {
             }
 
             //log mc account linked & log mc name/uuid pair
-            await this.minecraftLinkService.link(userUuid, userUuid, account.uuid)
+            const moonsamaUser = await this.userService.findByUuid(userUuid)
+            if (!moonsamaUser) {
+                throw new UnprocessableEntityException(`Invalid moonsama user`)
+            }
+            await this.minecraftLinkService.link(moonsamaUser, moonsamaUser, account.uuid)
             await this.minecraftUuidUserNameService.create(account.uuid, account.username)
 
             this.logger.log(`Account: ${JSON.stringify(account)}`, this.context);
