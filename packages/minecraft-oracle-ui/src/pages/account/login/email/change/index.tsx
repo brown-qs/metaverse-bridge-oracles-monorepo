@@ -84,8 +84,8 @@ const EmailChangePage = () => {
         if (e.key === 'Enter' && !isLoading && isValidEmail(email)) {
           submitEmail(email)
         }
-      }} onChange={(event) => { setEmail(event.target.value) }} label="New Email" variant="standard" />
-      <LoadingButton disableRipple disableElevation loading={isLoading} disabled={!isValidEmail(email)} onClick={(e) => submitEmail(email)} variant="contained">Change Email</LoadingButton>
+      }} onChange={(event) => { setEmail(event.target.value) }} label="NEW EMAIL" variant="standard" />
+      <LoadingButton disableRipple disableElevation loading={isLoading} disabled={!isValidEmail(email)} onClick={(e) => submitEmail(email)} variant="contained">CHANGE EMAIL</LoadingButton>
     </Stack >
   }
 
@@ -98,7 +98,7 @@ const EmailChangePage = () => {
 
   return (
     <>
-      <AuthLayout title="Change Email" loading={false} alert={alert} handleAlertClose={handleAlertClose}> {loginControls()}
+      <AuthLayout title="CHANGE EMAIL" loading={false} alert={alert} handleAlertClose={handleAlertClose}> {loginControls()}
       </AuthLayout >
       <ReCAPTCHA ref={recaptchaEl} grecaptcha={window.grecaptcha} sitekey={process.env.REACT_APP_RECAPTCHA_SITEKEY || ""} size="invisible" theme="dark" />
     </>

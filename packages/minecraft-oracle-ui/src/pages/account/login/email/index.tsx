@@ -81,8 +81,8 @@ const EmailLoginPage = () => {
         if (e.key === 'Enter' && !isLoading && isValidEmail(email)) {
           submitEmail(email)
         }
-      }} onChange={(event) => { setEmail(event.target.value) }} label="Email" variant="standard" />
-      <LoadingButton disableElevation disableRipple loading={isLoading} disabled={!isValidEmail(email)} onClick={(e) => submitEmail(email)} variant="contained">Send Login Link</LoadingButton>
+      }} onChange={(event) => { setEmail(event.target.value) }} label="EMAIL" variant="standard" />
+      <LoadingButton disableElevation disableRipple loading={isLoading} disabled={!isValidEmail(email)} onClick={(e) => submitEmail(email)} variant="contained">SEND LOGIN LINK</LoadingButton>
     </Stack >
   }
 
@@ -96,7 +96,7 @@ const EmailLoginPage = () => {
 
   return (
     <>
-      <AuthLayout title="Email Login" loading={false} alert={alert} handleAlertClose={handleAlertClose}> {loginControls()}
+      <AuthLayout title="EMAIL LOGIN" loading={false} alert={alert} handleAlertClose={handleAlertClose}> {loginControls()}
       </AuthLayout >
       <ReCAPTCHA ref={recaptchaEl} grecaptcha={window.grecaptcha} sitekey={process.env.REACT_APP_RECAPTCHA_SITEKEY || ""} size="invisible" theme="dark" />
     </>

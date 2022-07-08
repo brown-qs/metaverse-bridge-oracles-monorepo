@@ -47,7 +47,7 @@ const ServerAccount = () => {
 
   return (
     <Box onClick={() => isLoggedIn ? handleAccount() : handleLogin()} className={BoxStyle}>
-      {isLoggedIn ? 'Account' : 'Log In'}
+      {isLoggedIn ? 'ACCOUNT' : 'LOGIN'}
     </Box>
   );
 }
