@@ -14,7 +14,6 @@ export type AuthenticatedUser = {
 
 export type UserJwtPayload = {
     sub: string;
-    minecraftUuid: string | null
 }
 
 @Injectable()

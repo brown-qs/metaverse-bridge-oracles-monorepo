@@ -16,47 +16,66 @@ import { Redirect, useHistory, useParams } from 'react-router-dom';
 import axios from 'axios';
 
 const EmailVerifyPage = () => {
-  const [failureMessage, setFailureMessage] = useState("")
   let history = useHistory();
-  const params = useParams<{ loginKey: string }>();
-  const loginKey = params?.loginKey
+  const [isLoading, setIsLoading] = useState(false);
+  const [loginKey, setLoginKey] = useState("");
+  const [dirtyTextField, setDirtyTextField] = useState(false);
+  const [failureMessage, setFailureMessage] = useState("")
 
-  useEffect(() => {
-    const verifyLoginKey = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      try {
-        const response = await axios({
-          method: 'get',
-          url: `${process.env.REACT_APP_BACKEND_API_URL}/auth/email/verify?loginKey=${loginKey}`,
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          validateStatus: () => true
-        });
-        if (response?.data?.success) {
-          const jwt = response.data.jwt
-          history.push(`/auth/${jwt}`)
+  const verifyLoginKey = async (loginKey: string) => {
+    setIsLoading(true)
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    try {
+      const response = await axios({
+        method: 'get',
+        url: `${process.env.REACT_APP_BACKEND_API_URL}/auth/email/verify?loginKey=${loginKey}`,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        validateStatus: () => true
+      });
+      if (response?.data?.success) {
+        const jwt = response.data.jwt
+        history.push(`/auth/${jwt}`)
+      } else {
+        const msg = response?.data?.message
+        if (msg) {
+          setDirtyTextField(false)
+          setLoginKey("")
+          setIsLoading(false)
+          setFailureMessage(`Failed to log you in: ${msg}. Please try again.`)
         } else {
-          const msg = response?.data?.message
-          if (msg) {
-            setFailureMessage(`Failed to log you in: ${msg}. Please try again.`)
-
-          } else {
-            setFailureMessage("Failed to log you in. Please try again.")
-          }
+          setDirtyTextField(false)
+          setLoginKey("")
+          setIsLoading(false)
+          setFailureMessage("Failed to log you in. Please try again.")
         }
-      } catch (e) {
-        setFailureMessage(`Failed to log you in: ${e}. Please try again.`)
       }
+    } catch (e) {
+      setDirtyTextField(false)
+      setLoginKey("")
+      setIsLoading(false)
+      setFailureMessage(`Failed to log you in: ${e}. Please try again.`)
     }
+  }
 
-    verifyLoginKey()
-  }, [])
-
+  const isValidLoginKey = (loginKey: string) => {
+    return /^[a-z0-9]{40}$/.test(loginKey)
+  }
 
   const handleAlertClose = () => {
-    history.push('/account/login/email')
+    setFailureMessage("")
+  }
+
+  const verifyControls = () => {
+    return <Stack alignItems="center" spacing={2}>
+      <TextField disabled={isLoading} inputProps={{ spellCheck: false, autoCapitalize: "off", autoCorrect: "off", onFocus: () => setDirtyTextField(true) }} value={loginKey} error={dirtyTextField && !isValidLoginKey(loginKey)} onKeyPress={(e) => {
+        if (e.key === 'Enter' && !isLoading && isValidLoginKey(loginKey)) {
+          verifyLoginKey(loginKey)
+        }
+      }} onChange={(event) => { setLoginKey(event.target.value) }} label="LOGIN CODE" variant="standard" />
+      <LoadingButton disableElevation disableRipple loading={isLoading} disabled={!isValidLoginKey(loginKey)} onClick={(e) => verifyLoginKey(loginKey)} variant="contained">USE LOGIN CODE</LoadingButton>
+    </Stack >
   }
 
 
@@ -66,7 +85,7 @@ const EmailVerifyPage = () => {
   }
 
   return (
-    <AuthLayout title="VERIFYING LINK..." loading={!failureMessage} alert={alert} handleAlertClose={handleAlertClose}> </AuthLayout >
+    <AuthLayout title="Login Code" loading={false} alert={alert} handleAlertClose={handleAlertClose}>{verifyControls()} </AuthLayout >
   );
 };
 

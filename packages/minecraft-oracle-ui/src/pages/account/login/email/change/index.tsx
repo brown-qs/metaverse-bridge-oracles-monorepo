@@ -10,7 +10,7 @@ import Box from '@mui/material/Box';
 import "@fontsource/orbitron/500.css";
 import { Button, Stack, TextField, Typography, useMediaQuery } from '@mui/material';
 import { theme } from 'theme/Theme';
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import LoadingButton from '@mui/lab/LoadingButton';
 import { ReCAPTCHA } from 'components/Recaptcha';
 import axios, { AxiosError } from 'axios';
@@ -19,8 +19,9 @@ const EmailChangePage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [dirtyTextField, setDirtyTextField] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false)
   const [failureMessage, setFailureMessage] = useState("")
+  const history = useHistory();
+
   const recaptchaEl = useRef<any>(null)
 
   const isValidEmail = (email: string) => {
@@ -57,7 +58,9 @@ const EmailChangePage = () => {
         },
         data: { email: ema, "g-recaptcha-response": token }
       });
-      setShowSuccess(true)
+      //redirect
+      history.push('/account/login/email/verify')
+
     } catch (e) {
       const err = e as AxiosError;
 
@@ -75,7 +78,6 @@ const EmailChangePage = () => {
 
   const handleAlertClose = () => {
     setFailureMessage("")
-    setShowSuccess(false)
   }
 
   const loginControls = () => {
@@ -96,8 +98,6 @@ const EmailChangePage = () => {
     alertClose = undefined
   } else if (failureMessage) {
     alert = { severity: "error", text: failureMessage }
-  } else if (showSuccess) {
-    alert = { severity: "success", text: "A temporary login link has been emailed to you!" }
   }
 
   return (

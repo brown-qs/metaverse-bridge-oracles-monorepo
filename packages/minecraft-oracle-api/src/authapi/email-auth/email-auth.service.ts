@@ -56,15 +56,14 @@ export class EmailAuthService {
 
 
 
-        const uuid = makeUuid() + makeUuid()
+        const loginKey = makeLoginKey()
         try {
-            await this.emailLoginKeyService.createLogin(email.toLowerCase().trim(), uuid, new Date())
+            await this.emailLoginKeyService.createLogin(email.toLowerCase().trim(), loginKey, new Date())
         } catch (err) {
             this.logger.error(`sendAuthEmail: error upserting user into database: ${email}`, err, this.context)
             throw new UnprocessableEntityException(`Error upserting user into database`)
         }
 
-        const loginLink = `${this.configService.get<string>('frontend.url')}/account/login/email/verify/${uuid}`
         const mailgun = new Mailgun(formData);
         const mg = mailgun.client({ username: 'api', key: this.configService.get<string>('mailgun.apiKey'), url: 'https://api.eu.mailgun.net' });
 
@@ -72,8 +71,8 @@ export class EmailAuthService {
         const mailOptions = {
             from: 'Moonsama <no-reply@sp.moonsama.com>',
             to: [email], // list of receivers
-            subject: "Your Moonsama single-use login link", // Subject line
-            text: `We received your request for a single-use login link to use with Moonsama.\n\nYour single-use login link is: ${loginLink}`, // plaintext body
+            subject: "Your Moonsama single-use login code", // Subject line
+            text: `We received your request for a single-use login code to use with Moonsama.\n\nYour single-use login code is: ${loginKey}`, // plaintext body
         };
 
         // send mail with defined transport object
@@ -123,15 +122,14 @@ export class EmailAuthService {
             return
         }
 
-        const uuid = makeUuid() + makeUuid()
+        const loginKey = makeLoginKey()
         try {
-            await this.emailLoginKeyService.createChangeEmailLogin(userUuid, email.toLowerCase().trim(), uuid, new Date())
+            await this.emailLoginKeyService.createChangeEmailLogin(userUuid, email.toLowerCase().trim(), loginKey, new Date())
         } catch (err) {
             this.logger.error(`sendAuthChangeEmail: error upserting user into database: ${email}`, err, this.context)
             throw new UnprocessableEntityException(`Error upserting user into database`)
         }
 
-        const loginLink = `${this.configService.get<string>('frontend.url')}/account/login/email/verify/${uuid}`
         const mailgun = new Mailgun(formData);
         const mg = mailgun.client({ username: 'api', key: this.configService.get<string>('mailgun.apiKey'), url: 'https://api.eu.mailgun.net' });
 
@@ -140,7 +138,7 @@ export class EmailAuthService {
             from: 'Moonsama <no-reply@sp.moonsama.com>',
             to: [email], // list of receivers
             subject: "Moonsama change email request", // Subject line
-            text: `We received your request to change your email used with Moonsama.\n\nPlease use this single-use login link: ${loginLink}`, // plaintext body
+            text: `We received your request to change your email used with Moonsama.\n\nPlease use this single-use login code: ${loginKey}`, // plaintext body
         };
 
         // send mail with defined transport object
@@ -155,7 +153,7 @@ export class EmailAuthService {
         }
     }
 
-    async verifyAuthLink(loginKey: string): Promise<UserEntity> {
+    async verifyLoginKey(loginKey: string): Promise<UserEntity> {
         let loginKeyEntity: EmailLoginKeyEntity
         try {
             loginKeyEntity = await this.emailLoginKeyService.findByLoginKey(loginKey)
@@ -219,4 +217,4 @@ export class EmailAuthService {
     }
 }
 
-function makeUuid() { function s4() { return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1); } return s4() + s4() + '' + s4() + '' + s4() + '' + s4() + '' + s4() + s4() + s4(); }
+function makeLoginKey() { function s4() { return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1); } return String(s4() + s4() + s4() + s4() + s4() + s4() + s4() + s4() + s4() + s4()).toLowerCase(); }
