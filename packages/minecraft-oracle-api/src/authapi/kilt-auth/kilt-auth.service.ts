@@ -312,8 +312,6 @@ export class KiltAuthService {
     }
 
     async didConfiguration() {
-        console.log(`didConfiguration()\nprocess.env.KILT_WSS_ADDRESS: |${process.env.KILT_WSS_ADDRESS}|\nprocess.env.KILT_VERIFIER_MNEMONIC: |${process.env.KILT_VERIFIER_MNEMONIC}|\nprocess.env.KILT_VERIFIER_DID_URI: |${process.env.KILT_VERIFIER_DID_URI}|\nprocess.env.KILT_DAPP_NAME: |${process.env.KILT_DAPP_NAME}|\nprocess.env.KILT_CTYPE_NAME: |${process.env.KILT_CTYPE_NAME}|\nprocess.env.KILT_CTYPE_HASH: |${process.env.KILT_CTYPE_HASH}|\n\nthis.configService.get<string>('kilt.wssAddress'): |${this.configService.get<string>('kilt.wssAddress')}|\nthis.configService.get<string>('kilt.verifierMnemonic'): |${this.configService.get<string>('kilt.verifierMnemonic')}|\nthis.configService.get<string>('kilt.verifierDidUri'): |${this.configService.get<string>('kilt.verifierDidUri')}|\nthis.configService.get<string>('kilt.dappName'): |${this.configService.get<string>('kilt.dappName')}|\nthis.configService.get<string>('kilt.cTypeName'): |${this.configService.get<string>('kilt.cTypeName')}|\nthis.configService.get<string>('kilt.cTypeHash'): |${this.configService.get<string>('kilt.cTypeHash')}|\n`)
-
         await this.initKiltPromise
 
         const origin = this.configService.get<string>('frontend.url');
@@ -416,7 +414,6 @@ export class KiltAuthService {
 
     //only run this once for a DID to add an attestation key
     async addAttestationKey() {
-        console.log(`addAttestationKey()\nprocess.env.KILT_WSS_ADDRESS: |${process.env.KILT_WSS_ADDRESS}|\nprocess.env.KILT_VERIFIER_MNEMONIC: |${process.env.KILT_VERIFIER_MNEMONIC}|\nprocess.env.KILT_VERIFIER_DID_URI: |${process.env.KILT_VERIFIER_DID_URI}|\nprocess.env.KILT_DAPP_NAME: |${process.env.KILT_DAPP_NAME}|\nprocess.env.KILT_CTYPE_NAME: |${process.env.KILT_CTYPE_NAME}|\nprocess.env.KILT_CTYPE_HASH: |${process.env.KILT_CTYPE_HASH}|\n\nthis.configService.get<string>('kilt.wssAddress'): |${this.configService.get<string>('kilt.wssAddress')}|\nthis.configService.get<string>('kilt.verifierMnemonic'): |${this.configService.get<string>('kilt.verifierMnemonic')}|\nthis.configService.get<string>('kilt.verifierDidUri'): |${this.configService.get<string>('kilt.verifierDidUri')}|\nthis.configService.get<string>('kilt.dappName'): |${this.configService.get<string>('kilt.dappName')}|\nthis.configService.get<string>('kilt.cTypeName'): |${this.configService.get<string>('kilt.cTypeName')}|\nthis.configService.get<string>('kilt.cTypeHash'): |${this.configService.get<string>('kilt.cTypeHash')}|\n`)
         await this.initKiltPromise
         const keyring = new Utils.Keyring({
             ss58Format: 38,
@@ -461,7 +458,6 @@ export class KiltAuthService {
 
 
 async function keypairs() {
-    console.log(`keypairs()\nprocess.env.KILT_WSS_ADDRESS: |${process.env.KILT_WSS_ADDRESS}|\nprocess.env.KILT_VERIFIER_MNEMONIC: |${process.env.KILT_VERIFIER_MNEMONIC}|\nprocess.env.KILT_VERIFIER_DID_URI: |${process.env.KILT_VERIFIER_DID_URI}|\nprocess.env.KILT_DAPP_NAME: |${process.env.KILT_DAPP_NAME}|\nprocess.env.KILT_CTYPE_NAME: |${process.env.KILT_CTYPE_NAME}|\nprocess.env.KILT_CTYPE_HASH: |${process.env.KILT_CTYPE_HASH}|\n`)
 
     await cryptoWaitReady()
     const signingKeyPairType = 'sr25519'

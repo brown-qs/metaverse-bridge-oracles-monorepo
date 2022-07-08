@@ -54,8 +54,6 @@ export class KiltAuthController {
     @HttpCode(200)
     @ApiOperation({ summary: 'Dynamically generated did-configuration.json' })
     async didConfiguration() {
-        console.log(`GET did_configuration\nprocess.env.KILT_WSS_ADDRESS: |${process.env.KILT_WSS_ADDRESS}|\nprocess.env.KILT_VERIFIER_MNEMONIC: |${process.env.KILT_VERIFIER_MNEMONIC}|\nprocess.env.KILT_VERIFIER_DID_URI: |${process.env.KILT_VERIFIER_DID_URI}|\nprocess.env.KILT_DAPP_NAME: |${process.env.KILT_DAPP_NAME}|\nprocess.env.KILT_CTYPE_NAME: |${process.env.KILT_CTYPE_NAME}|\nprocess.env.KILT_CTYPE_HASH: |${process.env.KILT_CTYPE_HASH}|\n\nthis.configService.get<string>('kilt.wssAddress'): |${this.configService.get<string>('kilt.wssAddress')}|\nthis.configService.get<string>('kilt.verifierMnemonic'): |${this.configService.get<string>('kilt.verifierMnemonic')}|\nthis.configService.get<string>('kilt.verifierDidUri'): |${this.configService.get<string>('kilt.verifierDidUri')}|\nthis.configService.get<string>('kilt.dappName'): |${this.configService.get<string>('kilt.dappName')}|\nthis.configService.get<string>('kilt.cTypeName'): |${this.configService.get<string>('kilt.cTypeName')}|\nthis.configService.get<string>('kilt.cTypeHash'): |${this.configService.get<string>('kilt.cTypeHash')}|\n`)
-
         let result
         try {
             result = await this.kiltAuthApiService.didConfiguration()
@@ -71,8 +69,6 @@ export class KiltAuthController {
     @HttpCode(200)
     @ApiOperation({ summary: 'Add attestation key' })
     async addAttestationKey() {
-        console.log(`GET add_attestation_key\nprocess.env.KILT_WSS_ADDRESS: |${process.env.KILT_WSS_ADDRESS}|\nprocess.env.KILT_VERIFIER_MNEMONIC: |${process.env.KILT_VERIFIER_MNEMONIC}|\nprocess.env.KILT_VERIFIER_DID_URI: |${process.env.KILT_VERIFIER_DID_URI}|\nprocess.env.KILT_DAPP_NAME: |${process.env.KILT_DAPP_NAME}|\nprocess.env.KILT_CTYPE_NAME: |${process.env.KILT_CTYPE_NAME}|\nprocess.env.KILT_CTYPE_HASH: |${process.env.KILT_CTYPE_HASH}|\n\nthis.configService.get<string>('kilt.wssAddress'): |${this.configService.get<string>('kilt.wssAddress')}|\nthis.configService.get<string>('kilt.verifierMnemonic'): |${this.configService.get<string>('kilt.verifierMnemonic')}|\nthis.configService.get<string>('kilt.verifierDidUri'): |${this.configService.get<string>('kilt.verifierDidUri')}|\nthis.configService.get<string>('kilt.dappName'): |${this.configService.get<string>('kilt.dappName')}|\nthis.configService.get<string>('kilt.cTypeName'): |${this.configService.get<string>('kilt.cTypeName')}|\nthis.configService.get<string>('kilt.cTypeHash'): |${this.configService.get<string>('kilt.cTypeHash')}|\n`)
-
         let result
         try {
             result = await this.kiltAuthApiService.addAttestationKey()
