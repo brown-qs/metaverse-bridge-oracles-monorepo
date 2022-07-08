@@ -1,12 +1,16 @@
 import { IEncryptedMessage } from '@kiltprotocol/sdk-js';
-import { Body, Controller, Get, HttpCode, Inject, Post, Query } from '@nestjs/common';
-import { ApiOperation } from '@nestjs/swagger';
+import { Body, Controller, ForbiddenException, Get, HttpCode, Inject, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { KiltAuthService } from './kilt-auth.service';
 import { WalletSessionDto, WalletLoginDto } from './dtos';
 import { UserJwtPayload } from '../jwt.strategy';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { JwtAuthGuard } from '../jwt-auth.guard';
+import { UserEntity } from 'src/user/user/user.entity';
+import { User } from 'src/utils/decorators';
+import { UserRole } from 'src/common/enums/UserRole';
 
 @Controller('auth/kilt')
 export class KiltAuthController {
@@ -68,7 +72,12 @@ export class KiltAuthController {
     @Get('add_attestation_key')
     @HttpCode(200)
     @ApiOperation({ summary: 'Add attestation key' })
-    async addAttestationKey() {
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    async addAttestationKey(@User() user: UserEntity) {
+        if (user.role !== UserRole.ADMIN) {
+            throw new ForbiddenException('Not admin')
+        }
         let result
         try {
             result = await this.kiltAuthApiService.addAttestationKey()
