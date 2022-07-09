@@ -97,7 +97,6 @@ import { KiltSessionModule } from './user/kilt-session/kilt-session.module';
         }),
         WinstonModule.forRootAsync({
             useFactory: async (configService: ConfigService) => {
-                //console.log(configService.get<string>('typeorm'))
                 return {
                     level: configService.get<string>('log.level'),
                     format: winston.format.combine(
