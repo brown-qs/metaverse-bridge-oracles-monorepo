@@ -1,4 +1,4 @@
-import { NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
@@ -8,6 +8,11 @@ import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { StackTraceErrorFilter } from './filters/stack-trace-error.filter';
 
+//server will crash, if a controller/service calls an async function from outside the class and that function throws, will be unhandledRejection and crash app on node v15 and higher
+process.on('unhandledRejection', (reason: any, promise) => {
+  console.log('Unhandled Rejection at:', reason?.stack || reason)
+})
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: WinstonModule.createLogger({
@@ -16,7 +21,8 @@ async function bootstrap() {
       transports: [new winston.transports.Console()]
     })
   });
-  //app.useGlobalFilters(new StackTraceErrorFilter())
+  const { httpAdapter } = app.get(HttpAdapterHost);
+  app.useGlobalFilters(new StackTraceErrorFilter(httpAdapter))
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors();
   app.setGlobalPrefix('/api/v1');
