@@ -58,7 +58,6 @@ export class KiltAuthController {
     @HttpCode(200)
     @ApiOperation({ summary: 'Dynamically generated did-configuration.json' })
     async didConfiguration() {
-        Promise.reject("Hello world")
         let result
         try {
             result = await this.kiltAuthApiService.didConfiguration()
