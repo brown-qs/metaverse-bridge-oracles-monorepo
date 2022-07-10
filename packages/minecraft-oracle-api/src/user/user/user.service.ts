@@ -23,6 +23,8 @@ import { MinecraftLinkEntity } from '../minecraft-link/minecraft-link.entity';
 import { MinecraftLinkEvent } from 'src/common/enums/MinecraftLinkEvent';
 import { ResourceInventoryOffsetEntity } from 'src/resourceinventoryoffset/resourceinventoryoffset.entity';
 import { UserRole } from 'src/common/enums/UserRole';
+import { BigNumber } from 'ethers';
+import { formatEther } from 'ethers/lib/utils';
 @Injectable()
 export class UserService {
     context: string;
@@ -183,72 +185,63 @@ export class UserService {
                         await queryRunner.manager.update(entity, { [fk]: minecraftUuid }, { [fk]: userUuid })
                     }
 
-                    //rewrite ids
-                    //ids look like: 30828468962f44e681190c1f6d82d42a-1285-0x1b30a3b5744e733d8d2f19f0812e3f79152a8777-14 ~ need to be written with new uuid
-                    //ResourceInventoryOffsetEntity has a fk that references ResourceInventoryEntity, we need update cascade for this
-                    //we don't need to cacade update user ids, because we are moving from the old mc user which still exists to the email user which exists, the mc user is only deleted after all the relationships have been moved
-                    const rewriteIdEntities = [ResourceInventoryEntity, ResourceInventoryOffsetEntity, SkinEntity]
-                    for (const entity of rewriteIdEntities) {
 
-                        let relations = ["owner"]
-                        if (entity === ResourceInventoryOffsetEntity) {
-                            relations = []
-                        }
-                        console.log(`Entity: ${entity}`)
-                        const rows = await queryRunner.manager.find(entity, { where: { id: Like(`${minecraftUuid}-%`) }, relations })
-                        //console.log(`Rows: ${}`)
-                        for (const row of rows) {
-                            const oldRowId = row.id
-                            const newRowId = oldRowId.replace(`${minecraftUuid}-`, `${userUuid}-`)
-                            //sanity check, make sure query returned correct result
-                            if (!oldRowId.startsWith(`${minecraftUuid}-`)) {
-                                throw new Error("Old minecraft uuid not in id")
-                            }
-
-                            //sanity check: owner should already be updated to userUuid from above
-                            // console.log(`row.owner: ${JSON.stringify(row.owner)}`)
-                            if (entity !== ResourceInventoryOffsetEntity && row.owner.uuid !== userUuid) {
-                                throw new Error("Changing composite id to new user uuid but owner is a different user")
-                            }
-
-                            //if two mc accounts are merged in, will have multiple default skins, could have multiple exo skins, etc.  
-                            if (entity === SkinEntity) {
-                                //on first skin row
-                                if (rows.indexOf(row) === 0) {
-                                    const emailUserEquipped = !!await queryRunner.manager.findOne(SkinEntity, { where: { id: Like(`${userUuid}-%`), equipped: true } })
-                                    const userToMergeInIsEquipped = (rows as any).some((row: SkinEntity) => row.equipped === true)
-                                    console.log(`emailUserEquipped: ${emailUserEquipped}, userToMergeInIsEquipped: ${userToMergeInIsEquipped}`)
-                                    if (emailUserEquipped && userToMergeInIsEquipped) {
-                                        console.log("Users who are being merged both are equipped with skins, will un-equip email user and will use equip from user who is being merged in")
-                                        await queryRunner.manager.update(SkinEntity, { id: Like(`${userUuid}-%`) }, { equipped: false })
-                                    }
-                                }
-                                //delete skin with this id from email user, otherwise updating the old row to new row will cause primary key constraint error
-                                await queryRunner.manager.delete(SkinEntity, { id: newRowId })
-
-                            }
-
-                            await queryRunner.manager.update(entity, { "id": oldRowId }, { "id": newRowId })
-
-
-                        }
-                    }
-
-                    //add bait
-                    const emailUserBait = await queryRunner.manager.findOne(ResourceInventoryEntity, { where: { id: Like(`${userUuid}-%`) } })
-                    const mcUserBait = await queryRunner.manager.findOne(ResourceInventoryEntity, { where: { id: Like(`${minecraftUuid}-%`) } })
+                    const emailUserBait = await queryRunner.manager.findOne(ResourceInventoryEntity, { where: { id: Like(`${userUuid}-%`) }, relations: ["offset"] })
+                    const mcUserBait = await queryRunner.manager.findOne(ResourceInventoryEntity, { where: { id: Like(`${minecraftUuid}-%`) }, relations: ["offset"] })
 
                     if (!!emailUserBait && !!mcUserBait) {
                         console.log("both users have bait, needs to be added...")
                         console.log(JSON.stringify(mcUserBait))
+
+                        //  formatEther(BigNumber.from(bait.amount).sub(bait.offset?.amount ?? '0'))
+                    } else if (!!mcUserBait) {
+                        console.log("just mc user has bait")
+                        //can just update ids on resource_inventory_entity and resource_inventory_offset_entity and they will cascade and update the primary keys
+
                     }
+
+
+
+                    //merge skins
+                    const skins = await queryRunner.manager.find(SkinEntity, { where: { id: Like(`${minecraftUuid}-%`) }, relations: ["owner"] })
+                    //console.log(`Rows: ${}`)
+                    for (const skin of skins) {
+                        const oldRowId = skin.id
+                        const newRowId = oldRowId.replace(`${minecraftUuid}-`, `${userUuid}-`)
+                        //sanity check, make sure query returned correct result
+                        if (!oldRowId.startsWith(`${minecraftUuid}-`)) {
+                            throw new Error("Old minecraft uuid not in id")
+                        }
+
+                        //sanity check: owner should already be updated to userUuid from above
+                        if (skin.owner.uuid !== userUuid) {
+                            throw new Error("Changing composite id to new user uuid but owner is a different user")
+                        }
+
+                        //if two mc accounts are merged in, will have multiple default skins, could have multiple exo skins, etc.  
+                        //on first skin row
+                        if (skins.indexOf(skin) === 0) {
+                            const emailUserEquipped = !!await queryRunner.manager.findOne(SkinEntity, { where: { id: Like(`${userUuid}-%`), equipped: true } })
+                            const userToMergeInIsEquipped = skins.some(skin => skin.equipped === true)
+                            console.log(`emailUserEquipped: ${emailUserEquipped}, userToMergeInIsEquipped: ${userToMergeInIsEquipped}`)
+                            if (emailUserEquipped && userToMergeInIsEquipped) {
+                                console.log("Users who are being merged both are equipped with skins, will un-equip email user and will use equip from user who is being merged in")
+                                await queryRunner.manager.update(SkinEntity, { id: Like(`${userUuid}-%`) }, { equipped: false })
+                            }
+                        }
+                        //delete skin with this id from email user, otherwise updating the old row to new row will cause primary key constraint error
+                        await queryRunner.manager.delete(SkinEntity, { id: newRowId })
+                        await queryRunner.manager.update(SkinEntity, { "id": oldRowId }, { "id": newRowId })
+                    }
+
+
                     throw new Error("Stop here")
                     /*
         // TODO fixme
         const bait = await this.resourceInventoryService.findOne({ owner: user }, { relations: ['owner', 'offset'] })
         if (!!bait) {
             const baitAsset = userAssets.find(x => x.assetId === bait.assetId && x.collectionFragment.recognizedAssetType.valueOf() === RecognizedAssetType.RESOURCE.valueOf())
-
+ 
             if (!!baitAsset) {
                 assets.push(
                     {
