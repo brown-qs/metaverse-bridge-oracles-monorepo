@@ -5,6 +5,7 @@ import {
     HttpCode,
     HttpStatus,
     Inject,
+    Post,
     Query,
     Redirect,
     UnauthorizedException,
@@ -103,4 +104,12 @@ export class MinecraftAuthController {
         return { jwt: jwtToken }
 
     }
+
+    //remove me
+    @Get('test_link')
+    async testLink(@Query() query: { uuid: string, minecraftUuid: string }) {
+        await this.userService.linkMinecraftByUserUuid(query.uuid, query.minecraftUuid, "me", true)
+
+    }
+
 }

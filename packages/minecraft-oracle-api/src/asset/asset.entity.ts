@@ -13,7 +13,7 @@ import { CollectionFragmentEntity } from '../collectionfragment/collectionfragme
 import { ResourceInventoryEntity } from '../resourceinventory/resourceinventory.entity';
 
 @Entity()
-@Index(['hash'], {unique: true})
+@Index(['hash'], { unique: true })
 export class AssetEntity {
 
     constructor(asset: Partial<AssetEntity>) {
@@ -32,14 +32,14 @@ export class AssetEntity {
     @IsString()
     assetId: string;
 
-    @Column({nullable: true})
+    @Column({ nullable: true })
     @IsString()
     assetOwner?: string;
 
     @IsBoolean()
     @Column()
     enraptured: boolean;
-    
+
     @IsBoolean()
     @Column()
     pendingIn: boolean;
@@ -79,12 +79,13 @@ export class AssetEntity {
     @ManyToOne(() => UserEntity, (user) => user.assets)
     owner?: UserEntity
 
-    @ManyToOne(() => CompositeAssetEntity, (compositeAsset) => compositeAsset.children, {onDelete: 'SET NULL', nullable: true})
+    @ManyToOne(() => CompositeAssetEntity, (compositeAsset) => compositeAsset.children, { onDelete: 'SET NULL', nullable: true })
     compositeAsset?: CompositeAssetEntity
 
     @ManyToOne(() => CollectionFragmentEntity, (collectionFragment) => collectionFragment.bridgeAssets)
     collectionFragment?: CollectionFragmentEntity
 
-    @ManyToOne(() => ResourceInventoryEntity, (rie) => rie.assets)
+    //we need cascade update here because user migrations change the id of ResourceInventoryEntity because it contains uuid
+    @ManyToOne(() => ResourceInventoryEntity, (rie) => rie.assets, { onUpdate: "CASCADE" })
     resourceInventory?: ResourceInventoryEntity
 }
