@@ -120,8 +120,23 @@ export const moonsamaTheme = (colors: PaletteOptions): ThemeOptions => {
             backgroundColor: '#5EB234',
             color: "white"
           },
+
+          outlinedInfo: {
+            backgroundColor: '#1d59c9',
+            color: "white"
+          },
+          standardInfo: {
+            backgroundColor: '#1d59c9',
+            color: "white"
+
+          },
+          filledInfo: {
+            backgroundColor: '#1d59c9',
+            color: "white"
+          },
           message: {
-            "wordBreak": "break-word"
+            "wordBreak": "break-word",
+            "textAlign": "justify"
           }
         }
       },
