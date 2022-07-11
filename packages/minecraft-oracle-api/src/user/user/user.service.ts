@@ -261,7 +261,6 @@ export class UserService {
                             throw new Error("Changing composite id to new user uuid but owner is a different user")
                         }
 
-                        //if two mc accounts are merged in, will have multiple default skins, could have multiple exo skins, etc.  
                         //on first skin row
                         if (skins.indexOf(skin) === 0) {
                             const emailUserEquipped = !!await queryRunner.manager.findOne(SkinEntity, { where: { id: Like(`${userUuid}-%`), equipped: true } })
@@ -273,6 +272,7 @@ export class UserService {
                                 await queryRunner.manager.update(SkinEntity, { id: Like(`${userUuid}-%`) }, { equipped: false })
                             }
                         }
+                        //if two mc accounts are merged in, will have multiple default skins, could have multiple exo skins, etc., this will fix that
                         //delete skin with this id from email user, otherwise updating the old row to new row will cause primary key constraint error
                         await queryRunner.manager.delete(SkinEntity, { id: newRowId })
                         await queryRunner.manager.update(SkinEntity, { "id": oldRowId }, { "id": newRowId })
