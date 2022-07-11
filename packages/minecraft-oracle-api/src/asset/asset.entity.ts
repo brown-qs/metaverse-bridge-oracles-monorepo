@@ -85,7 +85,6 @@ export class AssetEntity {
     @ManyToOne(() => CollectionFragmentEntity, (collectionFragment) => collectionFragment.bridgeAssets)
     collectionFragment?: CollectionFragmentEntity
 
-    //we need cascade update here because user migrations change the id of ResourceInventoryEntity because it contains uuid
     @ManyToOne(() => ResourceInventoryEntity, (rie) => rie.assets, { onUpdate: "CASCADE" })
     resourceInventory?: ResourceInventoryEntity
 }
