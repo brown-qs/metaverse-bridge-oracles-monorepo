@@ -11,7 +11,7 @@ import Box from '@mui/material/Box';
 import "@fontsource/orbitron/500.css";
 import { Alert, AlertColor, Avatar, Button, Card, CardContent, CardHeader, Chip, CircularProgress, Collapse, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, useMediaQuery } from '@mui/material';
 import { theme } from 'theme/Theme';
-import { Edit, ExpandLess, ExpandMore, StarBorder } from '@mui/icons-material';
+import { Edit, SportsEsports, ExpandLess, ExpandMore, StarBorder } from '@mui/icons-material';
 import PersonIcon from '@mui/icons-material/Person';
 import { Redirect } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
@@ -104,25 +104,26 @@ const AccountPage = () => {
       return <Redirect to={'/account/login'} />
     }
 
-    return <Stack direction="column" alignItems='center' textAlign='center' spacing={0}>
-      <Chip color="info" icon={<PersonIcon />} label={authData?.userProfile?.email} onDelete={() => { history.push(`/account/login/email/change`) }}
-        deleteIcon={<Edit />}></Chip>
+    return (
+      <Stack direction="column" alignItems='center' textAlign='center' spacing={0}>
+        <Chip color="info" sx={{ maxWidth: 300 }} icon={<PersonIcon />} label={authData?.userProfile?.email} onDelete={() => { history.push(`/account/login/email/change`) }}
+          deleteIcon={<Edit />}></Chip>
+        <Stack direction="column" alignItems='center' textAlign='center' spacing={1} marginTop={2}>
+          <Box>
+            <Button disableElevation disableRipple style={{ maxWidth: '200px', width: '200px', minWidth: '200px' }} onClick={() => { handleLogout() }} variant="contained">LOGOUT</Button>
+          </Box>
+        </Stack>
+        <Stack direction="column" alignItems='center' textAlign='center' spacing={1} margin={2} marginTop={5}>
+          <Box>LINKED MINECRAFT ACCOUNT</Box>
+          {!authData?.userProfile?.minecraftUuid && <><Alert sx={{ margin: "auto" }} severity="warning">Linking a Minecraft account that was used with Moonsama prior to the new login system will migrate over all assets and resources to your Moonsama account. If you unlink, and then link a different unmigrated Minecraft account, multiple enraptured items such as game passes could end up on the same account.   </Alert><div></div></>}
+          {authData?.userProfile?.minecraftUuid && <><Chip color="success" icon={<SportsEsports />} label={authData?.userProfile?.minecraftUserName}></Chip><div></div></>}
+          <Box>{authData?.userProfile?.minecraftUuid
+            ? <Button disableElevation disableRipple style={{ maxWidth: '200px', width: '200px', minWidth: '200px' }} onClick={() => { handleMinecraftUnlink() }} variant="contained">UNLINK MINECRAFT</Button>
+            : <Button disableElevation disableRipple style={{ maxWidth: '200px', width: '200px', minWidth: '200px' }} onClick={() => { handleMinecraftLink() }} variant="contained">LINK MINECRAFT</Button>}
+          </Box>
+        </Stack>
 
-
-      <Stack direction="column" alignItems='center' textAlign='center' spacing={1} marginTop={2}>
-        <Box>
-          <Button disableElevation disableRipple style={{ maxWidth: '200px', width: '200px', minWidth: '200px' }} onClick={() => { handleLogout() }} variant="contained">LOGOUT</Button>
-        </Box>
-      </Stack>
-      <Stack direction="column" alignItems='center' textAlign='center' spacing={1} marginTop={5}>
-        <Box>LINKED MINECRAFT ACCOUNT</Box>
-        <Box>{authData.userProfile?.minecraftUuid
-          ? <Button disableElevation disableRipple style={{ maxWidth: '200px', width: '200px', minWidth: '200px' }} onClick={() => { handleMinecraftUnlink() }} variant="contained">UNLINK MINECRAFT</Button>
-          : <Button disableElevation disableRipple style={{ maxWidth: '200px', width: '200px', minWidth: '200px' }} onClick={() => { handleMinecraftLink() }} variant="contained">LINK MINECRAFT</Button>}
-        </Box>
-      </Stack>
-
-    </Stack>
+      </Stack >)
   }
 
   let alert
