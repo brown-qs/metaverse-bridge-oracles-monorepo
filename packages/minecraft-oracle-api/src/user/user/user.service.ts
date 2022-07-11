@@ -24,7 +24,7 @@ import { MinecraftLinkEvent } from 'src/common/enums/MinecraftLinkEvent';
 import { ResourceInventoryOffsetEntity } from 'src/resourceinventoryoffset/resourceinventoryoffset.entity';
 import { UserRole } from 'src/common/enums/UserRole';
 import { BigNumber } from 'ethers';
-import { formatEther } from 'ethers/lib/utils';
+import { formatEther, parseEther } from 'ethers/lib/utils';
 @Injectable()
 export class UserService {
     context: string;
@@ -186,6 +186,57 @@ export class UserService {
                     }
 
 
+                    //merge inventory
+                    const emailUserInventoryRows = await queryRunner.manager.find(InventoryEntity, { where: { id: Like(`${userUuid}-%`) } })
+                    const mcUserInventoryRows = await queryRunner.manager.find(InventoryEntity, { where: { id: Like(`${minecraftUuid}-%`) } })
+                    this.logger.debug(`user.service::linkMinecraftByUserUuid emailUserInventoryRows.length ${emailUserInventoryRows.length} mcUserInventoryRows.length ${mcUserInventoryRows.length}`, this.context)
+
+                    if (emailUserInventoryRows.length > 0 && mcUserInventoryRows.length > 0) {
+                        this.logger.debug(`user.service::linkMinecraftByUserUuid both users have inventory, needs to be added.`, this.context)
+                        let items = [...emailUserInventoryRows, ...mcUserInventoryRows].map(row => row.id.split("-")[1])
+                        //de-dupe
+                        items = items.filter((item, i, self) => self.lastIndexOf(item) === i).sort()
+
+                        for (const item of items) {
+                            const emailHasItem = emailUserInventoryRows.some(inv => inv.id.endsWith(`-${item}`))
+                            const mcHasItem = mcUserInventoryRows.some(inv => inv.id.endsWith(`-${item}`))
+                            this.logger.debug(`user.service::linkMinecraftByUserUuid ${item} mcHasItem: ${mcHasItem} emailHasItem: ${emailHasItem}`, this.context)
+
+                            if (emailHasItem && mcHasItem) {
+                                this.logger.debug(`user.service::linkMinecraftByUserUuid both users have item ${item}, we need to add them`, this.context)
+                                const oldId = `${minecraftUuid}-${item}`
+                                const newId = oldId.replace(`${minecraftUuid}-`, `${userUuid}-`)
+                                const mcInventory = await queryRunner.manager.findOne(InventoryEntity, { id: oldId })
+                                const emailInventory = await queryRunner.manager.findOne(InventoryEntity, { id: newId })
+
+                                const summedInventory = formatEther(BigNumber.from(parseEther(mcInventory.amount)).add(parseEther(emailInventory.amount)))
+                                this.logger.debug(`user.service::linkMinecraftByUserUuid item: ${item} mcInventory: ${mcInventory.amount} emailInventory: ${emailInventory.amount} summedInventory: ${summedInventory}`, this.context)
+                                await queryRunner.manager.update(InventoryEntity, { id: newId }, { amount: summedInventory })
+                                await queryRunner.manager.delete(InventoryEntity, { id: oldId })
+
+                            } else if (mcHasItem) {
+                                this.logger.debug(`user.service::linkMinecraftByUserUuid only mc user has item ${item}, we can just rewrite the id`, this.context)
+                                const oldId = `${minecraftUuid}-${item}`
+                                const newId = oldId.replace(`${minecraftUuid}-`, `${userUuid}-`)
+                                await queryRunner.manager.update(InventoryEntity, { id: oldId }, { id: newId })
+                            }
+                        }
+
+                        this.logger.debug(`user.service::linkMinecraftByUserUuid successfully merged inventory!`, this.context)
+
+                    } else if (mcUserInventoryRows.length > 0) {
+                        this.logger.debug(`user.service::linkMinecraftByUserUuid just mc user has inventory`, this.context)
+
+                        for (const row of mcUserInventoryRows) {
+                            const oldId = row.id
+                            const newId = oldId.replace(`${minecraftUuid}-`, `${userUuid}-`)
+                            await queryRunner.manager.update(InventoryEntity, { id: oldId }, { id: newId })
+                        }
+
+                        this.logger.debug(`user.service::linkMinecraftByUserUuid successfully moved inventory!`, this.context)
+                    }
+
+                    //   throw new Error("Stop here")
                     //merge bait :)
                     const emailUserBait = await queryRunner.manager.findOne(ResourceInventoryEntity, { where: { id: Like(`${userUuid}-%`) }, relations: ["offset"] })
                     const mcUserBait = await queryRunner.manager.findOne(ResourceInventoryEntity, { where: { id: Like(`${minecraftUuid}-%`) }, relations: ["offset"] })
@@ -243,7 +294,6 @@ export class UserService {
                         await queryRunner.manager.update(ResourceInventoryOffsetEntity, { id: oldMcResourceOffsetId }, { id: newMcResourceOffsetId })
 
                         this.logger.debug(`user.service::linkMinecraftByUserUuid successfully moved bait!`, this.context)
-
                     }
 
                     //merge skins

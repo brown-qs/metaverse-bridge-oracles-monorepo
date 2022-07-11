@@ -33,12 +33,16 @@ export async function walletLogin(extension: InjectedWindowProvider) {
   try {
     session = await extension.startSession(dappName, dAppEncryptionKeyUri, walletSessionChallenge);
 
-  } catch (e: any) {
-    const errStr = e.toString()
+  } catch (e: unknown) {
+    const errStr = String(e)
     if (errStr.includes("Request failed with status code 404 Not Found")) {
       throw new Error("Sporran could likely not find did-configuration.json")
+    } else if (errStr.includes("Not authorized")) {
+      throw new Error("You have not given this website permission to access your KILT wallet. Please go to your wallet settings and toggle access.")
     } else {
-      console.log(e.stack)
+      if (e instanceof Error) {
+        console.log(e.stack)
+      }
       throw e
     }
 
