@@ -11,6 +11,7 @@ import fetch from 'node-fetch'
 import { collections } from '../common/collections';
 import { TypeContractsCallbackProvider } from '../provider/contract';
 import { ContractType } from '../common/enums/ContractType';
+import { CollectionQueryDto, NftsQueryDto } from './dtos/nft.dto';
 
 
 @Injectable()
@@ -28,53 +29,80 @@ export class NftApiService {
         this.defaultChainId = this.configService.get<number>('network.defaultChainId')
     }
 
-    public async getNFTCollection(chainId: string, tokenType: string, address: string): Promise<ProcessedStaticTokenData[] | StaticTokenData[]> {
-        const recognizedCollection = (collections.collections.filter((x) => x.chainId === Number(chainId)) ?? []).find(coll => coll.address.toLowerCase() === address.toLowerCase());
-        let assets: Asset[] = [];
-        for (let i=recognizedCollection.minId; i<recognizedCollection.maxId; i++) {
-            assets.push({
+    public async getNFTCollection(dto: CollectionQueryDto): Promise<(ProcessedStaticTokenData | StaticTokenData)[]> {
+        const chainId = Number.parseInt(dto.chainId ?? '1285')
+        const take = dto.take ?? 100
+        const offset = Number.parseInt(dto.offset as any)
+        const assetIds: string[] = Array.from({ length: take }, (_, i) => (i + 1 + offset).toString())
+        const results = await this.getNFT(chainId.toString(), dto.assetType, dto.assetAddress, assetIds)
+        return results
+    }
+
+    public async getNFTs(dto: NftsQueryDto) {
+        const res = []
+        const x = await this.getNFT(dto.chainId, dto.assetType, dto.assetAddress, dto.assetIds)
+        return x
+    }
+
+    public async getNFT(chainId: string, tokenType: string, address: string, tokenIds: string[]): Promise<(ProcessedStaticTokenData | StaticTokenData)[]> {
+
+        this.logger.debug(`Fetching NFT metadata: ${chainId}-${tokenType}-${address}-${tokenIds}`, this.context)
+
+        const assets: Asset[] = tokenIds.map(tokenId => {
+            return {
                 assetAddress: address,
-                assetId: i.toString(),
+                assetId: tokenId,
                 assetType: stringToStringAssetType(tokenType),
-                id: '1',
-            })
-        }
+                chainId: Number.parseInt(chainId ?? '1285'),
+                id: '1'
+            }
+        })
 
         let calls: any[] = [];
         assets.map((asset, i) => {
             calls = [...calls, ...getTokenStaticCalldata(asset)];
         });
 
-
-        const multicall = await this.getContract(!!chainId ? Number.parseInt(chainId): this.defaultChainId, ContractType.MULTICALL)
-
+        const multicall = await this.getContract(!!chainId ? Number.parseInt(chainId) : this.defaultChainId, ContractType.MULTICALL)
         const call_results = await this.tryMultiCallCore(multicall, calls, false);
 
         if (!call_results) {
+            this.logger.error(`Fetching NFT metadata: ${chainId}-${tokenType}-${address}-${tokenIds}`, undefined, this.context)
             return undefined
         }
         //console.log('yolo tryMultiCallCore res', results);
-        let x = processTokenStaticCallResults(assets, call_results);
-        const tokenUris = await this.useFetchTokenUri(x)
+        let statics = processTokenStaticCallResults(assets, call_results);
+        const tokenUris = await this.useFetchTokenUri(statics)
         let results: any[] = [];
-        if(!!tokenUris) { 
-            results = await Promise.all(x.map(async (xi, ind) => {
-                let result: any = xi;
-                result['tokenURI'] = tokenUris[ind] as TokenMeta
-            
-                const imageurl = uriToHttp(result.tokenURI.image, false)
-                result.tokenURI.image = {
+
+        if (!!tokenUris) {
+            results = await Promise.all(statics.map(async (stat, ind) => {
+                let result: any = stat;
+
+                if (!tokenUris?.[ind]) {
+                    return undefined
+                }
+                result['tokenURI'] = tokenUris?.[ind] as TokenMeta
+
+                const imageurl = uriToHttp(result.tokenURI?.image, false)
+                result.tokenURI.image = imageurl
+                result.tokenURI['image_meta'] = {
                     url: imageurl,
                     ...await this.fetchMediaType(imageurl)
                 }
-                //console.log('hmm', result);
-                return result;
+                result['asset'] = {
+                    assetAddress: assets[ind].assetAddress,
+                    assetId: assets[ind].assetId,
+                    assetType: assets[ind].assetType,
+                    chainId: assets[ind].chainId,
+                }
+                return result
             }))
         }
-        return results;
+        return results
     }
 
-    public async getNFT(chainId: string, tokenType: string, address: string, tokenId: string): Promise<ProcessedStaticTokenData | StaticTokenData> {
+    public async getRawNFTMetadata(chainId: string, tokenType: string, address: string, tokenId: string): Promise<{ metaObject?: unknown, metaUri?: string } | undefined> {
 
         this.logger.debug(`Fetching NFT metadata: ${chainId}-${tokenType}-${address}-${tokenId}`, this.context)
 
@@ -92,48 +120,7 @@ export class NftApiService {
             calls = [...calls, ...getTokenStaticCalldata(asset)];
         });
 
-        const multicall = await this.getContract(!!chainId ? Number.parseInt(chainId): this.defaultChainId, ContractType.MULTICALL)
-        const results = await this.tryMultiCallCore(multicall, calls, false);
-
-        if (!results) {
-            this.logger.error(`Fetching NFT metadata: ${chainId}-${tokenType}-${address}-${tokenId}`, undefined, this.context)
-            return undefined
-        }
-        //console.log('yolo tryMultiCallCore res', results);
-        let x = processTokenStaticCallResults(assets, results);
-        const tokenUris = await this.useFetchTokenUri(x)
-        let result: any = x?.[0]
-        if(!!tokenUris) {
-            result['tokenURI'] = tokenUris?.[0] as TokenMeta
-            
-            const imageurl = uriToHttp(result.tokenURI.image, false)
-            result.tokenURI.image = {
-                url: imageurl,
-                ...await this.fetchMediaType(imageurl)
-            }
-        }
-        return result
-    }
-
-    public async getRawNFTMetadata(chainId: string, tokenType: string, address: string, tokenId: string): Promise<{metaObject?: unknown, metaUri?: string} | undefined> {
-
-        this.logger.debug(`Fetching NFT metadata: ${chainId}-${tokenType}-${address}-${tokenId}`, this.context)
-
-        const assets: Asset[] = [
-            {
-                assetAddress: address,
-                assetId: tokenId,
-                assetType: stringToStringAssetType(tokenType),
-                id: '1'
-            }
-        ]
-
-        let calls: any[] = [];
-        assets.map((asset, i) => {
-            calls = [...calls, ...getTokenStaticCalldata(asset)];
-        });
-
-        const multicall = await this.getContract(!!chainId ? Number.parseInt(chainId): this.defaultChainId, ContractType.MULTICALL)
+        const multicall = await this.getContract(!!chainId ? Number.parseInt(chainId) : this.defaultChainId, ContractType.MULTICALL)
         const results = await this.tryMultiCallCore(multicall, calls, false);
 
         if (!results) {
@@ -144,7 +131,7 @@ export class NftApiService {
         let x = processTokenStaticCallResults(assets, results);
         const tokenMetaUris = x.map(x => x.tokenURI)
         const tokenMetas = await this.useFetchRawTokenUri(x)
-        
+
 
         return {
             metaObject: tokenMetas?.[0] as TokenMeta,

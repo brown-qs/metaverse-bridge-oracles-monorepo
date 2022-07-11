@@ -50,12 +50,12 @@ import { CollectionFragmentModule } from '../collectionfragment/collectionfragme
         ProviderModule,
         GameItemTypeModule,
         PlayerGameItemModule,
+        CollectionFragmentModule,
         ResourceInventoryModule,
-        ResourceInventoryOffsetModule,
-        CollectionFragmentModule
+        ResourceInventoryOffsetModule
     ],
     providers: [GameApiService],
     exports: [GameApiService],
     controllers: [GameApiController]
 })
-export class GameApiModule {}
+export class GameApiModule { }

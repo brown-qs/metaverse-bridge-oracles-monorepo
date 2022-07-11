@@ -11,7 +11,7 @@ import { PlayerSkinDto } from './dtos/texturemap.dto';
 import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
 import { MaterialService } from '../material/material.service';
 import { SnapshotService } from '../snapshot/snapshot.service';
-import { SnapshotDto, SnapshotsDto } from './dtos/snapshot.dto';
+import { BulkSnapshotRequestDto, SnapshotDto, SnapshotsDto } from './dtos/snapshot.dto';
 import { PermittedMaterial, PermittedMaterials } from './dtos/permitted-material.dto';
 import { GameService } from '../game/game.service';
 
@@ -52,16 +52,9 @@ import { SetGameScoreTypeDto } from '../gamescoretype/dtos/gamescoretype.dto';
 import { PlayerScoreEntity } from '../playerscore/playerscore.entity';
 import { GameScoreTypeService } from '../gamescoretype/gamescoretype.service';
 import { adjustPower } from '../utils';
-import { allToSha256, allToSha3_256 } from '../crypto/hash';
-import { UserAssetFingerprint, UserAssetFingerprintsResult } from './dtos/fingerprint.dto';
 import { ResourceInventoryService } from '../resourceinventory/resourceinventory.service';
 import { ResourceInventoryOffsetService } from '../resourceinventoryoffset/resourceinventoryoffset.service';
-import { formatEther, parseEther } from 'ethers/lib/utils';
-import { ResourceInventoryQueryResult, SetResourceInventoryItems } from './dtos/resourceinventory.dto';
-import { ResourceInventoryOffsetQueryResult, SetResourceInventoryOffsetItems } from './dtos/resourceinventoryoffset.dto';
-import { CollectionFragmentService } from '../collectionfragment/collectionfragment.service';
-import { BigNumber } from 'ethers';
-import { GetFungibleBalancesResultDto } from './dtos/fungiblebalances.dto';
+import { parseEther } from 'ethers/lib/utils';
 
 @Injectable()
 export class GameApiService {
@@ -91,7 +84,6 @@ export class GameApiService {
         private readonly gameScoreTypeService: GameScoreTypeService,
         private readonly resourceInventoryService: ResourceInventoryService,
         private readonly resourceInventoryOffsetService: ResourceInventoryOffsetService,
-        private readonly collectionFragmentService: CollectionFragmentService,
         private configService: ConfigService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
@@ -125,7 +117,20 @@ export class GameApiService {
         }
     }
 
-    public async processSnapshots(user: UserEntity, dto: SnapshotsDto): Promise<[SnapshotItemEntity[], boolean[], number, number]> {
+    public async processSnapshots(dto: BulkSnapshotRequestDto): Promise<boolean[]> {
+        const res = []
+        for (const entry of dto.entries) {
+            const user = await this.userService.findByUuid(entry.uuid)
+            if (!user) {
+                res.push(false)
+            }
+            const [a, b, c, d] = await this.processUserSnapshots(user, entry)
+            res.push(c === d)
+        }
+        return res
+    }
+
+    public async processUserSnapshots(user: UserEntity, dto: SnapshotsDto): Promise<[SnapshotItemEntity[], boolean[], number, number]> {
 
         if (!user || !dto || !dto.snapshots || dto.snapshots.length == 0) {
             return [[], [], 0, 0]
@@ -1051,125 +1056,5 @@ export class GameApiService {
         }
 
         return entities;
-    }
-
-    getAssetFingerprintForPlayer(user: UserEntity): UserAssetFingerprint {
-
-        if (!user) {
-            return undefined
-        }
-
-        //console.log(user.userName)
-        const hash = user.assets.filter(asset => !asset.pendingIn)
-            .reduce((prevResult, element) => {
-                const leafHash = allToSha256(element.collectionFragment.collection.chainId, element.collectionFragment.collection.assetAddress, element.assetId, JSON.stringify(element.metadata))
-                const result = allToSha256(prevResult, leafHash)
-                //console.log('    ', {leafHash, result: result.toString('hex')})
-                return result
-            }, Buffer.from([]))
-
-        if (!hash || hash.length === 0) {
-            return undefined
-        }
-
-        return {
-            uuid: user.uuid,
-            assetsFingerprint: hash.toString('hex')
-        }
-    }
-
-    async getAssetFingerprints(): Promise<UserAssetFingerprintsResult> {
-        const users = await this.userService.findMany({ where: { hasGame: true }, relations: ['assets', 'assets.collectionFragment', 'assets.collectionFragment.collection'], loadEagerRelations: true })
-        const results: UserAssetFingerprint[] = users.map(user => this.getAssetFingerprintForPlayer(user)).filter(x => !!x)
-
-        return {
-            fingerprints: results
-        };
-    }
-
-    async getResourceInventoryPlayer(user: UserEntity): Promise<ResourceInventoryQueryResult[]> {
-        const res = await this.resourceInventoryService.findMany({ where: { owner: { uuid: user.uuid } }, relations: ['owner', 'collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
-
-        return res.map(x => {
-            return {
-                assetId: x.assetId,
-                assetAddress: x.collectionFragment.collection.assetAddress,
-                chainId: x.collectionFragment.collection.chainId,
-                assetType: x.collectionFragment.collection.assetType,
-                amount: formatEther(x.amount)
-            }
-        })
-    }
-
-    async setResourceInventoryPlayer(user: UserEntity, dto: SetResourceInventoryItems): Promise<boolean> {
-        const res = await this.resourceInventoryService.findMany({ where: { owner: { uuid: user.uuid } }, relations: ['owner'] })
-
-        await Promise.all(dto.items.map(async (x) => {
-            const id = ResourceInventoryService.calculateId({ ...x, uuid: user.uuid })
-
-            await this.resourceInventoryService.create({
-                amount: parseEther(x.amount).toString(),
-                id,
-                owner: user,
-                assetId: x.assetId,
-                collectionFragment: await this.collectionFragmentService.findOne({ collection: { assetAddress: x.assetAddress.toLowerCase(), chainId: x.chainId } }, { relations: ['collection'] })
-            })
-        }))
-
-        return true
-    }
-
-    async getResourceInventoryOffsetPlayer(user: UserEntity): Promise<ResourceInventoryOffsetQueryResult[]> {
-        const res = await this.resourceInventoryOffsetService.findMany({ where: { owner: { uuid: user.uuid } }, relations: ['owner', 'resourceInventory', 'resourceInventory.collectionFragment', 'resourceInventory.collectionFragment.collection'], loadEagerRelations: true })
-
-        return res.map(x => {
-            return {
-                assetId: x.resourceInventory.assetId,
-                assetAddress: x.resourceInventory.collectionFragment.collection.assetAddress,
-                chainId: x.resourceInventory.collectionFragment.collection.chainId,
-                assetType: x.resourceInventory.collectionFragment.collection.assetType,
-                amount: formatEther(x.amount)
-            }
-        })
-    }
-
-    async setResourceInventoryOffsetPlayer(user: UserEntity, dto: SetResourceInventoryOffsetItems): Promise<boolean> {
-        await Promise.all(dto.items.map(async (x) => {
-            const id = ResourceInventoryOffsetService.calculateId({ ...x, uuid: user.uuid })
-
-            const resourceInventory = await this.resourceInventoryService.findOne({ id })
-
-            if (!resourceInventory) {
-                return undefined
-            }
-
-            await this.resourceInventoryOffsetService.create({
-                amount: parseEther(x.amount).toString(),
-                id,
-                resourceInventory
-            })
-        }))
-
-        return true
-    }
-
-    async getFungibleBalancesForPlayer(user: UserEntity): Promise<GetFungibleBalancesResultDto> {
-
-        const res = await this.resourceInventoryService.findMany({ where: { owner: { uuid: user.uuid } }, relations: ['owner', 'offset', 'collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
-
-        if (!res) {
-            return { balances: [], uuid: user.uuid }
-        }
-        const results = await Promise.all(res.map(async (x) => {
-            return {
-                assetId: x.assetId,
-                assetAddress: x.collectionFragment.collection.assetAddress,
-                chainId: x.collectionFragment.collection.chainId,
-                assetType: x.collectionFragment.collection.assetType,
-                amount: x.offset?.amount ? formatEther(BigNumber.from(x.amount).sub(x.offset?.amount ?? '0')) : formatEther(x.amount)
-            }
-        }))
-
-        return { balances: results, uuid: user.uuid }
     }
 }

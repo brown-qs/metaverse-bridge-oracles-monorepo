@@ -39,11 +39,6 @@ export class ProfileApiService {
         this.defaultChainId = this.configService.get<number>('network.defaultChainId')
     }
 
-    async userAssets(user: UserEntity) {
-        let userAssets = await this.assetService.findMany({ where: { owner: user.uuid, pendingIn: false } })
-        return userAssets
-    }
-
     async getPlayerItems(user: UserEntity): Promise<ThingsDto> {
         const snapshots = await this.inventoryService.findMany({ relations: ['material', 'owner'], where: { owner: { uuid: user.uuid } } })
 

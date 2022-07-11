@@ -435,7 +435,7 @@ export class OracleApiService {
             let metadata = null
             let world = null
             try {
-                metadata = await this.nftApiService.getNFT(chainId.toString(), assetType, assetAddress, assetId) as any ?? null
+                metadata = (await this.nftApiService.getNFT(chainId.toString(), assetType, assetAddress, [assetId]))?.[0] as any ?? null
                 world = metadata?.tokenURI?.plot?.world ?? null
             } catch {
                 this.logger.error(`ImportConfirm: couldn't fetch asset metadata: ${hash}`, undefined, this.context)
@@ -556,7 +556,7 @@ export class OracleApiService {
             let metadata = null
             let world = null
             try {
-                metadata = await this.nftApiService.getNFT(chainId.toString(), assetType, assetAddress, assetId) as any ?? null
+                metadata = (await this.nftApiService.getNFT(chainId.toString(), assetType, assetAddress, [assetId]))?.[0] as any ?? null
                 world = metadata?.tokenURI?.plot?.world ?? null
             } catch {
                 this.logger.error(`ImportConfirm: couldn't fetch asset metadata: ${hash}`, undefined, this.context)

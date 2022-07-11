@@ -110,7 +110,7 @@ export class AdminApiController {
             throw new UnprocessableEntityException('No player found')
         }
 
-        const [snapshottedItems, successArray, receivedNum, savedNum] = await this.gameApiService.processSnapshots(user, snapshots)
+        const [snapshottedItems, successArray, receivedNum, savedNum] = await this.gameApiService.processUserSnapshots(user, snapshots)
         return successArray
     }
 

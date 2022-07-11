@@ -92,7 +92,7 @@ export function useInGameItems(trigger: string | undefined = undefined) {
                 //console.log('DEBUG melange', {asset: x})
                 return {
                     assetId: x.assetId,
-                    assetAddress: x.assetAddress,
+                    assetAddress: x.assetAddress.length === 42 ? x.assetAddress: `${x.assetAddress}${'0'.repeat(42 - x.assetAddress.length)}`,
                     assetType: stringToStringAssetType(x.assetType),
                     id: '1',
                     chainId: x.exportChainId,

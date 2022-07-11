@@ -81,7 +81,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
     //In Game Items
     const inGameItems = useInGameItems(fetchtrigger);
-    const inGameAssets = inGameItems?.assets ?? [];
+    const inGameAssets = (inGameItems?.assets ?? []).filter(x => x.assetAddress.length === 42);
     const inGameResources = inGameItems?.resources ?? []
     const inGameTextures: InGameTexture[] = inGameItems?.textures ?? []
 
@@ -310,7 +310,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                 {/*<img className={itemImage} src={item?.meta?.image} alt="" />*/}
                                                 <Media uri={item?.meta?.image} />
                                             </ListItemAvatar>
-                                            <ListItemText primary={item?.meta?.name} style={{ paddingLeft: '10px' }} />
+                                            <ListItemText primary={`${item?.meta?.name}${item?.asset?.assetAddress?.toLowerCase() !== '0xb654611f84a8dc429ba3cb4fda9fad236c505a1a' ? ` #${item?.asset?.assetId}`: '' }`} style={{ paddingLeft: '10px' }} />
                                             <Tooltip title={'You can have 1 VIP ticket imported at a time.'}>
                                                 <span>
                                                     <Button
@@ -338,7 +338,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     {/*<img className={itemImage} src={item?.meta?.image} alt="" />*/}
                                                     <Media uri={item?.meta?.image} />
                                                 </ListItemAvatar>
-                                                <ListItemText primary={item?.meta?.name} style={{ paddingLeft: '10px' }} />
+                                                <ListItemText primary={`${item?.meta?.name}${item?.asset?.assetAddress?.toLowerCase() !== '0xb654611f84a8dc429ba3cb4fda9fad236c505a1a' ? ` #${item?.asset?.assetId}`: '' }`} style={{ paddingLeft: '10px' }} />
                                                 {item.importable && <Tooltip title={`Your imported ${item?.meta?.name} will bound to your Minecraft account. It will go back to the sender address when exported.`}>
                                                     <span>
                                                         <Button
