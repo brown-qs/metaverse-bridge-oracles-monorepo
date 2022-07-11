@@ -29,10 +29,10 @@ export class UserEntity {
     uuid: string;
 
     @Column({ unique: true, default: null, nullable: true })
-    email: string;
+    email?: string;
 
     @CreateDateColumn()
-    createdAt: Date;
+    createdAt?: Date;
 
     @Column({ default: null, nullable: true })
     lastLogin?: Date;
@@ -127,19 +127,19 @@ export class UserEntity {
     scores?: PlayerScoreEntity[];
 
     @OneToMany(() => EmailChangeEntity, (emailChange) => emailChange.user)
-    emailChanges: EmailChangeEntity[]
+    emailChanges?: EmailChangeEntity[]
 
     @OneToMany(() => EmailChangeEntity, (emailChange) => emailChange.initiator)
-    emailChangeInitiations: EmailChangeEntity[]
+    emailChangeInitiations?: EmailChangeEntity[]
 
     @OneToMany(() => MinecraftLinkEntity, (minecraftLink) => minecraftLink.user)
-    minecraftLinks: MinecraftLinkEntity[]
+    minecraftLinks?: MinecraftLinkEntity[]
 
     @OneToMany(() => MinecraftLinkEntity, (minecraftLink) => minecraftLink.initiator)
-    minecraftLinkInitiations: MinecraftLinkEntity[]
+    minecraftLinkInitiations?: MinecraftLinkEntity[]
 
     @OneToMany(() => KiltSessionEntity, (kiltSession) => kiltSession.user)
-    kiltSessions: KiltSessionEntity[]
+    kiltSessions?: KiltSessionEntity[]
 }
 
 //resource_inventory_entity id example: 92e1e5635d684e1294c6c6cceb8c9b71-1285-0x1b30a3b5744e733d8d2f19f0812e3f79152a8777-14

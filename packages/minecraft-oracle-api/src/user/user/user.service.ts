@@ -6,25 +6,23 @@ import { Connection, DeepPartial, EntityManager, FindConditions, FindManyOptions
 import { UserEntity, userUuid } from './user.entity';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { exist } from 'joi';
-import { AssetEntity } from 'src/asset/asset.entity';
-import { SummonEntity } from 'src/summon/summon.entity';
-import { SnapshotItemEntity } from 'src/snapshot/snapshotItem.entity';
-import { SnaplogEntity } from 'src/snaplog/snaplog.entity';
-import { InventoryEntity } from 'src/playerinventory/inventory.entity';
-import { SkinEntity } from 'src/skin/skin.entity';
-import { ResourceInventory } from 'src/gameapi/dtos/resourceinventory.dto';
-import { ResourceInventoryEntity } from 'src/resourceinventory/resourceinventory.entity';
-import { PlaySessionEntity } from 'src/playsession/playsession.entity';
-import { PlayerAchievementEntity } from 'src/playerachievement/playerachievement.entity';
-import { PlayerGameItemEntity } from 'src/playergameitem/playergameitem.entity';
-import { PlayerScoreEntity } from 'src/playerscore/playerscore.entity';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { MinecraftLinkEntity } from '../minecraft-link/minecraft-link.entity';
-import { MinecraftLinkEvent } from 'src/common/enums/MinecraftLinkEvent';
-import { ResourceInventoryOffsetEntity } from 'src/resourceinventoryoffset/resourceinventoryoffset.entity';
-import { UserRole } from 'src/common/enums/UserRole';
 import { BigNumber } from 'ethers';
 import { formatEther, parseEther } from 'ethers/lib/utils';
+import { AssetEntity } from '../../asset/asset.entity';
+import { UserRole } from '../../common/enums/UserRole';
+import { PlayerAchievementEntity } from '../../playerachievement/playerachievement.entity';
+import { PlayerGameItemEntity } from '../../playergameitem/playergameitem.entity';
+import { InventoryEntity } from '../../playerinventory/inventory.entity';
+import { PlayerScoreEntity } from '../../playerscore/playerscore.entity';
+import { PlaySessionEntity } from '../../playsession/playsession.entity';
+import { ResourceInventoryEntity } from '../../resourceinventory/resourceinventory.entity';
+import { ResourceInventoryOffsetEntity } from '../../resourceinventoryoffset/resourceinventoryoffset.entity';
+import { SkinEntity } from '../../skin/skin.entity';
+import { SnapshotItemEntity } from '../../snapshot/snapshotItem.entity';
+import { SummonEntity } from '../../summon/summon.entity';
+import { MinecraftLinkEvent } from "../../common/enums/MinecraftLinkEvent"
 @Injectable()
 export class UserService {
     context: string;
