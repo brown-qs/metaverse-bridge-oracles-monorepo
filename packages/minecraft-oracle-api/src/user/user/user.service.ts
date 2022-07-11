@@ -50,7 +50,6 @@ export class UserService {
             .execute()
 
         const user = this.repository.create(result.generatedMaps[0])
-        console.log(JSON.stringify(user, null, 4))
         return user
     }
 
@@ -104,6 +103,7 @@ export class UserService {
     }
 
     public async linkMinecraftByUserUuid(userUuid: string, minecraftUuid: string, minecraftUserName: string, hasGame: boolean) {
+        this.logger.debug(`user.service::linkMinecraftByUserUuid userUuid: ${userUuid} minecraftUuid: ${minecraftUuid} minecraftUserName: ${minecraftUserName} hasGame: ${hasGame}`, this.context)
         let err;
         //typeorm 0.2.45 and @nestjs/typeorm@8.0.3
         //https://github.com/typeorm/typeorm/blob/0.2.45/docs/transactions.md
@@ -131,7 +131,6 @@ export class UserService {
             */
 
             const existingMinecraft = await queryRunner.manager.findOne(UserEntity, { minecraftUuid })
-            console.log("Existing minecraft: " + JSON.stringify(existingMinecraft))
 
             //minecraft account has never been used on moonsama
             if (!existingMinecraft) {
@@ -170,7 +169,8 @@ export class UserService {
                         { entity: AssetEntity, fk: "owner", },
                         { entity: SummonEntity, fk: "owner" },
                         { entity: SnapshotItemEntity, fk: "owner" },
-                        { entity: SnaplogEntity, fk: "owner" },
+                        //we will just leave this alone, fk constraint was removed
+                        //{ entity: SnaplogEntity, fk: "owner" },
                         { entity: InventoryEntity, fk: "owner" },
                         { entity: SkinEntity, fk: "owner" },
                         { entity: ResourceInventoryEntity, fk: "owner" },
@@ -186,25 +186,68 @@ export class UserService {
                     }
 
 
+                    //merge bait :)
                     const emailUserBait = await queryRunner.manager.findOne(ResourceInventoryEntity, { where: { id: Like(`${userUuid}-%`) }, relations: ["offset"] })
                     const mcUserBait = await queryRunner.manager.findOne(ResourceInventoryEntity, { where: { id: Like(`${minecraftUuid}-%`) }, relations: ["offset"] })
 
                     if (!!emailUserBait && !!mcUserBait) {
-                        console.log("both users have bait, needs to be added...")
-                        console.log(JSON.stringify(mcUserBait))
+                        this.logger.debug(`user.service::linkMinecraftByUserUuid both users have bait, needs to be added.`, this.context)
+                        //add bait from mc user and email user
+                        const mcUserBaitAmount = BigNumber.from(mcUserBait?.amount ?? '0')
+                        const emailUserBaitAmount = BigNumber.from(emailUserBait?.amount ?? '0')
+                        const mcUserBaitOffsetAmount = BigNumber.from(mcUserBait?.offset?.amount ?? '0')
+                        const emailUserBaitOffsetAmount = BigNumber.from(emailUserBait?.offset?.amount ?? '0')
+                        this.logger.debug(`user.service::linkMinecraftByUserUuid [MC User] Bait: ${formatEther(mcUserBaitAmount)} Bait Offset: ${formatEther(mcUserBaitOffsetAmount)} [Email User] Bait: ${formatEther(emailUserBaitAmount)} Bait Offset: ${formatEther(emailUserBaitOffsetAmount)}`, this.context)
 
-                        //  formatEther(BigNumber.from(bait.amount).sub(bait.offset?.amount ?? '0'))
+                        const addedBait = (mcUserBaitAmount.add(emailUserBaitAmount)).toString()
+                        const addedBaitOffset = (mcUserBaitOffsetAmount.add(emailUserBaitOffsetAmount)).toString()
+
+                        //move over all bait to email user
+                        this.logger.debug(`user.service::linkMinecraftByUserUuid moving over all bait to email user...`, this.context)
+
+                        await queryRunner.manager.update(ResourceInventoryEntity, { id: Like(`${userUuid}-%`) }, { amount: addedBait })
+                        await queryRunner.manager.update(ResourceInventoryOffsetEntity, { id: Like(`${userUuid}-%`) }, { amount: addedBaitOffset })
+
+                        //zero out minecraft user, will be deleted after keys in asset_entity are updated
+                        this.logger.debug(`user.service::linkMinecraftByUserUuid zeroing out bait in mc user...`, this.context)
+                        await queryRunner.manager.update(ResourceInventoryEntity, { id: Like(`${minecraftUuid}-%`) }, { amount: BigNumber.from("0").toString() })
+                        await queryRunner.manager.update(ResourceInventoryOffsetEntity, { id: Like(`${minecraftUuid}-%`) }, { amount: BigNumber.from("0").toString() })
+
+
+                        //update keys on asset_entity to point to email user
+                        this.logger.debug(`user.service::linkMinecraftByUserUuid updating resourceInventoryId on asset_entity to all be email user based`, this.context)
+                        await queryRunner.manager.update(AssetEntity, { resourceInventory: { id: mcUserBait.id } }, { resourceInventory: { id: emailUserBait.id } })
+
+                        this.logger.debug(`user.service::linkMinecraftByUserUuid deleting old minecraft resource_inventory_entity rows`, this.context)
+
+                        //ResourceInventoryEntity's id cascades to update the fk relationship in asset_entity, but no rows should reference it since we moved over all the fk's to asset_entity
+                        await queryRunner.manager.delete(ResourceInventoryOffsetEntity, { id: Like(`${minecraftUuid}-%`) })
+                        await queryRunner.manager.delete(ResourceInventoryEntity, { id: Like(`${minecraftUuid}-%`) })
+                        this.logger.debug(`user.service::linkMinecraftByUserUuid successfully merged bait!`, this.context)
+
                     } else if (!!mcUserBait) {
-                        console.log("just mc user has bait")
-                        //can just update ids on resource_inventory_entity and resource_inventory_offset_entity and they will cascade and update the primary keys
+                        this.logger.debug(`user.service::linkMinecraftByUserUuid just mc user has bait`, this.context)
+
+                        //update id on resource_inventory_entity will cascade to fks on asset_entity and resource_inventory_offset_entity, then just need to update id on resource_inventory_offset_entity
+                        const mcUserBait = await queryRunner.manager.findOne(ResourceInventoryEntity, { where: { id: Like(`${minecraftUuid}-%`) }, relations: ["offset"] })
+                        const mcUserBaitAmount = BigNumber.from(mcUserBait?.amount ?? '0')
+                        const mcUserBaitOffsetAmount = BigNumber.from(mcUserBait?.offset?.amount ?? '0')
+                        this.logger.debug(`user.service::linkMinecraftByUserUuid [MC User] Bait: ${formatEther(mcUserBaitAmount)} Bait Offset: ${formatEther(mcUserBaitOffsetAmount)}`, this.context)
+
+                        const oldMcResourceId = mcUserBait.id
+                        const oldMcResourceOffsetId = mcUserBait.offset.id
+                        const newMcResourceId = oldMcResourceId.replace(`${minecraftUuid}-`, `${userUuid}-`)
+                        const newMcResourceOffsetId = oldMcResourceOffsetId.replace(`${minecraftUuid}-`, `${userUuid}-`)
+                        //updating id here will cascade to fk on asset_entity and resource_inventory_offset_entity
+                        await queryRunner.manager.update(ResourceInventoryEntity, { id: oldMcResourceId }, { id: newMcResourceId })
+                        await queryRunner.manager.update(ResourceInventoryOffsetEntity, { id: oldMcResourceOffsetId }, { id: newMcResourceOffsetId })
+
+                        this.logger.debug(`user.service::linkMinecraftByUserUuid successfully moved bait!`, this.context)
 
                     }
 
-
-
                     //merge skins
                     const skins = await queryRunner.manager.find(SkinEntity, { where: { id: Like(`${minecraftUuid}-%`) }, relations: ["owner"] })
-                    //console.log(`Rows: ${}`)
                     for (const skin of skins) {
                         const oldRowId = skin.id
                         const newRowId = oldRowId.replace(`${minecraftUuid}-`, `${userUuid}-`)
@@ -223,9 +266,10 @@ export class UserService {
                         if (skins.indexOf(skin) === 0) {
                             const emailUserEquipped = !!await queryRunner.manager.findOne(SkinEntity, { where: { id: Like(`${userUuid}-%`), equipped: true } })
                             const userToMergeInIsEquipped = skins.some(skin => skin.equipped === true)
-                            console.log(`emailUserEquipped: ${emailUserEquipped}, userToMergeInIsEquipped: ${userToMergeInIsEquipped}`)
+                            this.logger.debug(`user.service::linkMinecraftByUserUuid emailUserEquipped: ${emailUserEquipped}, userToMergeInIsEquipped: ${userToMergeInIsEquipped}`, this.context)
+
                             if (emailUserEquipped && userToMergeInIsEquipped) {
-                                console.log("Users who are being merged both are equipped with skins, will un-equip email user and will use equip from user who is being merged in")
+                                this.logger.debug(`user.service::linkMinecraftByUserUuid Users who are being merged both are equipped with skins, will un-equip email user and will use equip from user who is being merged in`, this.context)
                                 await queryRunner.manager.update(SkinEntity, { id: Like(`${userUuid}-%`) }, { equipped: false })
                             }
                         }
@@ -235,33 +279,8 @@ export class UserService {
                     }
 
 
-                    throw new Error("Stop here")
-                    /*
-        // TODO fixme
-        const bait = await this.resourceInventoryService.findOne({ owner: user }, { relations: ['owner', 'offset'] })
-        if (!!bait) {
-            const baitAsset = userAssets.find(x => x.assetId === bait.assetId && x.collectionFragment.recognizedAssetType.valueOf() === RecognizedAssetType.RESOURCE.valueOf())
- 
-            if (!!baitAsset) {
-                assets.push(
-                    {
-                        amount: formatEther(BigNumber.from(bait.amount).sub(bait.offset?.amount ?? '0')),
-                        assetAddress: baitAsset.collectionFragment.collection.assetAddress.toLowerCase(),
-                        assetType: baitAsset.collectionFragment.collection.assetType,
-                        assetId: baitAsset.assetId,
-                        name: baitAsset.collectionFragment.name,
-                        exportable: !baitAsset.enraptured,
-                        hash: baitAsset.hash,
-                        summonable: false,
-                        recognizedAssetType: baitAsset.recognizedAssetType.valueOf(),
-                        enraptured: baitAsset.enraptured,
-                        exportChainId: baitAsset.collectionFragment.collection.chainId,
-                        exportAddress: baitAsset.assetOwner?.toLowerCase(),
-                    }
-                )
-            }
-        }
-                    */
+                    //  throw new Error("Stop here")
+
 
                     //     throw new Error("don't continue")
                     //move
