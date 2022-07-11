@@ -87,6 +87,9 @@ import { EmailChangeEntity } from './user/email-change/email-change.entity';
 import { UserAssetView } from './views';
 import { KiltSessionEntity } from './user/kilt-session/kilt-session.entity';
 import { KiltSessionModule } from './user/kilt-session/kilt-session.module';
+import { AssetApiModule } from './assetapi/assetapi.module';
+
+
 @Module({
     imports: [
         ConfigModule.forRoot({
@@ -216,6 +219,7 @@ import { KiltSessionModule } from './user/kilt-session/kilt-session.module';
         ResourceInventoryOffsetModule,
         CompositeApiModule,
         KiltSessionModule,
+        AssetApiModule
     ],
     controllers: [],
     providers: []

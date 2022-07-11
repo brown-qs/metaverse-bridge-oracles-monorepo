@@ -4,16 +4,18 @@ import {
     HttpCode,
     Inject,
     Param,
+    Query,
     UseGuards
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { SharedSecretGuard } from '../authapi/secret.guard';
+import { CollectionQueryDto, NftsQueryDto } from './dtos/nft.dto';
 import { NftApiService } from './nftapi.service';
 import { ProcessedStaticTokenData, StaticTokenData } from './nftapi.types';
 
-@ApiTags('game')
-@Controller('game')
+@ApiTags('nft')
+@Controller('nft')
 export class NftApiController {
 
     private readonly context: string;
@@ -25,32 +27,27 @@ export class NftApiController {
         this.context = NftApiController.name;
     }
 
-    @Get('nft/:chainId/:tokenType/:address/:tokenId')
+    @Get('collection-assets')
     @HttpCode(200)
-    @ApiOperation({ summary: 'Fetches NFT' })
+    @ApiOperation({ summary: 'Fetches collection assets by IDs' })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
-    async getNFT(
-        @Param('chainId') chainId: string,
-        @Param('tokenType') tokenType: string,
-        @Param('address') address: string,
-        @Param('tokenId') tokenId: string,
-    ): Promise<StaticTokenData | ProcessedStaticTokenData> {
-        const data = await this.nftService.getNFT(chainId, tokenType, address, tokenId)
+    async getNFTs(
+        @Query() dto: NftsQueryDto,
+    ): Promise<(StaticTokenData | ProcessedStaticTokenData)[]> {
+        const data = await this.nftService.getNFTs(dto)
         return data
     }
 
-    @Get('nft/:chainId/:tokenType/:address')
+    @Get('collection')
     @HttpCode(200)
-    @ApiOperation({ summary: 'Fetches NFT Collection' })
+    @ApiOperation({ summary: 'Fetches all collection assets paginated' })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
     async getNFTCollection(
-        @Param('chainId') chainId: string,
-        @Param('tokenType') tokenType: string,
-        @Param('address') address: string,
-    ): Promise<StaticTokenData[] | ProcessedStaticTokenData[]> {
-        const data = await this.nftService.getNFTCollection(chainId, tokenType, address);
+        @Query() dto: CollectionQueryDto
+    ): Promise<(StaticTokenData | ProcessedStaticTokenData)[]> {
+        const data = await this.nftService.getNFTCollection(dto);
         return data
     }
 }

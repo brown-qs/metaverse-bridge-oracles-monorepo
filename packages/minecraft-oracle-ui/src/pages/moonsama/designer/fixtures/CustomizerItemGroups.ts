@@ -58,7 +58,7 @@ const x = [
     "assetAddress": "0x1974eeaf317ecf792ff307f25a3521c35eecde86",
     "assetIDRanges": [
       [
-        11,
+        10,
         58
       ],
       [
@@ -73,6 +73,25 @@ const x = [
     "equippableType": "child",
     "zIndex": 1,
     "synthetic": false,
+    "dependant": false
+  },
+  {
+    "title": "Main Hand",
+    "assetAddress": "0x00008",
+    "subtitle": "Synthetic main hands",
+    "assetIDRanges": [
+      [
+        1,
+        1
+      ]
+    ],
+    "chainId": 1285,
+    "assetType": "ERC1155",
+    "uriPrefix": `${process.env.REACT_APP_COMPOSITE_MEDIA_URI_PREFIX}`,
+    "uriPostfix": ".png",
+    "equippableType": "child",
+    "zIndex": 1,
+    "synthetic": true,
     "dependant": false
   },
   {
