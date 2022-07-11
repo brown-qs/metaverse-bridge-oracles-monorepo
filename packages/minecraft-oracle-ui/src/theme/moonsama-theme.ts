@@ -81,6 +81,18 @@ export const moonsamaTheme = (colors: PaletteOptions): ThemeOptions => {
           }
         }
       },
+      MuiLink: {
+        styleOverrides: {
+          root: {
+            color: "white",
+            cursor: "pointer",
+            fontSize: "10px",
+            '&:hover': {
+              color: "#F7CA49"
+            }
+          }
+        }
+      },
       MuiAlert: {
         styleOverrides: {
           root: {
