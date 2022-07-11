@@ -27,7 +27,8 @@ export class KiltAuthController {
     @Get('wallet_session')
     @ApiOperation({ summary: 'Get kilt wallet session challenge' })
     async walletSession() {
-        return await this.kiltAuthApiService.getWalletSessionChallenge()
+        const walletSess = await this.kiltAuthApiService.getWalletSessionChallenge()
+        return walletSess
     }
 
     @Post('wallet_session')

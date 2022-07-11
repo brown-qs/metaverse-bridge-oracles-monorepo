@@ -107,7 +107,6 @@ export class MinecraftAuthController {
     }
 
     //privileged users only!
-
     @Get('test_migration')
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)

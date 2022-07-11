@@ -139,7 +139,7 @@ export class KiltAuthService {
     }
 
 
-    async getWalletSessionChallenge(): Promise<KiltSessionEntity> {
+    async getWalletSessionChallenge() {
         await this.initKiltPromise
         await cryptoWaitReady()
         await init({ address: this.configService.get<string>('kilt.wssAddress') })
@@ -149,7 +149,14 @@ export class KiltAuthService {
         const dAppEncryptionKeyUri = fullDid.assembleKeyUri(fullDid.encryptionKey.id);
 
 
-        return await this.kiltSessionService.create(randomAsHex(), randomAsHex(), this.configService.get<string>('kilt.dappName'), dAppEncryptionKeyUri)
+        const session = await this.kiltSessionService.create(randomAsHex(), randomAsHex(), this.configService.get<string>('kilt.dappName'), dAppEncryptionKeyUri)
+
+        return {
+            sessionId: session.sessionId,
+            walletSessionChallenge: session.walletSessionChallenge,
+            dappName: session.dappName,
+            dAppEncryptionKeyUri: session.dAppEncryptionKeyUri
+        }
     }
 
 
@@ -158,7 +165,7 @@ export class KiltAuthService {
 
 
         const session = await this.kiltSessionService.findBySessionId(sessionId)
-        if (!session) {
+        if (!session || session?.verified === true) {
             this.logger.error(`kiltAuthVerifyChallenge:: sessionId: ${sessionId} not found`, null, this.context)
             throw new GoneException("session gone")
         }
@@ -188,7 +195,7 @@ export class KiltAuthService {
         await this.initKiltPromise
 
         const session = await this.kiltSessionService.findBySessionId(sessionId)
-        if (!session) {
+        if (!session || session?.verified === true) {
             this.logger.error(`walletCredentialMessage:: sessionId: ${sessionId} not found`, null, this.context)
             throw new GoneException("session gone")
         }
@@ -251,7 +258,7 @@ export class KiltAuthService {
         await this.initKiltPromise
 
         const session = await this.kiltSessionService.findBySessionId(sessionId)
-        if (!session) {
+        if (!session || session?.verified === true) {
             this.logger.error(`verifyWalletLoginChallenge:: sessionId: ${sessionId} not found`, null, this.context)
             throw new GoneException("session gone")
         }
