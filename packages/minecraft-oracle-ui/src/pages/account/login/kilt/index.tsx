@@ -8,7 +8,7 @@ import LeftImage from 'assets/images/home/left.png';
 import RightImageFlip from 'assets/images/home/right.png';
 import Box from '@mui/material/Box';
 import "@fontsource/orbitron/500.css";
-import { Alert, Button, Stack, Typography, useMediaQuery } from '@mui/material';
+import { Alert, Button, Stack, Typography, useMediaQuery, Link } from '@mui/material';
 import { theme } from 'theme/Theme';
 import { getKiltExtension, walletLogin } from 'utils/kilt';
 import { useHistory } from 'react-router-dom';
@@ -69,12 +69,13 @@ const KiltLoginPage = () => {
 
       <Stack direction="row" spacing={2} margin={0} alignContent='center' textAlign='center' justifyContent="space-between">
         <Stack></Stack>
-        <Alert sx={{ margin: "auto" }} severity="info">KILT requires a Sporran wallet on Desktop. Your wallet must include an email credential from socialkyc.io. Your Moonsama account will be based on your email, so you can also login via one-time code.</Alert>
+        <Alert sx={{ margin: "auto" }} severity="info">Logging in with KILT requires a Sporran desktop wallet. Your wallet must include a SocialKYC email credential from <Link sx={{ textDecoration: "underline !important", "&:hover": { "color": "rgb(255, 201, 20) !important" } }} underline="always" href="https://socialkyc.io" target="_blank">socialkyc.io</Link>. Your Moonsama account is based on your email</Alert>
         <Stack></Stack>
       </Stack>
-      <Stack alignItems="center" spacing={2} margin={2}>
+      <Stack alignItems="center" spacing={1} margin={2}>
 
         <LoadingButton disableElevation disableRipple loading={isLoading} variant="contained" onClick={() => handleLogin()}>KILT LOGIN</LoadingButton>
+        <Link sx={{ fontSize: "11px" }} underline="none" onClick={() => { history.push(`/account/login`) }}>OTHER LOGIN METHODS</Link>
       </Stack>
     </AuthLayout >
   );

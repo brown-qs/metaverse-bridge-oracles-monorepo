@@ -86,7 +86,6 @@ export const moonsamaTheme = (colors: PaletteOptions): ThemeOptions => {
           root: {
             color: "white",
             cursor: "pointer",
-            fontSize: "10px",
             '&:hover': {
               color: "#F7CA49"
             }
@@ -144,6 +143,20 @@ export const moonsamaTheme = (colors: PaletteOptions): ThemeOptions => {
           },
           filledInfo: {
             backgroundColor: '#1d59c9',
+            color: "white"
+          },
+
+          outlinedWarning: {
+            backgroundColor: '#c96d1d',
+            color: "white"
+          },
+          standardWarning: {
+            backgroundColor: '#c96d1d',
+            color: "white"
+
+          },
+          filledWarning: {
+            backgroundColor: '#c96d1d',
             color: "white"
           },
           message: {

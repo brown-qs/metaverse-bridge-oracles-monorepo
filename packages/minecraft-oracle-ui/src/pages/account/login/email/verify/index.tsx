@@ -78,9 +78,9 @@ const EmailVerifyPage = () => {
       <LoadingButton disableElevation disableRipple loading={isLoading} disabled={!isValidLoginKey(loginKey)} onClick={(e) => verifyLoginKey(loginKey)} variant="contained">USE LOGIN CODE</LoadingButton>
       {!!authData?.jwt
         ?
-        <Link underline="none" onClick={() => { history.push(`/account`) }}>GO BACK</Link>
+        <Link sx={{ fontSize: "11px" }} underline="none" onClick={() => { history.push(`/account`) }}>GO BACK</Link>
         :
-        <Link underline="none" onClick={() => { history.push(`/account/login/email`) }}>REQUEST A NEW CODE</Link>
+        <Link sx={{ fontSize: "11px" }} underline="none" onClick={() => { history.push(`/account/login/email`) }}>REQUEST A NEW CODE</Link>
       }
     </Stack >
   }
