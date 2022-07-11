@@ -136,7 +136,7 @@ export const moonsamaTheme = (colors: PaletteOptions): ThemeOptions => {
           },
           message: {
             "wordBreak": "break-word",
-            "textAlign": "justify"
+            "textAlign": "left"
           }
         }
       },
