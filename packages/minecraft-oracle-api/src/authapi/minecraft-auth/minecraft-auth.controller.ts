@@ -23,6 +23,7 @@ import { UserJwtPayload } from '../jwt.strategy';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from 'src/user/user/user.service';
 import { MinecraftLinkService } from 'src/user/minecraft-link/minecraft-link.service';
+import { SharedSecretGuard } from '../secret.guard';
 
 @ApiTags('auth')
 @Controller('auth/minecraft')
@@ -105,11 +106,14 @@ export class MinecraftAuthController {
 
     }
 
-    //remove me
-    @Get('test_link')
-    async testLink(@Query() query: { uuid: string, minecraftUuid: string }) {
-        await this.userService.linkMinecraftByUserUuid(query.uuid, query.minecraftUuid, "me", true)
+    //privileged users only!
 
+    @Get('test_migration')
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    @ApiOperation({ summary: 'Migrate an old minecraft user to a user with an email' })
+    async testMigration(@Query() query: { uuid: string, minecraftUuid: string }) {
+        await this.userService.testMigration(query.uuid, query.minecraftUuid)
     }
 
 }
