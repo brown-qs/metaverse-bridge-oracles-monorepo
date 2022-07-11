@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AuthLayout, Loader } from 'ui';
-import { useClasses } from 'hooks';
+import { useAuth, useClasses } from 'hooks';
 import Tooltip from '@mui/material/Tooltip';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -9,13 +9,14 @@ import LeftImage from 'assets/images/home/left.png';
 import RightImageFlip from 'assets/images/home/right.png';
 import Box from '@mui/material/Box';
 import "@fontsource/orbitron/500.css";
-import { Alert, Button, CircularProgress, Collapse, IconButton, Input, Stack, TextField, Typography, useMediaQuery } from '@mui/material';
+import { Link, Alert, Button, CircularProgress, Collapse, IconButton, Input, Stack, TextField, Typography, useMediaQuery } from '@mui/material';
 import { theme } from 'theme/Theme';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { Redirect, useHistory, useParams } from 'react-router-dom';
 import axios from 'axios';
 
 const EmailVerifyPage = () => {
+  const { authData, setAuthData } = useAuth();
   let history = useHistory();
   const [isLoading, setIsLoading] = useState(false);
   const [loginKey, setLoginKey] = useState("");
@@ -67,13 +68,20 @@ const EmailVerifyPage = () => {
   }
 
   const verifyControls = () => {
-    return <Stack alignItems="center" spacing={2}>
+    return <Stack alignItems="center" spacing={1}>
       <TextField disabled={isLoading} inputProps={{ spellCheck: false, autoCapitalize: "off", autoCorrect: "off", onFocus: () => setDirtyTextField(true) }} value={loginKey} error={dirtyTextField && !isValidLoginKey(loginKey)} onKeyPress={(e) => {
         if (e.key === 'Enter' && !isLoading && isValidLoginKey(loginKey)) {
           verifyLoginKey(loginKey)
         }
       }} onChange={(event) => { setLoginKey(event.target.value) }} label="LOGIN CODE" variant="standard" />
+      <div></div>
       <LoadingButton disableElevation disableRipple loading={isLoading} disabled={!isValidLoginKey(loginKey)} onClick={(e) => verifyLoginKey(loginKey)} variant="contained">USE LOGIN CODE</LoadingButton>
+      {!!authData?.jwt
+        ?
+        <Link underline="none" onClick={() => { history.push(`/account`) }}>GO BACK</Link>
+        :
+        <Link underline="none" onClick={() => { history.push(`/account/login/email`) }}>REQUEST A NEW CODE</Link>
+      }
     </Stack >
   }
 
