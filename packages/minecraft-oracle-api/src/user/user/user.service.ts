@@ -1,6 +1,6 @@
 import { InjectConnection, InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Like } from "typeorm"
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Connection, DeepPartial, EntityManager, FindConditions, FindManyOptions, FindOneOptions, ObjectID, Repository, UpdateResult } from 'typeorm';
 import { UserEntity, userUuid } from './user.entity';
@@ -331,5 +331,32 @@ export class UserService {
 
     public async unlinkMinecraftByUserUuid(uuid: string) {
         await this.repository.update({ uuid }, { minecraftUuid: null, minecraftUserName: null, hasGame: false })
+    }
+
+    public async testMigration(uuid: string, minecraftUuid: string) {
+        const emailUser = await this.findOne({ uuid })
+        const mcUser = await this.findOne({ uuid: minecraftUuid })
+
+        if (uuid === minecraftUuid) {
+            throw new UnprocessableEntityException("uuid and minecraftUuid must be different")
+        }
+
+        if (!emailUser) {
+            throw new UnprocessableEntityException("uuid doesn't exist")
+        }
+
+        if (!mcUser) {
+            throw new UnprocessableEntityException("minecraftUuid doesn't exist")
+        }
+
+        if (!!mcUser.email) {
+            throw new UnprocessableEntityException("minecraftUuid has already been migrated")
+        }
+
+        if (!emailUser.email) {
+            throw new UnprocessableEntityException("uuid hasn't been migrated yet, can't use")
+        }
+        await this.linkMinecraftByUserUuid(uuid, minecraftUuid, "me", true)
+
     }
 }
