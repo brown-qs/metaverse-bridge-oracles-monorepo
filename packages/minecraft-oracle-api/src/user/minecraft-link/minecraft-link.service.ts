@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MinecraftLinkEvent } from 'src/common/enums/MinecraftLinkEvent';
-import { Repository } from 'typeorm';
+import { FindConditions, ObjectID, Repository, UpdateResult } from 'typeorm';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { UserEntity } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 import { MinecraftLinkEntity } from './minecraft-link.entity';
@@ -14,13 +14,18 @@ export class MinecraftLinkService {
 
     ) { }
 
-    public async link(user: UserEntity, initiator: UserEntity, minecraftUuid: string): Promise<void> {
-        const event = this.repository.create({ user, initiator, minecraftUuid, event: MinecraftLinkEvent.LINK })
+    /*
+    public async link(user: UserEntity, linkInitiator: UserEntity, minecraftUuid: string, minecraftUserName: string, hasGame: boolean): Promise<void> {
+        const event = this.repository.create({ user, linkInitiator, minecraftUuid, minecraftUserName, hasGame })
         await this.repository.insert(event);
+    }*/
+
+    public async unlink(user: UserEntity, unlinkInitiator: UserEntity, minecraftUuid: string): Promise<void> {
+        await this.update({ user, minecraftUuid, unlinkedAt: null }, { unlinkedAt: new Date(), unlinkInitiator })
     }
 
-    public async unlink(user: UserEntity, initiator: UserEntity, minecraftUuid: string): Promise<void> {
-        const event = this.repository.create({ user, initiator, minecraftUuid, event: MinecraftLinkEvent.UNLINK })
-        await this.repository.insert(event);
+    private async update(criteria: string | number | string[] | Date | ObjectID | number[] | Date[] | ObjectID[] | FindConditions<MinecraftLinkEntity>, partialEntity: QueryDeepPartialEntity<MinecraftLinkEntity>): Promise<UpdateResult> {
+        const u = await this.repository.update(criteria, partialEntity)
+        return u
     }
 }

@@ -78,8 +78,6 @@ import { KiltAuthModule } from './authapi/kilt-auth/kilt-auth.module';
 import { MinecraftAuthModule } from './authapi/minecraft-auth/minecraft-auth.module';
 import { EmailLoginKeyEntity } from './user/email-login-key/email-login-key.entity';
 import { EmailLoginKeyModule } from './user/email-login-key/email-login-key.module';
-import { MinecraftUuidUserNameEntity } from './user/minecraft-uuid-user-name/minecraft-uuid-user-name.entity';
-import { MinecraftUuidUserNameModule } from './user/minecraft-uuid-user-name/minecraft-uuid-user-name.module';
 import { EmailChangeModule } from './user/email-change/email-change.module';
 import { MinecraftLinkModule } from './user/minecraft-link/minecraft-link.module';
 import { MinecraftLinkEntity } from './user/minecraft-link/minecraft-link.entity';
@@ -122,7 +120,6 @@ import { AssetApiModule } from './assetapi/assetapi.module';
                 entities: [
                     EmailChangeEntity,
                     MinecraftLinkEntity,
-                    MinecraftUuidUserNameEntity,
                     KiltSessionEntity,
                     EmailLoginKeyEntity,
                     UserEntity,
@@ -177,7 +174,6 @@ import { AssetApiModule } from './assetapi/assetapi.module';
         }),
         EmailChangeModule,
         MinecraftLinkModule,
-        MinecraftUuidUserNameModule,
         PlaySessionModule,
         CronModule,
         ProviderModule,
@@ -219,7 +215,7 @@ import { AssetApiModule } from './assetapi/assetapi.module';
         ResourceInventoryOffsetModule,
         CompositeApiModule,
         KiltSessionModule,
-        AssetApiModule
+        AssetApiModule,
     ],
     controllers: [],
     providers: []

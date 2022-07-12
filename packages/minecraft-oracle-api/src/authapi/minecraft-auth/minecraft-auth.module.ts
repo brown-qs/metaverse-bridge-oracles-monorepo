@@ -12,12 +12,10 @@ import { SecretModule } from '../../secret/secret.module';
 import { SkinModule } from '../../skin/skin.module';
 import { TextureModule } from '../../texture/texture.module';
 import { MinecraftLinkModule } from 'src/user/minecraft-link/minecraft-link.module';
-import { MinecraftUuidUserNameModule } from 'src/user/minecraft-uuid-user-name/minecraft-uuid-user-name.module';
 
 @Module({
     imports: [
         MinecraftLinkModule,
-        MinecraftUuidUserNameModule,
         UserModule,
         SecretModule,
         CacheModule,
