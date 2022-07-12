@@ -26,6 +26,6 @@ export class EmailChangeEntity {
     @Column()
     newEmail: string;
 
-    @CreateDateColumn()
+    @Column({ type: "timestamptz" })
     createdAt: Date;
 }

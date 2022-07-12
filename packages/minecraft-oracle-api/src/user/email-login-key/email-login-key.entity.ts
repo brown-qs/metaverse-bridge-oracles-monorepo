@@ -4,7 +4,8 @@ import {
     IsNumber,
     IsString
 } from 'class-validator';
-import { Column, CreateDateColumn, Entity, Index, JoinColumn, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { UserEntity } from '../user/user.entity';
 
 @Entity()
 export class EmailLoginKeyEntity {
@@ -17,16 +18,16 @@ export class EmailLoginKeyEntity {
     @Column({ nullable: true })
     loginKey: string;
 
-    @Column({ nullable: true })
+    @Column({ type: "timestamptz", nullable: true })
     keyGenerationDate: Date;
 
-    @CreateDateColumn()
+    @Column({ type: "timestamptz" })
     createdAt: Date;
 
-    @Column({ default: null, nullable: true })
+    @Column({ type: "timestamptz", default: null, nullable: true })
     lastLogin: Date;
 
     //will change existing user with this uuid if login successful
-    @Column({ default: null, nullable: true })
-    changeUuid: string;
+    @ManyToOne(() => UserEntity, (user) => user.emailLoginKeyEmailChanges, { nullable: true })
+    changeUser: UserEntity
 }

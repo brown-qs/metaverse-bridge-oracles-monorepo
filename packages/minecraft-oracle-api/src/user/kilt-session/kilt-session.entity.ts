@@ -50,9 +50,9 @@ export class KiltSessionEntity {
     @Column({ default: null, nullable: true })
     email: string;
 
-    @CreateDateColumn()
+    @Column({ type: "timestamptz" })
     createdAt?: Date;
 
-    @UpdateDateColumn()
+    @Column({ type: "timestamptz" })
     updatedAt?: Date;
 }

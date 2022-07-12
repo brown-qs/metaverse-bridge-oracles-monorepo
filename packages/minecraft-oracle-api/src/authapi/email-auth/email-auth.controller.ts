@@ -35,7 +35,7 @@ export class EmailAuthController {
     @UseGuards(JwtAuthGuard)
     @ApiOperation({ summary: 'Change email address and send login code to new email' })
     async change(@User() user: UserEntity, @Body() dto: LoginDto): Promise<{ success: boolean }> {
-        await this.emailAuthService.sendAuthChangeEmail(user.uuid, dto.email, dto["g-recaptcha-response"])
+        await this.emailAuthService.sendAuthChangeEmail(user, dto.email, dto["g-recaptcha-response"])
         return { success: true }
     }
 

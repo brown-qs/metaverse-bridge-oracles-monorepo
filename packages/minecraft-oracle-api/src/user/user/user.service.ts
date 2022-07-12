@@ -22,7 +22,6 @@ import { ResourceInventoryOffsetEntity } from '../../resourceinventoryoffset/res
 import { SkinEntity } from '../../skin/skin.entity';
 import { SnapshotItemEntity } from '../../snapshot/snapshotItem.entity';
 import { SummonEntity } from '../../summon/summon.entity';
-import { MinecraftLinkEvent } from "../../common/enums/MinecraftLinkEvent"
 import { RecognizedAssetType } from 'src/config/constants';
 @Injectable()
 export class UserService {
@@ -43,7 +42,7 @@ export class UserService {
 
         const result = await this.repository.createQueryBuilder('users')
             .insert()
-            .values({ uuid: userUuid(), email: em, lastLogin: new Date() })
+            .values({ uuid: userUuid(), email: em, createdAt: new Date(), lastLogin: new Date() })
             .orUpdate(["lastLogin"], ["email"])
             .returning('*')
             .execute()
@@ -159,9 +158,7 @@ export class UserService {
                     const newUser = await queryRunner.manager.findOne(UserEntity, { uuid: userUuid })
 
                     //log the mc unlink, the user is old user who had the mc account linked, and the initiator is the new user who is linking
-                    const mcLink = queryRunner.manager.create(MinecraftLinkEntity, { minecraftUuid, user: existingMinecraft, initiator: newUser, event: MinecraftLinkEvent.UNLINK })
-                    await queryRunner.manager.save(MinecraftLinkEntity, mcLink)
-                    queryRunner.manager.create(MinecraftLinkEntity, { minecraftUuid, user: existingMinecraft, initiator: newUser, event: MinecraftLinkEvent.UNLINK })
+                    queryRunner.manager.update(MinecraftLinkEntity, { user: existingMinecraft, minecraftUuid, unlinkedAt: null }, { unlinkedAt: new Date(), unlinkInitiator: newUser })
 
 
                     //minecraft user has never been migrated
@@ -365,6 +362,13 @@ export class UserService {
             }
 
             await queryRunner.manager.update(UserEntity, { uuid: userUuid }, { minecraftUuid: minecraftUuid, minecraftUserName, hasGame })
+
+            const newUser = await queryRunner.manager.findOne(UserEntity, { uuid: userUuid })
+
+            const mcLink = queryRunner.manager.create(MinecraftLinkEntity, { user: newUser, minecraftUuid, minecraftUserName, hasGame, linkInitiator: newUser, linkedAt: new Date() })
+            await queryRunner.manager.save(MinecraftLinkEntity, mcLink)
+
+            //add minecraft link
             await queryRunner.commitTransaction();
 
         } catch (e) {

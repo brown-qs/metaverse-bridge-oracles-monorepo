@@ -20,6 +20,7 @@ import { ResourceInventoryEntity } from '../../resourceinventory/resourceinvento
 import { EmailChangeEntity } from '../email-change/email-change.entity';
 import { MinecraftLinkEntity } from '../minecraft-link/minecraft-link.entity';
 import { KiltSessionEntity } from '../kilt-session/kilt-session.entity';
+import { EmailLoginKeyEntity } from '../email-login-key/email-login-key.entity';
 
 @Entity()
 export class UserEntity {
@@ -31,10 +32,10 @@ export class UserEntity {
     @Column({ unique: true, default: null, nullable: true })
     email?: string;
 
-    @CreateDateColumn()
+    @Column({ type: "timestamptz", default: null, nullable: true })
     createdAt?: Date;
 
-    @Column({ default: null, nullable: true })
+    @Column({ type: "timestamptz", default: null, nullable: true })
     lastLogin?: Date;
 
     @Column({ unique: true, default: null, nullable: true })
@@ -132,11 +133,17 @@ export class UserEntity {
     @OneToMany(() => EmailChangeEntity, (emailChange) => emailChange.initiator)
     emailChangeInitiations?: EmailChangeEntity[]
 
+    @OneToMany(() => EmailLoginKeyEntity, (loginKey) => loginKey.changeUser)
+    emailLoginKeyEmailChanges?: EmailLoginKeyEntity[]
+
     @OneToMany(() => MinecraftLinkEntity, (minecraftLink) => minecraftLink.user)
     minecraftLinks?: MinecraftLinkEntity[]
 
-    @OneToMany(() => MinecraftLinkEntity, (minecraftLink) => minecraftLink.initiator)
+    @OneToMany(() => MinecraftLinkEntity, (minecraftLink) => minecraftLink.linkInitiator)
     minecraftLinkInitiations?: MinecraftLinkEntity[]
+
+    @OneToMany(() => MinecraftLinkEntity, (minecraftLink) => minecraftLink.unlinkInitiator)
+    minecraftUnlinkInitiations?: MinecraftLinkEntity[]
 
     @OneToMany(() => KiltSessionEntity, (kiltSession) => kiltSession.user)
     kiltSessions?: KiltSessionEntity[]
