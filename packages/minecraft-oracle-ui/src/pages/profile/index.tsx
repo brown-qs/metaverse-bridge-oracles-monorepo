@@ -110,7 +110,6 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
         <Container className={profileContainer} maxWidth={false} sx={{ backgroundColor: "black", minHeight: "100vh", paddingBottom: 10 }}>
             <Stack justifyContent="center" style={{ marginTop: '30px', minWidth: '90%', maxWidth: '90%' }} spacing={theme.spacing(4)}>
                 <Stack direction='row' display='flex' justifyContent='space-between' alignItems={'baseline'}>
-                    <div style={{ fontSize: '38px', fontFamily: `VT323, 'arial'`, textAlign: 'left' }}>Available skins</div>
                     <div style={{ textAlign: 'right' }}>
                         <span style={{ fontSize: '22px' }}>Welcome back {authData?.userProfile?.email},</span>
                         <br />
@@ -125,6 +124,9 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     </div>
                 </Stack>
                 {/* Start Skins */}
+                <Stack>
+                    <div style={{ fontSize: '38px', fontFamily: `VT323, 'arial'`, textAlign: 'left' }}>Available skins</div>
+                </Stack>
                 <Stack
                     style={{ marginTop: '20px', background: '#111' }}
                     maxWidth='100%'
@@ -134,6 +136,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     spacing={theme.spacing(4)}
                     overflow='auto'
                 >
+
                     {!!inGameTextures.length ? inGameTextures.sort((t1, t2) => t1.assetAddress.localeCompare(t2.assetAddress)).map((value, ind) => {
 
                         // console.log('SKIN', value)
@@ -310,7 +313,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                 {/*<img className={itemImage} src={item?.meta?.image} alt="" />*/}
                                                 <Media uri={item?.meta?.image} />
                                             </ListItemAvatar>
-                                            <ListItemText primary={`${item?.meta?.name}${item?.asset?.assetAddress?.toLowerCase() !== '0xb654611f84a8dc429ba3cb4fda9fad236c505a1a' ? ` #${item?.asset?.assetId}`: '' }`} style={{ paddingLeft: '10px' }} />
+                                            <ListItemText primary={`${item?.meta?.name}${item?.asset?.assetAddress?.toLowerCase() !== '0xb654611f84a8dc429ba3cb4fda9fad236c505a1a' ? ` #${item?.asset?.assetId}` : ''}`} style={{ paddingLeft: '10px' }} />
                                             <Tooltip title={'You can have 1 VIP ticket imported at a time.'}>
                                                 <span>
                                                     <Button
@@ -338,7 +341,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     {/*<img className={itemImage} src={item?.meta?.image} alt="" />*/}
                                                     <Media uri={item?.meta?.image} />
                                                 </ListItemAvatar>
-                                                <ListItemText primary={`${item?.meta?.name}${item?.asset?.assetAddress?.toLowerCase() !== '0xb654611f84a8dc429ba3cb4fda9fad236c505a1a' ? ` #${item?.asset?.assetId}`: '' }`} style={{ paddingLeft: '10px' }} />
+                                                <ListItemText primary={`${item?.meta?.name}${item?.asset?.assetAddress?.toLowerCase() !== '0xb654611f84a8dc429ba3cb4fda9fad236c505a1a' ? ` #${item?.asset?.assetId}` : ''}`} style={{ paddingLeft: '10px' }} />
                                                 {item.importable && <Tooltip title={`Your imported ${item?.meta?.name} will bound to your Minecraft account. It will go back to the sender address when exported.`}>
                                                     <span>
                                                         <Button
