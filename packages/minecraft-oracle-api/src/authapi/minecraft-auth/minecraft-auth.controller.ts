@@ -24,6 +24,7 @@ import { ConfigService } from '@nestjs/config';
 import { UserService } from 'src/user/user/user.service';
 import { MinecraftLinkService } from 'src/user/minecraft-link/minecraft-link.service';
 import { SharedSecretGuard } from '../secret.guard';
+import { UserEntity } from 'src/user/user/user.entity';
 
 @ApiTags('auth')
 @Controller('auth/minecraft')
@@ -60,16 +61,18 @@ export class MinecraftAuthController {
     @Get('response')
     @HttpCode(308)
     @ApiOperation({ summary: 'Minecraft authentication successful redirect target. Redirects again to the final destination with a jwt token.' })
+    //based on qs
+    @UseGuards(JwtAuthGuard)
     @Redirect()
-    async redirect(@Query() query: { code: string, jwt: string, error?: string, error_description?: string }) {
+    async redirect(@User() user: UserEntity, @Query() query: { code: string, jwt: string, error?: string, error_description?: string }) {
         if (!!query.error) {
             this.logger.error(`Response query:: ${query?.error}: ${query?.error_description}`, null, this.context)
         }
         this.logger.debug(`Response query: ${query?.code}`, this.context)
-        const result = await this.authApiService.authLogin(query.code, query.jwt);
+        const result = await this.authApiService.authLogin(query.code, user, query.jwt);
         this.logger.debug(`Response result: ${JSON.stringify(result)}`, this.context)
 
-        const payload: UserJwtPayload = { sub: result.user.uuid };
+        const payload: UserJwtPayload = { sub: user.uuid };
         const jwtToken = this.jwtService.sign(payload);
 
         const redirectUrl = `${this.configService.get<number>('frontend.url')}/auth/${jwtToken}`
@@ -80,7 +83,7 @@ export class MinecraftAuthController {
     @ApiOperation({ summary: 'Unlink minecraft' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    async unlink(@User() user: any) {
+    async unlink(@User() user: UserEntity) {
         const minecraftUuid = user.minecraftUuid
         if (!minecraftUuid) {
             throw new UnprocessableEntityException('There is no Minecraft account to unlink')
@@ -106,6 +109,8 @@ export class MinecraftAuthController {
 
     }
 
+    /*
+    //too dangerous to be used in production, could be used for stealing
     //privileged users only!
     @Get('test_migration')
     @ApiBearerAuth('AuthenticationHeader')
@@ -114,5 +119,6 @@ export class MinecraftAuthController {
     async testMigration(@Query() query: { uuid: string, minecraftUuid: string }) {
         await this.userService.testMigration(query.uuid, query.minecraftUuid)
     }
+    */
 
 }
