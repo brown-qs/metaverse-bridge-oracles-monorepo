@@ -100,7 +100,8 @@ export const moonsamaTheme = (colors: PaletteOptions): ThemeOptions => {
             },
             [defaultTheme.breakpoints.down('sm')]: {
               width: "100%"
-            }
+            },
+            fontFamily: "rubik"
           },
           //#5EB234 success
           //#C91D2B error
