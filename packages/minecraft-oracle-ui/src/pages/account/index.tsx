@@ -115,7 +115,7 @@ const AccountPage = () => {
         </Stack>
         <Stack direction="column" alignItems='center' textAlign='center' spacing={1} margin={2} marginTop={5}>
           <Box>LINKED MINECRAFT ACCOUNT</Box>
-          {!authData?.userProfile?.minecraftUuid && <><Alert sx={{ margin: "auto" }} severity="warning">Linking a Minecraft account that was used with Moonsama prior to the new login system will migrate over all assets and resources to your Moonsama account. If you unlink, and then link a different unmigrated Minecraft account, multiple enraptured items such as game passes could end up on the same account.   </Alert><div></div></>}
+          {!authData?.userProfile?.minecraftUuid && <><Alert sx={{ margin: "auto" }} severity="warning">Linking a Minecraft account that was used with Moonsama prior to the new login system will migrate over all assets and resources to your Moonsama account. Make sure you do not lose access to your email address.</Alert><div></div></>}
           {authData?.userProfile?.minecraftUuid && <><Chip color="success" icon={<SportsEsports />} label={authData?.userProfile?.minecraftUserName}></Chip><div></div></>}
           <Box>{authData?.userProfile?.minecraftUuid
             ? <Button disableElevation disableRipple style={{ maxWidth: '200px', width: '200px', minWidth: '200px' }} onClick={() => { handleMinecraftUnlink() }} variant="contained">UNLINK MINECRAFT</Button>

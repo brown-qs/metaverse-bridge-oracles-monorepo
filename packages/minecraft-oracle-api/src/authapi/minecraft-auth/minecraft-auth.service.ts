@@ -95,7 +95,12 @@ export class MinecraftAuthService {
                 user = await this.userService.linkMinecraftByUserUuid(userUuid, account.uuid, account.username, account.ownership ?? false)
             } catch (err) {
                 this.logger.error(`authLogin: error merging minecraft user into database: mc uuid: ${account.uuid}`, err, this.context)
-                throw new UnprocessableEntityException(`Error linking minecraft account`)
+                const errStr = String(err)
+                if (errStr.includes("already have an enraptured gamepass in your account")) {
+                    throw new UnprocessableEntityException(errStr)
+                } else {
+                    throw new UnprocessableEntityException(`Error linking minecraft account`)
+                }
             }
 
             //log mc account linked & log mc name/uuid pair
