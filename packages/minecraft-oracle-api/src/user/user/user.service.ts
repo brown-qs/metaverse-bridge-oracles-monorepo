@@ -23,6 +23,7 @@ import { SkinEntity } from '../../skin/skin.entity';
 import { SnapshotItemEntity } from '../../snapshot/snapshotItem.entity';
 import { SummonEntity } from '../../summon/summon.entity';
 import { MinecraftLinkEvent } from "../../common/enums/MinecraftLinkEvent"
+import { RecognizedAssetType } from 'src/config/constants';
 @Injectable()
 export class UserService {
     context: string;
@@ -127,8 +128,17 @@ export class UserService {
             3. minecraft account is already associated with an email
                 -relationships have already been migrated over to first email, can null out minecraftUuid on old user and put it on new user
             */
-
+            const emailUser = await queryRunner.manager.findOne(UserEntity, { uuid: userUuid })
             const existingMinecraft = await queryRunner.manager.findOne(UserEntity, { minecraftUuid })
+
+            const emailEnrapturedGamepass = await queryRunner.manager.findOne(AssetEntity, { owner: emailUser, recognizedAssetType: RecognizedAssetType.TEMPORARY_TICKET, enraptured: true })
+            const mcEnrapturedGamepass = await queryRunner.manager.findOne(AssetEntity, { owner: existingMinecraft, recognizedAssetType: RecognizedAssetType.TEMPORARY_TICKET, enraptured: true })
+            this.logger.debug(`user.service::linkMinecraftByUserUuid mcEnrapturedGamepass: ${!!mcEnrapturedGamepass} emailEnrapturedGamepass: ${!!emailEnrapturedGamepass}`, this.context)
+
+            //dont let users combine accounts with enraptured gamepasses
+            if (!!emailEnrapturedGamepass && !!mcEnrapturedGamepass) {
+                throw new Error("You already have an enraptured gamepass in your account, you cannot link a Minecraft account that also has an enraptured gamepass")
+            }
 
             //minecraft account has never been used on moonsama
             if (!existingMinecraft) {
@@ -327,10 +337,8 @@ export class UserService {
                     }
 
 
-                    //  throw new Error("Stop here")
 
 
-                    //     throw new Error("don't continue")
                     //move
                     //move other fields to email user
                     const emailUser = await queryRunner.manager.findOne(UserEntity, { uuid: userUuid })
