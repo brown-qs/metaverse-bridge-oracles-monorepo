@@ -17,7 +17,7 @@ export class EmailChangeService {
         const oldEm = oldEmail.toLowerCase().trim()
         const newEm = newEmail.toLowerCase().trim()
 
-        const emailChange = this.repository.create({ user, initiator, oldEmail: oldEm, newEmail: newEm })
+        const emailChange = this.repository.create({ user, initiator, oldEmail: oldEm, newEmail: newEm, createdAt: new Date() })
         await this.repository.insert(emailChange);
     }
 }

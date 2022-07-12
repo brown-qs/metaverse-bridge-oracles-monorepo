@@ -60,6 +60,7 @@ export class EmailAuthService {
         try {
             await this.emailLoginKeyService.createLogin(email.toLowerCase().trim(), loginKey, new Date())
         } catch (err) {
+            console.log(err)
             this.logger.error(`sendAuthEmail: error upserting user into database: ${email}`, err, this.context)
             throw new UnprocessableEntityException(`Error upserting user into database`)
         }
@@ -87,7 +88,7 @@ export class EmailAuthService {
         }
     }
 
-    async sendAuthChangeEmail(userUuid: string, email: string, gRecaptchaResponse: string) {
+    async sendAuthChangeEmail(user: UserEntity, email: string, gRecaptchaResponse: string) {
         const recaptchaSecret = this.configService.get<string>('recaptcha.secret')
 
         if (recaptchaSecret === "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe") {
@@ -118,13 +119,13 @@ export class EmailAuthService {
         const existingUserWithEmail = await this.userService.findByEmail(email.toLowerCase().trim())
         if (existingUserWithEmail) {
             //if email already exists just pretend like link is being sent
-            this.logger.error(`sendAuthChangeEmail: uuid: ${userUuid} wants to change to email ${email}, but that email already exists`, this.context)
+            this.logger.error(`sendAuthChangeEmail: uuid: ${user.uuid} wants to change to email ${email}, but that email already exists`, this.context)
             return
         }
 
         const loginKey = makeLoginKey()
         try {
-            await this.emailLoginKeyService.createChangeEmailLogin(userUuid, email.toLowerCase().trim(), loginKey, new Date())
+            await this.emailLoginKeyService.createChangeEmailLogin(user, email.toLowerCase().trim(), loginKey, new Date())
         } catch (err) {
             this.logger.error(`sendAuthChangeEmail: error upserting user into database: ${email}`, err, this.context)
             throw new UnprocessableEntityException(`Error upserting user into database`)
@@ -173,6 +174,8 @@ export class EmailAuthService {
         //login links last for 10 mins
         const expirationTime = 1000 * 60 * 10
         const timeDiff = new Date().getTime() - keyGenerationTime
+
+        this.logger.debug(`verifyAuthLink: user logged in ${timeDiff / 1000}s after login key was sent`, this.context)
         if (timeDiff > expirationTime) {
             this.logger.error(`verifyAuthLink: loginKey has expired it has been ${timeDiff}ms`, null, this.context)
             throw new UnprocessableEntityException(`loginKey expired`)
@@ -186,29 +189,21 @@ export class EmailAuthService {
             throw new UnprocessableEntityException(`loginKey failure`)
         }
 
-        let user: UserEntity
-        if (loginKeyEntity.changeUuid) {
-            let userBeforeUpdate
-            try {
-                userBeforeUpdate = await this.userService.findByUuid(loginKeyEntity.changeUuid)
-            } catch (err) {
-                this.logger.error(`verifyAuthLink: cant find user uuid ${loginKeyEntity.changeUuid} in database`, err, this.context)
-                throw new UnprocessableEntityException(`Can't find existing user with uuid`)
+        let user
+        if (!!loginKeyEntity.changeUser) {
+            user = loginKeyEntity.changeUser
+            const oldEmail = loginKeyEntity.changeUser.email.toLowerCase().trim()
 
-            }
-            const oldEmail = userBeforeUpdate.email.toLowerCase().trim()
-
-            this.logger.debug(`verifyAuthLink: change uuid email ${loginKeyEntity.changeUuid} ${oldEmail} > ${loginKeyEntity.email}`, this.context)
+            this.logger.debug(`verifyAuthLink: change uuid email ${loginKeyEntity.changeUser.uuid} ${oldEmail} > ${loginKeyEntity.email}`, this.context)
             try {
-                await this.userService.update({ uuid: loginKeyEntity.changeUuid }, { email: loginKeyEntity.email.toLowerCase().trim() })
+                await this.userService.update({ uuid: loginKeyEntity.changeUser.uuid }, { email: loginKeyEntity.email.toLowerCase().trim() })
             } catch (err) {
-                this.logger.error(`sendAuthChangeEmail: failed to update uuid: ${loginKeyEntity.changeUuid} to email: ${loginKeyEntity.email.toLowerCase().trim()}`, err, this.context)
+                this.logger.error(`sendAuthChangeEmail: failed to update uuid: ${loginKeyEntity.changeUser.uuid} to email: ${loginKeyEntity.email.toLowerCase().trim()}`, err, this.context)
                 throw new UnprocessableEntityException(`loginKey failure`)
             }
 
             //log email change
-            user = await this.userService.findByEmail(loginKeyEntity.email.toLowerCase().trim())
-            await this.emailChangeService.create(user, user, oldEmail, loginKeyEntity.email.toLowerCase().trim())
+            await this.emailChangeService.create(loginKeyEntity.changeUser, loginKeyEntity.changeUser, oldEmail, loginKeyEntity.email.toLowerCase().trim())
 
         } else {
             user = await this.userService.createEmail(loginKeyEntity.email.toLowerCase().trim())
