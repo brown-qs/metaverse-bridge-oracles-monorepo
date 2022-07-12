@@ -1,7 +1,6 @@
 import { Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { UserService } from '../../user/user/user.service';
-import jwt_decode from 'jwt-decode';
 import { MicrosoftAccount, MicrosoftAuth } from '../../minecraftauth'
 import { ConfigService } from '@nestjs/config';
 import { ProviderToken } from '../../provider/token';
@@ -26,7 +25,7 @@ export class MinecraftAuthService {
     }
 
     public generateJwtToken(uuid: string, userName: string): string {
-        const payload = { sub: uuid, userName };
+        const payload = { sub: uuid };
         return this.jwtService.sign(payload);
     }
 
@@ -43,7 +42,7 @@ export class MinecraftAuthService {
         return { redirectUrl }
     }
 
-    public async authLogin(code: string, jwt?: string) {
+    public async authLogin(code: string, user: UserEntity, jwt: string) {
 
         let account = new MicrosoftAccount();
 
@@ -82,14 +81,11 @@ export class MinecraftAuthService {
         if (!!account.uuid && !!account.username) {
             //account.uuid > minecraft uuid
             //account.username > minecraft username
-            //hasGame: account.ownership ?? false
+            //hasGame: account.ownership ?? false   
+            let minecraftUuid = account.uuid
 
-            const decodedJwt: any = jwt_decode(jwt)
-            const userUuid = decodedJwt.sub
-
-            let user: UserEntity
             try {
-                user = await this.userService.linkMinecraftByUserUuid(userUuid, account.uuid, account.username, account.ownership ?? false)
+                await this.userService.linkMinecraftByUserUuid(user.uuid, minecraftUuid, account.username, account.ownership ?? false)
             } catch (err) {
                 this.logger.error(`authLogin: error merging minecraft user into database: mc uuid: ${account.uuid}`, err, this.context)
                 const errStr = String(err)
@@ -100,51 +96,8 @@ export class MinecraftAuthService {
                 }
             }
 
-            //log mc account linked & log mc name/uuid pair
-            const moonsamaUser = await this.userService.findByUuid(userUuid)
-            if (!moonsamaUser) {
-                throw new UnprocessableEntityException(`Invalid moonsama user`)
-            }
 
             this.logger.log(`Account: ${JSON.stringify(account)}`, this.context);
-
-            const newJwt = this.generateJwtToken(user.uuid, user.minecraftUserName);
-            const redirectLink = `${successfulAuthRedirect}/${newJwt}`;
-
-            // check default skins
-            /*
-            (async () => {
-                try {
-                    const userFull = await this.userService.findOne({uuid: user.uuid}, {relations: ['skins']})
-                    if (!userFull.skins || userFull.skins.length < 2) {
-                        await this.skinService.createMultiple([
-                            {
-                                id: SkinEntity.toId(user.uuid, '0x0', '0'),
-                                owner: user,
-                                equipped: true,
-                                texture: await this.textureService.findOne({assetAddress: '0x0', assetId: '0', assetType: StringAssetType.NONE})
-                            },
-                            {
-                                id: SkinEntity.toId(user.uuid, '0x0', '1'),
-                                owner: user,
-                                equipped: false,
-                                texture: await this.textureService.findOne({assetAddress: '0x0', assetId: '1', assetType: StringAssetType.NONE})
-                            }
-                        ])
-                    }
-                } catch (error) {
-                    this.logger.warn(`authLogin:: error trying to set default skins for user ${user.uuid}`, this.context)
-                }
-            })()
-            */
-
-            this.logger.log(`authLogin:: successful login for user (${user.uuid}, ${user.minecraftUserName}). Redirect link: ${redirectLink}`, this.context)
-
-            return {
-                jwt,
-                user,
-                redirectUrl: redirectLink
-            }
 
         } else {
             this.logger.error('authLogin:: user uuid and userName was not received', null, this.context)

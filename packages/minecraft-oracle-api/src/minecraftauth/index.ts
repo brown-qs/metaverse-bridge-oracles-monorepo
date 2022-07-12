@@ -20,7 +20,6 @@ export module MicrosoftAuth {
         if (jwt) {
             rUrl += `?jwt=${jwt}`
         }
-        console.log(`sentUrl: ${rUrl}`)
         appID = _appID
         appSecret = _appSecret
         redirectURL = _redirectURL

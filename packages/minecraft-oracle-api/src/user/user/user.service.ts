@@ -127,17 +127,9 @@ export class UserService {
             3. minecraft account is already associated with an email
                 -relationships have already been migrated over to first email, can null out minecraftUuid on old user and put it on new user
             */
-            const emailUser = await queryRunner.manager.findOne(UserEntity, { uuid: userUuid })
             const existingMinecraft = await queryRunner.manager.findOne(UserEntity, { minecraftUuid })
 
-            const emailEnrapturedGamepass = await queryRunner.manager.findOne(AssetEntity, { owner: emailUser, recognizedAssetType: RecognizedAssetType.TEMPORARY_TICKET, enraptured: true })
-            const mcEnrapturedGamepass = await queryRunner.manager.findOne(AssetEntity, { owner: existingMinecraft, recognizedAssetType: RecognizedAssetType.TEMPORARY_TICKET, enraptured: true })
-            this.logger.debug(`user.service::linkMinecraftByUserUuid mcEnrapturedGamepass: ${!!mcEnrapturedGamepass} emailEnrapturedGamepass: ${!!emailEnrapturedGamepass}`, this.context)
 
-            //dont let users combine accounts with enraptured gamepasses
-            if (!!emailEnrapturedGamepass && !!mcEnrapturedGamepass) {
-                throw new Error("You already have an enraptured gamepass in your account, you cannot link a Minecraft account that also has an enraptured gamepass")
-            }
 
             //minecraft account has never been used on moonsama
             if (!existingMinecraft) {
@@ -168,6 +160,17 @@ export class UserService {
                         throw new Error("If old minecraft account, uuid === minecraftUuid, condition not met")
                     }
                     this.logger.debug(`user.service::linkMinecraftByUserUuid userUuid: ${userUuid} minecraftUuid: ${minecraftUuid}, MC account has never been migrated to email before, moving relationships`, this.context)
+
+                    //dont let users combine accounts with enraptured gamepasses
+
+                    const emUser = await queryRunner.manager.findOne(UserEntity, { uuid: userUuid })
+                    const emailEnrapturedGamepass = await queryRunner.manager.findOne(AssetEntity, { owner: emUser, recognizedAssetType: RecognizedAssetType.TEMPORARY_TICKET, enraptured: true })
+                    const mcEnrapturedGamepass = await queryRunner.manager.findOne(AssetEntity, { owner: existingMinecraft, recognizedAssetType: RecognizedAssetType.TEMPORARY_TICKET, enraptured: true })
+                    this.logger.debug(`user.service::linkMinecraftByUserUuid mcEnrapturedGamepass: ${!!mcEnrapturedGamepass} emailEnrapturedGamepass: ${!!emailEnrapturedGamepass}`, this.context)
+
+                    if (!!emailEnrapturedGamepass && !!mcEnrapturedGamepass) {
+                        throw new Error("You already have an enraptured gamepass in your account, you cannot link a Minecraft account that also has an enraptured gamepass")
+                    }
 
                     //move all relationships to email user
                     const relationships = [
@@ -393,6 +396,9 @@ export class UserService {
         await this.repository.update({ uuid }, { minecraftUuid: null, minecraftUserName: null, hasGame: false })
     }
 
+    /*
+    //too dangerous to be used in production, could be used for stealing
+
     public async testMigration(uuid: string, minecraftUuid: string) {
         const emailUser = await this.findOne({ uuid })
         const mcUser = await this.findOne({ uuid: minecraftUuid })
@@ -418,5 +424,5 @@ export class UserService {
         }
         await this.linkMinecraftByUserUuid(uuid, minecraftUuid, "me", true)
 
-    }
+    }*/
 }
