@@ -398,18 +398,14 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                         return (
                                             <ListItem
                                                 key={`${resource.assetAddress}-${resource.assetId}`}
-                                                secondaryAction={
-                                                    <>
-                                                        {resource.amount}
-                                                    </>
-                                                }
+
                                                 disablePadding
                                             >
-                                                <ListItemButton>
+                                                <ListItemButton disableRipple sx={{ cursor: "default" }}>
                                                     <ListItemAvatar>
                                                         <img src={resource.meta?.image} alt={resource.name} className={itemImage} />
                                                     </ListItemAvatar>
-                                                    <ListItemText id={resource.name} primary={resource.meta?.name} />
+                                                    <ListItemText secondaryTypographyProps={{ sx: { color: "white" } }} id={resource.name} primary={resource.meta?.name} secondary={String(parseFloat(resource.amount).toFixed(2))} />
                                                 </ListItemButton>
                                             </ListItem>
                                         )
