@@ -26,11 +26,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         private userService: UserService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
+        //extra jwt from query string for microsoft callback
         super({
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            jwtFromRequest: ExtractJwt.fromExtractors([ExtractJwt.fromAuthHeaderAsBearerToken(), ExtractJwt.fromUrlQueryParameter("jwt")]),
             secretOrKey: configService.get<string>('jwt.secret'),
             ignoreExpiration: false
         });
+
         this.context = JwtStrategy.name
     }
 
