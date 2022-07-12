@@ -24,7 +24,7 @@ const ServerAccount = () => {
     BoxStyle: {
       backgroundColor: 'rgba(14, 235, 168, 0.2)',
       textTransform: 'uppercase',
-      padding: '12px 12px 12px 12px',
+      padding: '16px',
       fontFamily: 'Orbitron',
       fontSize: '12px',
       lineHeight: '16px',
