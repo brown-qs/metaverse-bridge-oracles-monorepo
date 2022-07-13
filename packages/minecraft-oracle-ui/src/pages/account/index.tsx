@@ -53,8 +53,7 @@ const AccountPage = () => {
 
 
   const handleMinecraftLink = () => {
-    window.sessionStorage.setItem('authSuccessRedirect', window.location.pathname);
-    window.location.href = `${process.env.REACT_APP_BACKEND_API_URL}/auth/minecraft/login?jwt=${authData?.jwt}`;
+    history.push("/account/minecraft/redirect")
   }
 
   const handleLogout = () => {
@@ -63,31 +62,7 @@ const AccountPage = () => {
   }
 
   const handleMinecraftUnlink = async () => {
-    try {
-      const result = await axios({
-        method: 'delete',
-        url: `${process.env.REACT_APP_BACKEND_API_URL}/auth/minecraft/unlink`,
-        headers: {
-          "Authorization": `Bearer ${authData?.jwt}`,
-          "Content-Type": "application/json"
-        },
-      });
-      if (result?.data?.jwt) {
-        if (authData && authData.userProfile) {
-          //remove minecraft uuid
-          setAuthData({ ...authData, userProfile: { ...authData.userProfile, minecraftUuid: null } })
-        }
-        history.push(`/auth/${result?.data?.jwt}`)
-      }
-    } catch (e) {
-      const err = e as AxiosError;
-
-      if (err?.response?.data.statusCode === 401) {
-        window.localStorage.removeItem('authData');
-        setAuthData(undefined);
-      };
-      setFailureMessage(`Failed to unlink account: ${e}`)
-    }
+    history.push("/account/minecraft/unlink")
   }
 
   const handleAlertClose = () => {

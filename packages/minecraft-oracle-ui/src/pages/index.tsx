@@ -16,6 +16,9 @@ import EmailLoginPage from './account/login/email';
 import KiltLoginPage from './account/login/kilt';
 import EmailVerifyPage from './account/login/email/verify';
 import EmailChangePage from './account/login/email/change';
+import MinecraftRedirectPage from './account/minecraft/redirect';
+import MinecraftVerifyPage from './account/minecraft/verify';
+import MinecraftUnlinkPage from './account/minecraft/unlink';
 
 export const Routing = () => {
     const { authData } = useAuth();
@@ -45,6 +48,17 @@ export const Routing = () => {
                 <EmailVerifyPage />
             </Route>
 
+            <Route exact path="/account/minecraft/redirect">
+                {!!authData?.jwt ? <MinecraftRedirectPage /> : <LoginPage />}
+            </Route>
+
+            <Route exact path="/account/minecraft/verify">
+                {!!authData?.jwt ? <MinecraftVerifyPage /> : <LoginPage />}
+            </Route>
+
+            <Route exact path="/account/minecraft/unlink">
+                {!!authData?.jwt ? <MinecraftUnlinkPage /> : <LoginPage />}
+            </Route>
 
             <Route exact path="/account/login/kilt">
                 {!!authData?.jwt ? <Redirect to="/account" /> : <KiltLoginPage />}

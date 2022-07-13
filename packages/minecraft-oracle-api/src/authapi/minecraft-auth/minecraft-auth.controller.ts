@@ -25,7 +25,6 @@ import { UserService } from 'src/user/user/user.service';
 import { MinecraftLinkService } from 'src/user/minecraft-link/minecraft-link.service';
 import { SharedSecretGuard } from '../secret.guard';
 import { UserEntity } from 'src/user/user/user.entity';
-
 @ApiTags('auth')
 @Controller('auth/minecraft')
 export class MinecraftAuthController {
@@ -35,7 +34,7 @@ export class MinecraftAuthController {
     constructor(
         private readonly authApiService: MinecraftAuthService,
         private readonly userService: UserService,
-        private readonly minecraftLinkServer: MinecraftLinkService,
+        private readonly minecraftLinkService: MinecraftLinkService,
         private jwtService: JwtService,
         private configService: ConfigService,
 
@@ -45,35 +44,55 @@ export class MinecraftAuthController {
     }
 
     @Get('login')
-    @HttpCode(307)
-    @ApiOperation({ summary: 'Redirects user to Minecraft authentication' })
-    @Redirect()
-    async login(@Query() query: { jwt: string }) {
-        const { redirectUrl } = await this.authApiService.getMicrosoftAuthUrl(query.jwt);
+    @ApiOperation({ summary: 'Sends redirect url to Minecraft authentication' })
+    async login(@User() user: UserEntity) {
+        const { redirectUrl } = await this.authApiService.getMicrosoftAuthUrl();
 
         if (!redirectUrl) {
-            throw new UnauthorizedException();
+            throw new UnprocessableEntityException("Unable to get Minecraft login url. Please try again.");
         }
 
-        return { statusCode: HttpStatus.TEMPORARY_REDIRECT, url: redirectUrl }
+        return { status: "success", redirectUrl }
     }
 
     @Get('response')
     @HttpCode(308)
-    @ApiOperation({ summary: 'Minecraft authentication successful redirect target. Redirects again to the final destination with a jwt token.' })
-    //based on qs
-    @UseGuards(JwtAuthGuard)
+    @ApiOperation({ summary: 'Proxy Minecraft auth request to frontend' })
     @Redirect()
-    async redirect(@User() user: UserEntity, @Query() query: { code: string, jwt: string, error?: string, error_description?: string }) {
+    async redirect(@Query() query: { code: string, error?: string, error_description?: string }) {
         if (!!query.error) {
             this.logger.error(`Response query:: ${query?.error}: ${query?.error_description}`, null, this.context)
         }
-        this.logger.debug(`Response query: ${query?.code}`, this.context)
-        const result = await this.authApiService.authLogin(query.code, user, query.jwt);
-        this.logger.debug(`Response result: ${JSON.stringify(result)}`, this.context)
-
-        const redirectUrl = `${this.configService.get<number>('frontend.url')}/account`
+        const redirectUrl = `${this.configService.get<number>('frontend.url')}/account/minecraft/verify?${new URLSearchParams(query).toString()}`
+        console.log("redirectUrl: " + redirectUrl)
         return { statusCode: HttpStatus.TEMPORARY_REDIRECT, url: redirectUrl }
+    }
+
+    @Get('link')
+    @ApiOperation({ summary: 'Link a Minecraft.' })
+    @UseGuards(JwtAuthGuard)
+    async link(@User() user: UserEntity, @Query() query: { code: string, error?: string, error_description?: string }) {
+        if (!!query.error) {
+            this.logger.error(`Link query:: ${query?.error}: ${query?.error_description}`, null, this.context)
+        }
+
+        this.logger.debug(`Link query: ${query?.code}`, this.context)
+        const result = await this.authApiService.authLogin(query.code);
+
+        try {
+            await this.userService.linkMinecraftByUserUuid(user.uuid, result.minecraftUuid, result.minecraftUserName, result.ownership)
+        } catch (err) {
+            this.logger.error(`authLogin: error merging minecraft user into database: mc uuid: ${result.minecraftUuid}`, err, this.context)
+            const errStr = String(err)
+            if (errStr.includes("already have an enraptured gamepass in your account")) {
+                throw new UnprocessableEntityException(errStr)
+            } else {
+                throw new UnprocessableEntityException(`Error linking minecraft account`)
+            }
+        }
+        this.logger.debug(`Link result: ${JSON.stringify(result)}`, this.context)
+
+        return { success: true }
     }
 
     @Delete('unlink')
@@ -96,14 +115,8 @@ export class MinecraftAuthController {
         }
 
         //log unlink
-        await this.minecraftLinkServer.unlink(user, user, minecraftUuid)
-
-        const payload: UserJwtPayload = { sub: user.uuid };
-        const jwtToken = this.jwtService.sign(payload);
-
-        const redirectUrl = `${this.configService.get<number>('frontend.url')}/account`
-        return { jwt: jwtToken }
-
+        await this.minecraftLinkService.unlink(user, user, minecraftUuid)
+        return { success: true }
     }
 
     /*

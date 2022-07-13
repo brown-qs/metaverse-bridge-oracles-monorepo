@@ -28,7 +28,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     ) {
         //extra jwt from query string for microsoft callback
         super({
-            jwtFromRequest: ExtractJwt.fromExtractors([ExtractJwt.fromAuthHeaderAsBearerToken(), ExtractJwt.fromUrlQueryParameter("jwt")]),
+            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             secretOrKey: configService.get<string>('jwt.secret'),
             ignoreExpiration: false
         });
