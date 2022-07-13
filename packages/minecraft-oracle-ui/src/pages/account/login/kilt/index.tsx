@@ -69,7 +69,7 @@ const KiltLoginPage = () => {
 
       <Stack direction="row" spacing={2} margin={0} alignContent='center' textAlign='center' justifyContent="space-between">
         <Stack></Stack>
-        <Alert sx={{ margin: "auto" }} severity="info">Logging in with KILT requires a Sporran desktop wallet. Your wallet must include a SocialKYC email credential from <Link sx={{ textDecoration: "underline !important", "&:hover": { "color": "rgb(255, 201, 20) !important" } }} underline="always" href="https://socialkyc.io" target="_blank">socialkyc.io</Link>. Your Moonsama account is based on your email.</Alert>
+        <Alert sx={{ margin: "auto" }} severity="info">Logging in with KILT requires a Sporran desktop wallet. Your wallet must include a <Link sx={{ textDecoration: "underline !important", "&:hover": { "color": "rgb(255, 201, 20) !important" } }} underline="always" href="https://socialkyc.io" target="_blank">SocialKYC</Link> email credential. Your Moonsama account is based on your email.</Alert>
         <Stack></Stack>
       </Stack>
       <Stack alignItems="center" spacing={1} margin={2}>
