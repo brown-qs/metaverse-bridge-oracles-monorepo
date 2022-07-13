@@ -72,10 +72,7 @@ export class MinecraftAuthController {
         const result = await this.authApiService.authLogin(query.code, user, query.jwt);
         this.logger.debug(`Response result: ${JSON.stringify(result)}`, this.context)
 
-        const payload: UserJwtPayload = { sub: user.uuid };
-        const jwtToken = this.jwtService.sign(payload);
-
-        const redirectUrl = `${this.configService.get<number>('frontend.url')}/auth/${jwtToken}`
+        const redirectUrl = `${this.configService.get<number>('frontend.url')}/account`
         return { statusCode: HttpStatus.TEMPORARY_REDIRECT, url: redirectUrl }
     }
 
@@ -104,7 +101,7 @@ export class MinecraftAuthController {
         const payload: UserJwtPayload = { sub: user.uuid };
         const jwtToken = this.jwtService.sign(payload);
 
-        const redirectUrl = `${this.configService.get<number>('frontend.url')}/auth/${jwtToken}`
+        const redirectUrl = `${this.configService.get<number>('frontend.url')}/account`
         return { jwt: jwtToken }
 
     }
