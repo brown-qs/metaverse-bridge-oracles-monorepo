@@ -29,20 +29,18 @@ export class MinecraftAuthService {
         return this.jwtService.sign(payload);
     }
 
-    public async getMicrosoftAuthUrl(jwt?: string): Promise<{ redirectUrl: string }> {
+    public async getMicrosoftAuthUrl(): Promise<{ redirectUrl: string }> {
         MicrosoftAuth.setup(
             this.microsoftSetupParams.appId,
             this.microsoftSetupParams.appSecret,
             this.microsoftSetupParams.redirectUrl,
-            jwt
         )
-
         const redirectUrl = MicrosoftAuth.createUrl()
         this.logger.debug(`getMicrosoftAuthUrl:: created URL: ${redirectUrl}`);
         return { redirectUrl }
     }
 
-    public async authLogin(code: string, user: UserEntity, jwt: string) {
+    public async authLogin(code: string) {
 
         let account = new MicrosoftAccount();
 
@@ -55,7 +53,6 @@ export class MinecraftAuthService {
             this.microsoftSetupParams.appId,
             this.microsoftSetupParams.appSecret,
             this.microsoftSetupParams.redirectUrl,
-            jwt
         )
 
         let accessToken: string
@@ -82,23 +79,9 @@ export class MinecraftAuthService {
             //account.uuid > minecraft uuid
             //account.username > minecraft username
             //hasGame: account.ownership ?? false   
-            let minecraftUuid = account.uuid
-
-            try {
-                await this.userService.linkMinecraftByUserUuid(user.uuid, minecraftUuid, account.username, account.ownership ?? false)
-            } catch (err) {
-                this.logger.error(`authLogin: error merging minecraft user into database: mc uuid: ${account.uuid}`, err, this.context)
-                const errStr = String(err)
-                if (errStr.includes("already have an enraptured gamepass in your account")) {
-                    throw new UnprocessableEntityException(errStr)
-                } else {
-                    throw new UnprocessableEntityException(`Error linking minecraft account`)
-                }
-            }
-
 
             this.logger.log(`Account: ${JSON.stringify(account)}`, this.context);
-
+            return { minecraftUuid: account.uuid, minecraftUserName: account.username, ownership: account.ownership ?? false }
         } else {
             this.logger.error('authLogin:: user uuid and userName was not received', null, this.context)
             throw new UnprocessableEntityException('User profile could not be fetched.')
