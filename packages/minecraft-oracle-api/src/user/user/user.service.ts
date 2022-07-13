@@ -1,5 +1,5 @@
 import { InjectConnection, InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { Like } from "typeorm"
+import { IsNull, Like, Not, In } from "typeorm"
 import { Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Connection, DeepPartial, EntityManager, FindConditions, FindManyOptions, FindOneOptions, ObjectID, Repository, UpdateResult } from 'typeorm';
@@ -394,6 +394,25 @@ export class UserService {
 
     public async unlinkMinecraftByUserUuid(uuid: string) {
         await this.repository.update({ uuid }, { minecraftUuid: null, minecraftUserName: null, hasGame: false })
+    }
+
+    public async minecraftUuidMap(offset: number, minecraftUuids: string[] | undefined, limit: number | undefined) {
+
+        let whereObj = { "minecraftUuid": Not(IsNull()) }
+        if (Array.isArray(minecraftUuids)) {
+            whereObj = { "minecraftUuid": In([...minecraftUuids]) }
+        }
+
+        const query = this.repository.createQueryBuilder('users')
+            .select("users.uuid", "uuid")
+            .addSelect("users.minecraftUuid", "minecraftUuid")
+            .orderBy("users.minecraftUuid", "ASC")
+            .where(whereObj)
+            .offset(offset)
+        if (!!limit) {
+            query.limit(limit)
+        }
+        return await query.execute()
     }
 
     /*

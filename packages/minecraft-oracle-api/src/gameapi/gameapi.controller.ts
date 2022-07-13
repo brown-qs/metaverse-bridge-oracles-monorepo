@@ -43,6 +43,7 @@ import { SetGameScoreTypeDto } from '../gamescoretype/dtos/gamescoretype.dto';
 import { GameItemTypeDto, SetGameItemTypesDto } from '../gameitemtype/dtos/gameitemtype.dto';
 import { PlayerGameItemsDto, QueryGameItemsDto, SetPlayerGameItemsDto } from '../playergameitem/dtos/playergameitem.dto';
 import { GameService } from '../game/game.service';
+import { UuidMapDto } from './dtos/uuidmap.dto';
 
 @ApiTags('game')
 @Controller('game')
@@ -61,6 +62,26 @@ export class GameApiController {
     ) {
         this.context = GameApiController.name;
     }
+    @Get('players/uuids')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Map of uuids to minecraftUuids' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async uuids(@Query() dto: UuidMapDto): Promise<{ uuid: string, minecraftUuid: string }[]> {
+        let offset: number = 0
+        let limit: number | undefined = undefined
+
+        if (dto.hasOwnProperty("offset")) {
+            offset = Math.abs(parseInt(dto.offset))
+        }
+
+        if (dto.hasOwnProperty("limit")) {
+            limit = Math.abs(parseInt(dto.limit))
+        }
+
+        return await this.userService.minecraftUuidMap(offset, dto.minecraftUuids, limit)
+    }
+
     @Get('player/:minecraftUuid/profileByMinecraftUuid')
     @HttpCode(200)
     @ApiOperation({ summary: 'Fetches user profile by minecraftUuid' })
@@ -73,7 +94,6 @@ export class GameApiController {
         }
         return this.profileService.userProfile(user)
     }
-
 
     @Get('player/:uuid/profile')
     @HttpCode(200)
