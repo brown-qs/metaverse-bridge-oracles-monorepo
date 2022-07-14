@@ -25,6 +25,8 @@ import { UserService } from 'src/user/user/user.service';
 import { MinecraftLinkService } from 'src/user/minecraft-link/minecraft-link.service';
 import { SharedSecretGuard } from '../secret.guard';
 import { UserEntity } from 'src/user/user/user.entity';
+import { GameService } from 'src/game/game.service';
+import { GameKind } from 'src/game/game.enum';
 @ApiTags('auth')
 @Controller('auth/minecraft')
 export class MinecraftAuthController {
@@ -35,6 +37,7 @@ export class MinecraftAuthController {
         private readonly authApiService: MinecraftAuthService,
         private readonly userService: UserService,
         private readonly minecraftLinkService: MinecraftLinkService,
+        private readonly gameService: GameService,
         private configService: ConfigService,
 
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
@@ -82,12 +85,13 @@ export class MinecraftAuthController {
             await this.userService.linkMinecraftByUserUuid(user.uuid, result.minecraftUuid, result.minecraftUserName, result.ownership)
         } catch (err) {
             this.logger.error(`authLogin: error merging minecraft user into database: mc uuid: ${result.minecraftUuid}`, err, this.context)
-            const errStr = String(err)
-            if (errStr.includes("already have an enraptured gamepass in your account")) {
-                throw new UnprocessableEntityException(errStr)
+
+            if (err instanceof UnprocessableEntityException) {
+                throw err
             } else {
                 throw new UnprocessableEntityException(`Error linking minecraft account`)
             }
+
         }
         this.logger.debug(`Link result: ${JSON.stringify(result)}`, this.context)
 
@@ -102,6 +106,9 @@ export class MinecraftAuthController {
         const minecraftUuid = user.minecraftUuid
         if (!minecraftUuid) {
             throw new UnprocessableEntityException('There is no Minecraft account to unlink')
+        }
+        if (!!(await this.gameService.findOne({ ongoing: true, type: GameKind.CARNAGE }))) {
+            throw new UnprocessableEntityException('You cannot not unlink a Minecraft account during Carnage or the resource distribution period after Carnage.')
         }
         try {
             await this.userService.unlinkMinecraftByUserUuid(user.uuid)
