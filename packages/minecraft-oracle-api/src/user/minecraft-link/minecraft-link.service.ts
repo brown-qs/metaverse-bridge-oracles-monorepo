@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindConditions, ObjectID, Repository, UpdateResult } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import { MinecraftUuidEntity } from '../minecraft-uuid/minecraft-uuid.entity';
 import { UserEntity } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 import { MinecraftLinkEntity } from './minecraft-link.entity';
@@ -20,7 +21,7 @@ export class MinecraftLinkService {
         await this.repository.insert(event);
     }*/
 
-    public async unlink(user: UserEntity, unlinkInitiator: UserEntity, minecraftUuid: string): Promise<void> {
+    public async unlink(user: UserEntity, unlinkInitiator: UserEntity, minecraftUuid: MinecraftUuidEntity): Promise<void> {
         await this.update({ user, minecraftUuid, unlinkedAt: null }, { unlinkedAt: new Date(), unlinkInitiator })
     }
 

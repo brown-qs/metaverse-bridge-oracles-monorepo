@@ -13,9 +13,13 @@ import { SkinModule } from '../../skin/skin.module';
 import { TextureModule } from '../../texture/texture.module';
 import { MinecraftLinkModule } from 'src/user/minecraft-link/minecraft-link.module';
 import { GameModule } from 'src/game/game.module';
+import { MinecraftUserNameModule } from 'src/user/minecraft-user-name/minecraft-user-name.module';
+import { MinecraftUuidModule } from 'src/user/minecraft-uuid/minecraft-uuid.module';
 
 @Module({
     imports: [
+        MinecraftUserNameModule,
+        MinecraftUuidModule,
         GameModule,
         MinecraftLinkModule,
         UserModule,

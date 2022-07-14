@@ -5,6 +5,7 @@ import {
     IsString
 } from 'class-validator';
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { EmailEntity } from '../email/email.entity';
 import { UserEntity } from '../user/user.entity';
 
 @Entity()
@@ -12,19 +13,19 @@ export class EmailChangeEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(() => UserEntity, (user) => user.emailChanges, { createForeignKeyConstraints: true })
+    @ManyToOne(() => UserEntity, (user) => user.emailChanges, { createForeignKeyConstraints: true, nullable: false })
     user: UserEntity
 
-    //typeorm will error out with constraint "FK_3d1d94c5f8343369466833a0b05" for relation "email_change_entity" already exists... if we have two relations to user on this table
-    //https://github.com/typeorm/typeorm/issues/9171
-    @ManyToOne(() => UserEntity, (user) => user.emailChangeInitiations, { createForeignKeyConstraints: false })
+    @ManyToOne(() => UserEntity, (user) => user.emailChangeInitiations, { createForeignKeyConstraints: true, nullable: false })
     initiator: UserEntity
 
-    @Column()
-    oldEmail: string;
+    @ManyToOne(() => EmailEntity, (en) => en.email, { nullable: false })
+    @JoinColumn({ name: "oldEmail" })
+    oldEmail: EmailEntity
 
-    @Column()
-    newEmail: string;
+    @ManyToOne(() => EmailEntity, (en) => en.email, { nullable: false })
+    @JoinColumn({ name: "newEmail" })
+    newEmail: EmailEntity
 
     @Column({ type: "timestamptz" })
     createdAt: Date;

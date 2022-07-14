@@ -25,6 +25,9 @@ import { SummonEntity } from '../../summon/summon.entity';
 import { RecognizedAssetType } from 'src/config/constants';
 import { GameEntity } from 'src/game/game.entity';
 import { GameKind } from 'src/game/game.enum';
+import { MinecraftUuidEntity } from '../minecraft-uuid/minecraft-uuid.entity';
+import { MinecraftUserNameEntity } from '../minecraft-user-name/minecraft-user-name.entity';
+import { EmailEntity } from '../email/email.entity';
 @Injectable()
 export class UserService {
     context: string;
@@ -39,12 +42,11 @@ export class UserService {
     }
 
 
-    public async createEmail(email: string): Promise<UserEntity> {
-        const em = email.toLowerCase().trim()
+    public async createEmail(email: EmailEntity): Promise<UserEntity> {
 
         const result = await this.repository.createQueryBuilder('users')
             .insert()
-            .values({ uuid: userUuid(), email: em, createdAt: new Date(), lastLogin: new Date() })
+            .values({ uuid: userUuid(), email, createdAt: new Date(), lastLogin: new Date() })
             .orUpdate(["lastLogin"], ["email"])
             .returning('*')
             .execute()
@@ -72,18 +74,18 @@ export class UserService {
         return result;
     }
 
-    public async findByEmail(email: string): Promise<UserEntity> {
-        const result = await this.repository.findOne({ email: email.toLowerCase().trim() });
+    public async findByEmail(email: EmailEntity): Promise<UserEntity> {
+        const result = await this.repository.findOne({ email });
         return result;
     }
 
     public async findByUuid(uuid: string): Promise<UserEntity> {
-        const result: UserEntity = (await this.repository.findOne({ uuid }));
+        const result: UserEntity = (await this.repository.findOne({ uuid }, { relations: ["email"] }));
         return result;
     }
 
     public async findByMinecraftUuid(minecraftUuid: string): Promise<UserEntity> {
-        const result: UserEntity = (await this.repository.findOne({ minecraftUuid }));
+        const result: UserEntity = (await this.repository.findOne({ minecraftUuid }, { relations: ["email"] }));
         return result;
     }
 
@@ -129,7 +131,7 @@ export class UserService {
             3. minecraft account is already associated with an email
                 -relationships have already been migrated over to first email, can null out minecraftUuid on old user and put it on new user
             */
-            const existingMinecraft = await queryRunner.manager.findOne(UserEntity, { minecraftUuid })
+            const existingMinecraft = await queryRunner.manager.findOne(UserEntity, { minecraftUuid }, { relations: ["email"] })
 
 
 
@@ -140,7 +142,7 @@ export class UserService {
                 //
             } else {
                 //minecraft user has been migrated to an email before and is in use
-                if (typeof existingMinecraft.email === "string") {
+                if (!!existingMinecraft?.email?.email) {
                     //safety check, uuid and minecraftUuid should be different
                     if (existingMinecraft.uuid === existingMinecraft.minecraftUuid) {
                         throw new Error("If user has an email defined, uuid !== minecraftUuid, condition not met")
@@ -373,7 +375,13 @@ export class UserService {
 
             const newUser = await queryRunner.manager.findOne(UserEntity, { uuid: userUuid })
 
-            const mcLink = queryRunner.manager.create(MinecraftLinkEntity, { user: newUser, minecraftUuid, minecraftUserName, hasGame, linkInitiator: newUser, linkedAt: new Date() })
+            await queryRunner.manager.upsert(MinecraftUuidEntity, { minecraftUuid }, ["minecraftUuid"])
+            await queryRunner.manager.upsert(MinecraftUserNameEntity, { minecraftUserName }, ["minecraftUserName"])
+            const mcUuidEn = await queryRunner.manager.findOne(MinecraftUuidEntity, { minecraftUuid })
+            const mcUserNameEn = await queryRunner.manager.findOne(MinecraftUserNameEntity, { minecraftUserName })
+
+
+            const mcLink = queryRunner.manager.create(MinecraftLinkEntity, { user: newUser, minecraftUuid: mcUuidEn, minecraftUserName: mcUserNameEn, hasGame, linkInitiator: newUser, linkedAt: new Date() })
             await queryRunner.manager.save(MinecraftLinkEntity, mcLink)
 
             //add minecraft link

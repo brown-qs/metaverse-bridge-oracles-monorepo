@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindConditions, ObjectID, Repository, UpdateResult } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import { KiltDappEntity } from '../kilt-dapp/kilt-dapp.entity';
 import { KiltSessionEntity } from './kilt-session.entity';
 
 @Injectable()
@@ -13,13 +14,13 @@ export class KiltSessionService {
         private configService: ConfigService
     ) { }
 
-    public async create(sessionId: string, walletSessionChallenge: string, dappName: string, dAppEncryptionKeyUri: string): Promise<KiltSessionEntity> {
+    public async create(sessionId: string, walletSessionChallenge: string, dappName: KiltDappEntity, dAppEncryptionKeyUri: string): Promise<KiltSessionEntity> {
         const sess = await this.repository.save({ sessionId, walletSessionChallenge, dappName, dAppEncryptionKeyUri, createdAt: new Date(), updatedAt: new Date() });
         return sess;
     }
 
     public async findBySessionId(sessionId: string): Promise<KiltSessionEntity> {
-        const sess: KiltSessionEntity = (await this.repository.findOne({ sessionId }));
+        const sess: KiltSessionEntity = await this.repository.findOne({ sessionId }, { relations: ["did", "dappName"] });
         return sess;
     }
 
