@@ -9,9 +9,9 @@ import { ResourceInventoryQueryResult, SetResourceInventoryItems } from './dtos/
 import { ResourceInventoryOffsetQueryResult, SetResourceInventoryOffsetItems } from './dtos/resourceinventoryoffset.dto';
 import { ResourceInventoryService } from '../resourceinventory/resourceinventory.service';
 import { ResourceInventoryOffsetService } from '../resourceinventoryoffset/resourceinventoryoffset.service';
-import { UserEntity } from '../user/user.entity';
+import { UserEntity } from '../user/user/user.entity';
 import { AssetService } from '../asset/asset.service';
-import { UserService } from '../user/user.service';
+import { UserService } from '../user/user/user.service';
 import { AllAssetsQueryDto, AllAssetsResultDto } from './dtos/allassets.dto';
 import { FungibleBalanceEntryDto, UsersFungibleBalancesQueryDto, UsersFungibleBalancesResultDto } from './dtos/fungiblebalances.dto';
 import { CollectionFragmentService } from '../collectionfragment/collectionfragment.service';
@@ -42,7 +42,7 @@ export class AssetApiService {
         const specs = typeof dto.specifics === 'string' ? [dto.specifics] : dto.specifics
 
         const users = dto.specifics ? await this.userService.findMany({ where: { uuid: In(specs) }, order: { uuid: 'ASC' }, relations: ['assets'] })
-             : await this.userService.findMany({ take, skip, order: { uuid: 'ASC' }, relations: ['assets'] })
+            : await this.userService.findMany({ take, skip, order: { uuid: 'ASC' }, relations: ['assets'] })
         return {
             results: users.map(u => {
                 return {
@@ -62,7 +62,7 @@ export class AssetApiService {
 
         const specs = typeof dto.specifics === 'string' ? [dto.specifics] : dto.specifics
 
-        const assets = dto.specifics ? await this.assetService.findMany({ where: { hash: In(specs)}, order: { hash: 'ASC' }, relations: ['owner'] })
+        const assets = dto.specifics ? await this.assetService.findMany({ where: { hash: In(specs) }, order: { hash: 'ASC' }, relations: ['owner'] })
             : await this.assetService.findMany({ where: { pendingIn: false }, take, skip, order: { hash: 'ASC' }, relations: ['owner'] })
         return {
             results: assets.map(a => {
@@ -178,7 +178,7 @@ export class AssetApiService {
     }
 
     async getFungibleBalancesForPlayer(user: UserEntity): Promise<FungibleBalanceEntryDto> {
-        const res = await this.resourceInventoryService.findMany({ where: { owner: { uuid: user.uuid } }, relations: ['owner', 'offset', 'collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true})
+        const res = await this.resourceInventoryService.findMany({ where: { owner: { uuid: user.uuid } }, relations: ['owner', 'offset', 'collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
 
         if (!res) {
             return { balances: [], user: { uuid: user.uuid, name: user.userName } }
@@ -202,7 +202,7 @@ export class AssetApiService {
 
         const specs = typeof dto.specifics === 'string' ? [dto.specifics] : dto.specifics
 
-        const res = dto.specifics ? await this.userService.findMany({ where: {uuid: In(specs)}, relations: ['resourceInventoryItems', 'resourceInventoryItems.offset', 'resourceInventoryItems.collectionFragment', 'resourceInventoryItems.collectionFragment.collection'], loadEagerRelations: true, order: { uuid: 'ASC' } })
+        const res = dto.specifics ? await this.userService.findMany({ where: { uuid: In(specs) }, relations: ['resourceInventoryItems', 'resourceInventoryItems.offset', 'resourceInventoryItems.collectionFragment', 'resourceInventoryItems.collectionFragment.collection'], loadEagerRelations: true, order: { uuid: 'ASC' } })
             : await this.userService.findMany({ relations: ['resourceInventoryItems', 'resourceInventoryItems.offset', 'resourceInventoryItems.collectionFragment', 'resourceInventoryItems.collectionFragment.collection'], loadEagerRelations: true, take, skip, order: { uuid: 'ASC' } })
 
         const results = res.map((user) => {

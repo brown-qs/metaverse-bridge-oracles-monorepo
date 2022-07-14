@@ -618,7 +618,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
     const my1155s = transformOnChainAssets(onChainItems?.['???'] ?? [])
 
     setOwnedAssets({
-      bridge: myBridgedAssets?.assets ?? [],
+      bridge: [...(myBridgedAssets?.assets ?? [])],
       bridgeAttributes: myBridgedAssets?.attributes ?? [],
       wallet: [...(myMoonsamas?.assets ?? []), ...(my1155s?.assets ?? [])],
       walletAttributes: [...(myMoonsamas?.attributes ?? [])]

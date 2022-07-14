@@ -5,7 +5,7 @@ import {
     IsNumber,
     IsString
 } from 'class-validator';
-import { UserEntity } from '../user/user.entity';
+import { UserEntity } from '../user/user/user.entity';
 import { Column, Entity, Index, ManyToOne, PrimaryColumn } from 'typeorm';
 import { RecognizedAssetType } from '../config/constants';
 import { CompositeAssetEntity } from '../compositeasset/compositeasset.entity';
@@ -13,7 +13,7 @@ import { CollectionFragmentEntity } from '../collectionfragment/collectionfragme
 import { ResourceInventoryEntity } from '../resourceinventory/resourceinventory.entity';
 
 @Entity()
-@Index(['hash'], {unique: true})
+@Index(['hash'], { unique: true })
 export class AssetEntity {
 
     constructor(asset: Partial<AssetEntity>) {
@@ -32,14 +32,14 @@ export class AssetEntity {
     @IsString()
     assetId: string;
 
-    @Column({nullable: true})
+    @Column({ nullable: true })
     @IsString()
     assetOwner?: string;
 
     @IsBoolean()
     @Column()
     enraptured: boolean;
-    
+
     @IsBoolean()
     @Column()
     pendingIn: boolean;
@@ -79,12 +79,12 @@ export class AssetEntity {
     @ManyToOne(() => UserEntity, (user) => user.assets)
     owner?: UserEntity
 
-    @ManyToOne(() => CompositeAssetEntity, (compositeAsset) => compositeAsset.children, {onDelete: 'SET NULL', nullable: true})
+    @ManyToOne(() => CompositeAssetEntity, (compositeAsset) => compositeAsset.children, { onDelete: 'SET NULL', nullable: true })
     compositeAsset?: CompositeAssetEntity
 
     @ManyToOne(() => CollectionFragmentEntity, (collectionFragment) => collectionFragment.bridgeAssets)
     collectionFragment?: CollectionFragmentEntity
 
-    @ManyToOne(() => ResourceInventoryEntity, (rie) => rie.assets)
+    @ManyToOne(() => ResourceInventoryEntity, (rie) => rie.assets, { onUpdate: "CASCADE" })
     resourceInventory?: ResourceInventoryEntity
 }

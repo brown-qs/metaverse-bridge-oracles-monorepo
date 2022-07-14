@@ -81,7 +81,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
     //In Game Items
     const inGameItems = useInGameItems(fetchtrigger);
-    const inGameAssets = inGameItems?.assets ?? [];
+    const inGameAssets = (inGameItems?.assets ?? []).filter(x => x.assetAddress.length === 42);
     const inGameResources = inGameItems?.resources ?? []
     const inGameTextures: InGameTexture[] = inGameItems?.textures ?? []
 
@@ -107,12 +107,11 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const assetCounter = countGamePassAssets(inGameAssets)
     const hasImportedTicket = assetCounter.ticketNum > 0
     return (
-        <Container className={profileContainer} maxWidth='xl'>
-            <Stack justifyContent="center" style={{ marginTop: '30px', minWidth: '90%', maxWidth: '90%'}} spacing={theme.spacing(4)}>
+        <Container className={profileContainer} maxWidth={false} sx={{ backgroundColor: "black", minHeight: "100vh", paddingBottom: 10 }}>
+            <Stack justifyContent="center" style={{ marginTop: '30px', minWidth: '90%', maxWidth: '90%' }} spacing={theme.spacing(4)}>
                 <Stack direction='row' display='flex' justifyContent='space-between' alignItems={'baseline'}>
-                    <div style={{ fontSize: '38px', fontFamily: `VT323, 'arial'`, textAlign: 'left' }}>Available skins</div>
                     <div style={{ textAlign: 'right' }}>
-                        <span style={{ fontSize: '22px' }}>Welcome back {authData?.userProfile?.userName},</span>
+                        <span style={{ fontSize: '22px' }}>Welcome back {authData?.userProfile?.email},</span>
                         <br />
                         {profile?.allowedToPlay ? (
                             <Tooltip placement='bottom' title={playAllowedReasonTexts[profile.allowedToPlayReason] ?? playAllowedReasonTexts['DEFAULT']}>
@@ -124,6 +123,10 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                         }
                     </div>
                 </Stack>
+                {/* Start Skins */}
+                <Stack>
+                    <div style={{ fontSize: '38px', fontFamily: `VT323, 'arial'`, textAlign: 'left' }}>Available skins</div>
+                </Stack>
                 <Stack
                     style={{ marginTop: '20px', background: '#111' }}
                     maxWidth='100%'
@@ -133,6 +136,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     spacing={theme.spacing(4)}
                     overflow='auto'
                 >
+
                     {!!inGameTextures.length ? inGameTextures.sort((t1, t2) => t1.assetAddress.localeCompare(t2.assetAddress)).map((value, ind) => {
 
                         // console.log('SKIN', value)
@@ -153,23 +157,23 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                     </a>
                                 </Tooltip>}
                                 {!value.equipped ? (
-                                        <button
-                                            className={transferButtonMid}
-                                            disabled={value.equipped}
-                                            onClick={async () => {
-                                                const success = await callbackSkinEquip({
-                                                    assetAddress: value.assetAddress,
-                                                    assetId: value.assetId,
-                                                    assetType: value.assetType
-                                                })
-                                                if (success) {
-                                                    setFetchtrigger(Date.now().toString())
-                                                }
-                                            }}
-                                        >
-                                            Equip
-                                        </button>
-                                    ): <div style={{display: 'block'}}>Equipped</div>
+                                    <button
+                                        className={transferButtonMid}
+                                        disabled={value.equipped}
+                                        onClick={async () => {
+                                            const success = await callbackSkinEquip({
+                                                assetAddress: value.assetAddress,
+                                                assetId: value.assetId,
+                                                assetType: value.assetType
+                                            })
+                                            if (success) {
+                                                setFetchtrigger(Date.now().toString())
+                                            }
+                                        }}
+                                    >
+                                        Equip
+                                    </button>
+                                ) : <div style={{ display: 'block' }}>Equipped</div>
                                 }
                             </Stack>
                         );
@@ -179,9 +183,12 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                         </div>
                     )}
                 </Stack>
+                {/* End Skins */}
+
                 <div style={{ width: '100%', marginTop: '40px', textAlign: 'left' }}>
                     <span style={{ fontSize: '38px', fontFamily: `VT323, 'arial'`, }}>Multiverse bridge</span>
                 </div>
+                {/* Start Items Stack both on-chain/in-game */}
                 <Stack
                     direction={{ xs: 'column', sm: 'row' }}
                     justifyContent="space-between"
@@ -189,6 +196,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     style={{ marginTop: '20px', textAlign: 'center' }}
                     spacing={theme.spacing(4)}
                 >
+                    {/* Start In Game Items */}
                     <Box flexGrow={1}>
                         <div className={columnTitle}><span className={columnTitleText}>In-game items: Metaverse</span></div>
                         <List dense sx={{ width: '100%', bgcolor: '#111' }}>
@@ -288,6 +296,9 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                             </div>
                         </Dialog>
                     </Box>
+                    {/* End In Game Items */}
+
+                    {/* Start On Chain Items */}
                     <Box flexGrow={1}>
                         <div className={columnTitle}><span className={columnTitleText}>On-chain items: {NETWORK_NAME[chainId ?? DEFAULT_CHAIN]} account</span></div>
                         <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
@@ -302,7 +313,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                 {/*<img className={itemImage} src={item?.meta?.image} alt="" />*/}
                                                 <Media uri={item?.meta?.image} />
                                             </ListItemAvatar>
-                                            <ListItemText primary={`${item?.meta?.name}${item?.asset?.assetAddress?.toLowerCase() !== '0xb654611f84a8dc429ba3cb4fda9fad236c505a1a' ? ` #${item?.asset?.assetId}`: '' }`} style={{ paddingLeft: '10px' }} />
+                                            <ListItemText primary={`${item?.meta?.name}${item?.asset?.assetAddress?.toLowerCase() !== '0xb654611f84a8dc429ba3cb4fda9fad236c505a1a' ? ` #${item?.asset?.assetId}` : ''}`} style={{ paddingLeft: '10px' }} />
                                             <Tooltip title={'You can have 1 VIP ticket imported at a time.'}>
                                                 <span>
                                                     <Button
@@ -330,7 +341,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     {/*<img className={itemImage} src={item?.meta?.image} alt="" />*/}
                                                     <Media uri={item?.meta?.image} />
                                                 </ListItemAvatar>
-                                                <ListItemText primary={`${item?.meta?.name}${item?.asset?.assetAddress?.toLowerCase() !== '0xb654611f84a8dc429ba3cb4fda9fad236c505a1a' ? ` #${item?.asset?.assetId}`: '' }`} style={{ paddingLeft: '10px' }} />
+                                                <ListItemText primary={`${item?.meta?.name}${item?.asset?.assetAddress?.toLowerCase() !== '0xb654611f84a8dc429ba3cb4fda9fad236c505a1a' ? ` #${item?.asset?.assetId}` : ''}`} style={{ paddingLeft: '10px' }} />
                                                 {item.importable && <Tooltip title={`Your imported ${item?.meta?.name} will bound to your Minecraft account. It will go back to the sender address when exported.`}>
                                                     <span>
                                                         <Button
@@ -364,7 +375,12 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                             )}
                         </List>
                     </Box>
+                    {/* End On Chain Items */}
+
                 </Stack>
+                {/* End Items Stack both on-chain/in-game */}
+
+                {/* Start Resources Stack both on-chain/in-game */}
                 <Stack
                     direction={{ xs: 'column', sm: 'row' }}
                     justifyContent="space-between"
@@ -372,6 +388,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     spacing={theme.spacing(4)}
                     style={{ textAlign: 'center', marginTop: '30px' }}
                 >
+                    {/* Start In Game Resources */}
                     <Box flexGrow={1}>
                         <div className={columnTitle}><span className={columnTitleText}>In-game resources: Metaverse</span></div>
                         <List dense sx={{ width: '100%', bgcolor: '#111' }}>
@@ -381,18 +398,14 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                         return (
                                             <ListItem
                                                 key={`${resource.assetAddress}-${resource.assetId}`}
-                                                secondaryAction={
-                                                    <>
-                                                        {resource.amount}
-                                                    </>
-                                                }
+
                                                 disablePadding
                                             >
-                                                <ListItemButton>
+                                                <ListItemButton disableRipple sx={{ cursor: "default" }}>
                                                     <ListItemAvatar>
                                                         <img src={resource.meta?.image} alt={resource.name} className={itemImage} />
                                                     </ListItemAvatar>
-                                                    <ListItemText id={resource.name} primary={resource.meta?.name} />
+                                                    <ListItemText secondaryTypographyProps={{ sx: { color: "white" } }} id={resource.name} primary={resource.meta?.name} secondary={String(parseFloat(resource.amount).toFixed(2))} />
                                                 </ListItemButton>
                                             </ListItem>
                                         )
@@ -413,6 +426,9 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                             disabled={!canSummon}
                         >Summon resources</Button>
                     </Box>
+                    {/* End In Game Resources */}
+
+                    {/* Start On Chain Resources */}
                     <Box flexGrow={1}>
                         <div className={columnTitle}><span className={columnTitleText}>On-chain resources: {NETWORK_NAME[chainId ?? DEFAULT_CHAIN]} account</span></div>
                         <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
@@ -427,6 +443,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                         }
                                         disablePadding
                                         onClick={() => {
+                                            //user will be able to see resources in their metamask wallet as under assets, nothing is moving
                                             setAssetDialogOpen(true)
                                             setAssetDialogData({
                                                 title: value?.staticData?.name,
@@ -448,7 +465,11 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                             }) : <ListItem>No resources found in wallet.</ListItem>}
                         </List>
                     </Box>
+                    {/* End On Chain Resources */}
+
                 </Stack>
+                {/* End Resources Stack both on-chain/in-game */}
+
             </Stack>
         </Container>
     );

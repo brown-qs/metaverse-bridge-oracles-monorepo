@@ -2,12 +2,12 @@ import { Inject, Injectable, UnprocessableEntityException } from '@nestjs/common
 import { ProfileDto } from './dtos/profile.dto';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { AssetService } from '../asset/asset.service';
-import { UserEntity } from '../user/user.entity';
+import { UserEntity } from '../user/user/user.entity';
 import { RecognizedAssetType, PlayEligibilityReason } from '../config/constants';
 import { ProviderToken } from '../provider/token';
 import { AssetDto, TextureDto, ThingsDto } from './dtos/things.dto';
 import { InventoryService } from '../playerinventory/inventory.service';
-import { UserService } from '../user/user.service';
+import { UserService } from '../user/user/user.service';
 import { SkinselectDto } from './dtos/skinselect.dto';
 import { SkinService } from '../skin/skin.service';
 import { findRecognizedAsset } from '../utils';
@@ -64,7 +64,6 @@ export class ProfileApiService {
         const importableAssets = await this.getRecognizedAssets(BridgeAssetType.IMPORTED)
         const enrapturableAssets = await this.getRecognizedAssets(BridgeAssetType.ENRAPTURED)
 
-        //console.log(userSkins)
 
         const assets: AssetDto[] = []
 
@@ -125,13 +124,13 @@ export class ProfileApiService {
                 name: skin.texture.name
             }
         })
-        
+
 
         // TODO fixme
-        const bait = await this.resourceInventoryService.findOne({owner: user}, {relations: ['owner', 'offset']})
+        const bait = await this.resourceInventoryService.findOne({ owner: user }, { relations: ['owner', 'offset'] })
         if (!!bait) {
             const baitAsset = userAssets.find(x => x.assetId === bait.assetId && x.collectionFragment.recognizedAssetType.valueOf() === RecognizedAssetType.RESOURCE.valueOf())
-            
+
             if (!!baitAsset) {
                 assets.push(
                     {
@@ -169,8 +168,10 @@ export class ProfileApiService {
         }
         return {
             uuid: user.uuid,
+            minecraftUuid: user.minecraftUuid,
+            email: user.email.email,
             hasGame: user.hasGame,
-            userName: user.userName,
+            minecraftUserName: user.minecraftUserName,
             role: user.role,
             allowedToPlay: user.allowedToPlay,
             serverId: user.serverId,

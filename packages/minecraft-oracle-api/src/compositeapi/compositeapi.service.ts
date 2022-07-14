@@ -2,11 +2,11 @@ import { Injectable, Inject, UnprocessableEntityException } from "@nestjs/common
 import { ConfigService } from "@nestjs/config/dist/config.service";
 import MutexInterface from "async-mutex/lib/MutexInterface";
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from "nest-winston";
-import { UserEntity } from "../user/user.entity";
+import { UserEntity } from "../user/user/user.entity";
 import { AssetService } from "../asset/asset.service";
 import { CollectionFragmentService } from "../collectionfragment/collectionfragment.service";
 import { CompositeCollectionFragmentService } from "../compositecollectionfragment/compositecollectionfragment.service";
-import { UserService } from "../user/user.service";
+import { UserService } from "../user/user/user.service";
 import { CompositeAssetService } from "../compositeasset/compositeasset.service";
 import { ChainId } from "../config/constants";
 import { NftApiService } from "../nftapi/nftapi.service";
@@ -85,7 +85,7 @@ export class CompositeApiService {
         const parentChainId = compositeParent.chainId ?? ChainId.MOONRIVER
         const parentAssetId = compositeParent.assetId
 
-        this.logger.log(`saveCompositeConfig:: started for ${parentChainId}-${parentAssetAddress}-${parentAssetId} owned by ${user.userName}`, this.context)
+        this.logger.log(`saveCompositeConfig:: started for ${parentChainId}-${parentAssetAddress}-${parentAssetId} owned by ${user.minecraftUserName}`, this.context)
         //console.log(compositeChildren)
 
         let parentAsset: CompositeEnrichedAssetEntity | AssetEntity = await this.assetService.findOne({
@@ -95,7 +95,7 @@ export class CompositeApiService {
         }, { relations: ['collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
 
         if (!parentAsset) {
-            this.logger.error(`saveCompositeConfig:: Parent asset ${parentChainId}-${parentAssetAddress} is not owned by ${user.userName}`, undefined, this.context)
+            this.logger.error(`saveCompositeConfig:: Parent asset ${parentChainId}-${parentAssetAddress} is not owned by ${user.minecraftUserName}`, undefined, this.context)
 
             // we clean up faulty composite asset
             const existingCompositeAsset = await this.compositeAssetService.findOne({ assetId: parentAssetId, compositeCollectionFragment: { collection: { assetAddress: parentAssetAddress, chainId: parentChainId } } }, { relations: ['compositeCollectionFragment', 'compositeCollectionFragment.collection', 'syntheticChildren'], loadEagerRelations: true })
@@ -147,7 +147,7 @@ export class CompositeApiService {
                 }, { relations: ['collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
 
                 if (!childAsset) {
-                    this.logger.error(`saveCompositeConfig:: child asset ${childChainId}-${childAssetAddress}-${childAssetId} not owned by ${user.userName}`, undefined, this.context)
+                    this.logger.error(`saveCompositeConfig:: child asset ${childChainId}-${childAssetAddress}-${childAssetId} not owned by ${user.minecraftUserName}`, undefined, this.context)
                     throw new UnprocessableEntityException('Child asset is not owned by user.')
                 }
 
@@ -214,14 +214,14 @@ export class CompositeApiService {
             } else {
 
                 const sit = await this.syntheticItemService.findOne({
-                        id: SyntheticItemService.calculateId({
-                            assetId: c.assetId,
-                            chainId: c.collectionFragment.collection.chainId,
-                            assetAddress: c.collectionFragment.collection.assetAddress,
-                            syntheticPartId: c.syntheticPart.id
-                        })
-                    },
-                    {relations: ['compositeAssets']}
+                    id: SyntheticItemService.calculateId({
+                        assetId: c.assetId,
+                        chainId: c.collectionFragment.collection.chainId,
+                        assetAddress: c.collectionFragment.collection.assetAddress,
+                        syntheticPartId: c.syntheticPart.id
+                    })
+                },
+                    { relations: ['compositeAssets'] }
                 )
 
                 if (!!sit) {
@@ -375,7 +375,7 @@ export class CompositeApiService {
             return meta?.metaObject?.attributes ?? []
         }))
 
-        for (let i =0; i< attributelists.length; i++) {
+        for (let i = 0; i < attributelists.length; i++) {
             attributes = attributes.concat(attributelists[i])
         }
         console.log(attributes)
@@ -487,9 +487,9 @@ export class CompositeApiService {
         if (!!syntheticPart) {
 
             // check if synthetic item exists
-            console.log({assetAddress, assetId})
+            console.log({ assetAddress, assetId })
 
-            const syntheticItem = await this.syntheticItemService.findOne({syntheticPart, assetId})
+            const syntheticItem = await this.syntheticItemService.findOne({ syntheticPart, assetId })
 
             let attributes
             if (!!syntheticItem) {

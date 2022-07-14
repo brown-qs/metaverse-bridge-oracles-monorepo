@@ -6,7 +6,7 @@ import {
 import { GameEntity } from '../game/game.entity';
 import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 import { AchievementEntity } from '../achievement/achievement.entity';
-import { UserEntity } from '../user/user.entity';
+import { UserEntity } from '../user/user/user.entity';
 
 @Entity()
 export class PlayerAchievementEntity {
