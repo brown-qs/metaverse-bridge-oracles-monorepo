@@ -176,7 +176,7 @@ export class UserService {
                     this.logger.debug(`user.service::linkMinecraftByUserUuid mcEnrapturedGamepass: ${!!mcEnrapturedGamepass} emailEnrapturedGamepass: ${!!emailEnrapturedGamepass}`, this.context)
 
                     if (!!emailEnrapturedGamepass && !!mcEnrapturedGamepass) {
-                        throw new Error("You already have an enraptured gamepass in your account, you cannot link a Minecraft account that also has an enraptured gamepass")
+                        throw new UnprocessableEntityException("You already have an enraptured gamepass in your account, you cannot link a Minecraft account that also has an enraptured gamepass.")
                     }
 
                     //move all relationships to email user
