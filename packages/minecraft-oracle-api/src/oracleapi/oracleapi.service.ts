@@ -1,9 +1,9 @@
 import { Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { UserService } from '../user/user.service';
+import { UserService } from '../user/user/user.service';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { TextureService } from '../texture/texture.service';
-import { UserEntity } from '../user/user.entity';
+import { UserEntity } from '../user/user/user.entity';
 import { GameService } from '../game/game.service';
 import { ImportDto } from './dtos/import.dto';
 import { CALLDATA_EXPIRATION_MS, CALLDATA_EXPIRATION_THRESHOLD, METAVERSE, RecognizedAssetType } from '../config/constants';
@@ -551,7 +551,7 @@ export class OracleApiService {
         const finalentry = await this.assetService.create({ ...assetEntry, pendingIn: false });
 
         // TODO proper sideffects
-        
+
         (async () => {
             let metadata = null
             let world = null
@@ -569,8 +569,8 @@ export class OracleApiService {
         // TODO disgustang
 
         if (assetEntry.recognizedAssetType.valueOf() === RecognizedAssetType.RESOURCE.valueOf()) {
-            const cid = ResourceInventoryService.calculateId({chainId, assetAddress, assetId, uuid: user.uuid})
-            const inv = await this.resourceInventoryService.findOne({id: cid}, {relations: ['assets']})
+            const cid = ResourceInventoryService.calculateId({ chainId, assetAddress, assetId, uuid: user.uuid })
+            const inv = await this.resourceInventoryService.findOne({ id: cid }, { relations: ['assets'] })
             if (!inv) {
                 await this.resourceInventoryService.create({
                     amount: assetEntry.amount,
@@ -582,7 +582,7 @@ export class OracleApiService {
                 })
             } else {
                 const newAmount = (BigNumber.from(inv.amount).add(assetEntry.amount)).toString()
-                const entry: ResourceInventoryEntity = {...inv, amount: newAmount, assets: (inv.assets ?? []).concat([finalentry])}
+                const entry: ResourceInventoryEntity = { ...inv, amount: newAmount, assets: (inv.assets ?? []).concat([finalentry]) }
                 console.log(entry)
                 await this.resourceInventoryService.create(entry)
             }
@@ -691,26 +691,26 @@ export class OracleApiService {
         const compositeAsset = assetEntry.compositeAsset
         await this.assetService.remove(assetEntry)
 
-        ;(async () => {
-            if (!!compositeAsset) {
-                try {
-                    await this.compositeApiService.reevaluate(compositeAsset, user)
-                    return
-                } catch {
-                    this.logger.error(`userExportConfirm:: composite reevaluation as child failed`, undefined, this.context)
+            ; (async () => {
+                if (!!compositeAsset) {
+                    try {
+                        await this.compositeApiService.reevaluate(compositeAsset, user)
+                        return
+                    } catch {
+                        this.logger.error(`userExportConfirm:: composite reevaluation as child failed`, undefined, this.context)
+                    }
                 }
-            }
 
-            const cas = await this.compositeAssetService.findOne({assetId, compositeCollectionFragment: {collection: {assetAddress, chainId}}}, {relations: ['compositeCollectionFragment', 'compositeCollectionFragment.collection'], loadEagerRelations: true})
-            if (!!cas) {
-                try {
-                    await this.compositeApiService.reevaluate(cas, user)
-                    return
-                } catch {
-                    this.logger.error(`userExportConfirm:: composite reevaluation as parent failed`, undefined, this.context)
+                const cas = await this.compositeAssetService.findOne({ assetId, compositeCollectionFragment: { collection: { assetAddress, chainId } } }, { relations: ['compositeCollectionFragment', 'compositeCollectionFragment.collection'], loadEagerRelations: true })
+                if (!!cas) {
+                    try {
+                        await this.compositeApiService.reevaluate(cas, user)
+                        return
+                    } catch {
+                        this.logger.error(`userExportConfirm:: composite reevaluation as parent failed`, undefined, this.context)
+                    }
                 }
-            }
-        })();
+            })();
         return true
     }
 

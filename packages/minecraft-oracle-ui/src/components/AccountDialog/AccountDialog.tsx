@@ -10,7 +10,6 @@ import { Dialog } from 'ui';
 import { useClasses } from 'hooks';
 import { styles as accountDialogStyles } from './AccountDialog.styles';
 import { isMobile } from 'react-device-detect';
-
 import WalletConnectIcon from '../../assets/images/walletConnectIcon.svg';
 import MetamaskIcon from '../../assets/images/metamask.png';
 import Identicon from '../Identicon/Identicon';
@@ -43,11 +42,11 @@ export const AccountDialog = () => {
   const [pendingWallet, setPendingWallet] = useState<
     AbstractConnector | undefined
   >();
-  const [pendingError, setPendingError] = useState<boolean>();
+  const [, setPendingError] = useState<boolean>();
   const [walletView, setWalletView] = useState(WALLET_VIEWS.ACCOUNT);
 
   const sortedRecentTransactions = useSortedRecentTransactions();
-  const {addNetwork} = useAddNetworkToMetamaskCb()
+  const { addNetwork } = useAddNetworkToMetamaskCb()
 
   const pendingTransactions = sortedRecentTransactions
     .filter((tx) => !tx.receipt)

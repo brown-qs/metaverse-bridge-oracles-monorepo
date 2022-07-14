@@ -18,7 +18,7 @@ export const MicrosoftSetupParamsProvider: FactoryProvider<MicrosoftSetupParams>
         return {
             appId,
             appSecret,
-            redirectUrl: `${redirectUrl}/api/v1/auth/response`
+            redirectUrl: `${redirectUrl}/api/v1/auth/minecraft/response`
         }
     },
     inject: [ConfigService],

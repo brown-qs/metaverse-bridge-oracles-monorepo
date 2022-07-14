@@ -1,13 +1,15 @@
 export enum UserRole {
-    NONE='NONE',
-    PLAYER='PLAYER',
-    ADMIN='ADMIN'
+  NONE = 'NONE',
+  PLAYER = 'PLAYER',
+  ADMIN = 'ADMIN'
 }
 
 export type ProfileContextType = {
   uuid: string,
+  email: string | null,
+  minecraftUuid: string | null,
   hasGame: boolean,
-  userName: string,
+  minecraftUserName: string | null,
   role: UserRole,
   allowedToPlay: boolean,
   serverId: boolean | null,
@@ -21,6 +23,6 @@ export type ProfileContextType = {
 export type AuthData = { jwt?: string, userProfile?: ProfileContextType } | undefined
 
 export type AuthContextType = {
-    authData: AuthData;
-    setAuthData: React.Dispatch<React.SetStateAction<AuthData>>;
+  authData: AuthData;
+  setAuthData: React.Dispatch<React.SetStateAction<AuthData>>;
 };

@@ -8,9 +8,8 @@ import { ProviderModule } from './provider/provider.module';
 import { RedisModule } from 'nestjs-redis';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TextureEntity } from './texture/texture.entity';
-import { UserEntity } from './user/user.entity';
+import { UserEntity } from './user/user/user.entity';
 import { SnapshotItemEntity } from './snapshot/snapshotItem.entity';
-import { AuthModule } from './authapi/authapi.module';
 import { CacheModule } from './cache/cache.module';
 import { GameApiModule } from './gameapi/gameapi.module';
 import { TextureModule } from './texture/texture.module';
@@ -27,7 +26,7 @@ import { AssetModule } from './asset/asset.module';
 import { AssetEntity } from './asset/asset.entity';
 import { SummonEntity } from './summon/summon.entity';
 import { SummonModule } from './summon/summon.module';
-import { UserModule } from './user/user.module';
+import { UserModule } from './user/user/user.module';
 import { ProfileApiModule } from './profileapi/profileapi.module';
 import { CronModule } from './cron/cron.module';
 import { PlaySessionModule } from './playsession/playsession.module';
@@ -74,127 +73,171 @@ import { ResourceInventoryEntity } from './resourceinventory/resourceinventory.e
 import { ResourceInventoryModule } from './resourceinventory/resourceinventory.module';
 import { ResourceInventoryOffsetEntity } from './resourceinventoryoffset/resourceinventoryoffset.entity';
 import { ResourceInventoryOffsetModule } from './resourceinventoryoffset/resourceinventoryoffset.module';
+import { EmailAuthModule } from './authapi/email-auth/email-auth.module';
+import { KiltAuthModule } from './authapi/kilt-auth/kilt-auth.module';
+import { MinecraftAuthModule } from './authapi/minecraft-auth/minecraft-auth.module';
+import { EmailLoginKeyEntity } from './user/email-login-key/email-login-key.entity';
+import { EmailLoginKeyModule } from './user/email-login-key/email-login-key.module';
+import { EmailChangeModule } from './user/email-change/email-change.module';
+import { MinecraftLinkModule } from './user/minecraft-link/minecraft-link.module';
+import { MinecraftLinkEntity } from './user/minecraft-link/minecraft-link.entity';
+import { EmailChangeEntity } from './user/email-change/email-change.entity';
+import { UserAssetView } from './views';
+import { KiltSessionEntity } from './user/kilt-session/kilt-session.entity';
+import { KiltSessionModule } from './user/kilt-session/kilt-session.module';
 import { AssetApiModule } from './assetapi/assetapi.module';
+import { MinecraftUserNameModule } from './user/minecraft-user-name/minecraft-user-name.module';
+import { MinecraftUuidModule } from './user/minecraft-uuid/minecraft-uuid.module';
+import { EmailModule } from './user/email/email.module';
+import { DidModule } from './user/did/did.module';
+import { KiltDappModule } from './user/kilt-dapp/kilt-dapp.module';
+import { DidEntity } from './user/did/did.entity';
+import { EmailEntity } from './user/email/email.entity';
+import { KiltDappEntity } from './user/kilt-dapp/kilt-dapp.entity';
+import { MinecraftUserNameEntity } from './user/minecraft-user-name/minecraft-user-name.entity';
+import { MinecraftUuidEntity } from './user/minecraft-uuid/minecraft-uuid.entity';
 
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-        envFilePath: ['.env', '.env.ci'],
-        isGlobal: true,
-        validationSchema: envValidationSchema(),
-        load: [loadAll]
-    }),
-    WinstonModule.forRootAsync({
-        useFactory: async (configService: ConfigService) => {
-            //console.log(configService.get<string>('typeorm'))
-            return {
-                level: configService.get<string>('log.level'),
-                format: winston.format.combine(
-                    winston.format.timestamp(),
-                    nestLikeConsoleFormat()
-                ),
-                transports: [new winston.transports.Console()]
-            };
-        },
-        inject: [ConfigService]
-    }),
-    TypeOrmModule.forRootAsync({
-        useFactory: async (configService: ConfigService) => ({
-            type: configService.get<string>('typeorm.connection') as any,
-            host: configService.get<string>('typeorm.host'),
-            port: configService.get<number>('typeorm.port'),
-            username: configService.get<string>('typeorm.username'),
-            password: configService.get<string>('typeorm.password'),
-            database: configService.get<string>('typeorm.database'),
-            entities: [
-                UserEntity,
-                SnapshotItemEntity,
-                InventoryEntity,
-                TextureEntity,
-                SkinEntity,
-                PlayerScoreEntity,
-                MaterialEntity,
-                GameEntity,
-                GameTypeEntity,
-                AchievementEntity,
-                PlayerAchievementEntity,
-                SecretEntity,
-                AssetEntity,
-                SummonEntity,
-                PlaySessionEntity,
-                PlaySessionStatEntity,
-                GganbuEntity,
-                SnaplogEntity,
-                GameItemTypeEntity,
-                PlayerGameItemEntity,
-                GameScoreTypeEntity,
-                ChainEntity,
-                CollectionEntity,
-                CollectionFragmentEntity,
-                CompositeCollectionFragmentEntity,
-                CompositeAssetEntity,
-                CompositePartEntity,
-                SyntheticPartEntity,
-                SyntheticItemEntity,
-                ResourceInventoryEntity,
-                ResourceInventoryOffsetEntity
-            ],
-            synchronize: configService.get<boolean>('typeorm.synchronize'),
-            logging: configService.get<boolean>('typeorm.logging'),
+    imports: [
+        ConfigModule.forRoot({
+            envFilePath: ['.env', '.env.ci'],
+            isGlobal: true,
+            validationSchema: envValidationSchema(),
+            load: [loadAll]
         }),
-        inject: [ConfigService]
-    }),
-    RedisModule.forRootAsync({
-        useFactory: (configService: ConfigService) => [
-            {
-                name: configService.get<string>('redis.name'),
-                host: configService.get<string>('redis.host'),
-                port: configService.get<number>('redis.port'),
-                password: configService.get<string>('redis.password'),
-                keyPrefix: configService.get<string>('redis.keyPrefix')
-            }
-        ],
-        inject: [ConfigService]
-    }),
-    PlaySessionModule,
-    CronModule,
-    ProviderModule,
-    CacheModule,
-    SecretModule,
-    AssetModule,
-    UserModule,
-    ProfileApiModule,
-    AuthModule,
-    TextureModule,
-    SkinModule,
-    MaterialModule,
-    SnapshotModule,
-    InventoryModule,
-    SummonModule,
-    AchievementModule,
-    PlayerAchievementModule,
-    PlayerScoreModule,
-    GameModule,
-    GameTypeModule,
-    GameApiModule,
-    AdminApiModule,
-    OracleApiModule,
-    NftApiModule,
-    GganbuModule,
-    SnaplogModule,
-    ChainModule,
-    CollectionModule,
-    CollectionFragmentModule,
-    CompositeCollectionFragmentModule,
-    CompositeAssetModule,
-    CompositePartModule,
-    SyntheticPartModule,
-    SyntheticItemModule,
-    ResourceInventoryModule,
-    ResourceInventoryOffsetModule,
-    CompositeApiModule,
-    AssetApiModule
-  ]
+        WinstonModule.forRootAsync({
+            useFactory: async (configService: ConfigService) => {
+                return {
+                    level: configService.get<string>('log.level'),
+                    format: winston.format.combine(
+                        winston.format.timestamp(),
+                        nestLikeConsoleFormat()
+                    ),
+                    transports: [new winston.transports.Console()]
+                };
+            },
+            inject: [ConfigService]
+        }),
+        TypeOrmModule.forRootAsync({
+            useFactory: async (configService: ConfigService) => ({
+                type: configService.get<string>('typeorm.connection') as any,
+                host: configService.get<string>('typeorm.host'),
+                port: configService.get<number>('typeorm.port'),
+                username: configService.get<string>('typeorm.username'),
+                password: configService.get<string>('typeorm.password'),
+                database: configService.get<string>('typeorm.database'),
+                entities: [
+                    EmailChangeEntity,
+                    MinecraftLinkEntity,
+                    KiltSessionEntity,
+                    EmailLoginKeyEntity,
+                    UserEntity,
+                    SnapshotItemEntity,
+                    InventoryEntity,
+                    TextureEntity,
+                    SkinEntity,
+                    PlayerScoreEntity,
+                    MaterialEntity,
+                    GameEntity,
+                    GameTypeEntity,
+                    AchievementEntity,
+                    PlayerAchievementEntity,
+                    SecretEntity,
+                    AssetEntity,
+                    SummonEntity,
+                    PlaySessionEntity,
+                    PlaySessionStatEntity,
+                    GganbuEntity,
+                    SnaplogEntity,
+                    GameItemTypeEntity,
+                    PlayerGameItemEntity,
+                    GameScoreTypeEntity,
+                    ChainEntity,
+                    CollectionEntity,
+                    CollectionFragmentEntity,
+                    CompositeCollectionFragmentEntity,
+                    CompositeAssetEntity,
+                    CompositePartEntity,
+                    SyntheticPartEntity,
+                    SyntheticItemEntity,
+                    ResourceInventoryEntity,
+                    ResourceInventoryOffsetEntity,
+                    UserAssetView,
+                    MinecraftUserNameEntity,
+                    MinecraftUuidEntity,
+                    EmailEntity,
+                    DidEntity,
+                    KiltDappEntity
+                ],
+                synchronize: configService.get<boolean>('typeorm.synchronize'),
+                logging: configService.get<boolean>('typeorm.logging'),
+            }),
+            inject: [ConfigService]
+        }),
+        RedisModule.forRootAsync({
+            useFactory: (configService: ConfigService) => [
+                {
+                    name: configService.get<string>('redis.name'),
+                    host: configService.get<string>('redis.host'),
+                    port: configService.get<number>('redis.port'),
+                    password: configService.get<string>('redis.password'),
+                    keyPrefix: configService.get<string>('redis.keyPrefix')
+                }
+            ],
+            inject: [ConfigService]
+        }),
+        EmailChangeModule,
+        MinecraftLinkModule,
+        PlaySessionModule,
+        CronModule,
+        ProviderModule,
+        CacheModule,
+        SecretModule,
+        AssetModule,
+        EmailLoginKeyModule,
+        UserModule,
+        ProfileApiModule,
+        KiltAuthModule,
+        EmailAuthModule,
+        MinecraftAuthModule,
+        TextureModule,
+        SkinModule,
+        MaterialModule,
+        SnapshotModule,
+        InventoryModule,
+        SummonModule,
+        AchievementModule,
+        PlayerAchievementModule,
+        PlayerScoreModule,
+        GameModule,
+        GameTypeModule,
+        GameApiModule,
+        AdminApiModule,
+        OracleApiModule,
+        NftApiModule,
+        GganbuModule,
+        SnaplogModule,
+        ChainModule,
+        CollectionModule,
+        CollectionFragmentModule,
+        CompositeCollectionFragmentModule,
+        CompositeAssetModule,
+        CompositePartModule,
+        SyntheticPartModule,
+        SyntheticItemModule,
+        ResourceInventoryModule,
+        ResourceInventoryOffsetModule,
+        CompositeApiModule,
+        KiltSessionModule,
+        AssetApiModule,
+        MinecraftUserNameModule,
+        MinecraftUuidModule,
+        EmailModule,
+        DidModule,
+        KiltDappModule
+    ],
+    controllers: [],
+    providers: []
 })
-export class AppModule {}
+export class AppModule { }

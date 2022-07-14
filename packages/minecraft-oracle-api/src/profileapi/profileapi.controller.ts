@@ -18,7 +18,7 @@ import { JwtAuthGuard } from '../authapi/jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt';
 import { ProfileDto } from './dtos/profile.dto';
 import { User } from '../utils/decorators';
-import { UserEntity } from '../user/user.entity';
+import { UserEntity } from '../user/user/user.entity';
 import { ProfileApiService } from './profileapi.service';
 import { ThingsDto } from './dtos/things.dto';
 import { SkinselectDto } from './dtos/skinselect.dto';
@@ -26,6 +26,7 @@ import { GameKindInProgressDto } from '../gameapi/dtos/gamekndinprogress.dto';
 import { GameApiService } from '../gameapi/gameapi.service';
 import { PlayerAchievementEntity } from '../playerachievement/playerachievement.entity';
 import { QueryPlayerScoreDto } from '../playerscore/dtos/playerscore.dto';
+import { UserService } from 'src/user/user/user.service';
 
 
 @ApiTags('user')
@@ -36,6 +37,7 @@ export class ProfileApiController {
 
     constructor(
         private readonly profileService: ProfileApiService,
+        private readonly userService: UserService,
         private readonly gameApiService: GameApiService,
         private readonly jwtService: JwtService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger

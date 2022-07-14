@@ -5,7 +5,7 @@ import { CollectionModule } from '../collection/collection.module';
 import { CompositeAssetModule } from '../compositeasset/compositeasset.module';
 import { CompositeCollectionFragmentModule } from '../compositecollectionfragment/compositecollectionfragment.module';
 import { NftApiModule } from '../nftapi/nftapi.module';
-import { UserModule } from '../user/user.module';
+import { UserModule } from '../user/user/user.module';
 import { CompositeApiService } from './compositeapi.service';
 import { CompositeApiController } from './compositeapi.controller';
 import { SyntheticPartModule } from '../syntheticpart/syntheticpart.module';

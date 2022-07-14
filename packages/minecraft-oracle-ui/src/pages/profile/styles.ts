@@ -17,15 +17,15 @@ export const styles = (theme: Theme) => ({
         // minWidth: 500,
     },
     divider: {
-      background: theme.palette.text.secondary,
-      opacity: 0.5,
-      marginTop: theme.spacing(2),
+        background: theme.palette.text.secondary,
+        opacity: 0.5,
+        marginTop: theme.spacing(2),
     },
-        // Column
+    // Column
     col: {
         '[class*=formValue]': {
-        'min-height': 30,
-        color: 'fucsia',
+            'min-height': 30,
+            color: 'fucsia',
         },
     },
     row: {

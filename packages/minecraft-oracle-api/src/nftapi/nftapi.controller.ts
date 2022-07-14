@@ -23,7 +23,7 @@ export class NftApiController {
     constructor(
         private readonly nftService: NftApiService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
-    ) { 
+    ) {
         this.context = NftApiController.name;
     }
 
