@@ -1,11 +1,11 @@
 import * as fs from 'fs'
 
 import { MaterialEntity } from '../src/material/material.entity'
-import { Connection, createConnection, getConnection} from 'typeorm'
+import { Connection, createConnection, getConnection } from 'typeorm'
 
-import {config} from 'dotenv'
+import { config } from 'dotenv'
 import { SnapshotItemEntity } from '../src/snapshot/snapshotItem.entity'
-import { UserEntity } from '../src/user/user.entity'
+import { UserEntity } from 'src/user/user/user.entity'
 import { TextureEntity } from '../src/texture/texture.entity'
 import { AssetEntity } from '../src/asset/asset.entity'
 import { SummonEntity } from '../src/summon/summon.entity'
@@ -18,7 +18,7 @@ import { SkinEntity } from '../src/skin/skin.entity'
 
 config()
 
-async function main () {
+async function main() {
     let connection: Connection
     try {
         connection = await createConnection({
@@ -65,7 +65,7 @@ async function main () {
             const e = connection.manager.create<TextureEntity>(TextureEntity, entity)
             const success = await connection.manager.save<TextureEntity>(e)
             console.log(!!success)
-        } catch(err) {
+        } catch (err) {
             console.log(err)
         }
         return undefined
@@ -75,7 +75,7 @@ async function main () {
 
     //const entities = await connection.manager.find<TextureEntity>(TextureEntity, {relations: ['snapshots']})
 
-    const entities = await connection.manager.getRepository(TextureEntity).find({auction: true})
+    const entities = await connection.manager.getRepository(TextureEntity).find({ auction: true })
     console.log(entities?.[0])
     await connection.close()
 }

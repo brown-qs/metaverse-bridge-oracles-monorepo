@@ -2,7 +2,7 @@ import {
     IsNumber,
     IsString,
 } from 'class-validator';
-import { UserEntity } from '../user/user.entity';
+import { UserEntity } from '../user/user/user.entity';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { PlaySessionStatEntity } from './playsessionstat.entity';
 import { GameEntity } from '../game/game.entity';

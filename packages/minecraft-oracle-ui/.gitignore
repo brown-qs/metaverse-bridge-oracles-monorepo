@@ -41,3 +41,6 @@ workers-site
 dist
 
 /.idea
+
+# Kilt directories
+.well-known/

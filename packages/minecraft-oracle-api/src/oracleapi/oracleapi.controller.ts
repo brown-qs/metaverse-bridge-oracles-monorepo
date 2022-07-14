@@ -9,7 +9,7 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { JwtAuthGuard } from '../authapi/jwt-auth.guard';
-import { UserEntity } from '../user/user.entity';
+import { UserEntity } from '../user/user/user.entity';
 import { User } from '../utils/decorators';
 import { CallparamDto } from './dtos/callparams.dto';
 import { OracleApiService } from './oracleapi.service';
@@ -27,7 +27,7 @@ export class OracleApiController {
     constructor(
         private readonly oracleApiService: OracleApiService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
-    ) { 
+    ) {
         this.context = OracleApiController.name;
     }
 

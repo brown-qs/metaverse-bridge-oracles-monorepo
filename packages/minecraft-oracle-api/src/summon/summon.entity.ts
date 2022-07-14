@@ -4,7 +4,7 @@ import {
     IsInt,
     IsString
 } from 'class-validator';
-import { UserEntity } from '../user/user.entity';
+import { UserEntity } from '../user/user/user.entity';
 import { Column, Entity, Index, ManyToOne, PrimaryColumn } from 'typeorm';
 
 @Entity()

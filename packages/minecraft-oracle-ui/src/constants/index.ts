@@ -35,7 +35,7 @@ export enum ChainId {
   EWC = 246,
   VOLTA = 73799,
   MOONRIVER = 1285,
-  MOONBEAM= 1284
+  MOONBEAM = 1284
 }
 
 export const PERMISSIONED_CHAINS = [ChainId.MOONRIVER]
@@ -90,11 +90,11 @@ export const WAREHOUSE_ADDRESS: { [chainId in ChainId]?: string } = {
 };
 
 export const RECOGNIZED_COLLECTIONS_ADDRESS: { [chainId in ChainId]?: string } =
-  {
-    [ChainId.VOLTA]: '0xe35D9ACD226165d21d8bC7cf2C6D71b0deCb67d6',
-    [ChainId.MOONRIVER]: '0x45613dAd51D4262dB6c0F94Fc96435D8800500cD',
-    [ChainId.MOONBEAM]: '0x9b7c849864F246b1A963fdbbbfC198083e646e5b'
-  };
+{
+  [ChainId.VOLTA]: '0xe35D9ACD226165d21d8bC7cf2C6D71b0deCb67d6',
+  [ChainId.MOONRIVER]: '0x45613dAd51D4262dB6c0F94Fc96435D8800500cD',
+  [ChainId.MOONBEAM]: '0x9b7c849864F246b1A963fdbbbfC198083e646e5b'
+};
 
 export const WMOVR_ADDRESS: { [chainId in ChainId]?: string } = {
   [ChainId.VOLTA]: '0xcBe8903EFA22711608D2f0B9aA09852f9B30DBdc', //0xFF3e85e33A8Cfc73fe08F437bFAEADFf7C95e285
@@ -127,4 +127,4 @@ export const IPFS_GATEWAYS = [
 export const MAX_WIDTH_TO_SHOW_NAVIGATION = 1360;
 
 
-export const BURNABLE_RESOURCES_IDS = ['14'] 
+export const BURNABLE_RESOURCES_IDS = ['14']

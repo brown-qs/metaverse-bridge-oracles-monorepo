@@ -3,7 +3,7 @@ import {
     IsString
 } from 'class-validator';
 import { Column, Entity, Index, ManyToOne, OneToMany, OneToOne, PrimaryColumn } from 'typeorm';
-import { UserEntity } from '../user/user.entity';
+import { UserEntity } from '../user/user/user.entity';
 import { CollectionFragmentEntity } from '../collectionfragment/collectionfragment.entity';
 import { AssetEntity } from '../asset/asset.entity';
 import { ResourceInventoryOffsetEntity } from '../resourceinventoryoffset/resourceinventoryoffset.entity';

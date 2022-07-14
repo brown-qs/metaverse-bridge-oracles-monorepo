@@ -5,7 +5,7 @@ import { Column, Entity, Index, OneToOne, PrimaryColumn, JoinColumn } from 'type
 import { ResourceInventoryEntity } from '../resourceinventory/resourceinventory.entity';
 
 @Entity()
-@Index(['id'], {unique: true})
+@Index(['id'], { unique: true })
 export class ResourceInventoryOffsetEntity {
 
     constructor(item: Partial<ResourceInventoryOffsetEntity>) {
@@ -16,11 +16,12 @@ export class ResourceInventoryOffsetEntity {
     @IsString()
     id: string; // convention:: {user uuid}-{materialName}
 
-    @Column({nullable: true, default: '0'})
+    @Column({ nullable: true, default: '0' })
     @IsString()
     amount: string;
 
-    @OneToOne(() => ResourceInventoryEntity, (rie) => rie.offset)
+    //we need cascade update here because user migrations change the id of ResourceInventoryEntity because it contains uuid
+    @OneToOne(() => ResourceInventoryEntity, (rie) => rie.offset, { onUpdate: "CASCADE" })
     @JoinColumn()
     resourceInventory: ResourceInventoryEntity;
 }

@@ -13,11 +13,11 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
-import { UserService } from '../user/user.service';
+import { UserService } from '../user/user/user.service';
 import { ProfileDto } from '../profileapi/dtos/profile.dto';
 import { JwtAuthGuard } from '../authapi/jwt-auth.guard';
 import { User } from '../utils/decorators';
-import { UserEntity } from '../user/user.entity';
+import { UserEntity } from '../user/user/user.entity';
 import { UserRole } from '../common/enums/UserRole';
 import { PlayerSkinDto } from '../gameapi/dtos/texturemap.dto';
 import { GameApiService } from '../gameapi/gameapi.service';
@@ -56,7 +56,7 @@ export class AdminApiController {
         private readonly adminApiService: AdminApiService,
         private readonly oracleService: OracleApiService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
-    ) { 
+    ) {
         this.context = AdminApiController.name;
     }
 
@@ -96,7 +96,7 @@ export class AdminApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async snapshot(
-        @User() caller: UserEntity, 
+        @User() caller: UserEntity,
         @Param('uuid') uuid: string,
         @Body() snapshots: SnapshotsDto,
     ): Promise<boolean[]> {
@@ -105,7 +105,7 @@ export class AdminApiController {
         }
 
         const user = await this.userService.findByUuid(uuid)
-        
+
         if (!user) {
             throw new UnprocessableEntityException('No player found')
         }
@@ -120,7 +120,7 @@ export class AdminApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async vip(
-        @User() caller: UserEntity, 
+        @User() caller: UserEntity,
         @Param('uuid') uuid: string,
         @Param('vip') vip: boolean
     ): Promise<boolean> {
@@ -128,7 +128,7 @@ export class AdminApiController {
             throw new ForbiddenException('Not admin')
         }
 
-        const success = await this.adminApiService.setVIP({uuid}, typeof vip === 'string' ? vip === 'true' : vip)
+        const success = await this.adminApiService.setVIP({ uuid }, typeof vip === 'string' ? vip === 'true' : vip)
         return success
     }
 
@@ -243,10 +243,10 @@ export class AdminApiController {
             throw new ForbiddenException('Not admin')
         }
         const secrets = await this.adminApiService.getSharedSecrets()
-        return {secrets}
+        return { secrets }
     }
 
-     @Put('preferredServers')
+    @Put('preferredServers')
     @HttpCode(200)
     @ApiOperation({ summary: 'Sets preferred server for a user' })
     @ApiBearerAuth('AuthenticationHeader')
@@ -259,8 +259,8 @@ export class AdminApiController {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
         }
-        const promises = psDto.preferredServers.map(async(x) => {
-            await this.userService.update(x.uuid, { preferredServer: x.preferredServer})
+        const promises = psDto.preferredServers.map(async (x) => {
+            await this.userService.update(x.uuid, { preferredServer: x.preferredServer })
         })
 
         await Promise.all(promises)
@@ -279,16 +279,16 @@ export class AdminApiController {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
         }
-        const user = await this.userService.findOne({uuid: dto.uuid})
+        const user = await this.userService.findOne({ uuid: dto.uuid })
         if (!user) {
             return false
         }
         let success = false
-        if (dto.type.valueOf() === OracleActionTypeDto.ENRAPTURE ) {
+        if (dto.type.valueOf() === OracleActionTypeDto.ENRAPTURE) {
             success = await this.oracleService.userEnraptureConfirm(user, dto)
-        }  else if (dto.type.valueOf() === OracleActionTypeDto.IMPORT ) {
+        } else if (dto.type.valueOf() === OracleActionTypeDto.IMPORT) {
             success = await this.oracleService.userImportConfirm(user, dto)
-        } else if (dto.type.valueOf() === OracleActionTypeDto.EXPORT ) {
+        } else if (dto.type.valueOf() === OracleActionTypeDto.EXPORT) {
             success = await this.oracleService.userExportConfirm(user, dto)
         }
         return success
@@ -306,14 +306,14 @@ export class AdminApiController {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
         }
-        const user = await this.userService.findOne({uuid: dto.uuid})
+        const user = await this.userService.findOne({ uuid: dto.uuid })
         if (!user) {
             throw new UnprocessableEntityException('User not found')
         }
         let res
-        if (dto.type.valueOf() === OracleActionTypeDto.ENRAPTURE.valueOf() ) {
+        if (dto.type.valueOf() === OracleActionTypeDto.ENRAPTURE.valueOf()) {
             res = await this.oracleService.userInRequest(user, dto.data as ImportDto, true)
-        }  else if (dto.type.valueOf() === OracleActionTypeDto.IMPORT.valueOf() ) {
+        } else if (dto.type.valueOf() === OracleActionTypeDto.IMPORT.valueOf()) {
             res = await this.oracleService.userInRequest(user, dto.data as ImportDto, false)
         } else if (dto.type.valueOf() === OracleActionTypeDto.EXPORT.valueOf()) {
             res = await this.oracleService.userOutRequest(user, dto.data as ExportDto)
@@ -376,7 +376,7 @@ export class AdminApiController {
         if (caller.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
         }
-        const res = await this.adminApiService.blacklist({uuid}, dto.blacklist)
+        const res = await this.adminApiService.blacklist({ uuid }, dto.blacklist)
         return res
     }
 

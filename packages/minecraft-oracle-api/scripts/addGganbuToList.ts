@@ -3,7 +3,7 @@ import { Connection, createConnection, getConnection, In } from 'typeorm'
 
 import { config } from 'dotenv'
 import { SnapshotItemEntity } from '../src/snapshot/snapshotItem.entity'
-import { UserEntity } from '../src/user/user.entity'
+import { UserEntity } from '../src/user/user/user.entity'
 import { TextureEntity } from '../src/texture/texture.entity'
 import { AssetEntity } from '../src/asset/asset.entity'
 import { SummonEntity } from '../src/summon/summon.entity'
@@ -77,7 +77,7 @@ async function main() {
 
     // Check user exists
     // 
-    const game = await connection.manager.getRepository(GameEntity).findOne({ where: { id: gameId} })
+    const game = await connection.manager.getRepository(GameEntity).findOne({ where: { id: gameId } })
 
     if (!game) {
         console.log('game not found')
@@ -97,11 +97,11 @@ async function main() {
             console.error(`Non existant user: ${list[i]}`)
             continue
         } else {
-            console.log(user?.userName)
+            console.log(user?.minecraftUserName)
         }
 
         let adjustedPower = 0
-        
+
         const stat = await connection.manager.getRepository(PlaySessionStatEntity).findOne({ where: { id: PlaySessionStatService.calculateId({ uuid: user.uuid, gameId: game.id }) } })
 
         if (!stat) {
