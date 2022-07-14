@@ -12,9 +12,11 @@ import { SecretModule } from '../../secret/secret.module';
 import { SkinModule } from '../../skin/skin.module';
 import { TextureModule } from '../../texture/texture.module';
 import { MinecraftLinkModule } from 'src/user/minecraft-link/minecraft-link.module';
+import { GameModule } from 'src/game/game.module';
 
 @Module({
     imports: [
+        GameModule,
         MinecraftLinkModule,
         UserModule,
         SecretModule,
