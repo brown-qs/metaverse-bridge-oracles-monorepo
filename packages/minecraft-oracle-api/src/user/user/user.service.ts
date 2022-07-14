@@ -23,6 +23,8 @@ import { SkinEntity } from '../../skin/skin.entity';
 import { SnapshotItemEntity } from '../../snapshot/snapshotItem.entity';
 import { SummonEntity } from '../../summon/summon.entity';
 import { RecognizedAssetType } from 'src/config/constants';
+import { GameEntity } from 'src/game/game.entity';
+import { GameKind } from 'src/game/game.enum';
 @Injectable()
 export class UserService {
     context: string;
@@ -131,13 +133,13 @@ export class UserService {
 
 
 
-            //minecraft account has never been used on moonsama
+            //minecraft account has never been used on moonsama or was already migrated and unlinked
             if (!existingMinecraft) {
                 this.logger.debug(`user.service::linkMinecraftByUserUuid userUuid: ${userUuid} minecraftUuid: ${minecraftUuid}, MC account new to moonsama, can just add to email row`, this.context)
 
                 //
             } else {
-                //minecraft user has been migrated to an email before
+                //minecraft user has been migrated to an email before and is in use
                 if (typeof existingMinecraft.email === "string") {
                     //safety check, uuid and minecraftUuid should be different
                     if (existingMinecraft.uuid === existingMinecraft.minecraftUuid) {
@@ -145,6 +147,9 @@ export class UserService {
                     }
                     this.logger.debug(`user.service::linkMinecraftByUserUuid userUuid: ${userUuid} minecraftUuid: ${minecraftUuid}, MC account already been migrated to email before, removing MC account from prev email, and assigning to new`, this.context)
 
+                    if (!!(await queryRunner.manager.findOne(GameEntity, { ongoing: true, type: GameKind.CARNAGE }))) {
+                        throw new UnprocessableEntityException('Linking this Minecraft account would require unlinking it from another user who is currently using it. You cannot do this during Carnage or the resource distribution period after Carnage.')
+                    }
                     //no need to migrate anything, just remove from existing user 
                     await queryRunner.manager.update(UserEntity, { minecraftUuid }, { minecraftUuid: null, minecraftUserName: null, hasGame: false })
                     const newUser = await queryRunner.manager.findOne(UserEntity, { uuid: userUuid })
