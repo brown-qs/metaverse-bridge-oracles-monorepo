@@ -1,0 +1,31 @@
+{
+  "attester": "PeregrineSelfAttestedSocialKYC",
+  "cTypeTitle": "peregrine twitter",
+  "isDownloaded": true,
+  "name": "peregrine twitter",
+  "request": {
+    "claim": {
+      "cTypeHash": "0x47d04c42bdf7fdd3fc5a194bcaa367b2f4766a6b16ae3df628927656d818f420",
+      "contents": {
+        "Twitter": "dev"
+      },
+      "owner": "did:kilt:4sojFpsrv3W9fLB8tVEbbVgoAzhaJWFmA3wiVDTENqdNPwt3"
+    },
+    "claimHashes": [
+      "0x1afd018199d5653066ed697442234276cb5886c4483a4391433df2ab014ab434",
+      "0x2cba3cd900b06172aede5cdd2b4da7aeb5fd555eddc87bbd664c416292fce02f"
+    ],
+    "claimNonceMap": {
+      "0x4a14bb9c433dd20236a44389a48f09e13c63ff76c6888c8ba9c63fe61003b4c8": "3eeba6b8-fa12-4e50-8b60-8c827cfa9a03",
+      "0x09a165186dade6cc28ef71295a7ab2b191daa3652d215b253adbba13c5fd9d5f": "8301bf62-5fd7-4da0-9ed4-9ca89d26a9c7"
+    },
+    "legitimations": [],
+    "delegationId": null,
+    "rootHash": "0xa96e51ac7b6446da2e6ea8a475e0e2bd649e563252f74b4ce12f46beddcf273a",
+    "claimerSignature": {
+      "signature": "0x32d33da2358d272e65d3f7a68824be87fa6ad72894184df2e4abe115f331781470b7e41d5070b9a8b14185f0f68924c3b0b9f56964996ee5fec458f577fb7d80",
+      "keyId": "did:kilt:4sojFpsrv3W9fLB8tVEbbVgoAzhaJWFmA3wiVDTENqdNPwt3#0x75f07b1426ec419b5a2ef6bd34024c6d7f1920c9a600e41038af30d67937a974"
+    }
+  },
+  "attested": true
+}

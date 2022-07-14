@@ -5,7 +5,7 @@ import { Connection, createConnection, getConnection} from 'typeorm'
 
 import {config} from 'dotenv'
 import { SnapshotItemEntity } from '../src/snapshot/snapshotItem.entity'
-import { UserEntity } from '../src/user/user.entity'
+import { UserEntity } from '../src/user/user/user.entity'
 import { TextureEntity } from '../src/texture/texture.entity'
 import { stringToStringAssetType } from '../src/utils/misc'
 import { AssetEntity } from '../src/asset/asset.entity'

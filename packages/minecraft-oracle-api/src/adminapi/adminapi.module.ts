@@ -8,7 +8,7 @@ import { ProfileApiModule } from '../profileapi/profileapi.module';
 import { SecretModule } from '../secret/secret.module';
 import { SnapshotModule } from '../snapshot/snapshot.module';
 import { TextureModule } from '../texture/texture.module';
-import { UserModule } from '../user/user.module';
+import { UserModule } from '../user/user/user.module';
 import { AdminApiController } from './adminapi.controller';
 import { AdminApiService } from './adminapi.service';
 

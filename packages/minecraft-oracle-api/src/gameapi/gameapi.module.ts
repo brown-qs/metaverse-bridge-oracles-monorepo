@@ -5,7 +5,7 @@ import { SecretModule } from '../secret/secret.module';
 import { MaterialModule } from '../material/material.module';
 import { SnapshotModule } from '../snapshot/snapshot.module';
 import { TextureModule } from '../texture/texture.module';
-import { UserModule } from '../user/user.module';
+import { UserModule } from '../user/user/user.module';
 import { GameApiController } from './gameapi.controller';
 import { GameApiService } from './gameapi.service';
 import { InventoryModule } from '../playerinventory/inventory.module';

@@ -1,5 +1,5 @@
 import { Column, Entity, Index, ManyToOne, PrimaryColumn } from 'typeorm';
-import { UserEntity } from '../user/user.entity';
+import { UserEntity } from '../user/user/user.entity';
 import { MaterialEntity } from '../material/material.entity';
 import { GameEntity } from '../game/game.entity';
 

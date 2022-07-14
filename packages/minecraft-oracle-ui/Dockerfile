@@ -14,12 +14,15 @@ ARG REACT_APP_SUBGRAPH_URL=https://moonriver-subgraph.moonsama.com/subgraphs/nam
 ARG REACT_APP_NFT_SUBGRAPH_URL=https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/nft
 ARG REACT_APP_BACKEND_API_URL=https://minecraft-metaverse-api.moonsama.com/api/v1
 ARG REACT_APP_COMPOSITE_MEDIA_URI_PREFIX=https://dev.static.moonsama.com
-
+ARG REACT_APP_RECAPTCHA_SITEKEY=6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI
+ARG DID_CONFIGURATION_URL=https://backend-development.moonsama.com/api/v1/auth/kilt/did_configuration
 RUN yarn
 
 WORKDIR /home/node/packages/minecraft-oracle-ui
 
-RUN yarn build
+RUN yarn build && \
+    mkdir /home/node/packages/minecraft-oracle-ui/build/.well-known && \
+    curl $DID_CONFIGURATION_URL -o /home/node/packages/minecraft-oracle-ui/build/.well-known/did-configuration.json
 
 FROM nginxinc/nginx-unprivileged:1.21.6-alpine
 
