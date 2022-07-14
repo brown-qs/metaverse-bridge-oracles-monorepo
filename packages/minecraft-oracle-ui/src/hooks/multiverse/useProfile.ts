@@ -5,34 +5,12 @@ import { useActiveWeb3React, useAuth } from 'hooks';
 import { useBlockNumber } from 'state/application/hooks';
 
 
-export function useProfileCallback() {
-    const {authData, setAuthData} =  useAuth()
-    return useCallback(async (jwt: string) => {
-        const headers = { Authorization: `Bearer ${jwt}` }
-        try {
-            const resp = await axios.request<ProfileContextType>({
-                method: 'get',
-                url: `${process.env.REACT_APP_BACKEND_API_URL}/user/profile`,
-                headers: headers
-            });
-            setAuthData({
-                jwt: authData?.jwt,
-                userProfile: authData?.userProfile
-            })
-            return resp.data
-        } catch(e) {
-            console.error('Error fetching user profile', e);
-            return undefined
-        }
-    }, [authData?.jwt])
-}
-
 export function useProfile() {
-    const {authData, setAuthData} =  useAuth()
+    const { authData, setAuthData } = useAuth()
     const blocknumber = useBlockNumber()
 
-    const {jwt} = authData ?? {}
-    
+    const { jwt } = authData ?? {}
+
     const cb = useCallback(async () => {
         if (!jwt) {
             setAuthData({
@@ -52,10 +30,10 @@ export function useProfile() {
                 jwt: authData?.jwt,
                 userProfile: resp?.data
             })
-        } catch(e) {
+        } catch (e) {
             const err = e as AxiosError;
 
-            if(err?.response?.data.statusCode === 401){
+            if (err?.response?.data.statusCode === 401) {
                 window.localStorage.removeItem('authData');
                 setAuthData(undefined);
             };

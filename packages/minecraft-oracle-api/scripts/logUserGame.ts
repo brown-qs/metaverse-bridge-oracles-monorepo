@@ -3,7 +3,7 @@ import { Connection, createConnection, getConnection } from 'typeorm'
 
 import { config } from 'dotenv'
 import { SnapshotItemEntity } from '../src/snapshot/snapshotItem.entity'
-import { UserEntity } from '../src/user/user.entity'
+import { UserEntity } from '../src/user/user/user.entity'
 import { TextureEntity } from '../src/texture/texture.entity'
 import { AssetEntity } from '../src/asset/asset.entity'
 import { SummonEntity } from '../src/summon/summon.entity'
@@ -61,7 +61,7 @@ async function main() {
 
 
     for (let i = 0; i < list.length; i++) {
-        const user = await connection.manager.getRepository(UserEntity).findOne({ userName: list[i] })
+        const user = await connection.manager.getRepository(UserEntity).findOne({ minecraftUserName: list[i] })
 
         console.log(user)
         if (!user) {

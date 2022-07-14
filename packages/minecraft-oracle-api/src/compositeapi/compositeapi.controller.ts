@@ -11,11 +11,11 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { User } from '../utils/decorators';
-import { JwtAuthGuard } from '../authapi/jwt-auth.guard';
 import { CompositeApiService } from './compositeapi.service';
 import { SaveCompositeConfigDto } from './dtos/save.dto';
-import { UserEntity } from '../user/user.entity';
+import { UserEntity } from '../user/user/user.entity';
 import { CompositeMetadataType } from '../compositeasset/types';
+import { JwtAuthGuard } from '../authapi/jwt-auth.guard';
 
 @ApiTags('composite')
 @Controller('composite')
