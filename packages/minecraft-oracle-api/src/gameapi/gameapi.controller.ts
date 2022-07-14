@@ -14,7 +14,7 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { GameApiService } from './gameapi.service';
-import { UserService } from '../user/user.service';
+import { UserService } from '../user/user/user.service';
 import { ProfileDto } from '../profileapi/dtos/profile.dto';
 import { BulkSnapshotRequestDto, SnapshotsDto } from './dtos/snapshot.dto';
 import { PlayerSkinDto } from './dtos/texturemap.dto';
@@ -38,11 +38,12 @@ import { AchievementService } from '../achievement/achievement.service';
 import { AchievementEntity } from '../achievement/achievement.entity';
 import { SetPlayerAchievementsDto } from '../playerachievement/dtos/playerachievement.dto';
 import { PlayerAchievementEntity } from '../playerachievement/playerachievement.entity';
-import { UserEntity } from '../user/user.entity';
+import { UserEntity } from '../user/user/user.entity';
 import { SetGameScoreTypeDto } from '../gamescoretype/dtos/gamescoretype.dto';
 import { GameItemTypeDto, SetGameItemTypesDto } from '../gameitemtype/dtos/gameitemtype.dto';
 import { PlayerGameItemsDto, QueryGameItemsDto, SetPlayerGameItemsDto } from '../playergameitem/dtos/playergameitem.dto';
 import { GameService } from '../game/game.service';
+import { UuidMapDto } from './dtos/uuidmap.dto';
 
 @ApiTags('game')
 @Controller('game')
@@ -58,30 +59,51 @@ export class GameApiController {
         private readonly profileService: ProfileApiService,
         private readonly gameService: GameService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
-    ) { 
+    ) {
         this.context = GameApiController.name;
+    }
+    @Get('players/uuids')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Map of uuids to minecraftUuids' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async uuids(@Query() dto: UuidMapDto): Promise<{ uuid: string, minecraftUuid: string | null }[]> {
+        let offset: number = 0
+        let limit: number | undefined = undefined
+
+        if (dto.hasOwnProperty("offset")) {
+            offset = Math.abs(parseInt(dto.offset))
+        }
+
+        if (dto.hasOwnProperty("limit")) {
+            limit = Math.abs(parseInt(dto.limit))
+        }
+
+        return await this.userService.minecraftUuidMap(offset, dto.minecraftUuids, limit)
+    }
+
+    @Get('player/:minecraftUuid/profileByMinecraftUuid')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Fetches user profile by minecraftUuid' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async profileByMinecraftUuid(@Param('minecraftUuid') minecraftUuid: string): Promise<ProfileDto> {
+        let user = await this.userService.findByMinecraftUuid(minecraftUuid)
+        if (!user) {
+            throw new UnprocessableEntityException('User was not found')
+        }
+        return this.profileService.userProfile(user)
     }
 
     @Get('player/:uuid/profile')
     @HttpCode(200)
-    @ApiOperation({ summary: 'Fetches user profile' })
+    @ApiOperation({ summary: 'Fetches user profile by uuid' })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
     async profile(@Param('uuid') uuid: string): Promise<ProfileDto> {
         let user = await this.userService.findByUuid(uuid)
-        if ( !user ){
-            const userData: UserEntity = {
-                uuid: uuid,
-                hasGame: false
-            }
-            let newUser: UserEntity
-            try {
-                newUser = await this.userService.create(userData)
-                user = await this.userService.findByUuid(uuid)
-            } catch (err) {
-                this.logger.error(`authLogin: error upserting user into database: ${JSON.stringify(userData)}`, err, this.context)
-                throw new UnprocessableEntityException(`Error upserting user into database: ${JSON.stringify(userData)}`)
-            }
+        if (!user) {
+            throw new UnprocessableEntityException('User was not found')
         }
         return this.profileService.userProfile(user)
     }
@@ -94,7 +116,7 @@ export class GameApiController {
     async textures(@Param('uuid') uuid: string): Promise<PlayerSkinDto[]> {
         const user = await this.userService.findByUuid(uuid)
         if (!user) {
-            throw new UnprocessableEntityException('Player was not found')
+            throw new UnprocessableEntityException('User was not found')
         }
         const skins = await this.gameApiService.getUserSkins(user)
         return skins
@@ -111,7 +133,7 @@ export class GameApiController {
     ): Promise<boolean> {
         const user = await this.userService.findByUuid(uuid)
         if (!user) {
-            throw new UnprocessableEntityException('Player was not found')
+            throw new UnprocessableEntityException('User was not found')
         }
         const success = await this.profileService.skinSelect(user, dto)
         return success
@@ -147,7 +169,7 @@ export class GameApiController {
         @Body() snapshots: SnapshotsDto,
     ): Promise<boolean[]> {
         const user = await this.userService.findByUuid(uuid)
-        
+
         if (!user) {
             throw new UnprocessableEntityException('No player found')
         }
@@ -175,7 +197,7 @@ export class GameApiController {
     @UseGuards(SharedSecretGuard)
     async setServerId(
         @Param('uuid') uuid: string,
-        @Body() {serverId}: ServerIdDto
+        @Body() { serverId }: ServerIdDto
     ): Promise<boolean> {
         const user = await this.userService.findByUuid(uuid)
         await this.userService.update(user.uuid, {
@@ -248,40 +270,6 @@ export class GameApiController {
         return skins
     }
 
-    @Put('gganbu')
-    @HttpCode(200)
-    @ApiOperation({ summary: 'Makes players gganbu' })
-    @ApiBearerAuth('AuthenticationHeader')
-    @UseGuards(SharedSecretGuard)
-    async setGganbu(
-        @Body() gganbus: GganbuDto,
-    ): Promise<boolean> {
-        const success = await this.gameApiService.setGganbu(gganbus.player1, gganbus.player2)
-        return success
-    }
-
-    @Get('gganbu')
-    @HttpCode(200)
-    @ApiOperation({ summary: 'Gets if players are gganbu' })
-    @ApiBearerAuth('AuthenticationHeader')
-    @UseGuards(SharedSecretGuard)
-    async getGganbu(
-        @Query() gganbus: GganbuDto,
-    ): Promise<AreGganbusDto> {
-        const success = await this.gameApiService.getGganbu(gganbus.player1, gganbus.player2)
-        return {areGganbus:success}
-    }
-
-    @Delete('gganbus')
-    @HttpCode(200)
-    @ApiOperation({ summary: 'Gets if players are gganbu' })
-    @ApiBearerAuth('AuthenticationHeader')
-    @UseGuards(SharedSecretGuard)
-    async clearGganbus(): Promise<boolean> {
-        const success = await this.gameApiService.clearGganbus()
-        return success
-    }
-
     @Put('game/:gameId/session/:uuid/end')
     @HttpCode(200)
     @ApiOperation({ summary: 'Logs an ongoing game session end' })
@@ -291,7 +279,7 @@ export class GameApiController {
         @Param('uuid') uuid: string,
         @Param('gameId') gameId: string
     ): Promise<boolean> {
-        const success = await this.gameApiService.setPlayerGameSession(uuid, gameId,true)
+        const success = await this.gameApiService.setPlayerGameSession(uuid, gameId, true)
         return success
     }
 
@@ -327,14 +315,14 @@ export class GameApiController {
         @Query() dto: FetchGameDto,
     ) {
         if (!dto?.gameTypeId) {
-            const entities = await this.gameService.findMany({relations: ['gameType']})
+            const entities = await this.gameService.findMany({ relations: ['gameType'] })
             return (entities ?? [])
         }
 
-        const entities = await this.gameService.findMany({where: {gameType: {id: dto.gameTypeId}}, relations: ['gameType']})
+        const entities = await this.gameService.findMany({ where: { gameType: { id: dto.gameTypeId } }, relations: ['gameType'] })
         return (entities ?? [])
     }
-    
+
     @Put('gametype/:typeId')
     @HttpCode(200)
     @ApiOperation({ summary: 'Upserts a game type entry' })
@@ -392,7 +380,7 @@ export class GameApiController {
 
     @Get('game/:gameId/scoretypes')
     @HttpCode(200)
-    @ApiOperation({ summary: 'Fetches score types of a game'})
+    @ApiOperation({ summary: 'Fetches score types of a game' })
     //@ApiBearerAuth('AuthenticationHeader')
     //@UseGuards(SharedSecretGuard)
     async getScoreTypes(
@@ -432,9 +420,9 @@ export class GameApiController {
     @HttpCode(200)
     @ApiOperation({ summary: 'Queries available achievemenets for a game' })
     async getAchievements(
-         @Param('gameId') gameId: string
+        @Param('gameId') gameId: string
     ): Promise<AchievementEntity[]> {
-        const entities = await this.achievementService.findMany({where: {game: {id: gameId}}, relations: ['game']})
+        const entities = await this.achievementService.findMany({ where: { game: { id: gameId } }, relations: ['game'] })
         return entities
     }
 
@@ -480,7 +468,7 @@ export class GameApiController {
         const entities = await this.gameApiService.getGameItemTypes(gameId)
         return entities
     }
-    
+
     @Get('game/:gameId/player/:uuid/items')
     @HttpCode(200)
     @ApiOperation({ summary: 'Fetches all items for given game and player' })
@@ -493,7 +481,7 @@ export class GameApiController {
         const data = await this.gameApiService.getPlayerGameItems(gameId, uuid)
         return data
     }
-    
+
     @Get('game/:gameId/items')
     @HttpCode(200)
     @ApiOperation({ summary: 'Fetches players itmes.' })

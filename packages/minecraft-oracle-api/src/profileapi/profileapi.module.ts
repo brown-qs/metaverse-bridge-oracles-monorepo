@@ -8,7 +8,7 @@ import { SecretModule } from '../secret/secret.module';
 import { SummonModule } from '../summon/summon.module';
 import { MaterialModule } from '../material/material.module';
 import { TextureModule } from '../texture/texture.module';
-import { UserModule } from '../user/user.module';
+import { UserModule } from '../user/user/user.module';
 import { ProfileApiController } from './profileapi.controller';
 import { ProfileApiService } from './profileapi.service';
 import { InventoryModule } from '../playerinventory/inventory.module';
@@ -35,6 +35,7 @@ import { ResourceInventoryModule } from '../resourceinventory/resourceinventory.
         SkinModule,
         MaterialModule,
         InventoryModule,
+        UserModule,
         forwardRef(() => GameApiModule),
         SummonModule,
         ProviderModule,
@@ -44,4 +45,4 @@ import { ResourceInventoryModule } from '../resourceinventory/resourceinventory.
     exports: [ProfileApiService],
     controllers: [ProfileApiController]
 })
-export class ProfileApiModule {}
+export class ProfileApiModule { }

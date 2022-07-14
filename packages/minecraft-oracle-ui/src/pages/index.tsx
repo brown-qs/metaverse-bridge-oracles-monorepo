@@ -10,14 +10,58 @@ import { ImportDialog } from '../components/ImportDialog/ImportDialog';
 import { EnraptureDialog } from '../components/EnraptureDialog/EnraptureDialog';
 import { SummonDialog } from '../components/SummonDialog/SummonDialog';
 import { AssetDialog } from '../components/AssetDialog/AssetDialog';
+import AccountPage from './account';
+import LoginPage from './account/login';
+import EmailLoginPage from './account/login/email';
+import KiltLoginPage from './account/login/kilt';
+import EmailVerifyPage from './account/login/email/verify';
+import EmailChangePage from './account/login/email/change';
+import MinecraftRedirectPage from './account/minecraft/redirect';
+import MinecraftVerifyPage from './account/minecraft/verify';
+import MinecraftUnlinkPage from './account/minecraft/unlink';
 
 export const Routing = () => {
     const { authData } = useAuth();
-
     return (
         <Switch>
             <Route exact path="/">
                 <Redirect to="/login" />
+            </Route>
+
+            <Route exact path="/account">
+                {!!authData?.jwt ? <AccountPage></AccountPage> : <Redirect to="/account/login" />}
+            </Route>
+
+            <Route exact path="/account/login">
+                {!!authData?.jwt ? <Redirect to="/account" /> : <LoginPage />}
+            </Route>
+
+            <Route exact path="/account/login/email">
+                {!!authData?.jwt ? <Redirect to="/account" /> : <EmailLoginPage />}
+            </Route>
+
+            <Route exact path="/account/login/email/change">
+                {!!authData?.jwt ? <EmailChangePage /> : <Redirect to="/account/login" />}
+            </Route>
+
+            <Route exact path="/account/login/email/verify">
+                <EmailVerifyPage />
+            </Route>
+
+            <Route exact path="/account/minecraft/redirect">
+                {!!authData?.jwt ? <MinecraftRedirectPage /> : <LoginPage />}
+            </Route>
+
+            <Route exact path="/account/minecraft/verify">
+                {!!authData?.jwt ? <MinecraftVerifyPage /> : <LoginPage />}
+            </Route>
+
+            <Route exact path="/account/minecraft/unlink">
+                {!!authData?.jwt ? <MinecraftUnlinkPage /> : <LoginPage />}
+            </Route>
+
+            <Route exact path="/account/login/kilt">
+                {!!authData?.jwt ? <Redirect to="/account" /> : <KiltLoginPage />}
             </Route>
 
             <Route exact path="/auth/:jwt">
@@ -48,6 +92,10 @@ export const Routing = () => {
             <Route exact path="/moonsama/customizer">
                 <MoonsamaCharacterDesignerPage authData={authData} />
             </Route>
-        </Switch>
+
+            <Route path="*">
+                <Redirect to="/bridge" />
+            </Route>
+        </Switch >
     )
 };

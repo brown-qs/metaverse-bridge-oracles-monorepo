@@ -1,26 +1,31 @@
 import { useParams, Redirect } from "react-router-dom";
 import { useAuth } from "hooks";
+import { useEffect } from "react";
 
 const AuthPage = () => {
     const { authData, setAuthData } = useAuth();
     const params = useParams<{ jwt: string }>();
     const jwt = params?.jwt;
-    const redirectRoute = window.sessionStorage.getItem('authSuccessRedirect') ?? '/bridge';
-    
-    if(!!authData?.jwt && !jwt){
-        return <Redirect to={'/bridge'}  />;
+    const alreadyAuthed = !!authData?.jwt
+    const newAuth = !!jwt
+
+    useEffect(() => {
+        if (newAuth) {
+            console.log("set auth data: " + jwt)
+            setAuthData({
+                jwt,
+                userProfile: authData?.userProfile
+            });
+        }
+    }, [])
+
+    if (newAuth || alreadyAuthed) {
+        return <Redirect to={'/account'} />;
+
+    } else {
+        return <Redirect to='/account/login' />;
     }
 
-    if(!!jwt) {
-        setAuthData({
-           jwt,
-           userProfile: authData?.userProfile
-        });
-
-        return <Redirect to={'/bridge'} />;
-    }
-
-    return <Redirect to='/login'  />;
 };
 
 export default AuthPage;

@@ -1,0 +1,31 @@
+{
+  "attester": "PeregrineSelfAttestedSocialKYC",
+  "cTypeTitle": "peregrine email",
+  "isDownloaded": true,
+  "name": "peregrine email",
+  "request": {
+    "claim": {
+      "cTypeHash": "0x3291bb126e33b4862d421bfaa1d2f272e6cdfc4f96658988fbcffea8914bd9ac",
+      "contents": {
+        "Email": "dev@moonsama.com"
+      },
+      "owner": "did:kilt:4sojFpsrv3W9fLB8tVEbbVgoAzhaJWFmA3wiVDTENqdNPwt3"
+    },
+    "claimHashes": [
+      "0x939fdd37be9dac7245654789b4d879664d067b0b7e8471f6b237324fef472e66",
+      "0xf7667ba733db31544a86a9db586f2dc837898efdb09ded84518c4f4471209898"
+    ],
+    "claimNonceMap": {
+      "0x4a14bb9c433dd20236a44389a48f09e13c63ff76c6888c8ba9c63fe61003b4c8": "c9ddc98e-d5fe-4a4e-a91f-4361cacf3ead",
+      "0x6244f3a85c2c3756617020d4030f90e5a93d08892b58f5c7e12a07c45259a92c": "3c3bbb64-f39d-4735-bcbb-2d0e43ab176b"
+    },
+    "legitimations": [],
+    "delegationId": null,
+    "rootHash": "0x6b8529a25cd3bff7438930aee9036d84de415eaec77f4805c533398720a8fb25",
+    "claimerSignature": {
+      "signature": "0x406f028da9f49e87b3d5f2965a3fac78ceb9881c9af05f71f9304c18fbc2ea6b3081c3479ea3e5958e713ee9ad6810a671201468b370a53b5cab0421daebc081",
+      "keyId": "did:kilt:4sojFpsrv3W9fLB8tVEbbVgoAzhaJWFmA3wiVDTENqdNPwt3#0x75f07b1426ec419b5a2ef6bd34024c6d7f1920c9a600e41038af30d67937a974"
+    }
+  },
+  "attested": true
+}

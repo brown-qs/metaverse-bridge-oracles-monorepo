@@ -7,11 +7,11 @@ export const AuthContextController = ({ children }: AuthContextControllerProps) 
     const [authData, setAuthData] = useState<AuthData>(undefined);
 
     useEffect(() => {
-        if(!authData) {
+        if (!authData) {
             const persistedAuthData = window.localStorage.getItem('authData');
 
-            console.log('Auth Data', {persistedAuthData})
-            if(!!persistedAuthData && persistedAuthData !== 'undefined') {
+            console.log('Auth Data', { persistedAuthData })
+            if (!!persistedAuthData && persistedAuthData !== 'undefined') {
                 // @ts-ignore
                 setAuthData(JSON.parse(persistedAuthData));
             }

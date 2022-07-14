@@ -7,7 +7,7 @@ import { MaterialEntity } from '../src/material/material.entity';
 import { SnapshotItemEntity } from '../src/snapshot/snapshotItem.entity';
 import { SummonEntity } from '../src/summon/summon.entity';
 import { TextureEntity } from '../src/texture/texture.entity';
-import { UserEntity } from '../src/user/user.entity';
+import { UserEntity } from '../src/user/user/user.entity';
 import { PlaySessionEntity } from '../src/playsession/playsession.entity';
 import { PlaySessionStatEntity } from '../src/playsession/playsessionstat.entity';
 import { InventoryEntity } from '../src/playerinventory/inventory.entity';

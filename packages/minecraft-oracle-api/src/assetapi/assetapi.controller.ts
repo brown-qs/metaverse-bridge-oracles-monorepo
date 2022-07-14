@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
-import { UserService } from '../user/user.service';
+import { UserService } from '../user/user/user.service';
 import { SharedSecretGuard } from '../authapi/secret.guard';
 import { AssetEntity } from '../asset/asset.entity';
 import { UserAssetFingerprint, UserAssetFingerprintsResult, UsersAssetFingerprintQuery } from './dtos/fingerprint.dto';
