@@ -35,7 +35,6 @@ export class MinecraftAuthController {
         private readonly authApiService: MinecraftAuthService,
         private readonly userService: UserService,
         private readonly minecraftLinkService: MinecraftLinkService,
-        private jwtService: JwtService,
         private configService: ConfigService,
 
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
