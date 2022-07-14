@@ -27,6 +27,7 @@ import { SharedSecretGuard } from '../secret.guard';
 import { UserEntity } from 'src/user/user/user.entity';
 import { GameService } from 'src/game/game.service';
 import { GameKind } from 'src/game/game.enum';
+import { MinecraftUuidService } from 'src/user/minecraft-uuid/minecraft-uuid.service';
 @ApiTags('auth')
 @Controller('auth/minecraft')
 export class MinecraftAuthController {
@@ -37,6 +38,8 @@ export class MinecraftAuthController {
         private readonly authApiService: MinecraftAuthService,
         private readonly userService: UserService,
         private readonly minecraftLinkService: MinecraftLinkService,
+        private readonly minecraftUuidService: MinecraftUuidService,
+
         private readonly gameService: GameService,
         private configService: ConfigService,
 
@@ -121,7 +124,8 @@ export class MinecraftAuthController {
         }
 
         //log unlink
-        await this.minecraftLinkService.unlink(user, user, minecraftUuid)
+        const mcUuidEn = await this.minecraftUuidService.create(minecraftUuid)
+        await this.minecraftLinkService.unlink(user, user, mcUuidEn)
         return { success: true }
     }
 

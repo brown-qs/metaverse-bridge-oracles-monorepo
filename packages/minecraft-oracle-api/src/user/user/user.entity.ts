@@ -4,7 +4,7 @@ import {
     IsNumber,
     IsString
 } from 'class-validator';
-import { BeforeInsert, Column, CreateDateColumn, Entity, Index, JoinColumn, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { BeforeInsert, Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn, Unique } from 'typeorm';
 import { UserRole } from '../../common/enums/UserRole';
 import { SnapshotItemEntity } from '../../snapshot/snapshotItem.entity';
 import { AssetEntity } from '../../asset/asset.entity';
@@ -21,16 +21,19 @@ import { EmailChangeEntity } from '../email-change/email-change.entity';
 import { MinecraftLinkEntity } from '../minecraft-link/minecraft-link.entity';
 import { KiltSessionEntity } from '../kilt-session/kilt-session.entity';
 import { EmailLoginKeyEntity } from '../email-login-key/email-login-key.entity';
+import { EmailEntity } from '../email/email.entity';
 
 @Entity()
+@Unique(['email'])
 export class UserEntity {
     //cannot use uuid type or postgres will insert hyphens and screw up our existing minecraft uuids
     @PrimaryColumn()
     @IsString()
     uuid: string;
 
-    @Column({ unique: true, default: null, nullable: true })
-    email?: string;
+    @ManyToOne(() => EmailEntity, (en) => en.email, { nullable: true, eager: true })
+    @JoinColumn({ name: "email" })
+    email?: EmailEntity
 
     @Column({ type: "timestamptz", default: null, nullable: true })
     createdAt?: Date;

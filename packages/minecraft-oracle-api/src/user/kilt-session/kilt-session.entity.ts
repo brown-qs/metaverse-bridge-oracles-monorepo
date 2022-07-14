@@ -7,6 +7,9 @@ import {
 } from 'class-validator';
 import { UserEntity } from 'src/user/user/user.entity';
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { DidEntity } from '../did/did.entity';
+import { EmailEntity } from '../email/email.entity';
+import { KiltDappEntity } from '../kilt-dapp/kilt-dapp.entity';
 
 
 
@@ -20,8 +23,9 @@ export class KiltSessionEntity {
     @Column()
     walletSessionChallenge: string;
 
-    @Column()
-    dappName: string;
+    @ManyToOne(() => KiltDappEntity, (en) => en.dappName, { nullable: false })
+    @JoinColumn({ name: "dappName" })
+    dappName: KiltDappEntity
 
     @Column()
     dAppEncryptionKeyUri: string;
@@ -32,8 +36,9 @@ export class KiltSessionEntity {
     @Column({ default: null, nullable: true })
     encryptedDid?: string;
 
-    @Column({ default: null, nullable: true })
-    did?: string;
+    @ManyToOne(() => DidEntity, (en) => en.did, { nullable: true })
+    @JoinColumn({ name: "did" })
+    did: DidEntity
 
     @Column({ default: false, nullable: false })
     didConfirmed?: boolean;
@@ -47,8 +52,9 @@ export class KiltSessionEntity {
     @ManyToOne(() => UserEntity, (user) => user.kiltSessions, { nullable: true })
     user: UserEntity
 
-    @Column({ default: null, nullable: true })
-    email: string;
+    @ManyToOne(() => EmailEntity, (en) => en.email, { nullable: true })
+    @JoinColumn({ name: "email" })
+    email: EmailEntity
 
     @Column({ type: "timestamptz" })
     createdAt?: Date;

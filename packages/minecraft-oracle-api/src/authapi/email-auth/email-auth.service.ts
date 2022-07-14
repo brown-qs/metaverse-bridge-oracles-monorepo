@@ -11,6 +11,7 @@ import { EmailLoginKeyEntity } from 'src/user/email-login-key/email-login-key.en
 import { UserService } from 'src/user/user/user.service';
 import { UserEntity } from 'src/user/user/user.entity';
 import { EmailChangeService } from 'src/user/email-change/email-change.service';
+import { EmailService } from 'src/user/email/email.service';
 @Injectable()
 export class EmailAuthService {
     private readonly context: string;
@@ -21,6 +22,7 @@ export class EmailAuthService {
         private userService: UserService,
         private emailLoginKeyService: EmailLoginKeyService,
         private emailChangeService: EmailChangeService,
+        private emailService: EmailService,
         private configService: ConfigService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
@@ -58,7 +60,8 @@ export class EmailAuthService {
 
         const loginKey = makeLoginKey()
         try {
-            await this.emailLoginKeyService.createLogin(email.toLowerCase().trim(), loginKey, new Date())
+            const emEntity = await this.emailService.create(email.toLowerCase().trim())
+            await this.emailLoginKeyService.createLogin(emEntity, loginKey, new Date())
         } catch (err) {
             console.log(err)
             this.logger.error(`sendAuthEmail: error upserting user into database: ${email}`, err, this.context)
@@ -116,7 +119,8 @@ export class EmailAuthService {
         }
 
         //check that email is not already in use
-        const existingUserWithEmail = await this.userService.findByEmail(email.toLowerCase().trim())
+        const emEntity = await this.emailService.create(email.toLowerCase().trim())
+        const existingUserWithEmail = await this.userService.findByEmail(emEntity)
         if (existingUserWithEmail) {
             //if email already exists just pretend like link is being sent
             this.logger.error(`sendAuthChangeEmail: uuid: ${user.uuid} wants to change to email ${email}, but that email already exists`, this.context)
@@ -125,7 +129,7 @@ export class EmailAuthService {
 
         const loginKey = makeLoginKey()
         try {
-            await this.emailLoginKeyService.createChangeEmailLogin(user, email.toLowerCase().trim(), loginKey, new Date())
+            await this.emailLoginKeyService.createChangeEmailLogin(user, emEntity, loginKey, new Date())
         } catch (err) {
             this.logger.error(`sendAuthChangeEmail: error upserting user into database: ${email}`, err, this.context)
             throw new UnprocessableEntityException(`Error upserting user into database`)
@@ -192,21 +196,21 @@ export class EmailAuthService {
         let user
         if (!!loginKeyEntity.changeUser) {
             user = loginKeyEntity.changeUser
-            const oldEmail = loginKeyEntity.changeUser.email.toLowerCase().trim()
+            const oldEmailEntity = loginKeyEntity.changeUser.email
 
-            this.logger.debug(`verifyAuthLink: change uuid email ${loginKeyEntity.changeUser.uuid} ${oldEmail} > ${loginKeyEntity.email}`, this.context)
+            this.logger.debug(`verifyAuthLink: change uuid email ${loginKeyEntity.changeUser.uuid} ${oldEmailEntity.email} > ${loginKeyEntity.email.email}`, this.context)
             try {
-                await this.userService.update({ uuid: loginKeyEntity.changeUser.uuid }, { email: loginKeyEntity.email.toLowerCase().trim() })
+                await this.userService.update({ uuid: loginKeyEntity.changeUser.uuid }, { email: loginKeyEntity.email })
             } catch (err) {
-                this.logger.error(`sendAuthChangeEmail: failed to update uuid: ${loginKeyEntity.changeUser.uuid} to email: ${loginKeyEntity.email.toLowerCase().trim()}`, err, this.context)
+                this.logger.error(`sendAuthChangeEmail: failed to update uuid: ${loginKeyEntity.changeUser.uuid} to email: ${loginKeyEntity.email.email.toLowerCase().trim()}`, err, this.context)
                 throw new UnprocessableEntityException(`loginKey failure`)
             }
 
             //log email change
-            await this.emailChangeService.create(loginKeyEntity.changeUser, loginKeyEntity.changeUser, oldEmail, loginKeyEntity.email.toLowerCase().trim())
+            await this.emailChangeService.create(loginKeyEntity.changeUser, loginKeyEntity.changeUser, oldEmailEntity, loginKeyEntity.email)
 
         } else {
-            user = await this.userService.createEmail(loginKeyEntity.email.toLowerCase().trim())
+            user = await this.userService.createEmail(loginKeyEntity.email)
         }
         return user
     }
