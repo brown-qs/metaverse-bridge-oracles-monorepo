@@ -5,6 +5,7 @@ import { FindConditions, FindManyOptions, FindOneOptions, ObjectID, Repository, 
 import { EmailLoginKeyEntity } from './email-login-key.entity';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { UserEntity } from '../user/user.entity';
+import { EmailEntity } from '../email/email.entity';
 
 @Injectable()
 export class EmailLoginKeyService {
@@ -14,9 +15,8 @@ export class EmailLoginKeyService {
         private configService: ConfigService
     ) { }
 
-    public async createLogin(email: string, loginKey: string, keyGenerationDate: Date): Promise<EmailLoginKeyEntity> {
+    public async createLogin(email: EmailEntity, loginKey: string, keyGenerationDate: Date): Promise<EmailLoginKeyEntity> {
         //if user is trying to change uuid with this email but hasn't used the link, will invalidate and new link if used will create new account
-
         const result = await this.repository.createQueryBuilder('email_log_key')
             .insert()
             .values({ email, loginKey, keyGenerationDate, changeUser: null, createdAt: new Date() })
@@ -28,7 +28,7 @@ export class EmailLoginKeyService {
         return row
     }
 
-    public async createChangeEmailLogin(changeUser: UserEntity, email: string, loginKey: string, keyGenerationDate: Date): Promise<EmailLoginKeyEntity> {
+    public async createChangeEmailLogin(changeUser: UserEntity, email: EmailEntity, loginKey: string, keyGenerationDate: Date): Promise<EmailLoginKeyEntity> {
 
         const result = await this.repository.createQueryBuilder('email_log_key')
             .insert()
@@ -44,13 +44,13 @@ export class EmailLoginKeyService {
         await this.repository.update({ loginKey }, { loginKey: null, keyGenerationDate: null, lastLogin: new Date(), changeUser: null })
     }
 
-    public async findByEmail(email: string): Promise<EmailLoginKeyEntity> {
+    public async findByEmail(email: EmailEntity): Promise<EmailLoginKeyEntity> {
         const result = await this.repository.findOne({ email });
         return result;
     }
 
     public async findByLoginKey(loginKey: string): Promise<EmailLoginKeyEntity> {
-        const result = await this.repository.findOne({ loginKey }, { relations: ["changeUser"] });
+        const result = await this.repository.findOne({ loginKey }, { relations: ["changeUser", "email"] });
         return result;
     }
 

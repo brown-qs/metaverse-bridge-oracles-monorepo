@@ -5,6 +5,8 @@ import {
     IsString
 } from 'class-validator';
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { MinecraftUserNameEntity } from '../minecraft-user-name/minecraft-user-name.entity';
+import { MinecraftUuidEntity } from '../minecraft-uuid/minecraft-uuid.entity';
 import { UserEntity } from '../user/user.entity';
 
 //TODO: figure out how to make a user have only one null unlinkedAt at a time
@@ -13,28 +15,28 @@ export class MinecraftLinkEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(() => UserEntity, (user) => user.minecraftLinks, { createForeignKeyConstraints: true })
+    @ManyToOne(() => UserEntity, (user) => user.minecraftLinks, { createForeignKeyConstraints: true, nullable: false })
     user: UserEntity
 
-    @Column()
-    minecraftUuid: string;
+    @ManyToOne(() => MinecraftUuidEntity, (en) => en.minecraftUuid, { nullable: false })
+    @JoinColumn({ name: "minecraftUuid" })
+    minecraftUuid: MinecraftUuidEntity
 
-    @Column()
-    minecraftUserName: string
+    @ManyToOne(() => MinecraftUserNameEntity, (en) => en.minecraftUserName, { nullable: false })
+    @JoinColumn({ name: "minecraftUserName" })
+    minecraftUserName: MinecraftUserNameEntity
 
-    @Column()
+    @Column({ nullable: false })
     hasGame: boolean
 
-    //typeorm will error out with constraint "FK_3d1d94c5f8343369466833a0b05" for relation "" already exists... if we have two relations to user on this table
-    //https://github.com/typeorm/typeorm/issues/9171
-    @ManyToOne(() => UserEntity, (user) => user.minecraftLinkInitiations, { createForeignKeyConstraints: false })
+    @ManyToOne(() => UserEntity, (user) => user.minecraftLinkInitiations, { createForeignKeyConstraints: true, nullable: false })
     linkInitiator: UserEntity
 
     //use timestamp type and always send it utc date
-    @Column({ type: "timestamptz" })
+    @Column({ type: "timestamptz", nullable: false })
     linkedAt: Date;
 
-    @ManyToOne(() => UserEntity, (user) => user.minecraftLinkInitiations, { createForeignKeyConstraints: false })
+    @ManyToOne(() => UserEntity, (user) => user.minecraftLinkInitiations, { createForeignKeyConstraints: true, nullable: true })
     unlinkInitiator: UserEntity
 
     @Column({ type: "timestamptz", nullable: true })

@@ -86,6 +86,16 @@ import { UserAssetView } from './views';
 import { KiltSessionEntity } from './user/kilt-session/kilt-session.entity';
 import { KiltSessionModule } from './user/kilt-session/kilt-session.module';
 import { AssetApiModule } from './assetapi/assetapi.module';
+import { MinecraftUserNameModule } from './user/minecraft-user-name/minecraft-user-name.module';
+import { MinecraftUuidModule } from './user/minecraft-uuid/minecraft-uuid.module';
+import { EmailModule } from './user/email/email.module';
+import { DidModule } from './user/did/did.module';
+import { KiltDappModule } from './user/kilt-dapp/kilt-dapp.module';
+import { DidEntity } from './user/did/did.entity';
+import { EmailEntity } from './user/email/email.entity';
+import { KiltDappEntity } from './user/kilt-dapp/kilt-dapp.entity';
+import { MinecraftUserNameEntity } from './user/minecraft-user-name/minecraft-user-name.entity';
+import { MinecraftUuidEntity } from './user/minecraft-uuid/minecraft-uuid.entity';
 
 
 @Module({
@@ -154,6 +164,11 @@ import { AssetApiModule } from './assetapi/assetapi.module';
                     ResourceInventoryEntity,
                     ResourceInventoryOffsetEntity,
                     UserAssetView,
+                    MinecraftUserNameEntity,
+                    MinecraftUuidEntity,
+                    EmailEntity,
+                    DidEntity,
+                    KiltDappEntity
                 ],
                 synchronize: configService.get<boolean>('typeorm.synchronize'),
                 logging: configService.get<boolean>('typeorm.logging'),
@@ -216,6 +231,11 @@ import { AssetApiModule } from './assetapi/assetapi.module';
         CompositeApiModule,
         KiltSessionModule,
         AssetApiModule,
+        MinecraftUserNameModule,
+        MinecraftUuidModule,
+        EmailModule,
+        DidModule,
+        KiltDappModule
     ],
     controllers: [],
     providers: []

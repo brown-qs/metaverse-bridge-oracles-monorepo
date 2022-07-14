@@ -4,16 +4,19 @@ import {
     IsNumber,
     IsString
 } from 'class-validator';
-import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { EmailEntity } from '../email/email.entity';
 import { UserEntity } from '../user/user.entity';
 
 @Entity()
+@Unique(['email'])
 export class EmailLoginKeyEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ unique: true })
-    email: string;
+    @ManyToOne(() => EmailEntity, (en) => en.email, { nullable: false })
+    @JoinColumn({ name: "email" })
+    email: EmailEntity
 
     @Column({ nullable: true })
     loginKey: string;

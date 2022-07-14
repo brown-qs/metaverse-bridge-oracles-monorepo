@@ -10,10 +10,16 @@ import { KiltAuthService } from './kilt-auth.service';
 import { KiltAuthController } from './kilt-auth.controller';
 import { UserModule } from 'src/user/user/user.module';
 import { KiltSessionModule } from 'src/user/kilt-session/kilt-session.module';
+import { KiltDappModule } from 'src/user/kilt-dapp/kilt-dapp.module';
+import { DidModule } from 'src/user/did/did.module';
+import { EmailModule } from 'src/user/email/email.module';
 
 @Module({
   providers: [KiltAuthService],
   imports: [
+    EmailModule,
+    DidModule,
+    KiltDappModule,
     UserModule,
     KiltSessionModule,
     SecretModule,

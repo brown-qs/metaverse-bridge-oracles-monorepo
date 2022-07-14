@@ -11,6 +11,9 @@ import { UserEntity } from 'src/user/user/user.entity';
 import { KiltSessionEntity } from 'src/user/kilt-session/kilt-session.entity';
 import { KiltSessionService } from 'src/user/kilt-session/kilt-session.service';
 import { ApiPromise, WsProvider } from '@polkadot/api'
+import { DidService } from 'src/user/did/did.service';
+import { KiltDappService } from 'src/user/kilt-dapp/kilt-dapp.service';
+import { EmailService } from 'src/user/email/email.service';
 
 @Injectable()
 export class KiltAuthService {
@@ -30,6 +33,9 @@ export class KiltAuthService {
     constructor(
         private kiltSessionService: KiltSessionService,
         private userService: UserService,
+        private didService: DidService,
+        private kiltDappService: KiltDappService,
+        private emailService: EmailService,
         private configService: ConfigService,
         private jwtService: JwtService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
@@ -148,13 +154,13 @@ export class KiltAuthService {
 
         const dAppEncryptionKeyUri = fullDid.assembleKeyUri(fullDid.encryptionKey.id);
 
-
-        const session = await this.kiltSessionService.create(randomAsHex(), randomAsHex(), this.configService.get<string>('kilt.dappName'), dAppEncryptionKeyUri)
+        const dappEn = await this.kiltDappService.create(this.configService.get<string>('kilt.dappName'))
+        const session = await this.kiltSessionService.create(randomAsHex(), randomAsHex(), dappEn, dAppEncryptionKeyUri)
 
         return {
             sessionId: session.sessionId,
             walletSessionChallenge: session.walletSessionChallenge,
-            dappName: session.dappName,
+            dappName: session.dappName.dappName,
             dAppEncryptionKeyUri: session.dAppEncryptionKeyUri
         }
     }
@@ -308,13 +314,14 @@ export class KiltAuthService {
             throw new UnprocessableEntityException("User didn't share email")
         }
 
-
-        await this.kiltSessionService.update({ sessionId }, { verified: true, did, updatedAt: new Date() })
+        const didEn = await this.didService.create(did)
+        await this.kiltSessionService.update({ sessionId }, { verified: true, did: didEn, updatedAt: new Date() })
 
         this.logger.debug(`"successfully logged in kilt as: ${email}`, this.context)
 
-        const user = await this.userService.createEmail(email.toLowerCase().trim())
-        await this.kiltSessionService.update({ sessionId }, { user, email: email.toLowerCase().trim(), updatedAt: new Date() })
+        const emailEn = await this.emailService.create(email.toLowerCase().trim())
+        const user = await this.userService.createEmail(emailEn)
+        await this.kiltSessionService.update({ sessionId }, { user, email: emailEn, updatedAt: new Date() })
         return user
     }
 
