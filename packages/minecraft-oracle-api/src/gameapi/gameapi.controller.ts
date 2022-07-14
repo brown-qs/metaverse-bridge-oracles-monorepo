@@ -67,7 +67,7 @@ export class GameApiController {
     @ApiOperation({ summary: 'Map of uuids to minecraftUuids' })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
-    async uuids(@Query() dto: UuidMapDto): Promise<{ uuid: string, minecraftUuid: string }[]> {
+    async uuids(@Query() dto: UuidMapDto): Promise<{ uuid: string, minecraftUuid: string | null }[]> {
         let offset: number = 0
         let limit: number | undefined = undefined
 
