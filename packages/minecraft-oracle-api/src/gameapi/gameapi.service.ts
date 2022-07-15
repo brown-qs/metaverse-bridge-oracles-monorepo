@@ -830,7 +830,7 @@ export class GameApiService {
         const scores: PlayerScoreEntity[] = await this.playerScoreService.findMany({
             where: {
                 game: { id: gameId },
-                player: { userName: ILike(`%${dto.search}%`) }
+                player: { minecraftUserName: ILike(`%${dto.search}%`) }
             },
             relations: ['game', 'player']
         })
@@ -839,10 +839,10 @@ export class GameApiService {
             if (!r) {
                 r = {
                     playerId: x.player.uuid,
-                    username: x.player.minecraftUserName,
+                    minecraftUserName: x.player.minecraftUserName,
                     scores: [],
                 };
-                if (dto.sortBy === 'name') r.username = x.player.minecraftUserName;
+                if (dto.sortBy === 'name') r.minecraftUserName = x.player.minecraftUserName;
                 else { r.score = 0; r.updatedAt = 0; }
                 rv.push(r);
             }
@@ -864,7 +864,7 @@ export class GameApiService {
         const sortDirection = dto.sort == 'ASC' ? 1 : -1;
 
         if (dto.sortBy === 'name') {
-            players.sort((a: any, b: any) => ((a.username < b.username) ? 1 : -1) * sortDirection);
+            players.sort((a: any, b: any) => ((a.minecraftUserName < b.minecraftUserName) ? 1 : -1) * sortDirection);
         } else {
             players.sort((a: any, b: any) => {
                 let comp = a.score - b.score;
@@ -878,7 +878,7 @@ export class GameApiService {
             const statId = PlaySessionStatService.calculateId({ uuid: player.playerId, gameId: gameId })
             const playStats = await this.playSessionStatService.findOne({ id: statId });
             player.playtime = playStats?.timePlayed ?? '0';
-            delete player.username;
+            delete player.minecraftUserName;
             delete player.score; delete player.updatedAt;
             return player;
         }));
@@ -973,7 +973,7 @@ export class GameApiService {
             .createQueryBuilder('pitem')
             .leftJoinAndSelect(`pitem.player`, `player`)
             .leftJoinAndSelect(`pitem.game`, `game`)
-            .where(`pitem.itemId = :itemId AND game.id = :gameId AND player.userName ILIKE :userNameSearch`, { itemId: dto.itemId, gameId, userNameSearch: `%${dto.search}%` })
+            .where(`pitem.itemId = :itemId AND game.id = :gameId AND player.minecraftUserName ILIKE :userNameSearch`, { itemId: dto.itemId, gameId, userNameSearch: `%${dto.search}%` })
             .orderBy({
                 [sortByLabel]: sortDirection
             })
