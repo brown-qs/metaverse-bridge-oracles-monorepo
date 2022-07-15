@@ -76,10 +76,8 @@ export class KiltAuthController {
     @ApiOperation({ summary: 'Add attestation key' })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
-    async addAttestationKey(@User() user: UserEntity) {
-        if (user.role !== UserRole.ADMIN) {
-            throw new ForbiddenException('Not admin')
-        }
+    async addAttestationKey() {
+
         let result
         try {
             result = await this.kiltAuthApiService.addAttestationKey()
