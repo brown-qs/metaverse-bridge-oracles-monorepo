@@ -11,6 +11,7 @@ import { JwtAuthGuard } from '../jwt-auth.guard';
 import { UserEntity } from 'src/user/user/user.entity';
 import { User } from 'src/utils/decorators';
 import { UserRole } from 'src/common/enums/UserRole';
+import { SharedSecretGuard } from '../secret.guard';
 
 @Controller('auth/kilt')
 export class KiltAuthController {
@@ -73,8 +74,8 @@ export class KiltAuthController {
     @Get('add_attestation_key')
     @HttpCode(200)
     @ApiOperation({ summary: 'Add attestation key' })
-    @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
     async addAttestationKey(@User() user: UserEntity) {
         if (user.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
