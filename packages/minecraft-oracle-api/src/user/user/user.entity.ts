@@ -22,6 +22,7 @@ import { MinecraftLinkEntity } from '../minecraft-link/minecraft-link.entity';
 import { KiltSessionEntity } from '../kilt-session/kilt-session.entity';
 import { EmailLoginKeyEntity } from '../email-login-key/email-login-key.entity';
 import { EmailEntity } from '../email/email.entity';
+import { Oauth2ClientEntity } from 'src/oauth2/oauth2-client/oauth2-client.entity';
 
 @Entity()
 @Unique(['email'])
@@ -150,6 +151,9 @@ export class UserEntity {
 
     @OneToMany(() => KiltSessionEntity, (kiltSession) => kiltSession.user)
     kiltSessions?: KiltSessionEntity[]
+
+    @OneToMany(() => Oauth2ClientEntity, (en) => en.owner)
+    oauth2Clients?: Oauth2ClientEntity[]
 }
 
 //resource_inventory_entity id example: 92e1e5635d684e1294c6c6cceb8c9b71-1285-0x1b30a3b5744e733d8d2f19f0812e3f79152a8777-14
