@@ -5,7 +5,7 @@ import {
     IsNumber,
     IsString
 } from 'class-validator';
-import { UserEntity } from 'src/user/user/user.entity';
+import { UserEntity } from '../../user/user/user.entity';
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { DidEntity } from '../did/did.entity';
 import { EmailEntity } from '../email/email.entity';

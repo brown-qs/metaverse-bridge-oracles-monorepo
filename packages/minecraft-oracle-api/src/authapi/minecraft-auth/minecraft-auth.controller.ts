@@ -14,20 +14,16 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
-import { User } from 'src/utils/decorators';
-import { error, query } from 'winston';
+import { User } from '../../utils/decorators';
 import { JwtAuthGuard } from '../jwt-auth.guard';
 import { MinecraftAuthService } from './minecraft-auth.service';
-import { JwtService } from '@nestjs/jwt';
-import { UserJwtPayload } from '../jwt.strategy';
 import { ConfigService } from '@nestjs/config';
-import { UserService } from 'src/user/user/user.service';
-import { MinecraftLinkService } from 'src/user/minecraft-link/minecraft-link.service';
-import { SharedSecretGuard } from '../secret.guard';
-import { UserEntity } from 'src/user/user/user.entity';
-import { GameService } from 'src/game/game.service';
-import { GameKind } from 'src/game/game.enum';
-import { MinecraftUuidService } from 'src/user/minecraft-uuid/minecraft-uuid.service';
+import { UserService } from '../../user/user/user.service';
+import { MinecraftLinkService } from '../../user/minecraft-link/minecraft-link.service';
+import { UserEntity } from '../../user/user/user.entity';
+import { GameService } from '../../game/game.service';
+import { GameKind } from '../../game/game.enum';
+import { MinecraftUuidService } from '../../user/minecraft-uuid/minecraft-uuid.service';
 @ApiTags('auth')
 @Controller('auth/minecraft')
 export class MinecraftAuthController {

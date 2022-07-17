@@ -3,16 +3,16 @@ import { CacheModule } from '../../cache/cache.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
-import { SecretModule } from 'src/secret/secret.module';
-import { SkinModule } from 'src/skin/skin.module';
-import { TextureModule } from 'src/texture/texture.module';
+import { SecretModule } from '../../secret/secret.module';
+import { SkinModule } from '../../skin/skin.module';
+import { TextureModule } from '../../texture/texture.module';
 import { KiltAuthService } from './kilt-auth.service';
 import { KiltAuthController } from './kilt-auth.controller';
-import { UserModule } from 'src/user/user/user.module';
-import { KiltSessionModule } from 'src/user/kilt-session/kilt-session.module';
-import { KiltDappModule } from 'src/user/kilt-dapp/kilt-dapp.module';
-import { DidModule } from 'src/user/did/did.module';
-import { EmailModule } from 'src/user/email/email.module';
+import { UserModule } from '../../user/user/user.module';
+import { KiltSessionModule } from '../../user/kilt-session/kilt-session.module';
+import { KiltDappModule } from '../../user/kilt-dapp/kilt-dapp.module';
+import { DidModule } from '../../user/did/did.module';
+import { EmailModule } from '../../user/email/email.module';
 
 @Module({
   providers: [KiltAuthService],
