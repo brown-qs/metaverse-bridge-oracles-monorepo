@@ -6,12 +6,12 @@ import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { Repository } from 'typeorm';
 import formData from "form-data"
 import Mailgun from "mailgun.js"
-import { EmailLoginKeyService } from 'src/user/email-login-key/email-login-key.service';
-import { EmailLoginKeyEntity } from 'src/user/email-login-key/email-login-key.entity';
-import { UserService } from 'src/user/user/user.service';
-import { UserEntity } from 'src/user/user/user.entity';
-import { EmailChangeService } from 'src/user/email-change/email-change.service';
-import { EmailService } from 'src/user/email/email.service';
+import { EmailLoginKeyService } from '../../user/email-login-key/email-login-key.service';
+import { EmailLoginKeyEntity } from '../../user/email-login-key/email-login-key.entity';
+import { UserService } from '../../user/user/user.service';
+import { UserEntity } from '../../user/user/user.entity';
+import { EmailChangeService } from '../../user/email-change/email-change.service';
+import { EmailService } from '../../user/email/email.service';
 @Injectable()
 export class EmailAuthService {
     private readonly context: string;
