@@ -98,6 +98,9 @@ import { MinecraftUserNameEntity } from './user/minecraft-user-name/minecraft-us
 import { MinecraftUuidEntity } from './user/minecraft-uuid/minecraft-uuid.entity';
 import { Oauth2ClientEntity } from './oauth2/oauth2-client/oauth2-client.entity';
 import { Oauth2Module } from './oauth2/oauth2.module';
+import { Oauth2AuthorizationModule } from './oauth2/oauth2-authorization/oauth2-authorization.module';
+import { Oauth2ClientModule } from './oauth2/oauth2-client/oauth2-client.module';
+import { Oauth2ResourceModule } from './oauth2/oauth2-resource/oauth2-resource.module';
 
 
 @Module({
@@ -191,6 +194,9 @@ import { Oauth2Module } from './oauth2/oauth2.module';
             inject: [ConfigService]
         }),
         Oauth2Module,
+        Oauth2AuthorizationModule,
+        Oauth2ClientModule,
+        Oauth2ResourceModule,
         EmailChangeModule,
         MinecraftLinkModule,
         PlaySessionModule,
