@@ -69,11 +69,10 @@ export class EmailAuthService {
         }
 
         const mailgun = new Mailgun(formData);
-        const mg = mailgun.client({ username: 'api', key: this.configService.get<string>('mailgun.apiKey'), url: 'https://api.eu.mailgun.net' });
-
+        const mg = mailgun.client({ username: 'api', key: this.configService.get<string>('mailgun.apiKey'), url: this.configService.get<string>('mailgun.apiUrl') });
 
         const mailOptions = {
-            from: 'Moonsama <no-reply@sp.moonsama.com>',
+            from: `Moonsama <${this.configService.get<string>('mailgun.email')}>`,
             to: [email], // list of receivers
             subject: "Your Moonsama single-use login code", // Subject line
             text: `We received your request for a single-use login code to use with Moonsama.\n\nYour single-use login code is: ${loginKey}`, // plaintext body
@@ -136,11 +135,11 @@ export class EmailAuthService {
         }
 
         const mailgun = new Mailgun(formData);
-        const mg = mailgun.client({ username: 'api', key: this.configService.get<string>('mailgun.apiKey'), url: 'https://api.eu.mailgun.net' });
+        const mg = mailgun.client({ username: 'api', key: this.configService.get<string>('mailgun.apiKey'), url: this.configService.get<string>('mailgun.apiUrl') });
 
 
         const mailOptions = {
-            from: 'Moonsama <no-reply@sp.moonsama.com>',
+            from: `Moonsama <${this.configService.get<string>('mailgun.email')}>`,
             to: [email], // list of receivers
             subject: "Moonsama change email request", // Subject line
             text: `We received your request to change your email used with Moonsama.\n\nPlease use this single-use login code: ${loginKey}`, // plaintext body
