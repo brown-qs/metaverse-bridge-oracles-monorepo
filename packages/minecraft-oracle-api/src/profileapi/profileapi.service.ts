@@ -169,7 +169,7 @@ export class ProfileApiService {
         return {
             uuid: user.uuid,
             minecraftUuid: user.minecraftUuid,
-            email: user.email.email,
+            email: user?.email?.email ?? null,
             hasGame: user.hasGame,
             minecraftUserName: user.minecraftUserName,
             role: user.role,
