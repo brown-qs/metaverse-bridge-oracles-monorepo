@@ -96,6 +96,8 @@ import { EmailEntity } from './user/email/email.entity';
 import { KiltDappEntity } from './user/kilt-dapp/kilt-dapp.entity';
 import { MinecraftUserNameEntity } from './user/minecraft-user-name/minecraft-user-name.entity';
 import { MinecraftUuidEntity } from './user/minecraft-uuid/minecraft-uuid.entity';
+import { Oauth2ClientEntity } from './oauth2/oauth2-client/oauth2-client.entity';
+import { Oauth2Module } from './oauth2/oauth2.module';
 
 
 @Module({
@@ -168,7 +170,8 @@ import { MinecraftUuidEntity } from './user/minecraft-uuid/minecraft-uuid.entity
                     MinecraftUuidEntity,
                     EmailEntity,
                     DidEntity,
-                    KiltDappEntity
+                    KiltDappEntity,
+                    Oauth2ClientEntity,
                 ],
                 synchronize: configService.get<boolean>('typeorm.synchronize'),
                 logging: configService.get<boolean>('typeorm.logging'),
@@ -187,6 +190,7 @@ import { MinecraftUuidEntity } from './user/minecraft-uuid/minecraft-uuid.entity
             ],
             inject: [ConfigService]
         }),
+        Oauth2Module,
         EmailChangeModule,
         MinecraftLinkModule,
         PlaySessionModule,
@@ -235,7 +239,8 @@ import { MinecraftUuidEntity } from './user/minecraft-uuid/minecraft-uuid.entity
         MinecraftUuidModule,
         EmailModule,
         DidModule,
-        KiltDappModule
+        KiltDappModule,
+
     ],
     controllers: [],
     providers: []

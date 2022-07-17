@@ -1,0 +1,1 @@
+export const OAUTH2_SERVER = Symbol('OAUTH2_SERVER');
