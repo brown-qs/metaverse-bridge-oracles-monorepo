@@ -8,9 +8,9 @@ import { UserJwtPayload } from '../jwt.strategy';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from '../jwt-auth.guard';
-import { UserEntity } from 'src/user/user/user.entity';
-import { User } from 'src/utils/decorators';
-import { UserRole } from 'src/common/enums/UserRole';
+import { UserEntity } from '../../user/user/user.entity';
+import { User } from '../../utils/decorators';
+import { UserRole } from '../../common/enums/UserRole';
 
 @Controller('auth/kilt')
 export class KiltAuthController {

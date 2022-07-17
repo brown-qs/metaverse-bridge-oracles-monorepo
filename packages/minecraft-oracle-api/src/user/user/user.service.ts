@@ -22,9 +22,9 @@ import { ResourceInventoryOffsetEntity } from '../../resourceinventoryoffset/res
 import { SkinEntity } from '../../skin/skin.entity';
 import { SnapshotItemEntity } from '../../snapshot/snapshotItem.entity';
 import { SummonEntity } from '../../summon/summon.entity';
-import { RecognizedAssetType } from 'src/config/constants';
-import { GameEntity } from 'src/game/game.entity';
-import { GameKind } from 'src/game/game.enum';
+import { RecognizedAssetType } from '../../config/constants';
+import { GameEntity } from '../../game/game.entity';
+import { GameKind } from '../../game/game.enum';
 import { MinecraftUuidEntity } from '../minecraft-uuid/minecraft-uuid.entity';
 import { MinecraftUserNameEntity } from '../minecraft-user-name/minecraft-user-name.entity';
 import { EmailEntity } from '../email/email.entity';

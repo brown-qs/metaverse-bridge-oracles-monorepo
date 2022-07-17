@@ -2,18 +2,17 @@ import { BlockchainUtils, VerificationKeyType, init, IEncryptedMessage, Utils, M
 import * as Kilt from "@kiltprotocol/sdk-js"
 import { GoneException, Inject, Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { blake2AsHex, blake2AsU8a, cryptoWaitReady, keyExtractPath, keyFromPath, mnemonicToMiniSecret, naclBoxPairFromSecret, naclOpen, naclSeal, randomAsHex, sr25519PairFromSeed } from '@polkadot/util-crypto';
+import { blake2AsU8a, cryptoWaitReady, keyExtractPath, keyFromPath, mnemonicToMiniSecret, naclBoxPairFromSecret, naclOpen, naclSeal, randomAsHex, sr25519PairFromSeed } from '@polkadot/util-crypto';
 import { ConfigService } from '@nestjs/config';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { WalletLoginMessage } from './dtos';
-import { UserService } from 'src/user/user/user.service';
-import { UserEntity } from 'src/user/user/user.entity';
-import { KiltSessionEntity } from 'src/user/kilt-session/kilt-session.entity';
-import { KiltSessionService } from 'src/user/kilt-session/kilt-session.service';
+import { UserService } from '../../user/user/user.service';
+import { UserEntity } from '../../user/user/user.entity';
+import { KiltSessionService } from '../../user/kilt-session/kilt-session.service';
 import { ApiPromise, WsProvider } from '@polkadot/api'
-import { DidService } from 'src/user/did/did.service';
-import { KiltDappService } from 'src/user/kilt-dapp/kilt-dapp.service';
-import { EmailService } from 'src/user/email/email.service';
+import { DidService } from '../../user/did/did.service';
+import { KiltDappService } from '../../user/kilt-dapp/kilt-dapp.service';
+import { EmailService } from '../../user/email/email.service';
 
 @Injectable()
 export class KiltAuthService {
