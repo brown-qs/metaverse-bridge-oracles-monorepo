@@ -69,7 +69,8 @@ export class EmailAuthService {
         }
 
         const mailgun = new Mailgun(formData);
-        const mg = mailgun.client({ username: 'api', key: this.configService.get<string>('mailgun.apiKey'), url: this.configService.get<string>('mailgun.apiUrl') });
+
+        const mg = mailgun.client({ username: this.configService.get<string>('mailgun.apiUsername'), key: this.configService.get<string>('mailgun.apiKey'), url: this.configService.get<string>('mailgun.apiUrl') });
 
         const mailOptions = {
             from: `Moonsama <${this.configService.get<string>('mailgun.email')}>`,
@@ -133,9 +134,8 @@ export class EmailAuthService {
             this.logger.error(`sendAuthChangeEmail: error upserting user into database: ${email}`, err, this.context)
             throw new UnprocessableEntityException(`Error upserting user into database`)
         }
-
         const mailgun = new Mailgun(formData);
-        const mg = mailgun.client({ username: 'api', key: this.configService.get<string>('mailgun.apiKey'), url: this.configService.get<string>('mailgun.apiUrl') });
+        const mg = mailgun.client({ username: this.configService.get<string>('mailgun.apiUsername'), key: this.configService.get<string>('mailgun.apiKey'), url: this.configService.get<string>('mailgun.apiUrl') });
 
 
         const mailOptions = {
