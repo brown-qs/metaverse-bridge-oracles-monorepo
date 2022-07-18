@@ -356,10 +356,13 @@ export class UserService {
                     //move other fields to email user
                     const emailUser = await queryRunner.manager.findOne(UserEntity, { uuid: userUuid })
 
-                    const allowedToPlay = emailUser?.allowedToPlay === true || existingMinecraft?.allowedToPlay === true
-                    const blacklisted = emailUser?.blacklisted === true || existingMinecraft?.blacklisted === true
-                    const vip = emailUser?.vip === true || existingMinecraft?.vip === true
-                    const numGamePassAsset = emailUser?.numGamePassAsset ?? 0 + existingMinecraft?.numGamePassAsset ?? 0
+                    const allowedToPlay = (emailUser?.allowedToPlay === true) || (existingMinecraft?.allowedToPlay === true)
+                    this.logger.debug(`user.service::linkMinecraftByUserUuid emailUser?.blacklisted === true: ${emailUser?.blacklisted === true} existingMinecraft?.allowedToPlay === true: ${existingMinecraft?.allowedToPlay === true} allowedToPlay: ${allowedToPlay}`, this.context)
+                    const blacklisted = (emailUser?.blacklisted === true) || (existingMinecraft?.blacklisted === true)
+                    const vip = (emailUser?.vip === true) || (existingMinecraft?.vip === true)
+                    const numGamePassAsset = (emailUser?.numGamePassAsset ?? 0) + (existingMinecraft?.numGamePassAsset ?? 0)
+                    this.logger.debug(`user.service::linkMinecraftByUserUuid emailUser?.numGamePassAsset ?? 0: ${emailUser?.numGamePassAsset ?? 0} existingMinecraft?.numGamePassAsset ?? 0: ${existingMinecraft?.numGamePassAsset ?? 0} numGamePassAsset: ${numGamePassAsset}`, this.context)
+
                     let role = numGamePassAsset > 0 ? UserRole.PLAYER : UserRole.NONE
                     let usedAddresses = [...emailUser?.usedAddresses ?? [], ...existingMinecraft?.usedAddresses ?? []]
                     //remove duplicates
