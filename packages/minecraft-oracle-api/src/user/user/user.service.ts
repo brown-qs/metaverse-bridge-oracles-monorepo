@@ -301,12 +301,18 @@ export class UserService {
                         this.logger.debug(`user.service::linkMinecraftByUserUuid [MC User] Bait: ${formatEther(mcUserBaitAmount)} Bait Offset: ${formatEther(mcUserBaitOffsetAmount)}`, this.context)
 
                         const oldMcResourceId = mcUserBait.id
-                        const oldMcResourceOffsetId = mcUserBait.offset.id
                         const newMcResourceId = oldMcResourceId.replace(`${minecraftUuid}-`, `${userUuid}-`)
-                        const newMcResourceOffsetId = oldMcResourceOffsetId.replace(`${minecraftUuid}-`, `${userUuid}-`)
                         //updating id here will cascade to fk on asset_entity and resource_inventory_offset_entity
                         await queryRunner.manager.update(ResourceInventoryEntity, { id: oldMcResourceId }, { id: newMcResourceId })
-                        await queryRunner.manager.update(ResourceInventoryOffsetEntity, { id: oldMcResourceOffsetId }, { id: newMcResourceOffsetId })
+
+                        if (!!mcUserBait?.offset?.id) {
+                            this.logger.debug(`user.service::linkMinecraftByUserUuid has bait inventory offset`, this.context)
+                            const oldMcResourceOffsetId = mcUserBait.offset.id
+                            const newMcResourceOffsetId = oldMcResourceOffsetId.replace(`${minecraftUuid}-`, `${userUuid}-`)
+                            await queryRunner.manager.update(ResourceInventoryOffsetEntity, { id: oldMcResourceOffsetId }, { id: newMcResourceOffsetId })
+                        } else {
+                            this.logger.debug(`user.service::linkMinecraftByUserUuid doesn't have bait inventory offset`, this.context)
+                        }
 
                         this.logger.debug(`user.service::linkMinecraftByUserUuid successfully moved bait!`, this.context)
                     }
@@ -350,15 +356,19 @@ export class UserService {
                     //move other fields to email user
                     const emailUser = await queryRunner.manager.findOne(UserEntity, { uuid: userUuid })
 
-                    const allowedToPlay = emailUser?.allowedToPlay === true || existingMinecraft?.allowedToPlay === true
-                    const blacklisted = emailUser?.blacklisted === true || existingMinecraft?.blacklisted === true
-                    const vip = emailUser?.vip === true || existingMinecraft?.vip === true
-                    const numGamePassAsset = emailUser?.numGamePassAsset ?? 0 + existingMinecraft?.numGamePassAsset ?? 0
-                    let role = numGamePassAsset > 0 ? UserRole.PLAYER : UserRole.NONE
+                    const allowedToPlay = (emailUser?.allowedToPlay === true) || (existingMinecraft?.allowedToPlay === true)
+                    this.logger.debug(`user.service::linkMinecraftByUserUuid emailUser?.blacklisted === true: ${emailUser?.blacklisted === true} existingMinecraft?.allowedToPlay === true: ${existingMinecraft?.allowedToPlay === true} allowedToPlay: ${allowedToPlay}`, this.context)
+                    const blacklisted = (emailUser?.blacklisted === true) || (existingMinecraft?.blacklisted === true)
+                    const vip = (emailUser?.vip === true) || (existingMinecraft?.vip === true)
+                    const numGamePassAsset = (emailUser?.numGamePassAsset ?? 0) + (existingMinecraft?.numGamePassAsset ?? 0)
+                    this.logger.debug(`user.service::linkMinecraftByUserUuid emailUser?.numGamePassAsset ?? 0: ${emailUser?.numGamePassAsset ?? 0} existingMinecraft?.numGamePassAsset ?? 0: ${existingMinecraft?.numGamePassAsset ?? 0} numGamePassAsset: ${numGamePassAsset}`, this.context)
+
                     let usedAddresses = [...emailUser?.usedAddresses ?? [], ...existingMinecraft?.usedAddresses ?? []]
                     //remove duplicates
                     usedAddresses = usedAddresses.filter((item, i, self) => self.lastIndexOf(item) === i)
                     //if either of the two users being merged is an admin, user is admin
+
+                    let role = numGamePassAsset > 0 ? UserRole.PLAYER : UserRole.NONE
                     if (emailUser?.role.valueOf() === UserRole.ADMIN.valueOf() || existingMinecraft?.role.valueOf() === UserRole.ADMIN.valueOf()) {
                         role = UserRole.ADMIN
                     }
