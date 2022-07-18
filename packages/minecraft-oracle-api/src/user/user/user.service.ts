@@ -302,7 +302,7 @@ export class UserService {
 
                         const oldMcResourceId = mcUserBait.id
                         const newMcResourceId = oldMcResourceId.replace(`${minecraftUuid}-`, `${userUuid}-`)
-                        //updating id here will cascade to fk on asset_entity
+                        //updating id here will cascade to fk on asset_entity and resource_inventory_offset_entity
                         await queryRunner.manager.update(ResourceInventoryEntity, { id: oldMcResourceId }, { id: newMcResourceId })
 
                         if (!!mcUserBait?.offset?.id) {

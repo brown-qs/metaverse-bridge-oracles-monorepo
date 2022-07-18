@@ -48,7 +48,7 @@ export class EmailAuthService {
 
             //TO DO: check data.hostname
             if (data.success !== true) {
-                throw new Error("captcha rejected")
+                throw new UnprocessableEntityException(`Invalid captcha`)
             }
         } catch (err) {
             this.logger.error(`sendAuthEmail: captcha did verify`, err, this.context)

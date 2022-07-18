@@ -82,7 +82,6 @@ import { EmailChangeModule } from './user/email-change/email-change.module';
 import { MinecraftLinkModule } from './user/minecraft-link/minecraft-link.module';
 import { MinecraftLinkEntity } from './user/minecraft-link/minecraft-link.entity';
 import { EmailChangeEntity } from './user/email-change/email-change.entity';
-import { UserAssetView } from './views';
 import { KiltSessionEntity } from './user/kilt-session/kilt-session.entity';
 import { KiltSessionModule } from './user/kilt-session/kilt-session.module';
 import { AssetApiModule } from './assetapi/assetapi.module';
@@ -96,6 +95,8 @@ import { EmailEntity } from './user/email/email.entity';
 import { KiltDappEntity } from './user/kilt-dapp/kilt-dapp.entity';
 import { MinecraftUserNameEntity } from './user/minecraft-user-name/minecraft-user-name.entity';
 import { MinecraftUuidEntity } from './user/minecraft-uuid/minecraft-uuid.entity';
+import { ZUserAssetView } from './views/user-asset.view';
+import { ZUserBaitView } from './views';
 
 
 @Module({
@@ -163,12 +164,13 @@ import { MinecraftUuidEntity } from './user/minecraft-uuid/minecraft-uuid.entity
                     SyntheticItemEntity,
                     ResourceInventoryEntity,
                     ResourceInventoryOffsetEntity,
-                    UserAssetView,
+                    ZUserAssetView,
                     MinecraftUserNameEntity,
                     MinecraftUuidEntity,
                     EmailEntity,
                     DidEntity,
-                    KiltDappEntity
+                    KiltDappEntity,
+                    ZUserBaitView
                 ],
                 synchronize: configService.get<boolean>('typeorm.synchronize'),
                 logging: configService.get<boolean>('typeorm.logging'),
