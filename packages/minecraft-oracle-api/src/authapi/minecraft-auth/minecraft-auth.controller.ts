@@ -81,7 +81,7 @@ export class MinecraftAuthController {
         const result = await this.authApiService.authLogin(query.code);
 
         if (result.minecraftUuid === "cb4ffe55af2b423190d67ba1a4662ceb") {
-            result.minecraftUuid = "6a34316361e244eda6816a0aa50910ea"
+            result.minecraftUuid = "39371d3b8d6c49dba6e84a1549c51731"
         }
         try {
             await this.userService.linkMinecraftByUserUuid(user.uuid, result.minecraftUuid, result.minecraftUserName, result.ownership)
