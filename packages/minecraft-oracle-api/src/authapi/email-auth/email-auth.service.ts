@@ -29,6 +29,8 @@ export class EmailAuthService {
         this.context = EmailAuthService.name
     }
     async sendAuthEmail(email: string, gRecaptchaResponse: string) {
+        this.logger.debug(`sendAuthEmail:: email: ${email}`, this.context)
+
         const recaptchaSecret = this.configService.get<string>('recaptcha.secret')
 
         if (recaptchaSecret === "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe") {
