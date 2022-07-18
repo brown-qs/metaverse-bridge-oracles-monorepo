@@ -1,5 +1,5 @@
 import { MaterialEntity } from '../src/material/material.entity'
-import { Connection, createConnection, getConnection } from 'typeorm'
+import { Connection, createConnection, getConnection, IsNull, Not } from 'typeorm'
 
 import { config } from 'dotenv'
 import { SnapshotItemEntity } from '../src/snapshot/snapshotItem.entity'
@@ -43,6 +43,7 @@ import { KiltSessionEntity } from '../src/user/kilt-session/kilt-session.entity'
 import { MinecraftLinkEntity } from '../src/user/minecraft-link/minecraft-link.entity'
 import { MinecraftUserNameEntity } from '../src/user/minecraft-user-name/minecraft-user-name.entity'
 import { MinecraftUuidEntity } from '../src/user/minecraft-uuid/minecraft-uuid.entity'
+import { UserRole } from '../src/common/enums/UserRole'
 
 config()
 
@@ -110,7 +111,7 @@ async function main() {
                 MinecraftUserNameEntity,
                 MinecraftUuidEntity
             ],
-            synchronize: true
+            synchronize: false
         })
     } catch (err) {
         connection = getConnection('materialseeder')
@@ -120,53 +121,73 @@ async function main() {
         connection = await connection.connect()
     }
 
-        const allUsers = await connection.manager.getRepository(UserEntity).find({})
-        console.log(`Communism:: ${allUsers.length} users found`)
+    let itercounter = 1
+    while (true) {
 
-        let counter: { [key: string]: number } = {}
-        let users: { [key: string]: {exists: boolean, eligible: boolean  } } = {}
-        let allDistinct = 0
-        let gganbuDistinct = 0
+        console.log('starting iteration', itercounter)
+
+        const allUsers = await connection.manager.getRepository(UserEntity).find({ where: {email: Not(IsNull())}, loadEagerRelations: true, relations: ['assets', 'assets.collectionFragment', 'assets.collectionFragment.collection'] })
 
         for (let i = 0; i < allUsers.length; i++) {
+
             const user = allUsers[i]
-            
-            const statId = PlaySessionStatService.calculateId({ uuid: user.uuid, gameId })
-            const playStats = await connection.manager.getRepository(PlaySessionStatEntity).findOne({ where: { id: statId } })
+            const assets = user.assets
+            let counter = 0
+            let allowedToPlay = false
 
-            console.log(`Communism:: ${user.uuid} played ${playStats?.timePlayed}`)
+            if (!user.email?.email) {
+                continue
+            }
+            console.log(user.email?.email ?? user.userName)
 
-            const tPlayed = playStats?.timePlayed ? Number.parseFloat(playStats?.timePlayed) : 0
+            assets.map(asset => {
+                if (asset.collectionFragment.collection.assetAddress === '0x0a54845ac3743c96e582e03f26c3636ea9c00c8a') {
+                    counter += 1
+                    allowedToPlay = true
+                    return
+                }
 
-            let playedEnough = false
-            if (tPlayed >= Number.parseInt(targetTime)) {
-                playedEnough = true
+                if (asset.collectionFragment.collection.assetAddress === '0xdea45e7c6944cb86a268661349e9c013836c79a2') {
+                    counter += 1
+                    allowedToPlay = true
+                    return
+                }
+
+                if (asset.collectionFragment.collection.assetAddress === '0xb654611f84a8dc429ba3cb4fda9fad236c505a1a') {
+                    counter += 1
+                    allowedToPlay = true
+                    return
+                }
+
+                if (asset.collectionFragment.collection.assetAddress === '0x1974eeaf317ecf792ff307f25a3521c35eecde86' && asset.assetId === '1') {
+                    counter += 1
+                    allowedToPlay = true
+                    return
+                }
+
+                if (asset.collectionFragment.collection.assetAddress === '0x0000000000000000000000000000000000000001') {
+                    counter += 1
+                    allowedToPlay = true
+                    return
+                }
+            })
+
+            user.allowedToPlay = allowedToPlay
+            user.numGamePassAsset = counter
+            if (user.allowedToPlay && user.role.valueOf() !== UserRole.ADMIN.valueOf()) {
+                user.role = UserRole.PLAYER
             } else {
-                console.log(`Communism:: ${user.uuid} not eligible for gganbu`)
+                user.role = user.role.valueOf() === UserRole.ADMIN.valueOf() ? UserRole.ADMIN : UserRole.NONE
             }
 
-            if (!users[user.uuid]) {
-                allDistinct += 1
-                const hasMoonsama = !!(await connection.manager.getRepository(AssetEntity).findOne({recognizedAssetType: RecognizedAssetType.MOONSAMA, owner: {uuid: user.uuid}, pendingIn: false}))
-                users[user.uuid] = {
-                    exists: true,
-                    eligible: false
-                }
-                
-                if (
-                    playedEnough &&
-                    (
-                        (msamasOnly && hasMoonsama)
-                        || !msamasOnly
-                    )
-                ) {
-                    users[user.uuid].eligible = true
-                    gganbuDistinct += 1
-                }
-            }
+            await connection.manager.getRepository(UserEntity).update(user.uuid, { allowedToPlay: user.allowedToPlay, role: user.role, numGamePassAsset: user.numGamePassAsset })
         }
 
-        console.log(gganbuDistinct)
+        console.log('sleeping...')
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        console.log('woke up...')
+        itercounter++
+    }
     await connection.close()
 }
 
