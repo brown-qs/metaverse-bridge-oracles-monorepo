@@ -31,34 +31,7 @@ export class EmailAuthService {
     async sendAuthEmail(email: string, gRecaptchaResponse: string) {
         this.logger.debug(`sendAuthEmail:: email: ${email}`, this.context)
 
-        const recaptchaSecret = this.configService.get<string>('recaptcha.secret')
-
-        if (recaptchaSecret === "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe") {
-            this.logger.warn(`sendAuthEmail: using test recaptcha secret! Don't use in production!`, this.context)
-        }
-
-        try {
-            let result = await axios({
-                method: 'post',
-                url: 'https://www.google.com/recaptcha/api/siteverify',
-                params: {
-                    secret: recaptchaSecret,
-                    response: gRecaptchaResponse
-                }
-            });
-            let data = result.data || {};
-
-            //TO DO: check data.hostname
-            if (data.success !== true) {
-                throw new UnprocessableEntityException(`Invalid captcha`)
-            }
-        } catch (err) {
-            this.logger.error(`sendAuthEmail: captcha did verify`, err, this.context)
-            throw new UnprocessableEntityException(`Invalid captcha`)
-        }
-
-
-
+        await this.validateCaptcha(gRecaptchaResponse)
 
         const loginKey = makeLoginKey()
         try {
@@ -96,29 +69,7 @@ export class EmailAuthService {
     async sendAuthChangeEmail(user: UserEntity, email: string, gRecaptchaResponse: string) {
         const recaptchaSecret = this.configService.get<string>('recaptcha.secret')
 
-        if (recaptchaSecret === "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe") {
-            this.logger.warn(`sendAuthChangeEmail: using test recaptcha secret! Don't use in production!`, this.context)
-        }
-
-        try {
-            let result = await axios({
-                method: 'post',
-                url: 'https://www.google.com/recaptcha/api/siteverify',
-                params: {
-                    secret: recaptchaSecret,
-                    response: gRecaptchaResponse
-                }
-            });
-            let data = result.data || {};
-
-            //TO DO: check data.hostname
-            if (data.success !== true) {
-                throw new Error("captcha rejected")
-            }
-        } catch (err) {
-            this.logger.error(`sendAuthChangeEmail: captcha did verify`, err, this.context)
-            throw new UnprocessableEntityException(`Invalid captcha`)
-        }
+        await this.validateCaptcha(gRecaptchaResponse)
 
         //check that email is not already in use
         const emEntity = await this.emailService.create(email.toLowerCase().trim())
@@ -214,6 +165,35 @@ export class EmailAuthService {
             user = await this.userService.createEmail(loginKeyEntity.email)
         }
         return user
+    }
+
+    private async validateCaptcha(gRecaptchaResponse: string) {
+        const recaptchaSecret = this.configService.get<string>('recaptcha.secret')
+
+        if (recaptchaSecret === "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe") {
+            this.logger.warn(`sendAuthEmail: using test recaptcha secret! Don't use in production!`, this.context)
+        }
+
+        try {
+            let result = await axios({
+                method: 'post',
+                url: 'https://www.google.com/recaptcha/api/siteverify',
+                params: {
+                    secret: recaptchaSecret,
+                    response: gRecaptchaResponse
+                }
+            });
+            let data = result.data || {};
+
+            //TO DO: check data.hostname
+            if (data.success !== true) {
+                this.logger.debug(`sendAuthEmail: captcha did verify success=false data: ${JSON.stringify(data)}`, this.context)
+                throw new UnprocessableEntityException(`Invalid captcha`)
+            }
+        } catch (err) {
+            this.logger.error(`sendAuthEmail: captcha did verify ${String(err)}`, err, this.context)
+            throw new UnprocessableEntityException(`Invalid captcha`)
+        }
     }
 }
 
