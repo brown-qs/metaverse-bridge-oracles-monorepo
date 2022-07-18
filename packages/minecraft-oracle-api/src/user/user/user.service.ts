@@ -301,12 +301,18 @@ export class UserService {
                         this.logger.debug(`user.service::linkMinecraftByUserUuid [MC User] Bait: ${formatEther(mcUserBaitAmount)} Bait Offset: ${formatEther(mcUserBaitOffsetAmount)}`, this.context)
 
                         const oldMcResourceId = mcUserBait.id
-                        const oldMcResourceOffsetId = mcUserBait.offset.id
                         const newMcResourceId = oldMcResourceId.replace(`${minecraftUuid}-`, `${userUuid}-`)
-                        const newMcResourceOffsetId = oldMcResourceOffsetId.replace(`${minecraftUuid}-`, `${userUuid}-`)
-                        //updating id here will cascade to fk on asset_entity and resource_inventory_offset_entity
+                        //updating id here will cascade to fk on asset_entity
                         await queryRunner.manager.update(ResourceInventoryEntity, { id: oldMcResourceId }, { id: newMcResourceId })
-                        await queryRunner.manager.update(ResourceInventoryOffsetEntity, { id: oldMcResourceOffsetId }, { id: newMcResourceOffsetId })
+
+                        if (!!mcUserBait?.offset?.id) {
+                            this.logger.debug(`user.service::linkMinecraftByUserUuid has bait inventory offset`, this.context)
+                            const oldMcResourceOffsetId = mcUserBait.offset.id
+                            const newMcResourceOffsetId = oldMcResourceOffsetId.replace(`${minecraftUuid}-`, `${userUuid}-`)
+                            await queryRunner.manager.update(ResourceInventoryOffsetEntity, { id: oldMcResourceOffsetId }, { id: newMcResourceOffsetId })
+                        } else {
+                            this.logger.debug(`user.service::linkMinecraftByUserUuid doesn't have bait inventory offset`, this.context)
+                        }
 
                         this.logger.debug(`user.service::linkMinecraftByUserUuid successfully moved bait!`, this.context)
                     }
