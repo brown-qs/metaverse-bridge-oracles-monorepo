@@ -363,11 +363,12 @@ export class UserService {
                     const numGamePassAsset = (emailUser?.numGamePassAsset ?? 0) + (existingMinecraft?.numGamePassAsset ?? 0)
                     this.logger.debug(`user.service::linkMinecraftByUserUuid emailUser?.numGamePassAsset ?? 0: ${emailUser?.numGamePassAsset ?? 0} existingMinecraft?.numGamePassAsset ?? 0: ${existingMinecraft?.numGamePassAsset ?? 0} numGamePassAsset: ${numGamePassAsset}`, this.context)
 
-                    let role = numGamePassAsset > 0 ? UserRole.PLAYER : UserRole.NONE
                     let usedAddresses = [...emailUser?.usedAddresses ?? [], ...existingMinecraft?.usedAddresses ?? []]
                     //remove duplicates
                     usedAddresses = usedAddresses.filter((item, i, self) => self.lastIndexOf(item) === i)
                     //if either of the two users being merged is an admin, user is admin
+
+                    let role = numGamePassAsset > 0 ? UserRole.PLAYER : UserRole.NONE
                     if (emailUser?.role.valueOf() === UserRole.ADMIN.valueOf() || existingMinecraft?.role.valueOf() === UserRole.ADMIN.valueOf()) {
                         role = UserRole.ADMIN
                     }
