@@ -170,8 +170,7 @@ import { ZUserBaitView, ZUserGamepassView } from './views';
                     EmailEntity,
                     DidEntity,
                     KiltDappEntity,
-                    ZUserBaitView,
-                    ZUserGamepassView
+                    ZUserBaitView
                 ],
                 synchronize: configService.get<boolean>('typeorm.synchronize'),
                 logging: configService.get<boolean>('typeorm.logging'),
