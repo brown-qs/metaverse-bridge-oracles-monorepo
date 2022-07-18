@@ -14,6 +14,7 @@ import { theme } from 'theme/Theme';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { ReCAPTCHA } from 'components/Recaptcha';
 import { useHistory } from 'react-router-dom';
+import axios, { AxiosError } from 'axios';
 
 const EmailLoginPage = () => {
   const history = useHistory();
@@ -47,25 +48,29 @@ const EmailLoginPage = () => {
       recaptchaEl.current.reset()
     })
 
+
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_API_URL}/auth/email/login`, {
+      const result = await axios({
+        method: 'post',
+        url: `${process.env.REACT_APP_BACKEND_API_URL}/auth/email/login`,
         headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json"
         },
-        method: "POST",
-        body: JSON.stringify({ email: ema, "g-recaptcha-response": token })
-      })
-      const json = await response.json()
-      if (json.success) {
-        history.push('/account/login/email/verify')
-      } else {
-        throw new Error(json?.error)
-      }
-      //success
+        data: { email: ema, "g-recaptcha-response": token }
+      });
+      history.push('/account/login/email/verify')
+      return
     } catch (e) {
-      setFailureMessage(String(e))
+      const err = e as AxiosError;
+
+      if (!!err.response?.data?.message) {
+        setFailureMessage(`Error: ${String(err.response?.data?.message)}`)
+      } else {
+        setFailureMessage(String(e))
+      }
     }
+
+
     setDirtyTextField(false)
     setEmail("")
     setIsLoading(false)
