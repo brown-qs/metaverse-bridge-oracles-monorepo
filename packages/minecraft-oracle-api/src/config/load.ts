@@ -103,7 +103,10 @@ export const loadEnv = () => {
             url: process.env.FRONTEND_URL
         },
         mailgun: {
-            apiKey: process.env.MAILGUN_API_KEY
+            apiKey: process.env.MAILGUN_API_KEY,
+            email: process.env.MAILGUN_EMAIL,
+            apiUrl: process.env.MAILGUN_API_URL,
+            apiUsername: process.env.MAILGUN_API_USERNAME
         }
     };
 };
