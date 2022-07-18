@@ -96,7 +96,7 @@ import { KiltDappEntity } from './user/kilt-dapp/kilt-dapp.entity';
 import { MinecraftUserNameEntity } from './user/minecraft-user-name/minecraft-user-name.entity';
 import { MinecraftUuidEntity } from './user/minecraft-uuid/minecraft-uuid.entity';
 import { ZUserAssetView } from './views/user-asset.view';
-import { ZUserBaitView } from './views';
+import { ZUserBaitView, ZUserGamepassView } from './views';
 
 
 @Module({
@@ -170,7 +170,8 @@ import { ZUserBaitView } from './views';
                     EmailEntity,
                     DidEntity,
                     KiltDappEntity,
-                    ZUserBaitView
+                    ZUserBaitView,
+                    ZUserGamepassView
                 ],
                 synchronize: configService.get<boolean>('typeorm.synchronize'),
                 logging: configService.get<boolean>('typeorm.logging'),

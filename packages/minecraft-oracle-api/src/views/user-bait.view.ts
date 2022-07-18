@@ -35,15 +35,5 @@ import { ViewEntity, Connection, ViewColumn, Column } from "typeorm";
     }
 })
 export class ZUserBaitView {
-    @ViewColumn()
-    uuid: string
 
-    @ViewColumn()
-    email: string
-
-    @ViewColumn()
-    minecraftUserName: string
-
-    @ViewColumn()
-    collectionName: string
 }
