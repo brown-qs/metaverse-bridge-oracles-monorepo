@@ -26,7 +26,7 @@ import { ViewEntity, Connection, ViewColumn, Column } from "typeorm";
 
     }
 })
-export class UserAssetView {
+export class ZUserAssetView {
     @ViewColumn()
     uuid: string
 
