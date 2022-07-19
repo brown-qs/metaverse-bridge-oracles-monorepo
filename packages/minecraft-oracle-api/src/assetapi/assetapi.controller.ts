@@ -7,9 +7,10 @@ import {
     Param,
     Put,
     Query,
+    UnprocessableEntityException,
     UseGuards
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { UserService } from '../user/user/user.service';
 import { SharedSecretGuard } from '../authapi/secret.guard';
@@ -22,6 +23,10 @@ import { AllUserAssetsQueryDto, AllUserAssetsResultDto } from './dtos/alluserass
 import { AllAssetsQueryDto, AllAssetsResultDto } from './dtos/allassets.dto';
 import { AssetApiService } from './assetapi.service';
 import { UserUpdatesDto } from './dtos/userupdates.dto';
+import { UserDataDto } from './dtos/userdata.dto';
+import { ProfileApiService } from '../profileapi/profileapi.service';
+import { GameTypeService } from '../gametype/gametype.service';
+import { GameApiService } from '../gameapi/gameapi.service';
 
 @ApiTags('asset')
 @Controller('asset')
@@ -32,29 +37,70 @@ export class AssetApiController {
     constructor(
         private readonly userService: UserService,
         private readonly assetApiService: AssetApiService,
+        private readonly profileService: ProfileApiService,
+        private readonly gameApiService: GameApiService,
+
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
         this.context = AssetApiController.name;
     }
 
-    @Get('players/data')
+    @Get('players/updates')
     @HttpCode(200)
+    @ApiOkResponse({
+        description: 'Array of user uuids',
+        type: String,
+        isArray: true,
+    })
     @ApiOperation({ summary: `Fetches an array of user uuids whose profiles, assets, skins, or resources have changed since the provided timestamp` })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
     async userUpdates(@Query() dto: UserUpdatesDto) {
         let offset: number = 0
-        let limit: number | undefined = undefined
+        let take: number | undefined = undefined
 
         if (dto.hasOwnProperty("offset")) {
             offset = Math.abs(parseInt(dto.offset))
         }
 
-        if (dto.hasOwnProperty("limit")) {
-            limit = Math.abs(parseInt(dto.limit))
+        if (dto.hasOwnProperty("take")) {
+            take = Math.abs(parseInt(dto.take))
         }
 
-        return await this.userService.userUpdates(offset, dto.t, limit)
+        return await this.userService.userUpdates(offset, dto.t, take)
+    }
+
+    @Get('player/:uuid/data')
+    @HttpCode(200)
+    @ApiOkResponse({
+        description: 'Full user data',
+        type: UserDataDto,
+    })
+    @ApiOperation({ summary: `Fetches a user's assets, profile, skins, resources, and resource balances` })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async userData(@Param('uuid') uuid: string): Promise<UserDataDto> {
+        const user = await this.userService.findOne({ uuid }, { relations: ['assets'] })
+        if (!user) {
+            throw new UnprocessableEntityException("User not found")
+        }
+
+        const results = await Promise.all([
+            this.profileService.userProfile(user),
+            this.gameApiService.getUserSkins(user),
+            this.assetApiService.userAssets(user),
+            this.assetApiService.getFungibleBalancesForPlayer(user)
+        ])
+
+        const userData: UserDataDto = {
+            uuid: user.uuid,
+            minecraftUuid: user.minecraftUuid,
+            profile: results[0],
+            skins: results[1],
+            assets: results[2],
+            balances: results[3]
+        }
+        return userData
     }
 
     @Get('player/:uuid/assets')

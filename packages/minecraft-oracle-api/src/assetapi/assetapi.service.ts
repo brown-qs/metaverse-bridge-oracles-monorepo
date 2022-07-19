@@ -17,16 +17,21 @@ import { FungibleBalanceEntryDto, UsersFungibleBalancesQueryDto, UsersFungibleBa
 import { CollectionFragmentService } from '../collectionfragment/collectionfragment.service';
 import { In } from 'typeorm';
 import { fromTokenizer } from 'file-type';
+import { EventBus } from '@nestjs/cqrs';
+import { ResourceInventoryUpdateEvent } from '../events/resource-inventory-update.event';
+import { ResourceInventoryOffsetUpdateEvent } from '../events/resource-inventory-offset-update.event';
 
 @Injectable()
 export class AssetApiService {
     constructor(
+        private readonly eventBus: EventBus,
         private readonly userService: UserService,
         private readonly assetService: AssetService,
         private readonly resourceInventoryService: ResourceInventoryService,
         private readonly resourceInventoryOffsetService: ResourceInventoryOffsetService,
         private readonly collectionFragmentService: CollectionFragmentService,
         private configService: ConfigService,
+
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) { }
 
@@ -139,7 +144,7 @@ export class AssetApiService {
                 collectionFragment: await this.collectionFragmentService.findOne({ collection: { assetAddress: x.assetAddress.toLowerCase(), chainId: x.chainId } }, { relations: ['collection'] })
             })
         }))
-
+        this.eventBus.publish(new ResourceInventoryUpdateEvent(user.uuid))
         return true
     }
 
@@ -173,7 +178,7 @@ export class AssetApiService {
                 resourceInventory
             })
         }))
-
+        this.eventBus.publish(new ResourceInventoryOffsetUpdateEvent(user.uuid))
         return true
     }
 

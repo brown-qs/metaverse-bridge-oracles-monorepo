@@ -23,6 +23,8 @@ import S3 from 'aws-sdk/clients/s3';
 import sharp from "sharp";
 import { ProviderToken } from "../provider/token";
 import { fetchImageBufferCallback } from "./compositeapi.utils";
+import { EventBus } from "@nestjs/cqrs";
+import { CompositeAssetUpdateEvent } from "../events/composite-asset-update.event";
 
 
 export type CompositeEnrichedAssetEntity = AssetEntity & {
@@ -51,6 +53,7 @@ export class CompositeApiService {
     private readonly metadataPublicPath: string;
 
     constructor(
+        private readonly eventBus: EventBus,
         private readonly userService: UserService,
         private readonly assetService: AssetService,
         private readonly collectionService: CollectionService,
@@ -236,6 +239,7 @@ export class CompositeApiService {
                 }
             }
         }))
+        this.eventBus.publish(new CompositeAssetUpdateEvent(user.uuid))
 
         // return composite metadata
         return compositeMetadata

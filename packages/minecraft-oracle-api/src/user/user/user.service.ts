@@ -28,6 +28,8 @@ import { GameKind } from '../../game/game.enum';
 import { MinecraftUuidEntity } from '../minecraft-uuid/minecraft-uuid.entity';
 import { MinecraftUserNameEntity } from '../minecraft-user-name/minecraft-user-name.entity';
 import { EmailEntity } from '../email/email.entity';
+import { EventBus } from "@nestjs/cqrs";
+import { UserProfileUpdateEvent } from '../../events/user-profile-update.event';
 @Injectable()
 export class UserService {
     context: string;
@@ -36,7 +38,8 @@ export class UserService {
         @InjectConnection() private connection: Connection,
         @InjectRepository(UserEntity)
         private readonly repository: Repository<UserEntity>,
-        private configService: ConfigService
+        private readonly eventBus: EventBus,
+        private readonly configService: ConfigService
     ) {
         this.context = UserService.name
     }
@@ -412,11 +415,14 @@ export class UserService {
             }
         }
         this.logger.debug(`user.service::linkMinecraftByUserUuid userUuid: ${userUuid} minecraftUuid: ${minecraftUuid} successful link`, this.context)
-        return await this.findByUuid(userUuid)
+        const u = await this.findByUuid(userUuid)
+        this.eventBus.publish(new UserProfileUpdateEvent(userUuid))
+        return u
     }
 
     public async unlinkMinecraftByUserUuid(uuid: string) {
         await this.repository.update({ uuid }, { minecraftUuid: null, minecraftUserName: null, hasGame: false })
+        this.eventBus.publish(new UserProfileUpdateEvent(uuid))
     }
 
     public async minecraftUuidMap(offset: number, minecraftUuids: string[] | undefined, limit: number | undefined) {
@@ -438,7 +444,7 @@ export class UserService {
         return await query.execute()
     }
 
-    public async userUpdates(offset: number, secsSinceEpoch: string, limit: number | undefined): Promise<string[]> {
+    public async userUpdates(offset: number, secsSinceEpoch: string, take: number | undefined): Promise<string[]> {
 
         //sanitize to prevent sql injection
         const s = parseInt(secsSinceEpoch).toString()
@@ -449,8 +455,8 @@ export class UserService {
             .orderBy("users.relationsUpdatedAt", "ASC")
             .offset(offset)
 
-        if (!!limit) {
-            query.limit(limit)
+        if (!!take) {
+            query.limit(take)
         }
         const rows = await query.execute()
         return rows.map((r: { uuid: string }) => r.uuid)

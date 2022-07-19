@@ -33,6 +33,14 @@ import { CompositeAssetService } from '../compositeasset/compositeasset.service'
 import { MaterialService } from '../material/material.service';
 import { ResourceInventoryService } from '../resourceinventory/resourceinventory.service';
 import { ResourceInventoryEntity } from '../resourceinventory/resourceinventory.entity';
+import { EventBus } from '@nestjs/cqrs';
+import { UserProfileUpdateEvent } from '../events/user-profile-update.event';
+import { SkinAddedEvent } from '../events/skin-added.event';
+import { AssetAddedEvent } from '../events/asset-added.event';
+import { ResourceInventoryUpdateEvent } from '../events/resource-inventory-update.event';
+import { SkinRemovedEvent } from '../events/skin-removed.event';
+import { SkinSelectedEvent } from '../events/skin-selected.event';
+import { AssetRemovedEvent } from '../events/asset-removed.event';
 
 @Injectable()
 export class OracleApiService {
@@ -44,6 +52,7 @@ export class OracleApiService {
     private readonly defaultChainId: number;
 
     constructor(
+        private readonly eventBus: EventBus,
         private readonly userService: UserService,
         private readonly textureService: TextureService,
         private readonly skinService: SkinService,
@@ -343,6 +352,8 @@ export class OracleApiService {
     }
 
     public async userImportConfirm(user: UserEntity, data: { hash: string, chainId: number }, asset?: AssetEntity): Promise<boolean> {
+        let skinAdded = false
+
         const hash = data.hash;
         this.logger.log(`ImportConfirm: started ${user.uuid}: ${hash}`, this.context)
 
@@ -392,6 +403,7 @@ export class OracleApiService {
                 equipped: false,
                 texture
             })
+            skinAdded = true
         } else {
             this.logger.warn('ImportConfirm: no texture found for asset!!!', this.context)
         }
@@ -419,9 +431,11 @@ export class OracleApiService {
                                 texture: await this.textureService.findOne({ assetAddress: '0x0', assetId: '1', assetType: StringAssetType.NONE })
                             }
                         ])
+
                     } catch (error) {
                         this.logger.warn(`ImportConfirm: error trying to set default skins for user ${user.uuid}`, this.context)
                     }
+                    skinAdded = true
                 }
 
                 await this.userService.update(user.uuid, { allowedToPlay: user.allowedToPlay, role: user.role, numGamePassAsset: user.numGamePassAsset })
@@ -455,11 +469,18 @@ export class OracleApiService {
             user.usedAddresses.push(user.lastUsedAddress)
         }
         await this.userService.update(user.uuid, { usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress, numGamePassAsset: user.numGamePassAsset })
+        if (skinAdded) {
+            this.eventBus.publish(new SkinAddedEvent(user.uuid))
+        }
+        this.eventBus.publish(new UserProfileUpdateEvent(user.uuid))
+        this.eventBus.publish(new AssetAddedEvent(user.uuid))
 
         return true
     }
 
     public async userEnraptureConfirm(user: UserEntity, data: { hash: string, chainId: number }, asset?: AssetEntity): Promise<boolean> {
+        let skinAdded = false
+        let resourceInventoryUpdate = false
         const hash = data.hash
         this.logger.log(`EnraptureConfirm: started ${user.uuid}: ${hash}`, this.context)
 
@@ -511,6 +532,7 @@ export class OracleApiService {
                 equipped: false,
                 texture
             })
+            skinAdded = true
         } else {
             this.logger.warn('EnraptureConfirm: no texture found for asset!!!', this.context)
         }
@@ -541,6 +563,7 @@ export class OracleApiService {
                     } catch (error) {
                         this.logger.warn(`ImportConfirm: error trying to set default skins for user ${user.uuid}`, this.context)
                     }
+                    skinAdded = true
                 }
 
                 await this.userService.update(user.uuid, { allowedToPlay: user.allowedToPlay, role: user.role, numGamePassAsset: user.numGamePassAsset })
@@ -586,6 +609,7 @@ export class OracleApiService {
                 console.log(entry)
                 await this.resourceInventoryService.create(entry)
             }
+            resourceInventoryUpdate = true
         }
 
         if (!finalentry) {
@@ -598,12 +622,22 @@ export class OracleApiService {
             user.usedAddresses.push(user.lastUsedAddress)
         }
         await this.userService.update(user.uuid, { usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress, numGamePassAsset: user.numGamePassAsset })
+        if (skinAdded) {
+            this.eventBus.publish(new SkinAddedEvent(user.uuid))
+        }
+        if (resourceInventoryUpdate) {
+            this.eventBus.publish(new ResourceInventoryUpdateEvent(user.uuid))
+        }
+        this.eventBus.publish(new UserProfileUpdateEvent(user.uuid))
+        this.eventBus.publish(new AssetAddedEvent(user.uuid))
 
         return true
     }
 
     public async userExportConfirm(user: UserEntity, data: { hash: string, chainId: number }, asset?: AssetEntity): Promise<boolean> {
-
+        let skinSelectedChanged = false
+        let skinRemoved = false
+        let userProfileUpdated = false
         const hash = data.hash
         if (!hash) {
             this.logger.warn(`ExportConfirm: hash not received`, this.context)
@@ -656,6 +690,7 @@ export class OracleApiService {
                 user.role = user.allowedToPlay ? UserRole.PLAYER : UserRole.NONE
             }
             await this.userService.update(user.uuid, { numGamePassAsset: user.numGamePassAsset, allowedToPlay: user.allowedToPlay, role: user.role })
+            userProfileUpdated = true
         }
 
         const skin = await this.skinService.findOne({ id: SkinEntity.toId(user.uuid, assetAddress, assetId) })
@@ -664,6 +699,7 @@ export class OracleApiService {
             const removed = await this.skinService.remove(skin)
             if (removed.equipped && user.allowedToPlay) {
                 await this.skinService.update({ id: SkinEntity.toId(user.uuid, '0x0', '0') }, { equipped: true })
+                skinSelectedChanged = true
             }
         }
 
@@ -684,6 +720,7 @@ export class OracleApiService {
                     }
                 ]
             )
+            skinRemoved = true
         }
 
         // TODO modify composite asset if it belongs to one: either equipped, or as a base asset
@@ -711,6 +748,19 @@ export class OracleApiService {
                     }
                 }
             })();
+
+        if (skinSelectedChanged) {
+            this.eventBus.publish(new SkinSelectedEvent(user.uuid))
+        }
+
+        if (skinRemoved) {
+            this.eventBus.publish(new SkinRemovedEvent(user.uuid))
+        }
+
+        if (userProfileUpdated) {
+            this.eventBus.publish(new UserProfileUpdateEvent(user.uuid))
+        }
+        this.eventBus.publish(new AssetRemovedEvent(user.uuid))
         return true
     }
 
@@ -719,4 +769,6 @@ export class OracleApiService {
             this.locks.set(key, new Mutex());
         }
     }
+
+
 }
