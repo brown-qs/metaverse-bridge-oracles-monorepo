@@ -21,6 +21,7 @@ import { FungibleBalanceEntryDto, UsersFungibleBalancesQueryDto, UsersFungibleBa
 import { AllUserAssetsQueryDto, AllUserAssetsResultDto } from './dtos/alluserassets.dto';
 import { AllAssetsQueryDto, AllAssetsResultDto } from './dtos/allassets.dto';
 import { AssetApiService } from './assetapi.service';
+import { UserUpdatesDto } from './dtos/userupdates.dto';
 
 @ApiTags('asset')
 @Controller('asset')
@@ -34,6 +35,27 @@ export class AssetApiController {
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
         this.context = AssetApiController.name;
+    }
+
+    @Get('players/data')
+    @HttpCode(200)
+    @ApiOperation({ summary: `Fetches an array of user uuids whose profiles, assets, skins, or resources have changed since the provided timestamp` })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async userUpdates(@Query() dto: UserUpdatesDto) {
+        let offset: number = 0
+        let limit: number | undefined = undefined
+
+        if (dto.hasOwnProperty("offset")) {
+            offset = Math.abs(parseInt(dto.offset))
+        }
+
+        if (dto.hasOwnProperty("limit")) {
+            limit = Math.abs(parseInt(dto.limit))
+        }
+
+        const d = new Date(parseInt(dto.t))
+
     }
 
     @Get('player/:uuid/assets')
