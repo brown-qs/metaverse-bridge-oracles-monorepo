@@ -7,9 +7,13 @@ import { ResourceInventoryOffsetModule } from '../resourceinventoryoffset/resour
 import { CollectionFragmentModule } from '../collectionfragment/collectionfragment.module';
 import { AssetApiController } from './assetapi.controller';
 import { SecretModule } from '../secret/secret.module';
+import { ProfileApiModule } from '../profileapi/profileapi.module';
+import { GameApiModule } from '../gameapi/gameapi.module';
 
 @Module({
     imports: [
+        ProfileApiModule,
+        GameApiModule,
         SecretModule,
         UserModule,
         AssetModule,
