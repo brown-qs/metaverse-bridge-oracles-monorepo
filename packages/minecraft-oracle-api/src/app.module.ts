@@ -97,6 +97,7 @@ import { MinecraftUserNameEntity } from './user/minecraft-user-name/minecraft-us
 import { MinecraftUuidEntity } from './user/minecraft-uuid/minecraft-uuid.entity';
 import { ZUserAssetView } from './views/user-asset.view';
 import { ZUserBaitView, ZUserGamepassView } from './views';
+import { MoonsamaCqrsModule } from './cqrs/moonsama-cqrs.module';
 
 
 @Module({
@@ -237,7 +238,8 @@ import { ZUserBaitView, ZUserGamepassView } from './views';
         MinecraftUuidModule,
         EmailModule,
         DidModule,
-        KiltDappModule
+        KiltDappModule,
+        MoonsamaCqrsModule
     ],
     controllers: [],
     providers: []

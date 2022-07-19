@@ -9,9 +9,11 @@ import { AssetApiController } from './assetapi.controller';
 import { SecretModule } from '../secret/secret.module';
 import { ProfileApiModule } from '../profileapi/profileapi.module';
 import { GameApiModule } from '../gameapi/gameapi.module';
+import { CqrsModule } from '@nestjs/cqrs';
 
 @Module({
     imports: [
+        CqrsModule,
         ProfileApiModule,
         GameApiModule,
         SecretModule,
