@@ -17,6 +17,8 @@ import { BridgeAssetType } from '../common/enums/AssetType';
 import { ResourceInventoryService } from '../resourceinventory/resourceinventory.service';
 import { formatEther } from 'ethers/lib/utils';
 import { BigNumber } from 'ethers';
+import { EventBus } from '@nestjs/cqrs';
+import { SkinSelectedEvent } from '../events/skin-selected.event';
 
 @Injectable()
 export class ProfileApiService {
@@ -25,6 +27,7 @@ export class ProfileApiService {
     private readonly defaultChainId: number;
 
     constructor(
+        private readonly eventBus: EventBus,
         private readonly inventoryService: InventoryService,
         private readonly assetService: AssetService,
         private readonly skinService: SkinService,
@@ -216,7 +219,7 @@ export class ProfileApiService {
                 }
             }
         }))
-
+        this.eventBus.publish(new SkinSelectedEvent(user.uuid))
         return true
     }
 
