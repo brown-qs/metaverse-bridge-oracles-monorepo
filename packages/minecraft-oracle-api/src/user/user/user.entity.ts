@@ -41,6 +41,9 @@ export class UserEntity {
     @Column({ type: "timestamptz", default: null, nullable: true })
     lastLogin?: Date;
 
+    @Column({ type: "timestamptz", default: new Date() })
+    relationsUpdatedAt?: Date;
+
     @Column({ unique: true, default: null, nullable: true })
     @IsString()
     minecraftUuid?: string;

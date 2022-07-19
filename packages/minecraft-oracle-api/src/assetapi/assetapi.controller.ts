@@ -54,8 +54,7 @@ export class AssetApiController {
             limit = Math.abs(parseInt(dto.limit))
         }
 
-        const d = new Date(parseInt(dto.t))
-
+        return await this.userService.userUpdates(offset, dto.t, limit)
     }
 
     @Get('player/:uuid/assets')
