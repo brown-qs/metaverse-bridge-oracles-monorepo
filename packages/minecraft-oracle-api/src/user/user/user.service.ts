@@ -1,5 +1,5 @@
 import { InjectConnection, InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Like, Not, In } from "typeorm"
+import { IsNull, Like, Not, In, MoreThanOrEqual } from "typeorm"
 import { Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Connection, DeepPartial, EntityManager, FindConditions, FindManyOptions, FindOneOptions, ObjectID, Repository, UpdateResult } from 'typeorm';
@@ -436,6 +436,24 @@ export class UserService {
             query.limit(limit)
         }
         return await query.execute()
+    }
+
+    public async userUpdates(offset: number, secsSinceEpoch: string, limit: number | undefined): Promise<string[]> {
+
+        //sanitize to prevent sql injection
+        const s = parseInt(secsSinceEpoch).toString()
+
+        const query = this.repository.createQueryBuilder('users')
+            .select("users.uuid", "uuid")
+            .where(`extract(epoch from users.relationsUpdatedAt) >= ${s}`)
+            .orderBy("users.relationsUpdatedAt", "ASC")
+            .offset(offset)
+
+        if (!!limit) {
+            query.limit(limit)
+        }
+        const rows = await query.execute()
+        return rows.map((r: { uuid: string }) => r.uuid)
     }
 
     /*
