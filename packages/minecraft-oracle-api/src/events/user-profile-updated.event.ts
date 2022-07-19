@@ -1,4 +1,4 @@
-export class ResourceInventoryUpdateEvent {
+export class UserProfileUpdatedEvent {
     constructor(
         public readonly uuid: string,
     ) { }

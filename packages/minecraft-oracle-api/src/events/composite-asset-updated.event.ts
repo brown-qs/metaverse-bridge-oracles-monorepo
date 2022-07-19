@@ -1,4 +1,4 @@
-export class UserProfileUpdateEvent {
+export class CompositeAssetUpdatedEvent {
     constructor(
         public readonly uuid: string,
     ) { }
