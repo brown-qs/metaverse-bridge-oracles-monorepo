@@ -189,6 +189,7 @@ import { ZUserBaitView, ZUserGamepassView } from './views';
             ],
             inject: [ConfigService]
         }),
+        AssetApiModule,
         EmailChangeModule,
         MinecraftLinkModule,
         PlaySessionModule,
@@ -232,7 +233,6 @@ import { ZUserBaitView, ZUserGamepassView } from './views';
         ResourceInventoryOffsetModule,
         CompositeApiModule,
         KiltSessionModule,
-        AssetApiModule,
         MinecraftUserNameModule,
         MinecraftUuidModule,
         EmailModule,
