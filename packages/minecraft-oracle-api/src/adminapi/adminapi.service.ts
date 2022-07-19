@@ -9,7 +9,7 @@ import { MaterialEntity } from '../material/material.entity';
 import { TextureEntity } from '../texture/texture.entity';
 import { SecretService } from '../secret/secret.service';
 import { EventBus } from '@nestjs/cqrs';
-import { UserProfileUpdateEvent } from '../events/user-profile-update.event';
+import { UserProfileUpdatedEvent } from '../cqrs/events/user-profile-updated.event';
 
 @Injectable()
 export class AdminApiService {
@@ -116,14 +116,14 @@ export class AdminApiService {
         //console.log(user, vip, typeof vip)
         const res = await this.userService.update(user.uuid, { vip })
         //console.log(res)
-        this.eventBus.publish(new UserProfileUpdateEvent(user.uuid))
+        this.eventBus.publish(new UserProfileUpdatedEvent(user.uuid))
 
         return (res.affected ?? 1) > 0
     }
 
     public async blacklist(user: { uuid: string }, blacklisted: boolean) {
         const res = await this.userService.update(user.uuid, { blacklisted })
-        this.eventBus.publish(new UserProfileUpdateEvent(user.uuid))
+        this.eventBus.publish(new UserProfileUpdatedEvent(user.uuid))
         return (res.affected ?? 1) > 0
     }
 }

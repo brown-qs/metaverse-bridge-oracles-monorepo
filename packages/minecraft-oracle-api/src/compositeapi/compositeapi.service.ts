@@ -24,7 +24,7 @@ import sharp from "sharp";
 import { ProviderToken } from "../provider/token";
 import { fetchImageBufferCallback } from "./compositeapi.utils";
 import { EventBus } from "@nestjs/cqrs";
-import { CompositeAssetUpdateEvent } from "../events/composite-asset-update.event";
+import { CompositeAssetUpdatedEvent } from "../cqrs/events/composite-asset-updated.event";
 
 
 export type CompositeEnrichedAssetEntity = AssetEntity & {
@@ -239,7 +239,7 @@ export class CompositeApiService {
                 }
             }
         }))
-        this.eventBus.publish(new CompositeAssetUpdateEvent(user.uuid))
+        this.eventBus.publish(new CompositeAssetUpdatedEvent(user.uuid))
 
         // return composite metadata
         return compositeMetadata
