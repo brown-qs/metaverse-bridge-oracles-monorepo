@@ -34,10 +34,10 @@ import { MaterialService } from '../material/material.service';
 import { ResourceInventoryService } from '../resourceinventory/resourceinventory.service';
 import { ResourceInventoryEntity } from '../resourceinventory/resourceinventory.entity';
 import { EventBus } from '@nestjs/cqrs';
-import { UserProfileUpdateEvent } from '../events/user-profile-update.event';
+import { UserProfileUpdatedEvent } from '../events/user-profile-updated.event';
 import { SkinAddedEvent } from '../events/skin-added.event';
 import { AssetAddedEvent } from '../events/asset-added.event';
-import { ResourceInventoryUpdateEvent } from '../events/resource-inventory-update.event';
+import { ResourceInventoryUpdatedEvent } from '../events/resource-inventory-updated.event';
 import { SkinRemovedEvent } from '../events/skin-removed.event';
 import { SkinSelectedEvent } from '../events/skin-selected.event';
 import { AssetRemovedEvent } from '../events/asset-removed.event';
@@ -472,7 +472,7 @@ export class OracleApiService {
         if (skinAdded) {
             this.eventBus.publish(new SkinAddedEvent(user.uuid))
         }
-        this.eventBus.publish(new UserProfileUpdateEvent(user.uuid))
+        this.eventBus.publish(new UserProfileUpdatedEvent(user.uuid))
         this.eventBus.publish(new AssetAddedEvent(user.uuid))
 
         return true
@@ -626,9 +626,9 @@ export class OracleApiService {
             this.eventBus.publish(new SkinAddedEvent(user.uuid))
         }
         if (resourceInventoryUpdate) {
-            this.eventBus.publish(new ResourceInventoryUpdateEvent(user.uuid))
+            this.eventBus.publish(new ResourceInventoryUpdatedEvent(user.uuid))
         }
-        this.eventBus.publish(new UserProfileUpdateEvent(user.uuid))
+        this.eventBus.publish(new UserProfileUpdatedEvent(user.uuid))
         this.eventBus.publish(new AssetAddedEvent(user.uuid))
 
         return true
@@ -758,7 +758,7 @@ export class OracleApiService {
         }
 
         if (userProfileUpdated) {
-            this.eventBus.publish(new UserProfileUpdateEvent(user.uuid))
+            this.eventBus.publish(new UserProfileUpdatedEvent(user.uuid))
         }
         this.eventBus.publish(new AssetRemovedEvent(user.uuid))
         return true

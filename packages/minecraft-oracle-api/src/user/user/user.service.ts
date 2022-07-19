@@ -29,7 +29,7 @@ import { MinecraftUuidEntity } from '../minecraft-uuid/minecraft-uuid.entity';
 import { MinecraftUserNameEntity } from '../minecraft-user-name/minecraft-user-name.entity';
 import { EmailEntity } from '../email/email.entity';
 import { EventBus } from "@nestjs/cqrs";
-import { UserProfileUpdateEvent } from '../../events/user-profile-update.event';
+import { UserProfileUpdatedEvent } from '../../events/user-profile-updated.event';
 @Injectable()
 export class UserService {
     context: string;
@@ -416,13 +416,13 @@ export class UserService {
         }
         this.logger.debug(`user.service::linkMinecraftByUserUuid userUuid: ${userUuid} minecraftUuid: ${minecraftUuid} successful link`, this.context)
         const u = await this.findByUuid(userUuid)
-        this.eventBus.publish(new UserProfileUpdateEvent(userUuid))
+        this.eventBus.publish(new UserProfileUpdatedEvent(userUuid))
         return u
     }
 
     public async unlinkMinecraftByUserUuid(uuid: string) {
         await this.repository.update({ uuid }, { minecraftUuid: null, minecraftUserName: null, hasGame: false })
-        this.eventBus.publish(new UserProfileUpdateEvent(uuid))
+        this.eventBus.publish(new UserProfileUpdatedEvent(uuid))
     }
 
     public async minecraftUuidMap(offset: number, minecraftUuids: string[] | undefined, limit: number | undefined) {
