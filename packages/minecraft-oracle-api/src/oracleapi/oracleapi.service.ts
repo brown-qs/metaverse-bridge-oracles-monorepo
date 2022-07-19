@@ -34,13 +34,13 @@ import { MaterialService } from '../material/material.service';
 import { ResourceInventoryService } from '../resourceinventory/resourceinventory.service';
 import { ResourceInventoryEntity } from '../resourceinventory/resourceinventory.entity';
 import { EventBus } from '@nestjs/cqrs';
-import { UserProfileUpdatedEvent } from '../events/user-profile-updated.event';
-import { SkinAddedEvent } from '../events/skin-added.event';
-import { AssetAddedEvent } from '../events/asset-added.event';
-import { ResourceInventoryUpdatedEvent } from '../events/resource-inventory-updated.event';
-import { SkinRemovedEvent } from '../events/skin-removed.event';
-import { SkinSelectedEvent } from '../events/skin-selected.event';
-import { AssetRemovedEvent } from '../events/asset-removed.event';
+import { UserProfileUpdatedEvent } from '../cqrs/events/user-profile-updated.event';
+import { SkinAddedEvent } from '../cqrs/events/skin-added.event';
+import { AssetAddedEvent } from '../cqrs/events/asset-added.event';
+import { ResourceInventoryUpdatedEvent } from '../cqrs/events/resource-inventory-updated.event';
+import { SkinRemovedEvent } from '../cqrs/events/skin-removed.event';
+import { SkinSelectedEvent } from '../cqrs/events/skin-selected.event';
+import { AssetRemovedEvent } from '../cqrs/events/asset-removed.event';
 
 @Injectable()
 export class OracleApiService {

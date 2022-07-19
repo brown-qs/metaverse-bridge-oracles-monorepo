@@ -29,7 +29,7 @@ import { MinecraftUuidEntity } from '../minecraft-uuid/minecraft-uuid.entity';
 import { MinecraftUserNameEntity } from '../minecraft-user-name/minecraft-user-name.entity';
 import { EmailEntity } from '../email/email.entity';
 import { EventBus } from "@nestjs/cqrs";
-import { UserProfileUpdatedEvent } from '../../events/user-profile-updated.event';
+import { UserProfileUpdatedEvent } from '../../cqrs/events/user-profile-updated.event';
 @Injectable()
 export class UserService {
     context: string;

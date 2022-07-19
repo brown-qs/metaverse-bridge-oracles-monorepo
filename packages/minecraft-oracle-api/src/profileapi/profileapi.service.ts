@@ -18,7 +18,7 @@ import { ResourceInventoryService } from '../resourceinventory/resourceinventory
 import { formatEther } from 'ethers/lib/utils';
 import { BigNumber } from 'ethers';
 import { EventBus } from '@nestjs/cqrs';
-import { SkinSelectedEvent } from '../events/skin-selected.event';
+import { SkinSelectedEvent } from '../cqrs/events/skin-selected.event';
 
 @Injectable()
 export class ProfileApiService {

@@ -18,8 +18,8 @@ import { CollectionFragmentService } from '../collectionfragment/collectionfragm
 import { In } from 'typeorm';
 import { fromTokenizer } from 'file-type';
 import { EventBus } from '@nestjs/cqrs';
-import { ResourceInventoryUpdateEvent } from '../events/resource-inventory-update.event';
-import { ResourceInventoryOffsetUpdateEvent } from '../events/resource-inventory-offset-update.event';
+import { ResourceInventoryUpdatedEvent } from '../cqrs/events/resource-inventory-updated.event';
+import { ResourceInventoryOffsetUpdatedEvent } from '../cqrs/events/resource-inventory-offset-updated.event';
 
 @Injectable()
 export class AssetApiService {
@@ -144,7 +144,7 @@ export class AssetApiService {
                 collectionFragment: await this.collectionFragmentService.findOne({ collection: { assetAddress: x.assetAddress.toLowerCase(), chainId: x.chainId } }, { relations: ['collection'] })
             })
         }))
-        this.eventBus.publish(new ResourceInventoryUpdateEvent(user.uuid))
+        this.eventBus.publish(new ResourceInventoryUpdatedEvent(user.uuid))
         return true
     }
 
@@ -178,7 +178,7 @@ export class AssetApiService {
                 resourceInventory
             })
         }))
-        this.eventBus.publish(new ResourceInventoryOffsetUpdateEvent(user.uuid))
+        this.eventBus.publish(new ResourceInventoryOffsetUpdatedEvent(user.uuid))
         return true
     }
 
