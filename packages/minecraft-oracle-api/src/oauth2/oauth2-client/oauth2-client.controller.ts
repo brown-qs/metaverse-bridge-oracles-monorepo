@@ -10,7 +10,7 @@ import { Oauth2ClientUpdateDto } from './dtos/oauth2clientupdate.dto';
 import { Oauth2CreateClientDto } from './dtos/oauth2createclient.dto';
 import { Oauth2ClientService } from './oauth2-client.service';
 
-@ApiTags('oauth2')
+@ApiTags('OAuth 2.0 Client')
 @Controller('oauth2')
 export class Oauth2ClientController {
 
@@ -24,7 +24,7 @@ export class Oauth2ClientController {
     }
 
     @Post('client/create')
-    @ApiOperation({ summary: 'Create OAuth 2.0 client' })
+    @ApiOperation({ summary: 'Create OAuth 2.0 client. Requires admin user auth.' })
     @ApiCreatedResponse({
         description: 'The client has been successfully created.',
         type: Oauth2ClientDto,
@@ -51,7 +51,7 @@ export class Oauth2ClientController {
     }
 
     @Get('clients')
-    @ApiOperation({ summary: 'Get all OAuth 2.0 clients owned by user.' })
+    @ApiOperation({ summary: 'Get all OAuth 2.0 clients owned by user. Requires admin user auth.' })
     @ApiResponse({
         description: 'Clients for user',
         type: [Oauth2ClientDto]
@@ -67,7 +67,7 @@ export class Oauth2ClientController {
     }
 
     @Patch('client/:clientId/update')
-    @ApiOperation({ summary: 'Update OAuth 2.0 Client' })
+    @ApiOperation({ summary: 'Update OAuth 2.0 Client. Requires admin user auth.' })
     @ApiResponse({
         description: 'Updated client.',
         type: Oauth2ClientDto
