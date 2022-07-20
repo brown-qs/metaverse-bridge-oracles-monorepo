@@ -10,6 +10,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
   imports: [forwardRef(() => TypeOrmModule.forFeature([Oauth2AuthorizationEntity]))
     , Oauth2ClientModule],
   providers: [Oauth2AuthorizationService],
-  controllers: [Oauth2AuthorizationController]
+  controllers: [Oauth2AuthorizationController],
+  exports: [Oauth2AuthorizationService]
 })
 export class Oauth2AuthorizationModule { }

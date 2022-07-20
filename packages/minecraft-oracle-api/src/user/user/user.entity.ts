@@ -22,7 +22,7 @@ import { MinecraftLinkEntity } from '../minecraft-link/minecraft-link.entity';
 import { KiltSessionEntity } from '../kilt-session/kilt-session.entity';
 import { EmailLoginKeyEntity } from '../email-login-key/email-login-key.entity';
 import { EmailEntity } from '../email/email.entity';
-import { Oauth2ClientEntity } from 'src/oauth2/oauth2-client/oauth2-client.entity';
+import { Oauth2ClientEntity } from 'src/oauth2api/oauth2-client/oauth2-client.entity';
 
 @Entity()
 @Unique(['email'])
