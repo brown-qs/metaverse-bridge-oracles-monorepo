@@ -101,6 +101,7 @@ import { Oauth2Module } from './oauth2/oauth2.module';
 import { Oauth2AuthorizationModule } from './oauth2/oauth2-authorization/oauth2-authorization.module';
 import { Oauth2ClientModule } from './oauth2/oauth2-client/oauth2-client.module';
 import { Oauth2ResourceModule } from './oauth2/oauth2-resource/oauth2-resource.module';
+import { Oauth2AuthorizationEntity } from './oauth2/oauth2-authorization/oauth2-authorization.entity';
 
 
 @Module({
@@ -175,6 +176,7 @@ import { Oauth2ResourceModule } from './oauth2/oauth2-resource/oauth2-resource.m
                     DidEntity,
                     KiltDappEntity,
                     Oauth2ClientEntity,
+                    Oauth2AuthorizationEntity,
                 ],
                 synchronize: configService.get<boolean>('typeorm.synchronize'),
                 logging: configService.get<boolean>('typeorm.logging'),
@@ -194,9 +196,6 @@ import { Oauth2ResourceModule } from './oauth2/oauth2-resource/oauth2-resource.m
             inject: [ConfigService]
         }),
         Oauth2Module,
-        Oauth2AuthorizationModule,
-        Oauth2ClientModule,
-        Oauth2ResourceModule,
         EmailChangeModule,
         MinecraftLinkModule,
         PlaySessionModule,
