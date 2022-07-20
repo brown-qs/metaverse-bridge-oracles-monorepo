@@ -26,7 +26,7 @@ import { GameKindInProgressDto } from '../gameapi/dtos/gamekndinprogress.dto';
 import { GameApiService } from '../gameapi/gameapi.service';
 import { PlayerAchievementEntity } from '../playerachievement/playerachievement.entity';
 import { QueryPlayerScoreDto } from '../playerscore/dtos/playerscore.dto';
-import { UserService } from 'src/user/user/user.service';
+import { UserService } from '../user/user/user.service';
 
 
 @ApiTags('user')
