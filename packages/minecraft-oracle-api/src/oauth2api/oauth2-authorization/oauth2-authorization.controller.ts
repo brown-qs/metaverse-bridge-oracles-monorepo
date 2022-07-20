@@ -3,16 +3,6 @@ import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOkResponse, ApiOpera
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { Oauth2ClientDto } from '../oauth2-client/dtos/oauth2client.dto';
 import { AuthorizeQueryDto } from './dtos/authorizequery.dto';
-import OAuth2Server, {
-    Token,
-    OAuthError,
-    TokenOptions,
-    AuthorizeOptions,
-    AuthorizationCode,
-    AuthenticateOptions,
-    Request as OAuth2Request,
-    Response as OAuth2Response,
-} from 'oauth2-server';
 import { Oauth2ClientService } from '../oauth2-client/oauth2-client.service';
 import { JwtAuthGuard } from '../../authapi/jwt-auth.guard';
 import { UserEntity } from '../../user/user/user.entity';
@@ -115,7 +105,7 @@ export class Oauth2AuthorizationController {
     @HttpCode(200)
     //as per oauth2 spec
     @ApiConsumes('application/x-www-form-urlencoded')
-    @ApiOperation({ summary: 'Get an access token from a temp code.' })
+    @ApiOperation({ summary: 'Get an access token from a temp code. Requires clientId and clientSecret' })
     @ApiOkResponse({
         description: 'Code was successfully used and access token generated',
         type: TokenResponseDto,
@@ -187,7 +177,7 @@ export class Oauth2AuthorizationController {
             const refreshTokenCreatedAtTime = authorizationEntity.refreshTokenCreatedAt.getTime();
             const timeDiff = new Date().getTime() - refreshTokenCreatedAtTime
 
-            if (timeDiff > clientEntity.refreshTokenValidity) {
+            if (timeDiff > (clientEntity.refreshTokenValidity * 1000)) {
                 throw new BadRequestException("refresh_token expired")
             }
 
