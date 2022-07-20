@@ -11,7 +11,6 @@ import { BeforeInsert, Column, CreateDateColumn, Entity, Index, JoinColumn, Many
 import { UserRole } from '../../common/enums/UserRole';
 import { Oauth2ClientEntity } from '../oauth2-client/oauth2-client.entity';
 
-@Unique(["user", "client"])
 @Entity()
 export class Oauth2AuthorizationEntity {
   @PrimaryGeneratedColumn()
@@ -51,7 +50,7 @@ export class Oauth2AuthorizationEntity {
   @Column({ nullable: true })
   state: string;
 
-  @Column({ type: "boolean", default: false, nullable: false })
-  userRevoked: boolean;
+  @Column({ type: "boolean", default: true, nullable: false })
+  valid: boolean;
 }
 

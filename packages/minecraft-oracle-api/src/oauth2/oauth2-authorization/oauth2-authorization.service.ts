@@ -21,17 +21,24 @@ export class Oauth2AuthorizationService {
     }
 
     async create(scopes: Oauth2Scope[], user: UserEntity, client: Oauth2ClientEntity, redirectUri: string, state?: string) {
-
         const result = await this.repository.createQueryBuilder('authorization')
             .insert()
-            .values({ code: createToken(), codeCreatedAt: new Date(), scopes, user, client, accessToken: null, accessTokenCreatedAt: null, refreshToken: null, refreshTokenCreatedAt: null, userRevoked: false, redirectUri, state: state ?? null })
-            .orUpdate(["code", "codeCreatedAt", "accessToken", "accessTokenCreatedAt", "refreshToken", "refreshTokenCreatedAt", "userRevoked"], ["userUuid", "clientId"])
+            .values({ code: createToken(), codeCreatedAt: new Date(), scopes, user, client, accessToken: null, accessTokenCreatedAt: null, refreshToken: null, refreshTokenCreatedAt: null, valid: true, redirectUri, state: (state ?? null) })
             .returning('*')
             .execute()
 
         const row = this.repository.create(result.generatedMaps[0])
         return row
     }
+
+    public async updateTokensAuthorizationCode(authorizationEntity: Oauth2AuthorizationEntity, code: string) {
+        return await this.update({ id: authorizationEntity.id, code }, { accessToken: createToken(), accessTokenCreatedAt: new Date(), refreshToken: createToken(), refreshTokenCreatedAt: new Date() })
+    }
+
+    public async updateTokensRefreshToken(authorizationEntity: Oauth2AuthorizationEntity, refreshToken: string) {
+        return await this.update({ id: authorizationEntity.id, refreshToken }, { accessToken: createToken(), accessTokenCreatedAt: new Date(), refreshToken: createToken(), refreshTokenCreatedAt: new Date() })
+    }
+
 
     public async remove(material: Oauth2AuthorizationEntity): Promise<Oauth2AuthorizationEntity> {
         const u = await this.repository.remove(material);
