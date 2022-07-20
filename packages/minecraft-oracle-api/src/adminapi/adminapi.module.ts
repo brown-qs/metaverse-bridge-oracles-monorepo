@@ -11,9 +11,11 @@ import { TextureModule } from '../texture/texture.module';
 import { UserModule } from '../user/user/user.module';
 import { AdminApiController } from './adminapi.controller';
 import { AdminApiService } from './adminapi.service';
+import { CqrsModule } from '@nestjs/cqrs';
 
 @Module({
     imports: [
+        CqrsModule,
         MaterialModule,
         SecretModule,
         UserModule,
@@ -29,4 +31,4 @@ import { AdminApiService } from './adminapi.service';
     exports: [AdminApiService],
     controllers: [AdminApiController]
 })
-export class AdminApiModule {}
+export class AdminApiModule { }
