@@ -82,7 +82,6 @@ import { EmailChangeModule } from './user/email-change/email-change.module';
 import { MinecraftLinkModule } from './user/minecraft-link/minecraft-link.module';
 import { MinecraftLinkEntity } from './user/minecraft-link/minecraft-link.entity';
 import { EmailChangeEntity } from './user/email-change/email-change.entity';
-import { UserAssetView } from './views';
 import { KiltSessionEntity } from './user/kilt-session/kilt-session.entity';
 import { KiltSessionModule } from './user/kilt-session/kilt-session.module';
 import { AssetApiModule } from './assetapi/assetapi.module';
@@ -99,6 +98,8 @@ import { MinecraftUuidEntity } from './user/minecraft-uuid/minecraft-uuid.entity
 import { Oauth2ClientEntity } from './oauth2api/oauth2-client/oauth2-client.entity';
 import { Oauth2Module } from './oauth2api/oauth2.module';
 import { Oauth2AuthorizationEntity } from './oauth2api/oauth2-authorization/oauth2-authorization.entity';
+import { ZUserAssetView } from './views/user-asset.view';
+import { ZUserBaitView, ZUserGamepassView } from './views';
 
 
 @Module({
@@ -166,7 +167,7 @@ import { Oauth2AuthorizationEntity } from './oauth2api/oauth2-authorization/oaut
                     SyntheticItemEntity,
                     ResourceInventoryEntity,
                     ResourceInventoryOffsetEntity,
-                    UserAssetView,
+                    ZUserAssetView,
                     MinecraftUserNameEntity,
                     MinecraftUuidEntity,
                     EmailEntity,
@@ -174,6 +175,7 @@ import { Oauth2AuthorizationEntity } from './oauth2api/oauth2-authorization/oaut
                     KiltDappEntity,
                     Oauth2ClientEntity,
                     Oauth2AuthorizationEntity,
+                    ZUserBaitView
                 ],
                 synchronize: configService.get<boolean>('typeorm.synchronize'),
                 logging: configService.get<boolean>('typeorm.logging'),
