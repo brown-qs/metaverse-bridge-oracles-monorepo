@@ -10,7 +10,7 @@ import { CompositeApiService } from './compositeapi.service';
 import { CompositeApiController } from './compositeapi.controller';
 import { SyntheticPartModule } from '../syntheticpart/syntheticpart.module';
 import { SyntheticItemModule } from '../syntheticitem/syntheticitem.module';
-import { ProviderModule } from 'src/provider/provider.module';
+import { ProviderModule } from '../provider/provider.module';
 
 @Module({
     imports: [

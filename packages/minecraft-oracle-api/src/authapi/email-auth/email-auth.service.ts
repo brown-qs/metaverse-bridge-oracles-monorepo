@@ -6,12 +6,12 @@ import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { Repository } from 'typeorm';
 import formData from "form-data"
 import Mailgun from "mailgun.js"
-import { EmailLoginKeyService } from 'src/user/email-login-key/email-login-key.service';
-import { EmailLoginKeyEntity } from 'src/user/email-login-key/email-login-key.entity';
-import { UserService } from 'src/user/user/user.service';
-import { UserEntity } from 'src/user/user/user.entity';
-import { EmailChangeService } from 'src/user/email-change/email-change.service';
-import { EmailService } from 'src/user/email/email.service';
+import { EmailLoginKeyService } from '../../user/email-login-key/email-login-key.service';
+import { EmailLoginKeyEntity } from '../../user/email-login-key/email-login-key.entity';
+import { UserService } from '../../user/user/user.service';
+import { UserEntity } from '../../user/user/user.entity';
+import { EmailChangeService } from '../../user/email-change/email-change.service';
+import { EmailService } from '../../user/email/email.service';
 @Injectable()
 export class EmailAuthService {
     private readonly context: string;
@@ -29,34 +29,9 @@ export class EmailAuthService {
         this.context = EmailAuthService.name
     }
     async sendAuthEmail(email: string, gRecaptchaResponse: string) {
-        const recaptchaSecret = this.configService.get<string>('recaptcha.secret')
+        this.logger.debug(`sendAuthEmail:: email: ${email}`, this.context)
 
-        if (recaptchaSecret === "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe") {
-            this.logger.warn(`sendAuthEmail: using test recaptcha secret! Don't use in production!`, this.context)
-        }
-
-        try {
-            let result = await axios({
-                method: 'post',
-                url: 'https://www.google.com/recaptcha/api/siteverify',
-                params: {
-                    secret: recaptchaSecret,
-                    response: gRecaptchaResponse
-                }
-            });
-            let data = result.data || {};
-
-            //TO DO: check data.hostname
-            if (data.success !== true) {
-                throw new Error("captcha rejected")
-            }
-        } catch (err) {
-            this.logger.error(`sendAuthEmail: captcha did verify`, err, this.context)
-            throw new UnprocessableEntityException(`Invalid captcha`)
-        }
-
-
-
+        await this.validateCaptcha(gRecaptchaResponse)
 
         const loginKey = makeLoginKey()
         try {
@@ -69,11 +44,11 @@ export class EmailAuthService {
         }
 
         const mailgun = new Mailgun(formData);
-        const mg = mailgun.client({ username: 'api', key: this.configService.get<string>('mailgun.apiKey'), url: 'https://api.eu.mailgun.net' });
 
+        const mg = mailgun.client({ username: this.configService.get<string>('mailgun.apiUsername'), key: this.configService.get<string>('mailgun.apiKey'), url: this.configService.get<string>('mailgun.apiUrl') });
 
         const mailOptions = {
-            from: 'Moonsama <no-reply@sp.moonsama.com>',
+            from: `Moonsama <${this.configService.get<string>('mailgun.email')}>`,
             to: [email], // list of receivers
             subject: "Your Moonsama single-use login code", // Subject line
             text: `We received your request for a single-use login code to use with Moonsama.\n\nYour single-use login code is: ${loginKey}`, // plaintext body
@@ -94,29 +69,7 @@ export class EmailAuthService {
     async sendAuthChangeEmail(user: UserEntity, email: string, gRecaptchaResponse: string) {
         const recaptchaSecret = this.configService.get<string>('recaptcha.secret')
 
-        if (recaptchaSecret === "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe") {
-            this.logger.warn(`sendAuthChangeEmail: using test recaptcha secret! Don't use in production!`, this.context)
-        }
-
-        try {
-            let result = await axios({
-                method: 'post',
-                url: 'https://www.google.com/recaptcha/api/siteverify',
-                params: {
-                    secret: recaptchaSecret,
-                    response: gRecaptchaResponse
-                }
-            });
-            let data = result.data || {};
-
-            //TO DO: check data.hostname
-            if (data.success !== true) {
-                throw new Error("captcha rejected")
-            }
-        } catch (err) {
-            this.logger.error(`sendAuthChangeEmail: captcha did verify`, err, this.context)
-            throw new UnprocessableEntityException(`Invalid captcha`)
-        }
+        await this.validateCaptcha(gRecaptchaResponse)
 
         //check that email is not already in use
         const emEntity = await this.emailService.create(email.toLowerCase().trim())
@@ -134,13 +87,12 @@ export class EmailAuthService {
             this.logger.error(`sendAuthChangeEmail: error upserting user into database: ${email}`, err, this.context)
             throw new UnprocessableEntityException(`Error upserting user into database`)
         }
-
         const mailgun = new Mailgun(formData);
-        const mg = mailgun.client({ username: 'api', key: this.configService.get<string>('mailgun.apiKey'), url: 'https://api.eu.mailgun.net' });
+        const mg = mailgun.client({ username: this.configService.get<string>('mailgun.apiUsername'), key: this.configService.get<string>('mailgun.apiKey'), url: this.configService.get<string>('mailgun.apiUrl') });
 
 
         const mailOptions = {
-            from: 'Moonsama <no-reply@sp.moonsama.com>',
+            from: `Moonsama <${this.configService.get<string>('mailgun.email')}>`,
             to: [email], // list of receivers
             subject: "Moonsama change email request", // Subject line
             text: `We received your request to change your email used with Moonsama.\n\nPlease use this single-use login code: ${loginKey}`, // plaintext body
@@ -213,6 +165,35 @@ export class EmailAuthService {
             user = await this.userService.createEmail(loginKeyEntity.email)
         }
         return user
+    }
+
+    private async validateCaptcha(gRecaptchaResponse: string) {
+        const recaptchaSecret = this.configService.get<string>('recaptcha.secret')
+
+        if (recaptchaSecret === "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe") {
+            this.logger.warn(`sendAuthEmail: using test recaptcha secret! Don't use in production!`, this.context)
+        }
+
+        try {
+            let result = await axios({
+                method: 'post',
+                url: 'https://www.google.com/recaptcha/api/siteverify',
+                params: {
+                    secret: recaptchaSecret,
+                    response: gRecaptchaResponse
+                }
+            });
+            let data = result.data || {};
+
+            //TO DO: check data.hostname
+            if (data.success !== true) {
+                this.logger.debug(`sendAuthEmail: captcha did verify success=false data: ${JSON.stringify(data)}`, this.context)
+                throw new UnprocessableEntityException(`Invalid captcha`)
+            }
+        } catch (err) {
+            this.logger.error(`sendAuthEmail: captcha did verify ${String(err)}`, err, this.context)
+            throw new UnprocessableEntityException(`Invalid captcha`)
+        }
     }
 }
 
