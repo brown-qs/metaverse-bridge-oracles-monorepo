@@ -1,12 +1,9 @@
 import { Post } from "@nestjs/common";
 import { Category } from "fp-ts/lib/Reader";
-import { AssetEntity } from "src/asset/asset.entity";
-import { ResourceInventory } from "src/assetapi/dtos/resourceinventory.dto";
-import { CollectionFragmentEntity } from "src/collectionfragment/collectionfragment.entity";
-import { ResourceInventoryEntity } from "src/resourceinventory/resourceinventory.entity";
-import { ResourceInventoryOffsetEntity } from "src/resourceinventoryoffset/resourceinventoryoffset.entity";
-import { UserEntity } from "src/user/user/user.entity";
 import { ViewEntity, Connection, ViewColumn, Column } from "typeorm";
+import { ResourceInventoryEntity } from "../resourceinventory/resourceinventory.entity";
+import { ResourceInventoryOffsetEntity } from "../resourceinventoryoffset/resourceinventoryoffset.entity";
+import { UserEntity } from "../user/user/user.entity";
 
 @ViewEntity({
     expression: (connection: Connection) => {
