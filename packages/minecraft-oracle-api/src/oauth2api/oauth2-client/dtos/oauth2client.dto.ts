@@ -24,4 +24,7 @@ export class Oauth2ClientDto {
 
     @ApiResponseProperty()
     scopes: Oauth2Scope[]
+
+    @ApiResponseProperty()
+    approved: boolean
 }
