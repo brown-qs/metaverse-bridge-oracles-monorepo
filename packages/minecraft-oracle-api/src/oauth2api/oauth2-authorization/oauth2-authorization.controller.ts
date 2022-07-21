@@ -26,13 +26,14 @@ export class Oauth2AuthorizationController {
         this.context = Oauth2AuthorizationController.name;
     }
 
+    //this is not compliant with the oauth spec. the oauth spec expects a 302 redirect, but the browser will follow 302s and we don't want that
+    //can't just do window.location and go directly to this because we need the auth header to get the user
     @Get('authorize')
-    @ApiResponse({ status: 302, description: 'callback.uri?code=akdflajdflkj(&state=xyz) OR callback.uri?error=invalid_request|access_denied|unsupported_response_type&error_description=state%20must%20be%20alphanumeric' })
-    @Redirect()
+    @ApiResponse({ status: 200, description: '{"url": "callback.uri?code=akdflajdflkj(&state=xyz) OR callback.uri?error=invalid_request|access_denied|unsupported_response_type&error_description=state%20must%20be%20alphanumeric"}' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    @ApiOperation({ summary: 'Redirect user-agent (login flow on Moonsama.com) back to client (oauth2 app) with temp code that can be used to get an access token' })
-    async authorize(@User() user: UserEntity, @Query() dto: AuthorizeQueryDto) {
+    @ApiOperation({ summary: 'Starting URL (for now requires user to already be logged in): <moonsama domain>/oauth?client_id=9021ca9bb7160f8eca4402a666286be3&redirect_uri=http%3A%2F%2Flocalhost%2Fhome&response_type=code&scope=user%3Agamer_tag.read%20user%3Auuid.read. Redirect user-agent (login flow on Moonsama.com) back to client (oauth2 app) with temp code that can be used to get an access token' })
+    async authorize(@User() user: UserEntity, @Query() dto: AuthorizeQueryDto): Promise<{ url: string }> {
         const clientEntity = await this.oauth2ClientService.findOne({ clientId: dto.client_id })
         if (!clientEntity) {
             throw new BadRequestException("client not found")
