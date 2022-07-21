@@ -14,9 +14,11 @@ import { ProfileApiService } from './profileapi.service';
 import { InventoryModule } from '../playerinventory/inventory.module';
 import { SkinModule } from '../skin/skin.module';
 import { ResourceInventoryModule } from '../resourceinventory/resourceinventory.module';
+import { CqrsModule } from '@nestjs/cqrs';
 
 @Module({
     imports: [
+        CqrsModule,
         JwtModule.registerAsync({
             useFactory: async (configService: ConfigService) => {
                 const expiration = configService.get<number>('jwt.expiration')
