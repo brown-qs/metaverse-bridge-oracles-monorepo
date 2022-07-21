@@ -100,6 +100,7 @@ import { Oauth2Module } from './oauth2api/oauth2.module';
 import { Oauth2AuthorizationEntity } from './oauth2api/oauth2-authorization/oauth2-authorization.entity';
 import { ZUserAssetView } from './views/user-asset.view';
 import { ZUserBaitView, ZUserGamepassView } from './views';
+import { MoonsamaCqrsModule } from './cqrs/moonsama-cqrs.module';
 
 
 @Module({
@@ -195,6 +196,7 @@ import { ZUserBaitView, ZUserGamepassView } from './views';
             inject: [ConfigService]
         }),
         Oauth2Module,
+        AssetApiModule,
         EmailChangeModule,
         MinecraftLinkModule,
         PlaySessionModule,
@@ -238,13 +240,12 @@ import { ZUserBaitView, ZUserGamepassView } from './views';
         ResourceInventoryOffsetModule,
         CompositeApiModule,
         KiltSessionModule,
-        AssetApiModule,
         MinecraftUserNameModule,
         MinecraftUuidModule,
         EmailModule,
         DidModule,
         KiltDappModule,
-
+        MoonsamaCqrsModule
     ],
     controllers: [],
     providers: []

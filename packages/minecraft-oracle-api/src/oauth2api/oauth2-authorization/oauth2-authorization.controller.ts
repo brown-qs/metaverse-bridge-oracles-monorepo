@@ -32,7 +32,7 @@ export class Oauth2AuthorizationController {
     @ApiResponse({ status: 200, description: '{"url": "callback.uri?code=akdflajdflkj(&state=xyz) OR callback.uri?error=invalid_request|access_denied|unsupported_response_type&error_description=state%20must%20be%20alphanumeric"}' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    @ApiOperation({ summary: 'Starting URL (for now requires user to already be logged in): <moonsama domain>/oauth?client_id=9021ca9bb7160f8eca4402a666286be3&redirect_uri=http%3A%2F%2Flocalhost%2Fhome&response_type=code&scope=user%3Agamer_tag.read%20user%3Auuid.read. Redirect user-agent (login flow on Moonsama.com) back to client (oauth2 app) with temp code that can be used to get an access token' })
+    @ApiOperation({ summary: 'Starting URL (for now requires user to already be logged in): <moonsama domain>/oauth?client_id=asdkfljkjklfajljkl2324&redirect_uri=http%3A%2F%2Flocalhost%2Fhome&response_type=code&scope=user%3Agamer_tag.read%20user%3Auuid.read. Redirect user-agent (login flow on Moonsama.com) back to client (oauth2 app) with temp code that can be used to get an access token' })
     async authorize(@User() user: UserEntity, @Query() dto: AuthorizeQueryDto): Promise<{ url: string }> {
         const clientEntity = await this.oauth2ClientService.findOne({ clientId: dto.client_id })
         if (!clientEntity) {
