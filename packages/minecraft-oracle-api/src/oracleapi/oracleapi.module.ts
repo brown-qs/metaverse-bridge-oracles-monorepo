@@ -17,9 +17,11 @@ import { CompositeApiModule } from '../compositeapi/compositeapi.module';
 import { CompositeAssetModule } from '../compositeasset/compositeasset.module';
 import { MaterialModule } from '../material/material.module';
 import { ResourceInventoryModule } from '../resourceinventory/resourceinventory.module';
+import { CqrsModule } from '@nestjs/cqrs';
 
 @Module({
     imports: [
+        CqrsModule,
         AssetModule,
         UserModule,
         SecretModule,

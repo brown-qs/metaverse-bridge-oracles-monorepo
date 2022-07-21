@@ -8,12 +8,15 @@ import { SnapshotService } from '../snapshot/snapshot.service';
 import { MaterialEntity } from '../material/material.entity';
 import { TextureEntity } from '../texture/texture.entity';
 import { SecretService } from '../secret/secret.service';
+import { EventBus } from '@nestjs/cqrs';
+import { UserProfileUpdatedEvent } from '../cqrs/events/user-profile-updated.event';
 
 @Injectable()
 export class AdminApiService {
 
     private readonly context: string;
     constructor(
+        private readonly eventBus: EventBus,
         private readonly userService: UserService,
         private readonly textureService: TextureService,
         private readonly materialService: MaterialService,
@@ -113,12 +116,14 @@ export class AdminApiService {
         //console.log(user, vip, typeof vip)
         const res = await this.userService.update(user.uuid, { vip })
         //console.log(res)
+        this.eventBus.publish(new UserProfileUpdatedEvent(user.uuid))
 
         return (res.affected ?? 1) > 0
     }
 
     public async blacklist(user: { uuid: string }, blacklisted: boolean) {
         const res = await this.userService.update(user.uuid, { blacklisted })
+        this.eventBus.publish(new UserProfileUpdatedEvent(user.uuid))
         return (res.affected ?? 1) > 0
     }
 }
