@@ -46,7 +46,7 @@ export class Oauth2ClientService {
     }
 
     public clientEntityToDto(client: Oauth2ClientEntity): Oauth2ClientDto {
-        const result = { clientId: client.clientId, clientSecret: client.clientSecret, appName: client.appName, redirectUri: client.redirectUri, accessTokenValidity: client.accessTokenValidity, refreshTokenValidity: client.refreshTokenValidity, scopes: [...client.scopes] }
+        const result = { clientId: client.clientId, clientSecret: client.clientSecret, appName: client.appName, redirectUri: client.redirectUri, accessTokenValidity: client.accessTokenValidity, refreshTokenValidity: client.refreshTokenValidity, scopes: [...client.scopes], approved: client.approved }
         return result
     }
 }

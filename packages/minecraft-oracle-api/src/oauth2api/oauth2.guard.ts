@@ -49,6 +49,11 @@ export class Oauth2Guard implements CanActivate {
             throw new UnauthorizedException("OAuth 2.0 Access Token revoked")
         }
 
+        if (result.client.approved !== true) {
+            throw new UnauthorizedException("client has not passed approval")
+
+        }
+
         const accessTokenCreateTime = result.accessTokenCreatedAt.getTime()
         const timeDiff = new Date().getTime() - accessTokenCreateTime
 

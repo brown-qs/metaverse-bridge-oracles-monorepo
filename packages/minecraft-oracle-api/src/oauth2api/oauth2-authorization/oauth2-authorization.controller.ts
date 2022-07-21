@@ -38,6 +38,10 @@ export class Oauth2AuthorizationController {
             throw new BadRequestException("client not found")
         }
 
+        if (clientEntity.approved !== true) {
+            throw new BadRequestException("client has not passed approval")
+        }
+
         //invalid redirect url
         if (dto?.redirect_uri === "") {
             return { url: `${clientEntity.redirectUri}?error=invalid_request&error_description=${encodeURI("redirect_uri cannot be blank")}` }
@@ -114,6 +118,10 @@ export class Oauth2AuthorizationController {
         const clientEntity = await this.oauth2ClientService.findOne({ clientId: dto.client_id })
         if (!clientEntity) {
             throw new BadRequestException("clientId not found")
+        }
+
+        if (clientEntity.approved !== true) {
+            throw new BadRequestException("client has not passed approval")
         }
 
         //sanity check to make sure client secrets are strings and of certain length for security
