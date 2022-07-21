@@ -50,6 +50,9 @@ export class Oauth2ClientEntity {
   @Column({ type: "timestamptz", nullable: false })
   updatedAt: Date;
 
+  @Column({ type: "boolean", nullable: false, default: true })
+  approved: boolean;
+
   @ManyToOne(() => UserEntity, (en) => en.uuid, { nullable: false })
   owner: UserEntity
 }
