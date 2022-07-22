@@ -32,6 +32,7 @@ async function bootstrap() {
     .setVersion('1.0')
     .addBearerAuth({ scheme: 'bearer', type: 'http' })
     .addApiKey({ type: 'apiKey', in: 'header', name: 'AuthenticationHeader' }, 'AuthenticationHeader')
+    .addOAuth2()
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('/api/v1/docs', app, document);
