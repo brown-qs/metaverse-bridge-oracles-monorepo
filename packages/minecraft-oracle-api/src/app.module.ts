@@ -95,6 +95,9 @@ import { EmailEntity } from './user/email/email.entity';
 import { KiltDappEntity } from './user/kilt-dapp/kilt-dapp.entity';
 import { MinecraftUserNameEntity } from './user/minecraft-user-name/minecraft-user-name.entity';
 import { MinecraftUuidEntity } from './user/minecraft-uuid/minecraft-uuid.entity';
+import { Oauth2ClientEntity } from './oauth2api/oauth2-client/oauth2-client.entity';
+import { Oauth2Module } from './oauth2api/oauth2.module';
+import { Oauth2AuthorizationEntity } from './oauth2api/oauth2-authorization/oauth2-authorization.entity';
 import { ZUserAssetView } from './views/user-asset.view';
 import { ZUserBaitView, ZUserGamepassView } from './views';
 import { MoonsamaCqrsModule } from './cqrs/moonsama-cqrs.module';
@@ -171,6 +174,8 @@ import { MoonsamaCqrsModule } from './cqrs/moonsama-cqrs.module';
                     EmailEntity,
                     DidEntity,
                     KiltDappEntity,
+                    Oauth2ClientEntity,
+                    Oauth2AuthorizationEntity,
                     ZUserBaitView
                 ],
                 synchronize: configService.get<boolean>('typeorm.synchronize'),
@@ -190,6 +195,7 @@ import { MoonsamaCqrsModule } from './cqrs/moonsama-cqrs.module';
             ],
             inject: [ConfigService]
         }),
+        Oauth2Module,
         AssetApiModule,
         EmailChangeModule,
         MinecraftLinkModule,
