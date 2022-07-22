@@ -17,16 +17,21 @@ import { FungibleBalanceEntryDto, UsersFungibleBalancesQueryDto, UsersFungibleBa
 import { CollectionFragmentService } from '../collectionfragment/collectionfragment.service';
 import { In } from 'typeorm';
 import { fromTokenizer } from 'file-type';
+import { EventBus } from '@nestjs/cqrs';
+import { ResourceInventoryUpdatedEvent } from '../cqrs/events/resource-inventory-updated.event';
+import { ResourceInventoryOffsetUpdatedEvent } from '../cqrs/events/resource-inventory-offset-updated.event';
 
 @Injectable()
 export class AssetApiService {
     constructor(
+        private readonly eventBus: EventBus,
         private readonly userService: UserService,
         private readonly assetService: AssetService,
         private readonly resourceInventoryService: ResourceInventoryService,
         private readonly resourceInventoryOffsetService: ResourceInventoryOffsetService,
         private readonly collectionFragmentService: CollectionFragmentService,
         private configService: ConfigService,
+
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) { }
 
@@ -47,7 +52,7 @@ export class AssetApiService {
             results: users.map(u => {
                 return {
                     user: {
-                        name: u.userName,
+                        name: u.minecraftUserName,
                         uuid: u.uuid
                     },
                     assets: (u.assets ?? []).filter(a => !a.pendingIn)
@@ -66,7 +71,7 @@ export class AssetApiService {
             : await this.assetService.findMany({ where: { pendingIn: false }, take, skip, order: { hash: 'ASC' }, relations: ['owner'] })
         return {
             results: assets.map(a => {
-                return { ...a, owner: { name: a.owner.userName, uuid: a.owner.uuid } }
+                return { ...a, owner: { name: a.owner.minecraftUserName, uuid: a.owner.uuid } }
             })
         }
     }
@@ -77,7 +82,7 @@ export class AssetApiService {
             return undefined
         }
 
-        //console.log(user.userName)
+        //console.log(user.minecraftUserName)
         const hash = user.assets.filter(asset => !asset.pendingIn)
             .reduce((prevResult, element) => {
                 const leafHash = allToSha256(element.collectionFragment.collection.chainId, element.collectionFragment.collection.assetAddress, element.assetId, JSON.stringify(element.metadata))
@@ -139,7 +144,7 @@ export class AssetApiService {
                 collectionFragment: await this.collectionFragmentService.findOne({ collection: { assetAddress: x.assetAddress.toLowerCase(), chainId: x.chainId } }, { relations: ['collection'] })
             })
         }))
-
+        this.eventBus.publish(new ResourceInventoryUpdatedEvent(user.uuid))
         return true
     }
 
@@ -173,7 +178,7 @@ export class AssetApiService {
                 resourceInventory
             })
         }))
-
+        this.eventBus.publish(new ResourceInventoryOffsetUpdatedEvent(user.uuid))
         return true
     }
 
@@ -181,7 +186,7 @@ export class AssetApiService {
         const res = await this.resourceInventoryService.findMany({ where: { owner: { uuid: user.uuid } }, relations: ['owner', 'offset', 'collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
 
         if (!res) {
-            return { balances: [], user: { uuid: user.uuid, name: user.userName } }
+            return { balances: [], user: { uuid: user.uuid, name: user.minecraftUserName } }
         }
         const results = await Promise.all(res.map(async (x) => {
             return {
@@ -193,7 +198,7 @@ export class AssetApiService {
             }
         }))
 
-        return { balances: results, user: { uuid: user.uuid, name: user.userName } }
+        return { balances: results, user: { uuid: user.uuid, name: user.minecraftUserName } }
     }
 
     async getPlayersFungibleBalances(dto: UsersFungibleBalancesQueryDto): Promise<UsersFungibleBalancesResultDto> {
@@ -209,7 +214,7 @@ export class AssetApiService {
             return {
                 user: {
                     uuid: user.uuid,
-                    name: user.userName
+                    name: user.minecraftUserName
                 },
                 balances: user.resourceInventoryItems.map(x => {
                     return {

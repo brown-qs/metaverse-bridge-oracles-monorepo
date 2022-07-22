@@ -1,9 +1,9 @@
 import { Post } from "@nestjs/common";
 import { Category } from "fp-ts/lib/Reader";
-import { AssetEntity } from "src/asset/asset.entity";
-import { CollectionFragmentEntity } from "src/collectionfragment/collectionfragment.entity";
-import { UserEntity } from "src/user/user/user.entity";
 import { ViewEntity, Connection, ViewColumn, Column } from "typeorm";
+import { AssetEntity } from "../asset/asset.entity";
+import { CollectionFragmentEntity } from "../collectionfragment/collectionfragment.entity";
+import { UserEntity } from "../user/user/user.entity";
 
 @ViewEntity({
     expression: (connection: Connection) => {

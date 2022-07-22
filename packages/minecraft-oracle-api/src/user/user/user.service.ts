@@ -1,5 +1,5 @@
 import { InjectConnection, InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Like, Not, In } from "typeorm"
+import { IsNull, Like, Not, In, MoreThanOrEqual } from "typeorm"
 import { Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Connection, DeepPartial, EntityManager, FindConditions, FindManyOptions, FindOneOptions, ObjectID, Repository, UpdateResult } from 'typeorm';
@@ -28,6 +28,8 @@ import { GameKind } from '../../game/game.enum';
 import { MinecraftUuidEntity } from '../minecraft-uuid/minecraft-uuid.entity';
 import { MinecraftUserNameEntity } from '../minecraft-user-name/minecraft-user-name.entity';
 import { EmailEntity } from '../email/email.entity';
+import { EventBus } from "@nestjs/cqrs";
+import { UserProfileUpdatedEvent } from '../../cqrs/events/user-profile-updated.event';
 @Injectable()
 export class UserService {
     context: string;
@@ -36,7 +38,8 @@ export class UserService {
         @InjectConnection() private connection: Connection,
         @InjectRepository(UserEntity)
         private readonly repository: Repository<UserEntity>,
-        private configService: ConfigService
+        private readonly eventBus: EventBus,
+        private readonly configService: ConfigService
     ) {
         this.context = UserService.name
     }
@@ -412,11 +415,14 @@ export class UserService {
             }
         }
         this.logger.debug(`user.service::linkMinecraftByUserUuid userUuid: ${userUuid} minecraftUuid: ${minecraftUuid} successful link`, this.context)
-        return await this.findByUuid(userUuid)
+        const u = await this.findByUuid(userUuid)
+        this.eventBus.publish(new UserProfileUpdatedEvent(userUuid))
+        return u
     }
 
     public async unlinkMinecraftByUserUuid(uuid: string) {
         await this.repository.update({ uuid }, { minecraftUuid: null, minecraftUserName: null, hasGame: false })
+        this.eventBus.publish(new UserProfileUpdatedEvent(uuid))
     }
 
     public async minecraftUuidMap(offset: number, minecraftUuids: string[] | undefined, limit: number | undefined) {
@@ -436,6 +442,24 @@ export class UserService {
             query.limit(limit)
         }
         return await query.execute()
+    }
+
+    public async userUpdates(offset: number, secsSinceEpoch: string, take: number | undefined): Promise<string[]> {
+
+        //sanitize to prevent sql injection
+        const s = parseInt(secsSinceEpoch).toString()
+
+        const query = this.repository.createQueryBuilder('users')
+            .select("users.uuid", "uuid")
+            .where(`extract(epoch from users.relationsUpdatedAt) >= ${s}`)
+            .orderBy("users.relationsUpdatedAt", "ASC")
+            .offset(offset)
+
+        if (!!take) {
+            query.limit(take)
+        }
+        const rows = await query.execute()
+        return rows.map((r: { uuid: string }) => r.uuid)
     }
 
     /*
