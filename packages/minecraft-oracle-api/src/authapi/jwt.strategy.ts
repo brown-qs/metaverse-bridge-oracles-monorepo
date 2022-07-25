@@ -37,7 +37,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     async validate(payload: UserJwtPayload): Promise<any> {
-        this.logger.debug('validate:: called', this.context)
+       // this.logger.debug('validate:: called', this.context)
         //const token = req.headers.authorization.slice(7);
         if (!payload || !payload.sub) {
             this.logger.error('validate:: sub (uuid) required', null, this.context)
@@ -51,7 +51,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             throw new UnauthorizedException();
         }
 
-        this.logger.debug('validate:: success:' + JSON.stringify(user), this.context)
+        //this.logger.debug('validate:: success:' + JSON.stringify(user), this.context)
         //req.user = { user, sessionKey: token } 
         return user;
     }

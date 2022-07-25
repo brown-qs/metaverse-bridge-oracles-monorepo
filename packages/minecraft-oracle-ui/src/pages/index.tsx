@@ -19,6 +19,7 @@ import EmailChangePage from './account/login/email/change';
 import MinecraftRedirectPage from './account/minecraft/redirect';
 import MinecraftVerifyPage from './account/minecraft/verify';
 import MinecraftUnlinkPage from './account/minecraft/unlink';
+import OauthPage from './oauth';
 
 export const Routing = () => {
     const { authData } = useAuth();
@@ -71,6 +72,11 @@ export const Routing = () => {
             <Route exact path="/login">
                 {!!authData?.jwt ? <Redirect to="/bridge" /> : <HomePage />}
             </Route>
+
+            <Route exact path="/oauth">
+                {!!authData?.jwt ? <OauthPage /> : <LoginPage />}
+            </Route>
+
 
             <Route path="/bridge">
                 {!!authData?.jwt ? (

@@ -11,9 +11,11 @@ import { CompositeApiController } from './compositeapi.controller';
 import { SyntheticPartModule } from '../syntheticpart/syntheticpart.module';
 import { SyntheticItemModule } from '../syntheticitem/syntheticitem.module';
 import { ProviderModule } from '../provider/provider.module';
+import { CqrsModule } from '@nestjs/cqrs';
 
 @Module({
     imports: [
+        CqrsModule,
         ProviderModule,
         UserModule,
         AssetModule,
@@ -29,4 +31,4 @@ import { ProviderModule } from '../provider/provider.module';
     exports: [CompositeApiService],
     controllers: [CompositeApiController]
 })
-export class CompositeApiModule {}
+export class CompositeApiModule { }

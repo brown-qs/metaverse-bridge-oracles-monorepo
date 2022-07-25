@@ -9,9 +9,9 @@ export class CompositeAssetService {
     constructor(
         @InjectRepository(CompositeAssetEntity)
         private readonly repository: Repository<CompositeAssetEntity>
-    ) {}
+    ) { }
 
-    public static calculateId(dto: {chainId: string | number, assetAddress: string, assetId: string | number}): string {
+    public static calculateId(dto: { chainId: string | number, assetAddress: string, assetId: string | number }): string {
         return `${dto.chainId}-${dto.assetAddress}-${dto.assetId}`
     }
 
