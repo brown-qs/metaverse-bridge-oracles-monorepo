@@ -1,12 +1,11 @@
-import Box from '@mui/material/Box';
+import { Box } from '@chakra-ui/react';
 import { useActiveGame } from 'hooks/multiverse/useActiveGame';
-import { useClasses } from 'hooks';
 
 export default function CarnageStatus() {
   const isGameActive = useActiveGame();
 
-  const styles = () => ({
-    BoxStyle: {
+  return (
+    <Box sx={{
       backgroundColor: isGameActive ? 'rgba(14, 235, 168, 0.2)' : 'rgba(251, 122, 111, 0.2)',
       textTransform: 'uppercase',
       whiteSpace: "nowrap",
@@ -24,15 +23,7 @@ export default function CarnageStatus() {
       '&:hover': {
         border: '1px solid ' + (isGameActive ? '#0EEBA8' : '#FB7A6F'),
       }
-    }
-  })
-
-  const {
-    BoxStyle,
-  } = useClasses(styles)
-
-  return (
-    <Box className={BoxStyle}>
+    }}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
