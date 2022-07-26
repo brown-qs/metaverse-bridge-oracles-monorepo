@@ -3048,11 +3048,6 @@
     "@ethersproject/properties" "^5.5.0"
     "@ethersproject/strings" "^5.5.0"
 
-"@fontsource/orbitron@^4.5.8":
-  version "4.5.8"
-  resolved "https://registry.npmjs.org/@fontsource/orbitron/-/orbitron-4.5.8.tgz"
-  integrity sha512-En4xVwdVf3g3Rf6fuCWCdgIG9X6k1lW8rb5dZmgYv2WVwWofc14eoaRF551uOoHaWBsxHaF7o5mqY5EmnJaKbA==
-
 "@gar/promisify@^1.0.1":
   version "1.1.2"
   resolved "https://registry.npmjs.org/@gar/promisify/-/promisify-1.1.2.tgz"

@@ -1,6 +1,6 @@
 import Link from '@mui/material/Link';
 import Box from '@mui/material/Box';
-import "@fontsource/orbitron/500.css";
+
 import { useClasses } from 'hooks';
 
 export default function NavMenuItem({ href, label, external = false }: { href: string, label: string, external?: boolean }) {

@@ -1,6 +1,6 @@
 
 import Box from '@mui/material/Box';
-import "@fontsource/orbitron/500.css";
+
 import { useAccountDialog, useActiveWeb3React } from 'hooks';
 import { truncateAddress } from 'utils';
 import { useClasses } from 'hooks';
