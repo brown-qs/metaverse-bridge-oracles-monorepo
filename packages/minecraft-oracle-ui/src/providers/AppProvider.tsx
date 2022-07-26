@@ -19,6 +19,8 @@ import { TransferDialogContextController } from '../context/transferDialog/trans
 import { ExportDialogContextController } from '../context/exportDialog/exportDialogContextController/ExportDialogContextController';
 import { AssetDialogContextController } from '../context/assetDialog/assetDialogContextController/assetDialogContextController';
 import { ChakraProvider } from '@chakra-ui/react'
+import theme from '../theme/chakra-theme';
+
 function Updaters() {
   return (
     <>
@@ -29,7 +31,7 @@ function Updaters() {
 }
 
 export const AppProviders = ({ children }: AppProvidersProps) => (
-  <ChakraProvider>
+  <ChakraProvider theme={theme}>
     <ThemeOptionsContextController>
       <Web3ReactProvider getLibrary={getLibrary}>
         <Web3ReactProviderNetwork getLibrary={getLibrary}>
