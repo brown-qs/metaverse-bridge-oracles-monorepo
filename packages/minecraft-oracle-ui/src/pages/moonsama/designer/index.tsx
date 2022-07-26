@@ -15,7 +15,7 @@ import MOONSAMA_CUSTOMIZATION_ITEM_GROUPS from './fixtures/CustomizerItemGroups'
 import ImageStack from 'components/ImageStacks/Moonsama2';
 import { FixedSizeGrid, GridChildComponentProps, areEqual } from 'react-window';
 import { styled } from '@mui/material/styles';
-import "@fontsource/orbitron/500.css";
+
 import { InGameItemWithStatic, useInGameItemsWithCompositeMetaAndAssets } from 'hooks/multiverse/useInGameItems'
 import axios from 'axios';
 import type { AuthData } from 'context/auth/AuthContext/AuthContext.types';

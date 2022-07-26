@@ -1,5 +1,5 @@
 import Box from '@mui/material/Box';
-import "@fontsource/orbitron/500.css";
+
 import { useClasses } from 'hooks';
 import { useAuth } from 'hooks';
 import { useHistory } from 'react-router-dom';

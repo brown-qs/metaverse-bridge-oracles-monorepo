@@ -1,6 +1,5 @@
 import Box from '@mui/material/Box';
 import { useActiveGame } from 'hooks/multiverse/useActiveGame';
-import '@fontsource/orbitron/500.css';
 import { useClasses } from 'hooks';
 
 export default function CarnageStatus() {

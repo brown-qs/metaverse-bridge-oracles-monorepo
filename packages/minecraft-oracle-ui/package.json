@@ -21,7 +21,6 @@
     "@ethersproject/contracts": "^5.3.0",
     "@ethersproject/hash": "^5.4.0",
     "@ethersproject/providers": "^5.3.1",
-    "@fontsource/orbitron": "^4.5.8",
     "@mui/icons-material": "^5.8.2",
     "@mui/lab": "^5.0.0-alpha.84",
     "@mui/material": "^5.8.2",

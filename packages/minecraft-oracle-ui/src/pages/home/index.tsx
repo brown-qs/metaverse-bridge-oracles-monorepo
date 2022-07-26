@@ -8,7 +8,7 @@ import WhiteLogo from 'assets/images/moonsama-glitch-white.svg';
 import LeftImage from 'assets/images/home/left.png';
 import RightImageFlip from 'assets/images/home/right.png';
 import Box from '@mui/material/Box';
-import "@fontsource/orbitron/500.css";
+
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Stack, Typography, useMediaQuery } from '@mui/material';
 import { theme } from 'theme/Theme';
 import { useHistory } from 'react-router-dom';

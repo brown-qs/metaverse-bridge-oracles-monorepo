@@ -8,7 +8,7 @@ import WhiteLogo from 'assets/images/moonsama-glitch-white.svg';
 import LeftImage from 'assets/images/home/left.png';
 import RightImageFlip from 'assets/images/home/right.png';
 import Box from '@mui/material/Box';
-import "@fontsource/orbitron/500.css";
+
 import { Alert, AlertColor, Avatar, Button, Card, CardContent, CardHeader, Chip, CircularProgress, Collapse, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, useMediaQuery } from '@mui/material';
 import { theme } from 'theme/Theme';
 import { Edit, SportsEsports, ExpandLess, ExpandMore, StarBorder } from '@mui/icons-material';
