@@ -18,7 +18,7 @@ import { SummonDialogContextController } from '../context/summonDialog/summonDia
 import { TransferDialogContextController } from '../context/transferDialog/transferDialogContextController/TransferDialogContextController';
 import { ExportDialogContextController } from '../context/exportDialog/exportDialogContextController/ExportDialogContextController';
 import { AssetDialogContextController } from '../context/assetDialog/assetDialogContextController/assetDialogContextController';
-
+import { ChakraProvider } from '@chakra-ui/react'
 function Updaters() {
   return (
     <>
@@ -29,34 +29,36 @@ function Updaters() {
 }
 
 export const AppProviders = ({ children }: AppProvidersProps) => (
-  <ThemeOptionsContextController>
-    <Web3ReactProvider getLibrary={getLibrary}>
-      <Web3ReactProviderNetwork getLibrary={getLibrary}>
-        <AuthContextController>
-          <Provider store={store}>
-            <Updaters />
-            <Web3ReactManager>
-              <AccountDialogContextController>
-                <SummonDialogContextController>
-                  <ImportDialogContextController>
-                    <EnraptureDialogContextController>
-                      <ExportDialogContextController>
-                        <TransferDialogContextController>
-                          <AssetDialogContextController>
-                            <Router>
-                              <Theme>{children}</Theme>
-                            </Router>
-                          </AssetDialogContextController>
-                        </TransferDialogContextController>
-                      </ExportDialogContextController>
-                    </EnraptureDialogContextController>
-                  </ImportDialogContextController>
-                </SummonDialogContextController>
-              </AccountDialogContextController>
-            </Web3ReactManager>
-          </Provider>
-        </AuthContextController>
-      </Web3ReactProviderNetwork>
-    </Web3ReactProvider>
-  </ThemeOptionsContextController>
+  <ChakraProvider>
+    <ThemeOptionsContextController>
+      <Web3ReactProvider getLibrary={getLibrary}>
+        <Web3ReactProviderNetwork getLibrary={getLibrary}>
+          <AuthContextController>
+            <Provider store={store}>
+              <Updaters />
+              <Web3ReactManager>
+                <AccountDialogContextController>
+                  <SummonDialogContextController>
+                    <ImportDialogContextController>
+                      <EnraptureDialogContextController>
+                        <ExportDialogContextController>
+                          <TransferDialogContextController>
+                            <AssetDialogContextController>
+                              <Router>
+                                <Theme>{children}</Theme>
+                              </Router>
+                            </AssetDialogContextController>
+                          </TransferDialogContextController>
+                        </ExportDialogContextController>
+                      </EnraptureDialogContextController>
+                    </ImportDialogContextController>
+                  </SummonDialogContextController>
+                </AccountDialogContextController>
+              </Web3ReactManager>
+            </Provider>
+          </AuthContextController>
+        </Web3ReactProviderNetwork>
+      </Web3ReactProvider>
+    </ThemeOptionsContextController>
+  </ChakraProvider>
 );
