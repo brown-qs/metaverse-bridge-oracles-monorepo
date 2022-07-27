@@ -15,10 +15,13 @@ import { Edit, SportsEsports, ExpandLess, ExpandMore, StarBorder } from '@mui/ic
 import PersonIcon from '@mui/icons-material/Person';
 import { Redirect } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
+import { useOauthLogin } from '../../hooks/useOauthLogin/useOauthLogin';
 const AccountPage = () => {
   const { authData, setAuthData } = useAuth();
   const [isLoading, setIsLoading] = useState(true)
   const [failureMessage, setFailureMessage] = useState("")
+  const { oauthData, setOauthData } = useOauthLogin()
+
   let history = useHistory();
 
   const getAccount = async () => {
@@ -57,6 +60,7 @@ const AccountPage = () => {
   }
 
   const handleLogout = () => {
+    setOauthData(null)
     window.localStorage.removeItem('authData');
     setAuthData({ jwt: undefined })
   }
