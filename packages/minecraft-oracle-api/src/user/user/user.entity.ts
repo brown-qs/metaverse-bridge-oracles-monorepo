@@ -59,8 +59,8 @@ export class UserEntity {
 
     //delete this after migration
     @IsString()
-    @Column({ default: null, nullable: true })
-    userName?: string;
+    @Column({ default: null, nullable: true, unique: true })
+    gamerTag?: string;
 
     @IsString()
     @Column({ default: null, nullable: true })
