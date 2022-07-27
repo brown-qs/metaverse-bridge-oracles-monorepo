@@ -11,14 +11,17 @@ import Box from '@mui/material/Box';
 import "@fontsource/orbitron/500.css";
 import { Alert, AlertColor, Avatar, Button, Card, CardContent, CardHeader, Chip, CircularProgress, Collapse, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, useMediaQuery } from '@mui/material';
 import { theme } from 'theme/Theme';
-import { Edit, SportsEsports, ExpandLess, ExpandMore, StarBorder } from '@mui/icons-material';
+import { Edit, SportsEsports, ExpandLess, ExpandMore, StarBorder, Style } from '@mui/icons-material';
 import PersonIcon from '@mui/icons-material/Person';
 import { Redirect } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
+import { useOauthLogin } from '../../hooks/useOauthLogin/useOauthLogin';
 const AccountPage = () => {
   const { authData, setAuthData } = useAuth();
   const [isLoading, setIsLoading] = useState(true)
   const [failureMessage, setFailureMessage] = useState("")
+  const { oauthData, setOauthData } = useOauthLogin()
+
   let history = useHistory();
 
   const getAccount = async () => {
@@ -57,12 +60,18 @@ const AccountPage = () => {
   }
 
   const handleLogout = () => {
+    setOauthData(null)
     window.localStorage.removeItem('authData');
     setAuthData({ jwt: undefined })
   }
 
   const handleMinecraftUnlink = async () => {
     history.push("/account/minecraft/unlink")
+  }
+
+  const handleSetGamerTag = () => {
+    history.push("/account/gamertag")
+
   }
 
   const handleAlertClose = () => {
@@ -96,6 +105,17 @@ const AccountPage = () => {
             ? <Button disableElevation disableRipple style={{ maxWidth: '200px', width: '200px', minWidth: '200px' }} onClick={() => { handleMinecraftUnlink() }} variant="contained">UNLINK MINECRAFT</Button>
             : <Button disableElevation disableRipple style={{ maxWidth: '200px', width: '200px', minWidth: '200px' }} onClick={() => { handleMinecraftLink() }} variant="contained">LINK MINECRAFT</Button>}
           </Box>
+        </Stack>
+        <Stack direction="column" alignItems='center' textAlign='center' spacing={1} margin={2} marginTop={3}>
+          <Box>GAMER TAG</Box>
+          {!!authData?.userProfile?.gamerTag
+            ?
+            <Chip color="info" sx={{ maxWidth: 300 }} icon={<Style />} label={authData?.userProfile?.gamerTag} onDelete={() => { history.push(`/account/gamertag`) }}
+              deleteIcon={<Edit />}></Chip>
+            :
+            <Button disableElevation disableRipple style={{ maxWidth: '200px', width: '200px', minWidth: '200px' }} onClick={() => { handleSetGamerTag() }} variant="contained">SET GAMER TAG</Button>
+          }
+
         </Stack>
 
       </Stack >)
