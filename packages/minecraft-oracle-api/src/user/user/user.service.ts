@@ -425,6 +425,11 @@ export class UserService {
         this.eventBus.publish(new UserProfileUpdatedEvent(uuid))
     }
 
+    public async setGamerTag(uuid: string, gamerTag: string) {
+        await this.repository.update({ uuid }, { gamerTag })
+        this.eventBus.publish(new UserProfileUpdatedEvent(uuid))
+    }
+
     public async minecraftUuidMap(offset: number, minecraftUuids: string[] | undefined, limit: number | undefined) {
 
 

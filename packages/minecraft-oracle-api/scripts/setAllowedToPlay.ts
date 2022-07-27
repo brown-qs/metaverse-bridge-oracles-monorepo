@@ -126,7 +126,7 @@ async function main() {
 
         console.log('starting iteration', itercounter)
 
-        const allUsers = await connection.manager.getRepository(UserEntity).find({ where: {email: Not(IsNull())}, loadEagerRelations: true, relations: ['assets', 'assets.collectionFragment', 'assets.collectionFragment.collection'] })
+        const allUsers = await connection.manager.getRepository(UserEntity).find({ where: { email: Not(IsNull()) }, loadEagerRelations: true, relations: ['assets', 'assets.collectionFragment', 'assets.collectionFragment.collection'] })
 
         for (let i = 0; i < allUsers.length; i++) {
 
@@ -138,7 +138,7 @@ async function main() {
             if (!user.email?.email) {
                 continue
             }
-            console.log(user.email?.email ?? user.userName)
+            console.log(user.email?.email ?? user.minecraftUserName)
 
             assets.map(asset => {
                 if (asset.collectionFragment.collection.assetAddress === '0x0a54845ac3743c96e582e03f26c3636ea9c00c8a') {
