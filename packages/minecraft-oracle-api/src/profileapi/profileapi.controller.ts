@@ -126,6 +126,11 @@ export class ProfileApiController {
         if (gamerTag.length === 0) {
             throw new BadRequestException("Gamer Tag is either blank or contains invalid characters")
         }
+
+        if (gamerTag.length > 30) {
+            throw new BadRequestException("Gamer Tag is too long")
+        }
+
         try {
             await this.profileService.setGamerTag(user, gamerTag)
 
