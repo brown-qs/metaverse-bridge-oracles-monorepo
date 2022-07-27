@@ -141,7 +141,7 @@ async function main() {
         const num = Number.parseFloat(inv.amount)
 
         if (num < 0.0000000001 && num > -0.0000000001) {
-            console.log('dust', num, inv.material.name, inv.owner.userName)
+            console.log('dust', num, inv.material.name, inv.owner.minecraftUserName)
             await connection.manager.getRepository(InventoryEntity).delete(inv.id)
         }
     }
