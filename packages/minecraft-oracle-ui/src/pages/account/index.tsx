@@ -106,7 +106,7 @@ const AccountPage = () => {
             : <Button disableElevation disableRipple style={{ maxWidth: '200px', width: '200px', minWidth: '200px' }} onClick={() => { handleMinecraftLink() }} variant="contained">LINK MINECRAFT</Button>}
           </Box>
         </Stack>
-        <Stack direction="column" alignItems='center' textAlign='center' spacing={1} margin={2} marginTop={5}>
+        <Stack direction="column" alignItems='center' textAlign='center' spacing={1} margin={2} marginTop={3}>
           <Box>GAMER TAG</Box>
           {!!authData?.userProfile?.gamerTag
             ?
