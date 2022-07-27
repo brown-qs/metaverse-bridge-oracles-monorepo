@@ -5,6 +5,6 @@ export type OauthLoginContextType = {
 
 export type OauthDataType = {
   appName: string
-  scopes: string[],
+  scopes: { scope: string, prettyScope: string }[],
   params: URLSearchParams,
 } | null
