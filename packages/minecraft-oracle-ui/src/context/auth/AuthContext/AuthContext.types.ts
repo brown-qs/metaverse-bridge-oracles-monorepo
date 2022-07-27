@@ -7,6 +7,7 @@ export enum UserRole {
 export type ProfileContextType = {
   uuid: string,
   email: string | null,
+  gamerTag: string | null,
   minecraftUuid: string | null,
   hasGame: boolean,
   minecraftUserName: string | null,

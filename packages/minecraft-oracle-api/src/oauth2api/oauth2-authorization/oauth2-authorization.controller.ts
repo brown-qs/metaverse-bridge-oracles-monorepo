@@ -28,11 +28,12 @@ export class Oauth2AuthorizationController {
 
     //this is not compliant with the oauth spec. the oauth spec expects a 302 redirect, but the browser will follow 302s and we don't want that
     //can't just do window.location and go directly to this because we need the auth header to get the user
+
     @Get('authorize')
     @ApiResponse({ status: 200, description: '{"url": "callback.uri?code=akdflajdflkj(&state=xyz) OR callback.uri?error=invalid_request|access_denied|unsupported_response_type&error_description=state%20must%20be%20alphanumeric"}' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    @ApiOperation({ summary: 'Starting URL (for now requires user to already be logged in): <moonsama domain>/oauth?client_id=asdkfljkjklfajljkl2324&redirect_uri=http%3A%2F%2Flocalhost%2Fhome&response_type=code&scope=user%3Agamer_tag.read%20user%3Auuid.read. Redirect user-agent (login flow on Moonsama.com) back to client (oauth2 app) with temp code that can be used to get an access token' })
+    @ApiOperation({ summary: "Produces temporary code that can be used to get an access token. Expand and read the description!", description: `Drop user off at:<br>https://minecraft-metaverse.moonsama.com/oauth<br>?client_id=asdkfljkjklfajljkl2324<br>&redirect_uri=http%3A%2F%2Flocalhost%2Fhome<br>&response_type=code<br>&scope=user%3Agamer_tag.read%20user%3Auuid.read<br><br>client_id of your app<br>redirect_uri whitelisted url where user will be redirected after approving app<br>response_type always 'code'<br>scope requested scopes, space delimited<br><br>User will then go through OAuth flow after which the user will be redirected back to the client (oauth2 app) with a temp code that can be used to get an access token.` })
     async authorize(@User() user: UserEntity, @Query() dto: AuthorizeQueryDto): Promise<{ url: string }> {
         const clientEntity = await this.oauth2ClientService.findOne({ clientId: dto.client_id })
         if (!clientEntity) {
