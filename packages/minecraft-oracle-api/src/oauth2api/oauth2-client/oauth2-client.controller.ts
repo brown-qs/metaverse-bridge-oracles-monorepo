@@ -11,6 +11,7 @@ import { Oauth2ClientUpdateDto } from './dtos/oauth2clientupdate.dto';
 import { Oauth2CreateClientDto } from './dtos/oauth2createclient.dto';
 import { Oauth2PublicClientDto } from './dtos/oauth2publicclient.dto';
 import { Oauth2ClientService } from './oauth2-client.service';
+import xss from "xss"
 
 @ApiTags('OAuth 2.0 Client')
 @Controller('oauth2')
@@ -37,9 +38,19 @@ export class Oauth2ClientController {
         if (user.role !== UserRole.ADMIN) {
             throw new ForbiddenException('Not admin')
         }
+        let appName = body.appName
+            .replace(/[^\x20-\x7E]/g, '') //remove ascii control characters
+        appName = xss(appName, {
+            whiteList: {}, // empty, means filter out all tags
+            stripIgnoreTag: true, // filter out all HTML not in the whitelist
+            stripIgnoreTagBody: ["script"], // the script tag is a special case, we need
+            // to filter out its content
+        })
+        appName = appName.trim()
+
         let row
         try {
-            row = await this.oauth2ClientService.create(body.appName, body.redirectUri, [...body.scopes], user)
+            row = await this.oauth2ClientService.create(appName, body.redirectUri, [...body.scopes], user)
         } catch (e) {
             this.logger.error(`createClient:: error creating oauth client`, e, this.context)
 
