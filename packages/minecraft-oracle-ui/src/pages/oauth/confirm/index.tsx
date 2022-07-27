@@ -44,6 +44,8 @@ const OauthConfirmPage = () => {
       });
       setOauthData(null)
       window.location.href = result.data.url
+      //window.location.href continue to execute code until the page loads, put return statement
+      return
     } catch (e) {
       const err = e as AxiosError;
 
@@ -93,8 +95,8 @@ const OauthConfirmPage = () => {
         {oauthData?.scopes.map(scope => {
           return <div>{scope.prettyScope}</div>
         })}
-        <Button disableElevation disableRipple style={{ marginTop: "10px", maxWidth: '200px', width: '200px', minWidth: '200px' }} onClick={() => { acceptOauth() }} variant="contained">ACCEPT</Button>
-        <Button disableElevation disableRipple style={{ marginTop: "10px", maxWidth: '200px', width: '200px', minWidth: '200px' }} onClick={() => { declineOauth() }} variant="contained">DECLINE</Button>
+        <Button disabled={isLoading} disableElevation disableRipple style={{ marginTop: "10px", maxWidth: '200px', width: '200px', minWidth: '200px' }} onClick={() => { acceptOauth() }} variant="contained">ACCEPT</Button>
+        <Button disabled={isLoading} disableElevation disableRipple style={{ marginTop: "10px", maxWidth: '200px', width: '200px', minWidth: '200px' }} onClick={() => { declineOauth() }} variant="contained">DECLINE</Button>
       </Stack>
     </AuthLayout >
   );
