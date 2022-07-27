@@ -1,3 +1,4 @@
+import { Box } from '@mui/material';
 import React, { useState } from 'react';
 import { OauthLoginContext } from '../oauthLoginContext/OauthLoginContext';
 import { OauthDataType } from '../oauthLoginContext/OauthLoginContext.types';
@@ -9,10 +10,13 @@ export const OauthLoginContextController = ({
   const [oauthData, setOauthData] = useState<OauthDataType>(null);
 
   return (
-    <OauthLoginContext.Provider
-      value={{ oauthData, setOauthData }}
-    >
-      {children}
-    </OauthLoginContext.Provider>
+    <>
+      {!!oauthData && <Box sx={{ padding: "5px", fontFamily: "rubik", backgroundColor: "#c96d1d" }}>Authorizing <strong>{oauthData.appName}</strong></Box>}
+      <OauthLoginContext.Provider
+        value={{ oauthData, setOauthData }}
+      >
+        {children}
+      </OauthLoginContext.Provider>
+    </>
   );
 };

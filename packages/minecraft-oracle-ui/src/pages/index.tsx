@@ -20,6 +20,7 @@ import MinecraftRedirectPage from './account/minecraft/redirect';
 import MinecraftVerifyPage from './account/minecraft/verify';
 import MinecraftUnlinkPage from './account/minecraft/unlink';
 import OauthPage from './oauth';
+import OauthConfirmPage from './oauth/confirm';
 
 export const Routing = () => {
     const { authData } = useAuth();
@@ -74,7 +75,11 @@ export const Routing = () => {
             </Route>
 
             <Route exact path="/oauth">
-                {!!authData?.jwt ? <OauthPage /> : <LoginPage />}
+                <OauthPage />
+            </Route>
+
+            <Route exact path="/oauth/confirm">
+                {!!authData?.jwt ? <OauthConfirmPage /> : <LoginPage />}
             </Route>
 
 
