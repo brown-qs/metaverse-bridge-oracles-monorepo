@@ -1,4 +1,4 @@
-import { useParams, Redirect } from "react-router-dom";
+import { useParams, Navigate } from "react-router-dom";
 import { useAuth } from "hooks";
 import { useEffect } from "react";
 
@@ -20,10 +20,10 @@ const AuthPage = () => {
     }, [])
 
     if (newAuth || alreadyAuthed) {
-        return <Redirect to={'/account'} />;
+        return <Navigate to={'/account'} />;
 
     } else {
-        return <Redirect to='/account/login' />;
+        return <Navigate to='/account/login' />;
     }
 
 };

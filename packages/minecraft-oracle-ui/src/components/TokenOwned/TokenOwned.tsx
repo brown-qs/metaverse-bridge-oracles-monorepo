@@ -5,7 +5,7 @@ import { useActiveWeb3React } from 'hooks';
 import { Asset } from 'hooks/marketplace/types';
 import { TokenMeta } from 'hooks/useFetchTokenUri.ts/useFetchTokenUri.types';
 import { StaticTokenData } from 'hooks/useTokenStaticDataCallback/useTokenStaticDataCallback';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { GlitchText } from 'ui';
 import { truncateHexString } from 'utils';
 import { StringAssetType } from 'utils/subgraph';
@@ -32,14 +32,14 @@ export const TokenOwned = ({
     mr,
     lastPriceContainer,
   } = useClasses(styles);
-  const { push } = useHistory();
+  const navigate = useNavigate();
 
   const { chainId } = useActiveWeb3React();
 
   //console.log('FRESH', {asset, action, actionColor})
 
   const handleImageClick = () => {
-    push(`/token/${asset.assetType}/${asset.assetAddress}/${asset.assetId}`);
+    navigate(`/token/${asset.assetType}/${asset.assetAddress}/${asset.assetId}`);
   };
 
   const isErc721 =
@@ -48,8 +48,8 @@ export const TokenOwned = ({
   const totalSupplyString = isErc721
     ? 'unique'
     : sup
-    ? `${sup} pieces`
-    : undefined;
+      ? `${sup} pieces`
+      : undefined;
 
   return (
     <Paper className={container}>

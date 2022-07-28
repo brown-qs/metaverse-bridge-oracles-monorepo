@@ -13,7 +13,7 @@ import { Alert, Button, Collapse, IconButton, Input, Stack, TextField, Typograph
 import { theme } from 'theme/Theme';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { ReCAPTCHA } from 'components/Recaptcha';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
 
 const EmailLoginPage = () => {
@@ -58,7 +58,7 @@ const EmailLoginPage = () => {
         },
         data: { email: ema, "g-recaptcha-response": token }
       });
-      history.push('/account/login/email/verify')
+      navigate('/account/login/email/verify')
       return
     } catch (e) {
       const err = e as AxiosError;

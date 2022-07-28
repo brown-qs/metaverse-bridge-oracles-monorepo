@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AuthLayout, Loader } from 'ui';
 import { useAuth, useClasses } from 'hooks';
 import Tooltip from '@mui/material/Tooltip';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import WhiteLogo from 'assets/images/moonsama-glitch-white.svg';
 import LeftImage from 'assets/images/home/left.png';
@@ -12,13 +12,12 @@ import { Alert, AlertColor, Avatar, Button, Card, CardContent, CardHeader, Chip,
 import { theme } from 'theme/Theme';
 import { Edit, SportsEsports, ExpandLess, ExpandMore, StarBorder } from '@mui/icons-material';
 import PersonIcon from '@mui/icons-material/Person';
-import { Redirect } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
 const AccountPage = () => {
   const { authData, setAuthData } = useAuth();
   const [isLoading, setIsLoading] = useState(true)
   const [failureMessage, setFailureMessage] = useState("")
-  let history = useHistory();
+  const navigate = useNavigate();
 
   const getAccount = async () => {
     setIsLoading(true)
@@ -52,7 +51,7 @@ const AccountPage = () => {
 
 
   const handleMinecraftLink = () => {
-    history.push("/account/minecraft/redirect")
+    navigate("/account/minecraft/redirect")
   }
 
   const handleLogout = () => {
@@ -61,7 +60,7 @@ const AccountPage = () => {
   }
 
   const handleMinecraftUnlink = async () => {
-    history.push("/account/minecraft/unlink")
+    navigate("/account/minecraft/unlink")
   }
 
   const handleAlertClose = () => {
@@ -70,17 +69,17 @@ const AccountPage = () => {
   }
 
   if (!authData?.jwt) {
-    return <Redirect to={'/account/login'} />;
+    navigate('/account/login')
   }
 
   const accountView = () => {
     if (!authData) {
-      return <Redirect to={'/account/login'} />
+      navigate('/account/login')
     }
 
     return (
       <Stack direction="column" alignItems='center' textAlign='center' spacing={0}>
-        <Chip color="info" sx={{ maxWidth: 300 }} icon={<PersonIcon />} label={authData?.userProfile?.email} onDelete={() => { history.push(`/account/login/email/change`) }}
+        <Chip color="info" sx={{ maxWidth: 300 }} icon={<PersonIcon />} label={authData?.userProfile?.email} onDelete={() => { navigate(`/account/login/email/change`) }}
           deleteIcon={<Edit />}></Chip>
         <Stack direction="column" alignItems='center' textAlign='center' spacing={1} marginTop={2}>
           <Box>

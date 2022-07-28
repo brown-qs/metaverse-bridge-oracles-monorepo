@@ -1,5 +1,5 @@
 import React from 'react';
-import { Switch, Route, Redirect } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from "hooks";
 import HomePage from './home';
 import AuthPage from './auth';
@@ -24,84 +24,86 @@ import OauthPage from './oauth';
 export const Routing = () => {
     const { authData } = useAuth();
     return (
-        <Switch>
-            <Route exact path="/">
-                <Redirect to="/login" />
-            </Route>
+        <>
+            <Routes>
+                <Route path="/">
+                    <Navigate to="/login" />
+                </Route>
 
-            <Route exact path="/account">
-                {!!authData?.jwt ? <AccountPage></AccountPage> : <Redirect to="/account/login" />}
-            </Route>
+                <Route path="/account">
+                    {!!authData?.jwt ? <AccountPage></AccountPage> : <Navigate to="/account/login" />}
+                </Route>
 
-            <Route exact path="/account/login">
-                {!!authData?.jwt ? <Redirect to="/account" /> : <LoginPage />}
-            </Route>
+                <Route path="/account/login">
+                    {!!authData?.jwt ? <Navigate to="/account" /> : <LoginPage />}
+                </Route>
 
-            <Route exact path="/account/login/email">
-                {!!authData?.jwt ? <Redirect to="/account" /> : <EmailLoginPage />}
-            </Route>
+                <Route path="/account/login/email">
+                    {!!authData?.jwt ? <Navigate to="/account" /> : <EmailLoginPage />}
+                </Route>
 
-            <Route exact path="/account/login/email/change">
-                {!!authData?.jwt ? <EmailChangePage /> : <Redirect to="/account/login" />}
-            </Route>
+                <Route path="/account/login/email/change">
+                    {!!authData?.jwt ? <EmailChangePage /> : <Navigate to="/account/login" />}
+                </Route>
 
-            <Route exact path="/account/login/email/verify">
-                <EmailVerifyPage />
-            </Route>
+                <Route path="/account/login/email/verify">
+                    <EmailVerifyPage />
+                </Route>
 
-            <Route exact path="/account/minecraft/redirect">
-                {!!authData?.jwt ? <MinecraftRedirectPage /> : <LoginPage />}
-            </Route>
+                <Route path="/account/minecraft/redirect">
+                    {!!authData?.jwt ? <MinecraftRedirectPage /> : <LoginPage />}
+                </Route>
 
-            <Route exact path="/account/minecraft/verify">
-                {!!authData?.jwt ? <MinecraftVerifyPage /> : <LoginPage />}
-            </Route>
+                <Route path="/account/minecraft/verify">
+                    {!!authData?.jwt ? <MinecraftVerifyPage /> : <LoginPage />}
+                </Route>
 
-            <Route exact path="/account/minecraft/unlink">
-                {!!authData?.jwt ? <MinecraftUnlinkPage /> : <LoginPage />}
-            </Route>
+                <Route path="/account/minecraft/unlink">
+                    {!!authData?.jwt ? <MinecraftUnlinkPage /> : <LoginPage />}
+                </Route>
 
-            <Route exact path="/account/login/kilt">
-                {!!authData?.jwt ? <Redirect to="/account" /> : <KiltLoginPage />}
-            </Route>
+                <Route path="/account/login/kilt">
+                    {!!authData?.jwt ? <Navigate to="/account" /> : <KiltLoginPage />}
+                </Route>
 
-            <Route exact path="/auth/:jwt">
-                <AuthPage />
-            </Route>
+                <Route path="/auth/:jwt">
+                    <AuthPage />
+                </Route>
 
-            <Route exact path="/login">
-                {!!authData?.jwt ? <Redirect to="/bridge" /> : <HomePage />}
-            </Route>
+                <Route path="/login">
+                    {!!authData?.jwt ? <Navigate to="/bridge" /> : <HomePage />}
+                </Route>
 
-            <Route exact path="/oauth">
-                {!!authData?.jwt ? <OauthPage /> : <LoginPage />}
-            </Route>
+                <Route path="/oauth">
+                    {!!authData?.jwt ? <OauthPage /> : <LoginPage />}
+                </Route>
 
 
-            <Route path="/bridge">
-                {!!authData?.jwt ? (
-                    <>
-                        <ImportDialog />
-                        <ExportDialog />
-                        <EnraptureDialog />
-                        <SummonDialog />
-                        <AssetDialog />
-                        <ProfilePage authData={authData} />
-                    </>
-                ) : <HomePage />}
-            </Route>
+                <Route path="/bridge">
+                    {!!authData?.jwt ? (
+                        <>
+                            <ImportDialog />
+                            <ExportDialog />
+                            <EnraptureDialog />
+                            <SummonDialog />
+                            <AssetDialog />
+                            <ProfilePage authData={authData} />
+                        </>
+                    ) : <HomePage />}
+                </Route>
 
-            <Route path="/moonsama/customizer/:chainId/:assetAddress/:assetId">
-                <MoonsamaCharacterDesignerPage authData={authData} />
-            </Route>
+                <Route path="/moonsama/customizer/:chainId/:assetAddress/:assetId">
+                    <MoonsamaCharacterDesignerPage authData={authData} />
+                </Route>
 
-            <Route exact path="/moonsama/customizer">
-                <MoonsamaCharacterDesignerPage authData={authData} />
-            </Route>
+                <Route path="/moonsama/customizer">
+                    <MoonsamaCharacterDesignerPage authData={authData} />
+                </Route>
 
-            <Route path="*">
-                <Redirect to="/bridge" />
-            </Route>
-        </Switch >
+                <Route path="*">
+                    <Navigate to="/bridge" />
+                </Route>
+            </Routes >
+        </>
     )
 };
