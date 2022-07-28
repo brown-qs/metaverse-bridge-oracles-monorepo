@@ -31,7 +31,7 @@ const MinecraftUnlinkPage = () => {
           "Content-Type": "application/json"
         },
       });
-      history.push("/account")
+      navigate("/account")
       return
     } catch (e) {
       const err = e as AxiosError;
@@ -56,7 +56,7 @@ const MinecraftUnlinkPage = () => {
 
 
   const handleAlertClose = () => {
-    history.push(`/account`)
+    navigate(`/account`)
   }
 
 

@@ -34,7 +34,7 @@ const MinecraftRedirectPage = () => {
       });
 
       window.location = result?.data?.redirectUrl
-      //    history.push('/account/login/email/verify')
+      //    navigate('/account/login/email/verify')
 
     } catch (e) {
       const err = e as AxiosError;
@@ -61,7 +61,7 @@ const MinecraftRedirectPage = () => {
 
 
   const handleAlertClose = () => {
-    history.push(`/account`)
+    navigate(`/account`)
   }
 
 

@@ -2,7 +2,7 @@ import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import { Media } from 'components';
 import { useLastTradedPriceOnce } from 'hooks/marketplace/useLastTradedPrice';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { GlitchText, PriceBox } from 'ui';
 import { truncateHexString } from 'utils';
 import { Fraction } from 'utils/Fraction';
@@ -35,13 +35,13 @@ export const Token = ({ meta, staticData, order }: TokenData) => {
     mr,
     lastPriceContainer,
   } = useClasses(styles);
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const [fetchedOrder, setFetchedOrer] = useState<Order | undefined>(undefined)
 
   const asset = staticData.asset;
 
   const handleImageClick = () => {
-    push(`/token/${asset.assetType}/${asset.assetAddress}/${asset.assetId}`);
+    navigate(`/token/${asset.assetType}/${asset.assetAddress}/${asset.assetId}`);
   };
 
   /*
@@ -109,7 +109,7 @@ export const Token = ({ meta, staticData, order }: TokenData) => {
       <div
         onClick={handleImageClick}
         onKeyPress={handleImageClick}
-        style={{cursor: 'pointer'}}
+        style={{ cursor: 'pointer' }}
       >
         <div
           role="button"

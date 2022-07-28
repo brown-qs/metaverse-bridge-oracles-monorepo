@@ -1,5 +1,5 @@
-import Box from '@mui/material/Box';
 
+import { Box } from '@chakra-ui/react';
 import { useWeb3React } from '@web3-react/core';
 import { useAccountDialog, useActiveWeb3React, useClasses } from 'hooks';
 import { NETWORK_NAME } from '../../constants';

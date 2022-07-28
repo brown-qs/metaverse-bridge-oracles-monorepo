@@ -31,36 +31,34 @@ function Updaters() {
 }
 
 export const AppProviders = ({ children }: AppProvidersProps) => (
-  <ChakraProvider theme={theme}>
-    <ThemeOptionsContextController>
-      <Web3ReactProvider getLibrary={getLibrary}>
-        <Web3ReactProviderNetwork getLibrary={getLibrary}>
-          <AuthContextController>
-            <Provider store={store}>
-              <Updaters />
-              <Web3ReactManager>
-                <AccountDialogContextController>
-                  <SummonDialogContextController>
-                    <ImportDialogContextController>
-                      <EnraptureDialogContextController>
-                        <ExportDialogContextController>
-                          <TransferDialogContextController>
-                            <AssetDialogContextController>
-                              <Router>
-                                <Theme>{children}</Theme>
-                              </Router>
-                            </AssetDialogContextController>
-                          </TransferDialogContextController>
-                        </ExportDialogContextController>
-                      </EnraptureDialogContextController>
-                    </ImportDialogContextController>
-                  </SummonDialogContextController>
-                </AccountDialogContextController>
-              </Web3ReactManager>
-            </Provider>
-          </AuthContextController>
-        </Web3ReactProviderNetwork>
-      </Web3ReactProvider>
-    </ThemeOptionsContextController>
-  </ChakraProvider>
+  <ThemeOptionsContextController>
+    <Web3ReactProvider getLibrary={getLibrary}>
+      <Web3ReactProviderNetwork getLibrary={getLibrary}>
+        <AuthContextController>
+          <Provider store={store}>
+            <Updaters />
+            <Web3ReactManager>
+              <AccountDialogContextController>
+                <SummonDialogContextController>
+                  <ImportDialogContextController>
+                    <EnraptureDialogContextController>
+                      <ExportDialogContextController>
+                        <TransferDialogContextController>
+                          <AssetDialogContextController>
+                            <Router>
+                              {children}
+                            </Router>
+                          </AssetDialogContextController>
+                        </TransferDialogContextController>
+                      </ExportDialogContextController>
+                    </EnraptureDialogContextController>
+                  </ImportDialogContextController>
+                </SummonDialogContextController>
+              </AccountDialogContextController>
+            </Web3ReactManager>
+          </Provider>
+        </AuthContextController>
+      </Web3ReactProviderNetwork>
+    </Web3ReactProvider>
+  </ThemeOptionsContextController>
 );

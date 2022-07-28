@@ -1,19 +1,19 @@
-import Box from '@mui/material/Box';
 
+import { Box } from '@chakra-ui/react';
 import { useClasses } from 'hooks';
 import { useAuth } from 'hooks';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const ServerAccount = () => {
-  let history = useHistory();
+  let navigate = useNavigate();
   const { authData, setAuthData } = useAuth();
 
   const handleAccount = () => {
-    history.push("/account");
+    navigate("/account");
   };
 
   const handleLogin = () => {
-    history.push("/account/login");
+    navigate("/account/login");
   };
 
   const isLoggedIn = !!authData && !!authData?.jwt
