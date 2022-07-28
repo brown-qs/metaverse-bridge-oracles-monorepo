@@ -1,8 +1,8 @@
-import { Button } from 'ui';
 import { useWeb3React } from '@web3-react/core';
 import { useAccountDialog, useActiveWeb3React, useClasses } from 'hooks';
 import { styles } from './ConnectedNetwork.styles';
 import { NETWORK_NAME } from '../../constants';
+import { Button } from '@chakra-ui/react';
 
 export const ConnectedNetwork = () => {
   const { chainId } = useActiveWeb3React();
@@ -16,16 +16,16 @@ export const ConnectedNetwork = () => {
   const { button } = useClasses(styles);
 
   return (
-      <Button
-        className={button}
-        size="medium"
-        onClick={() => setAccountDialogOpen(true)}
-      > 
-        {showError || !chainId ? (
-          'WRONG NETWORK'
-        ) : (
-          NETWORK_NAME[chainId]
-        )}
-      </Button>
+    <Button
+      className={button}
+      size="medium"
+      onClick={() => setAccountDialogOpen(true)}
+    >
+      {showError || !chainId ? (
+        'WRONG NETWORK'
+      ) : (
+        NETWORK_NAME[chainId]
+      )}
+    </Button>
   );
 };

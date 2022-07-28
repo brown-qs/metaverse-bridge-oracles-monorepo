@@ -1,18 +1,15 @@
-import IconButton from '@mui/material/IconButton';
-import DialogUI, { DialogProps } from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import Typography from '@mui/material/Typography';
+import { IconButton, Modal, ModalContent, ModalHeader, Text } from '@chakra-ui/react';
 import { useClasses } from 'hooks';
 import { styles } from './Dialog.styles';
 
-export const Dialog = ({ title, children, onClose, ...props }: DialogProps) => {
+export const Dialog = ({ title, children, onClose, ...props }: any) => {
   const { dialogContainer, dialogTitle, paperStyles, closeButton } =
     useClasses(styles);
   const handleClose = () => {
     onClose && onClose({}, 'escapeKeyDown');
   };
   return (
-    <DialogUI
+    <Modal
       className={dialogContainer}
       PaperProps={{
         className: paperStyles,
@@ -20,24 +17,26 @@ export const Dialog = ({ title, children, onClose, ...props }: DialogProps) => {
       onClose={onClose}
       {...props}
     >
-      <div>
-        <DialogTitle className={dialogTitle}>
-          <Typography variant="h4">{title}</Typography>
-          {onClose ? (
-            <div>
-              <IconButton
-                className={closeButton}
-                aria-label="close"
-                onClick={handleClose}
-              >
-                &times;
-              </IconButton>
-            </div>
-          ) : null}
-        </DialogTitle>
+      <ModalContent>
+        <div>
+          <ModalHeader className={dialogTitle}>
+            <Text variant="h4">{title}</Text>
+            {onClose ? (
+              <div>
+                <IconButton
+                  className={closeButton}
+                  aria-label="close"
+                  onClick={handleClose}
+                >
+                  &times;
+                </IconButton>
+              </div>
+            ) : null}
+          </ModalHeader>
 
-        {children}
-      </div>
-    </DialogUI>
+          {children}
+        </div>
+      </ModalContent>
+    </Modal>
   );
 };

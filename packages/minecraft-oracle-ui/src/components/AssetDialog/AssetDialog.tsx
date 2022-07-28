@@ -1,15 +1,8 @@
 
-import {
-  Box,
-  Grid,
-  Stack,
-} from '@mui/material';
-import CircularProgress from '@mui/material/CircularProgress';
-import Typography from '@mui/material/Typography';
 import { AddressDisplayComponent } from 'components/form/AddressDisplayComponent';
 import 'date-fns';
 import { useState } from 'react';
-import { Button, Dialog } from 'ui';
+import { Dialog } from 'ui';
 import { useClasses } from 'hooks';
 import { styles as appStyles } from '../../app.styles';
 import { styles as assetDialogStyles } from './AssetDialog.styles';
@@ -18,6 +11,7 @@ import useAddTokenToMetamask from 'hooks/useAddTokenToMetamask/useAddTokenToMeta
 import { useTokenStaticData } from 'hooks/useTokenStaticData/useTokenStaticData';
 import { StringAssetType } from 'utils/subgraph';
 import { AddressZero } from '@ethersproject/constants';
+import { Button, CircularProgress, Grid, Stack, Text } from '@chakra-ui/react';
 
 
 export const AssetDialog = () => {
@@ -67,10 +61,10 @@ export const AssetDialog = () => {
         <div className={loadingContainer}>
           <CircularProgress />
           <div>
-            <Typography>Loading asset details</Typography>
-            <Typography color="textSecondary" variant="h5">
+            <Text>Loading asset details</Text>
+            <Text color="textSecondary" variant="h5">
               Should be a jiffy
-            </Typography>
+            </Text>
           </div>
         </div>
       );
@@ -78,8 +72,8 @@ export const AssetDialog = () => {
 
     return (
       <Stack spacing={1} justifyContent="center">
-        <Typography style={{alignSelf: 'center'}} variant='body1'>Hybrid token details</Typography>
-        {assetDialogData?.assetERC1155 && <Grid item md={12} xs={12}>
+        <Text style={{ alignSelf: 'center' }} variant='body1'>Hybrid token details</Text>
+        {assetDialogData?.assetERC1155 && <Grid /*item md={12} xs={12}*/>
           <Stack direction={'row'} className={formBox} spacing={5}>
             <div className={col}>
               <div className={formLabel}>Type</div>
@@ -107,25 +101,25 @@ export const AssetDialog = () => {
         </Grid>}
 
         {assetDialogData?.assetAddressERC20 && (
-            <Stack direction={'row'} className={`${formBox} ${row}`} spacing={5}>
-              <div className={col}>
-                <div className={formLabel}>Type</div>
-                <div className={`${formValue} ${formValueTokenDetails}`}>
-                  {'ERC20'}
-                </div>
+          <Stack direction={'row'} className={`${formBox} ${row}`} spacing={5}>
+            <div className={col}>
+              <div className={formLabel}>Type</div>
+              <div className={`${formValue} ${formValueTokenDetails}`}>
+                {'ERC20'}
               </div>
-              <div className={col}>
-                <div className={formLabel}>Address</div>
-                <AddressDisplayComponent
-                  className={`${formValue} ${formValueTokenDetails}`}
-                  copyTooltipLabel={'Copy address'}
-                  charsShown={5}
-                >
-                  {assetDialogData?.assetAddressERC20 ?? '?'}
-                </AddressDisplayComponent>
-              </div>
-            </Stack>
-          )}
+            </div>
+            <div className={col}>
+              <div className={formLabel}>Address</div>
+              <AddressDisplayComponent
+                className={`${formValue} ${formValueTokenDetails}`}
+                copyTooltipLabel={'Copy address'}
+                charsShown={5}
+              >
+                {assetDialogData?.assetAddressERC20 ?? '?'}
+              </AddressDisplayComponent>
+            </div>
+          </Stack>
+        )}
         <Button
           onClick={() => {
             addToken()

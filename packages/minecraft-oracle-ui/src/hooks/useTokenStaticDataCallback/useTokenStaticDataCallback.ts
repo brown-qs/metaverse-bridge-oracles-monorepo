@@ -31,7 +31,6 @@ import {
   ChainId,
   RPC_URLS,
 } from '../../constants';
-import { integerPropType } from '@mui/utils';
 
 export interface StaticTokenData {
   asset: Asset;
@@ -402,8 +401,8 @@ export const useTokenStaticDataCallbackArrayWithChains = () => {
     await Promise.all(
       PERMISSIONED_CHAINS.map(async (chainId) => {
         let address = chainId
-        ? MULTICALL_NETWORKS[chainId ?? ChainId.MOONRIVER]
-        : undefined;
+          ? MULTICALL_NETWORKS[chainId ?? ChainId.MOONRIVER]
+          : undefined;
         if (!address) return;
         if (calls[chainId]?.length && RPC_URLS[chainId]) {
           const result = await tryMultiCallCore(multi(address, chainId), calls[chainId], false);

@@ -1,10 +1,9 @@
 import { BigNumber } from '@ethersproject/bignumber';
-import { FormControl, InputAdornment, OutlinedInput } from '@mui/material';
-import Button from '@mui/material/Button';
 import React from 'react';
 import { styles as appStyles } from '../../app.styles';
 import { useClasses } from 'hooks';
 import { styles } from './NumberFieldWithMaxButton.styles';
+import { FormControl, Input } from '@chakra-ui/react';
 
 export const NumberFieldWithMaxButton = (props: any) => {
   const fieldType = props.type || 'number';
@@ -26,13 +25,13 @@ export const NumberFieldWithMaxButton = (props: any) => {
   return (
     <React.Fragment>
       <FormControl className={props.className} variant="outlined">
-        <OutlinedInput
+        <Input
           id={props.id}
           type={fieldType}
           className={outlinedInput}
-          inputProps={{ min: 0 }}
+          //inputProps={{ min: 0 }}
           onChange={onChange}
-          endAdornment={
+          /*endAdornment={
             <InputAdornment position="end">
               <Button
                 className={formMaxButton}
@@ -43,7 +42,7 @@ export const NumberFieldWithMaxButton = (props: any) => {
                 MAX
               </Button>
             </InputAdornment>
-          }
+          }*/
           value={value}
         />
       </FormControl>

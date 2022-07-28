@@ -1,11 +1,10 @@
-import { Theme } from '@mui/material';
 
-export const styles = (theme: Theme) => ({
+export const styles = (theme: any) => ({
   container: {
     display: 'flex',
     flexDirection: 'column',
-    marginTop: theme.spacing(2),
-    padding: theme.spacing(1.5),
+    //   marginTop: theme.spacing(2),
+    //   padding: theme.spacing(1.5),
     borderRadius: 0,
   },
   imageContainer: {
@@ -52,6 +51,6 @@ export const styles = (theme: Theme) => ({
     fontSize: 14,
   },
   mr: {
-    marginRight: theme.spacing(1),
+    //   marginRight: theme.spacing(1),
   },
 });

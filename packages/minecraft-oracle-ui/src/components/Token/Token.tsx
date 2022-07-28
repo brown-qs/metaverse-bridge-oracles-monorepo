@@ -1,22 +1,21 @@
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
+
 import { Media } from 'components';
 import { useLastTradedPriceOnce } from 'hooks/marketplace/useLastTradedPrice';
 import { useNavigate } from 'react-router-dom';
-import { GlitchText, PriceBox } from 'ui';
+import { PriceBox } from 'ui';
 import { truncateHexString } from 'utils';
 import { Fraction } from 'utils/Fraction';
 import { OrderType, StringAssetType, StringOrderType, stringToOrderType } from 'utils/subgraph';
 import { useClasses } from 'hooks';
 import { styles } from './Token.styles';
 import LootBox from '../../assets/images/loot-box.png';
-import { width } from '@mui/system';
 import { TokenMeta } from 'hooks/useFetchTokenUri.ts/useFetchTokenUri.types';
 import { StaticTokenData } from 'hooks/useTokenStaticDataCallback/useTokenStaticDataCallback';
 import { Order } from 'hooks/marketplace/types';
 import { useEffect, useState } from 'react';
 import { useOrder } from 'hooks/marketplace/useOrder';
 import { useAssetOrders, useAssetOrdersCallback } from 'hooks/marketplace/useAssetOrders';
+import { Container, Text } from '@chakra-ui/react';
 
 export interface TokenData {
   meta: TokenMeta | undefined;
@@ -105,7 +104,7 @@ export const Token = ({ meta, staticData, order }: TokenData) => {
       : undefined;
 
   return (
-    <Paper className={container}>
+    <Container className={container}>
       <div
         onClick={handleImageClick}
         onKeyPress={handleImageClick}
@@ -120,9 +119,9 @@ export const Token = ({ meta, staticData, order }: TokenData) => {
           {/*<img src={LootBox} style={{width: '100%', height: 'auto'}}/>*/}
         </div>
         <div className={nameContainer}>
-          <GlitchText className={tokenName}>
+          <Text className={tokenName}>
             {meta?.name ?? truncateHexString(asset.assetId)}
-          </GlitchText>
+          </Text>
           {finalOrder?.pricePerUnit && (
             <PriceBox margin={false} size="small" color={color}>
               {Fraction.from(finalOrder?.pricePerUnit.toString(), 18)?.toFixed(0)} MOVR
@@ -131,22 +130,22 @@ export const Token = ({ meta, staticData, order }: TokenData) => {
         </div>
         <div className={stockContainer}>
           {staticData?.symbol && (
-            <Typography color="textSecondary">{staticData.symbol}</Typography>
+            <Text color="textSecondary">{staticData.symbol}</Text>
           )}
 
           {totalSupplyString && (
-            <Typography color="textSecondary">{totalSupplyString}</Typography>
+            <Text color="textSecondary">{totalSupplyString}</Text>
           )}
         </div>
         {/*{ltp && <div className={lastPriceContainer}>
-        <Typography color="textSecondary" noWrap className={mr}>
+        <Text color="textSecondary" noWrap className={mr}>
           Last trade
-        </Typography>
+        </Text>
         <PriceBox margin={true} size="small" color='white'>
           {Fraction.from(ltp.unitPrice, 18)?.toFixed(2)} MOVR
         </PriceBox>
       </div>}*/}
       </div>
-    </Paper>
+    </Container>
   );
 };

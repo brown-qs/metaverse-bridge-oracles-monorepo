@@ -1,25 +1,24 @@
-import { Theme } from '@mui/material';
 
-export const styles = (theme: Theme) => ({
+export const styles = (theme: any) => ({
     profileContainer: {
         display: 'flex',
         alignItems: 'center',
         flexDirection: 'column',
-        margin: `${theme.spacing(8)}px 0`,
-        [theme.breakpoints.down('sm')]: {
-            textAlign: 'center',
-        },
+        /* margin: `${theme.spacing(8)}px 0`,
+         [theme.breakpoints.down('sm')]: {
+             textAlign: 'center',
+         },*/
     },
     dialogContainer: {
         display: 'flex',
-        padding: theme.spacing(4),
+        //   padding: theme.spacing(4),
         flexDirection: 'column',
         // minWidth: 500,
     },
     divider: {
-        background: theme.palette.text.secondary,
+        // background: theme.palette.text.secondary,
         opacity: 0.5,
-        marginTop: theme.spacing(2),
+        // marginTop: theme.spacing(2),
     },
     // Column
     col: {
@@ -41,27 +40,27 @@ export const styles = (theme: Theme) => ({
     formBox: {
         border: 1,
         borderStyle: 'solid',
-        borderColor: theme.palette.grey[900],
+        //   borderColor: theme.palette.grey[900],
         padding: 30,
     },
     formSubheader: {
         fontSize: 22,
-        color: theme.palette.common.white,
+        // color: theme.palette.common.white,
         marginBottom: '1rem',
     },
     formButton: {
-        marginTop: theme.spacing(2),
+        //  marginTop: theme.spacing(2),
         margin: '0 auto',
         display: 'block',
         minWidth: 240,
     },
     formLabel: {
-        color: theme.palette.grey[500],
+        //    color: theme.palette.grey[500],
         display: 'flex',
         alignItems: 'center',
     },
     formValue: {
-        color: theme.palette.text.primary,
+        //color: theme.palette.text.primary,
     },
     formValueTokenDetails: {
         height: 40,

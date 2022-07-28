@@ -1,5 +1,4 @@
 import { Provider } from 'react-redux';
-import Theme from '../theme/Theme';
 import { ThemeOptionsContextController } from '../context/themeOptions/themeOptionsContextController/ThemeOptionsContextController';
 import { AuthContextController } from '../context/auth/AuthContextController/AuthContextController';
 import { ImportDialogContextController } from '../context/importDialog/importDialogContextController/ImportDialogContextController';

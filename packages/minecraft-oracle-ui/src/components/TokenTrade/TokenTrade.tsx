@@ -1,5 +1,4 @@
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
+
 import { Media } from 'components';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 import { useActiveWeb3React } from 'hooks';
@@ -7,7 +6,7 @@ import { FillWithOrder, Order } from 'hooks/marketplace/types';
 import { TokenMeta } from 'hooks/useFetchTokenUri.ts/useFetchTokenUri.types';
 import { StaticTokenData } from 'hooks/useTokenStaticDataCallback/useTokenStaticDataCallback';
 import { useNavigate } from 'react-router-dom';
-import { GlitchText, PriceBox } from 'ui';
+import { PriceBox } from 'ui';
 import { getExplorerLink, truncateHexString } from 'utils';
 import { Fraction } from 'utils/Fraction';
 import {
@@ -19,6 +18,7 @@ import {
 import { useClasses } from 'hooks';
 import { styles } from './TokenTrade.styles';
 import LootBox from '../../assets/images/loot-box.png';
+import { Container, Text } from '@chakra-ui/react';
 
 export const TokenTrade = ({
   fill,
@@ -81,7 +81,7 @@ export const TokenTrade = ({
     : action;
 
   return (
-    <Paper className={container}>
+    <Container className={container}>
       <div
         role="button"
         className={imageContainer}
@@ -93,39 +93,39 @@ export const TokenTrade = ({
         {/*<img src={LootBox} style={{width: '100%', height: 'auto'}}/>*/}
       </div>
       <div className={nameContainer}>
-        <GlitchText className={tokenName}>
+        <Text className={tokenName}>
           {meta?.name ?? truncateHexString(asset.assetId)}
-        </GlitchText>
+        </Text>
         <PriceBox margin={false} size="small" color={actionColor}>
           {ppuDisplay}
         </PriceBox>
       </div>
       <div className={stockContainer}>
         {staticData?.symbol && (
-          <Typography color="textSecondary">{staticData.symbol}</Typography>
+          <Text color="textSecondary">{staticData.symbol}</Text>
         )}
         {totalSupplyString && (
-          <Typography color="textSecondary">{totalSupplyString}</Typography>
+          <Text color="textSecondary">{totalSupplyString}</Text>
         )}
       </div>
       <div className={lastPriceContainer}>
         <ExternalLink href={getExplorerLink(chainId, fill.id, 'transaction')}>
-          <Typography className={smallText} noWrap>
+          <Text className={smallText} >
             {unit?.toString()} taken
-          </Typography>
+          </Text>
         </ExternalLink>
-        <Typography color="textSecondary" noWrap className={mr}>
+        <Text color="textSecondary" className={mr}>
           by
-        </Typography>
-        {/*<Typography color="textSecondary" noWrap>
+        </Text>
+        {/*<Text color="textSecondary" noWrap>
           {truncateHexString(order.seller)}
-        </Typography>*/}
+        </Text>*/}
         <ExternalLink href={getExplorerLink(chainId, fill.buyer, 'address')}>
-          <Typography className={smallText} noWrap>
+          <Text className={smallText} >
             {truncateHexString(fill.buyer)}
-          </Typography>
+          </Text>
         </ExternalLink>
       </div>
-    </Paper>
+    </Container>
   );
 };

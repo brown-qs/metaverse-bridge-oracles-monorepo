@@ -1,8 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AuthLayout, Loader } from 'ui';
-
-import { theme } from 'theme/Theme';
-import LoadingButton from '@mui/lab/LoadingButton';
 import { ReCAPTCHA } from 'components/Recaptcha';
 import { useNavigate } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
