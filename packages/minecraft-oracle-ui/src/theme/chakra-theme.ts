@@ -124,7 +124,7 @@ export default extendTheme({
     }
   },
   fonts: {
-    body: `Rubik, system-ui, sans-serif`,
+    body: `Orbitron, system-ui, sans-serif`,
     heading: `Orbitron, Georgia, serif`,
     mono: `Menlo, monospace`,
   },
