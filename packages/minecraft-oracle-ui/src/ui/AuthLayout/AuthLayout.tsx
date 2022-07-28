@@ -13,7 +13,10 @@ export interface AuthLayoutProps {
 
 export const AuthLayout = ({ children, ...props }: React.PropsWithChildren<AuthLayoutProps>) => {
   return (
-    <Stack direction="column" alignItems='stretch' textAlign='center' spacing={2}>
+    <Stack direction="column" alignItems='stretch' textAlign='center' spacing={2} width={{
+      base: '100%',
+      sm: '500px',
+    }} sx={{ margin: "auto" }}>
       {!!props?.alert && !props.loading
         ?
         <Stack direction="column" spacing={6} margin={2} alignContent='center' textAlign='center'>
