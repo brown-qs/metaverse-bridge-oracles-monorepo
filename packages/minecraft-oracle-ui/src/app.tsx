@@ -1,14 +1,14 @@
 import { AppProviders } from 'providers/AppProvider';
-import { AccountDialog, Layout } from 'components';
+import { AccountDialog, MoonsamaLayout } from 'components';
 import { Routing } from 'pages';
 
 function MyApp() {
   return (
     <AppProviders>
       <AccountDialog />
-      <Layout>
+      <MoonsamaLayout>
         <Routing />
-      </Layout>
+      </MoonsamaLayout>
     </AppProviders>
   );
 }

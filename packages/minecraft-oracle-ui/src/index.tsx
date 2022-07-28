@@ -15,5 +15,5 @@ root.render(
     <ChakraProvider theme={chakraTheme}>
       <App />
     </ChakraProvider>
-  </React.StrictMode>,
+  </React.StrictMode>
 );
