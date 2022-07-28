@@ -1,20 +1,19 @@
 import { MAX_WIDTH_TO_SHOW_NAVIGATION } from '../../constants';
-import { useState } from 'react';
-import { Box, Flex, HStack, VStack } from '@chakra-ui/react'
+import { useRef, useState } from 'react';
+import { Box, Button, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Flex, HStack, Input, useDisclosure, VStack } from '@chakra-ui/react'
 import CarnageStatus from './CarnageStatus';
 import ConnectedNetwork from './ConnectedNetwork';
 import WalletAccount from './WalletAccount';
 import ServerAccount from './ServerAccount';
 import NavMenuItem from './NavMenuItem';
 import { useMediaQuery } from '@chakra-ui/react'
+import { Menu2 } from 'tabler-icons-react';
 
 export default function MoonsamaNav() {
   const [isLargerThanXl] = useMediaQuery('(min-width: 1280px)')
   const [isLargerThanLg] = useMediaQuery('(min-width: 992px)')
   const [isLargerThanSm] = useMediaQuery('(min-width: 480px)')
-
-  const [isDrawerOpened, setIsDrawerOpened] = useState<boolean>(false);
-
+  const { isOpen, onOpen, onClose } = useDisclosure()
 
 
   return (
@@ -53,6 +52,32 @@ export default function MoonsamaNav() {
           :
           <>
             <WalletAccount />
+            <Button onClick={onOpen} variant="ghost"><Menu2 color="#66C8FF"></Menu2></Button>
+            <Drawer
+              isOpen={isOpen}
+              placement='left'
+              onClose={onClose}
+            >
+              <DrawerOverlay />
+              <DrawerContent background="#1A202C">
+
+                <DrawerBody>
+                  <VStack alignItems={"stretch"}>
+                    <NavMenuItem href={'https://marketplace.moonsama.com'} label={`Marketplace`} external={true} />
+                    <NavMenuItem href={'https://mcapi.moonsama.com'} label={`MCAPI`} external={true} />
+                    <NavMenuItem href={'https://wiki.moonsama.com'} label={`Docs`} external={true} />
+                    <NavMenuItem href={'/moonsama/customizer'} label={`Customizer`} />
+                  </VStack>
+                  <VStack alignItems={"stretch"}>
+                    <ConnectedNetwork />
+                    <WalletAccount />
+                    <ServerAccount />
+                  </VStack>
+                </DrawerBody>
+
+
+              </DrawerContent>
+            </Drawer>
           </>
         }
 
