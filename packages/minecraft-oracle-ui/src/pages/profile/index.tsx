@@ -78,50 +78,28 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const assetCounter = countGamePassAssets(inGameAssets)
     const hasImportedTicket = assetCounter.ticketNum > 0
 
+
+    const skinsElem = inGameTextures.sort((t1, t2) => t1.assetAddress.localeCompare(t2.assetAddress)).map((value, ind) => {
+
+        const skinLabel = SKIN_LABELS[value.assetAddress.toLowerCase()]
+        //<a target='_blank' className={itemImage} href={`${value.renderURL ? `https://minerender.org/embed/skin/?skin=${value.renderURL}` : value.coverURL}`} rel="noreferrer">
+        return (
+
+            < GridItem _before={{ content: `""`, paddingBottom: "100%", display: "block" }
+            } backgroundImage={`url(${value.coverURL})`} backgroundRepeat="no-repeat" backgroundSize="contain" cursor="pointer" backgroundPosition="center" sx={{ backgroundSize: "auto 75%" }}>
+
+            </GridItem >
+        );
+
+
+    })
     const skinListElem = (<>
         {!!inGameTextures.length
             ?
-            inGameTextures.sort((t1, t2) => t1.assetAddress.localeCompare(t2.assetAddress)).map((value, ind) => {
+            <Grid templateColumns='repeat(2, 1fr)' width="100%">
+                {skinsElem}
+            </Grid>
 
-                // console.log('SKIN', value)
-
-                const skinLabel = SKIN_LABELS[value.assetAddress.toLowerCase()]
-
-                return (
-                    <Stack
-                        direction='column'
-                        alignItems="center"
-                        justifyContent="space-between"
-                        key={`${value?.assetAddress}-${value?.assetId}-${ind}`} //update key
-                    // className={`${skinComponent} ${value.equipped ? 'selected' : ''}`}
-                    >
-                        {value.coverURL && <Tooltip placement='left' title={`${skinLabel?.[value.assetId]?.label ?? skinLabel?.label ?? 'Available in-game skin'}${value.assetAddress !== '0x0' ? ` Because you imported ${value.name} #${value.assetId}` : ''}`}>
-                            <a target='_blank' /*className={itemImage}*/ href={`${value.renderURL ? `https://minerender.org/embed/skin/?skin=${value.renderURL}` : value.coverURL}`} rel="noreferrer">
-                                <Media uri={value.coverURL} style={{ marginTop: `${value.equipped ? 'none' : '15px'}` }} />
-                            </a>
-                        </Tooltip>}
-                        {!value.equipped ? (
-                            <button
-                                // className={transferButtonMid}
-                                disabled={value.equipped}
-                                onClick={async () => {
-                                    const success = await callbackSkinEquip({
-                                        assetAddress: value.assetAddress,
-                                        assetId: value.assetId,
-                                        assetType: value.assetType
-                                    })
-                                    if (success) {
-                                        setFetchtrigger(Date.now().toString())
-                                    }
-                                }}
-                            >
-                                Equip
-                            </button>
-                        ) : <div style={{ display: 'block' }}>Equipped</div>
-                        }
-                    </Stack>
-                );
-            })
             : (
                 <Box padding="24px" color="white" textAlign="left" w="100%" fontFamily='Rubik'>
                     No available skins found.
@@ -130,60 +108,39 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
         }
     </>)
 
+    const inGameItemsElem = inGameAssets.map((value, ind) => {
+        const labelId = `checkbox-list-secondary-label-${ind}`;
+        return (
+            <>
+                <GridItem margin="8px 0px 8px 11px" h="80px" key={`${value?.assetAddress}-${value?.assetId}-${ind}`} backgroundImage={`url(${value?.meta?.image})`} backgroundRepeat="no-repeat" backgroundSize="contain" backgroundPosition="center"></GridItem>
+                <GridItem fontSize="16px" fontFamily="Rubik" color="white">
+                    <Flex h="100%" direction="row" alignItems="center" paddingLeft="8px">
+                        <Box>{value?.meta?.name ?? `${value.assetAddress} ${value.assetId}`}</Box>
+                    </Flex>
+                </GridItem>
+                <GridItem margin="0 11px 0 0">
+                    <Flex h="100%" direction="row" alignItems="center" paddingLeft="8px">
+                        <Button isDisabled={!value?.exportable} onClick={() => {
+                            setItemDetailDialogData(value);
+                            setItemDetailDialogOpen(true);
+                        }} size='xs'>Export</Button>
+                    </Flex>
+                </GridItem>
+            </>
+        );
+    })
     const inGameItemListElem = (<> {/* Start In Game Items */}
         <List sx={{ width: '100%', bgcolor: '#111' }}>
             {!!inGameAssets.length
                 ?
-                inGameAssets.map((value, ind) => {
-                    const labelId = `checkbox-list-secondary-label-${ind}`;
-                    return (
-                        <ListItem
-                            key={`${value?.assetAddress}-${value?.assetId}-${ind}`} //update key
-
-                        >
-                            <Box onClick={() => {
-                                setItemDetailDialogData(value);
-                                setItemDetailDialogOpen(true);
-                            }}>
-                                <ListIcon >
-                                    {/*<img className={itemImage} src={value?.meta?.image} alt="" />*/}
-                                    <Media uri={value?.meta?.image} />
-                                </ListIcon>
-                                <Text style={{ paddingLeft: '10px' }}>{value?.meta?.name ?? `${value.assetAddress} ${value.assetId}`} </Text>
-                                {value?.exportable && (
-                                    <Tooltip title={'Your exported asset will go back to the sender address you imported from. Associated items or skins will be unavailable.'}>
-                                        <Button
-                                            onClick={(e: any) => {
-                                                e.stopPropagation();
-                                                setExportDialogOpen(true);
-                                                setExportDialogData(
-                                                    {
-                                                        hash: value.hash,
-                                                        asset: {
-                                                            assetAddress: value.assetAddress,
-                                                            assetId: value.assetId,
-                                                            assetType: stringToStringAssetType(value.assetType),
-                                                            id: 'x'
-                                                        },
-                                                        chain: value.exportChainId,
-                                                        item: value
-                                                    }
-                                                );
-                                            }}
-                                        >
-                                            Export to wallet
-                                        </Button>
-                                    </Tooltip>
-                                )}
-                            </Box>
-                        </ListItem>
-                    );
-                })
-                : (
-                    <Box padding="24px" color="white" textAlign="left" w="100%" fontFamily='Rubik'>
-                        No items found in game.
-                    </Box>
-                )}
+                <Grid templateColumns='80px 1fr 80px' width="100%">
+                    {inGameItemsElem}
+                </Grid>
+                :
+                <Box padding="24px" color="white" textAlign="left" w="100%" fontFamily='Rubik'>
+                    No items found in game.
+                </Box>
+            }
         </List>
         <Dialog
             open={itemDetailDialogOpen}
@@ -305,34 +262,38 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     </>)
 
 
-    const inGameResourcesElem = (<>
-        <List sx={{ width: '100%', bgcolor: '#111' }}>
-            {!!inGameResources.length ? (
-                <>
-                    {inGameResources.map(resource => {
-                        return (
-                            <ListItem
-                                key={`${resource.assetAddress}-${resource.assetId}`}
+    const inGameResourcesElem = inGameResources.map(resource => {
+        return (
+            <>
+                <GridItem margin="8px 0px 8px 11px" h="80px" key={`${resource.assetAddress}-${resource.assetId}`} backgroundImage={`url(${resource.meta?.image})`} backgroundRepeat="no-repeat" backgroundSize="contain" backgroundPosition="center"></GridItem>
+                <GridItem fontSize="16px" fontFamily="Rubik" color="white">
+                    <Flex h="100%" direction="row" alignItems="center" paddingLeft="8px">
+                        <Box>{resource?.meta?.name}</Box>
+                    </Flex>
+                </GridItem>
+                <GridItem margin="0 11px 0 0">
+                    <Flex h="100%" direction="row" alignItems="center" paddingLeft="8px" color="white">
+                        <Box>{String(parseFloat(resource.amount).toFixed(2))}</Box>
+                    </Flex>
+                </GridItem>
 
+            </>
+        )
+    })
+    const inGameResourcesListElem = (<>
+        {!!inGameResources.length ? (
 
-                            >
-                                <Box sx={{ cursor: "default" }}>
-                                    <ListIcon>
-                                        <img src={resource.meta?.image} alt={resource.name} />
-                                    </ListIcon>
-                                    {/*<Text secondaryTypographyProps={{ sx: { color: "white" } }} id={resource.name} primary={resource.meta?.name} secondary={String(parseFloat(resource.amount).toFixed(2))} />*/}
-                                </Box>
-                            </ListItem>
-                        )
-                    })}
-                </>
-            ) :
-                <Box padding="24px" color="white" textAlign="left" w="100%" fontFamily='Rubik'>
-                    No in-game resources available
-                </Box>
-            }
-        </List>
-        <Button
+            <Grid templateColumns='80px 1fr 100px' width="100%">
+                {inGameResourcesElem}
+            </Grid>
+
+        ) :
+            <Box padding="24px" color="white" textAlign="left" w="100%" fontFamily='Rubik'>
+                No in-game resources available
+            </Box>
+        }
+        <Button size="xs"
+            variant="solid"
             onClick={() => {
                 if (!!account) {
                     setSummonDialogOpen(true);
@@ -387,7 +348,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
     return (
         <Container background="black" minWidth="100%" margin="0" padding="0" height={{ base: "100%", md: "max(calc(100vh - 80px), 100%)", xl: "max(calc(100vh - 64px), 100%)" }} overflow="visible">
-            <Grid templateRows={{ base: "200px repeat(5, 450px)", md: '275px 1fr 1fr 1fr', lg: '275px 1fr 1fr' }} templateColumns='repeat(12, 1fr)' maxW="1440px" margin="auto" height={{ base: "100%", md: "max(calc(100vh - 80px), 800px)", xl: "max(calc(100vh - 64px), 800px)" }}>
+            <Grid templateRows={{ base: "200px repeat(5, 450px)", md: '275px 1fr 1fr 1fr', lg: '275px minmax(0, 1fr) minmax(0, 1fr)' }} templateColumns='repeat(12, 1fr)' maxW="1440px" margin="auto" height={{ base: "100%", md: "max(calc(100vh - 80px), 800px)", xl: "max(calc(100vh - 64px), 800px)" }}>
 
 
 
@@ -479,7 +440,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     colSpan={{ base: 12, md: 6, lg: 6 }}
                 >
                     <BridgeTab title="In-Game Resources">
-                        {inGameResourcesElem}
+                        {inGameResourcesListElem}
                     </BridgeTab>
                 </GridItem>
 
@@ -508,7 +469,7 @@ export default ProfilePage;
 
 const BridgeTab: React.FC<{ title: string, children: ReactNode }> = ({ title, children }) => {
     return (
-        <VStack height="100%" alignItems={"flex-start"} spacing={0}>
+        <VStack maxHeight="100%" height="100%" alignItems={"flex-start"} spacing={0}>
             <HStack
                 alignItems={"center"}
                 width="250px"
@@ -535,5 +496,7 @@ const BridgeTab: React.FC<{ title: string, children: ReactNode }> = ({ title, ch
                 {children}
             </VStack>
         </VStack>
+
     )
 };
+
