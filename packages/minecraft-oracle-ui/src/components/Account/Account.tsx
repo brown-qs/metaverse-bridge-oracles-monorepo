@@ -1,20 +1,15 @@
 import React, { useState } from 'react';
-import Popover from '@mui/material/Popover';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import { Button } from 'ui';
 import { HeaderBalance } from 'components/HeaderBalance/HeaderBalance';
 import { UnsupportedChainIdError } from '@web3-react/core';
 import { useAccountDialog, useActiveWeb3React, useAuth } from 'hooks';
 import { truncateAddress } from 'utils';
 import Identicon from 'components/Identicon/Identicon';
-import PersonSharpIcon from '@mui/icons-material/PersonSharp';
 import { Activity } from 'react-feather';
 import { useMediaQuery } from 'beautiful-react-hooks';
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWalletSharp';
 import { styles as accountStyles } from './Account.styles';
 import { useClasses } from 'hooks';
+import { User, Wallet } from 'tabler-icons-react';
+import { Box, Button, List, ListItem, Popover } from '@chakra-ui/react';
 
 export const Account = () => {
   const [accountButton, setAccountButton] = useState<HTMLButtonElement | null>(null);
@@ -69,7 +64,7 @@ export const Account = () => {
           )
         ) : (
           <div style={{ fontSize: 0, margin: '0 8px 0 0' }}>
-            <AccountBalanceWalletIcon />
+            <Wallet />
           </div>
         )}
         {showError ? (
@@ -93,29 +88,29 @@ export const Account = () => {
               onClick={handleAccountPopoverClick}
             >
               <div style={{ fontSize: 0, margin: '0 8px' }}>
-                <PersonSharpIcon />
+                <User />
               </div>
               {`${authData?.userProfile?.email}`}
             </Button>
             <Popover
               id={id}
-              open={open}
-              anchorEl={accountButton}
-              onClose={handleAccountPopoverClose}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right',
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
+              isOpen={open}
+            /*anchorEl={accountButton}
+            onClose={handleAccountPopoverClose}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}*/
             >
-              <List dense sx={{ width: '150px', bgcolor: '#111' }}>
-                <ListItem className={popoverListItem} disablePadding>
-                  <ListItemButton onClick={handleLogout}>
+              <List sx={{ width: '150px', bgcolor: '#111' }}>
+                <ListItem className={popoverListItem}>
+                  <Box onClick={handleLogout}>
                     Logout
-                  </ListItemButton>
+                  </Box>
                 </ListItem>
               </List>
             </Popover>

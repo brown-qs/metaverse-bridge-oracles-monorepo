@@ -1,8 +1,8 @@
-import Button from '@mui/material/Button/Button';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 import React from 'react';
 import { useClasses } from 'hooks'
 import { styles as optionCardStyles } from './OptionCard.styles';
+import { Button } from '@chakra-ui/react';
 
 export default function OptionCard({
   link = null,

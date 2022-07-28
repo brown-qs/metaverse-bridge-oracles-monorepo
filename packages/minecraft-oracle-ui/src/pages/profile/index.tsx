@@ -1,15 +1,5 @@
-import { Button } from 'ui';
-import Stack from '@mui/material/Stack';
 import { useClasses } from 'hooks';
 import { styles } from './styles';
-import List from '@mui/material/List';
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box'
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
-import Tooltip from '@mui/material/Tooltip';
 
 import { Dialog } from 'ui';
 import { AuthData } from 'context/auth/AuthContext/AuthContext.types';
@@ -31,8 +21,7 @@ import { SKIN_LABELS } from '../../constants/skins';
 import { InGameItemWithStatic } from 'hooks/multiverse/useInGameItems';
 import { BURNABLE_RESOURCES_IDS, DEFAULT_CHAIN, NETWORK_NAME } from "../../constants";
 import { AssetChainDetails } from '../../components/AssetChainDetails/AssetChainDetails';
-import Container from '@mui/material/Container';
-import { theme } from 'theme/Theme';
+import { Text, Box, Container, Grid, List, ListIcon, ListItem, Stack, Tooltip, Button } from '@chakra-ui/react';
 
 export type ProfilePagePropTypes = {
     authData: AuthData
@@ -107,8 +96,8 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const assetCounter = countGamePassAssets(inGameAssets)
     const hasImportedTicket = assetCounter.ticketNum > 0
     return (
-        <Container className={profileContainer} maxWidth={false} sx={{ backgroundColor: "black", minHeight: "100vh", paddingBottom: 10 }}>
-            <Stack justifyContent="center" style={{ marginTop: '30px', minWidth: '90%', maxWidth: '90%' }} spacing={theme.spacing(4)}>
+        <Container className={profileContainer} sx={{ maxWidth: "false", backgroundColor: "black", minHeight: "100vh", paddingBottom: 10 }}>
+            <Stack justifyContent="center" style={{ marginTop: '30px', minWidth: '90%', maxWidth: '90%' }} >
                 <Stack direction='row' display='flex' justifyContent='space-between' alignItems={'baseline'}>
                     <div style={{ textAlign: 'right' }}>
                         <span style={{ fontSize: '22px' }}>Welcome back {authData?.userProfile?.email},</span>
@@ -133,7 +122,6 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     direction={{ xs: 'row', sm: 'row' }}
                     justifyContent="space-between"
                     alignItems="flex-start"
-                    spacing={theme.spacing(4)}
                     overflow='auto'
                 >
 
@@ -194,33 +182,32 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     justifyContent="space-between"
                     alignItems="flex-start"
                     style={{ marginTop: '20px', textAlign: 'center' }}
-                    spacing={theme.spacing(4)}
                 >
                     {/* Start In Game Items */}
                     <Box flexGrow={1}>
                         <div className={columnTitle}><span className={columnTitleText}>In-game items: Metaverse</span></div>
-                        <List dense sx={{ width: '100%', bgcolor: '#111' }}>
+                        <List sx={{ width: '100%', bgcolor: '#111' }}>
                             {!!inGameAssets.length ? inGameAssets.map((value, ind) => {
                                 const labelId = `checkbox-list-secondary-label-${ind}`;
                                 return (
                                     <ListItem
                                         key={`${value?.assetAddress}-${value?.assetId}-${ind}`} //update key
-                                        disablePadding
+
                                     >
-                                        <ListItemButton onClick={() => {
+                                        <Box onClick={() => {
                                             setItemDetailDialogData(value);
                                             setItemDetailDialogOpen(true);
                                         }}>
-                                            <ListItemAvatar className={itemImage}>
+                                            <ListIcon className={itemImage}>
                                                 {/*<img className={itemImage} src={value?.meta?.image} alt="" />*/}
                                                 <Media uri={value?.meta?.image} />
-                                            </ListItemAvatar>
-                                            <ListItemText primary={value?.meta?.name ?? `${value.assetAddress} ${value.assetId}`} style={{ paddingLeft: '10px' }} />
+                                            </ListIcon>
+                                            <Text>{value?.meta?.name ?? `${value.assetAddress} ${value.assetId}`} style={{ paddingLeft: '10px' }} </Text>
                                             {value?.exportable && (
                                                 <Tooltip title={'Your exported asset will go back to the sender address you imported from. Associated items or skins will be unavailable.'}>
                                                     <Button
                                                         className={transferButtonMid}
-                                                        onClick={(e) => {
+                                                        onClick={(e: any) => {
                                                             e.stopPropagation();
                                                             setExportDialogOpen(true);
                                                             setExportDialogData(
@@ -242,7 +229,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     </Button>
                                                 </Tooltip>
                                             )}
-                                        </ListItemButton>
+                                        </Box>
                                     </ListItem>
                                 );
                             }) : (
@@ -261,8 +248,8 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                             fullWidth
                         >
                             <div className={dialogContainer}>
-                                <Grid container spacing={1} justifyContent="center">
-                                    <Grid item md={12} xs={12}>
+                                <Grid /*container spacing={1}*/ justifyContent="center">
+                                    <Grid /*itemmd={12} xs={12}*/>
                                         <Box className={formBox}>
                                             <div className={row}>
                                                 <div className={formLabel}>Item type</div>
@@ -301,19 +288,19 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     {/* Start On Chain Items */}
                     <Box flexGrow={1}>
                         <div className={columnTitle}><span className={columnTitleText}>On-chain items: {NETWORK_NAME[chainId ?? DEFAULT_CHAIN]} account</span></div>
-                        <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
+                        <List sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
                             {!!onChainImportables.length ? (onChainGoldenTickets ?? []).map((item, ind) => {
                                 return (
                                     <ListItem
                                         key={`${item?.asset?.assetAddress}-${item?.asset?.assetId}-${ind}`} //update key
-                                        disablePadding
+
                                     >
-                                        <ListItemButton>
-                                            <ListItemAvatar className={itemImage}>
+                                        <Box>
+                                            <ListIcon className={itemImage}>
                                                 {/*<img className={itemImage} src={item?.meta?.image} alt="" />*/}
                                                 <Media uri={item?.meta?.image} />
-                                            </ListItemAvatar>
-                                            <ListItemText primary={`${item?.meta?.name}${item?.asset?.assetAddress?.toLowerCase() !== '0xb654611f84a8dc429ba3cb4fda9fad236c505a1a' ? ` #${item?.asset?.assetId}` : ''}`} style={{ paddingLeft: '10px' }} />
+                                            </ListIcon>
+                                            <Text style={{ paddingLeft: '10px' }}> {`${item?.meta?.name}${item?.asset?.assetAddress?.toLowerCase() !== '0xb654611f84a8dc429ba3cb4fda9fad236c505a1a' ? ` #${item?.asset?.assetId}` : ''}`}  </Text>
                                             <Tooltip title={'You can have 1 VIP ticket imported at a time.'}>
                                                 <span>
                                                     <Button
@@ -326,7 +313,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                     >Import to game</Button>
                                                 </span>
                                             </Tooltip>
-                                        </ListItemButton>
+                                        </Box>
                                     </ListItem>
                                 );
                             }).concat(
@@ -334,14 +321,14 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                     return (
                                         <ListItem
                                             key={`${item?.asset?.assetAddress}-${item?.asset?.assetId}-${ind}`} //update key
-                                            disablePadding
+
                                         >
-                                            <ListItemButton>
-                                                <ListItemAvatar className={itemImage}>
+                                            <Box>
+                                                <ListIcon className={itemImage}>
                                                     {/*<img className={itemImage} src={item?.meta?.image} alt="" />*/}
                                                     <Media uri={item?.meta?.image} />
-                                                </ListItemAvatar>
-                                                <ListItemText primary={`${item?.meta?.name}${item?.asset?.assetAddress?.toLowerCase() !== '0xb654611f84a8dc429ba3cb4fda9fad236c505a1a' ? ` #${item?.asset?.assetId}` : ''}`} style={{ paddingLeft: '10px' }} />
+                                                </ListIcon>
+                                                <Text style={{ paddingLeft: '10px' }}> {`${item?.meta?.name}${item?.asset?.assetAddress?.toLowerCase() !== '0xb654611f84a8dc429ba3cb4fda9fad236c505a1a' ? ` #${item?.asset?.assetId}` : ''}`}  </Text>
                                                 {item.importable && <Tooltip title={`Your imported ${item?.meta?.name} will bound to your Minecraft account. It will go back to the sender address when exported.`}>
                                                     <span>
                                                         <Button
@@ -364,7 +351,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                         >Burn into game</Button>
                                                     </span>
                                                 </Tooltip>}
-                                            </ListItemButton>
+                                            </Box>
                                         </ListItem>
                                     );
                                 })
@@ -385,13 +372,12 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     direction={{ xs: 'column', sm: 'row' }}
                     justifyContent="space-between"
                     alignItems="flex-start"
-                    spacing={theme.spacing(4)}
                     style={{ textAlign: 'center', marginTop: '30px' }}
                 >
                     {/* Start In Game Resources */}
                     <Box flexGrow={1}>
                         <div className={columnTitle}><span className={columnTitleText}>In-game resources: Metaverse</span></div>
-                        <List dense sx={{ width: '100%', bgcolor: '#111' }}>
+                        <List sx={{ width: '100%', bgcolor: '#111' }}>
                             {!!inGameResources.length ? (
                                 <>
                                     {inGameResources.map(resource => {
@@ -399,14 +385,14 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                             <ListItem
                                                 key={`${resource.assetAddress}-${resource.assetId}`}
 
-                                                disablePadding
+
                                             >
-                                                <ListItemButton disableRipple sx={{ cursor: "default" }}>
-                                                    <ListItemAvatar>
+                                                <Box sx={{ cursor: "default" }}>
+                                                    <ListIcon>
                                                         <img src={resource.meta?.image} alt={resource.name} className={itemImage} />
-                                                    </ListItemAvatar>
-                                                    <ListItemText secondaryTypographyProps={{ sx: { color: "white" } }} id={resource.name} primary={resource.meta?.name} secondary={String(parseFloat(resource.amount).toFixed(2))} />
-                                                </ListItemButton>
+                                                    </ListIcon>
+                                                    {/*<Text secondaryTypographyProps={{ sx: { color: "white" } }} id={resource.name} primary={resource.meta?.name} secondary={String(parseFloat(resource.amount).toFixed(2))} />*/}
+                                                </Box>
                                             </ListItem>
                                         )
                                     })}
@@ -431,17 +417,18 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     {/* Start On Chain Resources */}
                     <Box flexGrow={1}>
                         <div className={columnTitle}><span className={columnTitleText}>On-chain resources: {NETWORK_NAME[chainId ?? DEFAULT_CHAIN]} account</span></div>
-                        <List dense sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
+                        <List sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
 
                             {!!onChainResources.length ? onChainResources.map((value) => {
                                 const labelId = value?.asset?.assetId;
                                 return (
                                     <ListItem
                                         key={value?.asset.assetId}
+                                        /*
                                         secondaryAction={
                                             <>{Fraction.from(value?.asset?.balance, 18)?.toFixed(2)}</>
-                                        }
-                                        disablePadding
+                                        }*/
+
                                         onClick={() => {
                                             //user will be able to see resources in their metamask wallet as under assets, nothing is moving
                                             setAssetDialogOpen(true)
@@ -454,12 +441,12 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                             //window.open(getExplorerLink(chainId ?? ChainId.MOONRIVER, value.asset.assetAddress,'address'))
                                         }}
                                     >
-                                        <ListItemButton>
-                                            <ListItemAvatar>
+                                        <Box>
+                                            <ListIcon>
                                                 <img src={value?.meta?.image} alt="" className={itemImage} />
-                                            </ListItemAvatar>
-                                            <ListItemText id={labelId} primary={value?.meta?.name} />
-                                        </ListItemButton>
+                                            </ListIcon>
+                                            <Text id={labelId}>{value?.meta?.name}</Text>
+                                        </Box>
                                     </ListItem>
                                 );
                             }) : <ListItem>No resources found in wallet.</ListItem>}

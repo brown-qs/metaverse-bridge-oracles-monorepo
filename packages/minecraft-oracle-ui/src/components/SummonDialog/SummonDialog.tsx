@@ -1,13 +1,8 @@
-import { Box, Select, Grid, Stack } from '@mui/material';
-import CircularProgress from '@mui/material/CircularProgress';
-import Typography from '@mui/material/Typography';
-import MenuItem from '@mui/material/MenuItem';
-import { SortSharp } from '@mui/icons-material';
+
 import 'date-fns';
 import { useActiveWeb3React, useSummonDialog } from 'hooks';
-import { SuccessIcon } from 'icons';
 import { useState } from 'react';
-import { Button, Dialog } from 'ui';
+import { Dialog } from 'ui';
 import { useClasses } from 'hooks';
 import { styles as appStyles } from '../../app.styles';
 import { styles } from './SummonDialog.styles';
@@ -18,6 +13,8 @@ import {
   PERMISSIONED_CHAINS,
 } from '../../constants';
 import { AddressDisplayComponent } from 'components/form/AddressDisplayComponent';
+import { Box, Button, CircularProgress, MenuItem, Select, Stack, Text } from '@chakra-ui/react';
+import { CircleCheck } from 'tabler-icons-react';
 
 export const SummonDialog = () => {
   const {
@@ -52,7 +49,7 @@ export const SummonDialog = () => {
     setSummonConfirmed(0);
   };
 
-  const recipient =  account ?? summonDialogData?.recipient ?? undefined;
+  const recipient = account ?? summonDialogData?.recipient ?? undefined;
 
   const summonCallback = useSummonCallback();
 
@@ -60,11 +57,11 @@ export const SummonDialog = () => {
     if (summonSubmitted && summonConfirmed === 1) {
       return (
         <div className={successContainer}>
-          <SuccessIcon className={successIcon} />
-          <Typography>{`Summon request received!`}</Typography>
-          <Typography color="textSecondary">
+          <CircleCheck className={successIcon} />
+          <Text>{`Summon request received!`}</Text>
+          <Text color="textSecondary">
             {`Your summon request was acknowledged by the Oracle. Depending on the number of requests and Moonriver traffic the transaction can take a while. You can sit back and relax now. Check back later.`}
-          </Typography>
+          </Text>
           <Button
             className={button}
             onClick={() => handleClose({}, 'yada')}
@@ -83,9 +80,9 @@ export const SummonDialog = () => {
           <div className={loadingContainer}>
             <CircularProgress />
             <div>
-              <Typography>
+              <Text>
                 Multiverse Bridge Oracle processing your request...
-              </Typography>
+              </Text>
             </div>
           </div>
         </>
@@ -97,11 +94,11 @@ export const SummonDialog = () => {
         <>
           <div className={loadingContainer}>
             <div>
-              <Typography>Unsuccessful summon</Typography>
-              <Typography color="textSecondary" variant="h5">
+              <Text>Unsuccessful summon</Text>
+              <Text color="textSecondary" variant="h5">
                 It seems you didn't have any metaverse resources to summon, or
                 something went wrong. Try again later or contact support.
-              </Typography>
+              </Text>
             </div>
           </div>
         </>
@@ -111,10 +108,10 @@ export const SummonDialog = () => {
     return (
       <Stack spacing={1} justifyContent="center">
         <Stack className={formBox} spacing={2}>
-          <Typography className="form-subheader">
+          <Text className="form-subheader">
             Mint all in-game resources from the metaverse into your connected
             on-chain wallet address:
-          </Typography>
+          </Text>
           <Box alignSelf={'center'}>
             <AddressDisplayComponent
               className={alignSelfCenter}
@@ -124,18 +121,18 @@ export const SummonDialog = () => {
               {recipient}
             </AddressDisplayComponent>
           </Box>
-          <Typography alignSelf={'center'} className="form-subheader">
+          <Text alignSelf={'center'} className="form-subheader">
             Please select the network to summon to.
-          </Typography>
+          </Text>
           <Select
             className={sortElement}
-            IconComponent={SortSharp}
+            /*IconComponent={SortSharp}*/
             variant="outlined"
             color="primary"
-            inputProps={{
-              name: 'sort',
-              id: 'uncontrolled-native',
-            }}
+            /*   inputProps={{
+                 name: 'sort',
+                 id: 'uncontrolled-native',
+               }}*/
             defaultValue={selectedChainId}
             onChange={(event: any) => {
               setSelectedChainId(event.target.value);
