@@ -1,23 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AuthLayout, Loader } from 'ui';
-import { useClasses } from 'hooks';
-import Tooltip from '@mui/material/Tooltip';
-import CloseIcon from '@mui/icons-material/Close';
 
-import WhiteLogo from 'assets/images/moonsama-glitch-white.svg';
-import LeftImage from 'assets/images/home/left.png';
-import RightImageFlip from 'assets/images/home/right.png';
-import Box from '@mui/material/Box';
-
-import { Alert, Button, Collapse, IconButton, Input, Stack, TextField, Typography, useMediaQuery } from '@mui/material';
 import { theme } from 'theme/Theme';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { ReCAPTCHA } from 'components/Recaptcha';
 import { useNavigate } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
+import { Button, Input, Stack } from '@chakra-ui/react';
 
 const EmailLoginPage = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [dirtyTextField, setDirtyTextField] = useState(false);
@@ -82,12 +74,13 @@ const EmailLoginPage = () => {
 
   const loginControls = () => {
     return <Stack alignItems="center" spacing={2}>
-      <TextField disabled={isLoading} inputProps={{ spellCheck: false, autoCapitalize: "off", autoCorrect: "off", onFocus: () => setDirtyTextField(true) }} value={email} error={dirtyTextField && !isValidEmail(email)} onKeyPress={(e) => {
+      {/*disabled={isLoading} inputProps={{ spellCheck: false, autoCapitalize: "off", autoCorrect: "off", onFocus: () => setDirtyTextField(true) }} value={email} error={dirtyTextField && !isValidEmail(email)} onKeyPress={(e) => {
         if (e.key === 'Enter' && !isLoading && isValidEmail(email)) {
           submitEmail(email)
         }
-      }} onChange={(event) => { setEmail(event.target.value) }} label="EMAIL" variant="standard" />
-      <LoadingButton disableElevation disableRipple loading={isLoading} disabled={!isValidEmail(email)} onClick={(e) => submitEmail(email)} variant="contained">SEND LOGIN CODE</LoadingButton>
+      }} onChange={(event) => { setEmail(event.target.value) }} label="EMAIL" variant="standard" */}
+      <Input />
+      <Button isLoading={isLoading} isDisabled={!isValidEmail(email)} onClick={() => submitEmail(email)} variant="solid">SEND LOGIN CODE</Button>
     </Stack >
   }
 

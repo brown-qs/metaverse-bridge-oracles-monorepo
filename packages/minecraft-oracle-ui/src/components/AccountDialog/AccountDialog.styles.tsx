@@ -36,7 +36,7 @@ export const styles = (theme: Theme) => ({
     width: 'initial',
     fontSize: '0.825rem',
     fontWeight: 500,
-    color: theme.palette.text.secondary,
+    // color: theme.palette.text.secondary,
   },
   iconWrapper: {
     display: 'flex',
@@ -59,7 +59,7 @@ export const styles = (theme: Theme) => ({
     textDecoration: 'none',
     background: 'none',
     cursor: 'pointer',
-    color: theme.palette.text.primary,
+    // color: theme.palette.text.primary,
     fontWeight: 500,
     ':hover': {
       textDecoration: 'underline',

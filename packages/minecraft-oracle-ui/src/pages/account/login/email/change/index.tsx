@@ -1,9 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { AuthLayout } from 'ui';
 import { useAuth } from 'hooks';
-
-
-import { Link, useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { ReCAPTCHA } from 'components/Recaptcha';
 import axios, { AxiosError } from 'axios';
 import { Button, FormControl, FormHelperText, FormLabel, Input, Stack } from '@chakra-ui/react';
@@ -13,7 +11,7 @@ const EmailChangePage = () => {
   const [email, setEmail] = useState("");
   const [dirtyTextField, setDirtyTextField] = useState(false);
   const [failureMessage, setFailureMessage] = useState("")
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const recaptchaEl = useRef<any>(null)
 
