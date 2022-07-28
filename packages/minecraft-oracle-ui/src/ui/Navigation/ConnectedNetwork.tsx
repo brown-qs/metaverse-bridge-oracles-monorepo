@@ -1,5 +1,5 @@
 
-import { Box } from '@chakra-ui/react';
+import { Box, Text } from '@chakra-ui/react';
 import { useWeb3React } from '@web3-react/core';
 import { useAccountDialog, useActiveWeb3React, useClasses } from 'hooks';
 import { NETWORK_NAME } from '../../constants';
@@ -39,7 +39,7 @@ export default function CarnageStatus() {
 
   return (
     <Box onClick={() => setAccountDialogOpen(true)} className={BoxStyle}>
-      <span>{errorState ? 'Wrong Network' : NETWORK_NAME[chainId]}</span>
+      <Text color="white">{errorState ? 'Wrong Network' : NETWORK_NAME[chainId]}</Text>
     </Box>
   );
 };

@@ -3,6 +3,7 @@ import { Box } from '@chakra-ui/react';
 import { useClasses } from 'hooks';
 import { useAuth } from 'hooks';
 import { useNavigate } from 'react-router-dom';
+import { UserCircle } from 'tabler-icons-react';
 
 const ServerAccount = () => {
   let navigate = useNavigate();
@@ -25,6 +26,7 @@ const ServerAccount = () => {
       backgroundColor: 'rgba(14, 235, 168, 0.2)',
       textTransform: 'uppercase',
       padding: '16px',
+      height: "50px",
       fontFamily: 'Orbitron',
       fontSize: '12px',
       lineHeight: '16px',
@@ -46,8 +48,8 @@ const ServerAccount = () => {
   } = useClasses(styles)
 
   return (
-    <Box onClick={() => isLoggedIn ? handleAccount() : handleLogin()} className={BoxStyle}>
-      {isLoggedIn ? 'ACCOUNT' : 'LOGIN'}
+    <Box color="white" onClick={() => isLoggedIn ? handleAccount() : handleLogin()} className={BoxStyle}>
+      <UserCircle color="#3BEFB8"></UserCircle>&nbsp;
     </Box>
   );
 }
