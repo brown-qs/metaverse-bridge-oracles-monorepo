@@ -24,7 +24,7 @@ export default function MoonsamaNav() {
       alignItems: "center",
       padding: "8px 16px",
       height: { "base": "80px", "xl": "64px" },
-      background: "#1B1B3A",
+      background: "#1A202C",
       zIndex: 1,
       boxShadow: "0px 20px 25px -5px rgba(0, 0, 0, 0.1), 0px 10px 10px -5px rgba(0, 0, 0, 0.04)"
     }}>
@@ -40,10 +40,10 @@ export default function MoonsamaNav() {
         {isLargerThan1280
           ?
           <>
-            <NavMenuItem href={'/bridge'} label={`Bridge`} />
-            <NavMenuItem href={'/moonsama/customizer'} label={`Customizer`} />
             <NavMenuItem href={'https://marketplace.moonsama.com'} label={`Marketplace`} external={true} />
+            <NavMenuItem href={'https://mcapi.moonsama.com'} label={`MCAPI`} external={true} />
             <NavMenuItem href={'https://wiki.moonsama.com'} label={`Docs`} external={true} />
+            <NavMenuItem href={'/moonsama/customizer'} label={`Customizer`} />
             <CarnageStatus />
             <ConnectedNetwork />
             <WalletAccount />
