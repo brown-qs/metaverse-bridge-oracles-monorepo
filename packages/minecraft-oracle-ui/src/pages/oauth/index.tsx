@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AuthLayout, Loader } from 'ui';
 import { useAuth, useClasses } from 'hooks';
 import Tooltip from '@mui/material/Tooltip';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import WhiteLogo from 'assets/images/moonsama-glitch-white.svg';
 import LeftImage from 'assets/images/home/left.png';
@@ -13,13 +13,12 @@ import { Alert, AlertColor, Avatar, Button, Card, CardContent, CardHeader, Chip,
 import { theme } from 'theme/Theme';
 import { Edit, SportsEsports, ExpandLess, ExpandMore, StarBorder } from '@mui/icons-material';
 import PersonIcon from '@mui/icons-material/Person';
-import { Redirect } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
 const OauthPage = () => {
   const { authData, setAuthData } = useAuth();
   const [isLoading, setIsLoading] = useState(true)
   const [failureMessage, setFailureMessage] = useState("")
-  let history = useHistory();
+  let navigate = useNavigate();
   const { search } = useLocation()
 
   const getOauthCode = async () => {

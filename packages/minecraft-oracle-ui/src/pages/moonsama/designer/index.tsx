@@ -13,7 +13,8 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import MuiAccordionSummary from '@mui/material/AccordionSummary';
 import MOONSAMA_CUSTOMIZATION_ITEM_GROUPS from './fixtures/CustomizerItemGroups'
 import ImageStack from 'components/ImageStacks/Moonsama2';
-import { FixedSizeGrid, GridChildComponentProps, areEqual } from 'react-window';
+import { ComponentType } from "react";
+import { FixedSizeGrid as _FixedSizeGrid, GridChildComponentProps, areEqual, FixedSizeGridProps } from 'react-window';
 import { styled } from '@mui/material/styles';
 
 import { InGameItemWithStatic, useInGameItemsWithCompositeMetaAndAssets } from 'hooks/multiverse/useInGameItems'
@@ -27,6 +28,8 @@ import { useFetchUrlCallback } from 'hooks/useFetchUrlCallback/useFetchUrlCallba
 import { useParams } from 'react-router';
 import NoSsr from '@mui/base/NoSsr';
 
+//fix for type checks
+const FixedSizeGrid = _FixedSizeGrid as ComponentType<FixedSizeGridProps>;
 enum AssetLocation {
   INCLUDED = 'INCLUDED',
   BRIDGE = 'BRIDGE',

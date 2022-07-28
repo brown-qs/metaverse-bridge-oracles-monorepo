@@ -12,12 +12,12 @@ import Box from '@mui/material/Box';
 import { Link, Alert, Button, CircularProgress, Collapse, IconButton, Input, Stack, TextField, Typography, useMediaQuery } from '@mui/material';
 import { theme } from 'theme/Theme';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Redirect, useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
 
 const MinecraftVerifyPage = () => {
   const { authData, setAuthData } = useAuth();
-  let history = useHistory();
+  let navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [failureMessage, setFailureMessage] = useState("")
   const { search } = useLocation()
