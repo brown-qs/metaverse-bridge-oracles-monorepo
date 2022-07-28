@@ -11,7 +11,7 @@ import Box from '@mui/material/Box';
 
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Stack, Typography, useMediaQuery } from '@mui/material';
 import { theme } from 'theme/Theme';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const HomePage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -30,11 +30,11 @@ const HomePage = () => {
   } = useClasses(styles);
 
   const handleLogin = () => {
-    history.push("/account/login")
+    navigate("/account/login")
   };
 
   const handleLinkMinecraft = () => {
-    history.push("/account")
+    navigate("/account")
   }
 
   const isMobileViewport = useMediaQuery(theme.breakpoints.down('sm'));

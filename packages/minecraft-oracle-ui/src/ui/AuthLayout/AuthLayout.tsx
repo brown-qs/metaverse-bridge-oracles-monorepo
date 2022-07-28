@@ -1,4 +1,4 @@
-import { Alert, AlertColor, CircularProgress, Stack } from "@mui/material"
+import { Alert, AlertDescription, AlertIcon, AlertStatus, AlertTitle, Box, CircularProgress, CloseButton, Stack } from "@chakra-ui/react"
 import { useState } from "react"
 
 export interface AuthLayoutProps {
@@ -17,7 +17,23 @@ export const AuthLayout = ({ children, ...props }: React.PropsWithChildren<AuthL
       {!!props?.alert && !props.loading
         ?
         <Stack direction="column" spacing={6} margin={2} alignContent='center' textAlign='center'>
-          <Alert sx={{ margin: "auto" }} severity={props.alert.severity as AlertColor} onClose={props.handleAlertClose}>{props.alert.text}</Alert>
+          <Alert sx={{ margin: "auto" }} status={props.alert.severity as AlertStatus}>
+
+            <AlertIcon />
+            <Box>
+              <AlertTitle>Success!</AlertTitle>
+              <AlertDescription>
+                {props.alert.text}
+              </AlertDescription>
+            </Box>
+            {!!props.handleAlertClose && <CloseButton
+              alignSelf='flex-start'
+              position='relative'
+              right={-1}
+              top={-1}
+              onClick={props.handleAlertClose}
+            />}
+          </Alert>
         </Stack>
 
         :

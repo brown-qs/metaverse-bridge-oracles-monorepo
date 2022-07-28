@@ -34,7 +34,7 @@ const MinecraftVerifyPage = () => {
         },
         params: Object.fromEntries(new URLSearchParams(search))
       });
-      history.push("/account")
+      navigate("/account")
       return
     } catch (e) {
       const err = e as AxiosError;
@@ -59,7 +59,7 @@ const MinecraftVerifyPage = () => {
 
 
   const handleAlertClose = () => {
-    history.push(`/account`)
+    navigate(`/account`)
   }
 
 
