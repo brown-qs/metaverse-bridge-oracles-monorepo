@@ -1,17 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AuthLayout, Loader } from 'ui';
 import { useAuth, useClasses } from 'hooks';
-import Tooltip from '@mui/material/Tooltip';
-import CloseIcon from '@mui/icons-material/Close';
-
-import WhiteLogo from 'assets/images/moonsama-glitch-white.svg';
-import LeftImage from 'assets/images/home/left.png';
-import RightImageFlip from 'assets/images/home/right.png';
-import Box from '@mui/material/Box';
-
-import { Link, Alert, Button, CircularProgress, Collapse, IconButton, Input, Stack, TextField, Typography, useMediaQuery } from '@mui/material';
-import { theme } from 'theme/Theme';
-import LoadingButton from '@mui/lab/LoadingButton';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
 
@@ -35,7 +24,7 @@ const MinecraftRedirectPage = () => {
 
       window.location = result?.data?.redirectUrl
       //    navigate('/account/login/email/verify')
-
+      return
     } catch (e) {
       const err = e as AxiosError;
 
