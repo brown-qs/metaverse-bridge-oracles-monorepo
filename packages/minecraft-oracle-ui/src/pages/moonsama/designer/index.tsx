@@ -1,21 +1,14 @@
 import { useState, useMemo, useEffect, memo } from 'react';
 import { useOnChainItemsWithCompositeMetaAndAssets } from 'hooks/multiverse/useOnChainItems';
-import { Box, Typography, Modal, CircularProgress, IconButton } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import { useClasses } from 'hooks';
 import { cx } from '@emotion/css';
 import { styles } from './styles';
-import Accordion from '@mui/material/Accordion';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import Stack from '@mui/material/Stack';
-import LoadingButton from '@mui/lab/LoadingButton';
-import MuiAccordionSummary from '@mui/material/AccordionSummary';
+
+
 import MOONSAMA_CUSTOMIZATION_ITEM_GROUPS from './fixtures/CustomizerItemGroups'
 import ImageStack from 'components/ImageStacks/Moonsama2';
 import { ComponentType } from "react";
 import { FixedSizeGrid as _FixedSizeGrid, GridChildComponentProps, areEqual, FixedSizeGridProps } from 'react-window';
-import { styled } from '@mui/material/styles';
 
 import { InGameItemWithStatic, useInGameItemsWithCompositeMetaAndAssets } from 'hooks/multiverse/useInGameItems'
 import axios from 'axios';
@@ -26,7 +19,7 @@ import { MOONSAMA_ATTR_TO_ID_MAP } from './fixtures/AttributeToAssetMap';
 import { ADDITIONAL_PARENT_LAYERS_CONFIG, ADDITIONAL_CHILD_LAYERS_CONFIG, MOONSAMA_CATEGORY_INCOMPATIBILITIES } from './fixtures/ItemRules';
 import { useFetchUrlCallback } from 'hooks/useFetchUrlCallback/useFetchUrlCallback';
 import { useParams } from 'react-router';
-import NoSsr from '@mui/base/NoSsr';
+import { AccordionPanel, AccordionItem, Text, Accordion, Box, Button, CircularProgress, IconButton, Stack, useMediaQuery, Modal } from '@chakra-ui/react';
 
 //fix for type checks
 const FixedSizeGrid = _FixedSizeGrid as ComponentType<FixedSizeGridProps>;
@@ -515,8 +508,8 @@ const ExpandMoreIcon = ({ expanded }: { expanded?: boolean }) => {
 const Cell = memo(({ columnIndex, rowIndex, style, data }: GridChildComponentProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { gridItem, selected } = useClasses(styles);
-  const theme = useTheme();
-  const isMobileViewport = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const [isMobileViewport] = useMediaQuery('(max-width: 600px)')
 
   const assetIndex = (data.numCols * rowIndex) + columnIndex;
 
@@ -576,10 +569,9 @@ const Cell = memo(({ columnIndex, rowIndex, style, data }: GridChildComponentPro
 }, areEqual);
 
 const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
-  const theme = useTheme();
   const { assetAddress, assetId, chainId } = useParams<{ assetAddress?: string, assetId?: string, chainId?: string }>();
   console.log('PARAMS', { assetAddress, assetId, chainId })
-  const isMobileViewport = useMediaQuery(theme.breakpoints.down('sm'));
+  const [isMobileViewport] = useMediaQuery('(max-width: 600px)')
   const isLoggedIn = !!authData && !!authData.userProfile
   const numCols = 3
   const urlCb = useFetchUrlCallback()
@@ -985,7 +977,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
       allowedToSave = false;
     }
   })
-
+  /*
   const AccordionSummary = styled((props: any) => (
     <MuiAccordionSummary
       {...props}
@@ -1006,7 +998,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
     '&.expanded': {
       opacity: 1,
     }
-  }));
+  }));*/
 
   const saveCustomizationCallback = async (openModal = true) => {
     setSaveProgress({ inProgress: true, errorMessage: undefined })
@@ -1040,6 +1032,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
                   {isMobileViewport ? (
                     <Stack direction="row" justifyContent="start" alignItems="end" spacing={1}>
                       <IconButton
+                        aria-label=''
                         style={{ justifySelf: 'center', alignSelf: 'center', margin: 0 }}
                         onClick={() => {
                           if (currentCustomization.children !== null && currentCustomization.parent !== null) {
@@ -1061,6 +1054,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
                           {!isLoggedIn && 'Login to save or share'}
                           {isLoggedIn && !allowedToSave && 'Assets not owned by you'}
                           {isLoggedIn && allowedToSave && <IconButton
+                            aria-label=''
                             style={{ justifySelf: 'center', alignSelf: 'center', marginBottom: 0 }}
                             onClick={() => saveCustomizationCallback()}
                             className={customizerActionButton}
@@ -1075,6 +1069,7 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
                             </svg>
                           </IconButton>}
                           {isLoggedIn && allowedToSave && <IconButton
+                            aria-label=''
                             style={{ justifySelf: 'center', alignSelf: 'center', marginBottom: 0, marginLeft: '8px' }}
                             onClick={() => {
                               saveCustomizationCallback(false)
@@ -1098,9 +1093,9 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
                     </Stack>
                   ) : (
                     <Stack direction="row" justifyContent="start" alignItems="end" spacing={1}>
-                      <LoadingButton
+                      <Button
                         variant="outlined"
-                        loadingPosition="start"
+                        //loadingPosition="start"
                         onClick={() => {
                           if (currentCustomization.children !== null && currentCustomization.parent !== null) {
                             downloadAsImage([...currentCustomization.children, currentCustomization.parent])
@@ -1108,15 +1103,17 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
                         }}
                         className={customizerActionButton}
                         sx={{ marginBottom: 1 }}
-                        startIcon={(
-                          <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-download" width="20" height="20" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#ffffff" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
-                            <polyline points="7 11 12 16 17 11" />
-                            <line x1="12" y1="4" x2="12" y2="16" />
-                          </svg>)}>
+                      /*startIcon={(
+                         <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-download" width="20" height="20" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#ffffff" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                           <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
+                           <polyline points="7 11 12 16 17 11" />
+                           <line x1="12" y1="4" x2="12" y2="16" />
+                         </svg>)}*/
+
+                      >
                         Download
-                      </LoadingButton>
+                      </Button>
 
                       <Stack direction={isMobileViewport ? 'row-reverse' : 'row-reverse'} spacing={1} alignItems="center" sx={{ backgroundColor: isLoggedIn && allowedToSave ? 'transparent' : 'rgba(22, 19, 43, 0.75)', backgroundBlendMode: 'lighten', p: 1, borderRadius: (isMobileViewport ? '0.5rem' : '800px') }}>
                         <Box style={{ textTransform: 'uppercase', fontSize: '12px', display: 'flex', alignItems: 'center', paddingRight: (isMobileViewport ? '0px' : '8px'), textAlign: 'center' }}>
@@ -1125,28 +1122,29 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
                         </Box>
 
                         <Stack direction="row" spacing={1}>
-                          <LoadingButton
-                            loading={saveProgress.inProgress}
+                          <Button
+                            isLoading={saveProgress.inProgress}
                             variant="outlined"
-                            loadingPosition="start"
+                            //loadingPosition="start"
                             onClick={() => saveCustomizationCallback()}
                             className={customizerActionButton}
                             disabled={!isLoggedIn || !allowedToSave}
-                            startIcon={(
+                            /*startIcon={(
                               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#fff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" className="icon icon-tabler icon-tabler-file-upload" viewBox="0 0 24 24">
                                 <path stroke="none" d="M0 0h24v24H0z"></path>
                                 <path d="M14 3v4a1 1 0 001 1h4"></path>
                                 <path d="M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"></path>
                                 <path d="M12 11L12 17"></path>
                                 <path d="M9 14L12 11 15 14"></path>
-                              </svg>)}>
+                              </svg>)}
+                              */>
                             Save
-                          </LoadingButton>
+                          </Button>
 
-                          <LoadingButton
+                          <Button
                             variant="outlined"
-                            loadingPosition="start"
-                            loading={saveProgress.inProgress}
+                            //loadingPosition="start"
+                            isLoading={saveProgress.inProgress}
                             onClick={() => {
                               saveCustomizationCallback(false)
                               setShareURLCopied(false)
@@ -1154,17 +1152,19 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
                             }}
                             className={customizerActionButton}
                             disabled={!isLoggedIn || !allowedToSave}
-                            startIcon={(
-                              <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-share" width="20" height="20" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#ffffff" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                <circle cx="6" cy="12" r="3" />
-                                <circle cx="18" cy="6" r="3" />
-                                <circle cx="18" cy="18" r="3" />
-                                <line x1="8.7" y1="10.7" x2="15.3" y2="7.3" />
-                                <line x1="8.7" y1="13.3" x2="15.3" y2="16.7" />
-                              </svg>)}>
+                          /*startIcon={(
+                            <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-share" width="20" height="20" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#ffffff" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                              <circle cx="6" cy="12" r="3" />
+                              <circle cx="18" cy="6" r="3" />
+                              <circle cx="18" cy="18" r="3" />
+                              <line x1="8.7" y1="10.7" x2="15.3" y2="7.3" />
+                              <line x1="8.7" y1="13.3" x2="15.3" y2="16.7" />
+                            </svg>)}*/
+
+                          >
                             Share
-                          </LoadingButton>
+                          </Button>
                         </Stack>
                       </Stack>
                     </Stack>
@@ -1178,22 +1178,23 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
               const isExpanded = expanded.title === customizationOption.title
 
               return (
-                <Accordion key={customizationOption.title} disableGutters elevation={0} defaultExpanded={optionIndex === 0} className={cx({ [accordion]: true, [accordionExpanded]: isExpanded })} expanded={expanded.title === customizationOption.title} onChange={handleChange(customizationOption)}>
-                  <AccordionSummary
+                <Accordion key={customizationOption.title} /*defaultExpanded={optionIndex === 0}*/ className={cx({ [accordion]: true, [accordionExpanded]: isExpanded })} /*expanded={expanded.title === customizationOption.title}*/ /*onChange={handleChange(customizationOption)}*/>
+                  <AccordionItem>
+                    {/* <AccordionSummary
                     aria-controls={`${customizationOption.title}-content`}
                     expandIcon={<ExpandMoreIcon expanded={isExpanded} />}
                     backgroundImage={customizationOption.background}
                     className={isExpanded && 'expanded'}
                     id={`${customizationOption.title.replace(' ', '-').toLowerCase()}-header`}>
+                     // Box used to be in here 
+                  </AccordionSummary>*/}
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                       <img src={customizationOption.icon} width="32" height="32" style={{ flexShrink: 0 }} alt={`${customizationOption.title} Icon`} />
-                      <Typography sx={{ marginLeft: '12px', flexShrink: 0, fontFamily: 'Orbitron', fontSize: '16px', letterSpacing: '0.1em', fontWeight: '500', textTransform: 'uppercase', lineHeight: '24px' }}>
+                      <Text sx={{ marginLeft: '12px', flexShrink: 0, fontFamily: 'Orbitron', fontSize: '16px', letterSpacing: '0.1em', fontWeight: '500', textTransform: 'uppercase', lineHeight: '24px' }}>
                         {customizationOption.title}
-                      </Typography>
+                      </Text>
                     </Box>
-                  </AccordionSummary>
-                  <AccordionDetails sx={{ height: 360, overflowY: 'auto', padding: 0, position: 'relative' }}>
-                    <NoSsr>
+                    <AccordionPanel sx={{ height: 360, overflowY: 'auto', padding: 0, position: 'relative' }}>
                       <FixedSizeGrid
                         columnCount={3}
                         columnWidth={isMobileViewport ? (Math.floor(window.innerWidth / 3) - 6) : (678 / 3) - 6}
@@ -1207,9 +1208,9 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
                       >
                         {Cell}
                       </FixedSizeGrid>
-                    </NoSsr>
-                    <Box style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: '100%', backgroundImage: 'linear-gradient(rgba(0,0,0,0) 95%, rgba(0,0,0,0.5)', pointerEvents: 'none' }}></Box>
-                  </AccordionDetails>
+                      <Box style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: '100%', backgroundImage: 'linear-gradient(rgba(0,0,0,0) 95%, rgba(0,0,0,0.5)', pointerEvents: 'none' }}></Box>
+                    </AccordionPanel>
+                  </AccordionItem>
                 </Accordion>
               )
             })}
@@ -1217,9 +1218,10 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
         </Box>
       </Box>
       <Modal
-        open={showShareModal}
+        isOpen={showShareModal}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
+        onClose={() => { }}
       >
         <Box sx={{
           position: 'absolute' as 'absolute',
@@ -1236,12 +1238,12 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
           p: 4,
           fontFamily: 'Orbitron',
         }}>
-          <Typography id="modal-modal-title" variant="h6" component="h2" sx={{ fontWeight: 600, textAlign: 'center' }}>
+          <Text id="modal-modal-title" variant="h6" as="h2" sx={{ fontWeight: 600, textAlign: 'center' }}>
             Share your customized Moonsama.
-          </Typography>
-          <Typography id="modal-modal-description" sx={{ mt: 2, wordBreak: 'break-word', wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+          </Text>
+          <Text id="modal-modal-description" sx={{ mt: 2, wordBreak: 'break-word', wordWrap: 'break-word', overflowWrap: 'break-word' }}>
             {(new URL(`/moonsama/customizer/${currentCustomization.parent?.chainId}/${currentCustomization.parent?.assetAddress}/${currentCustomization.parent?.assetId}`, `${window.location.protocol}//${window.location.host}`)).href}
-          </Typography>
+          </Text>
 
           <Stack direction="row" justifyContent="space-between" sx={{ width: '100%' }}>
             <Box sx={{
@@ -1292,9 +1294,10 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
       </Modal>
 
       <Modal
-        open={saveConfigModal}
+        isOpen={saveConfigModal}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
+        onClose={() => { }}
       >
         <Box sx={{
           position: 'absolute' as 'absolute',
@@ -1310,24 +1313,24 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
           boxShadow: 24,
           p: 4,
         }}>
-          <Typography id="modal-modal-title" variant="h6" component="h2" sx={{
+          <Text id="modal-modal-title" variant="h6" as="h2" sx={{
             fontWeight: 600, textAlign: 'center',
             fontFamily: 'Orbitron',
           }}>
             Your 2.0 Moonsama is being cooked
-          </Typography>
-          {saveProgress.inProgress && <Box display={'flex'} style={{ paddingTop: theme.spacing(2) }}><CircularProgress sx={{ alignSelf: 'center', textAlign: 'center' }} /></Box>}
-          {!saveProgress.inProgress && !saveProgress.errorMessage && <Typography id="modal-modal-description" sx={{ mt: 2, wordBreak: 'break-word', wordWrap: 'break-word', overflowWrap: 'break-word', textAlign: 'center', fontFamily: 'Orbitron' }}>
+          </Text>
+          {saveProgress.inProgress && <Box display={'flex'} style={{ paddingTop: "2px" }}><CircularProgress sx={{ alignSelf: 'center', textAlign: 'center' }} /></Box>}
+          {!saveProgress.inProgress && !saveProgress.errorMessage && <Text id="modal-modal-description" sx={{ mt: 2, wordBreak: 'break-word', wordWrap: 'break-word', overflowWrap: 'break-word', textAlign: 'center', fontFamily: 'Orbitron' }}>
             Done! You can access your config at
-          </Typography>
+          </Text>
           }
-          {!saveProgress.inProgress && !saveProgress.errorMessage && <Typography id="modal-modal-description" sx={{ mt: 2, wordBreak: 'break-word', wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+          {!saveProgress.inProgress && !saveProgress.errorMessage && <Text id="modal-modal-description" sx={{ mt: 2, wordBreak: 'break-word', wordWrap: 'break-word', overflowWrap: 'break-word' }}>
             {(new URL(`/moonsama/customizer/${currentCustomization.parent?.chainId}/${currentCustomization.parent?.assetAddress}/${currentCustomization.parent?.assetId}`, `${window.location.protocol}//${window.location.host}`)).href}
-          </Typography>
+          </Text>
           }
-          {!saveProgress.inProgress && saveProgress.errorMessage && <Typography id="modal-modal-description" sx={{ mt: 2, wordBreak: 'break-word', wordWrap: 'break-word', overflowWrap: 'break-word', textAlign: 'center' }}>
+          {!saveProgress.inProgress && saveProgress.errorMessage && <Text id="modal-modal-description" sx={{ mt: 2, wordBreak: 'break-word', wordWrap: 'break-word', overflowWrap: 'break-word', textAlign: 'center' }}>
             {saveProgress.errorMessage}
-          </Typography>
+          </Text>
           }
 
           {!saveProgress.inProgress && <Box sx={{
