@@ -19,7 +19,7 @@ export const styles = (theme: Theme) => ({
     background: '#0a0a0a',
   },
   closeButton: {
-    color: theme.palette.text.primary,
+    // color: theme.palette.text.primary,
     fontSize: 32,
   },
 });

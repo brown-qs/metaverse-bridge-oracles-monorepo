@@ -40,7 +40,7 @@ export const TokenTrade = ({
     lastPriceContainer,
     smallText,
   } = useClasses(styles);
-  const { push } = useHistory();
+  const navigate = useNavigate();
 
   const { chainId } = useActiveWeb3React();
   const ot = inferOrderTYpe(chainId, fill.order.sellAsset, fill.order.buyAsset);
@@ -52,7 +52,7 @@ export const TokenTrade = ({
   //console.log('FRESH', {asset, action, actionColor})
 
   const handleImageClick = () => {
-    push(`/token/${asset.assetType}/${asset.assetAddress}/${asset.assetId}`);
+    navigate(`/token/${asset.assetType}/${asset.assetAddress}/${asset.assetId}`);
   };
 
   const isErc721 =
@@ -61,8 +61,8 @@ export const TokenTrade = ({
   const totalSupplyString = isErc721
     ? 'unique'
     : sup
-    ? `${sup} pieces`
-    : undefined;
+      ? `${sup} pieces`
+      : undefined;
 
   const ppu = getUnitPrice(
     fill.order?.askPerUnitNominator,
@@ -73,8 +73,8 @@ export const TokenTrade = ({
     ot == OrderType.BUY
       ? fill.buyerSendsAmountFull
       : fill.order?.askPerUnitDenominator
-          .mul(fill.buyerSendsAmountFull)
-          .div(fill.order?.askPerUnitNominator);
+        .mul(fill.buyerSendsAmountFull)
+        .div(fill.order?.askPerUnitNominator);
 
   const ppuDisplay = ppu
     ? `${Fraction.from(ppu.toString(), 18)?.toFixed(0)} MOVR`
