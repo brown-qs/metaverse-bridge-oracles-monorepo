@@ -4,7 +4,7 @@ import { useAuth } from 'hooks';
 import { useNavigate } from 'react-router-dom'
 import { ReCAPTCHA } from 'components/Recaptcha';
 import axios, { AxiosError } from 'axios';
-import { Button, FormControl, FormHelperText, FormLabel, Input, Stack } from '@chakra-ui/react';
+import { Button, FormControl, FormErrorMessage, FormHelperText, FormLabel, Input, Stack } from '@chakra-ui/react';
 const EmailChangePage = () => {
   const { authData, setAuthData } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -70,23 +70,6 @@ const EmailChangePage = () => {
     setFailureMessage("")
   }
 
-  const loginControls = () => {
-    return <Stack alignItems="center" spacing={2}>
-      {/*disabled={isLoading} inputProps={{ spellCheck: false, autoCapitalize: "off", autoCorrect: "off", onFocus: () => setDirtyTextField(true) }} value={email} error={dirtyTextField && !isValidEmail(email)} onKeyPress={(e) => {
-        if (e.key === 'Enter' && !isLoading && isValidEmail(email)) {
-          submitEmail(email)
-        }
-      }} onChange={(event) => { setEmail(event.target.value) }}  */}
-      <FormControl>
-        <FormLabel>Email address</FormLabel>
-        <Input type='email' />
-        <FormHelperText>We'll never share your email.</FormHelperText>
-        <Button variant="solid">CHANGE EMAIL</Button>
-      </FormControl>
-      {/*loading={isLoading} disabled={!isValidEmail(email)} onClick={(e) => submitEmail(email)}*/}
-
-    </Stack >
-  }
 
   let alert
   let alertClose: (() => void) | undefined = handleAlertClose
@@ -99,7 +82,43 @@ const EmailChangePage = () => {
 
   return (
     <>
-      <AuthLayout title="CHANGE EMAIL" loading={false} alert={alert} handleAlertClose={alertClose}> {loginControls()}
+      <AuthLayout title="CHANGE EMAIL" loading={false} alert={alert} handleAlertClose={alertClose}>
+        <Stack alignItems="center" spacing={2}>
+          <FormControl isInvalid={dirtyTextField && !isValidEmail(email)} maxW="300px">
+            <FormLabel>Email</FormLabel>
+            <Input
+              isDisabled={isLoading}
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value)
+              }}
+              onFocus={() => setDirtyTextField(true)}
+              onKeyUp={(e) => {
+                if (e.key === 'Enter' && !isLoading && isValidEmail(email)) {
+                  submitEmail(email)
+                }
+              }}
+              spellCheck="false"
+              autoCapitalize="off"
+              autoCorrect="off"
+            />
+            {dirtyTextField && !isValidEmail(email) ? (
+              <FormErrorMessage sx={{}}>Invalid email.</FormErrorMessage>
+
+            ) : (
+              <FormHelperText>
+                &nbsp;
+              </FormHelperText>
+            )}
+          </FormControl>
+
+          {/*disabled={isLoading} inputProps={{ spellCheck: false, autoCapitalize: "off", autoCorrect: "off", onFocus: () => setDirtyTextField(true) }} value={email} error={dirtyTextField && !isValidEmail(email)} onKeyPress={(e) => {
+        if (e.key === 'Enter' && !isLoading && isValidEmail(email)) {
+          submitEmail(email)
+        }
+      }} onChange={(event) => { setEmail(event.target.value) }} label="EMAIL" variant="standard" */}
+          <Button isLoading={isLoading} isDisabled={!isValidEmail(email)} onClick={() => submitEmail(email)} variant="solid">SEND LOGIN CODE</Button>
+        </Stack >
       </AuthLayout >
       {!!process.env.REACT_APP_RECAPTCHA_SITEKEY && <ReCAPTCHA ref={recaptchaEl} grecaptcha={window.grecaptcha} sitekey={process.env.REACT_APP_RECAPTCHA_SITEKEY || ""} size="invisible" theme="dark" />}
     </>

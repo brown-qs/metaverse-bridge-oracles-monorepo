@@ -1,30 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { AuthLayout, Loader } from 'ui';
 import { useAuth, useClasses } from 'hooks';
-import Tooltip from '@mui/material/Tooltip';
-import CloseIcon from '@mui/icons-material/Close';
-
-import WhiteLogo from 'assets/images/moonsama-glitch-white.svg';
-import LeftImage from 'assets/images/home/left.png';
-import RightImageFlip from 'assets/images/home/right.png';
-import Box from '@mui/material/Box';
-
-import { Link, Alert, Button, CircularProgress, Collapse, IconButton, Input, Stack, TextField, Typography, useMediaQuery } from '@mui/material';
-import { theme } from 'theme/Theme';
-import LoadingButton from '@mui/lab/LoadingButton';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
 
 const MinecraftVerifyPage = () => {
+  //react strict mode in dev will render this twice...need to use a ref to prevent that
   const { authData, setAuthData } = useAuth();
   let navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [failureMessage, setFailureMessage] = useState("")
   const { search } = useLocation()
   const verifyMinecraft = async () => {
+
     setIsLoading(true)
     try {
-      console.log(`search`, search)
       const result = await axios({
         method: 'get',
         url: `${process.env.REACT_APP_BACKEND_API_URL}/auth/minecraft/link`,
@@ -54,6 +44,7 @@ const MinecraftVerifyPage = () => {
 
   useEffect(() => {
     verifyMinecraft()
+
   }, [])
 
 
