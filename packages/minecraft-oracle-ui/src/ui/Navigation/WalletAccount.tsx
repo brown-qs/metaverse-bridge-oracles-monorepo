@@ -1,10 +1,10 @@
 
-import Box from '@mui/material/Box';
 
 import { useAccountDialog, useActiveWeb3React } from 'hooks';
 import { truncateAddress } from 'utils';
 import { useClasses } from 'hooks';
 import Identicon from 'components/Identicon/Identicon';
+import { Box } from '@chakra-ui/react';
 
 export default function WalletAccount() {
   const { account } = useActiveWeb3React();

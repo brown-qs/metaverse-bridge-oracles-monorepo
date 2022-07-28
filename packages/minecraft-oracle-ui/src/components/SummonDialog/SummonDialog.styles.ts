@@ -1,9 +1,8 @@
-import { Theme } from '@mui/material';
 
-export const styles = (theme: Theme) => ({
+export const styles = (a: any) => ({
   dialogContainer: {
     display: 'flex',
-    padding: theme.spacing(4),
+    //  padding: theme.spacing(4),
     flexDirection: 'column',
     // minWidth: 500,
   },
@@ -12,7 +11,7 @@ export const styles = (theme: Theme) => ({
     background: 'transparent',
     padding: 0,
     margin: 0,
-    fontFamily: theme.typography.fontFamily,
+    //  fontFamily: theme.typography.fontFamily,
     color: 'white',
     textAlign: 'right',
     outline: 'none',
@@ -20,17 +19,17 @@ export const styles = (theme: Theme) => ({
   inputContainer: {
     display: 'flex',
     justifyContent: 'space-between',
-    marginTop: theme.spacing(2),
+    //  marginTop: theme.spacing(2),
     alignItems: 'center',
-    [theme.breakpoints.down('xs')]: {
-      flexDirection: 'column',
-      alignItems: 'flex-start',
-    },
+    /* [theme.breakpoints.down('xs')]: {
+       flexDirection: 'column',
+       alignItems: 'flex-start',
+     },*/
   },
   loadingContainer: {
     display: 'flex',
     alignItems: 'center',
-    gap: theme.spacing(2),
+    //   gap: theme.spacing(2),
   },
   successContainer: {
     display: 'flex',
@@ -40,14 +39,14 @@ export const styles = (theme: Theme) => ({
   successIcon: {
     width: '30%',
     height: 'auto',
-    marginBottom: theme.spacing(2),
+    //   marginBottom: theme.spacing(2),
   },
   sortElement: {
     background: '#000 !important',
     color: '#fff !important',
     border: 1,
     borderStyle: 'solid',
-    borderColor: theme.palette.grey[900],
+    //  borderColor: theme.palette.grey[900],
     maxHeight: 'auto',
     alignSelf: 'center'
   },

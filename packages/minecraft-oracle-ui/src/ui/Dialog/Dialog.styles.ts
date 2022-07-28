@@ -1,6 +1,5 @@
-import { Theme } from '@mui/material';
 
-export const styles = (theme: Theme) => ({
+export const styles = (theme: any) => ({
   dialogContainer: {
     background: 'rgba(0, 0, 0, 0.5)',
     backdropFilter: 'blur(5px)',

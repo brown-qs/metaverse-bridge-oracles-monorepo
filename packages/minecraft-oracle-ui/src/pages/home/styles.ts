@@ -1,7 +1,6 @@
-import { Theme } from '@mui/material';
 import BackgroundImage from '../../assets/images/home/background.jpg'
 
-export const styles = (theme: Theme) => ({
+export const styles = (theme: any) => ({
   homeContainer: {
     minWidth: '100vw',
     overflow: 'hidden',
@@ -46,22 +45,22 @@ export const styles = (theme: Theme) => ({
     },
   },
   loginButtonStyleV2: {
-      backgroundColor: 'rgba(14, 235, 168, 0.2)',
-      textTransform: 'uppercase',
-      padding: '12px 24px 12px 16px',
-      fontFamily: 'Orbitron',
-      fontSize: '12px',
-      lineHeight: '24px',
-      letterSpacing: '0.032em',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      border: '1px solid transparent',
-      cursor: 'pointer',
-      borderRadius: '4px',
-      '&:hover': {
-        border: '1px solid #0EEBA8',
-      }
+    backgroundColor: 'rgba(14, 235, 168, 0.2)',
+    textTransform: 'uppercase',
+    padding: '12px 24px 12px 16px',
+    fontFamily: 'Orbitron',
+    fontSize: '12px',
+    lineHeight: '24px',
+    letterSpacing: '0.032em',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    border: '1px solid transparent',
+    cursor: 'pointer',
+    borderRadius: '4px',
+    '&:hover': {
+      border: '1px solid #0EEBA8',
+    }
   },
   glitchText: {
     color: '#fff',

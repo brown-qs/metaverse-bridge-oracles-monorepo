@@ -1,6 +1,4 @@
-import Grid from '@mui/material/Grid';
-import CircularProgress from '@mui/material/CircularProgress';
-import Typography from '@mui/material/Typography';
+
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 import { parseEther } from '@ethersproject/units';
 import 'date-fns';
@@ -15,9 +13,8 @@ import {
 } from '../../constants';
 import { useBalances } from 'hooks/useBalances/useBalances';
 import { getExplorerLink } from 'utils';
-import { SuccessIcon } from 'icons';
 import { useEffect, useState } from 'react';
-import { Button, Dialog } from 'ui';
+import { Dialog } from 'ui';
 import { styles } from './EnraptureDialog.styles';
 import { styles as appStyles } from '../../app.styles';
 import { useClasses } from 'hooks';
@@ -25,9 +22,9 @@ import { useIsTransactionPending, useSubmittedEnraptureTx } from 'state/transact
 import { useEnraptureConfirmCallback } from 'hooks/multiverse/useConfirm';
 import { EnraptureAssetCallbackState, useEnraptureAssetCallback } from 'hooks/multiverse/useEnraptureAsset';
 import { stringAssetTypeToAssetType } from 'utils/marketplace';
-import Stack from '@mui/material/Stack/Stack';
 import { TokenDetails } from 'components/TokenDetails/TokenDetails';
-import TextField from '@mui/material/TextField';
+import { Button, CircularProgress, Grid, Input, Stack, Text } from '@chakra-ui/react';
+import { CircleCheck } from 'tabler-icons-react';
 
 
 export const EnraptureDialog = () => {
@@ -164,10 +161,10 @@ export const EnraptureDialog = () => {
         <div className={loadingContainer}>
           <CircularProgress />
           <div>
-            <Typography>Loading import details</Typography>
-            <Typography color="textSecondary" variant="h5">
+            <Text>Loading import details</Text>
+            <Text color="textSecondary" variant="h5">
               Should be a jiffy
-            </Typography>
+            </Text>
           </div>
         </div>
       );
@@ -176,8 +173,8 @@ export const EnraptureDialog = () => {
     if (enraptureConfirmed) {
       return (
         <div className={successContainer}>
-          <SuccessIcon className={successIcon} />
-          <Typography>{`Enrapture to metaverse confirmed!`}</Typography>
+          <CircleCheck className={successIcon} />
+          <Text>{`Enrapture to metaverse confirmed!`}</Text>
 
           {enraptureTx && (
             <ExternalLink
@@ -208,10 +205,10 @@ export const EnraptureDialog = () => {
           <div className={loadingContainer}>
             <CircularProgress />
             <div>
-              <Typography>Enrapturing asset into the metaverse...</Typography>
-              <Typography color="textSecondary" variant="h5">
+              <Text>Enrapturing asset into the metaverse...</Text>
+              <Text color="textSecondary" variant="h5">
                 Check your wallet for potential action
-              </Typography>
+              </Text>
             </div>
           </div>
         </>
@@ -221,11 +218,11 @@ export const EnraptureDialog = () => {
     if (finalTxSubmitted && enraptureSubmitted && !isPending) {
       return (
         <div className={successContainer}>
-          <SuccessIcon className={successIcon} />
-          <Typography>{`Transaction success!`}</Typography>
-          <Typography color="textSecondary" variant="h5">
+          <CircleCheck className={successIcon} />
+          <Text>{`Transaction success!`}</Text>
+          <Text color="textSecondary" variant="h5">
             Confirming enrapture with the metaverse oracle...
-          </Typography>
+          </Text>
 
           {enraptureTx && (
             <ExternalLink
@@ -243,9 +240,9 @@ export const EnraptureDialog = () => {
     }
     if (!userUnderstood) {
       return (
-        <Grid container spacing={1} justifyContent="center">
+        <Grid /*container spacing={1}*/ justifyContent="center">
           <div className={successContainer}>
-            <Typography>{`This NFT is going to be burned in the process and bound to the MC account forever!`}</Typography>
+            <Text>{`This NFT is going to be burned in the process and bound to the MC account forever!`}</Text>
 
             <Button
               onClick={() => {
@@ -266,7 +263,7 @@ export const EnraptureDialog = () => {
       <Stack spacing={3} justifyContent="center" >
 
         <TokenDetails assetAddress={assetAddress} assetId={assetId} assetType={assetType} />
-        {isResource && <TextField onChange={handleAmountChange} style={{alignSelf: 'center'}} label='Amount' value={chosenAmount} inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} />}
+        {isResource && <Input onChange={handleAmountChange} style={{ alignSelf: 'center' }} placeholder='Amount' value={chosenAmount} /*inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}*/ />}
         <Stack spacing={1} justifyContent="center" direction={'column'} >
           {
             showApproveFlow ? (

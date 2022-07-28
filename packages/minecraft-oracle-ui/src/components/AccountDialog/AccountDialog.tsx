@@ -1,7 +1,5 @@
 import { useDispatch } from 'react-redux';
 
-import { Button, Stack } from '@mui/material';
-import Typography from '@mui/material/Typography';
 import { injected, walletconnect } from 'connectors';
 import { SUPPORTED_WALLETS } from '../../connectors';
 import { useAccountDialog } from 'hooks';
@@ -23,10 +21,10 @@ import { WalletConnectConnector } from '@web3-react/walletconnect-connector';
 import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core';
 import OptionCard from './OptionCard';
 import usePrevious from 'hooks/usePrevious/usePrevious';
-import CircularProgress from '@mui/material/CircularProgress';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 import useAddNetworkToMetamaskCb from 'hooks/useAddNetworkToMetamask/useAddNetworkToMetamask';
 import { ChainId, NETWORK_NAME, PERMISSIONED_CHAINS } from '../../constants';
+import { Button, CircularProgress, Stack, Text } from '@chakra-ui/react';
 
 const WALLET_VIEWS = {
   OPTIONS: 'options',
@@ -358,7 +356,7 @@ export const AccountDialog = () => {
             (!!pendingTransactions.length || !!confirmedTransactions.length) ? (
             <Stack className={styles.lowerSection}>
               <Stack direction={'row'} justifyContent={'space-between'}>
-                <Typography>Recent transactions</Typography>
+                <Text>Recent transactions</Text>
                 <Button
                   //className={styles.linkStyledButton}
                   onClick={clearAllTransactionsCallback}
@@ -371,7 +369,7 @@ export const AccountDialog = () => {
             </Stack>
           ) : (
             <div className={styles.lowerSection}>
-              <Typography>Your transactions will appear here...</Typography>
+              <Text>Your transactions will appear here...</Text>
             </div>
           )}
         </>
@@ -398,25 +396,25 @@ export const AccountDialog = () => {
           <>
             <CircularProgress />
             {error ? (
-              <Typography className={styles.walletPendingText}>
+              <Text className={styles.walletPendingText}>
                 Error connecting
-              </Typography>
+              </Text>
             ) : (
-              <Typography className={styles.walletPendingText}>
+              <Text className={styles.walletPendingText}>
                 Initializing...
-              </Typography>
+              </Text>
             )}
           </>
         ) : (
           getOptions()
         )}
         {walletView !== WALLET_VIEWS.PENDING && (
-          <Typography variant="body2" className={styles.row}>
+          <Text variant="body2" className={styles.row}>
             New to Ethereum? &nbsp;
             <ExternalLink href="https://ethereum.org/wallets">
               Learn more about wallets
             </ExternalLink>
-          </Typography>
+          </Text>
         )}
       </div>
     );

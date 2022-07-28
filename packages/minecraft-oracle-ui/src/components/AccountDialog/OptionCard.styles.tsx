@@ -1,7 +1,5 @@
-import { Theme } from '@mui/material';
-import { green } from '@mui/material/colors';
 
-export const styles = (theme: Theme) => ({
+export const styles = (theme: any) => ({
   optionElementContainer: {
     display: 'flex',
     flexDirection: 'row',
@@ -48,7 +46,7 @@ export const styles = (theme: Theme) => ({
     height: '100%',
   },
   circleWrapper: {
-    color: green[900],
+    // color: green[900],
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -63,7 +61,7 @@ export const styles = (theme: Theme) => ({
       height: '8px',
       width: '8px',
       marginRight: '8px',
-      backgroundColor: green[900],
+      //  backgroundColor: green[900],
       borderRadius: '50%',
     },
   },

@@ -7,7 +7,6 @@ import WhiteLogo from 'assets/images/moonsama-glitch-white.svg';
 import LeftImage from 'assets/images/home/left.png';
 import RightImageFlip from 'assets/images/home/right.png';
 
-import { theme } from 'theme/Theme';
 import { useNavigate } from 'react-router-dom';
 import { Button, Stack, useMediaQuery, Text } from '@chakra-ui/react';
 
@@ -35,7 +34,7 @@ const HomePage = () => {
     navigate("/account")
   }
 
-  const isMobileViewport = useMediaQuery(theme.breakpoints.down('sm'));
+  const [isMobileViewport] = useMediaQuery('(max-width: 600px)')
 
 
 

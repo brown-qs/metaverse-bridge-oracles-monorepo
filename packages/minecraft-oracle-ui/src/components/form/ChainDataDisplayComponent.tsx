@@ -1,11 +1,10 @@
 import React, { ReactNode } from 'react';
-import Button from '@mui/material/Button';
-import { Box, Tooltip, Typography } from '@mui/material';
-import FileCopyOutlinedIcon from '@mui/icons-material/FileCopyOutlined';
 import { useClasses } from 'hooks';
 import { styles } from './AddressDisplayComponent.styles';
 import { EXPLORER_URL, ChainId } from '../../constants';
 import { ExternalLink } from '../ExternalLink/ExternalLink'
+import { Box, Button, Text, Tooltip } from '@chakra-ui/react';
+import { Copy } from 'tabler-icons-react';
 
 const _fallbackCopyTextToClipboard = (text: string): void => {
   let textArea = document.createElement('textarea');
@@ -58,30 +57,30 @@ export const ChainDataDisplayComponent = (props: {
   const { copyButton } = useClasses(styles);
 
   return (
-    
-      <Box display="flex" alignItems="center">
-          {!props.dontShowLink ? (
-            <Typography className={props.className}>
-              <ExternalLink href={EXPLORER_URL[chainId]}>
-                {text}
-              </ExternalLink>
-            </Typography>
-          ) : (
-            <Typography className={props.className}>
-              {text}
-            </Typography>
-          )}
-          <Tooltip title={copyTooltipLabel}>
-            <Button
-              className={`${copyButton} ${props.buttonClassName}`}
-              size="small"
-              onClick={() => {
-                _copyTextToClipboard(text);
-              }}
-            >
-              <FileCopyOutlinedIcon color="secondary" />
-            </Button>
-          </Tooltip>
-      </Box>
+
+    <Box display="flex" alignItems="center">
+      {!props.dontShowLink ? (
+        <Text className={props.className}>
+          <ExternalLink href={EXPLORER_URL[chainId]}>
+            {text}
+          </ExternalLink>
+        </Text>
+      ) : (
+        <Text className={props.className}>
+          {text}
+        </Text>
+      )}
+      <Tooltip title={copyTooltipLabel}>
+        <Button
+          className={`${copyButton} ${props.buttonClassName}`}
+          size="small"
+          onClick={() => {
+            _copyTextToClipboard(text);
+          }}
+        >
+          <Copy />
+        </Button>
+      </Tooltip>
+    </Box>
   );
 };

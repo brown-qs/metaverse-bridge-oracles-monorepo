@@ -5,7 +5,7 @@ import { ChainDataDisplayComponent } from '../form/ChainDataDisplayComponent';
 
 import { styles } from './AssetChainDetails.styles';
 import { NETWORK_NAME } from '../../constants';
-import Stack from '@mui/material/Stack/Stack';
+import { Stack } from '@chakra-ui/react';
 
 export const AssetChainDetails = ({ data, borderOn }: { data?: InGameItemWithStatic, borderOn?: boolean }) => {
 
