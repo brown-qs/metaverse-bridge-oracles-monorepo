@@ -4,7 +4,7 @@ import { useAccountDialog, useActiveWeb3React } from 'hooks';
 import { truncateAddress } from 'utils';
 import { useClasses } from 'hooks';
 import Identicon from 'components/Identicon/Identicon';
-import { Box } from '@chakra-ui/react';
+import { Box, Text } from '@chakra-ui/react';
 import { Wallet } from 'tabler-icons-react';
 
 export default function WalletAccount() {
@@ -50,8 +50,8 @@ export default function WalletAccount() {
           </Box >
         ) : (
           <Box onClick={() => setAccountDialogOpen(true)} className={WalletDetailsStyle}>
-            <Wallet />
-            <span>Connect Wallet</span>
+            <Wallet color="#3BEFB8" />
+            <Text paddingLeft="10px" color="white">Connect Wallet</Text>
           </Box>
         )}
     </>

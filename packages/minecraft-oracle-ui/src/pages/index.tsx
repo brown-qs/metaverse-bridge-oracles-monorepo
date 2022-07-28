@@ -90,10 +90,10 @@ export const Routing = () => {
 
             </Route>
 
-            <Route path="/moonsama/customizer/:chainId/:assetAddress/:assetId" element={<MoonsamaCharacterDesignerPage authData={authData} />}>
+            <Route path="/moonsama/customizer/:chainId/:assetAddress/:assetId" element={<MoonsamaCharacterDesignerPage />}>
             </Route>
 
-            <Route path="/moonsama/customizer" element={<><MoonsamaCharacterDesignerPage authData={authData} /></>}>
+            <Route path="/moonsama/customizer" element={<><MoonsamaCharacterDesignerPage /></>}>
 
             </Route>
 
