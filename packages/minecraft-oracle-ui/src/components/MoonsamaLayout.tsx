@@ -1,11 +1,9 @@
-import { Box } from '@chakra-ui/react'
-import { Container } from '@chakra-ui/react'
-import MoonsamaNav from 'ui/Navigation/MoonsamaNav';
+import { Box, Container } from '@chakra-ui/react'
+import { ReactNode } from 'react';
+import BackgroundImage from '../assets/images/home/background.jpg'
+import MoonsamaNav from '../ui/Navigation/MoonsamaNav'
 
-import { LayoutProps } from './Layout.types';
-import BackgroundImage from '../../assets/images/home/background.jpg'
-
-export const Layout = ({ children }: LayoutProps) => {
+export const MoonsamaLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <Box minHeight="100vh" display="flex" flexDirection="column" sx={{ background: "blue" }}>
       <MoonsamaNav />
