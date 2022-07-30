@@ -19,7 +19,7 @@ import { MOONSAMA_ATTR_TO_ID_MAP } from './fixtures/AttributeToAssetMap';
 import { ADDITIONAL_PARENT_LAYERS_CONFIG, ADDITIONAL_CHILD_LAYERS_CONFIG, MOONSAMA_CATEGORY_INCOMPATIBILITIES } from './fixtures/ItemRules';
 import { useFetchUrlCallback } from 'hooks/useFetchUrlCallback/useFetchUrlCallback';
 import { useParams } from 'react-router';
-import { AccordionPanel, AccordionItem, Text, Accordion, Box, Button, CircularProgress, IconButton, Stack, useMediaQuery, Modal, Container, Grid, GridItem, AccordionButton, AccordionIcon, ExpandedIndex } from '@chakra-ui/react';
+import { AccordionPanel, AccordionItem, Text, Accordion, Box, Button, CircularProgress, IconButton, Stack, useMediaQuery, Modal, Container, Grid, GridItem, AccordionButton, AccordionIcon, ExpandedIndex, HStack } from '@chakra-ui/react';
 import { MoonsamaLayout } from '../../../components';
 import { ChevronDown, ChevronUp } from 'tabler-icons-react';
 
@@ -989,9 +989,9 @@ const CharacterDesignerPage = () => {
             boxShadow="0px 20px 25px -5px rgba(0, 0, 0, 0.1), 0px 10px 10px -5px rgba(0, 0, 0, 0.04)">
 
             {!currentCustomization.parent ? (
-              <Box >
-                Select a Moonsama from {isMobileViewport ? 'below' : 'the right'} to begin.
-              </Box>
+              <HStack color="white" h="100%" alignItems="center">
+                <Box w="100%" textAlign="center" >Select a Moonsama from {isMobileViewport ? 'below' : 'the right'} to begin.</Box>
+              </HStack>
             ) : (
               <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
                 <ImageStack layers={[...currentCustomization.children, currentCustomization.parent]} />
