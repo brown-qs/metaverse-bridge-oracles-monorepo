@@ -15,7 +15,6 @@ import {
 import { useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useSubmittedTransferTx } from 'state/transactions/hooks';
-import { Dialog } from 'ui';
 import { getExplorerLink } from 'utils';
 import * as yup from 'yup';
 import { styles as appStyles } from '../../app.styles';
@@ -48,7 +47,7 @@ type TransferFormData = {
 
 export const TransferDialog = () => {
   const [finalTxSubmitted, setFinalTxSubmitted] = useState<boolean>(false);
-  const { isTransferDialogOpen, setTransferDialogOpen, transferData } =
+  const { isTransferDialogOpen, onTransferDialogOpen, onTransferDialogClose, transferData } =
     useTransferDialog();
   const [orderLoaded, setOrderLoaded] = useState<boolean>(false);
 
@@ -75,7 +74,7 @@ export const TransferDialog = () => {
   const { chainId } = useActiveWeb3React();
 
   const handleClose = () => {
-    setTransferDialogOpen(false);
+    onTransferDialogClose();
     setFinalTxSubmitted(false);
   };
 
@@ -325,13 +324,16 @@ export const TransferDialog = () => {
       </>
     );
   };
-  return (
-    <Dialog
+  /*
+   <Dialog
       open={isTransferDialogOpen}
       onClose={handleClose}
       title={'Transfer asset'}
     >
       <div className={dialogContainer}>{renderBody()}</div>
     </Dialog>
+  */
+  return (
+    <></>
   );
 };

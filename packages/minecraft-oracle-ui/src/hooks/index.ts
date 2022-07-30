@@ -1,4 +1,3 @@
-export { useThemeOptions } from './useThemeOptions/useThemeOptions';
 export { useImportDialog } from './useImportDialog/useImportDialog';
 export { useEnraptureDialog } from './useEnraptureDialog/useEnraptureDialog';
 export { useSummonDialog } from './useSummonDialog/useSummonDialog';

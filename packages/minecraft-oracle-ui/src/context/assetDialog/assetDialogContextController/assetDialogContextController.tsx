@@ -1,3 +1,4 @@
+import { useDisclosure } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 
 import { AssetDialogContext } from '../assetDialogContext/assetDialogContext';
@@ -8,7 +9,7 @@ import { AssetDialogContextControllerProps } from './assetDialogContextControlle
 export const AssetDialogContextController = ({
   children,
 }: AssetDialogContextControllerProps) => {
-  const [isAssetDialogOpen, setAssetDialogOpen] = useState<boolean>(false);
+  const { isOpen: isAssetDialogOpen, onOpen: onAssetDialogOpen, onClose: onAssetDialogClose } = useDisclosure()
   const [assetDialogData, setAssetDialogData] = useState<AssetDialogData>(undefined);
 
   useEffect(() => {
@@ -19,7 +20,7 @@ export const AssetDialogContextController = ({
 
   return (
     <AssetDialogContext.Provider
-      value={{ isAssetDialogOpen, setAssetDialogOpen, assetDialogData, setAssetDialogData }}
+      value={{ isAssetDialogOpen, onAssetDialogOpen, onAssetDialogClose, assetDialogData, setAssetDialogData }}
     >
       {children}
     </AssetDialogContext.Provider>

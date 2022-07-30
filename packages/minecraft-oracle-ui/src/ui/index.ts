@@ -1,6 +1,5 @@
 
 export { PriceBox } from './PriceBox/PriceBox';
-export { Dialog } from './Dialog/Dialog';
 export { Video } from './Video/Video';
 export { Image } from './Image/Image';
 export { Placeholder } from './MediaPlaceholder/MediaPlaceholder';

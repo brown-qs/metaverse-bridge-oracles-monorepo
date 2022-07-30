@@ -2,7 +2,6 @@
 import { AddressDisplayComponent } from 'components/form/AddressDisplayComponent';
 import 'date-fns';
 import { useState } from 'react';
-import { Dialog } from 'ui';
 import { useClasses } from 'hooks';
 import { styles as appStyles } from '../../app.styles';
 import { styles as assetDialogStyles } from './AssetDialog.styles';
@@ -16,7 +15,7 @@ import { Button, CircularProgress, Grid, Stack, Text } from '@chakra-ui/react';
 
 export const AssetDialog = () => {
   const [assetParamsLoaded, setAssetParamsLoaded] = useState<boolean>(false);
-  const { isAssetDialogOpen, assetDialogData, setAssetDialogOpen } = useAssetDialog();
+  const { isAssetDialogOpen, onAssetDialogOpen, onAssetDialogClose, assetDialogData, setAssetDialogData } = useAssetDialog();
 
   const {
     row,
@@ -34,7 +33,7 @@ export const AssetDialog = () => {
   } = useClasses(assetDialogStyles);
 
   const handleClose = (event: any, reason: string) => {
-    setAssetDialogOpen(false)
+    onAssetDialogClose()
     setAssetParamsLoaded(false);
   };
 
@@ -138,8 +137,8 @@ export const AssetDialog = () => {
       </Stack>
     );
   };
-  return (
-    <Dialog
+  /*
+      <Dialog
       open={isAssetDialogOpen}
       onClose={handleClose}
       title={title}
@@ -147,5 +146,8 @@ export const AssetDialog = () => {
     >
       <div className={dialogContainer}>{renderBody()}</div>
     </Dialog>
+  */
+  return (
+    <></>
   );
 };
