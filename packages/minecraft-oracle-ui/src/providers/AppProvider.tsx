@@ -1,5 +1,4 @@
 import { Provider } from 'react-redux';
-import { ThemeOptionsContextController } from '../context/themeOptions/themeOptionsContextController/ThemeOptionsContextController';
 import { AuthContextController } from '../context/auth/AuthContextController/AuthContextController';
 import { ImportDialogContextController } from '../context/importDialog/importDialogContextController/ImportDialogContextController';
 import { EnraptureDialogContextController } from '../context/enraptureDialog/enraptureDialogContextController/enraptureDialogContextController';
@@ -30,34 +29,32 @@ function Updaters() {
 }
 
 export const AppProviders = ({ children }: AppProvidersProps) => (
-  <ThemeOptionsContextController>
-    <Web3ReactProvider getLibrary={getLibrary}>
-      <Web3ReactProviderNetwork getLibrary={getLibrary}>
-        <AuthContextController>
-          <Provider store={store}>
-            <Updaters />
-            <Web3ReactManager>
-              <AccountDialogContextController>
-                <SummonDialogContextController>
-                  <ImportDialogContextController>
-                    <EnraptureDialogContextController>
-                      <ExportDialogContextController>
-                        <TransferDialogContextController>
-                          <AssetDialogContextController>
-                            <Router>
-                              {children}
-                            </Router>
-                          </AssetDialogContextController>
-                        </TransferDialogContextController>
-                      </ExportDialogContextController>
-                    </EnraptureDialogContextController>
-                  </ImportDialogContextController>
-                </SummonDialogContextController>
-              </AccountDialogContextController>
-            </Web3ReactManager>
-          </Provider>
-        </AuthContextController>
-      </Web3ReactProviderNetwork>
-    </Web3ReactProvider>
-  </ThemeOptionsContextController>
+  <Web3ReactProvider getLibrary={getLibrary}>
+    <Web3ReactProviderNetwork getLibrary={getLibrary}>
+      <AuthContextController>
+        <Provider store={store}>
+          <Updaters />
+          <Web3ReactManager>
+            <AccountDialogContextController>
+              <SummonDialogContextController>
+                <ImportDialogContextController>
+                  <EnraptureDialogContextController>
+                    <ExportDialogContextController>
+                      <TransferDialogContextController>
+                        <AssetDialogContextController>
+                          <Router>
+                            {children}
+                          </Router>
+                        </AssetDialogContextController>
+                      </TransferDialogContextController>
+                    </ExportDialogContextController>
+                  </EnraptureDialogContextController>
+                </ImportDialogContextController>
+              </SummonDialogContextController>
+            </AccountDialogContextController>
+          </Web3ReactManager>
+        </Provider>
+      </AuthContextController>
+    </Web3ReactProviderNetwork>
+  </Web3ReactProvider>
 );

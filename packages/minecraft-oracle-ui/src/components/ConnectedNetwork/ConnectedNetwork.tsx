@@ -7,7 +7,7 @@ import { Button } from '@chakra-ui/react';
 export const ConnectedNetwork = () => {
   const { chainId } = useActiveWeb3React();
   const { error: err } = useWeb3React();
-  const { setAccountDialogOpen } = useAccountDialog();
+  const { onAccountDialogOpen } = useAccountDialog();
 
   //console.log('yolo',{ account, error, chainId, active, err, cid })
 
@@ -19,7 +19,7 @@ export const ConnectedNetwork = () => {
     <Button
       className={button}
       size="medium"
-      onClick={() => setAccountDialogOpen(true)}
+      onClick={() => onAccountDialogOpen()}
     >
       {showError || !chainId ? (
         'WRONG NETWORK'

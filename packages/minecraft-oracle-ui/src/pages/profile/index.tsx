@@ -1,7 +1,6 @@
 import { useClasses } from 'hooks';
 import { styles } from './styles';
 
-import { Dialog } from 'ui';
 import { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 
 import { useProfile } from 'hooks/multiverse/useProfile';
@@ -36,7 +35,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
         'TEMPORARY_TICKET': 'You are eligible to play because you imported a game pass.',
         'DEFAULT': 'You are eligible to play because you were given permanent access.',
     }
-    const { setAccountDialogOpen } = useAccountDialog();
+    const { isAccountDialogOpen, onAccountDialogOpen, onAccountDialogClose } = useAccountDialog();
 
     const [fetchtrigger, setFetchtrigger] = useState<string | undefined>(undefined)
 
@@ -46,11 +45,11 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const callbackSkinEquip = useCallbackSkinEquip()
 
     // Dialogs
-    const { setImportDialogOpen, setImportDialogData } = useImportDialog()
-    const { setEnraptureDialogOpen, setEnraptureDialogData } = useEnraptureDialog()
-    const { setExportDialogOpen, setExportDialogData } = useExportDialog()
-    const { setSummonDialogOpen, setSummonDialogData } = useSummonDialog()
-    const { setAssetDialogOpen, setAssetDialogData } = useAssetDialog()
+    const { isImportDialogOpen, onImportDialogOpen, onImportDialogClose, importDialogData, setImportDialogData } = useImportDialog()
+    const { isEnraptureDialogOpen, onEnraptureDialogOpen, onEnraptureDialogClose, enraptureDialogData, setEnraptureDialogData } = useEnraptureDialog()
+    const { isExportDialogOpen, onExportDialogOpen, onExportDialogClose, exportDialogData, setExportDialogData } = useExportDialog()
+    const { isSummonDialogOpen, onSummonDialogOpen, onSummonDialogClose, summonDialogData, setSummonDialogData } = useSummonDialog()
+    const { isAssetDialogOpen, onAssetDialogOpen, onAssetDialogClose, assetDialogData, setAssetDialogData } = useAssetDialog()
 
     //On chain Items
     const onChainItems = useOnChainItems();
@@ -142,6 +141,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                 </Box>
             }
         </List>
+        {/*
         <Dialog
             open={itemDetailDialogOpen}
             onClose={() => {
@@ -152,8 +152,8 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
             fullWidth
         >
             <div >
-                <Grid /*container spacing={1}*/ justifyContent="center">
-                    <Grid /*itemmd={12} xs={12}*/>
+                <Grid  justifyContent="center">
+                    <Grid >
                         <Box >
                             <div >
                                 <div >Item type</div>
@@ -185,7 +185,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     </Grid>
                 </Grid>
             </div>
-        </Dialog>
+        </Dialog>*/}
         {/* End In Game Items */}</>)
 
     const onChainItemsElem = (<><List sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
@@ -205,7 +205,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                             <span>
                                 <Button
                                     onClick={() => {
-                                        setImportDialogOpen(true);
+                                        onImportDialogOpen();
                                         setImportDialogData({ asset: item.asset });
                                     }}
                                     isDisabled={hasImportedTicket}
@@ -232,7 +232,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                 <span>
                                     <Button
                                         onClick={() => {
-                                            setImportDialogOpen(true);
+                                            onImportDialogOpen();
                                             setImportDialogData({ asset: item.asset });
                                         }}
                                     >Import to game</Button>
@@ -242,7 +242,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                 <span>
                                     <Button
                                         onClick={() => {
-                                            setEnraptureDialogOpen(true);
+                                            onEnraptureDialogOpen();
                                             setEnraptureDialogData({ asset: item.asset });
                                         }}
                                     >Burn into game</Button>
@@ -296,10 +296,10 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
             variant="solid"
             onClick={() => {
                 if (!!account) {
-                    setSummonDialogOpen(true);
+                    onSummonDialogOpen();
                     setSummonDialogData({ recipient: account ?? undefined });
                 } else {
-                    setAccountDialogOpen(true)
+                    onAccountDialogOpen()
                 }
             }}
             disabled={!canSummon}
@@ -320,7 +320,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
                     onClick={() => {
                         //user will be able to see resources in their metamask wallet as under assets, nothing is moving
-                        setAssetDialogOpen(true)
+                        onAssetDialogOpen()
                         setAssetDialogData({
                             title: value?.staticData?.name,
                             image: value?.meta?.imageRaw,

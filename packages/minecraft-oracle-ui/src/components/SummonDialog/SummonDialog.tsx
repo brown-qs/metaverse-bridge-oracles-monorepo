@@ -2,7 +2,6 @@
 import 'date-fns';
 import { useActiveWeb3React, useSummonDialog } from 'hooks';
 import { useState } from 'react';
-import { Dialog } from 'ui';
 import { useClasses } from 'hooks';
 import { styles as appStyles } from '../../app.styles';
 import { styles } from './SummonDialog.styles';
@@ -17,12 +16,7 @@ import { Box, Button, CircularProgress, MenuItem, Select, Stack, Text } from '@c
 import { CircleCheck } from 'tabler-icons-react';
 
 export const SummonDialog = () => {
-  const {
-    isSummonDialogOpen,
-    summonDialogData,
-    setSummonDialogData,
-    setSummonDialogOpen,
-  } = useSummonDialog();
+  const { isSummonDialogOpen, onSummonDialogOpen, onSummonDialogClose, summonDialogData, setSummonDialogData } = useSummonDialog();
   const [summonConfirmed, setSummonConfirmed] = useState<number>(0);
   const [summonSubmitted, setSummonSubmitted] = useState<boolean>(false);
   const [selectedChainId, setSelectedChainId] = useState<number>(DEFAULT_CHAIN);
@@ -44,7 +38,7 @@ export const SummonDialog = () => {
     if (reason === 'backdropClick') {
       return;
     }
-    setSummonDialogOpen(false);
+    onSummonDialogClose();
     setSummonSubmitted(false);
     setSummonConfirmed(0);
   };
@@ -175,7 +169,7 @@ export const SummonDialog = () => {
       </Stack>
     );
   };
-  return (
+  /*
     <Dialog
       open={isSummonDialogOpen}
       onClose={handleClose}
@@ -184,5 +178,8 @@ export const SummonDialog = () => {
     >
       <div className={dialogContainer}>{renderBody()}</div>
     </Dialog>
+  */
+  return (
+    <></>
   );
 };

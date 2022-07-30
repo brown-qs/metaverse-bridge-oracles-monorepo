@@ -14,7 +14,6 @@ import {
 import { useBalances } from 'hooks/useBalances/useBalances';
 import { getExplorerLink } from 'utils';
 import { useEffect, useState } from 'react';
-import { Dialog } from 'ui';
 import { styles } from './EnraptureDialog.styles';
 import { styles as appStyles } from '../../app.styles';
 import { useClasses } from 'hooks';
@@ -29,7 +28,7 @@ import { CircleCheck } from 'tabler-icons-react';
 
 export const EnraptureDialog = () => {
   const [finalTxSubmitted, setFinalTxSubmitted] = useState<boolean>(false);
-  const { isEnraptureDialogOpen, enraptureDialogData, setEnraptureDialogOpen } = useEnraptureDialog();
+  const { isEnraptureDialogOpen, onEnraptureDialogOpen, onEnraptureDialogClose, enraptureDialogData, setEnraptureDialogData } = useEnraptureDialog();
   const [enraptureParamsLoaded, setEnraptureParamsLoaded] = useState<boolean>(false);
   const [approvalSubmitted, setApprovalSubmitted] = useState<boolean>(false);
   const [enraptureConfirmed, setEnraptureConfirmed] = useState<boolean>(false);
@@ -54,7 +53,7 @@ export const EnraptureDialog = () => {
     if (reason === 'backdropClick') {
       return
     }
-    setEnraptureDialogOpen(false);
+    onEnraptureDialogClose();
     setEnraptureParamsLoaded(false);
     setFinalTxSubmitted(false);
     setEnraptureConfirmed(false)
@@ -303,8 +302,9 @@ export const EnraptureDialog = () => {
       </Stack >
     );
   };
-  return (
-    <Dialog
+
+  /*
+      <Dialog
       open={isEnraptureDialogOpen}
       onClose={handleClose}
       title={'MultiverseBridge: enrapture'}
@@ -313,5 +313,8 @@ export const EnraptureDialog = () => {
     >
       <div className={dialogContainer}>{renderBody()}</div>
     </Dialog>
+  */
+  return (
+    <></>
   );
 };

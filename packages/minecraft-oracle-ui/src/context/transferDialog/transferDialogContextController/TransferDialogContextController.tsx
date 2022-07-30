@@ -1,3 +1,4 @@
+import { useDisclosure } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 
 import { TransferDialogContext } from '../transferDialogContext/TransferDialogContext';
@@ -8,8 +9,8 @@ import { TransferDialogContextControllerProps } from './TransferDialogContextCon
 export const TransferDialogContextController = ({
   children,
 }: TransferDialogContextControllerProps) => {
-  const [isTransferDialogOpen, setTransferDialogOpen] =
-    useState<boolean>(false);
+  const { isOpen: isTransferDialogOpen, onOpen: onTransferDialogOpen, onClose: onTransferDialogClose } = useDisclosure()
+
   const [transferData, setTransferData] = useState<TransferData>(null);
 
   useEffect(() => {
@@ -22,7 +23,8 @@ export const TransferDialogContextController = ({
     <TransferDialogContext.Provider
       value={{
         isTransferDialogOpen,
-        setTransferDialogOpen,
+        onTransferDialogOpen,
+        onTransferDialogClose,
         transferData,
         setTransferData,
       }}

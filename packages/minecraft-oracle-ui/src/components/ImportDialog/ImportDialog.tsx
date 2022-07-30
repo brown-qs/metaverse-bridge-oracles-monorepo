@@ -15,7 +15,6 @@ import {
 } from 'utils/marketplace';
 import { getExplorerLink } from 'utils';
 import { useEffect, useState } from 'react';
-import { Dialog } from 'ui';
 import { styles as appStyles } from '../../app.styles';
 import { styles } from './ImportDialog.styles';
 import { useIsTransactionPending, useSubmittedImportTx } from '../../state/transactions/hooks';
@@ -27,7 +26,7 @@ import { CircleCheck } from 'tabler-icons-react';
 
 export const ImportDialog = () => {
   const [finalTxSubmitted, setFinalTxSubmitted] = useState<boolean>(false);
-  const { isImportDialogOpen, importDialogData, setImportDialogOpen } = useImportDialog();
+  const { isImportDialogOpen, onImportDialogOpen, onImportDialogClose, importDialogData, setImportDialogData } = useImportDialog();
   const [importParamsLoaded, setImportParamsLoaded] = useState<boolean>(false);
   const [approvalSubmitted, setApprovalSubmitted] = useState<boolean>(false);
   const [importConfirmed, setImportConfirmed] = useState<boolean>(false);
@@ -51,7 +50,7 @@ export const ImportDialog = () => {
     if (reason === 'backdropClick') {
       return
     }
-    setImportDialogOpen(false);
+    onImportDialogClose();
     setImportParamsLoaded(false);
     setFinalTxSubmitted(false);
     setImportConfirmed(false);
@@ -260,8 +259,8 @@ export const ImportDialog = () => {
       </Stack>
     );
   };
-  return (
-    <Dialog
+  /*
+      <Dialog
       open={isImportDialogOpen}
       onClose={handleClose}
       title={'MultiverseBridge: import'}
@@ -269,5 +268,8 @@ export const ImportDialog = () => {
     >
       <div className={dialogContainer}>{renderBody()}</div>
     </Dialog>
+  */
+  return (
+    <></>
   );
 };
