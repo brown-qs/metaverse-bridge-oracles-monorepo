@@ -8,8 +8,9 @@ export type AssetDialogData = {
 } | undefined;
 
 export type AssetDialogContextType = {
-  isAssetDialogOpen: boolean;
-  setAssetDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isAssetDialogOpen: boolean
+  onAssetDialogOpen: () => void
+  onAssetDialogClose: () => void
   assetDialogData?: AssetDialogData;
   setAssetDialogData: React.Dispatch<React.SetStateAction<AssetDialogData>>;
 };

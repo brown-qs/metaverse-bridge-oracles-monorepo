@@ -14,7 +14,7 @@ import { Box, Button, List, ListItem, Popover } from '@chakra-ui/react';
 export const Account = () => {
   const [accountButton, setAccountButton] = useState<HTMLButtonElement | null>(null);
   const { account, error } = useActiveWeb3React();
-  const { setAccountDialogOpen } = useAccountDialog();
+  const { onAccountDialogOpen } = useAccountDialog();
   const hideAddress = useMediaQuery(`(max-width: 500px)`);
 
   const showError = error ? true : false;
@@ -50,7 +50,7 @@ export const Account = () => {
       <Button
         className={button}
         size="medium"
-        onClick={() => setAccountDialogOpen(true)}
+        onClick={() => onAccountDialogOpen()}
       >
         {account && <HeaderBalance />}
 

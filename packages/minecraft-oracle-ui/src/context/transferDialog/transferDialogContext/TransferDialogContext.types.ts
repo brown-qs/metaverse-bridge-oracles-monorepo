@@ -7,8 +7,9 @@ export type TransferData = {
 } | null;
 
 export type TransferDialogContextType = {
-  isTransferDialogOpen: boolean;
-  setTransferDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isTransferDialogOpen: boolean
+  onTransferDialogOpen: () => void
+  onTransferDialogClose: () => void
   transferData?: TransferData;
   setTransferData: React.Dispatch<React.SetStateAction<TransferData>>;
 };

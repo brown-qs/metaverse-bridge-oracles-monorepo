@@ -8,7 +8,6 @@ import {
 } from '../../constants';
 import { getExplorerLink } from 'utils';
 import { useEffect, useState } from 'react';
-import { Dialog } from 'ui';
 import { useClasses } from 'hooks';
 import { styles as appStyles } from '../../app.styles';
 import { styles } from './ExportDialog.styles';
@@ -27,7 +26,7 @@ import { CircleCheck } from 'tabler-icons-react';
 
 export const ExportDialog = () => {
   const [finalTxSubmitted, setFinalTxSubmitted] = useState<boolean>(false);
-  const { isExportDialogOpen, exportDialogData, setExportDialogData, setExportDialogOpen } = useExportDialog();
+  const { isExportDialogOpen, onExportDialogOpen, onExportDialogClose, exportDialogData, setExportDialogData } = useExportDialog();
   const [exportParamsLoaded, setExportParamsLoaded] = useState<boolean>(false);
   const [approvalSubmitted, setApprovalSubmitted] = useState<boolean>(false);
   const [exportConfirmed, setExportConfirmed] = useState<boolean>(false);
@@ -62,7 +61,7 @@ export const ExportDialog = () => {
     if (reason === 'backdropClick') {
       return
     }
-    setExportDialogOpen(false);
+    onExportDialogClose();
     setExportParamsLoaded(false);
     setFinalTxSubmitted(false);
     setExportConfirmed(false);
@@ -271,7 +270,7 @@ export const ExportDialog = () => {
       </Stack>
     );
   };
-  return (
+  /*
     <Dialog
       open={isExportDialogOpen}
       onClose={handleClose}
@@ -280,5 +279,8 @@ export const ExportDialog = () => {
     >
       <div className={dialogContainer}>{renderBody()}</div>
     </Dialog>
+  */
+  return (
+    <></>
   );
 };

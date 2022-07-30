@@ -1,4 +1,5 @@
 export type AccountDialogContextType = {
-  isAccountDialogOpen: boolean;
-  setAccountDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isAccountDialogOpen: boolean
+  onAccountDialogOpen: () => void
+  onAccountDialogClose: () => void
 };

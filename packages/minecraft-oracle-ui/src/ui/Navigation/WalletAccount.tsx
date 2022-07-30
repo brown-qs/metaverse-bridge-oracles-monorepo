@@ -9,7 +9,7 @@ import { Wallet } from 'tabler-icons-react';
 
 export default function WalletAccount() {
   const { account } = useActiveWeb3React();
-  const { setAccountDialogOpen } = useAccountDialog();
+  const { isAccountDialogOpen, onAccountDialogOpen, onAccountDialogClose } = useAccountDialog();
 
   const styles = () => ({
     WalletDetailsStyle: {
@@ -42,14 +42,14 @@ export default function WalletAccount() {
     <>
       {
         account ? (
-          <Box onClick={() => setAccountDialogOpen(true)} className={WalletDetailsStyle}>
+          <Box onClick={() => onAccountDialogOpen()} className={WalletDetailsStyle}>
             <div style={{ margin: '0 8px' }}>
               <Identicon />
             </div>
             <span>{truncateAddress(account, 4)}</span>
           </Box >
         ) : (
-          <Box onClick={() => setAccountDialogOpen(true)} className={WalletDetailsStyle}>
+          <Box onClick={() => onAccountDialogOpen()} className={WalletDetailsStyle}>
             <Wallet color="#3BEFB8" />
             <Text paddingLeft="10px" color="white">Connect Wallet</Text>
           </Box>

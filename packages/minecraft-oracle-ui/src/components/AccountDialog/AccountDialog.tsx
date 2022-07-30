@@ -4,7 +4,6 @@ import { injected, walletconnect } from 'connectors';
 import { SUPPORTED_WALLETS } from '../../connectors';
 import { useAccountDialog } from 'hooks';
 import { useCallback, useEffect, useState } from 'react';
-import { Dialog } from 'ui';
 import { useClasses } from 'hooks';
 import { styles as accountDialogStyles } from './AccountDialog.styles';
 import { isMobile } from 'react-device-detect';
@@ -24,7 +23,7 @@ import usePrevious from 'hooks/usePrevious/usePrevious';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 import useAddNetworkToMetamaskCb from 'hooks/useAddNetworkToMetamask/useAddNetworkToMetamask';
 import { ChainId, NETWORK_NAME, PERMISSIONED_CHAINS } from '../../constants';
-import { Button, CircularProgress, Stack, Text } from '@chakra-ui/react';
+import { Box, Button, CircularProgress, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Stack, Text } from '@chakra-ui/react';
 
 const WALLET_VIEWS = {
   OPTIONS: 'options',
@@ -53,7 +52,7 @@ export const AccountDialog = () => {
     .filter((tx) => tx.receipt)
     .map((tx) => tx.hash);
 
-  const { isAccountDialogOpen, setAccountDialogOpen } = useAccountDialog();
+  const { isAccountDialogOpen, onAccountDialogOpen, onAccountDialogClose } = useAccountDialog();
   // error reporting not working (e.g. on unsupported chain id)
   const { chainId, account, connector, active, error, activate, deactivate } =
     useWeb3React();
@@ -62,9 +61,13 @@ export const AccountDialog = () => {
   // close on connection, when logged out before
   useEffect(() => {
     if (account && !previousAccount && isAccountDialogOpen) {
-      setAccountDialogOpen(!isAccountDialogOpen);
+      if (isAccountDialogOpen) {
+        onAccountDialogClose()
+      } else {
+        onAccountDialogOpen()
+      }
     }
-  }, [account, previousAccount, isAccountDialogOpen, setAccountDialogOpen]);
+  }, [account, previousAccount, isAccountDialogOpen, onAccountDialogOpen, onAccountDialogClose]);
 
   // always reset to account view
   useEffect(() => {
@@ -421,15 +424,26 @@ export const AccountDialog = () => {
   }
 
   return (
-    <Dialog
-      open={isAccountDialogOpen}
-      onClose={() => setAccountDialogOpen(false)}
-      title="Account"
-      maxWidth='sm'
-      fullWidth={true}
-    >
-      {getModalContent()}
-    </Dialog>
+
+    <Modal isOpen={isAccountDialogOpen} onClose={onAccountDialogClose}>
+      <ModalOverlay />
+      <ModalContent>
+        <ModalHeader>Modal Title</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+
+        </ModalBody>
+
+        <ModalFooter>
+          <Button colorScheme='blue' mr={3} onClick={onAccountDialogClose}>
+            Close
+          </Button>
+          <Button variant='ghost'>Secondary Action</Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
+
+
   );
 };
 
