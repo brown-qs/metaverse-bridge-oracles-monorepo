@@ -1,5 +1,8 @@
 import { extendTheme } from '@chakra-ui/react'
 
+import { ComponentStyleConfig } from '@chakra-ui/react'
+
+
 export default extendTheme({
   "colors": {
     "gray": {
@@ -128,4 +131,29 @@ export default extendTheme({
     heading: `Orbitron, Georgia, serif`,
     mono: `Menlo, monospace`,
   },
+  components: {
+    Button: {
+      variants: {
+        solid: {
+          fontWeight: "normal",
+          fontSize: "12px",
+          borderRadius: "4px",
+          color: "white",
+          border: "1px solid",
+          borderColor: "#099E71",
+          bg: "#099E71",
+          _hover: {
+            border: "1px solid",
+            borderColor: "#3BEFB8",
+            bg: "#08825D"
+          },
+          _active: {
+            border: "1px solid",
+            borderColor: "#3BEFB8",
+            bg: "#05563D"
+          }
+        }
+      }
+    }
+  }
 })
