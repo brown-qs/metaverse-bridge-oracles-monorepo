@@ -4,33 +4,21 @@ import 'date-fns';
 import { useState } from 'react';
 import { useClasses } from 'hooks';
 import { styles as appStyles } from '../../app.styles';
-import { styles as assetDialogStyles } from './AssetDialog.styles';
 import { useAssetDialog } from 'hooks/useAssetDialog/useAssetDialog';
 import useAddTokenToMetamask from 'hooks/useAddTokenToMetamask/useAddTokenToMetamask';
 import { useTokenStaticData } from 'hooks/useTokenStaticData/useTokenStaticData';
 import { StringAssetType } from 'utils/subgraph';
 import { AddressZero } from '@ethersproject/constants';
-import { Button, CircularProgress, Grid, Stack, Text } from '@chakra-ui/react';
+import { Button, CircularProgress, Grid, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Stack, Text } from '@chakra-ui/react';
 
 
 export const AssetDialog = () => {
   const [assetParamsLoaded, setAssetParamsLoaded] = useState<boolean>(false);
   const { isAssetDialogOpen, onAssetDialogOpen, onAssetDialogClose, assetDialogData, setAssetDialogData } = useAssetDialog();
 
-  const {
-    row,
-    col,
-    formBox,
-    formLabel,
-    formValue,
-    formValueTokenDetails,
-    formButton,
-  } = useClasses(appStyles);
 
-  const {
-    dialogContainer,
-    loadingContainer,
-  } = useClasses(assetDialogStyles);
+
+
 
   const handleClose = (event: any, reason: string) => {
     onAssetDialogClose()
@@ -57,8 +45,8 @@ export const AssetDialog = () => {
 
     if (!assetParamsLoaded) {
       return (
-        <div className={loadingContainer}>
-          <CircularProgress />
+        <div >
+          <CircularProgress isIndeterminate />
           <div>
             <Text>Loading asset details</Text>
             <Text color="textSecondary" variant="h5">
@@ -73,23 +61,22 @@ export const AssetDialog = () => {
       <Stack spacing={1} justifyContent="center">
         <Text style={{ alignSelf: 'center' }} variant='body1'>Hybrid token details</Text>
         {assetDialogData?.assetERC1155 && <Grid /*item md={12} xs={12}*/>
-          <Stack direction={'row'} className={formBox} spacing={5}>
-            <div className={col}>
-              <div className={formLabel}>Type</div>
-              <div className={`${formValue} ${formValueTokenDetails}`}>
+          <Stack direction={'row'} spacing={5}>
+            <div >
+              <div >Type</div>
+              <div >
                 {assetDialogData?.assetERC1155?.assetType}
               </div>
             </div>
-            <div className={col}>
-              <div className={formLabel}>ID</div>
-              <div className={`${formValue} ${formValueTokenDetails}`}>
+            <div >
+              <div >ID</div>
+              <div>
                 {assetDialogData?.assetERC1155?.assetId}
               </div>
             </div>
-            <div className={col}>
-              <div className={formLabel}>Address</div>
+            <div>
+              <div>Address</div>
               <AddressDisplayComponent
-                className={`${formValue} ${formValueTokenDetails}`}
                 copyTooltipLabel={'Copy address'}
                 charsShown={5}
               >
@@ -100,17 +87,16 @@ export const AssetDialog = () => {
         </Grid>}
 
         {assetDialogData?.assetAddressERC20 && (
-          <Stack direction={'row'} className={`${formBox} ${row}`} spacing={5}>
-            <div className={col}>
-              <div className={formLabel}>Type</div>
-              <div className={`${formValue} ${formValueTokenDetails}`}>
+          <Stack direction={'row'} spacing={5}>
+            <div >
+              <div >Type</div>
+              <div >
                 {'ERC20'}
               </div>
             </div>
-            <div className={col}>
-              <div className={formLabel}>Address</div>
+            <div >
+              <div >Address</div>
               <AddressDisplayComponent
-                className={`${formValue} ${formValueTokenDetails}`}
                 copyTooltipLabel={'Copy address'}
                 charsShown={5}
               >
@@ -123,7 +109,6 @@ export const AssetDialog = () => {
           onClick={() => {
             addToken()
           }}
-          className={formButton}
           variant="contained"
           color="primary"
           disabled={!assetDialogData?.assetAddressERC20}
@@ -131,23 +116,22 @@ export const AssetDialog = () => {
         >
           Add to Metamask
         </Button>
-        <Button className={formButton} onClick={() => handleClose({}, "yada")} color="primary">
+        <Button onClick={() => handleClose({}, "yada")} color="primary">
           Cancel
         </Button>
       </Stack>
     );
   };
-  /*
-      <Dialog
-      open={isAssetDialogOpen}
-      onClose={handleClose}
-      title={title}
-      maxWidth="md"
-    >
-      <div className={dialogContainer}>{renderBody()}</div>
-    </Dialog>
-  */
+
   return (
-    <></>
-  );
+    <Modal isOpen={isAssetDialogOpen} onClose={onAssetDialogClose} isCentered>
+      <ModalOverlay />
+      <ModalContent>
+        <ModalCloseButton />
+        <ModalHeader>{title}</ModalHeader>
+        <ModalBody>
+          {renderBody()}
+        </ModalBody>
+      </ModalContent>
+    </Modal>);
 };
