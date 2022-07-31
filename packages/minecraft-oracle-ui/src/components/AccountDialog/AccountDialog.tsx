@@ -5,7 +5,6 @@ import { SUPPORTED_WALLETS } from '../../connectors';
 import { useAccountDialog } from 'hooks';
 import { useCallback, useEffect, useState } from 'react';
 import { useClasses } from 'hooks';
-import { styles as accountDialogStyles } from './AccountDialog.styles';
 import { isMobile } from 'react-device-detect';
 import WalletConnectIcon from '../../assets/images/walletConnectIcon.svg';
 import MetamaskIcon from '../../assets/images/metamask.png';
@@ -33,7 +32,6 @@ const WALLET_VIEWS = {
 };
 
 export const AccountDialog = () => {
-  const styles = useClasses(accountDialogStyles);
   const dispatch = useDispatch<AppDispatch>();
 
   const [pendingWallet, setPendingWallet] = useState<
@@ -108,19 +106,19 @@ export const AccountDialog = () => {
           (connector !== injected || isMetaMask === (k === 'METAMASK'))
       )
       .map((k) => SUPPORTED_WALLETS[k].name)[0];
-    return <div className={styles.walletName}>Connected with {name}</div>;
+    return <div >Connected with {name}</div>;
   }
 
   function getStatusIcon() {
     if (connector === injected) {
       return (
-        <div className={styles.iconWrapper}>
+        <div >
           <Identicon />
         </div>
       );
     } else if (connector === walletconnect) {
       return (
-        <div className={styles.iconWrapper}>
+        <div >
           <img src={WalletConnectIcon} alt={'wallet connect logo'} />
         </div>
       );
@@ -142,21 +140,20 @@ export const AccountDialog = () => {
     () => (
       <>
         {formatConnectorName()}
-        <div className={styles.row}>
+        <div>
           {getStatusIcon()}
           <p> {account && shortenAddress(account)}</p>
         </div>
         <Button
           variant="outlined"
           color="primary"
-          className={styles.row}
           onClick={() => setWalletView(WALLET_VIEWS.OPTIONS)}
         >
           Change
         </Button>
       </>
     ),
-    [account, activate, deactivate, styles]
+    [account, activate, deactivate]
   );
 
   const clearAllTransactionsCallback = useCallback(() => {
@@ -319,7 +316,7 @@ export const AccountDialog = () => {
   function getModalContent() {
     if (error) {
       return (
-        <div className={styles.dialogContainer}>
+        <div >
           {error instanceof UnsupportedChainIdError && <>
             <div>
               Unsupported network
@@ -352,12 +349,12 @@ export const AccountDialog = () => {
     if (account && walletView === WALLET_VIEWS.ACCOUNT) {
       return (
         <>
-          <div className={styles.dialogContainer}>
+          <div >
             {showConnectedAccountDetails()}
           </div>
           {account &&
             (!!pendingTransactions.length || !!confirmedTransactions.length) ? (
-            <Stack className={styles.lowerSection}>
+            <Stack >
               <Stack direction={'row'} justifyContent={'space-between'}>
                 <Text>Recent transactions</Text>
                 <Button
@@ -371,7 +368,7 @@ export const AccountDialog = () => {
               {renderTransactions(confirmedTransactions)}
             </Stack>
           ) : (
-            <div className={styles.lowerSection}>
+            <div >
               <Text>Your transactions will appear here...</Text>
             </div>
           )}
@@ -379,10 +376,9 @@ export const AccountDialog = () => {
       );
     }
     return (
-      <div className={styles.dialogContainer}>
+      <div >
         {walletView !== WALLET_VIEWS.ACCOUNT ? (
           <Button
-            className={styles.titleSlot}
             variant="outlined"
             color="primary"
             onClick={() => {
@@ -393,17 +389,17 @@ export const AccountDialog = () => {
             Back
           </Button>
         ) : (
-          <span className={styles.titleSlot}>Connect to a wallet</span>
+          <span>Connect to a wallet</span>
         )}
         {walletView === WALLET_VIEWS.PENDING ? (
           <>
             <CircularProgress />
             {error ? (
-              <Text className={styles.walletPendingText}>
+              <Text>
                 Error connecting
               </Text>
             ) : (
-              <Text className={styles.walletPendingText}>
+              <Text>
                 Initializing...
               </Text>
             )}
@@ -412,7 +408,7 @@ export const AccountDialog = () => {
           getOptions()
         )}
         {walletView !== WALLET_VIEWS.PENDING && (
-          <Text variant="body2" className={styles.row}>
+          <Text variant="body2">
             New to Ethereum? &nbsp;
             <ExternalLink href="https://ethereum.org/wallets">
               Learn more about wallets
@@ -425,18 +421,15 @@ export const AccountDialog = () => {
 
   return (
 
-    <Modal isOpen={isAccountDialogOpen} onClose={onAccountDialogClose}>
+    <Modal isOpen={isAccountDialogOpen} onClose={onAccountDialogClose} isCentered>
       <ModalOverlay />
       <ModalContent>
         <ModalCloseButton />
         <ModalBody>
           {getModalContent()}
         </ModalBody>
-
       </ModalContent>
     </Modal>
-
-
   );
 };
 

@@ -4,7 +4,6 @@ import { useActiveWeb3React, useSummonDialog } from 'hooks';
 import { useState } from 'react';
 import { useClasses } from 'hooks';
 import { styles as appStyles } from '../../app.styles';
-import { styles } from './SummonDialog.styles';
 import { useSummonCallback } from 'hooks/multiverse/useSummon';
 import {
   DEFAULT_CHAIN,
@@ -12,7 +11,7 @@ import {
   PERMISSIONED_CHAINS,
 } from '../../constants';
 import { AddressDisplayComponent } from 'components/form/AddressDisplayComponent';
-import { Box, Button, CircularProgress, MenuItem, Select, Stack, Text } from '@chakra-ui/react';
+import { VStack, Box, Button, CircularProgress, MenuItem, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Select, Stack, Text } from '@chakra-ui/react';
 import { CircleCheck } from 'tabler-icons-react';
 
 export const SummonDialog = () => {
@@ -23,21 +22,12 @@ export const SummonDialog = () => {
 
   const { button, formBox, formButton } = useClasses(appStyles);
 
-  const {
-    dialogContainer,
-    loadingContainer,
-    successContainer,
-    successIcon,
-    sortElement,
-    alignSelfCenter
-  } = useClasses(styles);
+
 
   const { account } = useActiveWeb3React();
 
-  const handleClose = (event: any, reason: string) => {
-    if (reason === 'backdropClick') {
-      return;
-    }
+  const handleClose = () => {
+    //TO DO: don't let backdrop close
     onSummonDialogClose();
     setSummonSubmitted(false);
     setSummonConfirmed(0);
@@ -50,15 +40,15 @@ export const SummonDialog = () => {
   const renderBody = () => {
     if (summonSubmitted && summonConfirmed === 1) {
       return (
-        <div className={successContainer}>
-          <CircleCheck className={successIcon} />
+        <div >
+          <CircleCheck />
           <Text>{`Summon request received!`}</Text>
           <Text color="textSecondary">
             {`Your summon request was acknowledged by the Oracle. Depending on the number of requests and Moonriver traffic the transaction can take a while. You can sit back and relax now. Check back later.`}
           </Text>
           <Button
             className={button}
-            onClick={() => handleClose({}, 'yada')}
+            onClick={() => handleClose()}
             variant="outlined"
             color="primary"
           >
@@ -71,14 +61,14 @@ export const SummonDialog = () => {
     if (summonSubmitted && summonConfirmed === 0) {
       return (
         <>
-          <div className={loadingContainer}>
-            <CircularProgress />
-            <div>
+          <VStack alignItems="center" >
+            <CircularProgress isIndeterminate />
+            <Box>
               <Text>
                 Multiverse Bridge Oracle processing your request...
               </Text>
-            </div>
-          </div>
+            </Box>
+          </VStack>
         </>
       );
     }
@@ -86,7 +76,7 @@ export const SummonDialog = () => {
     if (summonSubmitted && summonConfirmed === 2) {
       return (
         <>
-          <div className={loadingContainer}>
+          <div >
             <div>
               <Text>Unsuccessful summon</Text>
               <Text color="textSecondary" variant="h5">
@@ -108,7 +98,6 @@ export const SummonDialog = () => {
           </Text>
           <Box alignSelf={'center'}>
             <AddressDisplayComponent
-              className={alignSelfCenter}
               charsShown={7}
               copyTooltipLabel='Copy address'
             >
@@ -119,14 +108,7 @@ export const SummonDialog = () => {
             Please select the network to summon to.
           </Text>
           <Select
-            className={sortElement}
-            /*IconComponent={SortSharp}*/
-            variant="outlined"
-            color="primary"
-            /*   inputProps={{
-                 name: 'sort',
-                 id: 'uncontrolled-native',
-               }}*/
+
             defaultValue={selectedChainId}
             onChange={(event: any) => {
               setSelectedChainId(event.target.value);
@@ -134,7 +116,7 @@ export const SummonDialog = () => {
           >
             {PERMISSIONED_CHAINS.map((chain) => {
               return (
-                <MenuItem value={chain}>{NETWORK_NAME[chain]}</MenuItem>
+                <option key={NETWORK_NAME[chain]} value={chain}>{NETWORK_NAME[chain]}</option>
               );
             })}
           </Select>
@@ -159,7 +141,7 @@ export const SummonDialog = () => {
         <Button
           className={formButton}
           onClick={() => {
-            handleClose({}, 'yada');
+            handleClose();
             setSelectedChainId(0);
           }}
           color="primary"
@@ -169,17 +151,20 @@ export const SummonDialog = () => {
       </Stack>
     );
   };
-  /*
-    <Dialog
-      open={isSummonDialogOpen}
-      onClose={handleClose}
-      title={'MultiverseBridge: summon'}
-      maxWidth="sm"
-    >
-      <div className={dialogContainer}>{renderBody()}</div>
-    </Dialog>
-  */
+
+
+
+
   return (
-    <></>
+    <Modal isOpen={isSummonDialogOpen} onClose={() => handleClose()} isCentered closeOnOverlayClick={false}>
+      <ModalOverlay />
+      <ModalContent>
+        <ModalCloseButton />
+        <ModalHeader>MultiverseBridge: summon</ModalHeader>
+        <ModalBody>
+          {renderBody()}
+        </ModalBody>
+      </ModalContent>
+    </Modal>
   );
 };
