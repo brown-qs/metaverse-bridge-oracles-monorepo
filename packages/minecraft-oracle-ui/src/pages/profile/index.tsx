@@ -21,6 +21,10 @@ import { InGameItemWithStatic } from 'hooks/multiverse/useInGameItems';
 import { BURNABLE_RESOURCES_IDS, DEFAULT_CHAIN, NETWORK_NAME } from "../../constants";
 import { AssetChainDetails } from '../../components/AssetChainDetails/AssetChainDetails';
 import { Text, Box, Container, Grid, List, ListIcon, ListItem, Stack, Tooltip, Button, Flex, SimpleGrid, GridItem, VStack, HStack } from '@chakra-ui/react';
+import { BridgeTab } from '../../components/Bridge/BridgeTab';
+import { InGameItem } from '../../components/Bridge/InGameItem';
+import { DeviceGamepad, UserCircle, Wallet } from 'tabler-icons-react';
+import { InGameResource } from '../../components/Bridge/InGameResource';
 
 export type ProfilePagePropTypes = {
     authData: AuthData
@@ -84,7 +88,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
         //<a target='_blank' className={itemImage} href={`${value.renderURL ? `https://minerender.org/embed/skin/?skin=${value.renderURL}` : value.coverURL}`} rel="noreferrer">
         return (
 
-            < GridItem _before={{ content: `""`, paddingBottom: "100%", display: "block" }
+            < GridItem key={`${value?.assetAddress}-${value?.assetId}-${ind}`} _before={{ content: `""`, paddingBottom: "100%", display: "block" }
             } backgroundImage={`url(${value.coverURL})`} backgroundRepeat="no-repeat" backgroundSize="contain" cursor="pointer" backgroundPosition="center" sx={{ backgroundSize: "auto 75%" }}>
 
             </GridItem >
@@ -110,37 +114,16 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const inGameItemsElem = inGameAssets.map((value, ind) => {
         const labelId = `checkbox-list-secondary-label-${ind}`;
         return (
-            <>
-                <GridItem margin="8px 0px 8px 11px" h="80px" key={`${value?.assetAddress}-${value?.assetId}-${ind}`} backgroundImage={`url(${value?.meta?.image})`} backgroundRepeat="no-repeat" backgroundSize="contain" backgroundPosition="center"></GridItem>
-                <GridItem fontSize="16px" fontFamily="Rubik" color="white">
-                    <Flex h="100%" direction="row" alignItems="center" paddingLeft="8px">
-                        <Box>{value?.meta?.name ?? `${value.assetAddress} ${value.assetId}`}</Box>
-                    </Flex>
-                </GridItem>
-                <GridItem margin="0 11px 0 0">
-                    <Flex h="100%" direction="row" alignItems="center" paddingLeft="8px">
-                        <Button isDisabled={!value?.exportable} onClick={() => {
-                            setItemDetailDialogData(value);
-                            setItemDetailDialogOpen(true);
-                        }} size='xs'>Export</Button>
-                    </Flex>
-                </GridItem>
-            </>
+            <InGameItem key={`${value?.assetAddress}-${value?.assetId}-${ind}`} data={value} onClick={() => {
+                setItemDetailDialogData(value);
+                setItemDetailDialogOpen(true);
+            }}></InGameItem>
         );
     })
     const inGameItemListElem = (<> {/* Start In Game Items */}
-        <List sx={{ width: '100%', bgcolor: '#111' }}>
-            {!!inGameAssets.length
-                ?
-                <Grid templateColumns='80px 1fr 80px' width="100%">
-                    {inGameItemsElem}
-                </Grid>
-                :
-                <Box padding="24px" color="white" textAlign="left" w="100%" fontFamily='Rubik'>
-                    No items found in game.
-                </Box>
-            }
-        </List>
+        <VStack spacing="8px" width="100%" padding="8px 11px 8px 11px">
+            {inGameItemsElem}
+        </VStack>
         {/*
         <Dialog
             open={itemDetailDialogOpen}
@@ -264,46 +247,22 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
     const inGameResourcesElem = inGameResources.map(resource => {
         return (
-            <>
-                <GridItem margin="8px 0px 8px 11px" h="80px" key={`${resource.assetAddress}-${resource.assetId}`} backgroundImage={`url(${resource.meta?.image})`} backgroundRepeat="no-repeat" backgroundSize="contain" backgroundPosition="center"></GridItem>
-                <GridItem fontSize="16px" fontFamily="Rubik" color="white">
-                    <Flex h="100%" direction="row" alignItems="center" paddingLeft="8px">
-                        <Box>{resource?.meta?.name}</Box>
-                    </Flex>
-                </GridItem>
-                <GridItem margin="0 11px 0 0">
-                    <Flex h="100%" direction="row" alignItems="center" paddingLeft="8px" color="white">
-                        <Box>{String(parseFloat(resource.amount).toFixed(2))}</Box>
-                    </Flex>
-                </GridItem>
-
-            </>
+            <InGameResource key={`${resource.assetAddress}-${resource.assetId}`} data={resource}></InGameResource>
         )
     })
     const inGameResourcesListElem = (<>
         {!!inGameResources.length ? (
 
-            <Grid templateColumns='80px 1fr 100px' width="100%">
+            <VStack spacing="8px" width="100%" padding="8px 11px 8px 11px">
                 {inGameResourcesElem}
-            </Grid>
+            </VStack>
 
         ) :
             <Box padding="24px" color="white" textAlign="left" w="100%" fontFamily='Rubik'>
                 No in-game resources available
             </Box>
         }
-        <Button size="xs"
-            variant="solid"
-            onClick={() => {
-                if (!!account) {
-                    onSummonDialogOpen();
-                    setSummonDialogData({ recipient: account ?? undefined });
-                } else {
-                    onAccountDialogOpen()
-                }
-            }}
-            disabled={!canSummon}
-        >Summon resources</Button></>)
+    </>)
 
 
     const onChainResourcesElem = (<> <List sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
@@ -347,7 +306,18 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
 
     return (
-        <Container background="black" minWidth="100%" margin="0" padding="0" height={{ base: "100%", md: "max(calc(100vh - 80px), 100%)", xl: "max(calc(100vh - 64px), 100%)" }} overflow="visible">
+        <Container
+            background="#080714"
+            backgroundPosition="top right"
+            backgroundRepeat="no-repeat"
+            backgroundSize='630px 816px'
+            backgroundImage="bridge-background-blur.svg"
+            backgroundBlendMode="hard-light"
+            minWidth="100%"
+            margin="0"
+            padding="0"
+            height={{ base: "100%", md: "max(calc(100vh - 80px), 100%)", xl: "max(calc(100vh - 64px), 100%)" }}
+            overflow="visible">
             <Grid templateRows={{ base: "200px repeat(5, 450px)", md: '275px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr)', lg: '275px minmax(0, 1fr) minmax(0, 1fr)' }} templateColumns='repeat(12, 1fr)' maxW="1440px" margin="auto" height={{ base: "100%", md: "max(calc(100vh - 80px), 800px)", xl: "max(calc(100vh - 64px), 800px)" }}>
 
 
@@ -391,7 +361,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     rowSpan={1}
                     colSpan={{ base: 12, md: 6, lg: 4 }}
                 >
-                    <BridgeTab title="Available Skins">
+                    <BridgeTab title="Available Skins" icon={<UserCircle size="18px" />}>
                         {skinListElem}
                     </BridgeTab>
                 </GridItem>
@@ -407,7 +377,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     rowSpan={1}
                     colSpan={{ base: 12, md: 6, lg: 4 }}
                 >
-                    <BridgeTab title="In-Game Items">
+                    <BridgeTab title="In-Game Items" icon={<DeviceGamepad size="18px" />}>
                         {inGameItemListElem}
                     </BridgeTab>
                 </GridItem>
@@ -423,7 +393,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     rowSpan={1}
                     colSpan={{ base: 12, md: 6, lg: 4 }}
                 >
-                    <BridgeTab title="On-Chain Items">
+                    <BridgeTab title="On-Chain Items" icon={<Wallet size="18px" />}>
                         {onChainItemsElem}
                     </BridgeTab>
                 </GridItem>
@@ -439,7 +409,15 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     rowSpan={1}
                     colSpan={{ base: 12, md: 6, lg: 6 }}
                 >
-                    <BridgeTab title="In-Game Resources">
+                    <BridgeTab title="In-Game Resources" footer={<Button onClick={() => {
+                        if (!!account) {
+                            onSummonDialogOpen();
+                            setSummonDialogData({ recipient: account ?? undefined });
+                        } else {
+                            onAccountDialogOpen()
+                        }
+                    }}
+                        isDisabled={!canSummon} w="100%">Summon All Resources</Button>} icon={<DeviceGamepad size="18px" />}>
                         {inGameResourcesListElem}
                     </BridgeTab>
                 </GridItem>
@@ -454,7 +432,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     rowSpan={1}
                     colSpan={{ base: 12, md: 12, lg: 6 }}
                 >
-                    <BridgeTab title="On-Chain Resources">
+                    <BridgeTab title="On-Chain Resources" icon={<Wallet size="18px" />}>
                         {onChainResourcesElem}
                     </BridgeTab>
                 </GridItem>
@@ -467,36 +445,5 @@ export default ProfilePage;
 
 
 
-const BridgeTab: React.FC<{ title: string, children: ReactNode }> = ({ title, children }) => {
-    return (
-        <VStack maxHeight="100%" height="100%" alignItems={"flex-start"} spacing={0}>
-            <HStack
-                alignItems={"center"}
-                width="250px"
-                minHeight="40px"
-                height="40px"
-                borderRadius="8px 8px 0px 0px"
-                background="rgba(22, 19, 43, 0.92)"
 
-            >
-                <Box
-                    color="#FCD14E"
-                    fontSize="12px"
-                    lineHeight="16px"
-                    // background="rgba(22, 19, 43, 0.92)"
-                    width="100%"
-                    textAlign={"center"}
-
-                    marginLeft="0"
-                    fontFamily="Orbitron"
-                    textTransform="uppercase"
-                >{title}</Box>
-            </HStack>
-            <VStack flexGrow="1" borderRadius="0px 8px 8px 8px" overflowY="scroll" width="100%" background="rgba(22, 19, 43, 0.92)">
-                {children}
-            </VStack>
-        </VStack>
-
-    )
-};
 
