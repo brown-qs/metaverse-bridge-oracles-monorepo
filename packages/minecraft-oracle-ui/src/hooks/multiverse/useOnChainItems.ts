@@ -26,15 +26,15 @@ export interface TokenOwner {
 
 export type AssetWithBalance = Asset & { balance: string | BigNumber }
 
-
+export interface UserCollectionElement {
+  meta: TokenMeta | undefined,
+  staticData: StaticTokenData,
+  asset: AssetWithBalance,
+  enrapturable: boolean;
+  importable: boolean;
+}
 export interface UserCollection {
-  [key: string]: {
-    meta: TokenMeta | undefined,
-    staticData: StaticTokenData,
-    asset: AssetWithBalance,
-    enrapturable: boolean;
-    importable: boolean;
-  }[]
+  [key: string]: UserCollectionElement[]
 }
 
 export interface UserCollectionWithCompositeMetaOnly {
@@ -301,7 +301,7 @@ export const useOnChainItemsWithCompositeMetaAndAssets = (trigger: string | unde
     })
 
     await Promise.all(fetches)
-    
+
     if (!checkResultsEqual(result, onChainItems)) {
       console.log('WAAA')
       console.log({
@@ -338,7 +338,7 @@ function checkResultsEqual(a?: UserCollectionWithCompositeMetaOnly, b?: UserColl
 
   const keys = Object.keys(a)
 
-  for(let i=0; i< keys.length; i++) {
+  for (let i = 0; i < keys.length; i++) {
     const key = keys[i]
     if (a[key]?.length !== b[key]?.length) {
       return false
