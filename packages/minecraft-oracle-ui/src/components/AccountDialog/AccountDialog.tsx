@@ -428,18 +428,11 @@ export const AccountDialog = () => {
     <Modal isOpen={isAccountDialogOpen} onClose={onAccountDialogClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Modal Title</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-
+          {getModalContent()}
         </ModalBody>
 
-        <ModalFooter>
-          <Button colorScheme='blue' mr={3} onClick={onAccountDialogClose}>
-            Close
-          </Button>
-          <Button variant='ghost'>Secondary Action</Button>
-        </ModalFooter>
       </ModalContent>
     </Modal>
 

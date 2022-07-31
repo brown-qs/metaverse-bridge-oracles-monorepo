@@ -3,7 +3,7 @@ import { AuthLayout, Loader } from 'ui';
 import { useAuth, useClasses } from 'hooks';
 import { useNavigate } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
-import { Alert, Box, Button, Stack, Tag, TagCloseButton, TagLabel, TagLeftIcon, TagRightIcon } from '@chakra-ui/react';
+import { Alert, AlertDescription, AlertIcon, Box, Button, Stack, Tag, TagCloseButton, TagLabel, TagLeftIcon, TagRightIcon } from '@chakra-ui/react';
 import { DeviceGamepad2, Pencil, User } from 'tabler-icons-react';
 const AccountPage = () => {
   const { authData, setAuthData } = useAuth();
@@ -89,13 +89,13 @@ const AccountPage = () => {
 
 
         <Stack direction="column" alignItems='center' textAlign='center' spacing={1} marginTop={2}>
-          <Box>
+          <Box paddingTop="10px" >
             <Button style={{ maxWidth: '200px', width: '200px', minWidth: '200px' }} onClick={() => { handleLogout() }} variant="solid">LOGOUT</Button>
           </Box>
         </Stack>
         <Stack direction="column" alignItems='center' textAlign='center' spacing={1} margin={2} marginTop={5}>
-          <Box>LINKED MINECRAFT ACCOUNT</Box>
-          {!authData?.userProfile?.minecraftUuid && <><Alert sx={{ margin: "auto" }} status="warning">Linking a Minecraft account that was used with Moonsama prior to the new login system will migrate over all assets and resources to your Moonsama account. Make sure you do not lose access to your email address.</Alert><div></div></>}
+          <Box paddingTop="30px">LINKED MINECRAFT ACCOUNT</Box>
+          {!authData?.userProfile?.minecraftUuid && <><Alert sx={{ margin: "auto" }} variant='solid' status="warning"><AlertIcon /><AlertDescription textAlign="left" fontFamily="Rubik">Linking a Minecraft account that was used with Moonsama prior to the new login system will migrate over all assets and resources to your Moonsama account. Make sure you do not lose access to your email address.</AlertDescription></Alert><div></div></>}
           {authData?.userProfile?.minecraftUuid && <>
             <Tag sx={{ maxWidth: 300 }}
               size={"lg"}
@@ -107,10 +107,10 @@ const AccountPage = () => {
               <TagLeftIcon as={DeviceGamepad2} />
               <TagLabel>{authData?.userProfile?.minecraftUserName}</TagLabel>
             </Tag>
-            <div></div></>}
+          </>}
           <Box>{authData?.userProfile?.minecraftUuid
-            ? <Button style={{ maxWidth: '200px', width: '200px', minWidth: '200px' }} onClick={() => { handleMinecraftUnlink() }} variant="solid">UNLINK MINECRAFT</Button>
-            : <Button style={{ maxWidth: '200px', width: '200px', minWidth: '200px' }} onClick={() => { handleMinecraftLink() }} variant="solid">LINK MINECRAFT</Button>}
+            ? <Button style={{ maxWidth: '200px', width: '200px', minWidth: '200px' }} marginTop="6px" onClick={() => { handleMinecraftUnlink() }} variant="solid">UNLINK MINECRAFT</Button>
+            : <Button style={{ maxWidth: '200px', width: '200px', minWidth: '200px' }} marginTop="4px" onClick={() => { handleMinecraftLink() }} variant="solid">LINK MINECRAFT</Button>}
           </Box>
         </Stack>
 
