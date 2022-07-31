@@ -22,7 +22,7 @@ import usePrevious from 'hooks/usePrevious/usePrevious';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 import useAddNetworkToMetamaskCb from 'hooks/useAddNetworkToMetamask/useAddNetworkToMetamask';
 import { ChainId, NETWORK_NAME, PERMISSIONED_CHAINS } from '../../constants';
-import { Box, Button, CircularProgress, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Stack, Text } from '@chakra-ui/react';
+import { Box, Button, CircularProgress, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Stack, Text, VStack } from '@chakra-ui/react';
 
 const WALLET_VIEWS = {
   OPTIONS: 'options',
@@ -316,11 +316,11 @@ export const AccountDialog = () => {
   function getModalContent() {
     if (error) {
       return (
-        <div >
+        <VStack >
           {error instanceof UnsupportedChainIdError && <>
-            <div>
+            <Box>
               Unsupported network
-            </div>
+            </Box>
             <h5>Please connect to a supported Ethereum network.</h5>
             {PERMISSIONED_CHAINS.map((chainId, i) => {
               return <Button
@@ -329,7 +329,6 @@ export const AccountDialog = () => {
                 onClick={() => {
                   addNetwork(chainId as ChainId)
                 }}
-                color="primary"
               >
                 Switch to {NETWORK_NAME[chainId]}
               </Button>
@@ -337,28 +336,27 @@ export const AccountDialog = () => {
           </>}
 
           {!(error instanceof UnsupportedChainIdError) && <>
-            <div>
+            <Box>
               Something went wrong
-            </div>
+            </Box>
             <h5>Error connecting. Try refreshing the page.</h5>
           </>}
-        </div>
+        </VStack>
       );
     }
 
     if (account && walletView === WALLET_VIEWS.ACCOUNT) {
       return (
-        <>
-          <div >
+        <VStack>
+          <Box >
             {showConnectedAccountDetails()}
-          </div>
+          </Box>
           {account &&
             (!!pendingTransactions.length || !!confirmedTransactions.length) ? (
             <Stack >
               <Stack direction={'row'} justifyContent={'space-between'}>
                 <Text>Recent transactions</Text>
                 <Button
-                  //className={styles.linkStyledButton}
                   onClick={clearAllTransactionsCallback}
                 >
                   (clear all)
@@ -368,15 +366,15 @@ export const AccountDialog = () => {
               {renderTransactions(confirmedTransactions)}
             </Stack>
           ) : (
-            <div >
+            <Box >
               <Text>Your transactions will appear here...</Text>
-            </div>
+            </Box>
           )}
-        </>
+        </VStack>
       );
     }
     return (
-      <div >
+      <VStack >
         {walletView !== WALLET_VIEWS.ACCOUNT ? (
           <Button
             variant="outlined"
@@ -415,7 +413,7 @@ export const AccountDialog = () => {
             </ExternalLink>
           </Text>
         )}
-      </div>
+      </VStack>
     );
   }
 
@@ -425,6 +423,7 @@ export const AccountDialog = () => {
       <ModalOverlay />
       <ModalContent>
         <ModalCloseButton />
+        <ModalHeader>Account</ModalHeader>
         <ModalBody>
           {getModalContent()}
         </ModalBody>

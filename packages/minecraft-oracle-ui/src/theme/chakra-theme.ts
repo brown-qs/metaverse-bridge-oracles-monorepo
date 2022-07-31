@@ -164,6 +164,28 @@ export default extendTheme({
           boxShadow: "0px 25px 50px -12px rgba(0, 0, 0, 0.25)"
         }
       }
+    },
+    Checkbox: {
+      baseStyle: {
+        control: {
+          bg: "rgba(255, 255, 255, 0.2)",
+          _checked: {
+            borderColor: "#3BEFB8",
+            bg: "#099E71",
+            _hover: {
+              borderColor: "#3BEFB8",
+              bg: "#08825D"
+            }
+          },
+          _hover: {
+            bg: "#099E71"
+          },
+          _disabled: {
+            bg: "#099E71"
+
+          }
+        }
+      }
     }
   }
 })

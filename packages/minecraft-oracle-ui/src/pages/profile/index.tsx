@@ -23,7 +23,7 @@ import { AssetChainDetails } from '../../components/AssetChainDetails/AssetChain
 import { Text, Box, Container, Grid, List, ListIcon, ListItem, Stack, Tooltip, Button, Flex, SimpleGrid, GridItem, VStack, HStack, background, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody } from '@chakra-ui/react';
 import { BridgeTab } from '../../components/Bridge/BridgeTab';
 import { InGameItem } from '../../components/Bridge/InGameItem';
-import { DeviceGamepad, UserCircle, Wallet } from 'tabler-icons-react';
+import { CaretLeft, CaretRight, DeviceGamepad, UserCircle, Wallet } from 'tabler-icons-react';
 import { InGameResource } from '../../components/Bridge/InGameResource';
 import { OnChainResources } from '../../components/Bridge/OnChainResources';
 import { OnChainItem } from '../../components/Bridge/OnChainItem';
@@ -150,7 +150,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
             {inGameItemsElem}
         </VStack>
         {
-            <Modal isOpen={isItemDetailDialogOpen} onClose={onItemDetailDialogClose}>
+            <Modal isOpen={isItemDetailDialogOpen} onClose={onItemDetailDialogClose} isCentered>
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>Item details</ModalHeader>
@@ -391,7 +391,14 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     rowSpan={1}
                     colSpan={{ base: 12, md: 6, lg: 4 }}
                 >
-                    <BridgeTab title="In-Game Items" icon={<DeviceGamepad size="18px" />}>
+                    <BridgeTab title="In-Game Items"
+                        icon={<DeviceGamepad size="18px" />}
+                        footer={<Button
+                            rightIcon={<CaretRight></CaretRight>}
+                            onClick={() => {
+                            }}
+                            isDisabled={false} w="100%">EXPORT TO WALLET</Button>}
+                    >
                         {inGameItemListElem}
                     </BridgeTab>
                 </GridItem>
@@ -407,7 +414,15 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     rowSpan={1}
                     colSpan={{ base: 12, md: 6, lg: 4 }}
                 >
-                    <BridgeTab title="On-Chain Items" icon={<Wallet size="18px" />}>
+                    <BridgeTab
+                        title="On-Chain Items"
+                        icon={<Wallet size="18px" />}
+                        footer={<Button
+                            leftIcon={<CaretLeft></CaretLeft>}
+                            onClick={() => {
+                            }}
+                            isDisabled={false} w="100%">IMPORT TO GAME</Button>}
+                    >
                         {onChainItemsListElem}
                     </BridgeTab>
                 </GridItem>
@@ -423,14 +438,16 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     rowSpan={1}
                     colSpan={{ base: 12, md: 6, lg: 6 }}
                 >
-                    <BridgeTab title="In-Game Resources" footer={<Button onClick={() => {
-                        if (!!account) {
-                            onSummonDialogOpen();
-                            setSummonDialogData({ recipient: account ?? undefined });
-                        } else {
-                            onAccountDialogOpen()
-                        }
-                    }}
+                    <BridgeTab title="In-Game Resources" footer={<Button
+                        rightIcon={<CaretRight></CaretRight>}
+                        onClick={() => {
+                            if (!!account) {
+                                onSummonDialogOpen();
+                                setSummonDialogData({ recipient: account ?? undefined });
+                            } else {
+                                onAccountDialogOpen()
+                            }
+                        }}
                         isDisabled={!canSummon} w="100%">SUMMON ALL RESOURCES</Button>} icon={<DeviceGamepad size="18px" />}>
                         {inGameResourcesListElem}
                     </BridgeTab>
