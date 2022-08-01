@@ -112,7 +112,7 @@ const EmailVerifyPage = () => {
             </FormHelperText>
           )}
         </FormControl>
-        <Button isLoading={isLoading} isDisabled={!isValidLoginKey(loginKey)} onClick={() => verifyLoginKey(loginKey)} variant="solid">SEND LOGIN CODE</Button>
+        <Button isLoading={isLoading} isDisabled={!isValidLoginKey(loginKey)} onClick={() => verifyLoginKey(loginKey)} >SEND LOGIN CODE</Button>
         {!!authData?.jwt
           ?
           <Link sx={{ fontSize: "11px" }} onClick={() => { navigate(`/account`) }}>GO BACK</Link>

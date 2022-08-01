@@ -47,7 +47,7 @@ const HomePage = () => {
           <img src={WhiteLogo} alt="" />
         </div>
         <Text className={glitchText} fontSize={isMobileViewport ? '20px' : '50px'} fontFamily={'Orbitron'}>MULTIVERSE BRIDGE</Text>
-        <Button onClick={() => { handleLogin() }} sx={{ zIndex: 100 }} variant="solid">LOGIN</Button>
+        <Button onClick={() => { handleLogin() }} sx={{ zIndex: 100 }}>LOGIN</Button>
 
       </Stack>
 
