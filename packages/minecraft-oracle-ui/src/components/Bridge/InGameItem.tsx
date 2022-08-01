@@ -1,8 +1,8 @@
 import { Box, Checkbox, HStack } from "@chakra-ui/react";
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 import { InGameItemWithStatic } from "../../hooks/multiverse/useInGameItems";
 
-export const InGameItem: React.FC<{ data: InGameItemWithStatic, onClick?: () => void }> = ({ data, onClick }) => {
+export const InGameItem: React.FC<{ data: InGameItemWithStatic, checkboxValue: string, isCheckboxDisabled: boolean | undefined, isChecked: boolean, onCheckboxChange: (e: React.ChangeEvent<HTMLInputElement>) => void, onClick?: () => void }> = ({ data, checkboxValue, isCheckboxDisabled, isChecked, onCheckboxChange, onClick }) => {
     return (
         <HStack height="80px" width="100%" spacing="0" color="white" fontFamily="Rubik" fontSize="16px" _hover={{ color: "#FCD14E" }}>
             <Box
@@ -26,7 +26,14 @@ export const InGameItem: React.FC<{ data: InGameItemWithStatic, onClick?: () => 
             <Box
                 cursor="default"
             >
-                <Checkbox></Checkbox>
+                <Checkbox
+                    value={checkboxValue}
+                    isDisabled={isCheckboxDisabled || data.enraptured === true}
+                    isChecked={isChecked}
+                    onChange={(e) => onCheckboxChange(e)}
+                >
+
+                </Checkbox>
             </Box>
         </HStack>
     )

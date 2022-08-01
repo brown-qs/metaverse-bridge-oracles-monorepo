@@ -1,8 +1,8 @@
 import { Box, HStack } from "@chakra-ui/react";
 import { ReactNode } from "react";
-import { InGameItemWithStatic } from "../../hooks/multiverse/useInGameItems";
+import { InGameResourceWithStatic } from "../../hooks/multiverse/useInGameItems";
 
-export const InGameResource: React.FC<{ data: InGameItemWithStatic }> = ({ data }) => {
+export const InGameResource: React.FC<{ data: InGameResourceWithStatic }> = ({ data }) => {
     return (
         <HStack height="80px" width="100%" spacing="0" color="white" fontFamily="Rubik" fontSize="16px" >
             <Box

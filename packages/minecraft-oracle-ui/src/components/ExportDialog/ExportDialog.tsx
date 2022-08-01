@@ -20,7 +20,7 @@ import { DEFAULT_CHAIN, NETWORK_NAME } from "../../constants";
 import { AssetChainDetails } from '../../components/AssetChainDetails/AssetChainDetails';
 import useAddNetworkToMetamaskCb from 'hooks/useAddNetworkToMetamask/useAddNetworkToMetamask';
 import { useWeb3React } from '@web3-react/core';
-import { Button, CircularProgress, Divider, Stack, Text } from '@chakra-ui/react';
+import { Button, CircularProgress, Divider, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Stack, Text } from '@chakra-ui/react';
 import { CircleCheck } from 'tabler-icons-react';
 
 
@@ -57,16 +57,14 @@ export const ExportDialog = () => {
   const { error: networkError, chainId: networkChainId } = useWeb3React();
   const { addNetwork } = useAddNetworkToMetamaskCb()
 
-  const handleClose = (event: any, reason: string) => {
-    if (reason === 'backdropClick') {
-      return
-    }
+  const handleClose = (() => {
+
     onExportDialogClose();
     setExportParamsLoaded(false);
     setFinalTxSubmitted(false);
     setExportConfirmed(false);
     setApprovalSubmitted(false)
-  };
+  });
 
   if (!exportParamsLoaded && !!exportDialogData?.hash) {
     setExportParamsLoaded(true);
@@ -168,7 +166,7 @@ export const ExportDialog = () => {
           )}
           <Button
             className={button}
-            onClick={() => handleClose({}, "yada")}
+            onClick={() => handleClose()}
             variant="outlined"
             color="primary"
           >
@@ -264,23 +262,23 @@ export const ExportDialog = () => {
         >
           Export from metaverse
         </Button>
-        <Button className={formButton} onClick={() => handleClose({}, "yada")} color="primary">
+        <Button className={formButton} onClick={() => handleClose()} color="primary">
           Cancel
         </Button>
       </Stack>
     );
   };
-  /*
-    <Dialog
-      open={isExportDialogOpen}
-      onClose={handleClose}
-      title={'MultiverseBridge: export'}
-      maxWidth="md"
-    >
-      <div className={dialogContainer}>{renderBody()}</div>
-    </Dialog>
-  */
+
   return (
-    <></>
+    <Modal isOpen={isExportDialogOpen} onClose={() => handleClose()} isCentered closeOnOverlayClick={false}>
+      <ModalOverlay />
+      <ModalContent>
+        <ModalCloseButton />
+        <ModalHeader>Export</ModalHeader>
+        <ModalBody>
+          {renderBody()}
+        </ModalBody>
+      </ModalContent>
+    </Modal >
   );
 };

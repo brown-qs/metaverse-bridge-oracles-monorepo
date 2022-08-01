@@ -1,7 +1,7 @@
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 import React from 'react';
 import { useClasses } from 'hooks'
-import { Button } from '@chakra-ui/react';
+import { Box, Button } from '@chakra-ui/react';
 
 export default function OptionCard({
   link = null,
@@ -19,7 +19,7 @@ export default function OptionCard({
   color: string;
   header: React.ReactNode;
   subheader: React.ReactNode | null;
-  icon: string;
+  icon: React.ReactNode;
   active?: boolean;
   id: string;
 }) {
@@ -52,12 +52,14 @@ export default function OptionCard({
   }
 
   return (
-    <Button
-      id={id}
-      onClick={() => onClick?.()}
-      rightIcon={<img src={icon} alt={'Icon'} />}
-    >
-      {header}
-    </Button>
+    <>
+      <Button
+        id={id}
+        onClick={() => onClick?.()}
+        rightIcon={<>{icon}</>}
+      >
+
+        {header}
+      </Button></>
   );
 }
