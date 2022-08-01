@@ -10,7 +10,7 @@ export const BridgeTab: React.FC<{ title: string, children: ReactNode, icon?: Re
                 minHeight="40px"
                 height="40px"
                 borderRadius="8px 8px 0px 0px"
-                background="rgba(22, 19, 43, 0.92)"
+                background="gray.800"
 
             >
                 <VStack
@@ -37,7 +37,7 @@ export const BridgeTab: React.FC<{ title: string, children: ReactNode, icon?: Re
                 borderRadius={footer ? "0px 8px 0px 0px" : "0px 8px 8px 8px"}
                 overflowY="scroll"
                 width="100%"
-                background="rgba(22, 19, 43, 0.92)"
+                background="gray.800"
             >
                 {children}
             </VStack>
@@ -46,7 +46,7 @@ export const BridgeTab: React.FC<{ title: string, children: ReactNode, icon?: Re
                     padding="8px"
                     width="100%"
                     borderRadius="0px 0px 8px 8px"
-                    background="rgba(22, 19, 43, 0.92)"
+                    background="gray.800"
                 >{footer}</Box>
             }
         </VStack>

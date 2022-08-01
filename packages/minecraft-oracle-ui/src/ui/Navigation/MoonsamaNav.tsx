@@ -26,7 +26,7 @@ export default function MoonsamaNav() {
       alignItems: "center",
       padding: "8px 16px",
       height: { "base": "80px", "xl": "64px" },
-      background: "#1A202C",
+      background: "gray.800",
       zIndex: 1,
       boxShadow: "0px 20px 25px -5px rgba(0, 0, 0, 0.1), 0px 10px 10px -5px rgba(0, 0, 0, 0.04)"
     }}>

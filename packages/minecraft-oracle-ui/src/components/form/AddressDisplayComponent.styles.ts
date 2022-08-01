@@ -12,7 +12,7 @@ export const styles = (theme: any) => ({
       height: '16px',
     },
     '& path': {
-      color: '#d2023e',
+      color: 'white',
     },
   },
 });

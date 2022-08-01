@@ -9,7 +9,7 @@ import useAddTokenToMetamask from 'hooks/useAddTokenToMetamask/useAddTokenToMeta
 import { useTokenStaticData } from 'hooks/useTokenStaticData/useTokenStaticData';
 import { StringAssetType } from 'utils/subgraph';
 import { AddressZero } from '@ethersproject/constants';
-import { Button, CircularProgress, Grid, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Stack, Text } from '@chakra-ui/react';
+import { Box, Button, CircularProgress, Grid, HStack, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, SimpleGrid, Stack, Text, VStack } from '@chakra-ui/react';
 
 
 export const AssetDialog = () => {
@@ -20,7 +20,7 @@ export const AssetDialog = () => {
 
 
 
-  const handleClose = (event: any, reason: string) => {
+  const handleClose = () => {
     onAssetDialogClose()
     setAssetParamsLoaded(false);
   };
@@ -60,71 +60,58 @@ export const AssetDialog = () => {
     return (
       <Stack spacing={1} justifyContent="center">
         <Text style={{ alignSelf: 'center' }} variant='body1'>Hybrid token details</Text>
-        {assetDialogData?.assetERC1155 && <Grid /*item md={12} xs={12}*/>
-          <Stack direction={'row'} spacing={5}>
-            <div >
-              <div >Type</div>
-              <div >
-                {assetDialogData?.assetERC1155?.assetType}
-              </div>
-            </div>
-            <div >
-              <div >ID</div>
-              <div>
-                {assetDialogData?.assetERC1155?.assetId}
-              </div>
-            </div>
-            <div>
-              <div>Address</div>
+        {assetDialogData?.assetERC1155 &&
+
+          <SimpleGrid columns={2} spacing={1}>
+            <Box >Type</Box>
+            <Box >{assetDialogData?.assetERC1155?.assetType}</Box>
+            <Box >ID</Box>
+            <Box>{assetDialogData?.assetERC1155?.assetId}</Box>
+            <Box>Address</Box>
+            <Box>
               <AddressDisplayComponent
                 copyTooltipLabel={'Copy address'}
                 charsShown={5}
               >
                 {assetDialogData?.assetERC1155?.assetAddress ?? '?'}
               </AddressDisplayComponent>
-            </div>
-          </Stack>
-        </Grid>}
+            </Box>
+          </SimpleGrid>
+        }
 
         {assetDialogData?.assetAddressERC20 && (
-          <Stack direction={'row'} spacing={5}>
-            <div >
-              <div >Type</div>
-              <div >
-                {'ERC20'}
-              </div>
-            </div>
-            <div >
-              <div >Address</div>
+          <SimpleGrid columns={2} spacing={1} paddingTop="20px">
+            <Box >Type</Box>
+            <Box >ERC20</Box>
+            <Box>Address</Box>
+            <Box>
               <AddressDisplayComponent
                 copyTooltipLabel={'Copy address'}
                 charsShown={5}
               >
                 {assetDialogData?.assetAddressERC20 ?? '?'}
               </AddressDisplayComponent>
-            </div>
-          </Stack>
+            </Box>
+          </SimpleGrid>
         )}
         <Button
           onClick={() => {
             addToken()
           }}
-          variant="contained"
-          color="primary"
           disabled={!assetDialogData?.assetAddressERC20}
         //startIcon={<Avatar src={MetamaskLogo}>Add to Metamask</Avatar>}
         >
-          Add to Metamask
+          ADD TO METAMASK
         </Button>
-        <Button onClick={() => handleClose({}, "yada")} color="primary">
-          Cancel
+        <Button onClick={() => handleClose()} color="primary">
+          CANCEL
         </Button>
       </Stack>
     );
   };
 
   return (
-    <Modal isOpen={isAssetDialogOpen} onClose={onAssetDialogClose} isCentered>
+    <Modal isOpen={isAssetDialogOpen} onClose={() => { handleClose() }} isCentered>
       <ModalOverlay />
       <ModalContent>
         <ModalCloseButton />

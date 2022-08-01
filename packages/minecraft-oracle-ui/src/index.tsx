@@ -2,7 +2,7 @@ import React from 'react';
 import { createRoot } from "react-dom/client"
 import { initalizeValidation } from './utils/validation';
 import { ChakraProvider } from '@chakra-ui/react';
-import chakraTheme from './theme/chakra-theme';
+import chakraTheme from './theme';
 
 initalizeValidation();
 

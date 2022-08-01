@@ -1,7 +1,7 @@
 
 export const styles = (theme: any) => ({
   externalLink: {
-    color: '#d2023e',
+    color: '#099E71',
     fontSize: '12px',
   },
 });

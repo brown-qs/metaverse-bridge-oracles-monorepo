@@ -82,13 +82,13 @@ export const AddressDisplayComponent = (props: {
         <Tooltip title={text}>
           {!props.dontShowLink ? (
             <Text className={props.className}>
-              <ExternalLink href={getExplorerLink(chainId, text, 'address')}>
+              <ExternalLink color="#099E71" href={getExplorerLink(chainId, text, 'address')}>
                 {_apply_ellipsis()}
               </ExternalLink>
             </Text>
           ) : (
             <Text className={props.className}>
-              <ExternalLink>
+              <ExternalLink color="#099E71">
                 {_apply_ellipsis()}
               </ExternalLink>
             </Text>
@@ -96,6 +96,7 @@ export const AddressDisplayComponent = (props: {
         </Tooltip>
         <Tooltip title={copyTooltipLabel}>
           <Button
+            marginLeft="5px"
             className={`${copyButton} ${props.buttonClassName}`}
             size="small"
             onClick={() => {
