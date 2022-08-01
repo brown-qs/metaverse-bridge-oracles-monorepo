@@ -8,6 +8,7 @@ import { useClasses } from 'hooks';
 import { isMobile } from 'react-device-detect';
 import WalletConnectIcon from '../../assets/images/walletConnectIcon.svg';
 import MetamaskIcon from '../../assets/images/metamask.png';
+
 import Identicon from '../Identicon/Identicon';
 import { Transaction } from './Transaction';
 import { clearAllTransactions } from 'state/transactions/actions';
@@ -22,7 +23,7 @@ import usePrevious from 'hooks/usePrevious/usePrevious';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 import useAddNetworkToMetamaskCb from 'hooks/useAddNetworkToMetamask/useAddNetworkToMetamask';
 import { ChainId, NETWORK_NAME, PERMISSIONED_CHAINS } from '../../constants';
-import { Box, Button, CircularProgress, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Stack, Text, VStack } from '@chakra-ui/react';
+import { Image, Box, Button, CircularProgress, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Stack, Text, VStack } from '@chakra-ui/react';
 
 const WALLET_VIEWS = {
   OPTIONS: 'options',
@@ -215,7 +216,8 @@ export const AccountDialog = () => {
               link={option.href}
               header={option.name}
               subheader={null}
-              icon={require('../../assets/images/' + option.iconName)}
+              //icon={<img src={require('../../assets/images/' + option.iconName)}></img>}
+              icon={<Image boxSize='25px' objectFit='cover' src="image.png"></Image>}
             />
           );
         }
@@ -228,14 +230,15 @@ export const AccountDialog = () => {
         if (!(window.web3 || window.ethereum)) {
           if (option.name === 'MetaMask') {
             return (
-              <OptionCard
-                id={`connect-${key}`}
+              < OptionCard
+                id={`connect-${key}`
+                }
                 key={key}
                 color={'#E8831D'}
                 header={'Install Metamask'}
                 subheader={null}
                 link={'https://metamask.io/'}
-                icon={MetamaskIcon}
+                icon={<Image boxSize='25px' objectFit='cover' src={MetamaskIcon}></Image>}
               />
             );
           } else {
@@ -253,6 +256,7 @@ export const AccountDialog = () => {
       }
 
       // return rest of options
+
       return (
         !isMobile &&
         !option.mobileOnly && (
@@ -269,49 +273,13 @@ export const AccountDialog = () => {
             link={option.href}
             header={option.name}
             subheader={null} //use option.descriptio to bring back multi-line
-            icon={require('../../assets/images/' + option.iconName).default}
+            //     icon={<img src={require('../../assets/images/' + option.iconName).default}></img>}
+            icon={<Image boxSize='25px' objectFit='cover' src={MetamaskIcon}></Image>}
           />
         )
       );
     });
   }
-
-  /*
-  const showConnectionOptions = useCallback(
-    () => (
-      <>
-        <Button
-          variant="outlined"
-          color="primary"
-          className={styles.button}
-          onClick={() => activate(injected)}
-        >
-          MetaMask
-        </Button>
-        <Button
-          variant="outlined"
-          color="primary"
-          className={styles.button}
-          onClick={() => activate(walletconnect)}
-        >
-          Wallet Connect
-        </Button>
-        {error && (
-          <div className={styles.row}>
-            <Typography variant="body2" color="error">{error.message}</Typography>
-          </div>
-        )}
-        <Typography variant="body2" className={styles.row}>
-          New to Ethereum?{' '}
-          <ExternalLink href="https://ethereum.org/wallets">
-            Learn more about wallets
-          </ExternalLink>
-        </Typography>
-      </>
-    ),
-    [activate, styles]
-  );
-  */
 
   function getModalContent() {
     if (error) {
@@ -346,6 +314,7 @@ export const AccountDialog = () => {
     }
 
     if (account && walletView === WALLET_VIEWS.ACCOUNT) {
+
       return (
         <VStack>
           <Box >
@@ -373,25 +342,14 @@ export const AccountDialog = () => {
         </VStack>
       );
     }
+
     return (
+
       <VStack >
-        {walletView !== WALLET_VIEWS.ACCOUNT ? (
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={() => {
-              setPendingError(false);
-              setWalletView(WALLET_VIEWS.ACCOUNT);
-            }}
-          >
-            Back
-          </Button>
-        ) : (
-          <span>Connect to a wallet</span>
-        )}
+
         {walletView === WALLET_VIEWS.PENDING ? (
           <>
-            <CircularProgress />
+            <CircularProgress isIndeterminate />
             {error ? (
               <Text>
                 Error connecting
@@ -404,6 +362,18 @@ export const AccountDialog = () => {
           </>
         ) : (
           getOptions()
+        )}
+        {walletView !== WALLET_VIEWS.ACCOUNT ? (
+          <Button
+            onClick={() => {
+              setPendingError(false);
+              setWalletView(WALLET_VIEWS.ACCOUNT);
+            }}
+          >
+            Back
+          </Button>
+        ) : (
+          <span>Connect to a wallet</span>
         )}
         {walletView !== WALLET_VIEWS.PENDING && (
           <Text variant="body2">
@@ -431,24 +401,3 @@ export const AccountDialog = () => {
     </Modal>
   );
 };
-
-/**
- * <div className={styles.dialogContainer}>
-        {account ? showConnectedAccountDetails() : getOptions()}
-      </div>
-      {account && (!!pendingTransactions.length || !!confirmedTransactions.length) ? (
-        <div className={styles.lowerSection}>
-          <div className={styles.autoRow}>
-            <Typography>Recent transactions</Typography>
-            <Button className={styles.linkStyledButton} onClick={clearAllTransactionsCallback}>(clear all)</Button>
-          </div>
-          {renderTransactions(pendingTransactions)}
-          {renderTransactions(confirmedTransactions)}
-        </div>
-      ) : (
-        <div className={styles.lowerSection}>
-          <Typography>Your transactions will appear here...</Typography>
-        </div>
-      )}
- * 
- */
