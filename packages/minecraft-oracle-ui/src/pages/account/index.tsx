@@ -90,7 +90,7 @@ const AccountPage = () => {
 
         <Stack direction="column" alignItems='center' textAlign='center' spacing={1} marginTop={2}>
           <Box paddingTop="10px" >
-            <Button style={{ maxWidth: '200px', width: '200px', minWidth: '200px' }} onClick={() => { handleLogout() }} variant="solid">LOGOUT</Button>
+            <Button style={{ maxWidth: '200px', width: '200px', minWidth: '200px' }} onClick={() => { handleLogout() }} >LOGOUT</Button>
           </Box>
         </Stack>
         <Stack direction="column" alignItems='center' textAlign='center' spacing={1} margin={2} marginTop={5}>
@@ -109,8 +109,8 @@ const AccountPage = () => {
             </Tag>
           </>}
           <Box>{authData?.userProfile?.minecraftUuid
-            ? <Button style={{ maxWidth: '200px', width: '200px', minWidth: '200px' }} marginTop="6px" onClick={() => { handleMinecraftUnlink() }} variant="solid">UNLINK MINECRAFT</Button>
-            : <Button style={{ maxWidth: '200px', width: '200px', minWidth: '200px' }} marginTop="4px" onClick={() => { handleMinecraftLink() }} variant="solid">LINK MINECRAFT</Button>}
+            ? <Button style={{ maxWidth: '200px', width: '200px', minWidth: '200px' }} marginTop="6px" onClick={() => { handleMinecraftUnlink() }} >UNLINK MINECRAFT</Button>
+            : <Button style={{ maxWidth: '200px', width: '200px', minWidth: '200px' }} marginTop="4px" onClick={() => { handleMinecraftLink() }} >LINK MINECRAFT</Button>}
           </Box>
         </Stack>
 
