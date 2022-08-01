@@ -102,10 +102,11 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                 bg={value.equipped ? "rgba(14, 235, 168, 0.1)" : "inherit"}
                 _hover={value.equipped ? {} : { bg: "rgba(255, 255, 255, 0.06)" }}
                 _after={{ content: `""`, paddingBottom: "100%", display: "block", backgroundImage: value.coverURL, backgroundRepeat: "no-repeat", backgroundPosition: "center", backgroundSize: "auto 60%" }}
-                _before={value.equipped ? { content: `"EQUIPPED"`, fontSize: "12px", bg: "#0EEBA8", color: "#16132B", padding: "4px 8px", borderRadius: "8px 0px 0px 0px", marginTop: "100px", position: "absolute", bottom: "0", right: "0" } : {}}
+                _before={value.equipped ? { content: `"EQUIPPED"`, fontSize: "12px", bg: "teal.500", color: "#16132B", padding: "4px 8px", borderRadius: "8px 0px 0px 0px", marginTop: "100px", position: "absolute", bottom: "0", right: "0" } : {}}
                 cursor={value.equipped ? "default" : "pointer"}
                 borderRadius="4px"
-                border={value.equipped ? "1px solid #0EEBA8" : "1px solid transparent"}
+                border={value.equipped ? "1px solid" : "1px solid"}
+                borderColor={value.equipped ? "teal.500" : "transparent"}
                 onClick={async () => {
                     if (!value.equipped) {
                         const success = await callbackSkinEquip({
@@ -401,7 +402,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                         <Box textAlign="left" w="100%">
                             {profile?.allowedToPlay ? (
                                 <Tooltip placement='bottom' title={playAllowedReasonTexts[profile.allowedToPlayReason] ?? playAllowedReasonTexts['DEFAULT']}>
-                                    <span style={{ color: '#0EEBA8', fontSize: '16px', fontWeight: 'bold' }}>{profile?.blacklisted ? `You are blacklisted but can play` : `You are eligible to play!`}</span>
+                                    <Text color="teal.500">{profile?.blacklisted ? `You are blacklisted but can play` : `You are eligible to play!`}</Text>
                                 </Tooltip>
                             ) : (
                                 <p style={{ color: '#DB3B21' }}>To be eligible to play, bridge a VIP ticket/Moonsama, <br /> or <a href="https://moonsama.com/freshoffers" target="_blank" rel="noreferrer">visit the Marketplace to get one</a></p>
