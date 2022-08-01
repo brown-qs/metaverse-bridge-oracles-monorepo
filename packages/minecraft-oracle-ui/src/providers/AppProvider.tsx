@@ -17,7 +17,6 @@ import { TransferDialogContextController } from '../context/transferDialog/trans
 import { ExportDialogContextController } from '../context/exportDialog/exportDialogContextController/ExportDialogContextController';
 import { AssetDialogContextController } from '../context/assetDialog/assetDialogContextController/assetDialogContextController';
 import { ChakraProvider } from '@chakra-ui/react'
-import theme from '../theme/chakra-theme';
 
 function Updaters() {
   return (

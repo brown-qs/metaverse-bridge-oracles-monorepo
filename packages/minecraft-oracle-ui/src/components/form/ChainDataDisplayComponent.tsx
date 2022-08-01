@@ -72,6 +72,7 @@ export const ChainDataDisplayComponent = (props: {
       )}
       <Tooltip title={copyTooltipLabel}>
         <Button
+          marginLeft="5px"
           className={`${copyButton} ${props.buttonClassName}`}
           size="small"
           onClick={() => {

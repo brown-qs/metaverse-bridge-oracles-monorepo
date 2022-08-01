@@ -4,13 +4,13 @@ import { useAccountDialog, useActiveWeb3React } from 'hooks';
 import { truncateAddress } from 'utils';
 import { useClasses } from 'hooks';
 import Identicon from 'components/Identicon/Identicon';
-import { Box, Text } from '@chakra-ui/react';
+import { Box, Text, useMediaQuery } from '@chakra-ui/react';
 import { Wallet } from 'tabler-icons-react';
 
 export default function WalletAccount() {
   const { account } = useActiveWeb3React();
   const { isAccountDialogOpen, onAccountDialogOpen, onAccountDialogClose } = useAccountDialog();
-
+  const [isSmallerThan400] = useMediaQuery('(max-width: 400px)')
   const styles = () => ({
     WalletDetailsStyle: {
       backgroundColor: 'rgba(14, 235, 168, 0.2)',
@@ -38,6 +38,11 @@ export default function WalletAccount() {
     WalletDetailsStyle,
   } = useClasses(styles)
 
+  let buttonText = "Connect Wallet"
+
+  if (isSmallerThan400) {
+    buttonText = "Connect"
+  }
   return (
     <>
       {
@@ -51,7 +56,7 @@ export default function WalletAccount() {
         ) : (
           <Box onClick={() => onAccountDialogOpen()} className={WalletDetailsStyle}>
             <Wallet color="#3BEFB8" />
-            <Text paddingLeft="10px" color="white">Connect Wallet</Text>
+            <Text paddingLeft="10px" color="white">{buttonText}</Text>
           </Box>
         )}
     </>
