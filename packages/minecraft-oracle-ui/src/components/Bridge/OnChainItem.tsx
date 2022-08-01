@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 import { InGameItemWithStatic } from "../../hooks/multiverse/useInGameItems";
 import { UserCollectionElement } from "../../hooks/multiverse/useOnChainItems";
 
-export const OnChainItem: React.FC<{ data: UserCollectionElement, onClick?: () => void, children: ReactNode }> = ({ data, onClick }) => {
+export const OnChainItem: React.FC<{ data: UserCollectionElement, checkboxValue: string, isCheckboxDisabled: boolean | undefined, isChecked: boolean, onCheckboxChange: (e: React.ChangeEvent<HTMLInputElement>) => void, onClick?: () => void, children: ReactNode }> = ({ data, checkboxValue, isCheckboxDisabled, isChecked, onCheckboxChange, onClick }) => {
     return (
         <HStack height="80px" width="100%" spacing="0" color="white" fontFamily="Rubik" fontSize="16px">
             <Box
@@ -22,7 +22,7 @@ export const OnChainItem: React.FC<{ data: UserCollectionElement, onClick?: () =
             <Box
                 cursor="default"
             >
-                {data.importable && <Checkbox></Checkbox>}
+                {data.importable && <Checkbox value={checkboxValue} isDisabled={isCheckboxDisabled} isChecked={isChecked} onChange={(e) => onCheckboxChange(e)}></Checkbox>}
                 {!data.importable && <Checkbox isDisabled={true}></Checkbox>}
             </Box>
         </HStack >

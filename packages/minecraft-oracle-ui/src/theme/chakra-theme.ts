@@ -181,8 +181,10 @@ export default extendTheme({
             bg: "#099E71"
           },
           _disabled: {
-            bg: "#099E71"
-
+            bg: "rgba(255, 255, 255, 0.2)",
+            _hover: {
+              bg: "rgba(255, 255, 255, 0.2)"
+            }
           }
         }
       }

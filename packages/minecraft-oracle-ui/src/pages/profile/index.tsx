@@ -1,6 +1,4 @@
 import { useClasses } from 'hooks';
-import { styles } from './styles';
-
 import { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 
 import { useProfile } from 'hooks/multiverse/useProfile';
@@ -20,13 +18,14 @@ import { SKIN_LABELS } from '../../constants/skins';
 import { InGameItemWithStatic } from 'hooks/multiverse/useInGameItems';
 import { BURNABLE_RESOURCES_IDS, DEFAULT_CHAIN, NETWORK_NAME } from "../../constants";
 import { AssetChainDetails } from '../../components/AssetChainDetails/AssetChainDetails';
-import { Text, Box, Container, Grid, List, ListIcon, ListItem, Stack, Tooltip, Button, Flex, SimpleGrid, GridItem, VStack, HStack, background, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody } from '@chakra-ui/react';
+import { Text, Box, Container, Grid, List, ListIcon, ListItem, Stack, Tooltip, Button, Flex, SimpleGrid, GridItem, VStack, HStack, background, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useCheckboxGroup } from '@chakra-ui/react';
 import { BridgeTab } from '../../components/Bridge/BridgeTab';
 import { InGameItem } from '../../components/Bridge/InGameItem';
 import { CaretLeft, CaretRight, DeviceGamepad, UserCircle, Wallet } from 'tabler-icons-react';
 import { InGameResource } from '../../components/Bridge/InGameResource';
 import { OnChainResources } from '../../components/Bridge/OnChainResources';
 import { OnChainItem } from '../../components/Bridge/OnChainItem';
+import { check } from 'prettier';
 
 export type ProfilePagePropTypes = {
     authData: AuthData
@@ -85,6 +84,10 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const hasImportedTicket = assetCounter.ticketNum > 0
 
 
+    const { value: inGameCheckboxGroupValue, isDisabled: isInGameCheckboxGroupDisabled, onChange: onInGameCheckboxGroupChange, setValue: setInGameCheckboxGroupValue, getCheckboxProps: getInGameCheckboxGroupProps } = useCheckboxGroup()
+    const { value: onChainCheckboxGroupValue, isDisabled: isOnChainCheckboxGroupDisabled, onChange: onOnChainCheckboxGroupChange, setValue: setOnChainCheckboxGroupValue, getCheckboxProps: getOnChainCheckboxGroupProps } = useCheckboxGroup()
+
+
     const skinsElem = inGameTextures.sort((t1, t2) => t1.assetAddress.localeCompare(t2.assetAddress)).map((value, ind) => {
 
         const skinLabel = SKIN_LABELS[value.assetAddress.toLowerCase()]
@@ -138,11 +141,27 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
     const inGameItemsElem = inGameAssets.map((value, ind) => {
         const labelId = `checkbox-list-secondary-label-${ind}`;
+        const checkBoxProps = getInGameCheckboxGroupProps({ value: value.hash })
         return (
-            <InGameItem key={`${value?.assetAddress}-${value?.assetId}-${ind}`} data={value} onClick={() => {
-                setItemDetailDialogData(value);
-                onItemDetailDialogOpen();
-            }}></InGameItem>
+            <InGameItem
+                key={value.hash}
+                data={value}
+                isCheckboxDisabled={isInGameCheckboxGroupDisabled}
+                checkboxValue={value.hash}
+                isChecked={inGameCheckboxGroupValue.includes(value.hash)}
+                onCheckboxChange={(e) => {
+                    //hack for now allow only one check
+                    if (e.target.checked) {
+                        setInGameCheckboxGroupValue([value.hash])
+                    } else {
+                        setInGameCheckboxGroupValue([])
+                    }
+                    //checkBoxProps.onChange(e)
+                }}
+                onClick={() => {
+                    setItemDetailDialogData(value);
+                    onItemDetailDialogOpen();
+                }}></InGameItem>
         );
     })
     const inGameItemListElem = (<> {/* Start In Game Items */}
@@ -197,11 +216,25 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
         {/* End In Game Items */}</>)
 
     const onChainItemsElem = (<>{(onChainGoldenTickets ?? []).map((item, ind) => {
+        const key = `${item?.asset?.assetAddress}-${item?.asset?.assetId}-${ind}`
+        //    const checkBoxProps = getInGameCheckboxGroupProps({ value: key })
+
         return (
             <OnChainItem
                 data={item}
-                key={`${item?.asset?.assetAddress}-${item?.asset?.assetId}-${ind}`} //update key
-
+                key={key} //update key
+                isCheckboxDisabled={isOnChainCheckboxGroupDisabled}
+                checkboxValue={key}
+                isChecked={onChainCheckboxGroupValue.includes(key)}
+                onCheckboxChange={(e) => {
+                    //hack for now allow only one check
+                    if (e.target.checked) {
+                        setOnChainCheckboxGroupValue([key])
+                    } else {
+                        setOnChainCheckboxGroupValue([])
+                    }
+                    //checkBoxProps.onChange(e)
+                }}
             >
                 <Box>
                     <ListIcon >
@@ -225,9 +258,23 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
         );
     }).concat(
         [...(onChainBurnableResources ?? []), ...(onChainArt ?? []), ...(onChainPlot ?? []), ...(onChainMoonbrella ?? []), ...(onChainEmbassy ?? []), ...(onChainMoonsamas ?? []), ...(onChainPondsamas ?? [])].map((item, ind) => {
+            const key = `${item?.asset?.assetAddress}-${item?.asset?.assetId}-${ind}`
+
             return (
                 <OnChainItem
-                    key={`${item?.asset?.assetAddress}-${item?.asset?.assetId}-${ind}`} //update key
+                    key={key} //update key
+                    isCheckboxDisabled={isOnChainCheckboxGroupDisabled}
+                    checkboxValue={key}
+                    isChecked={onChainCheckboxGroupValue.includes(key)}
+                    onCheckboxChange={(e) => {
+                        //hack for now allow only one check
+                        if (e.target.checked) {
+                            setOnChainCheckboxGroupValue([key])
+                        } else {
+                            setOnChainCheckboxGroupValue([])
+                        }
+                        //checkBoxProps.onChange(e)
+                    }}
                     data={item}
                     onClick={() => {
                         if (item.importable) {
@@ -395,9 +442,37 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                         icon={<DeviceGamepad size="18px" />}
                         footer={<Button
                             rightIcon={<CaretRight></CaretRight>}
-                            onClick={() => {
+                            onClick={(e) => {
+                                e.stopPropagation();
+
+                                const exportAssets = []
+                                for (const hash of inGameCheckboxGroupValue) {
+                                    const ass = inGameAssets.find(ass => ass.hash === hash)
+                                    if (!!ass) {
+                                        exportAssets.push(ass)
+                                    }
+                                }
+
+                                //just export one items now but we are setup for multiple later
+                                if (exportAssets.length > 0) {
+                                    const value = exportAssets[0]
+                                    onExportDialogOpen();
+                                    setExportDialogData(
+                                        {
+                                            hash: value.hash,
+                                            asset: {
+                                                assetAddress: value.assetAddress,
+                                                assetId: value.assetId,
+                                                assetType: stringToStringAssetType(value.assetType),
+                                                id: 'x'
+                                            },
+                                            chain: value.exportChainId,
+                                            item: value
+                                        }
+                                    );
+                                }
                             }}
-                            isDisabled={false} w="100%">EXPORT TO WALLET</Button>}
+                            isDisabled={inGameCheckboxGroupValue.length === 0} w="100%">EXPORT TO WALLET</Button>}
                     >
                         {inGameItemListElem}
                     </BridgeTab>

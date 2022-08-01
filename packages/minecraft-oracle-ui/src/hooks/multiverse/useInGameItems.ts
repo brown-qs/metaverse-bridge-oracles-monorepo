@@ -8,13 +8,29 @@ import { RecognizedAssetType } from 'assets/data/recognized'
 import { useFetchUrlCallback } from 'hooks/useFetchUrlCallback/useFetchUrlCallback';
 
 export interface InGameItem {
+    hash: string
     name: string
     assetAddress: string
     assetId: string
     assetType: string
     amount: string
     exportable: boolean
-    hash?: string
+    summonable: boolean
+    staticData: StaticTokenData,
+    meta: any,
+    recognizedAssetType: RecognizedAssetType,
+    enraptured: boolean,
+    exportChainId: number,
+    exportAddress: string,
+}
+
+export interface InGameResource {
+    name: string
+    assetAddress: string
+    assetId: string
+    assetType: string
+    amount: string
+    exportable: boolean
     summonable: boolean
     staticData: StaticTokenData,
     meta: any,
@@ -25,12 +41,12 @@ export interface InGameItem {
 }
 
 export interface InGameTexture {
+    hash: string
     assetAddress: string
     assetId: string
     assetType: string
     selectable: boolean
     equipped: boolean
-    hash?: string
     textureData: string
     textureSignature: string,
     decodedData?: any,
@@ -40,27 +56,27 @@ export interface InGameTexture {
     name?: string
 }
 
-export type InGameItemWithStatic = InGameItem & {staticData: StaticTokenData} 
-
+export type InGameItemWithStatic = InGameItem & { staticData: StaticTokenData }
+export type InGameResourceWithStatic = InGameResource & { staticData: StaticTokenData }
 export interface ProfileInGameItems {
     assets: InGameItem[],
     textures: InGameTexture[],
-    resources: InGameItem[]
+    resources: InGameResource[]
 }
 
 export interface ProfileInGameItemsWithStatic {
     assets: InGameItemWithStatic[],
     textures: InGameTexture[],
-    resources: InGameItemWithStatic[]
+    resources: InGameResourceWithStatic[]
 }
 
 export function useInGameItems(trigger: string | undefined = undefined) {
-    const { authData, setAuthData } =  useAuth();
+    const { authData, setAuthData } = useAuth();
     const blocknumber = useBlockNumber();
     const staticCallback = useTokenStaticDataCallbackArrayWithChains();
 
-    console.log({authData})
-    const {jwt} = authData ?? {}
+    console.log({ authData })
+    const { jwt } = authData ?? {}
 
     const [items, setItems] = useState<ProfileInGameItemsWithStatic | undefined>(undefined);
 
@@ -73,10 +89,10 @@ export function useInGameItems(trigger: string | undefined = undefined) {
                 headers: { Authorization: `Bearer ${authData?.jwt}` }
             });
             rawData = resp.data
-        } catch(e) {
+        } catch (e) {
             const err = e as AxiosError;
 
-            if(err?.response?.data.statusCode === 401){
+            if (err?.response?.data.statusCode === 401) {
                 window.localStorage.removeItem('authData');
                 setAuthData(undefined);
             };
@@ -92,7 +108,7 @@ export function useInGameItems(trigger: string | undefined = undefined) {
                 //console.log('DEBUG melange', {asset: x})
                 return {
                     assetId: x.assetId,
-                    assetAddress: x.assetAddress.length === 42 ? x.assetAddress: `${x.assetAddress}${'0'.repeat(42 - x.assetAddress.length)}`,
+                    assetAddress: x.assetAddress.length === 42 ? x.assetAddress : `${x.assetAddress}${'0'.repeat(42 - x.assetAddress.length)}`,
                     assetType: stringToStringAssetType(x.assetType),
                     id: '1',
                     chainId: x.exportChainId,
@@ -100,7 +116,7 @@ export function useInGameItems(trigger: string | undefined = undefined) {
             })
         );
         //console.log('DEBUG staticDataCallbackArrayWithChains', {staticDatas})
-        let resultSet: ProfileInGameItemsWithStatic = { assets: [], resources: [], textures: []}
+        let resultSet: ProfileInGameItemsWithStatic = { assets: [], resources: [], textures: [] }
         if (rawData.assets.length > 0) {
             staticDatas.slice(0, rawData.assets.length).map((sd, i) => {
                 resultSet.assets.push({
@@ -148,7 +164,7 @@ export function useInGameItems(trigger: string | undefined = undefined) {
         }))
 
         setItems(resultSet)
-        
+
     }, [blocknumber, jwt, trigger])
 
     useEffect(() => {
@@ -159,12 +175,12 @@ export function useInGameItems(trigger: string | undefined = undefined) {
 }
 
 export function useInGameItemsWithCompositeMetaAndAssets(trigger: string | undefined = undefined) {
-    const { authData, setAuthData } =  useAuth();
+    const { authData, setAuthData } = useAuth();
     //const blocknumber = useBlockNumber();
     const urlCb = useFetchUrlCallback()
 
-    console.log({authData})
-    const {jwt} = authData ?? {}
+    console.log({ authData })
+    const { jwt } = authData ?? {}
 
     const [items, setItems] = useState<ProfileInGameItemsWithStatic | undefined>(undefined);
 
@@ -177,10 +193,10 @@ export function useInGameItemsWithCompositeMetaAndAssets(trigger: string | undef
                 headers: { Authorization: `Bearer ${authData?.jwt}` }
             });
             rawData = resp.data
-        } catch(e) {
+        } catch (e) {
             const err = e as AxiosError;
 
-            if(err?.response?.data.statusCode === 401){
+            if (err?.response?.data.statusCode === 401) {
                 window.localStorage.removeItem('authData');
                 setAuthData(undefined);
             };
@@ -195,10 +211,10 @@ export function useInGameItemsWithCompositeMetaAndAssets(trigger: string | undef
         let metas = await Promise.all(melange.map(async (asset) => {
             const meta = await urlCb(`${process.env.REACT_APP_BACKEND_API_URL}/composite/metadata/${asset.exportChainId}/${asset?.assetAddress}/${asset?.assetId}`, false)
             return meta
-          }))
+        }))
 
         //console.log('DEBUG staticDataCallbackArrayWithChains', {staticDatas})
-        let resultSet: ProfileInGameItemsWithStatic = { assets: [], resources: [], textures: []}
+        let resultSet: ProfileInGameItemsWithStatic = { assets: [], resources: [], textures: [] }
         if (rawData.assets.length > 0) {
             metas.slice(0, rawData.assets.length).map((meta, i) => {
                 resultSet.assets.push({
@@ -247,7 +263,7 @@ export function useInGameItemsWithCompositeMetaAndAssets(trigger: string | undef
             console.log('WAAAA 2222')
             setItems(resultSet)
         }
-        
+
     }, [jwt, trigger])
 
     useEffect(() => {
@@ -259,17 +275,17 @@ export function useInGameItemsWithCompositeMetaAndAssets(trigger: string | undef
 
 function checkResultsEqual(a?: ProfileInGameItemsWithStatic, b?: ProfileInGameItemsWithStatic): boolean {
     if (!a) {
-      if (!b) {
-        return true
-      }
-      return false
+        if (!b) {
+            return true
+        }
+        return false
     }
-  
+
     if (!b) {
-      if (!a) {
-        return true
-      }
-      return false
+        if (!a) {
+            return true
+        }
+        return false
     }
 
     if (a.assets?.length !== b.assets?.length) {
@@ -294,4 +310,4 @@ function checkResultsEqual(a?: ProfileInGameItemsWithStatic, b?: ProfileInGameIt
     }
 
     return true
-  }
+}
