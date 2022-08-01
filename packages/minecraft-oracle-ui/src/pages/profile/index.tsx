@@ -92,21 +92,15 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
         const skinLabel = SKIN_LABELS[value.assetAddress.toLowerCase()]
         //<a target='_blank' className={itemImage} href={`${value.renderURL ? `https://minerender.org/embed/skin/?skin=${value.renderURL}` : value.coverURL}`} rel="noreferrer">
-        const evenIndex = ind % 2 === 0
-
+        const firstColumn = ind % 2 === 0
+        const firstRow = ind < 2
         return (
             < GridItem
+                paddingTop="100%"
                 position="relative"
-                margin={evenIndex ? "12px 12px 12px 12px" : "12px 12px 12px 0px"}
+                //                margin={evenIndex ? "0px 12px 0px 12px" : "12px 12px 12px 0px"}
                 key={`${value?.assetAddress}-${value?.assetId}-${ind}`}
-                bg={value.equipped ? "rgba(14, 235, 168, 0.1)" : "inherit"}
-                _hover={value.equipped ? {} : { bg: "rgba(255, 255, 255, 0.06)" }}
-                _after={{ content: `""`, paddingBottom: "100%", display: "block", backgroundImage: value.coverURL, backgroundRepeat: "no-repeat", backgroundPosition: "center", backgroundSize: "auto 60%" }}
-                _before={value.equipped ? { content: `"EQUIPPED"`, fontSize: "12px", bg: "teal.500", color: "#16132B", padding: "4px 8px", borderRadius: "8px 0px 0px 0px", marginTop: "100px", position: "absolute", bottom: "0", right: "0" } : {}}
-                cursor={value.equipped ? "default" : "pointer"}
-                borderRadius="4px"
-                border={value.equipped ? "1px solid" : "1px solid"}
-                borderColor={value.equipped ? "teal.500" : "transparent"}
+
                 onClick={async () => {
                     if (!value.equipped) {
                         const success = await callbackSkinEquip({
@@ -120,9 +114,25 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     }
                 }}
             >
+                <Box
+                    position="absolute"
+                    top={firstRow ? "12px" : "4px"}
+                    right="12px"
+                    bottom="12px"
+                    left={firstColumn ? "12px" : "4px"}
+                    bg={value.equipped ? "rgba(14, 235, 168, 0.1)" : "inherit"}
+                    _hover={value.equipped ? {} : { bg: "rgba(255, 255, 255, 0.06)" }}
+                    _before={value.equipped ? { content: `"EQUIPPED"`, fontSize: "12px", bg: "teal.500", color: "#16132B", padding: "4px 8px", borderRadius: "8px 0px 0px 0px", marginTop: "100px", position: "absolute", bottom: "0", right: "0" } : {}}
+                    cursor={value.equipped ? "default" : "pointer"}
+                    borderRadius="4px"
+                    border={value.equipped ? "1px solid" : "1px solid"}
+                    borderColor={value.equipped ? "teal.500" : "transparent"}
+                    padding="12%"
+                >
+                    <Media uri={value.coverURL} />
+                </Box>
             </GridItem >
         );
-
 
     })
     const skinListElem = (<>
@@ -166,7 +176,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
         );
     })
     const inGameItemListElem = (<> {/* Start In Game Items */}
-        <VStack spacing="8px" width="100%" padding="8px 11px 8px 11px">
+        <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">
             {inGameItemsElem}
         </VStack>
         {
@@ -193,9 +203,9 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                         </div>
                                         <div >
                                             <div >
-                                                {itemDetailDialogData.exportable ? <Tooltip title={'This item can be exported back to the chain it came from to the original owner address.'}>
+                                                {itemDetailDialogData.exportable ? <Tooltip label={'This item can be exported back to the chain it came from to the original owner address.'}>
                                                     <div>This item is exportable.</div>
-                                                </Tooltip> : <Tooltip title={'This item is burned into the metaverse forever. Cannot be taken back.'}>
+                                                </Tooltip> : <Tooltip label={'This item is burned into the metaverse forever. Cannot be taken back.'}>
                                                     <div>This item is not exportable.</div>
                                                 </Tooltip>}
                                             </div>
@@ -237,24 +247,6 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     //checkBoxProps.onChange(e)
                 }}
             >
-                <Box>
-                    <ListIcon >
-                        {/*<img className={itemImage} src={item?.meta?.image} alt="" />*/}
-                        <Media uri={item?.meta?.image} />
-                    </ListIcon>
-                    <Text style={{ paddingLeft: '10px' }}> {`${item?.meta?.name}${item?.asset?.assetAddress?.toLowerCase() !== '0xb654611f84a8dc429ba3cb4fda9fad236c505a1a' ? ` #${item?.asset?.assetId}` : ''}`}  </Text>
-                    <Tooltip title={'You can have 1 VIP ticket imported at a time.'}>
-                        <span>
-                            <Button
-                                onClick={() => {
-                                    onImportDialogOpen();
-                                    setImportDialogData({ asset: item.asset });
-                                }}
-                                isDisabled={hasImportedTicket}
-                            >Import to game</Button>
-                        </span>
-                    </Tooltip>
-                </Box>
             </OnChainItem>
         );
     }).concat(
@@ -277,15 +269,6 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                         //checkBoxProps.onChange(e)
                     }}
                     data={item}
-                    onClick={() => {
-                        if (item.importable) {
-                            onImportDialogOpen();
-                            setImportDialogData({ asset: item.asset });
-                        } else if (item.enrapturable) {
-                            onEnraptureDialogOpen();
-                            setEnraptureDialogData({ asset: item.asset });
-                        }
-                    }}
                 >
 
                 </OnChainItem>
@@ -295,7 +278,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const onChainItemsListElem = (<><List sx={{ width: '100%', bgcolor: '#111', marginBottom: '16px' }}>
         {!!onChainImportables.length
             ?
-            <VStack spacing="8px" width="100%" padding="8px 11px 8px 11px">
+            <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">
                 {onChainItemsElem}
             </VStack>
             : (
@@ -316,7 +299,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const inGameResourcesListElem = (<>
         {!!inGameResources.length ? (
 
-            <VStack spacing="8px" width="100%" padding="8px 11px 8px 11px">
+            <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">
                 {inGameResourcesElem}
             </VStack>
 
@@ -355,7 +338,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
         {!!onChainResources.length
             ?
-            <VStack spacing="8px" width="100%" padding="8px 11px 8px 11px">
+            <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">
                 {onChainResourcesElem}
             </VStack>
 
@@ -396,12 +379,12 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                         <Box textAlign="left" w="100%" color="white">
                             Welcome back,
                         </Box>
-                        <Box textAlign="left" w="100%" color="#FCD14E">
+                        <Box textAlign="left" w="100%" color="yellow.300">
                             {authData?.userProfile?.email}
                         </Box>
                         <Box textAlign="left" w="100%">
                             {profile?.allowedToPlay ? (
-                                <Tooltip placement='bottom' title={playAllowedReasonTexts[profile.allowedToPlayReason] ?? playAllowedReasonTexts['DEFAULT']}>
+                                <Tooltip label={playAllowedReasonTexts[profile.allowedToPlayReason] ?? playAllowedReasonTexts['DEFAULT']}>
                                     <Text color="teal.500">{profile?.blacklisted ? `You are blacklisted but can play` : `You are eligible to play!`}</Text>
                                 </Tooltip>
                             ) : (
@@ -495,7 +478,31 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                         icon={<Wallet size="18px" />}
                         footer={<Button
                             leftIcon={<CaretLeft></CaretLeft>}
-                            onClick={() => {
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                /*
+                                const importAssets = []
+                                for (const hash of onChainCheckboxGroupValue) {
+                                    const ass = onChainItems.find(ass => ass.hash === hash)
+                                    if (!!ass) {
+                                        importAssets.push(ass)
+                                    }
+                                }
+                                if (importAssets.length > 0) {
+                                    const item = importAssets[0]
+                                    if (item.importable) {
+                                        onImportDialogOpen();
+                                        setImportDialogData({ asset: item.asset });
+                                    } else if (item.enrapturable) {
+                                        onEnraptureDialogOpen();
+                                        setEnraptureDialogData({ asset: item.asset });
+                                    }
+                                }
+
+                                /*
+                                onImportDialogOpen();
+                                setImportDialogData({ asset: item.asset });*/
+
                             }}
                             isDisabled={false} w="100%">IMPORT TO GAME</Button>}
                     >

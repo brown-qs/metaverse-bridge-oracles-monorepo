@@ -2,7 +2,8 @@
 export const styles = () => ({
   image: {
     width: '100%',
-    height: 'auto',
+    height: '100%',
+    objectFit: "contain"
   },
   imageNotShow: {
     display: 'none',

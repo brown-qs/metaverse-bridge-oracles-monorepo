@@ -14,7 +14,7 @@ export const BridgeTab: React.FC<{ title: string, children: ReactNode, icon?: Re
 
             >
                 <VStack
-                    color="#FCD14E"
+                    color="yellow.300"
                     fontSize="12px"
                     lineHeight="16px"
                     // background="rgba(22, 19, 43, 0.92)"
@@ -43,7 +43,7 @@ export const BridgeTab: React.FC<{ title: string, children: ReactNode, icon?: Re
             </VStack>
             {footer &&
                 <Box
-                    padding="8px"
+                    padding="9px"
                     width="100%"
                     borderRadius="0px 0px 8px 8px"
                     background="gray.800"

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { AuthLayout } from 'ui';
 import { getKiltExtension, walletLogin } from 'utils/kilt';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Button, Link, Stack } from '@chakra-ui/react';
+import { Alert, AlertDescription, AlertIcon, Button, Link, Stack } from '@chakra-ui/react';
 
 const KiltLoginPage = () => {
   const [isLoading, setIsLoading] = useState(false)
@@ -59,12 +59,18 @@ const KiltLoginPage = () => {
 
       <Stack direction="row" spacing={2} margin={0} alignContent='center' textAlign='center' justifyContent="space-between">
         <Stack></Stack>
-        <Alert sx={{ margin: "auto" }} status="info">Logging in with KILT requires a Sporran desktop wallet. Your wallet must include a <Link sx={{ textDecoration: "underline !important", "&:hover": { "color": "rgb(255, 201, 20) !important" } }} href="https://socialkyc.io" target="_blank">SocialKYC</Link> email credential. Your Moonsama account is based on your email.</Alert>
+        <Alert margin="auto" status="info" variant='solid' fontFamily="Rubik" textAlign="left">
+          <AlertIcon />
+          <AlertDescription>
+            Logging in with KILT requires a Sporran desktop wallet. Your wallet must include a <Link sx={{ textDecoration: "underline !important", "&:hover": { "color": "rgb(255, 201, 20) !important" } }} href="https://socialkyc.io" target="_blank">SocialKYC</Link> email credential. Your Moonsama account is based on your email.
+          </AlertDescription>
+
+        </Alert>
         <Stack></Stack>
       </Stack>
       <Stack alignItems="center" spacing={1} margin={2}>
 
-        <Button isDisabled={isLoading} variant="solid" onClick={() => { handleLogin() }}>KILT LOGIN</Button>
+        <Button isDisabled={isLoading} onClick={() => { handleLogin() }}>KILT LOGIN</Button>
         <Link sx={{ fontSize: "11px" }} onClick={() => { navigate(`/account/login`) }}>OTHER LOGIN METHODS</Link>
       </Stack>
     </AuthLayout >

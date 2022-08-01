@@ -1,17 +1,19 @@
 import { Box, HStack } from "@chakra-ui/react";
 import { ReactNode } from "react";
 import { InGameResourceWithStatic } from "../../hooks/multiverse/useInGameItems";
+import { Media } from "../Media/Media";
 
 export const InGameResource: React.FC<{ data: InGameResourceWithStatic }> = ({ data }) => {
     return (
         <HStack height="80px" width="100%" spacing="0" color="white" fontFamily="Rubik" fontSize="16px" >
             <Box
+                borderRadius="4px"
                 height="80px"
                 width="80px"
-                backgroundImage={`url(${data?.meta?.image})`}
-                backgroundRepeat="no-repeat"
-                backgroundSize="contain"
-                backgroundPosition="center">
+                overflow="hidden"
+            >
+                <Media uri={data?.meta?.image} />
+
             </Box>
             <Box flex="1" paddingLeft="8px">{data?.meta?.name ?? `${data.assetAddress} ${data.assetId}`}</Box>
             <Box

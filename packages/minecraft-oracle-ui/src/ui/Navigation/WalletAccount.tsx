@@ -47,7 +47,7 @@ export default function WalletAccount() {
     <>
       {
         account ? (
-          <Box onClick={() => onAccountDialogOpen()} className={WalletDetailsStyle}>
+          <Box color="white" onClick={() => onAccountDialogOpen()} className={WalletDetailsStyle}>
             <div style={{ margin: '0 8px' }}>
               <Identicon />
             </div>

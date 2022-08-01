@@ -116,7 +116,7 @@ const EmailLoginPage = () => {
           submitEmail(email)
         }
       }} onChange={(event) => { setEmail(event.target.value) }} label="EMAIL" variant="standard" */}
-          <Button isLoading={isLoading} isDisabled={!isValidEmail(email)} onClick={() => submitEmail(email)} variant="solid">SEND LOGIN CODE</Button>
+          <Button isLoading={isLoading} isDisabled={!isValidEmail(email)} onClick={() => submitEmail(email)} >SEND LOGIN CODE</Button>
         </Stack >
 
       </AuthLayout >
