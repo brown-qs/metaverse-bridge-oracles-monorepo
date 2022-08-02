@@ -1,3 +1,4 @@
+
 export const collections = {
   name: 'MoonSama List',
   timestamp: '2021-08-18T00:00:00.000Z',
@@ -116,7 +117,7 @@ export const collections = {
       chainId: 1285,
       address: '0x1974eEAF317Ecf792ff307F25A3521C35eECde86',
       display_name: 'Moonbrella',
-      ids: Array.from({length: 70}, (_, i) => (i + 2).toString()),
+      ids: Array.from({ length: 70 }, (_, i) => (i + 2).toString()),
       enrapturable: false,
       importable: true,
       symbol: 'Moonbrella',
@@ -135,7 +136,7 @@ export const collections = {
       enrapturable: true,
       contractURI: 'ipfs://QmSN98qwiFYy3yGUWznm43E5ex3c5RoozkmQqpZBu69fDS',
       subgraph: 'https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/nft-1155-factory'
-     //subgraph: 'https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/nft-1155-test-factory'
+      //subgraph: 'https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/nft-1155-test-factory'
     },
     {
       chainId: 1285,
