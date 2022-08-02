@@ -174,6 +174,8 @@ export const useOnChainItems = (trigger: string | undefined = undefined) => {
     fetchUserCollection()
   }, [chainId, blocknumber, account, trigger])
 
+  console.log("========= ON CHAIN ITEMS ===========")
+  console.log(JSON.stringify(onChainItems))
   return onChainItems;
 };
 
