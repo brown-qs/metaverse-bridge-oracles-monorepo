@@ -59,20 +59,10 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const { isAssetDialogOpen, onAssetDialogOpen, onAssetDialogClose, assetDialogData, setAssetDialogData } = useAssetDialog()
 
     //On chain Items
-    const onChainItems = useOnChainItems();
-    const onChainMoonsamas = onChainItems?.['Moonsama'] ?? [];
-    const onChainPondsamas = onChainItems?.['Pondsama'] ?? [];
-    const onChainGoldenTickets = onChainItems?.['VIP Ticket'] ?? [];
-    const onChainResources = onChainItems?.['Moonsama Metaverse Asset Factory'] ?? [];
-    const onChainPlot = onChainItems?.['Moonsama Minecraft Plots Season 1'] ?? [];
-    const onChainArt = onChainItems?.['Multiverse Art'] ?? [];
-    const onChainMoonbrella = onChainItems?.['Moonbrella'] ?? [];
-    const onChainEmbassy = onChainItems?.['Moonsama Embassy'] ?? [];
-
-    // TODO fixme
+    const { onChainItems, isLoading: onChainItemsLoading } = useOnChainItems();
+    const onChainResources = onChainItems.filter((item) => item.collection === "Moonsama Metaverse Asset Factory")
     const onChainBurnableResources = onChainResources.filter(x => BURNABLE_RESOURCES_IDS.includes(x.asset.assetId))
-
-    const onChainImportables = [...onChainBurnableResources, ...onChainGoldenTickets, ...onChainMoonbrella, ...onChainPondsamas, ...onChainMoonsamas, ...onChainArt, ...onChainPlot, ...onChainEmbassy];
+    const onChainImportables = [...onChainItems.filter((item) => ['VIP Ticket', "Moonbrella", "Pondsama", "Moonsama", "Multiverse Art", "Moonsama Minecraft Plots Season 1", "Moonsama Embassy"].includes(item.collection)), ...onChainBurnableResources]
 
     //In Game Items
     const inGameItems = useInGameItems(fetchtrigger);
@@ -314,55 +304,57 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                 >
                     <BridgeTab
                         title="On-Chain Items"
+                        isLoading={onChainItemsLoading}
                         icon={<Wallet size="18px" />}
-                        footer={<Button
-                            leftIcon={<CaretLeft></CaretLeft>}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                /*
-                                const importAssets = []
-                                for (const hash of onChainCheckboxGroupValue) {
-                                    const ass = onChainItems.find(ass => ass.hash === hash)
-                                    if (!!ass) {
-                                        importAssets.push(ass)
-                                    }
-                                }
-                                if (importAssets.length > 0) {
-                                    const item = importAssets[0]
-                                    if (item.importable) {
-                                        onImportDialogOpen();
-                                        setImportDialogData({ asset: item.asset });
-                                    } else if (item.enrapturable) {
-                                        onEnraptureDialogOpen();
-                                        setEnraptureDialogData({ asset: item.asset });
-                                    }
-                                }
+                        footer={
+                            <Button
+                                leftIcon={<CaretLeft></CaretLeft>}
+                                onClick={(e) => {
+                                    e.stopPropagation();
 
-                                /*
-                                onImportDialogOpen();
-                                setImportDialogData({ asset: item.asset });*/
+                                    const importAssets = []
+                                    for (const id of onChainCheckboxGroupValue) {
+                                        const ass = onChainItems.find(ass => ass.id === id)
+                                        if (!!ass) {
+                                            importAssets.push(ass)
+                                        }
+                                    }
+                                    if (importAssets.length > 0) {
+                                        const item = importAssets[0]
+                                        if (item.importable) {
+                                            onImportDialogOpen();
+                                            setImportDialogData({ asset: item.asset });
+                                        } else if (item.enrapturable) {
+                                            onEnraptureDialogOpen();
+                                            setEnraptureDialogData({ asset: item.asset });
+                                        }
+                                    }
 
-                            }}
-                            isDisabled={false} w="100%">IMPORT TO GAME</Button>}
+                                    /*
+                                    onImportDialogOpen();
+                                    setImportDialogData({ asset: item.asset });*/
+
+                                }}
+                                isDisabled={onChainCheckboxGroupValue.length === 0} w="100%">IMPORT TO GAME
+                            </Button>}
                     >
                         {!!onChainImportables.length
                             ?
                             <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">
-                                {(onChainGoldenTickets ?? []).map((item, ind) => {
-                                    const key = `${item?.asset?.assetAddress}-${item?.asset?.assetId}-${ind}`
-                                    //    const checkBoxProps = getOnChainCheckboxGroupProps({ value: key })
+                                {onChainImportables.map((item, ind) => {
+                                    const checkBoxProps = getOnChainCheckboxGroupProps({ value: item.id })
 
                                     return (
                                         <OnChainItem
                                             data={item}
-                                            key={key} //update key
+                                            key={item.id} //update key
                                             isCheckboxDisabled={isOnChainCheckboxGroupDisabled}
-                                            checkboxValue={key}
-                                            isChecked={onChainCheckboxGroupValue.includes(key)}
+                                            checkboxValue={item.id}
+                                            isChecked={onChainCheckboxGroupValue.includes(item.id)}
                                             onCheckboxChange={(e) => {
                                                 //hack for now allow only one check
                                                 if (e.target.checked) {
-                                                    setOnChainCheckboxGroupValue([key])
+                                                    setOnChainCheckboxGroupValue([item.id])
                                                 } else {
                                                     setOnChainCheckboxGroupValue([])
                                                 }
@@ -373,30 +365,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                         >
                                         </OnChainItem>
                                     );
-                                }).concat(
-                                    [...(onChainBurnableResources ?? []), ...(onChainArt ?? []), ...(onChainPlot ?? []), ...(onChainMoonbrella ?? []), ...(onChainEmbassy ?? []), ...(onChainMoonsamas ?? []), ...(onChainPondsamas ?? [])].map((item, ind) => {
-                                        const key = `${item?.asset?.assetAddress}-${item?.asset?.assetId}-${ind}`
-
-                                        return (
-                                            <OnChainItem
-                                                key={key} //update key
-                                                isCheckboxDisabled={isOnChainCheckboxGroupDisabled}
-                                                checkboxValue={key}
-                                                isChecked={onChainCheckboxGroupValue.includes(key)}
-                                                onCheckboxChange={(e) => {
-                                                    //hack for now allow only one check
-                                                    if (e.target.checked) {
-                                                        setOnChainCheckboxGroupValue([key])
-                                                    } else {
-                                                        setOnChainCheckboxGroupValue([])
-                                                    }
-                                                    //checkBoxProps.onChange(e)
-                                                }}
-                                                data={item}
-                                            >
-                                            </OnChainItem>
-                                        );
-                                    }))}
+                                })}
                             </VStack>
                             :
                             <Box padding="24px" color="white" textAlign="left" w="100%" fontFamily='Rubik'>
@@ -419,17 +388,24 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     rowSpan={1}
                     colSpan={{ base: 12, md: 6, lg: 6 }}
                 >
-                    <BridgeTab title="In-Game Resources" footer={<Button
-                        rightIcon={<CaretRight></CaretRight>}
-                        onClick={() => {
-                            if (!!account) {
-                                onSummonDialogOpen();
-                                setSummonDialogData({ recipient: account ?? undefined });
-                            } else {
-                                onAccountDialogOpen()
-                            }
-                        }}
-                        isDisabled={!canSummon} w="100%">SUMMON ALL RESOURCES</Button>} icon={<DeviceGamepad size="18px" />}>
+                    <BridgeTab
+                        title="In-Game Resources"
+                        footer={
+                            <Button
+                                rightIcon={<CaretRight></CaretRight>}
+                                onClick={() => {
+                                    if (!!account) {
+                                        onSummonDialogOpen();
+                                        setSummonDialogData({ recipient: account ?? undefined });
+                                    } else {
+                                        onAccountDialogOpen()
+                                    }
+                                }}
+                                isDisabled={!canSummon} w="100%">SUMMON ALL RESOURCES
+                            </Button>
+                        }
+                        icon={<DeviceGamepad size="18px" />}
+                    >
                         {!!inGameResources.length
                             ?
                             <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">
@@ -458,7 +434,10 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     rowSpan={1}
                     colSpan={{ base: 12, md: 12, lg: 6 }}
                 >
-                    <BridgeTab title="On-Chain Resources" icon={<Wallet size="18px" />}>
+                    <BridgeTab
+                        title="On-Chain Resources"
+                        isLoading={onChainItemsLoading}
+                        icon={<Wallet size="18px" />}>
                         {!!onChainResources.length
                             ?
                             <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">
