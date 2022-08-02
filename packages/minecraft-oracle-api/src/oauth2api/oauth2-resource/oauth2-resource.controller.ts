@@ -31,6 +31,6 @@ export class Oauth2ResourceController {
     @ApiOAuth2([Oauth2Scope.UserUuidRead, Oauth2Scope.UserGamerTagRead])
     @Oauth2RequiredScopes(Oauth2Scope.UserUuidRead, Oauth2Scope.UserGamerTagRead)
     async getUser(@Oauth2User() user: UserEntity): Promise<OauthGetUserDto> {
-        return { "uuid": user.uuid, "gamerTag": null }
+        return { "uuid": user.uuid, "gamerTag": user.gamerTag }
     }
 }
