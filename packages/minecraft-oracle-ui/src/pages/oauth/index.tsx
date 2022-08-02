@@ -26,7 +26,7 @@ const OauthPage = () => {
         }
       });
       setOauthData({ ...result.data, params: searchParams })
-      history.push("oauth/confirm")
+      navigate("oauth/confirm")
     } catch (e) {
       const err = e as AxiosError;
 
