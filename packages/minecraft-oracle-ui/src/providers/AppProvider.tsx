@@ -17,6 +17,7 @@ import { TransferDialogContextController } from '../context/transferDialog/trans
 import { ExportDialogContextController } from '../context/exportDialog/exportDialogContextController/ExportDialogContextController';
 import { AssetDialogContextController } from '../context/assetDialog/assetDialogContextController/assetDialogContextController';
 import { ChakraProvider } from '@chakra-ui/react'
+import { OauthLoginContextController } from '../context/oauthLogin/oauthLoginContextController/OauthLoginContextController';
 
 function Updaters() {
   return (
@@ -33,25 +34,27 @@ export const AppProviders = ({ children }: AppProvidersProps) => (
       <AuthContextController>
         <Provider store={store}>
           <Updaters />
-          <Web3ReactManager>
-            <AccountDialogContextController>
-              <SummonDialogContextController>
-                <ImportDialogContextController>
-                  <EnraptureDialogContextController>
-                    <ExportDialogContextController>
-                      <TransferDialogContextController>
-                        <AssetDialogContextController>
-                          <Router>
-                            {children}
-                          </Router>
-                        </AssetDialogContextController>
-                      </TransferDialogContextController>
-                    </ExportDialogContextController>
-                  </EnraptureDialogContextController>
-                </ImportDialogContextController>
-              </SummonDialogContextController>
-            </AccountDialogContextController>
-          </Web3ReactManager>
+          <OauthLoginContextController>
+            <Web3ReactManager>
+              <AccountDialogContextController>
+                <SummonDialogContextController>
+                  <ImportDialogContextController>
+                    <EnraptureDialogContextController>
+                      <ExportDialogContextController>
+                        <TransferDialogContextController>
+                          <AssetDialogContextController>
+                            <Router>
+                              {children}
+                            </Router>
+                          </AssetDialogContextController>
+                        </TransferDialogContextController>
+                      </ExportDialogContextController>
+                    </EnraptureDialogContextController>
+                  </ImportDialogContextController>
+                </SummonDialogContextController>
+              </AccountDialogContextController>
+            </Web3ReactManager>
+          </OauthLoginContextController>
         </Provider>
       </AuthContextController>
     </Web3ReactProviderNetwork>

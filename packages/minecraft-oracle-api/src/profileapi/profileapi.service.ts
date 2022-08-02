@@ -173,6 +173,7 @@ export class ProfileApiService {
             uuid: user.uuid,
             minecraftUuid: user.minecraftUuid,
             email: user?.email?.email ?? null,
+            gamerTag: user.gamerTag,
             hasGame: user.hasGame,
             minecraftUserName: user.minecraftUserName,
             role: user.role,
@@ -221,6 +222,10 @@ export class ProfileApiService {
         }))
         this.eventBus.publish(new SkinSelectedEvent(user.uuid))
         return true
+    }
+
+    public async setGamerTag(user: UserEntity, gamerTag: string) {
+        await this.userService.setGamerTag(user.uuid, gamerTag)
     }
 
 }

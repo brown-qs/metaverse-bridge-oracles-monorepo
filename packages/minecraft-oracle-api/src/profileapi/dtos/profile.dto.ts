@@ -10,6 +10,9 @@ export class ProfileDto {
     @ApiProperty({ description: 'Email' })
     email: string | null
 
+    @ApiProperty({ description: 'Gamer Tag' })
+    gamerTag: string | null
+
     @ApiProperty({ description: 'Mincraft UUID' })
     minecraftUuid: string | null
 
