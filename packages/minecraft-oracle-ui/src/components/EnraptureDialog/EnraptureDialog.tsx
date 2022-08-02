@@ -22,7 +22,7 @@ import { useEnraptureConfirmCallback } from 'hooks/multiverse/useConfirm';
 import { EnraptureAssetCallbackState, useEnraptureAssetCallback } from 'hooks/multiverse/useEnraptureAsset';
 import { stringAssetTypeToAssetType } from 'utils/marketplace';
 import { TokenDetails } from 'components/TokenDetails/TokenDetails';
-import { Button, CircularProgress, Grid, Input, Stack, Text } from '@chakra-ui/react';
+import { Button, CircularProgress, Grid, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Stack, Text } from '@chakra-ui/react';
 import { CircleCheck } from 'tabler-icons-react';
 
 
@@ -303,18 +303,16 @@ export const EnraptureDialog = () => {
     );
   };
 
-  /*
-      <Dialog
-      open={isEnraptureDialogOpen}
-      onClose={handleClose}
-      title={'MultiverseBridge: enrapture'}
-      maxWidth="md"
-      style={{ justifyContent: 'center' }}
-    >
-      <div className={dialogContainer}>{renderBody()}</div>
-    </Dialog>
-  */
+
   return (
-    <></>
-  );
+    <Modal isOpen={isEnraptureDialogOpen} onClose={onEnraptureDialogClose} isCentered closeOnOverlayClick={false}>
+      <ModalOverlay />
+      <ModalContent>
+        <ModalCloseButton />
+        <ModalHeader>Enrapture</ModalHeader>
+        <ModalBody>
+          {renderBody()}
+        </ModalBody>
+      </ModalContent>
+    </Modal>);
 };
