@@ -4,7 +4,7 @@ import { useAuth, useClasses, useOauthLogin } from 'hooks';
 import { useNavigate } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
 import { Alert, AlertDescription, AlertIcon, Box, Button, Stack, Tag, TagCloseButton, TagLabel, TagLeftIcon, TagRightIcon } from '@chakra-ui/react';
-import { DeviceGamepad2, Pencil, User } from 'tabler-icons-react';
+import { DeviceGamepad2, Pencil, Tags, User } from 'tabler-icons-react';
 const AccountPage = () => {
   const { authData, setAuthData } = useAuth();
   const [isLoading, setIsLoading] = useState(true)
@@ -130,7 +130,7 @@ const AccountPage = () => {
               borderRadius='full'
               variant='solid'
             >
-              <TagLeftIcon as={DeviceGamepad2} />
+              <TagLeftIcon as={Tags} />
               <TagLabel>{authData?.userProfile?.gamerTag}</TagLabel>
               <TagRightIcon sx={{ cursor: "pointer" }} as={Pencil} onClick={() => { navigate(`/account/gamertag`) }} />
 
