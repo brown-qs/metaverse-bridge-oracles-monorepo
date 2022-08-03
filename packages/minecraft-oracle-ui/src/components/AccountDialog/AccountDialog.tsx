@@ -23,7 +23,7 @@ import usePrevious from 'hooks/usePrevious/usePrevious';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 import useAddNetworkToMetamaskCb from 'hooks/useAddNetworkToMetamask/useAddNetworkToMetamask';
 import { ChainId, NETWORK_NAME, PERMISSIONED_CHAINS } from '../../constants';
-import { Image, Box, Button, CircularProgress, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Stack, Text, VStack } from '@chakra-ui/react';
+import { Image, Box, Button, CircularProgress, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Stack, Text, VStack, HStack } from '@chakra-ui/react';
 
 const WALLET_VIEWS = {
   OPTIONS: 'options',
@@ -373,17 +373,19 @@ export const AccountDialog = () => {
             Back
           </Button>
         ) : (
-          <span>Connect to a wallet</span>
+          <Box lineHeight="24px" paddingTop="16px" fontSize="16px" fontFamily="Rubik">Connect to a wallet</Box>
         )}
         {walletView !== WALLET_VIEWS.PENDING && (
-          <Text variant="body2">
-            New to Ethereum? &nbsp;
+          <HStack paddingBottom="16px" fontFamily="Rubik" alignItems="center" w="100%">
+            <Text color="whiteAlpha.700" fontSize="12px">New to Ethereum?</Text>
             <ExternalLink href="https://ethereum.org/wallets">
-              Learn more about wallets
+              <Text color="teal.200" _hover={{ textDecoration: "underline" }}>Learn more about wallets</Text>
             </ExternalLink>
-          </Text>
-        )}
-      </VStack>
+          </HStack>
+
+        )
+        }
+      </VStack >
     );
   }
 
@@ -393,8 +395,8 @@ export const AccountDialog = () => {
       <ModalOverlay />
       <ModalContent>
         <ModalCloseButton />
-        <ModalHeader>Account</ModalHeader>
         <ModalBody>
+          <Box paddingTop="32px" fontSize="16px" lineHeight="24px">Account</Box>
           {getModalContent()}
         </ModalBody>
       </ModalContent>
