@@ -121,7 +121,7 @@ const AccountPage = () => {
           </Box>
         </Stack>
         <Stack direction="column" alignItems='center' textAlign='center' spacing={1} margin={2} marginTop={3}>
-          <Box>GAMER TAG</Box>
+          <Box paddingTop="30px">GAMER TAG</Box>
           {!!authData?.userProfile?.gamerTag
             ?
             <Tag sx={{ maxWidth: 300 }}
@@ -136,7 +136,11 @@ const AccountPage = () => {
 
             </Tag>
             :
-            <Button onClick={() => { handleSetGamerTag() }} >SET GAMER TAG</Button>
+            <>
+              <Box></Box>
+              <Button onClick={() => { handleSetGamerTag() }} >SET GAMER TAG</Button>
+
+            </>
           }
 
         </Stack>
