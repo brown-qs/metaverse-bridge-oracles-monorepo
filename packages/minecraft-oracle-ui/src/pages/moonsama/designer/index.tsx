@@ -1016,7 +1016,7 @@ const CharacterDesignerPage = () => {
                         </svg>
                       </IconButton>
                       <Stack direction={isMobileViewport ? 'row-reverse' : 'row-reverse'} spacing={1} alignItems="center" sx={{ backgroundColor: isLoggedIn && allowedToSave ? 'transparent' : 'rgba(22, 19, 43, 0.75)', backgroundBlendMode: 'lighten', p: 1, borderRadius: (isMobileViewport ? '0.5rem' : '800px') }}>
-                        <Box style={{ textTransform: 'uppercase', fontSize: '12px', display: 'flex', alignItems: 'center', paddingRight: (isMobileViewport ? '0px' : '8px'), textAlign: 'center' }}>
+                        <Box marginLeft="10px" color="white" style={{ textTransform: 'uppercase', fontSize: '12px', display: 'flex', alignItems: 'center', paddingRight: (isMobileViewport ? '0px' : '8px'), textAlign: 'center' }}>
                           {!isLoggedIn && 'Login to save or share'}
                           {isLoggedIn && !allowedToSave && 'Assets not owned by you'}
                           {isLoggedIn && allowedToSave && <IconButton
