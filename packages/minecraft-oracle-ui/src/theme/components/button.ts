@@ -2,10 +2,11 @@ import { ComponentStyleConfig } from '@chakra-ui/react'
 
 const Button: ComponentStyleConfig = {
     defaultProps: {
-        variant: "moonsamaSolid"
+        variant: "moonsamaSolid",
     },
     variants: {
         moonsamaSolid: {
+            overflow: "hidden",
             fontWeight: "normal",
             fontSize: "12px",
             borderRadius: "4px",
