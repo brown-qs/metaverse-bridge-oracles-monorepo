@@ -1,10 +1,4 @@
 
-import {
-  Stack,
-} from '@mui/material';
-import CircularProgress from '@mui/material/CircularProgress';
-import Divider from '@mui/material/Divider';
-import Typography from '@mui/material/Typography';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 import { AddressDisplayComponent } from 'components/form/AddressDisplayComponent';
 import 'date-fns';
@@ -13,9 +7,7 @@ import {
   ChainId,
 } from '../../constants';
 import { getExplorerLink } from 'utils';
-import { SuccessIcon } from 'icons';
 import { useEffect, useState } from 'react';
-import { Button, Dialog } from 'ui';
 import { useClasses } from 'hooks';
 import { styles as appStyles } from '../../app.styles';
 import { styles } from './ExportDialog.styles';
@@ -28,11 +20,13 @@ import { DEFAULT_CHAIN, NETWORK_NAME } from "../../constants";
 import { AssetChainDetails } from '../../components/AssetChainDetails/AssetChainDetails';
 import useAddNetworkToMetamaskCb from 'hooks/useAddNetworkToMetamask/useAddNetworkToMetamask';
 import { useWeb3React } from '@web3-react/core';
+import { Button, CircularProgress, Divider, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Stack, Text } from '@chakra-ui/react';
+import { CircleCheck } from 'tabler-icons-react';
 
 
 export const ExportDialog = () => {
   const [finalTxSubmitted, setFinalTxSubmitted] = useState<boolean>(false);
-  const { isExportDialogOpen, exportDialogData, setExportDialogData, setExportDialogOpen } = useExportDialog();
+  const { isExportDialogOpen, onExportDialogOpen, onExportDialogClose, exportDialogData, setExportDialogData } = useExportDialog();
   const [exportParamsLoaded, setExportParamsLoaded] = useState<boolean>(false);
   const [approvalSubmitted, setApprovalSubmitted] = useState<boolean>(false);
   const [exportConfirmed, setExportConfirmed] = useState<boolean>(false);
@@ -63,16 +57,14 @@ export const ExportDialog = () => {
   const { error: networkError, chainId: networkChainId } = useWeb3React();
   const { addNetwork } = useAddNetworkToMetamaskCb()
 
-  const handleClose = (event: any, reason: string) => {
-    if (reason === 'backdropClick') {
-      return
-    }
-    setExportDialogOpen(false);
+  const handleClose = (() => {
+
+    onExportDialogClose();
     setExportParamsLoaded(false);
     setFinalTxSubmitted(false);
     setExportConfirmed(false);
     setApprovalSubmitted(false)
-  };
+  });
 
   if (!exportParamsLoaded && !!exportDialogData?.hash) {
     setExportParamsLoaded(true);
@@ -113,7 +105,7 @@ export const ExportDialog = () => {
       return (
         <div className={loadingContainer}>
           <div>
-            <Typography>Sorry you cannot export from the bridge during an ongoing Carnage game.</Typography>
+            <Text>Sorry you cannot export from the bridge during an ongoing Carnage game.</Text>
           </div>
         </div>
       );
@@ -124,10 +116,10 @@ export const ExportDialog = () => {
         <div className={loadingContainer}>
           <CircularProgress />
           <div>
-            <Typography>Loading export details</Typography>
-            <Typography color="textSecondary" variant="h5">
+            <Text>Loading export details</Text>
+            <Text color="textSecondary" variant="h5">
               Should be a jiffy
-            </Typography>
+            </Text>
           </div>
         </div>
       );
@@ -140,7 +132,7 @@ export const ExportDialog = () => {
       return (
         <div className={loadingContainer}>
           <Stack direction={'column'} spacing={1}>
-            <Typography>Connect to {networkName} network first to export this item.</Typography>
+            <Text>Connect to {networkName} network first to export this item.</Text>
             <Button
               //className={formButton}
               onClick={() => {
@@ -158,8 +150,8 @@ export const ExportDialog = () => {
     if (exportConfirmed) {
       return (
         <div className={successContainer}>
-          <SuccessIcon className={successIcon} />
-          <Typography>{`Export from metaverse confirmed!`}</Typography>
+          <CircleCheck className={successIcon} />
+          <Text>{`Export from metaverse confirmed!`}</Text>
 
           {exportTx && (
             <ExternalLink
@@ -174,7 +166,7 @@ export const ExportDialog = () => {
           )}
           <Button
             className={button}
-            onClick={() => handleClose({}, "yada")}
+            onClick={() => handleClose()}
             variant="outlined"
             color="primary"
           >
@@ -190,10 +182,10 @@ export const ExportDialog = () => {
           <div className={loadingContainer}>
             <CircularProgress />
             <div>
-              <Typography>Landing in owner address soon...</Typography>
-              <Typography color="textSecondary" variant="h5">
+              <Text>Landing in owner address soon...</Text>
+              <Text color="textSecondary" variant="h5">
                 Check your wallet for potential action
-              </Typography>
+              </Text>
             </div>
           </div>
         </>
@@ -203,8 +195,8 @@ export const ExportDialog = () => {
     if (finalTxSubmitted && exportSubmitted && !isPending) {
       return (
         <div className={successContainer}>
-          <SuccessIcon className={successIcon} />
-          <Typography>{`Transaction success!`}</Typography>
+          <CircleCheck className={successIcon} />
+          <Text>{`Transaction success!`}</Text>
 
           {exportTx && (
             <ExternalLink
@@ -218,9 +210,9 @@ export const ExportDialog = () => {
             </ExternalLink>
           )}
 
-          <Typography color="textSecondary" variant="h5">
+          <Text color="textSecondary" variant="h5">
             Confirming export with the metaverse oracle...
-          </Typography>
+          </Text>
         </div>
       );
     }
@@ -228,7 +220,7 @@ export const ExportDialog = () => {
     return (
       <Stack spacing={1} justifyContent="center">
         <Stack className={formBox} spacing={2}>
-          <Typography variant="body2">Token Details</Typography>
+          <Text variant="body2">Token Details</Text>
           <Stack direction={'row'} className={row}>
             <div className={col}>
               <div className={formLabel}>Address</div>
@@ -270,20 +262,23 @@ export const ExportDialog = () => {
         >
           Export from metaverse
         </Button>
-        <Button className={formButton} onClick={() => handleClose({}, "yada")} color="primary">
+        <Button className={formButton} onClick={() => handleClose()} color="primary">
           Cancel
         </Button>
       </Stack>
     );
   };
+
   return (
-    <Dialog
-      open={isExportDialogOpen}
-      onClose={handleClose}
-      title={'MultiverseBridge: export'}
-      maxWidth="md"
-    >
-      <div className={dialogContainer}>{renderBody()}</div>
-    </Dialog>
+    <Modal isOpen={isExportDialogOpen} onClose={() => handleClose()} isCentered closeOnOverlayClick={false}>
+      <ModalOverlay />
+      <ModalContent>
+        <ModalCloseButton />
+        <ModalHeader>Export</ModalHeader>
+        <ModalBody>
+          {renderBody()}
+        </ModalBody>
+      </ModalContent>
+    </Modal >
   );
 };

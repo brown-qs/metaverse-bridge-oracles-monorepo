@@ -1,26 +1,16 @@
 import React, { useRef, useState } from 'react';
 import { AuthLayout, Loader } from 'ui';
 import { useAuth, useClasses } from 'hooks';
-import Tooltip from '@mui/material/Tooltip';
-
-import WhiteLogo from 'assets/images/moonsama-glitch-white.svg';
-import LeftImage from 'assets/images/home/left.png';
-import RightImageFlip from 'assets/images/home/right.png';
-import Box from '@mui/material/Box';
-import "@fontsource/orbitron/500.css";
-import { Button, Stack, TextField, Typography, useMediaQuery } from '@mui/material';
-import { theme } from 'theme/Theme';
-import { Link, useHistory } from 'react-router-dom'
-import LoadingButton from '@mui/lab/LoadingButton';
-import { ReCAPTCHA } from 'components/Recaptcha';
+import { Link, useNavigate } from 'react-router-dom'
 import axios, { AxiosError } from 'axios';
+import { Button, FormControl, FormErrorMessage, FormHelperText, FormLabel, Input, Stack } from '@chakra-ui/react';
 const GamerTagChangePage = () => {
   const { authData, setAuthData } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [gamerTag, setGamerTag] = useState("");
   const [dirtyTextField, setDirtyTextField] = useState(false);
   const [failureMessage, setFailureMessage] = useState("")
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const recaptchaEl = useRef<any>(null)
 
@@ -41,7 +31,7 @@ const GamerTagChangePage = () => {
         data: { gamerTag }
       });
       //redirect
-      history.push('/account')
+      navigate('/account')
 
     } catch (e) {
       const err = e as AxiosError;
@@ -66,12 +56,35 @@ const GamerTagChangePage = () => {
 
   const gamerTagControls = () => {
     return <Stack alignItems="center" spacing={2}>
-      <TextField disabled={isLoading} inputProps={{ spellCheck: false, autoCapitalize: "off", autoCorrect: "off", onFocus: () => setDirtyTextField(true) }} value={gamerTag} error={dirtyTextField && !isValidGamerTag(gamerTag)} onKeyPress={(e) => {
-        if (e.key === 'Enter' && !isLoading && isValidGamerTag(gamerTag)) {
-          submitGamerTag(gamerTag)
-        }
-      }} onChange={(event) => { setGamerTag(event.target.value) }} label="GAMER TAG" variant="standard" />
-      <LoadingButton disableRipple disableElevation loading={isLoading} disabled={!isValidGamerTag(gamerTag)} onClick={(e) => submitGamerTag(gamerTag)} variant="contained">SET GAMER TAG</LoadingButton>
+
+      <FormControl isInvalid={dirtyTextField && !isValidGamerTag(gamerTag)} maxW="300px">
+        <FormLabel>Gamer Tag</FormLabel>
+        <Input
+          isDisabled={isLoading}
+          value={gamerTag}
+          onChange={(e) => {
+            setGamerTag(e.target.value)
+          }}
+          onFocus={() => setDirtyTextField(true)}
+          onKeyUp={(e) => {
+            if (e.key === 'Enter' && !isLoading && isValidGamerTag(gamerTag)) {
+              submitGamerTag(gamerTag)
+            }
+          }}
+          spellCheck="false"
+          autoCapitalize="off"
+          autoCorrect="off"
+        />
+        {dirtyTextField && !isValidGamerTag(gamerTag) ? (
+          <FormErrorMessage sx={{}}>Invalid gamer tag.</FormErrorMessage>
+
+        ) : (
+          <FormHelperText>
+            &nbsp;
+          </FormHelperText>
+        )}
+      </FormControl>
+      <Button isLoading={isLoading} disabled={!isValidGamerTag(gamerTag)} onClick={(e) => submitGamerTag(gamerTag)} >SET GAMER TAG</Button>
     </Stack >
   }
 

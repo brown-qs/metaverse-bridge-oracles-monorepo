@@ -1,12 +1,5 @@
+import { Box, Button, FormControl, Input } from '@chakra-ui/react';
 import { BigNumber } from '@ethersproject/bignumber';
-import {
-  Button,
-  FormControl,
-  InputAdornment,
-  MenuItem,
-  OutlinedInput,
-  Select,
-} from '@mui/material';
 import { useClasses } from 'hooks';
 import { styles as appStyles } from '../../app.styles';
 import { styles } from './CoinQuantityField.styles';
@@ -43,7 +36,7 @@ export const CoinQuantityField = (props: any) => {
   return (
     <>
       <FormControl className={props.className} variant="outlined">
-        <OutlinedInput
+        <Input
           id={props.id}
           type="text"
           className={outlinedInput}
@@ -51,22 +44,22 @@ export const CoinQuantityField = (props: any) => {
           // onChange={(event: any) => inputToBigNum(event.target.value, setSendAmount)}
           onChange={onValueChange}
           value={value}
-          endAdornment={
-            withMaxButton ? (
-              <InputAdornment position="end">
-                <Button
-                  className={formMaxButton}
-                  onClick={() => {
-                    _setMaxNumber();
-                  }}
-                >
-                  MAX
-                </Button>
-              </InputAdornment>
-            ) : (
-              ''
-            )
-          }
+        /*endAdornment={
+          withMaxButton ? (
+            <Box position="end">
+              <Button
+                className={formMaxButton}
+                onClick={() => {
+                  _setMaxNumber();
+                }}
+              >
+                MAX
+              </Button>
+            </Box>
+          ) : (
+            ''
+          )
+        }*/
         />
       </FormControl>
     </>

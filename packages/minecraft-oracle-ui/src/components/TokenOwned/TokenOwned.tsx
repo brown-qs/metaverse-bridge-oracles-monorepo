@@ -1,17 +1,16 @@
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
+
 import { Media } from 'components';
 import { useActiveWeb3React } from 'hooks';
 import { Asset } from 'hooks/marketplace/types';
 import { TokenMeta } from 'hooks/useFetchTokenUri.ts/useFetchTokenUri.types';
 import { StaticTokenData } from 'hooks/useTokenStaticDataCallback/useTokenStaticDataCallback';
-import { useHistory } from 'react-router-dom';
-import { GlitchText } from 'ui';
+import { useNavigate } from 'react-router-dom';
 import { truncateHexString } from 'utils';
 import { StringAssetType } from 'utils/subgraph';
 import { useClasses } from 'hooks';
 import { styles } from './TokenOwned.styles';
 import LootBox from '../../assets/images/loot-box.png';
+import { Box, Text } from '@chakra-ui/react';
 
 export const TokenOwned = ({
   meta,
@@ -32,14 +31,14 @@ export const TokenOwned = ({
     mr,
     lastPriceContainer,
   } = useClasses(styles);
-  const { push } = useHistory();
+  const navigate = useNavigate();
 
   const { chainId } = useActiveWeb3React();
 
   //console.log('FRESH', {asset, action, actionColor})
 
   const handleImageClick = () => {
-    push(`/token/${asset.assetType}/${asset.assetAddress}/${asset.assetId}`);
+    navigate(`/token/${asset.assetType}/${asset.assetAddress}/${asset.assetId}`);
   };
 
   const isErc721 =
@@ -48,11 +47,11 @@ export const TokenOwned = ({
   const totalSupplyString = isErc721
     ? 'unique'
     : sup
-    ? `${sup} pieces`
-    : undefined;
+      ? `${sup} pieces`
+      : undefined;
 
   return (
-    <Paper className={container}>
+    <Box className={container}>
       <div
         role="button"
         className={imageContainer}
@@ -64,18 +63,18 @@ export const TokenOwned = ({
         {/*<img src={LootBox} style={{width: '100%', height: 'auto'}}/>*/}
       </div>
       <div className={nameContainer}>
-        <GlitchText className={tokenName}>
+        <Text className={tokenName}>
           {meta?.name ?? truncateHexString(asset.assetId)}
-        </GlitchText>
+        </Text>
       </div>
       <div className={stockContainer}>
         {staticData?.symbol && (
-          <Typography color="textSecondary">{staticData.symbol}</Typography>
+          <Text color="textSecondary">{staticData.symbol}</Text>
         )}
         {totalSupplyString && (
-          <Typography color="textSecondary">{totalSupplyString}</Typography>
+          <Text color="textSecondary">{totalSupplyString}</Text>
         )}
       </div>
-    </Paper>
+    </Box>
   );
 };
