@@ -1,3 +1,4 @@
+import { useDisclosure } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 
 import { ExportDialogContext } from '../exportDialogContext/ExportDialogContext';
@@ -8,7 +9,7 @@ import { ExportDialogContextControllerProps } from './ExportDialogContextControl
 export const ExportDialogContextController = ({
   children,
 }: ExportDialogContextControllerProps) => {
-  const [isExportDialogOpen, setExportDialogOpen] = useState<boolean>(false);
+  const { isOpen: isExportDialogOpen, onOpen: onExportDialogOpen, onClose: onExportDialogClose } = useDisclosure()
   const [exportDialogData, setExportDialogData] = useState<ExportDialogData>(undefined);
 
   useEffect(() => {
@@ -19,7 +20,7 @@ export const ExportDialogContextController = ({
 
   return (
     <ExportDialogContext.Provider
-      value={{ isExportDialogOpen, setExportDialogOpen, exportDialogData, setExportDialogData }}
+      value={{ isExportDialogOpen, onExportDialogOpen, onExportDialogClose, exportDialogData, setExportDialogData }}
     >
       {children}
     </ExportDialogContext.Provider>

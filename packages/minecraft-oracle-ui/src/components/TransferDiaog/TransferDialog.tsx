@@ -1,8 +1,5 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { yupResolver } from '@hookform/resolvers/yup';
-import CircularProgress from '@mui/material/CircularProgress';
-import Divider from '@mui/material/Divider';
-import Typography from '@mui/material/Typography';
 import { AssetLink } from 'components/AssetLink/AssetLink';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 import { AddressDisplayComponent } from 'components/form/AddressDisplayComponent';
@@ -15,11 +12,9 @@ import {
   TransferState,
   useTransferCallback,
 } from 'hooks/useTransferCallback/useTransferCallback';
-import { SuccessIcon } from 'icons/Success/success';
 import { useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useSubmittedTransferTx } from 'state/transactions/hooks';
-import { Button, Dialog } from 'ui';
 import { getExplorerLink } from 'utils';
 import * as yup from 'yup';
 import { styles as appStyles } from '../../app.styles';
@@ -27,9 +22,10 @@ import { ChainId } from '../../constants';
 import { useTransferDialog } from '../../hooks/useTransferDialog/useTransferDialog';
 import { useClasses } from 'hooks';
 import { styles } from './TransferDialog.styles';
-import { Box, FormControl, OutlinedInput } from '@mui/material';
 import { UNIT } from 'components/form/CoinQuantityField';
 import { Fraction } from 'utils/Fraction';
+import { Box, Button, CircularProgress, Divider, FormControl, Text } from '@chakra-ui/react';
+import { CircleCheck } from 'tabler-icons-react';
 
 const makeTransferFormDataSchema = (): yup.ObjectSchema<TransferFormData> =>
   yup
@@ -51,7 +47,7 @@ type TransferFormData = {
 
 export const TransferDialog = () => {
   const [finalTxSubmitted, setFinalTxSubmitted] = useState<boolean>(false);
-  const { isTransferDialogOpen, setTransferDialogOpen, transferData } =
+  const { isTransferDialogOpen, onTransferDialogOpen, onTransferDialogClose, transferData } =
     useTransferDialog();
   const [orderLoaded, setOrderLoaded] = useState<boolean>(false);
 
@@ -71,14 +67,14 @@ export const TransferDialog = () => {
     fieldError,
     formButton,
   } = useClasses(appStyles);
-  
+
   const { dialogContainer, loadingContainer, successContainer, successIcon } =
     useClasses(styles);
 
   const { chainId } = useActiveWeb3React();
 
   const handleClose = () => {
-    setTransferDialogOpen(false);
+    onTransferDialogClose();
     setFinalTxSubmitted(false);
   };
 
@@ -92,7 +88,7 @@ export const TransferDialog = () => {
     setOrderLoaded(true);
   }
 
-  const makeformDataSchema = () => {};
+  const makeformDataSchema = () => { };
   const {
     handleSubmit,
     formState: { errors, isValid },
@@ -162,10 +158,10 @@ export const TransferDialog = () => {
         <div className={loadingContainer}>
           <CircularProgress />
           <div>
-            <Typography>Loading asset details</Typography>
-            <Typography color="textSecondary" variant="h5">
+            <Text>Loading asset details</Text>
+            <Text color="textSecondary" variant="h5">
               Should be a jiffy
-            </Typography>
+            </Text>
           </div>
         </div>
       );
@@ -176,10 +172,10 @@ export const TransferDialog = () => {
           <div className={loadingContainer}>
             <CircularProgress />
             <div>
-              <Typography>Placing transfer transaction...</Typography>
-              <Typography color="textSecondary" variant="h5">
+              <Text>Placing transfer transaction...</Text>
+              <Text color="textSecondary" variant="h5">
                 Check your wallet for potential action
-              </Typography>
+              </Text>
             </div>
           </div>
         </>
@@ -188,15 +184,15 @@ export const TransferDialog = () => {
     if (finalTxSubmitted && transferSubmitted) {
       return (
         <div className={successContainer}>
-          <SuccessIcon className={successIcon} />
-          <Typography>Transfer submitted</Typography>
-          <Typography color="primary">
+          <CircleCheck className={successIcon} />
+          <Text>Transfer submitted</Text>
+          <Text color="primary">
             {transferData?.asset.assetAddress}
-          </Typography>
-          <Typography color="primary">{transferData?.asset.assetId}</Typography>
-          <Typography color="primary">
+          </Text>
+          <Text color="primary">{transferData?.asset.assetId}</Text>
+          <Text color="primary">
             {transferData?.asset.assetType}
-          </Typography>
+          </Text>
 
           {transferTx && (
             <ExternalLink
@@ -226,14 +222,14 @@ export const TransferDialog = () => {
         <form>
           <Box className={formBox}>
             <div className={infoContainer}>
-              <Typography className={formLabel}>Type</Typography>
-              <Typography className={formValue}>
+              <Text className={formLabel}>Type</Text>
+              <Text className={formValue}>
                 {transferData?.asset?.assetType ?? '?'}
-              </Typography>
+              </Text>
             </div>
 
             <div className={infoContainer}>
-              <Typography className={formLabel}>Address</Typography>
+              <Text className={formLabel}>Address</Text>
               <AddressDisplayComponent className={formValue} charsShown={10} copyTooltipLabel={'Copy address'}>
                 {transferData?.asset?.assetAddress ?? '?'}
               </AddressDisplayComponent>
@@ -241,27 +237,27 @@ export const TransferDialog = () => {
 
             {transferData?.asset?.assetType?.valueOf() !==
               StringAssetType.ERC20 && (
-              <div className={infoContainer}>
-                <Typography className={formLabel}>ID</Typography>
-                <AssetLink href="#" asset={transferData?.asset}>
-                  <Typography className={formValue}>
-                    {transferData?.asset?.assetId ?? '?'}
-                  </Typography>
-                </AssetLink>
-              </div>
-            )}
+                <div className={infoContainer}>
+                  <Text className={formLabel}>ID</Text>
+                  <AssetLink href="#" asset={transferData?.asset}>
+                    <Text className={formValue}>
+                      {transferData?.asset?.assetId ?? '?'}
+                    </Text>
+                  </AssetLink>
+                </div>
+              )}
 
             <Divider variant="fullWidth" className={divider} />
 
             <div className={infoContainer}>
-              <Typography className={formLabel}>You have</Typography>
-              <Typography className={formValue}>
+              <Text className={formLabel}>You have</Text>
+              <Text className={formValue}>
                 {youhave?.toString() ?? '0'}
-              </Typography>
+              </Text>
             </div>
 
             <div className={infoContainer}>
-              <Typography className={formLabel}>You send</Typography>
+              <Text className={formLabel}>You send</Text>
 
               <NumberFieldWithMaxButton
                 id="send-amount"
@@ -282,23 +278,24 @@ export const TransferDialog = () => {
             {amountError && <div className={fieldError}>{amountError}</div>}
 
             <div className={infoContainer}>
-              <Typography className={formLabel}>Recipient</Typography>
+              <Text className={formLabel}>Recipient</Text>
               <FormControl className={formValue} variant="outlined">
-                <Controller
+                {/*    <Controller
                   control={control}
                   name="recipient"
-                  render={({ field: { onChange, onBlur, value, ref } }) => (
-                    <OutlinedInput
-                      id="recipient"
-                      type="text"
-                      // onChange={(event: any) => setTo(event.target.value)}
-                      onChange={onChange}
-                      onBlur={onBlur}
-                      value={value}
-                      placeholder={'0x0...'}
-                    />
-                  )}
-                />
+                render={({ field: { onChange, onBlur, value, ref } }) => (
+                  <OutlinedInput
+                    id="recipient"
+                    type="text"
+                    // onChange={(event: any) => setTo(event.target.value)}
+                    onChange={onChange}
+                    onBlur={onBlur}
+                    value={value}
+                    placeholder={'0x0...'}
+                  />
+                )}
+                  />*/}
+
               </FormControl>
             </div>
             <div className={fieldError}>{errors.recipient?.message}</div>
@@ -327,13 +324,16 @@ export const TransferDialog = () => {
       </>
     );
   };
-  return (
-    <Dialog
+  /*
+   <Dialog
       open={isTransferDialogOpen}
       onClose={handleClose}
       title={'Transfer asset'}
     >
       <div className={dialogContainer}>{renderBody()}</div>
     </Dialog>
+  */
+  return (
+    <></>
   );
 };

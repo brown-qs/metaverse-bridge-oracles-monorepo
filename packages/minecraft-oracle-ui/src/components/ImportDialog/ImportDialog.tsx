@@ -1,6 +1,4 @@
 
-import CircularProgress from '@mui/material/CircularProgress';
-import Typography from '@mui/material/Typography';
 import { ExternalLink } from '../../components/ExternalLink/ExternalLink';
 import { TokenDetails } from '../../components/TokenDetails/TokenDetails';
 import { useActiveWeb3React, useImportDialog, useClasses } from '../../hooks';
@@ -16,36 +14,24 @@ import {
   stringAssetTypeToAssetType,
 } from 'utils/marketplace';
 import { getExplorerLink } from 'utils';
-import { SuccessIcon } from 'icons';
 import { useEffect, useState } from 'react';
-import { Button, Dialog } from 'ui';
 import { styles as appStyles } from '../../app.styles';
-import { styles } from './ImportDialog.styles';
 import { useIsTransactionPending, useSubmittedImportTx } from '../../state/transactions/hooks';
 import { CreateImportAssetCallbackState, useImportAssetCallback } from '../../hooks/multiverse/useImportAsset';
 import { useImportConfirmCallback } from '../../hooks/multiverse/useConfirm';
-import Stack from '@mui/material/Stack/Stack';
+import { Button, CircularProgress, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Stack, Text } from '@chakra-ui/react';
+import { CircleCheck } from 'tabler-icons-react';
 
 
 export const ImportDialog = () => {
   const [finalTxSubmitted, setFinalTxSubmitted] = useState<boolean>(false);
-  const { isImportDialogOpen, importDialogData, setImportDialogOpen } = useImportDialog();
+  const { isImportDialogOpen, onImportDialogOpen, onImportDialogClose, importDialogData, setImportDialogData } = useImportDialog();
   const [importParamsLoaded, setImportParamsLoaded] = useState<boolean>(false);
   const [approvalSubmitted, setApprovalSubmitted] = useState<boolean>(false);
   const [importConfirmed, setImportConfirmed] = useState<boolean>(false);
   const confirmCb = useImportConfirmCallback()
 
-  const {
-    button,
-    formButton,
-  } = useClasses(appStyles);
 
-  const {
-    dialogContainer,
-    loadingContainer,
-    successContainer,
-    successIcon,
-  } = useClasses(styles);
 
   const { chainId, account } = useActiveWeb3React();
 
@@ -53,7 +39,7 @@ export const ImportDialog = () => {
     if (reason === 'backdropClick') {
       return
     }
-    setImportDialogOpen(false);
+    onImportDialogClose();
     setImportParamsLoaded(false);
     setFinalTxSubmitted(false);
     setImportConfirmed(false);
@@ -143,13 +129,13 @@ export const ImportDialog = () => {
 
     if (!importParamsLoaded) {
       return (
-        <div className={loadingContainer}>
-          <CircularProgress />
+        <div >
+          <CircularProgress isIndeterminate />
           <div>
-            <Typography>Loading import details</Typography>
-            <Typography color="textSecondary" variant="h5">
+            <Text>Loading import details</Text>
+            <Text color="textSecondary" variant="h5">
               Should be a jiffy
-            </Typography>
+            </Text>
           </div>
         </div>
       );
@@ -157,9 +143,9 @@ export const ImportDialog = () => {
 
     if (importConfirmed) {
       return (
-        <div className={successContainer}>
-          <SuccessIcon className={successIcon} />
-          <Typography>{`Import to metaverse confirmed!`}</Typography>
+        <div>
+          <CircleCheck />
+          <Text>{`Import to metaverse confirmed!`}</Text>
 
           {importTx && (
             <ExternalLink
@@ -173,7 +159,6 @@ export const ImportDialog = () => {
             </ExternalLink>
           )}
           <Button
-            className={button}
             onClick={() => handleClose({}, "yada")}
             variant="outlined"
             color="primary"
@@ -187,13 +172,13 @@ export const ImportDialog = () => {
     if (finalTxSubmitted && isPending) {
       return (
         <>
-          <div className={loadingContainer}>
+          <div >
             <CircularProgress />
             <div>
-              <Typography>Importing asset into the metaverse...</Typography>
-              <Typography color="textSecondary" variant="h5">
+              <Text>Importing asset into the metaverse...</Text>
+              <Text color="textSecondary" variant="h5">
                 Check your wallet for potential action
-              </Typography>
+              </Text>
             </div>
           </div>
         </>
@@ -202,12 +187,12 @@ export const ImportDialog = () => {
 
     if (finalTxSubmitted && importSubmitted && !isPending) {
       return (
-        <div className={successContainer}>
-          <SuccessIcon className={successIcon} />
-          <Typography>{`Transaction success!`}</Typography>
-          <Typography color="textSecondary" variant="h5">
+        <div >
+          <CircleCheck />
+          <Text>{`Transaction success!`}</Text>
+          <Text color="textSecondary" variant="h5">
             Confirming import with the metaverse oracle...
-          </Typography>
+          </Text>
 
           {importTx && (
             <ExternalLink
@@ -233,7 +218,6 @@ export const ImportDialog = () => {
               approveCallback();
               setApprovalSubmitted(true);
             }}
-            className={button}
             variant="contained"
             color="primary"
             disabled={approvalState === ApprovalState.PENDING || !hasEnough}
@@ -246,7 +230,6 @@ export const ImportDialog = () => {
               importCallbackParams.callback?.();
               setFinalTxSubmitted(true);
             }}
-            className={formButton}
             variant="contained"
             color="primary"
             disabled={
@@ -256,14 +239,14 @@ export const ImportDialog = () => {
             Import to metaverse
           </Button>
         )}
-        <Button className={formButton} onClick={() => handleClose({}, "yada")} color="primary">
+        <Button onClick={() => handleClose({}, "yada")} color="primary">
           Cancel
         </Button>
       </Stack>
     );
   };
-  return (
-    <Dialog
+  /*
+      <Dialog
       open={isImportDialogOpen}
       onClose={handleClose}
       title={'MultiverseBridge: import'}
@@ -271,5 +254,16 @@ export const ImportDialog = () => {
     >
       <div className={dialogContainer}>{renderBody()}</div>
     </Dialog>
-  );
+  */
+  return (
+    <Modal isOpen={isImportDialogOpen} onClose={onImportDialogClose} isCentered closeOnOverlayClick={false}>
+      <ModalOverlay />
+      <ModalContent>
+        <ModalCloseButton />
+        <ModalHeader>MultiverseBridge: import</ModalHeader>
+        <ModalBody>
+          {renderBody()}
+        </ModalBody>
+      </ModalContent>
+    </Modal>);
 };

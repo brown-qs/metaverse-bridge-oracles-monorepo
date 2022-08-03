@@ -1,6 +1,5 @@
-import { Theme } from '@mui/material';
 
-export const styles = (theme: Theme) => ({
+export const styles = (theme: any) => ({
   customizerContainer: {
     fontFamily: 'Orbitron',
     display: 'flex',
@@ -13,28 +12,30 @@ export const styles = (theme: Theme) => ({
     backgroundColor: '#1B1B3A',
     flex: 1,
     boxShadow: '0px 20px 25px -5px rgba(0, 0, 0, 0.1), 0px 10px 10px -5px rgba(0, 0, 0, 0.04)',
-    [theme.breakpoints.up('sm')]: {
+    /*[theme.breakpoints.up('sm')]: {
       flexDirection: 'row',
       height: 'auto',
       marginTop: 40,
-    },
+    },*/
   },
   previewViewport: {
     width: '100%',
     height: '100vw',
     flexShrink: 0,
+    /*
     [theme.breakpoints.up('sm')]: {
       width: '760px',
       height: 'auto',
-    }
+    }*/
   },
   traitExplorer: {
     width: '100%',
     height: '760px',
+    /*
     [theme.breakpoints.up('sm')]: {
       width: '677px',
       height: 'auto',
-    }
+    }*/
   },
 
   startCue: {
@@ -49,9 +50,10 @@ export const styles = (theme: Theme) => ({
     backgroundImage: 'url(https://static.moonsama.com/customizer-ui/preview-background.jpg)',
     backgroundSize: 'cover',
     backgroundRepeat: 'no-repeat',
+    /*
     [theme.breakpoints.up('sm')]: {
       fontSize: '1.5rem',
-    }
+    }*/
   },
 
   gridItem: {
@@ -144,12 +146,13 @@ export const styles = (theme: Theme) => ({
     fontSize: '0.65rem',
     cursor: 'default !important',
     backgroundColor: '#888888',
+    /*
     [theme.breakpoints.up('sm')]: {
       paddingTop: 2,
       paddingBottom: 2,
       paddingLeft: 16,
       paddingRight: 16,
-    },
+    },*/
     '&[disabled]': {
       color: '#ffffff',
       opacity: 0.75,

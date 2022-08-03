@@ -1,9 +1,9 @@
-import { Box } from '@mui/material';
-import { Theme } from '@mui/material';
+
+import { Box } from '@chakra-ui/react';
 import { useClasses } from 'hooks';
 import { Asset as AssetType } from 'pages/moonsama/designer/index'
 
-const styles = (theme: Theme) => ({
+const styles = (theme: any) => ({
   imageStackLayer: {
     width: '100%',
     height: '100%',
@@ -15,7 +15,7 @@ const styles = (theme: Theme) => ({
 
 type layersType = Array<AssetType>;
 
-const ImageStack = ({ layers }: {layers: layersType}) => {
+const ImageStack = ({ layers }: { layers: layersType }) => {
   const {
     imageStackLayer,
   } = useClasses(styles);

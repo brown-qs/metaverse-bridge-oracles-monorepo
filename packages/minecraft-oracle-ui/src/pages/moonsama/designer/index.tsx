@@ -1,21 +1,15 @@
 import { useState, useMemo, useEffect, memo } from 'react';
 import { useOnChainItemsWithCompositeMetaAndAssets } from 'hooks/multiverse/useOnChainItems';
-import { Box, Typography, Modal, CircularProgress, IconButton } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import { useClasses } from 'hooks';
+import { useAuth, useClasses } from 'hooks';
 import { cx } from '@emotion/css';
 import { styles } from './styles';
-import Accordion from '@mui/material/Accordion';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import Stack from '@mui/material/Stack';
-import LoadingButton from '@mui/lab/LoadingButton';
-import MuiAccordionSummary from '@mui/material/AccordionSummary';
+
+
 import MOONSAMA_CUSTOMIZATION_ITEM_GROUPS from './fixtures/CustomizerItemGroups'
 import ImageStack from 'components/ImageStacks/Moonsama2';
-import { FixedSizeGrid, GridChildComponentProps, areEqual } from 'react-window';
-import { styled } from '@mui/material/styles';
-import "@fontsource/orbitron/500.css";
+import { ComponentType } from "react";
+import { FixedSizeGrid as _FixedSizeGrid, GridChildComponentProps, areEqual, FixedSizeGridProps } from 'react-window';
+
 import { InGameItemWithStatic, useInGameItemsWithCompositeMetaAndAssets } from 'hooks/multiverse/useInGameItems'
 import axios from 'axios';
 import type { AuthData } from 'context/auth/AuthContext/AuthContext.types';
@@ -25,8 +19,13 @@ import { MOONSAMA_ATTR_TO_ID_MAP } from './fixtures/AttributeToAssetMap';
 import { ADDITIONAL_PARENT_LAYERS_CONFIG, ADDITIONAL_CHILD_LAYERS_CONFIG, MOONSAMA_CATEGORY_INCOMPATIBILITIES } from './fixtures/ItemRules';
 import { useFetchUrlCallback } from 'hooks/useFetchUrlCallback/useFetchUrlCallback';
 import { useParams } from 'react-router';
-import NoSsr from '@mui/base/NoSsr';
+import { AccordionPanel, AccordionItem, Text, Accordion, Box, Button, CircularProgress, IconButton, Stack, useMediaQuery, Modal, Container, Grid, GridItem, AccordionButton, AccordionIcon, ExpandedIndex, HStack } from '@chakra-ui/react';
+import { MoonsamaLayout } from '../../../components';
+import { ChevronDown, ChevronUp } from 'tabler-icons-react';
 
+
+//fix for type checks
+const FixedSizeGrid = _FixedSizeGrid as ComponentType<FixedSizeGridProps>;
 enum AssetLocation {
   INCLUDED = 'INCLUDED',
   BRIDGE = 'BRIDGE',
@@ -489,31 +488,11 @@ const getAssetImages = (customizationCategory: CustomizationCategory, ownedAsset
   return [...attributeBridgeOptions, ...bridgeOptions, ...attributeWalletOptions, ...walletOptions, ...attributeOptions, ...options];
 }
 
-const ExpandMoreIcon = ({ expanded }: { expanded?: boolean }) => {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      fill="none"
-      stroke={expanded ? '#FFC914' : '#66C8FF'}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      className="icon icon-tabler icon-tabler-chevron-down"
-      viewBox="0 0 24 24"
-    >
-      <path stroke="none" d="M0 0h24v24H0z"></path>
-      <path d="M6 9L12 15 18 9"></path>
-    </svg>
-  );
-}
-
 const Cell = memo(({ columnIndex, rowIndex, style, data }: GridChildComponentProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { gridItem, selected } = useClasses(styles);
-  const theme = useTheme();
-  const isMobileViewport = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const [isMobileViewport] = useMediaQuery('(max-width: 992px)')
 
   const assetIndex = (data.numCols * rowIndex) + columnIndex;
 
@@ -572,11 +551,13 @@ const Cell = memo(({ columnIndex, rowIndex, style, data }: GridChildComponentPro
   );
 }, areEqual);
 
-const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
-  const theme = useTheme();
+const CharacterDesignerPage = () => {
+  //883px is where designer container stops, is on lg or greater dont show scroll bar for padding
+  const { authData, setAuthData } = useAuth();
+  const [isTallerThan883] = useMediaQuery('(min-height: 883px)')
+  const [isMobileViewport] = useMediaQuery('(max-width: 992px)')
   const { assetAddress, assetId, chainId } = useParams<{ assetAddress?: string, assetId?: string, chainId?: string }>();
   console.log('PARAMS', { assetAddress, assetId, chainId })
-  const isMobileViewport = useMediaQuery(theme.breakpoints.down('sm'));
   const isLoggedIn = !!authData && !!authData.userProfile
   const numCols = 3
   const urlCb = useFetchUrlCallback()
@@ -833,24 +814,8 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
     };
   };
 
-  const {
-    customizerContainer,
-    previewViewport,
-    traitExplorer,
-    customizerActionButton,
-    startCue,
-    grid,
-    accordion,
-    accordionExpanded,
-  } = useClasses(styles);
 
-  const handleChange =
-    (customizationOption: CustomizationCategory) => (event: React.SyntheticEvent, newExpanded: boolean) => {
-      console.log(customizationOption, newExpanded)
-      if (newExpanded) {
-        setExpanded(customizationOption)
-      }
-    };
+
 
   const selectAsset = async (assetIndex: number) => {
     // if asset is already selected, don't do anything
@@ -983,28 +948,6 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
     }
   })
 
-  const AccordionSummary = styled((props: any) => (
-    <MuiAccordionSummary
-      {...props}
-    />
-  ))(({ theme, backgroundImage }) => ({
-    height: '80px',
-    background: `url(${backgroundImage})`,
-    backgroundSize: 'cover !important',
-    backgroundBlendMode: 'lighten',
-    backgroundRepeat: 'no-repeat',
-    cursor: 'default',
-    opacity: 0.6,
-    '&:not(.expanded)&:hover': {
-      cursor: 'pointer',
-      opacity: 1,
-      background: `#313168 url(${backgroundImage})`,
-    },
-    '&.expanded': {
-      opacity: 1,
-    }
-  }));
-
   const saveCustomizationCallback = async (openModal = true) => {
     setSaveProgress({ inProgress: true, errorMessage: undefined })
     if (openModal) {
@@ -1018,32 +961,51 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
     }
   }
 
-  /**
-   * TODO @Ishan: Fix issue with page height on larger viewports.
-  */
   return (
-    <Box sx={{ flex: 1, height: isMobileViewport ? '100%' : '100vh', minHeight: '100%', display: 'flex', flexDirection: 'column', background: 'url("/moonsama/egg-pattern.svg"), url("/moonsama/background-aurora.svg") top right no-repeat, radial-gradient(73.61% 73.46% at 49.9% 50%, rgba(123, 97, 255, 0.5) 13.27%, rgba(123, 97, 255, 0) 100%), linear-gradient(77.59deg, #4A4A77 -1.39%, #1B1B3A 44.24%);', backgroundBlendMode: 'overlay, hard-light', backgroundSize: 'auto, contain, auto' }}>
-      <Box sx={{ flex: 1, width: '100%' }}>
-        <Box className={customizerContainer}>
-          <Box className={previewViewport}>
+    <Container
+      sx={{ background: 'url("/moonsama/egg-pattern.svg"), url("/moonsama/background-aurora.svg") top right no-repeat, radial-gradient(73.61% 73.46% at 49.9% 50%, rgba(123, 97, 255, 0.5) 13.27%, rgba(123, 97, 255, 0) 100%), linear-gradient(77.59deg, #4A4A77 -1.39%, #1B1B3A 44.24%);', backgroundBlendMode: 'overlay, hard-light', backgroundSize: 'auto, contain, auto' }}
+      minWidth="100%"
+      margin="0"
+      padding="0"
+      minHeight={{ base: "calc(100vh - 80px)", xl: "calc(100vh - 164px)" }}
+      height={{ base: "calc(100vh - 80px)", xl: "calc(100vh - 64px)" }}
+      overflowY={{ lg: isTallerThan883 ? "hidden" : "scroll" }}
+    >
+      <Grid
+        templateColumns={{ base: 'minmax(0, 1fr)', lg: '1fr 480px' }}
+        maxW="1440px"
+        margin="auto"
+
+      >
+        <GridItem w='100%' h={{ base: '100vw', lg: '898' }} padding={{ base: "24px 0 0 0", lg: "54px 0 80px 80px" }} >
+          <Box
+            h="100%"
+            // backgroundPosition="0px 1px"
+            backgroundSize='cover'
+            backgroundRepeat='no-repeat'
+            bg="#1B1B3A"
+            // backgroundImage='url(https://static.moonsama.com/customizer-ui/preview-background.jpg)'
+            borderRadius={{ base: "8px 8px 0px 0px", lg: "8px 0px 0px 8px" }}
+            boxShadow="0px 20px 25px -5px rgba(0, 0, 0, 0.1), 0px 10px 10px -5px rgba(0, 0, 0, 0.04)">
+
             {!currentCustomization.parent ? (
-              <Box className={startCue}>
-                Select a Moonsama from {isMobileViewport ? 'below' : 'the right'} to begin.
-              </Box>
+              <HStack color="white" h="100%" alignItems="center">
+                <Box w="100%" textAlign="center" >Select a Moonsama from {isMobileViewport ? 'below' : 'the right'} to begin.</Box>
+              </HStack>
             ) : (
-              <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+              <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
                 <ImageStack layers={[...currentCustomization.children, currentCustomization.parent]} />
-                <div style={{ position: 'absolute', bottom: '8px', left: '8px' }}>
-                  {isMobileViewport ? (
+                <Box sx={{ position: 'absolute', bottom: '8px', left: '8px' }}>
+                  {true ? (
                     <Stack direction="row" justifyContent="start" alignItems="end" spacing={1}>
                       <IconButton
+                        aria-label=''
                         style={{ justifySelf: 'center', alignSelf: 'center', margin: 0 }}
                         onClick={() => {
                           if (currentCustomization.children !== null && currentCustomization.parent !== null) {
                             downloadAsImage([...currentCustomization.children, currentCustomization.parent])
                           }
                         }}
-                        className={customizerActionButton}
                         sx={{ marginBottom: 1 }}
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-download" width="20" height="20" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#ffffff" fill="none" strokeLinecap="round" strokeLinejoin="round">
@@ -1054,13 +1016,13 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
                         </svg>
                       </IconButton>
                       <Stack direction={isMobileViewport ? 'row-reverse' : 'row-reverse'} spacing={1} alignItems="center" sx={{ backgroundColor: isLoggedIn && allowedToSave ? 'transparent' : 'rgba(22, 19, 43, 0.75)', backgroundBlendMode: 'lighten', p: 1, borderRadius: (isMobileViewport ? '0.5rem' : '800px') }}>
-                        <Box style={{ textTransform: 'uppercase', fontSize: '12px', display: 'flex', alignItems: 'center', paddingRight: (isMobileViewport ? '0px' : '8px'), textAlign: 'center' }}>
+                        <Box marginLeft="10px" color="white" style={{ textTransform: 'uppercase', fontSize: '12px', display: 'flex', alignItems: 'center', paddingRight: (isMobileViewport ? '0px' : '8px'), textAlign: 'center' }}>
                           {!isLoggedIn && 'Login to save or share'}
                           {isLoggedIn && !allowedToSave && 'Assets not owned by you'}
                           {isLoggedIn && allowedToSave && <IconButton
+                            aria-label=''
                             style={{ justifySelf: 'center', alignSelf: 'center', marginBottom: 0 }}
                             onClick={() => saveCustomizationCallback()}
-                            className={customizerActionButton}
                             sx={{ marginBottom: 1 }}
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#fff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" className="icon icon-tabler icon-tabler-file-upload" viewBox="0 0 24 24">
@@ -1072,13 +1034,13 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
                             </svg>
                           </IconButton>}
                           {isLoggedIn && allowedToSave && <IconButton
+                            aria-label=''
                             style={{ justifySelf: 'center', alignSelf: 'center', marginBottom: 0, marginLeft: '8px' }}
                             onClick={() => {
                               saveCustomizationCallback(false)
                               setShareURLCopied(false)
                               shareCustomization(currentCustomization, setShowShareModal)
                             }}
-                            className={customizerActionButton}
                             sx={{ marginBottom: 1 }}
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-share" width="20" height="20" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#ffffff" fill="none" strokeLinecap="round" strokeLinejoin="round">
@@ -1095,25 +1057,20 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
                     </Stack>
                   ) : (
                     <Stack direction="row" justifyContent="start" alignItems="end" spacing={1}>
-                      <LoadingButton
+                      <Button
                         variant="outlined"
-                        loadingPosition="start"
+                        //loadingPosition="start"
                         onClick={() => {
                           if (currentCustomization.children !== null && currentCustomization.parent !== null) {
                             downloadAsImage([...currentCustomization.children, currentCustomization.parent])
                           }
                         }}
-                        className={customizerActionButton}
                         sx={{ marginBottom: 1 }}
-                        startIcon={(
-                          <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-download" width="20" height="20" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#ffffff" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
-                            <polyline points="7 11 12 16 17 11" />
-                            <line x1="12" y1="4" x2="12" y2="16" />
-                          </svg>)}>
+
+
+                      >
                         Download
-                      </LoadingButton>
+                      </Button>
 
                       <Stack direction={isMobileViewport ? 'row-reverse' : 'row-reverse'} spacing={1} alignItems="center" sx={{ backgroundColor: isLoggedIn && allowedToSave ? 'transparent' : 'rgba(22, 19, 43, 0.75)', backgroundBlendMode: 'lighten', p: 1, borderRadius: (isMobileViewport ? '0.5rem' : '800px') }}>
                         <Box style={{ textTransform: 'uppercase', fontSize: '12px', display: 'flex', alignItems: 'center', paddingRight: (isMobileViewport ? '0px' : '8px'), textAlign: 'center' }}>
@@ -1122,239 +1079,106 @@ const CharacterDesignerPage = ({ authData }: { authData: AuthData }) => {
                         </Box>
 
                         <Stack direction="row" spacing={1}>
-                          <LoadingButton
-                            loading={saveProgress.inProgress}
+                          <Button
+                            isLoading={saveProgress.inProgress}
                             variant="outlined"
-                            loadingPosition="start"
+                            //loadingPosition="start"
                             onClick={() => saveCustomizationCallback()}
-                            className={customizerActionButton}
                             disabled={!isLoggedIn || !allowedToSave}
-                            startIcon={(
-                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#fff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" className="icon icon-tabler icon-tabler-file-upload" viewBox="0 0 24 24">
-                                <path stroke="none" d="M0 0h24v24H0z"></path>
-                                <path d="M14 3v4a1 1 0 001 1h4"></path>
-                                <path d="M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"></path>
-                                <path d="M12 11L12 17"></path>
-                                <path d="M9 14L12 11 15 14"></path>
-                              </svg>)}>
+                          >
                             Save
-                          </LoadingButton>
+                          </Button>
 
-                          <LoadingButton
+                          <Button
                             variant="outlined"
-                            loadingPosition="start"
-                            loading={saveProgress.inProgress}
+                            //loadingPosition="start"
+                            isLoading={saveProgress.inProgress}
                             onClick={() => {
                               saveCustomizationCallback(false)
                               setShareURLCopied(false)
                               shareCustomization(currentCustomization, setShowShareModal)
                             }}
-                            className={customizerActionButton}
                             disabled={!isLoggedIn || !allowedToSave}
-                            startIcon={(
-                              <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-share" width="20" height="20" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#ffffff" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                <circle cx="6" cy="12" r="3" />
-                                <circle cx="18" cy="6" r="3" />
-                                <circle cx="18" cy="18" r="3" />
-                                <line x1="8.7" y1="10.7" x2="15.3" y2="7.3" />
-                                <line x1="8.7" y1="13.3" x2="15.3" y2="16.7" />
-                              </svg>)}>
+
+
+                          >
                             Share
-                          </LoadingButton>
+                          </Button>
                         </Stack>
                       </Stack>
                     </Stack>
                   )}
-                </div>
-              </div>
+                </Box>
+              </Box>
             )}
           </Box>
-          <Box className={traitExplorer}>
-            {MOONSAMA_CUSTOMIZER_CATEGORIES.filter(option => option.shown).map((customizationOption, optionIndex) => {
-              const isExpanded = expanded.title === customizationOption.title
 
-              return (
-                <Accordion key={customizationOption.title} disableGutters elevation={0} defaultExpanded={optionIndex === 0} className={cx({ [accordion]: true, [accordionExpanded]: isExpanded })} expanded={expanded.title === customizationOption.title} onChange={handleChange(customizationOption)}>
-                  <AccordionSummary
-                    aria-controls={`${customizationOption.title}-content`}
-                    expandIcon={<ExpandMoreIcon expanded={isExpanded} />}
-                    backgroundImage={customizationOption.background}
-                    className={isExpanded && 'expanded'}
-                    id={`${customizationOption.title.replace(' ', '-').toLowerCase()}-header`}>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <img src={customizationOption.icon} width="32" height="32" style={{ flexShrink: 0 }} alt={`${customizationOption.title} Icon`} />
-                      <Typography sx={{ marginLeft: '12px', flexShrink: 0, fontFamily: 'Orbitron', fontSize: '16px', letterSpacing: '0.1em', fontWeight: '500', textTransform: 'uppercase', lineHeight: '24px' }}>
-                        {customizationOption.title}
-                      </Typography>
-                    </Box>
-                  </AccordionSummary>
-                  <AccordionDetails sx={{ height: 360, overflowY: 'auto', padding: 0, position: 'relative' }}>
-                    <NoSsr>
-                      <FixedSizeGrid
-                        columnCount={3}
-                        columnWidth={isMobileViewport ? (Math.floor(window.innerWidth / 3) - 6) : (678 / 3) - 6}
-                        height={360}
-                        rowCount={Math.ceil(traitOptionsAssets.length / 3)}
-                        rowHeight={isMobileViewport ? (Math.floor(window.innerWidth / 3) - 6) : (678 / 3) - 6}
-                        width={isMobileViewport ? window.innerWidth : 670}
-                        itemData={{ traitOptionsAssets, numCols, fetchingCustomizations, selectedAsset: getSelectedAsset(expanded), onSelectAsset: selectAsset, myCustomizations }}
-                        overscanRowCount={3}
-                        className={grid}
-                      >
-                        {Cell}
-                      </FixedSizeGrid>
-                    </NoSsr>
-                    <Box style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: '100%', backgroundImage: 'linear-gradient(rgba(0,0,0,0) 95%, rgba(0,0,0,0.5)', pointerEvents: 'none' }}></Box>
-                  </AccordionDetails>
-                </Accordion>
-              )
-            })}
+        </GridItem>
+        <GridItem w='100%' h={{ lg: '898' }} padding={{ base: "0 0 0 0", lg: "54px 80px 80px 0" }} >
+          <Box h="100%" bg="rgba(27, 27, 58, .8)" backdropFilter="blur(8px)" borderRadius={{ base: "inherit", lg: "0px 0px 0px 0px" }} overflow="hidden" boxShadow="0px 20px 25px -5px rgba(0, 0, 0, 0.1), 0px 10px 10px -5px rgba(0, 0, 0, 0.04)">
+            <Accordion allowToggle textTransform="uppercase" onChange={(expandedIndex: ExpandedIndex) => {
+              if (expandedIndex === -1) {
+                return
+              }
+              setExpanded(MOONSAMA_CUSTOMIZER_CATEGORIES[parseInt(String(expandedIndex))])
+            }}>
+              {MOONSAMA_CUSTOMIZER_CATEGORIES.filter(option => option.shown).map((customizationOption, optionIndex) => {
+                return (
+                  <AccordionItem
+                    key={customizationOption.title}
+                    bg="#1B1B3A"
+                    position="relative"
+                    _before={{ content: `""`, position: "absolute", top: "-1px", height: "1px", width: "100%", background: "linear-gradient(270deg, #F84AA7 2.78%, #FB7A6F 32.52%, #FFC914 62.72%, #0EEBA8 90.83%)" }}
+                    _after={{ content: `""`, position: "absolute", bottom: "-1px", height: "1px", width: "100%", background: "linear-gradient(270deg, #F84AA7 2.78%, #FB7A6F 32.52%, #FFC914 62.72%, #0EEBA8 90.83%)" }}
+
+                    borderColor="#F84AA7">
+                    {({ isExpanded }) => (
+                      <>
+                        <h2>
+                          <AccordionButton h="80px" backgroundImage={customizationOption.background} backgroundRepeat="no-repeat" color="white" _hover={{ color: "#FFC914" }}>
+                            <Box paddingLeft="7px">
+                              <img src={customizationOption.icon} width="32" height="32" style={{ flexShrink: 0 }} alt={`${customizationOption.title} Icon`} />
+                            </Box>
+                            <Box flex='1' textAlign='left' fontSize="16px" paddingLeft="12px">
+                              {customizationOption.title.toUpperCase()}
+                            </Box>
+                            {isExpanded ? (
+                              <ChevronUp color="#FFC914" />
+
+                            ) : (
+                              <ChevronDown color="#66C8FF" />
+                            )}
+                          </AccordionButton>
+                        </h2>
+                        <AccordionPanel h="358px" padding="0">
+                          <FixedSizeGrid
+                            columnCount={3}
+                            columnWidth={isMobileViewport ? (Math.floor(window.innerWidth / 3) - 6) : (418 / 3) - 6}
+                            height={358}
+                            rowCount={Math.ceil(traitOptionsAssets.length / 3)}
+                            rowHeight={isMobileViewport ? (Math.floor(window.innerWidth / 3) - 6) : (400 / 3) - 6}
+                            width={isMobileViewport ? window.innerWidth : 400}
+                            itemData={{ traitOptionsAssets, numCols, fetchingCustomizations, selectedAsset: getSelectedAsset(expanded), onSelectAsset: selectAsset, myCustomizations }}
+                            overscanRowCount={3}
+                          // className={grid}
+                          >
+                            {Cell}
+                          </FixedSizeGrid>
+                        </AccordionPanel>
+                      </>
+                    )
+                    }
+
+                  </AccordionItem>)
+              })}
+            </Accordion>
           </Box>
-        </Box>
-      </Box>
-      <Modal
-        open={showShareModal}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={{
-          position: 'absolute' as 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '90%',
-          maxWidth: '600px',
-          color: '#fffff',
-          backgroundImage: 'linear-gradient(311.18deg, #1B1B3A 67.03%, #313168 100%)',
-          border: '2px solid #0EEBA8',
-          borderRadius: '8px',
-          boxShadow: 24,
-          p: 4,
-          fontFamily: 'Orbitron',
-        }}>
-          <Typography id="modal-modal-title" variant="h6" component="h2" sx={{ fontWeight: 600, textAlign: 'center' }}>
-            Share your customized Moonsama.
-          </Typography>
-          <Typography id="modal-modal-description" sx={{ mt: 2, wordBreak: 'break-word', wordWrap: 'break-word', overflowWrap: 'break-word' }}>
-            {(new URL(`/moonsama/customizer/${currentCustomization.parent?.chainId}/${currentCustomization.parent?.assetAddress}/${currentCustomization.parent?.assetId}`, `${window.location.protocol}//${window.location.host}`)).href}
-          </Typography>
 
-          <Stack direction="row" justifyContent="space-between" sx={{ width: '100%' }}>
-            <Box sx={{
-              backgroundColor: '#0EEBA8',
-              textTransform: 'uppercase',
-              padding: '12px 18px',
-              fontFamily: 'Orbitron',
-              fontSize: '12px',
-              lineHeight: '16px',
-              letterSpacing: '0.032em',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              border: '1px solid transparent',
-              margin: '32px auto 0px auto',
-              width: '1/3',
-              cursor: 'pointer',
-              borderRadius: '800px',
-              textAlign: 'center',
-              fontWeight: '600',
-              color: '#000000'
-            }} onClick={() => {
-              navigator.clipboard.writeText((new URL(`/moonsama/customizer/${currentCustomization.parent?.chainId}/${currentCustomization.parent?.assetAddress}/${currentCustomization.parent?.assetId}`, `${window.location.protocol}//${window.location.host}`)).href)
-              setShareURLCopied(true)
-            }}>{shareURLCopied ? 'Copied' : 'Copy'}</Box>
-            <Box sx={{
-              backgroundColor: '#0EEBA8',
-              textTransform: 'uppercase',
-              padding: '12px 18px',
-              fontFamily: 'Orbitron',
-              fontSize: '12px',
-              lineHeight: '16px',
-              letterSpacing: '0.032em',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              border: '1px solid transparent',
-              margin: '32px auto 0px auto',
-              width: '1/3',
-              cursor: 'pointer',
-              borderRadius: '800px',
-              textAlign: 'center',
-              fontWeight: '600',
-              color: '#000000'
-            }} onClick={() => setShowShareModal(false)}>Done</Box>
-          </Stack>
-        </Box>
-      </Modal>
-
-      <Modal
-        open={saveConfigModal}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={{
-          position: 'absolute' as 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '90%',
-          maxWidth: '600px',
-          color: '#fffff',
-          backgroundImage: 'linear-gradient(311.18deg, #1B1B3A 67.03%, #313168 100%)',
-          border: '2px solid #0EEBA8',
-          borderRadius: '8px',
-          boxShadow: 24,
-          p: 4,
-        }}>
-          <Typography id="modal-modal-title" variant="h6" component="h2" sx={{
-            fontWeight: 600, textAlign: 'center',
-            fontFamily: 'Orbitron',
-          }}>
-            Your 2.0 Moonsama is being cooked
-          </Typography>
-          {saveProgress.inProgress && <Box display={'flex'} style={{ paddingTop: theme.spacing(2) }}><CircularProgress sx={{ alignSelf: 'center', textAlign: 'center' }} /></Box>}
-          {!saveProgress.inProgress && !saveProgress.errorMessage && <Typography id="modal-modal-description" sx={{ mt: 2, wordBreak: 'break-word', wordWrap: 'break-word', overflowWrap: 'break-word', textAlign: 'center', fontFamily: 'Orbitron' }}>
-            Done! You can access your config at
-          </Typography>
-          }
-          {!saveProgress.inProgress && !saveProgress.errorMessage && <Typography id="modal-modal-description" sx={{ mt: 2, wordBreak: 'break-word', wordWrap: 'break-word', overflowWrap: 'break-word' }}>
-            {(new URL(`/moonsama/customizer/${currentCustomization.parent?.chainId}/${currentCustomization.parent?.assetAddress}/${currentCustomization.parent?.assetId}`, `${window.location.protocol}//${window.location.host}`)).href}
-          </Typography>
-          }
-          {!saveProgress.inProgress && saveProgress.errorMessage && <Typography id="modal-modal-description" sx={{ mt: 2, wordBreak: 'break-word', wordWrap: 'break-word', overflowWrap: 'break-word', textAlign: 'center' }}>
-            {saveProgress.errorMessage}
-          </Typography>
-          }
-
-          {!saveProgress.inProgress && <Box sx={{
-            backgroundColor: '#0EEBA8',
-            textTransform: 'uppercase',
-            padding: '12px 18px',
-            fontFamily: 'Orbitron',
-            fontSize: '12px',
-            lineHeight: '16px',
-            letterSpacing: '0.032em',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            border: '1px solid transparent',
-            margin: '32px auto 0px auto',
-            width: '1/3',
-            cursor: 'pointer',
-            borderRadius: '800px',
-            textAlign: 'center',
-            fontWeight: '600',
-            color: '#000000'
-
-          }} onClick={() => {
-            setShowSaveConfigModal(false)
-          }}>{!saveProgress?.errorMessage ? `Great!` : `Oops`}</Box>}
-        </Box>
-      </Modal>
-    </Box >
-  );
-};
+        </GridItem>
+      </Grid>
+    </Container >
+  )
+}
 
 export default CharacterDesignerPage;
 export type { Asset };

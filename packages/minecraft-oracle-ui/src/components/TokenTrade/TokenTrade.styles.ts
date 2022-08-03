@@ -1,6 +1,5 @@
-import { Theme } from '@mui/material';
 
-export const styles = (theme: Theme) => ({
+export const styles = (theme: any) => ({
   container: {
     display: 'flex',
     flexDirection: 'column',
