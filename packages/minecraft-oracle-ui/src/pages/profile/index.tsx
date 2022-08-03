@@ -179,7 +179,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                 left={firstColumn ? "12px" : "4px"}
                                                 bg={value.equipped ? "rgba(14, 235, 168, 0.1)" : "inherit"}
                                                 _hover={value.equipped ? {} : { bg: "rgba(255, 255, 255, 0.06)" }}
-                                                _before={value.equipped ? { content: `"EQUIPPED"`, fontSize: "12px", bg: "teal.400", color: "#16132B", padding: "4px 8px", borderRadius: "8px 0px 0px 0px", marginTop: "100px", position: "absolute", bottom: "0", right: "0" } : {}}
+                                                _before={value.equipped ? { content: `"EQUIPPED"`, fontSize: "12px", bg: "teal.400", color: "#16132B", padding: "4px 8px", borderRadius: "8px 0px 4px 0px", marginTop: "100px", position: "absolute", bottom: "-1px", right: "-1px" } : {}}
                                                 cursor={value.equipped ? "default" : "pointer"}
                                                 borderRadius="4px"
                                                 border={value.equipped ? "1px solid" : "1px solid"}
