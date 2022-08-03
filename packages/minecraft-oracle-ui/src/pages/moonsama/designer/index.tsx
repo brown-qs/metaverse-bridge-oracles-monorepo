@@ -996,7 +996,7 @@ const CharacterDesignerPage = () => {
               <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
                 <ImageStack layers={[...currentCustomization.children, currentCustomization.parent]} />
                 <Box sx={{ position: 'absolute', bottom: '8px', left: '8px' }}>
-                  {isMobileViewport ? (
+                  {true ? (
                     <Stack direction="row" justifyContent="start" alignItems="end" spacing={1}>
                       <IconButton
                         aria-label=''
@@ -1124,7 +1124,14 @@ const CharacterDesignerPage = () => {
             }}>
               {MOONSAMA_CUSTOMIZER_CATEGORIES.filter(option => option.shown).map((customizationOption, optionIndex) => {
                 return (
-                  <AccordionItem key={customizationOption.title} bg="#1B1B3A" sx={{ borderImageRepeat: "stretch", borderStyle: "solid", borderImage: `url(../../../../rainbox-gradient.svg) 30 stretch` }}>
+                  <AccordionItem
+                    key={customizationOption.title}
+                    bg="#1B1B3A"
+                    position="relative"
+                    _before={{ content: `""`, position: "absolute", top: "-1px", height: "1px", width: "100%", background: "linear-gradient(270deg, #F84AA7 2.78%, #FB7A6F 32.52%, #FFC914 62.72%, #0EEBA8 90.83%)" }}
+                    _after={{ content: `""`, position: "absolute", bottom: "-1px", height: "1px", width: "100%", background: "linear-gradient(270deg, #F84AA7 2.78%, #FB7A6F 32.52%, #FFC914 62.72%, #0EEBA8 90.83%)" }}
+
+                    borderColor="#F84AA7">
                     {({ isExpanded }) => (
                       <>
                         <h2>
