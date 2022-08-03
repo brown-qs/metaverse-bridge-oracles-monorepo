@@ -2,7 +2,6 @@ import { VStack, HStack, Box, CircularProgress } from "@chakra-ui/react";
 import { ReactNode } from "react";
 
 export const BridgeTab: React.FC<{ title: string, children: ReactNode, isLoading?: boolean, icon?: ReactNode, footer?: ReactNode }> = ({ title, children, isLoading, icon, footer }) => {
-    console.log("Bridge Tab: " + isLoading)
     return (
         <VStack maxHeight="100%" height="100%" alignItems={"flex-start"} spacing={0}>
             <HStack
