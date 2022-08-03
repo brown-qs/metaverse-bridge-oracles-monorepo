@@ -18,7 +18,7 @@ import { SKIN_LABELS } from '../../constants/skins';
 import { InGameItemWithStatic } from 'hooks/multiverse/useInGameItems';
 import { BURNABLE_RESOURCES_IDS, DEFAULT_CHAIN, NETWORK_NAME } from "../../constants";
 import { AssetChainDetails } from '../../components/AssetChainDetails/AssetChainDetails';
-import { Text, Box, Container, Grid, List, ListIcon, ListItem, Stack, Tooltip, Button, Flex, SimpleGrid, GridItem, VStack, HStack, background, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useCheckboxGroup } from '@chakra-ui/react';
+import { Text, Box, Container, Grid, List, ListIcon, ListItem, Stack, Tooltip, Button, Flex, SimpleGrid, GridItem, VStack, HStack, background, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useCheckboxGroup, useMediaQuery } from '@chakra-ui/react';
 import { BridgeTab } from '../../components/Bridge/BridgeTab';
 import { InGameItem } from '../../components/Bridge/InGameItem';
 import { CaretLeft, CaretRight, DeviceGamepad, UserCircle, Wallet } from 'tabler-icons-react';
@@ -79,7 +79,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const { value: inGameCheckboxGroupValue, isDisabled: isInGameCheckboxGroupDisabled, onChange: onInGameCheckboxGroupChange, setValue: setInGameCheckboxGroupValue, getCheckboxProps: getInGameCheckboxGroupProps } = useCheckboxGroup()
     const { value: onChainCheckboxGroupValue, isDisabled: isOnChainCheckboxGroupDisabled, onChange: onOnChainCheckboxGroupChange, setValue: setOnChainCheckboxGroupValue, getCheckboxProps: getOnChainCheckboxGroupProps } = useCheckboxGroup()
 
-
+    const [isSmallerThan285] = useMediaQuery('(max-width: 285px)')
     return (
         <Container
             background="#080714"
@@ -179,7 +179,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                 left={firstColumn ? "12px" : "4px"}
                                                 bg={value.equipped ? "rgba(14, 235, 168, 0.1)" : "inherit"}
                                                 _hover={value.equipped ? {} : { bg: "rgba(255, 255, 255, 0.06)" }}
-                                                _before={value.equipped ? { content: `"EQUIPPED"`, fontSize: "12px", bg: "teal.400", color: "#16132B", padding: "4px 8px", borderRadius: "8px 0px 4px 0px", marginTop: "100px", position: "absolute", bottom: "-1px", right: "-1px" } : {}}
+                                                _before={(value.equipped && !isSmallerThan285) ? { content: `"EQUIPPED"`, fontSize: "12px", bg: "teal.400", color: "#16132B", padding: "4px 8px", borderRadius: "8px 0px 4px 0px", marginTop: "100px", position: "absolute", bottom: "-1px", right: "-1px" } : {}}
                                                 cursor={value.equipped ? "default" : "pointer"}
                                                 borderRadius="4px"
                                                 border={value.equipped ? "1px solid" : "1px solid"}
