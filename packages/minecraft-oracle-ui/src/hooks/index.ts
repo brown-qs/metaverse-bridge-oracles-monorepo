@@ -1,4 +1,3 @@
-export { useThemeOptions } from './useThemeOptions/useThemeOptions';
 export { useImportDialog } from './useImportDialog/useImportDialog';
 export { useEnraptureDialog } from './useEnraptureDialog/useEnraptureDialog';
 export { useSummonDialog } from './useSummonDialog/useSummonDialog';
@@ -10,3 +9,4 @@ export { useActiveWeb3React } from './useActiveWeb3React/useActiveWeb3React';
 export { useFileType } from './useFileType/useFileType';
 export { useAuth } from './useAuth/useAuth';
 export { useClasses } from './useClasses/useClasses'
+export { useOauthLogin } from "./useOauthLogin/useOauthLogin"

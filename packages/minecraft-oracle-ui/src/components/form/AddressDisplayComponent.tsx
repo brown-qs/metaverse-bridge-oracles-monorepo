@@ -1,12 +1,12 @@
 import React, { ReactNode } from 'react';
-import Button from '@mui/material/Button';
-import { Box, Tooltip, Typography } from '@mui/material';
-import FileCopyOutlinedIcon from '@mui/icons-material/FileCopyOutlined';
+
 import { useClasses } from 'hooks';
 import { styles } from './AddressDisplayComponent.styles';
 import { getExplorerLink } from 'utils';
 import { useActiveWeb3React } from 'hooks';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
+import { Box, Tooltip, Text, Button } from '@chakra-ui/react';
+import { Copy } from 'tabler-icons-react';
 
 const CHARS_SHOWN = 3;
 const MIN_LENGTH = 5;
@@ -81,28 +81,29 @@ export const AddressDisplayComponent = (props: {
       <Box display="flex" alignItems="center">
         <Tooltip title={text}>
           {!props.dontShowLink ? (
-            <Typography className={props.className}>
-              <ExternalLink href={getExplorerLink(chainId, text, 'address')}>
+            <Text className={props.className}>
+              <ExternalLink color="#099E71" href={getExplorerLink(chainId, text, 'address')}>
                 {_apply_ellipsis()}
               </ExternalLink>
-            </Typography>
+            </Text>
           ) : (
-            <Typography className={props.className}>
-              <ExternalLink>
+            <Text className={props.className}>
+              <ExternalLink color="#099E71">
                 {_apply_ellipsis()}
               </ExternalLink>
-            </Typography>
+            </Text>
           )}
         </Tooltip>
         <Tooltip title={copyTooltipLabel}>
           <Button
+            marginLeft="5px"
             className={`${copyButton} ${props.buttonClassName}`}
             size="small"
             onClick={() => {
               _copyTextToClipboard(text);
             }}
           >
-            <FileCopyOutlinedIcon color="secondary" />
+            <Copy />
           </Button>
         </Tooltip>
       </Box>

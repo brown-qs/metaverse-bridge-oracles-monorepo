@@ -1,3 +1,4 @@
+import { useDisclosure } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 
 import { CancelDialogContext } from '../cancelDialogContext/CancelDialogContext';
@@ -8,7 +9,7 @@ import { CancelDialogContextControllerProps } from './CancelDialogContextControl
 export const CancelDialogContextController = ({
   children,
 }: CancelDialogContextControllerProps) => {
-  const [isCancelDialogOpen, setCancelDialogOpen] = useState<boolean>(false);
+  const { isOpen: isCancelDialogOpen, onOpen: onCancelDialogOpen, onClose: onCancelDialogClose } = useDisclosure()
   const [cancelData, setCancelData] = useState<CancelData>(null);
 
   useEffect(() => {
@@ -21,7 +22,8 @@ export const CancelDialogContextController = ({
     <CancelDialogContext.Provider
       value={{
         isCancelDialogOpen,
-        setCancelDialogOpen,
+        onCancelDialogOpen,
+        onCancelDialogClose,
         cancelData,
         setCancelData,
       }}

@@ -1,14 +1,12 @@
-import Button from '@mui/material/Button/Button';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 import React from 'react';
 import { useClasses } from 'hooks'
-import { styles as optionCardStyles } from './OptionCard.styles';
+import { Box, Button } from '@chakra-ui/react';
 
 export default function OptionCard({
   link = null,
   onClick = null,
   header,
-  color,
   subheader = null,
   icon,
   active = false,
@@ -21,19 +19,18 @@ export default function OptionCard({
   color: string;
   header: React.ReactNode;
   subheader: React.ReactNode | null;
-  icon: string;
+  icon: React.ReactNode;
   active?: boolean;
   id: string;
 }) {
   console.log({ icon });
-  const styles = useClasses(optionCardStyles);
   const content = (
-    <div className={styles.optionElementContainer}>
-      <div className={styles.optionCardLeft}>
-        <div className={styles.headertext}>
+    <div >
+      <div >
+        <div >
           {active ? (
-            <div className={styles.circleWrapper}>
-              <div className={styles.greenCircle}>
+            <div >
+              <div >
                 <div />
               </div>
             </div>
@@ -42,11 +39,11 @@ export default function OptionCard({
           )}
           {header}
         </div>
-        {subheader && <div className={styles.subheader}>{subheader}</div>}
+        {subheader && <div >{subheader}</div>}
       </div>
 
-      <div className={styles.iconWrapper}>
-        <img className={styles.icon} src={icon} alt={'Icon'} />
+      <div >
+
       </div>
     </div>
   );
@@ -55,13 +52,14 @@ export default function OptionCard({
   }
 
   return (
-    <Button
-      variant="outlined"
-      style={{ color }}
-      id={id}
-      onClick={() => onClick?.()}
-    >
-      {content}
-    </Button>
+    <>
+      <Button
+        id={id}
+        onClick={() => onClick?.()}
+        rightIcon={<>{icon}</>}
+      >
+
+        {header}
+      </Button></>
   );
 }

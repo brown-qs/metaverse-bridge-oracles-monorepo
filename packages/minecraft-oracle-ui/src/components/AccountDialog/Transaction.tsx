@@ -1,13 +1,13 @@
-import { CircularProgress, Stack } from '@mui/material';
-import Typography from '@mui/material/Typography';
+
 import { ExternalLink } from 'components';
 import { ChainId } from '../../constants';
 import { useActiveWeb3React } from 'hooks';
 import { useAllTransactions } from 'state/transactions/hooks';
 import { getExplorerLink } from 'utils';
 import { useClasses } from 'hooks';
-import { styles as transactionStyles} from './Transaction.styles';
+import { styles as transactionStyles } from './Transaction.styles';
 import { CheckCircle, Triangle } from 'react-feather';
+import { CircularProgress, Stack, Text } from '@chakra-ui/react';
 
 export const Transaction = ({ hash }: { hash: string }) => {
   const { chainId } = useActiveWeb3React();
@@ -33,7 +33,7 @@ export const Transaction = ({ hash }: { hash: string }) => {
         )}
       >
         <Stack direction={'row'} spacing={1}>
-          <div className={`${pending ? styles.iconWrapperText: success ? styles.iconWrapperSuccess : styles.iconWrapperError}`}>
+          <div className={`${pending ? styles.iconWrapperText : success ? styles.iconWrapperSuccess : styles.iconWrapperError}`}>
             {pending ? (
               <CircularProgress />
             ) : success ? (
@@ -42,7 +42,7 @@ export const Transaction = ({ hash }: { hash: string }) => {
               <Triangle size="16" />
             )}
           </div>
-        <Typography variant={'body2'}>{summary ?? hash} ↗</Typography>
+          <Text variant={'body2'}>{summary ?? hash} ↗</Text>
         </Stack>
       </ExternalLink>
     </div>

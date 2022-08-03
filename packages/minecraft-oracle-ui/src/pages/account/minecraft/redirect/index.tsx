@@ -1,23 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { AuthLayout, Loader } from 'ui';
 import { useAuth, useClasses } from 'hooks';
-import Tooltip from '@mui/material/Tooltip';
-import CloseIcon from '@mui/icons-material/Close';
-
-import WhiteLogo from 'assets/images/moonsama-glitch-white.svg';
-import LeftImage from 'assets/images/home/left.png';
-import RightImageFlip from 'assets/images/home/right.png';
-import Box from '@mui/material/Box';
-import "@fontsource/orbitron/500.css";
-import { Link, Alert, Button, CircularProgress, Collapse, IconButton, Input, Stack, TextField, Typography, useMediaQuery } from '@mui/material';
-import { theme } from 'theme/Theme';
-import LoadingButton from '@mui/lab/LoadingButton';
-import { Redirect, useHistory, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
 
 const MinecraftRedirectPage = () => {
   const { authData, setAuthData } = useAuth();
-  let history = useHistory();
+  let navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [failureMessage, setFailureMessage] = useState("")
 
@@ -34,8 +23,8 @@ const MinecraftRedirectPage = () => {
       });
 
       window.location = result?.data?.redirectUrl
-      //    history.push('/account/login/email/verify')
-
+      //    navigate('/account/login/email/verify')
+      return
     } catch (e) {
       const err = e as AxiosError;
 
@@ -61,7 +50,7 @@ const MinecraftRedirectPage = () => {
 
 
   const handleAlertClose = () => {
-    history.push(`/account`)
+    navigate(`/account`)
   }
 
 

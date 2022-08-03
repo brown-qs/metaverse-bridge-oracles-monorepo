@@ -1,9 +1,9 @@
-import { Stack, Typography } from "@mui/material"
 import { AddressDisplayComponent } from "../../components/form/AddressDisplayComponent"
 
 import { styles as appStyles } from '../../app.styles';
 import { useClasses } from 'hooks';
 import { StringAssetType } from "../../utils/subgraph";
+import { Stack, Text } from "@chakra-ui/react";
 
 
 export const TokenDetails = ({ assetAddress, assetId, assetType }: { assetAddress?: string, assetId?: string, assetType?: StringAssetType }) => {
@@ -19,7 +19,7 @@ export const TokenDetails = ({ assetAddress, assetId, assetType }: { assetAddres
 
     return (
         <Stack className={formBox} spacing={2}>
-            <Typography variant="body2">Token Details</Typography>
+            <Text variant="body2">Token Details</Text>
             <Stack direction={'row'} className={row}>
                 <div className={col}>
                     <div className={formLabel}>Address</div>

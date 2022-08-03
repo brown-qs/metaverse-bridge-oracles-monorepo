@@ -1,4 +1,4 @@
-import { useParams, Redirect } from "react-router-dom";
+import { useParams, Navigate } from "react-router-dom";
 import { useAuth } from "hooks";
 import { useEffect } from "react";
 import { useOauthLogin } from "../../hooks/useOauthLogin/useOauthLogin";
@@ -24,13 +24,12 @@ const AuthPage = () => {
 
     if (newAuth || alreadyAuthed) {
         if (!!oauthData) {
-            return <Redirect to={'/oauth/confirm'} />;
+            return <Navigate to={'/oauth/confirm'} />;
         } else {
-            return <Redirect to={'/account'} />;
+            return <Navigate to={'/account'} />;
         }
-
     } else {
-        return <Redirect to='/account/login' />;
+        return <Navigate to='/account/login' />;
     }
 
 };

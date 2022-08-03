@@ -26,15 +26,17 @@ export interface TokenOwner {
 
 export type AssetWithBalance = Asset & { balance: string | BigNumber }
 
-
+export interface UserCollectionElement {
+  id: string,
+  collection: string,
+  meta: TokenMeta | undefined,
+  staticData: StaticTokenData,
+  asset: AssetWithBalance,
+  enrapturable: boolean;
+  importable: boolean;
+}
 export interface UserCollection {
-  [key: string]: {
-    meta: TokenMeta | undefined,
-    staticData: StaticTokenData,
-    asset: AssetWithBalance,
-    enrapturable: boolean;
-    importable: boolean;
-  }[]
+  [key: string]: UserCollectionElement[]
 }
 
 export interface UserCollectionWithCompositeMetaOnly {
@@ -46,136 +48,133 @@ export interface UserCollectionWithCompositeMetaOnly {
   }[]
 }
 
-export const useOnChainItems = (trigger: string | undefined = undefined) => {
+export const useOnChainItems = (trigger: string | undefined = undefined): { onChainItems: UserCollectionElement[], isLoading: boolean } => {
   const { chainId, account } = useActiveWeb3React();
   const blocknumber = useBlockNumber()
   const staticCallback = useTokenStaticDataCallbackArray();
   const rawCollections = useRawAssetsFromList()
 
-  const [onChainItems, setOnChainItems] = useState<UserCollection | undefined>(undefined)
+  const [onChainItems, setOnChainItems] = useState<UserCollectionElement[]>([])
+  const [isLoading, setIsLoading] = useState<boolean>(true)
 
   const fetchUserCollection = useCallback(async () => {
 
     if (!account) {
-      setOnChainItems(undefined)
+      setOnChainItems([])
+      setIsLoading(false)
       return
     }
 
-    const result: UserCollection = {}
-    const fetches = rawCollections.map(async (collection) => {
+    let results: UserCollectionElement[] = []
+    const proms = []
+    for (const rawCollection of rawCollections) {
 
-      if (!collection.subgraph) {
-        result[collection.display_name] = []
-        return;
+      if (!rawCollection.subgraph) {
+        continue;
       }
 
-      let assets: (AssetWithBalance | undefined)[] = []
+      const fetchAssetForAccountByCollection = async () => {
+        const assets: AssetWithBalance[] = []
 
-      // console.log('collection', collection.display_name)
+        let query
+        if (rawCollection.type === StringAssetType.ERC721) {
+          query = QUERY_USER_ERC721(account)
+        } else {
+          query = QUERY_USER_ERC1155(account)
+        }
 
-      if (collection.type === 'ERC721') {
-        const query = QUERY_USER_ERC721(account)
-        const response = await request(collection.subgraph, query);
-
-        console.debug('YOLO fetchUserCollection', response);
+        const response = await request(rawCollection.subgraph, query);
 
         if (!response) {
-          result[collection.display_name] = []
-          return;
+          return
         }
 
-        const ot: OwnedTokens = response.owners?.[0];
 
-        console.log(ot)
-
-        if (!ot) {
-          result[collection.display_name] = []
-          return;
-        }
-
-        assets = ot.ownedTokens.map((x) => {
-          const aid = BigNumber.from(x.id).toString();
-
-          if (!!collection.ids && !collection.ids.includes(aid)) {
-            console.log('fail')
-            return undefined
+        if (rawCollection.type === StringAssetType.ERC721) {
+          const ot: OwnedTokens = response.owners?.[0];
+          if (!ot) {
+            return;
+          }
+          for (const ownedToken of ot.ownedTokens) {
+            const aid = BigNumber.from(ownedToken.id).toString();
+            if (!!rawCollection.ids && !rawCollection.ids.includes(aid)) {
+              continue
+            }
+            const asset = {
+              assetId: aid,
+              id: getAssetEntityId(ownedToken.contract.id, aid),
+              assetType: rawCollection.type,
+              assetAddress: ownedToken.contract.id,
+              balance: '1'
+            }
+            assets.push(asset)
           }
 
+        } else {
+          let tokenOwners: TokenOwner[] = response.tokenOwners;
+          if (!tokenOwners) {
+            return;
+          }
+          tokenOwners = tokenOwners.filter(x => x.balance !== '0')
+
+          for (const tokenOwner of tokenOwners) {
+            const aid = BigNumber.from(tokenOwner.token.id).toString();
+
+            if (!!rawCollection.ids && !rawCollection.ids.includes(aid)) {
+              continue
+            }
+            const asset = {
+              assetId: aid,
+              id: getAssetEntityId(tokenOwner.token.contract.id, aid),
+              assetType: StringAssetType.ERC1155,
+              assetAddress: tokenOwner.token.contract.id,
+              balance: tokenOwner.balance
+            }
+            assets.push(asset)
+          }
+
+        }
+
+        const assetIdCount = new Map<string, number>()
+        const staticDatas = await staticCallback(assets as AssetWithBalance[]);
+        const resultsForCollection = staticDatas.map((sd, i) => {
+          const asset = assets[i]
+          const aid = asset.id
+
+          const aidCount = assetIdCount.get(aid) ?? 0
+          assetIdCount.set(aid, aidCount + 1)
           return {
-            assetId: aid,
-            id: getAssetEntityId(x.contract.id, aid),
-            assetType: StringAssetType.ERC721,
-            assetAddress: x.contract.id,
-            balance: '1'
+            id: `${aid}~${chainId}~${aidCount}`,
+            collection: rawCollection.display_name,
+            meta: sd.meta,
+            staticData: sd.staticData,
+            asset: asset as AssetWithBalance,
+            enrapturable: rawCollection.enrapturable,
+            importable: rawCollection.importable
           };
         });
-
-        console.log(assets)
-      } else {
-        const query = QUERY_USER_ERC1155(account)
-        const response = await request(collection.subgraph, query);
-
-        console.debug('YOLO fetchUserCollection', response);
-
-        if (!response) {
-          result[collection.display_name] = []
-          return;
-        }
-
-        const to: TokenOwner[] = response.tokenOwners;
-
-        if (!to) {
-          result[collection.display_name] = []
-          return;
-        }
-
-        assets = to
-          .filter(x => x.balance !== '0')
-          .map((x) => {
-            const aid = BigNumber.from(x.token.id).toString();
-
-            if (!!collection.ids && !collection.ids.includes(aid)) {
-              console.log('fail')
-              return undefined
-            }
-            return {
-              assetId: aid,
-              id: getAssetEntityId(x.token.contract.id, aid),
-              assetType: StringAssetType.ERC1155,
-              assetAddress: x.token.contract.id,
-              balance: x.balance
-            };
-          })
-          .filter(x => !!x)
+        results = [...results, ...resultsForCollection]
       }
+      const prom = fetchAssetForAccountByCollection()
+      proms.push(prom)
 
-      const staticDatas = await staticCallback(assets as AssetWithBalance[]);
+    }
+    await Promise.all(proms)
+    setOnChainItems(results)
+    setIsLoading(false)
+  }, [chainId, blocknumber, account, trigger])
 
-      const datas = staticDatas.map((sd, i) => {
-        return {
-          meta: sd.meta,
-          staticData: sd.staticData,
-          asset: assets[i] as AssetWithBalance,
-          enrapturable: collection.enrapturable,
-          importable: collection.importable
-        };
-      });
-      result[collection.display_name] = datas
-      return
-    })
-
-    await Promise.all(fetches)
-    setOnChainItems(result)
-  },
-    [chainId, blocknumber, account, trigger]
-  );
 
   useEffect(() => {
     fetchUserCollection()
   }, [chainId, blocknumber, account, trigger])
 
-  return onChainItems;
-};
+  useEffect(() => {
+    setIsLoading(true)
+  }, [chainId, account])
+
+  return { onChainItems, isLoading }
+}
 
 
 export const useOnChainItemsWithCompositeMetaAndAssets = (trigger: string | undefined = undefined) => {
@@ -301,7 +300,7 @@ export const useOnChainItemsWithCompositeMetaAndAssets = (trigger: string | unde
     })
 
     await Promise.all(fetches)
-    
+
     if (!checkResultsEqual(result, onChainItems)) {
       console.log('WAAA')
       console.log({
@@ -338,7 +337,7 @@ function checkResultsEqual(a?: UserCollectionWithCompositeMetaOnly, b?: UserColl
 
   const keys = Object.keys(a)
 
-  for(let i=0; i< keys.length; i++) {
+  for (let i = 0; i < keys.length; i++) {
     const key = keys[i]
     if (a[key]?.length !== b[key]?.length) {
       return false

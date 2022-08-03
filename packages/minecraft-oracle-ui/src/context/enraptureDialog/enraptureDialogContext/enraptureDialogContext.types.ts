@@ -11,8 +11,9 @@ export type EnraptureDialogData = {
 } | undefined;
 
 export type EnraptureDialogContextType = {
-  isEnraptureDialogOpen: boolean;
-  setEnraptureDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isEnraptureDialogOpen: boolean
+  onEnraptureDialogOpen: () => void
+  onEnraptureDialogClose: () => void
   enraptureDialogData?: EnraptureDialogData;
   setEnraptureDialogData: React.Dispatch<React.SetStateAction<EnraptureDialogData>>;
 };

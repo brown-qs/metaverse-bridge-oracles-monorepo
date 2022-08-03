@@ -1,6 +1,5 @@
-import { Theme } from '@mui/material';
 
-export const styles = (theme: Theme) => ({
+export const styles = (theme: any) => ({
   copyButton: {
     fontSize: '13px',
     //margin: '5px 0 0 -5px',
@@ -13,7 +12,7 @@ export const styles = (theme: Theme) => ({
       height: '16px',
     },
     '& path': {
-      color: '#d2023e',
+      color: 'white',
     },
   },
 });
