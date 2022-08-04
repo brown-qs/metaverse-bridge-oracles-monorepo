@@ -11,11 +11,13 @@ export const InGameResource: React.FC<{ data: InGameResourceWithStatic }> = ({ d
                 height="80px"
                 width="80px"
                 overflow="hidden"
+                minWidth="80px"
+
             >
                 <Media uri={data?.meta?.image} />
 
             </Box>
-            <Box flex="1" paddingLeft="8px">{data?.meta?.name ?? `${data.assetAddress} ${data.assetId}`}</Box>
+            <Box flex="1" paddingLeft="8px" paddingRight="8px">{data?.meta?.name ?? `${data.assetAddress} ${data.assetId}`}</Box>
             <Box
                 bg="rgba(255, 255, 255, 0.06)"
                 borderRadius="4px"
