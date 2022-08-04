@@ -12,6 +12,7 @@ export const OnChainItem: React.FC<{ data: UserCollectionElement, checkboxValue:
                 height="80px"
                 width="80px"
                 overflow="hidden"
+                minWidth="80px"
                 outline={data.enrapturable ? "1px solid red" : "inherit"}
             >
                 <Media uri={data?.meta?.image} />

@@ -12,11 +12,12 @@ export const OnChainResources: React.FC<{ data: UserCollectionElement, onClick?:
                 height="80px"
                 width="80px"
                 overflow="hidden"
-
+                minWidth="80px"
+                textOverflow="ellipsis"
             >
                 <Media uri={data?.meta?.image} />
             </Box>
-            <Box flex="1" paddingLeft="8px">{data?.meta?.name}</Box>
+            <Box flex="1" paddingLeft="8px" paddingRight="8px">{data?.meta?.name}</Box>
             <Box
                 bg="rgba(255, 255, 255, 0.06)"
                 borderRadius="4px"
