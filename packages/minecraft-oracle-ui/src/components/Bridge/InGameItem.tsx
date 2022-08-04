@@ -16,12 +16,12 @@ export const InGameItem: React.FC<{ data: InGameItemWithStatic, checkboxValue: s
             <Box
                 borderRadius="4px"
                 cursor="pointer"
-                height="80px"
-                width="80px"
-                minWidth="80px"
+                height={data.enraptured ? "78px" : "80px"}
+                width={data.enraptured ? "78px" : "80px"}
+                minWidth={data.enraptured ? "78px" : "80px"}
                 overflow="hidden"
                 onClick={onClick}
-                outline={data.enraptured ? "1px solid red" : "inherit"}
+                border={data.enraptured ? "1px solid red" : "inherit"}
             >
                 <Media uri={data?.meta?.image} />
             </Box>

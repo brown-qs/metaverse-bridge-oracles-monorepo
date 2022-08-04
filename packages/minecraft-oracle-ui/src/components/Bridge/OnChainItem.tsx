@@ -9,11 +9,11 @@ export const OnChainItem: React.FC<{ data: UserCollectionElement, checkboxValue:
         <HStack height="80px" width="100%" spacing="0" color="white" fontFamily="Rubik" fontSize="16px">
             <Box
                 borderRadius="4px"
-                height="80px"
-                width="80px"
+                height={data.enrapturable ? "78px" : "80px"}
+                width={data.enrapturable ? "78px" : "80px"}
                 overflow="hidden"
-                minWidth="80px"
-                outline={data.enrapturable ? "1px solid red" : "inherit"}
+                minWidth={data.enrapturable ? "78px" : "80px"}
+                border={data.enrapturable ? "1px solid red" : "inherit"}
             >
                 <Media uri={data?.meta?.image} />
             </Box>
