@@ -54,9 +54,10 @@ export default function OptionCard({
   return (
     <>
       <Button
+        w="100%"
         id={id}
         onClick={() => onClick?.()}
-        rightIcon={<>{icon}</>}
+        leftIcon={<>{icon}</>}
       >
 
         {header}

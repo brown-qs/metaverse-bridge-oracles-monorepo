@@ -24,6 +24,8 @@ import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 import useAddNetworkToMetamaskCb from 'hooks/useAddNetworkToMetamask/useAddNetworkToMetamask';
 import { ChainId, NETWORK_NAME, PERMISSIONED_CHAINS } from '../../constants';
 import { Image, Box, Button, CircularProgress, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Stack, Text, VStack, HStack } from '@chakra-ui/react';
+import { ArrowsRightLeft, MessageReport } from 'tabler-icons-react';
+import { ModalIcon } from '../ModalIcon';
 
 const WALLET_VIEWS = {
   OPTIONS: 'options',
@@ -284,16 +286,22 @@ export const AccountDialog = () => {
   function getModalContent() {
     if (error) {
       return (
-        <VStack >
+        <VStack alignItems="flex-start">
+          <Box paddingTop="16px">
+            <ModalIcon TablerIcon={MessageReport} backgroundColor="yellow.300" iconColor="black"></ModalIcon>
+          </Box>
+          <Box></Box>
           {error instanceof UnsupportedChainIdError && <>
-            <Box>
+            <Box fontSize="16px" lineHeight="24px">
               Unsupported network
             </Box>
-            <h5>Please connect to a supported Ethereum network.</h5>
+            <Box fontSize="16px" lineHeight="24px" fontFamily="Rubik" color="whiteAlpha.700" >Please connect to a supported network.</Box>
+            <Box></Box>
             {PERMISSIONED_CHAINS.map((chainId, i) => {
               return <Button
-                //className={formButton}
+                width="100%"
                 key={`${chainId}-${i}`}
+                leftIcon={<ArrowsRightLeft />}
                 onClick={() => {
                   addNetwork(chainId as ChainId)
                 }}
@@ -304,11 +312,13 @@ export const AccountDialog = () => {
           </>}
 
           {!(error instanceof UnsupportedChainIdError) && <>
-            <Box>
+
+            <Box fontSize="16px" lineHeight="24px">
               Something went wrong
             </Box>
-            <h5>Error connecting. Try refreshing the page.</h5>
-          </>}
+            <Box fontSize="16px" lineHeight="24px" fontFamily="Rubik" color="whiteAlpha.700" >Error connecting. Try refreshing the page.</Box>
+          </>
+          }
         </VStack>
       );
     }
@@ -345,7 +355,8 @@ export const AccountDialog = () => {
 
     return (
 
-      <VStack >
+      <VStack alignContent="flex-start">
+        <Box w="100%" paddingTop="32px" fontSize="16px" lineHeight="24px">Account</Box>
 
         {walletView === WALLET_VIEWS.PENDING ? (
           <>
@@ -361,7 +372,10 @@ export const AccountDialog = () => {
             )}
           </>
         ) : (
-          getOptions()
+          <>
+            <Box w="100%" lineHeight="24px" paddingTop="16px" fontSize="16px" fontFamily="Rubik">Connect to a wallet</Box>
+            {getOptions()}
+          </>
         )}
         {walletView !== WALLET_VIEWS.ACCOUNT ? (
           <Button
@@ -373,16 +387,18 @@ export const AccountDialog = () => {
             Back
           </Button>
         ) : (
-          <Box lineHeight="24px" paddingTop="16px" fontSize="16px" fontFamily="Rubik">Connect to a wallet</Box>
+          <></>
+
         )}
         {walletView !== WALLET_VIEWS.PENDING && (
-          <HStack paddingBottom="16px" fontFamily="Rubik" alignItems="center" w="100%">
-            <Text color="whiteAlpha.700" fontSize="12px">New to Ethereum?</Text>
-            <ExternalLink href="https://ethereum.org/wallets">
-              <Text color="teal.200" _hover={{ textDecoration: "underline" }}>Learn more about wallets</Text>
-            </ExternalLink>
-          </HStack>
-
+          <>
+            <HStack fontFamily="Rubik" alignItems="center" w="100%">
+              <Text color="whiteAlpha.700" fontSize="12px">New to Ethereum?</Text>
+              <ExternalLink href="https://ethereum.org/wallets">
+                <Text color="teal.200" _hover={{ textDecoration: "underline" }}>Learn more about wallets</Text>
+              </ExternalLink>
+            </HStack>
+          </>
         )
         }
       </VStack >
@@ -396,7 +412,6 @@ export const AccountDialog = () => {
       <ModalContent>
         <ModalCloseButton />
         <ModalBody>
-          <Box paddingTop="32px" fontSize="16px" lineHeight="24px">Account</Box>
           {getModalContent()}
         </ModalBody>
       </ModalContent>
