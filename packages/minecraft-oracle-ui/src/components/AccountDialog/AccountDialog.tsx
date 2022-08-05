@@ -25,7 +25,8 @@ import useAddNetworkToMetamaskCb from 'hooks/useAddNetworkToMetamask/useAddNetwo
 import { ChainId, NETWORK_NAME, PERMISSIONED_CHAINS } from '../../constants';
 import { Image, Box, Button, CircularProgress, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Stack, Text, VStack, HStack } from '@chakra-ui/react';
 import { ArrowsRightLeft, MessageReport } from 'tabler-icons-react';
-import { ModalIcon } from '../ModalIcon';
+import { ModalIcon } from '../MoonsamaModal/ModalIcon';
+import { MoonsamaModal } from '../MoonsamaModal';
 
 const WALLET_VIEWS = {
   OPTIONS: 'options',
@@ -283,6 +284,133 @@ export const AccountDialog = () => {
     });
   }
 
+
+  const newToEthereumElem = (<>
+    <HStack fontFamily="Rubik" alignItems="center" w="100%">
+      <Text color="whiteAlpha.700" fontSize="12px">New to Ethereum?</Text>
+      <ExternalLink href="https://ethereum.org/wallets">
+        <Text color="teal.200" _hover={{ textDecoration: "underline" }}>Learn more about wallets</Text>
+      </ExternalLink>
+    </HStack>
+  </>)
+  if (error && error instanceof UnsupportedChainIdError) {
+    return (<MoonsamaModal
+      title="Unsupported network"
+      isOpen={isAccountDialogOpen}
+      onClose={onAccountDialogClose}
+      TablerIcon={MessageReport}
+      iconBackgroundColor="yellow.300"
+      iconColor="black"
+      message="Please connect to a supported network."
+    >
+      {PERMISSIONED_CHAINS.map((chainId, i) => {
+        return <Button
+          width="100%"
+          key={`${chainId}-${i}`}
+          leftIcon={<ArrowsRightLeft />}
+          onClick={() => {
+            addNetwork(chainId as ChainId)
+          }}
+        >
+          Switch to {NETWORK_NAME[chainId]}
+        </Button>
+      })}
+    </MoonsamaModal>)
+  } else if (error && !(error instanceof UnsupportedChainIdError)) {
+    return (<MoonsamaModal
+      title="Something went wrong"
+      isOpen={isAccountDialogOpen}
+      onClose={onAccountDialogClose}
+      TablerIcon={MessageReport}
+      iconBackgroundColor="yellow.300"
+      iconColor="black"
+      message="Error connecting. Try refreshing the page."
+    >
+    </MoonsamaModal>)
+  } else if (walletView === WALLET_VIEWS.PENDING) {
+    return (<MoonsamaModal
+      title="Initializing wallet..."
+      isOpen={isAccountDialogOpen}
+      onClose={onAccountDialogClose}
+    >
+      <VStack alignItems="center" spacing="0">
+        <Box>
+          <CircularProgress isIndeterminate color="teal" />
+        </Box>
+      </VStack>
+    </MoonsamaModal>)
+  } else if (!account) {
+    return (<MoonsamaModal
+      title="Account"
+      isOpen={isAccountDialogOpen}
+      onClose={onAccountDialogClose}
+      message="Connect to a wallet"
+    >
+      <VStack alignItems="center" spacing="0" w="100%">
+        <Box bg="blue" w="100%">
+          {getOptions()}
+        </Box>
+        <Box paddingTop="16px">
+          {newToEthereumElem}
+        </Box>
+      </VStack>
+    </MoonsamaModal>)
+  } else if (account && walletView === WALLET_VIEWS.ACCOUNT) {
+    return (<MoonsamaModal
+      title="Account"
+      isOpen={isAccountDialogOpen}
+      onClose={onAccountDialogClose}
+    >
+      <VStack>
+        <Box >
+          {showConnectedAccountDetails()}
+        </Box>
+        {account &&
+          (!!pendingTransactions.length || !!confirmedTransactions.length) ? (
+          <Stack >
+            <Stack direction={'row'} justifyContent={'space-between'}>
+              <Text>Recent transactions</Text>
+              <Button
+                onClick={clearAllTransactionsCallback}
+              >
+                (clear all)
+              </Button>
+            </Stack>
+            {renderTransactions(pendingTransactions)}
+            {renderTransactions(confirmedTransactions)}
+          </Stack>
+        ) : (
+          <Box >
+            <Text>Your transactions will appear here...</Text>
+          </Box>
+        )}
+      </VStack>
+    </MoonsamaModal>)
+  } else if (account && walletView === WALLET_VIEWS.OPTIONS) {
+    return (<MoonsamaModal
+      title="Change wallet"
+      isOpen={isAccountDialogOpen}
+      onClose={onAccountDialogClose}
+      bottomButtonText="Back"
+      onBottomButtonClick={() => {
+        setPendingError(false);
+        setWalletView(WALLET_VIEWS.ACCOUNT);
+      }}
+    >
+      {getOptions()}
+
+    </MoonsamaModal>)
+  } else {
+    return (<MoonsamaModal
+      title="Account"
+      isOpen={isAccountDialogOpen}
+      onClose={onAccountDialogClose}
+      message="Connect to a wallet"
+    >
+      <Box>Hello World</Box>
+    </MoonsamaModal>)
+  }
+
   function getModalContent() {
     if (error) {
       return (
@@ -405,16 +533,5 @@ export const AccountDialog = () => {
     );
   }
 
-  return (
 
-    <Modal isOpen={isAccountDialogOpen} onClose={onAccountDialogClose} isCentered>
-      <ModalOverlay />
-      <ModalContent>
-        <ModalCloseButton />
-        <ModalBody>
-          {getModalContent()}
-        </ModalBody>
-      </ModalContent>
-    </Modal>
-  );
 };
