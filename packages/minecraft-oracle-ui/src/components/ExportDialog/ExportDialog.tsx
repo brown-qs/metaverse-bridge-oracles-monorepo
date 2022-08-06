@@ -10,7 +10,6 @@ import { getExplorerLink } from 'utils';
 import { useEffect, useState } from 'react';
 import { useClasses } from 'hooks';
 import { styles as appStyles } from '../../app.styles';
-import { styles } from './ExportDialog.styles';
 import { useIsTransactionPending, useSubmittedExportTx } from 'state/transactions/hooks';
 import { ExportAssetCallbackState, useExportAssetCallback } from 'hooks/multiverse/useExportAsset';
 import { useExportConfirmCallback } from 'hooks/multiverse/useConfirm';
@@ -47,12 +46,6 @@ export const ExportDialog = () => {
     formButton,
   } = useClasses(appStyles);
 
-  const {
-    dialogContainer,
-    loadingContainer,
-    successContainer,
-    successIcon,
-  } = useClasses(styles);
 
   const { chainId } = useActiveWeb3React();
   const { error: networkError, chainId: networkChainId } = useWeb3React();

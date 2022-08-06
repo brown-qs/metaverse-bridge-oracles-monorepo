@@ -475,6 +475,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
 
             </Grid >
+
             <ItemDetailsModal data={itemDetailDialogData} isOpen={isItemDetailDialogOpen} onClose={onItemDetailDialogClose}></ItemDetailsModal>
         </Container >
     )
