@@ -6,6 +6,7 @@ const Button: ComponentStyleConfig = {
     },
     variants: {
         moonsamaSolid: {
+            fontFamily: "Orbitron",
             overflow: "hidden",
             fontWeight: "normal",
             fontSize: "12px",

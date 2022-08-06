@@ -3,9 +3,9 @@ import React, { ReactNode } from "react";
 import { Icon } from "tabler-icons-react";
 import { ModalIcon } from "./ModalIcon";
 
-export const MoonsamaModal: React.FC<{ isOpen: boolean, onClose: () => void, title: string, message?: string, bottomButtonText?: string, onBottomButtonClick?: () => void, TablerIcon?: Icon, iconBackgroundColor?: string, iconColor?: string, children: ReactNode }> = ({ isOpen, onClose, title, message, bottomButtonText, onBottomButtonClick, TablerIcon, iconBackgroundColor, iconColor, children }) => {
+export const MoonsamaModal: React.FC<{ isOpen: boolean, onClose: () => void, title: string, message?: string, bottomButtonText?: string, onBottomButtonClick?: () => void, TablerIcon?: Icon, iconBackgroundColor?: string, iconColor?: string, closeOnOverlayClick?: boolean, children?: ReactNode }> = ({ isOpen, onClose, title, message, bottomButtonText, onBottomButtonClick, TablerIcon, iconBackgroundColor, iconColor, closeOnOverlayClick, children }) => {
     return (
-        <Modal isOpen={isOpen} onClose={onClose} isCentered>
+        <Modal isOpen={isOpen} onClose={onClose} isCentered closeOnOverlayClick={closeOnOverlayClick}>
             <ModalOverlay />
             <ModalContent>
                 <ModalCloseButton />
@@ -36,7 +36,7 @@ export const MoonsamaModal: React.FC<{ isOpen: boolean, onClose: () => void, tit
                                 {message}
                             </Box>
                         }
-                        <Box w="100%" h="100%">{children}</Box>
+                        <Box w="100%" h="100%" fontFamily={"Rubik"}>{children}</Box>
                         {bottomButtonText &&
                             <>
                                 <Box paddingTop="16px"></Box>
