@@ -1,6 +1,5 @@
 import React, { ReactNode } from 'react';
 import { useClasses } from 'hooks';
-import { styles } from './AddressDisplayComponent.styles';
 import { EXPLORER_URL, ChainId } from '../../constants';
 import { ExternalLink } from '../ExternalLink/ExternalLink'
 import { Box, Button, Text, Tooltip } from '@chakra-ui/react';
@@ -54,7 +53,6 @@ export const ChainDataDisplayComponent = (props: {
   const chainId = props.chainId ?? ChainId.MOONRIVER
   const copyTooltipLabel = props.copyTooltipLabel
 
-  const { copyButton } = useClasses(styles);
 
   return (
 
@@ -72,8 +70,7 @@ export const ChainDataDisplayComponent = (props: {
       )}
       <Tooltip title={copyTooltipLabel}>
         <Button
-          marginLeft="5px"
-          className={`${copyButton} ${props.buttonClassName}`}
+          marginLeft="12px"
           size="small"
           onClick={() => {
             _copyTextToClipboard(text);
