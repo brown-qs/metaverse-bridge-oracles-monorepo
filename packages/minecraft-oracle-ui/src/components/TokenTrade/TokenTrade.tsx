@@ -89,7 +89,7 @@ export const TokenTrade = ({
         onKeyPress={handleImageClick}
         tabIndex={0}
       >
-        <Media uri={meta?.image} className={image} />
+        <Media uri={meta?.image} />
         {/*<img src={LootBox} style={{width: '100%', height: 'auto'}}/>*/}
       </div>
       <div className={nameContainer}>
