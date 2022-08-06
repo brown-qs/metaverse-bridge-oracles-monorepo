@@ -2,13 +2,10 @@ import React, { ImgHTMLAttributes, useEffect, useState } from 'react';
 import { useClasses } from 'hooks';
 import { Loader } from 'ui';
 import { Box, Image } from "@chakra-ui/react";
+import { IMoonsamaMedia } from '../../components/Media/Media';
 
-export interface IMoonsamaImage {
-  src: string,
-  onLoad: () => void,
-  onError: () => void
-}
-export const MoonsamaImage = ({ src, onLoad, onError }: IMoonsamaImage) => {
+
+export const MoonsamaImage = ({ src, onLoad, onError }: IMoonsamaMedia) => {
 
 
 

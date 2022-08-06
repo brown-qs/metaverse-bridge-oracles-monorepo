@@ -8,9 +8,14 @@ import LogoWhite from '../../assets/images/logo_white.svg';
 
 type MediaProps = {
   uri?: string;
+  padding?: string
 };
-
-export const Media = ({ uri }: MediaProps) => {
+export interface IMoonsamaMedia {
+  src: string,
+  onLoad: () => void,
+  onError: () => void
+}
+export const Media = ({ uri, padding }: MediaProps) => {
   const { getMediaType, mediaUrl, isLoading } = useFileType(uri);
   const [mediaLoading, setMediaLoading] = useState<boolean>(true)
   const [mediaError, setMediaError] = useState<boolean>(false)
@@ -35,7 +40,17 @@ export const Media = ({ uri }: MediaProps) => {
     }
 
     if ((mediaType === 'video' || mediaType === 'audio') && mediaUrl) {
-      return <Video src={mediaUrl} />;
+      return <Video
+        src={mediaUrl}
+        onLoad={() => {
+          setMediaLoading(false)
+        }
+        }
+        onError={() => {
+          setMediaLoading(false)
+          setMediaError(true)
+        }
+        } />;
     }
   }
   const loading = isLoading || mediaLoading
@@ -71,7 +86,7 @@ export const Media = ({ uri }: MediaProps) => {
           w="100%"
           h="100%"
           bg="transparent"
-
+          padding={padding}
         >
           {getMedia()}
         </Box>

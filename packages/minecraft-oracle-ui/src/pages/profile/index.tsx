@@ -174,6 +174,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                             }}
                                         >
                                             <Box
+                                                overflow="hidden"
                                                 position="absolute"
                                                 top={firstRow ? "12px" : "4px"}
                                                 right="12px"
@@ -186,9 +187,8 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                 borderRadius="4px"
                                                 border={value.equipped ? "1px solid" : "1px solid"}
                                                 borderColor={value.equipped ? "teal.400" : "transparent"}
-                                                padding="12%"
                                             >
-                                                <Media uri={value.coverURL} />
+                                                <Media padding="12%" uri={value.coverURL} />
                                             </Box>
                                         </GridItem >
                                     );
