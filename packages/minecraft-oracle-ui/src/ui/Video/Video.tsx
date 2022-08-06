@@ -1,17 +1,17 @@
 import { VideoHTMLAttributes } from 'react';
 import { useClasses } from 'hooks';
-import { styles } from './Video.styles';
+import { IMoonsamaMedia } from '../../components/Media/Media';
 
-export const Video = (props: VideoHTMLAttributes<any>) => {
-  const { video } = useClasses(styles);
+export const Video = ({ src, onLoad, onError }: IMoonsamaMedia) => {
   return (
     <video
       autoPlay
       muted
       loop
       controls
-      {...props}
-      className={`${video} ${props.className || ''}`}
+      onPlay={() => onLoad()}
+      onError={() => onError()}
+      src={src}
     />
   );
 };
