@@ -8,7 +8,6 @@ export const Video = ({ src, onLoad, onError }: IMoonsamaMedia) => {
       autoPlay
       muted
       loop
-      controls
       onPlay={() => onLoad()}
       onError={() => onError()}
       src={src}
