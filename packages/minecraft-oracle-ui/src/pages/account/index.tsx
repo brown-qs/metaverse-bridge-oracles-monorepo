@@ -145,7 +145,7 @@ const AccountPage = () => {
 
         </Stack>
         <Stack direction="column" alignItems='center' textAlign='center' spacing={1} margin={2} marginTop={3}>
-          <Box paddingTop="30px">
+          <Box paddingTop="30px" paddingBottom="30px">
             <Button onClick={() => { navigate("/bridge") }} >GO TO BRIDGE</Button>
           </Box>
 
