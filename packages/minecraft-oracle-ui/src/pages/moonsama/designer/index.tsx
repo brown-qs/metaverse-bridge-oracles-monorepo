@@ -984,6 +984,7 @@ const CharacterDesignerPage = () => {
             backgroundSize='cover'
             backgroundRepeat='no-repeat'
             bg="#1B1B3A"
+            overflow="hidden"
             // backgroundImage='url(https://static.moonsama.com/customizer-ui/preview-background.jpg)'
             borderRadius={{ base: "8px 8px 0px 0px", lg: "8px 0px 0px 8px" }}
             boxShadow="0px 20px 25px -5px rgba(0, 0, 0, 0.1), 0px 10px 10px -5px rgba(0, 0, 0, 0.04)">
@@ -1015,10 +1016,10 @@ const CharacterDesignerPage = () => {
                           <line x1="12" y1="4" x2="12" y2="16" />
                         </svg>
                       </IconButton>
-                      <Stack direction={isMobileViewport ? 'row-reverse' : 'row-reverse'} spacing={1} alignItems="center" sx={{ backgroundColor: isLoggedIn && allowedToSave ? 'transparent' : 'rgba(22, 19, 43, 0.75)', backgroundBlendMode: 'lighten', p: 1, borderRadius: (isMobileViewport ? '0.5rem' : '800px') }}>
-                        <Box marginLeft="10px" color="white" style={{ textTransform: 'uppercase', fontSize: '12px', display: 'flex', alignItems: 'center', paddingRight: (isMobileViewport ? '0px' : '8px'), textAlign: 'center' }}>
-                          {!isLoggedIn && 'Login to save or share'}
-                          {isLoggedIn && !allowedToSave && 'Assets not owned by you'}
+                      <Stack direction={isMobileViewport ? 'row-reverse' : 'row-reverse'} spacing={1} alignItems="center" sx={{ backgroundColor: isLoggedIn && allowedToSave ? 'transparent' : 'transparent', backgroundBlendMode: 'lighten', p: 1, borderRadius: (isMobileViewport ? '0.5rem' : '800px') }}>
+                        <Box color="white" style={{ textTransform: 'uppercase', fontSize: '12px', display: 'flex', alignItems: 'center', paddingRight: (isMobileViewport ? '0px' : '8px'), textAlign: 'center' }}>
+                          {/*{!isLoggedIn && 'Login to save or share'}
+                          {isLoggedIn && !allowedToSave && 'Assets not owned by you'}*/}
                           {isLoggedIn && allowedToSave && <IconButton
                             aria-label=''
                             style={{ justifySelf: 'center', alignSelf: 'center', marginBottom: 0 }}

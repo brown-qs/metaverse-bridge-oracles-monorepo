@@ -71,7 +71,7 @@ const KiltLoginPage = () => {
       <Stack alignItems="center" spacing={1} margin={2}>
 
         <Button isDisabled={isLoading} onClick={() => { handleLogin() }}>KILT LOGIN</Button>
-        <Link sx={{ fontSize: "11px" }} onClick={() => { navigate(`/account/login`) }}>OTHER LOGIN METHODS</Link>
+        <Link sx={{ fontSize: "11px" }} onClick={() => { navigate(`/bridge`) }}>OTHER LOGIN METHODS</Link>
       </Stack>
     </AuthLayout >
   );

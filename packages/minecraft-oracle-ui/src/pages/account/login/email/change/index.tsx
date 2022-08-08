@@ -34,9 +34,9 @@ const EmailChangePage = () => {
       setFailureMessage("Invalid captcha")
     }
 
-    setImmediate(() => {
+    window.setTimeout(() => {
       recaptchaEl.current.reset()
-    })
+    }, 1)
 
     try {
       const result = await axios({

@@ -94,7 +94,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
             height="100%"
             overflow="visible">
             <Grid
-                templateRows={{ base: "200px repeat(5, 450px)", md: '275px repeat(3, 700px)', lg: '275px repeat(2, 700px)' }}
+                templateRows={{ base: "275px repeat(5, 450px)", md: '275px repeat(3, 700px)', lg: '275px repeat(2, 700px)' }}
                 templateColumns='repeat(12, 1fr)'
                 maxW="1440px"
                 margin="auto"
@@ -105,30 +105,32 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                 {/* START WELCOME MESSAGE & PLAYER ELIGIBILITY */}
                 <GridItem
                     padding={{
-                        base: "0 11px 0 11px",
-                        md: "0 40px 0 40px"
+                        base: "96px 11px 0 11px",
+                        md: "96px 40px 0 40px"
                     }}
                     rowSpan={1}
                     colSpan={{ base: 12, md: 12, lg: 12 }}
+                    overflow="hidden"
                 >
-                    <VStack h="100%" paddingTop="40px">
-                        <Box textAlign="left" w="100%" color="white">
+                    <Stack lineHeight="40px" fontSize="32px" textAlign="left" direction={{ base: "column" }}>
+                        <Box color="white" whiteSpace="nowrap" textOverflow="ellipsis" overflow="hidden">
                             Welcome back,
                         </Box>
-                        <Box textAlign="left" w="100%" color="yellow.300">
+                        <Box color="yellow.300" whiteSpace="nowrap" textOverflow="ellipsis" overflow="hidden" flex="1">
                             {authData?.userProfile?.email}
                         </Box>
-                        <Box textAlign="left" w="100%">
-                            {profile?.allowedToPlay
-                                ?
-                                <Tooltip label={playAllowedReasonTexts[profile.allowedToPlayReason] ?? playAllowedReasonTexts['DEFAULT']}>
-                                    <Text color="teal.500">{profile?.blacklisted ? `You are blacklisted but can play` : `You are eligible to play!`}</Text>
-                                </Tooltip>
-                                :
-                                <p style={{ color: '#DB3B21' }}>To be eligible to play, bridge a VIP ticket/Moonsama, <br /> or <a href="https://moonsama.com/freshoffers" target="_blank" rel="noreferrer">visit the Marketplace to get one</a></p>
-                            }
-                        </Box>
-                    </VStack>
+                    </Stack>
+                    <HStack marginTop="20px" fontSize="12px">
+                        {!profile?.allowedToPlay &&
+                            <Box padding="4px 8px" borderRadius="4px" color="white" bg="red.500">BUY YOUR TICKET AT THE MARKETPLACE TO PLAY</Box>
+                        }
+                        {profile?.allowedToPlay && !profile?.blacklisted &&
+                            <Box padding="4px 8px" borderRadius="4px" color="#1B1B3A" bg="teal.200">YOU ARE ELIGIBLE TO PLAY</Box>
+                        }
+                        {profile?.allowedToPlay && profile?.blacklisted &&
+                            <Box padding="4px 8px" borderRadius="4px" color="#1B1B3A" bg="yellow.300">BLACKLISTED, BUT ALLOWED TO PLAY</Box>
+                        }
+                    </HStack>
                 </GridItem>
                 {/* END WELCOME MESSAGE & PLAYER ELIGIBILITY */}
 
@@ -172,6 +174,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                             }}
                                         >
                                             <Box
+                                                overflow="hidden"
                                                 position="absolute"
                                                 top={firstRow ? "12px" : "4px"}
                                                 right="12px"
@@ -184,9 +187,8 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                                                 borderRadius="4px"
                                                 border={value.equipped ? "1px solid" : "1px solid"}
                                                 borderColor={value.equipped ? "teal.400" : "transparent"}
-                                                padding="12%"
                                             >
-                                                <Media uri={value.coverURL} />
+                                                <Media padding="12%" uri={value.coverURL} />
                                             </Box>
                                         </GridItem >
                                     );
@@ -473,6 +475,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
 
             </Grid >
+
             <ItemDetailsModal data={itemDetailDialogData} isOpen={isItemDetailDialogOpen} onClose={onItemDetailDialogClose}></ItemDetailsModal>
         </Container >
     )

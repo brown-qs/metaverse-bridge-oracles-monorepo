@@ -29,7 +29,7 @@ const AuthPage = () => {
             return <Navigate to={'/account'} />;
         }
     } else {
-        return <Navigate to='/account/login' />;
+        return <Navigate to='/bridge' />;
     }
 
 };
