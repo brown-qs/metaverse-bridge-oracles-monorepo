@@ -1,9 +1,8 @@
 import React, { ReactNode } from 'react';
 import { useClasses } from 'hooks';
-import { styles } from './AddressDisplayComponent.styles';
 import { EXPLORER_URL, ChainId } from '../../constants';
 import { ExternalLink } from '../ExternalLink/ExternalLink'
-import { Box, Button, Text, Tooltip } from '@chakra-ui/react';
+import { Box, Button, Link, Text, Tooltip } from '@chakra-ui/react';
 import { Copy } from 'tabler-icons-react';
 
 const _fallbackCopyTextToClipboard = (text: string): void => {
@@ -54,34 +53,28 @@ export const ChainDataDisplayComponent = (props: {
   const chainId = props.chainId ?? ChainId.MOONRIVER
   const copyTooltipLabel = props.copyTooltipLabel
 
-  const { copyButton } = useClasses(styles);
 
   return (
 
-    <Box display="flex" alignItems="center">
-      {!props.dontShowLink ? (
-        <Text className={props.className}>
-          <ExternalLink href={EXPLORER_URL[chainId]}>
-            {text}
-          </ExternalLink>
-        </Text>
-      ) : (
-        <Text className={props.className}>
-          {text}
-        </Text>
-      )}
-      <Tooltip title={copyTooltipLabel}>
-        <Button
-          marginLeft="5px"
-          className={`${copyButton} ${props.buttonClassName}`}
-          size="small"
-          onClick={() => {
-            _copyTextToClipboard(text);
-          }}
-        >
-          <Copy />
-        </Button>
+    <Box display="flex" alignItems="center" color="teal.200" fontSize="12px">
+      <Tooltip title={text}>
+        {!props.dontShowLink ? (
+          <Text className={props.className}>
+            <Link isExternal href={EXPLORER_URL[chainId]}>
+              {text}
+            </Link>
+          </Text>
+        ) : (
+          <Text className={props.className}>
+            <Link color="teal.200" isExternal>
+              {text}
+            </Link>
+          </Text>
+        )}
       </Tooltip>
+      <Box marginLeft="12px" cursor="pointer" onClick={() => { _copyTextToClipboard(text) }}>
+        <Copy color="#3BEFB8" size="18px" />
+      </Box>
     </Box>
   );
 };

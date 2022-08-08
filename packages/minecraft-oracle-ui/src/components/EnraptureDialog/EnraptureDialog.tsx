@@ -22,8 +22,10 @@ import { useEnraptureConfirmCallback } from 'hooks/multiverse/useConfirm';
 import { EnraptureAssetCallbackState, useEnraptureAssetCallback } from 'hooks/multiverse/useEnraptureAsset';
 import { stringAssetTypeToAssetType } from 'utils/marketplace';
 import { TokenDetails } from 'components/TokenDetails/TokenDetails';
-import { Button, CircularProgress, Grid, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Stack, Text } from '@chakra-ui/react';
-import { CircleCheck } from 'tabler-icons-react';
+import { Box, Button, CircularProgress, FormControl, FormErrorMessage, FormHelperText, FormLabel, Grid, HStack, Input, Link, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Stack, Text, VStack } from '@chakra-ui/react';
+import { Checks, CircleCheck } from 'tabler-icons-react';
+import { MoonsamaModal } from '../MoonsamaModal';
+import { isValid } from 'date-fns';
 
 
 export const EnraptureDialog = () => {
@@ -40,19 +42,11 @@ export const EnraptureDialog = () => {
     formButton,
   } = useClasses(appStyles);
 
-  const {
-    dialogContainer,
-    loadingContainer,
-    successContainer,
-    successIcon
-  } = useClasses(styles);
 
   const { chainId, account } = useActiveWeb3React();
 
-  const handleClose = (event: any, reason: string) => {
-    if (reason === 'backdropClick') {
-      return
-    }
+  const handleClose = () => {
+
     onEnraptureDialogClose();
     setEnraptureParamsLoaded(false);
     setFinalTxSubmitted(false);
@@ -82,8 +76,14 @@ export const EnraptureDialog = () => {
 
   const [chosenAmount, setChosenAmount] = useState<string>(amount);
 
-  const finalAmount = isResource ? parseEther(chosenAmount).toString() : chosenAmount
-
+  let finalAmount = chosenAmount
+  if (isResource) {
+    try {
+      finalAmount = parseEther(chosenAmount).toString()
+    } catch (e) {
+      finalAmount = '1'
+    }
+  }
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.value) {
       setChosenAmount(event.target.value);
@@ -111,6 +111,7 @@ export const EnraptureDialog = () => {
     },
   ])?.[0];
 
+
   const enraptureCallbackParams = useEnraptureAssetCallback(enraptureObject)
 
 
@@ -119,7 +120,6 @@ export const EnraptureDialog = () => {
   }
 
   const hasEnough = bal?.gte(finalAmount);
-
   const [approvalState, approveCallback] = useApproveCallback({
     assetAddress: assetAddress,
     assetId: assetId,
@@ -153,166 +153,214 @@ export const EnraptureDialog = () => {
 
   console.log('APPROVE FLOW', { showApproveFlow, approvalState, hasEnough });
 
-  const renderBody = () => {
+  const isValidAmount = (amount: string) => {
+    return /^\d+$/.test(amount)
+  }
+  if (!enraptureParamsLoaded) {
+    return (<MoonsamaModal
+      title="Loading enrapture details"
 
-    if (!enraptureParamsLoaded) {
-      return (
-        <div className={loadingContainer}>
-          <CircularProgress />
-          <div>
-            <Text>Loading import details</Text>
-            <Text color="textSecondary" variant="h5">
-              Should be a jiffy
-            </Text>
-          </div>
-        </div>
-      );
-    }
+      isOpen={isEnraptureDialogOpen}
+      onClose={() => handleClose()}
+      message="Should be a jiffy"
+      closeOnOverlayClick={false}
+    >
+      <VStack alignItems="center">
+        <CircularProgress isIndeterminate color="teal"></CircularProgress>
+      </VStack>
 
-    if (enraptureConfirmed) {
-      return (
-        <div className={successContainer}>
-          <CircleCheck className={successIcon} />
-          <Text>{`Enrapture to metaverse confirmed!`}</Text>
-
-          {enraptureTx && (
-            <ExternalLink
-              href={getExplorerLink(
-                chainId ?? ChainId.MOONRIVER,
-                enraptureTx.hash,
-                'transaction'
+    </MoonsamaModal >)
+  } else if (enraptureConfirmed) {
+    return (<MoonsamaModal
+      title="Enrapture to metaverse confirmed!"
+      TablerIcon={Checks}
+      iconBackgroundColor="teal.200"
+      iconColor="black"
+      isOpen={isEnraptureDialogOpen}
+      onClose={handleClose}
+      closeOnOverlayClick={false}
+    >
+      <VStack spacing="0">
+        <Box w="100%" h="48px" bg="whiteAlpha.100" borderRadius="8px">
+          <HStack padding="12px">
+            <Box flex="1" color="whiteAlpha.700">Transaction</Box>
+            <Box>
+              {enraptureTx && (
+                <Link isExternal
+                  href={getExplorerLink(
+                    chainId ?? ChainId.MOONRIVER,
+                    String(enraptureTx?.hash),
+                    'transaction'
+                  )}
+                >
+                  {enraptureTx?.hash}
+                </Link>
               )}
-            >
-              {enraptureTx.hash}
-            </ExternalLink>
-          )}
+            </Box>
+
+          </HStack>
+        </Box>
+        <Box w="100%" paddingTop="16px">
           <Button
-            className={button}
-            onClick={() => handleClose({}, "yada")}
-            variant="outlined"
-            color="primary"
-          >
-            Close
-          </Button>
-        </div>
-      );
-    }
+            onClick={() => {
+              handleClose()
+            }}
+            leftIcon={<Checks />}
+            w="100%">GOT IT!</Button>
+        </Box>
+      </VStack >
 
-    if (finalTxSubmitted && isPending) {
-      return (
-        <>
-          <div className={loadingContainer}>
-            <CircularProgress />
-            <div>
-              <Text>Enrapturing asset into the metaverse...</Text>
-              <Text color="textSecondary" variant="h5">
-                Check your wallet for potential action
-              </Text>
-            </div>
-          </div>
-        </>
-      );
-    }
+    </MoonsamaModal >)
+  } else if (finalTxSubmitted && isPending) {
+    return (<MoonsamaModal
+      title="Enrapturing asset into the metaverse..."
+      isOpen={isEnraptureDialogOpen}
+      onClose={handleClose}
+      closeOnOverlayClick={false}
+      message="Check your wallet for potential action"
+    >
 
-    if (finalTxSubmitted && enraptureSubmitted && !isPending) {
-      return (
-        <div className={successContainer}>
-          <CircleCheck className={successIcon} />
-          <Text>{`Transaction success!`}</Text>
-          <Text color="textSecondary" variant="h5">
-            Confirming enrapture with the metaverse oracle...
-          </Text>
-
-          {enraptureTx && (
-            <ExternalLink
-              href={getExplorerLink(
-                chainId ?? ChainId.MOONRIVER,
-                enraptureTx.hash,
-                'transaction'
+    </MoonsamaModal >)
+  } else if (finalTxSubmitted && enraptureSubmitted && !isPending) {
+    return (<MoonsamaModal
+      title="Transaction success!"
+      TablerIcon={Checks}
+      iconBackgroundColor="teal.200"
+      iconColor="black"
+      isOpen={isEnraptureDialogOpen}
+      onClose={handleClose}
+      closeOnOverlayClick={false}
+      message="Confirming enrapture with the metaverse oracle..."
+    >
+      <VStack spacing="0">
+        <Box w="100%" h="48px" bg="whiteAlpha.100" borderRadius="8px">
+          <HStack padding="12px">
+            <Box flex="1" color="whiteAlpha.700">Transaction</Box>
+            <Box>
+              {enraptureTx && (
+                <Link isExternal
+                  href={getExplorerLink(
+                    chainId ?? ChainId.MOONRIVER,
+                    String(enraptureTx?.hash),
+                    'transaction'
+                  )}
+                >
+                  {enraptureTx?.hash}
+                </Link>
               )}
-            >
-              {enraptureTx.hash}
-            </ExternalLink>
-          )}
-        </div>
-      );
-    }
-    if (!userUnderstood) {
-      return (
-        <Grid /*container spacing={1}*/ justifyContent="center">
-          <div className={successContainer}>
-            <Text>{`This NFT is going to be burned in the process and bound to the MC account forever!`}</Text>
+            </Box>
 
-            <Button
-              onClick={() => {
-                setUserUnderstood(true)
-              }}
-              className={button}
-              variant="contained"
-              color="primary"
-            >
-              I understood
-            </Button>
-          </div>
-        </Grid>
-      );
-    }
+          </HStack>
+        </Box>
+        <Box w="100%" paddingTop="16px">
+          <Button
+            onClick={() => {
+              handleClose()
+            }}
+            leftIcon={<Checks />}
+            w="100%">GOT IT!</Button>
+        </Box>
+      </VStack >
 
-    return (
-      <Stack spacing={3} justifyContent="center" >
+    </MoonsamaModal >)
+  } else if (!userUnderstood) {
+    return (<MoonsamaModal
+      title="Enrapture"
+      isOpen={isEnraptureDialogOpen}
+      onClose={handleClose}
+      closeOnOverlayClick={false}
+      message="This NFT is going to be burned in the process and bound to your account forever!"
+    >
+      <VStack spacing="0">
+        <Box w="100%" paddingTop="16px">
+          <Button
+            onClick={() => {
+              setUserUnderstood(true)
+            }}
+            leftIcon={<Checks />}
+            w="100%">I UNDERSTAND</Button>
+        </Box>
+      </VStack >
+    </MoonsamaModal >)
+  } else {
+    return (<MoonsamaModal
+      title="Import to metaverse"
+      isOpen={isEnraptureDialogOpen}
+      onClose={handleClose}
+      message="You are about to import one or more items to the metaverse to use them in-game, and you will be able to export them back to your wallet afterward."
+      closeOnOverlayClick={false}
+      bottomButtonText="Cancel"
+      onBottomButtonClick={handleClose}
+    >
+      <VStack spacing="0">
 
-        <TokenDetails assetAddress={assetAddress} assetId={assetId} assetType={assetType} />
-        {isResource && <Input onChange={handleAmountChange} style={{ alignSelf: 'center' }} placeholder='Amount' value={chosenAmount} /*inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}*/ />}
-        <Stack spacing={1} justifyContent="center" direction={'column'} >
+        {isResource &&
+          <>
+            <Box w="100%">
+              <FormControl isInvalid={!hasEnough || !isValidAmount(chosenAmount)} w="100%">
+                <FormLabel>Amount</FormLabel>
+                <Input
+                  // isDisabled={isLoading}
+                  value={chosenAmount}
+                  onChange={handleAmountChange}
+                  spellCheck="false"
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                />
+
+                {!hasEnough && isValidAmount(chosenAmount) &&
+                  <FormErrorMessage>You do not have enough.</FormErrorMessage>
+                }
+
+                {!isValidAmount(chosenAmount) &&
+                  <FormErrorMessage>Invalid amount.</FormErrorMessage>
+                }
+
+                {hasEnough && isValidAmount(chosenAmount) &&
+                  <FormHelperText>
+                    &nbsp;
+                  </FormHelperText>
+                }
+              </FormControl>
+
+            </Box>
+          </>
+        }
+
+
+        <Box w="100%" paddingTop="16px">
           {
             showApproveFlow ? (
               <Button
+                w="100%"
                 onClick={() => {
                   approveCallback();
                   setApprovalSubmitted(true);
                 }}
                 className={formButton}
-                variant="contained"
-                color="primary"
-                disabled={approvalState === ApprovalState.PENDING || !hasEnough}
+                disabled={approvalState === ApprovalState.PENDING || !hasEnough || !isValidAmount(chosenAmount)}
               >
-                Approve
+                APPROVE
               </Button>
             ) : (
               <Button
+                w="100%"
                 onClick={() => {
                   enraptureCallbackParams.callback?.();
                   setFinalTxSubmitted(true);
                 }}
                 className={formButton}
-                variant="contained"
-                color="primary"
                 disabled={
                   enraptureCallbackParams.state !== EnraptureAssetCallbackState.VALID || !hasEnough
                 }
               >
-                Enrapture to metaverse
+                ENRAPTURE TO METAVERSE
               </Button>
             )
           }
-          <Button className={formButton} onClick={() => handleClose({}, "yada")} color="primary">
-            Cancel
-          </Button>
-        </Stack>
-      </Stack >
-    );
-  };
+        </Box>
+      </VStack>
+    </MoonsamaModal>)
+  }
 
-
-  return (
-    <Modal isOpen={isEnraptureDialogOpen} onClose={onEnraptureDialogClose} isCentered closeOnOverlayClick={false}>
-      <ModalOverlay />
-      <ModalContent>
-        <ModalCloseButton />
-        <ModalHeader>Enrapture</ModalHeader>
-        <ModalBody>
-          {renderBody()}
-        </ModalBody>
-      </ModalContent>
-    </Modal>);
 };
