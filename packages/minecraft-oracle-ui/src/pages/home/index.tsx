@@ -8,7 +8,7 @@ import LeftImage from 'assets/images/home/left.png';
 import RightImageFlip from 'assets/images/home/right.png';
 
 import { useNavigate } from 'react-router-dom';
-import { Button, Stack, useMediaQuery, Text, VStack, Box } from '@chakra-ui/react';
+import { Image, Button, Stack, useMediaQuery, Text, VStack, Box } from '@chakra-ui/react';
 import { Mail } from 'tabler-icons-react';
 
 const HomePage = () => {
@@ -27,13 +27,7 @@ const HomePage = () => {
     centerBgImage
   } = useClasses(styles);
 
-  const handleLogin = () => {
-    navigate("/account/login")
-  };
 
-  const handleLinkMinecraft = () => {
-    navigate("/account")
-  }
 
   const [isMobileViewport] = useMediaQuery('(max-width: 600px)')
 
@@ -41,13 +35,25 @@ const HomePage = () => {
   const loginButtonProps = { h: "80px", w: "100%", fontSize: "20px", bg: "rgba(255, 255, 255, 0.06)", border: "none" }
   return (
 
-    <Stack direction="column" className={homeContainer} alignItems='center' textAlign='center' style={{ height: `calc(100vh - ${isMobileViewport ? '58px' : '80px'})` }}>
+    <Stack direction="column" alignItems='center' textAlign='center' style={{ height: `calc(100vh - ${isMobileViewport ? '58px' : '80px'})` }}>
 
-      <Stack zIndex="1" direction={'column'} justifyContent='center' alignItems='center' spacing={3}>
-        <div className={logo}>
-          <img src={WhiteLogo} alt="" />
-        </div>
-        <Text className={glitchText} fontSize={isMobileViewport ? '20px' : '50px'} fontFamily={'Orbitron'}>MULTIVERSE BRIDGE</Text>
+      <VStack
+        zIndex="1"
+        direction={'column'}
+        justifyContent='center'
+        alignItems='center'
+        spacing="0"
+        paddingLeft="20px"
+        paddingRight="20px"
+        paddingTop="48px"
+      >
+        <Box w="100%">
+          <Image h="100%" w="100%" src={WhiteLogo} alt="" />
+        </Box>
+        <Box fontSize="32px" lineHeight="40px" paddingTop="20px" paddingBottom="32px">
+          <Text fontFamily={'Orbitron'} color="white">MULTIVERSE BRIDGE</Text>
+
+        </Box>
         <VStack
           bg="linear-gradient(311.18deg, #1A202C 67.03%, #2D3748 100%)"
           boxShadow="0px 25px 50px -12px rgba(0, 0, 0, 0.25)"
@@ -57,7 +63,7 @@ const HomePage = () => {
           overflow="hidden"
           spacing="0"
         >
-          <Box fontSize="24px">Login Method</Box>
+          <Box fontSize="24px" color="white">Login Method</Box>
           <Box w="100%" h="100%" paddingTop="24px">
             <Stack direction={{ base: "column", md: "row" }} w="100%" spacing="0">
               <Box flex="1" padding={{ base: "0 0 4px 0", md: "0 4px 0 0" }}>
@@ -85,7 +91,7 @@ const HomePage = () => {
           </Box>
 
         </VStack>
-      </Stack>
+      </VStack>
 
       {!isMobileViewport && <img src={LeftImage} className={leftBgImage} alt="" />}
       {!isMobileViewport && <img src={RightImageFlip} className={rightBgImage} alt="" />}
