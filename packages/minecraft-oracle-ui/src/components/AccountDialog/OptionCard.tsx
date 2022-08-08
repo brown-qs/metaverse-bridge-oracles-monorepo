@@ -1,14 +1,14 @@
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 import React from 'react';
 import { useClasses } from 'hooks'
-import { Box, Button } from '@chakra-ui/react';
+import { Link, Image, Box, Button, HStack, VStack, Text } from '@chakra-ui/react';
 
 export default function OptionCard({
   link = null,
   onClick = null,
   header,
   subheader = null,
-  icon,
+  iconUrl,
   active = false,
   id,
 }: {
@@ -19,11 +19,10 @@ export default function OptionCard({
   color: string;
   header: React.ReactNode;
   subheader: React.ReactNode | null;
-  icon: React.ReactNode;
+  iconUrl?: string
   active?: boolean;
   id: string;
 }) {
-  console.log({ icon });
   const content = (
     <div >
       <div >
@@ -48,18 +47,32 @@ export default function OptionCard({
     </div>
   );
   if (link) {
-    return <ExternalLink href={link}>{content}</ExternalLink>;
+    return <Link isExternal color="teal.200" lineHeight="24px" fontSize="16px" fontFamily="Rubik" href={link}>{header}</Link >;
   }
 
   return (
-    <>
+    <Box
+      position="relative"
+    >
+      <Image
+        zIndex="1"
+        position="absolute"
+        top="0"
+        right="0"
+        height="100%"
+        padding="8px"
+        left="0"
+        objectFit="contain"
+        pointerEvents="none"  //only hover to pass down to button
+        src={iconUrl}>
+
+      </Image>
       <Button
+        w="100%"
         id={id}
         onClick={() => onClick?.()}
-        rightIcon={<>{icon}</>}
       >
-
         {header}
-      </Button></>
-  );
+      </Button>
+    </Box >)
 }

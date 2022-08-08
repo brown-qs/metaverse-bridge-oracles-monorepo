@@ -10,6 +10,7 @@ import { useTokenStaticData } from 'hooks/useTokenStaticData/useTokenStaticData'
 import { StringAssetType } from 'utils/subgraph';
 import { AddressZero } from '@ethersproject/constants';
 import { Box, Button, CircularProgress, Grid, HStack, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, SimpleGrid, Stack, Text, VStack } from '@chakra-ui/react';
+import { MoonsamaModal } from '../MoonsamaModal';
 
 
 export const AssetDialog = () => {
@@ -41,28 +42,30 @@ export const AssetDialog = () => {
 
   const title = `${erc20Data?.[0]?.name ?? 'Asset'}`
 
-  const renderBody = () => {
 
-    if (!assetParamsLoaded) {
-      return (
-        <div >
-          <CircularProgress isIndeterminate />
-          <div>
-            <Text>Loading asset details</Text>
-            <Text color="textSecondary" variant="h5">
-              Should be a jiffy
-            </Text>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <Stack spacing={1} justifyContent="center">
-        <Text style={{ alignSelf: 'center' }} variant='body1'>Hybrid token details</Text>
+  if (!assetParamsLoaded) {
+    return (<MoonsamaModal
+      title="Loading asset details"
+      isOpen={isAssetDialogOpen}
+      onClose={handleClose}
+      message="Should be a jiffy"
+    >
+      <VStack alignItems="center">
+        <CircularProgress isIndeterminate color="teal"></CircularProgress>
+      </VStack>
+    </MoonsamaModal >)
+  } else {
+    return (<MoonsamaModal
+      title="Hybrid token details"
+      isOpen={isAssetDialogOpen}
+      onClose={handleClose}
+      bottomButtonText='Close'
+      onBottomButtonClick={handleClose}
+    >
+      <VStack alignItems="center">
         {assetDialogData?.assetERC1155 &&
 
-          <SimpleGrid columns={2} spacing={1}>
+          <SimpleGrid columns={2} spacing={1} w="100%">
             <Box >Type</Box>
             <Box >{assetDialogData?.assetERC1155?.assetType}</Box>
             <Box >ID</Box>
@@ -80,7 +83,7 @@ export const AssetDialog = () => {
         }
 
         {assetDialogData?.assetAddressERC20 && (
-          <SimpleGrid columns={2} spacing={1} paddingTop="20px">
+          <SimpleGrid columns={2} spacing={1} paddingTop="16px" w="100%">
             <Box >Type</Box>
             <Box >ERC20</Box>
             <Box>Address</Box>
@@ -95,6 +98,7 @@ export const AssetDialog = () => {
           </SimpleGrid>
         )}
         <Button
+          w="100%"
           onClick={() => {
             addToken()
           }}
@@ -103,22 +107,7 @@ export const AssetDialog = () => {
         >
           ADD TO METAMASK
         </Button>
-        <Button onClick={() => handleClose()} color="primary">
-          CANCEL
-        </Button>
-      </Stack>
-    );
-  };
-
-  return (
-    <Modal isOpen={isAssetDialogOpen} onClose={() => { handleClose() }} isCentered>
-      <ModalOverlay />
-      <ModalContent>
-        <ModalCloseButton />
-        <ModalHeader>{title}</ModalHeader>
-        <ModalBody>
-          {renderBody()}
-        </ModalBody>
-      </ModalContent>
-    </Modal>);
+      </VStack>
+    </MoonsamaModal >)
+  }
 };
