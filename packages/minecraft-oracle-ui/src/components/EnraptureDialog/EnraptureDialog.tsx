@@ -42,12 +42,6 @@ export const EnraptureDialog = () => {
     formButton,
   } = useClasses(appStyles);
 
-  const {
-    dialogContainer,
-    loadingContainer,
-    successContainer,
-    successIcon
-  } = useClasses(styles);
 
   const { chainId, account } = useActiveWeb3React();
 
@@ -81,16 +75,18 @@ export const EnraptureDialog = () => {
   const isResource = BURNABLE_RESOURCES_IDS.includes(assetId ?? '0') && assetAddress === '0x1b30a3b5744e733d8d2f19f0812e3f79152a8777'
 
   const [chosenAmount, setChosenAmount] = useState<string>(amount);
-  const [inputChosenAmount, setInputChosenAmount] = useState<string>(amount);
 
-  const finalAmount = isResource ? parseEther(chosenAmount).toString() : chosenAmount
-
+  let finalAmount = chosenAmount
+  if (isResource) {
+    try {
+      finalAmount = parseEther(chosenAmount).toString()
+    } catch (e) {
+      finalAmount = '1'
+    }
+  }
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.value) {
-      setInputChosenAmount(event.target.value)
-      if (isValidAmount(event.target.value)) {
-        setChosenAmount(event.target.value);
-      }
+      setChosenAmount(event.target.value);
     }
   };
 
@@ -114,6 +110,7 @@ export const EnraptureDialog = () => {
       id: '1',
     },
   ])?.[0];
+
 
   const enraptureCallbackParams = useEnraptureAssetCallback(enraptureObject)
 
@@ -286,7 +283,6 @@ export const EnraptureDialog = () => {
       </VStack >
     </MoonsamaModal >)
   } else {
-    console.log("")
     return (<MoonsamaModal
       title="Import to metaverse"
       isOpen={isEnraptureDialogOpen}
@@ -299,34 +295,36 @@ export const EnraptureDialog = () => {
       <VStack spacing="0">
 
         {isResource &&
-          <Box w="100%">
-            <FormControl isInvalid={!hasEnough || !isValidAmount(inputChosenAmount)} w="100%">
-              <FormLabel>Amount</FormLabel>
-              <Input
-                // isDisabled={isLoading}
-                //value={inputChosenAmount}
-                //onChange={handleAmountChange}
-                spellCheck="false"
-                autoCapitalize="off"
-                autoCorrect="off"
-              />
+          <>
+            <Box w="100%">
+              <FormControl isInvalid={!hasEnough || !isValidAmount(chosenAmount)} w="100%">
+                <FormLabel>Amount</FormLabel>
+                <Input
+                  // isDisabled={isLoading}
+                  value={chosenAmount}
+                  onChange={handleAmountChange}
+                  spellCheck="false"
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                />
 
-              {!hasEnough && isValidAmount(inputChosenAmount) &&
-                <FormErrorMessage>You do not have enough.</FormErrorMessage>
-              }
+                {!hasEnough && isValidAmount(chosenAmount) &&
+                  <FormErrorMessage>You do not have enough.</FormErrorMessage>
+                }
 
-              {!isValidAmount(inputChosenAmount) &&
-                <FormErrorMessage>Invalid amount.</FormErrorMessage>
-              }
+                {!isValidAmount(chosenAmount) &&
+                  <FormErrorMessage>Invalid amount.</FormErrorMessage>
+                }
 
-              {hasEnough && isValidAmount(inputChosenAmount) &&
-                <FormHelperText>
-                  &nbsp;
-                </FormHelperText>
-              }
-            </FormControl>
+                {hasEnough && isValidAmount(chosenAmount) &&
+                  <FormHelperText>
+                    &nbsp;
+                  </FormHelperText>
+                }
+              </FormControl>
 
-          </Box>
+            </Box>
+          </>
         }
 
 
@@ -340,7 +338,7 @@ export const EnraptureDialog = () => {
                   setApprovalSubmitted(true);
                 }}
                 className={formButton}
-                disabled={approvalState === ApprovalState.PENDING || !hasEnough}
+                disabled={approvalState === ApprovalState.PENDING || !hasEnough || !isValidAmount(chosenAmount)}
               >
                 APPROVE
               </Button>
