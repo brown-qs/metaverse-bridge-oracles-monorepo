@@ -14,7 +14,7 @@ const ServerAccount = () => {
   };
 
   const handleLogin = () => {
-    navigate("/account/login");
+    navigate("/bridge");
   };
 
   const isLoggedIn = !!authData && !!authData?.jwt
