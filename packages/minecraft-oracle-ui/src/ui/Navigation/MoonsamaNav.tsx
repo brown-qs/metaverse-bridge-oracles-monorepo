@@ -7,7 +7,7 @@ import WalletAccount from './WalletAccount';
 import ServerAccount from './ServerAccount';
 import NavMenuItem from './NavMenuItem';
 import { useMediaQuery } from '@chakra-ui/react'
-import { Menu2 } from 'tabler-icons-react';
+import { Brush, ChevronUpRight, Menu2 } from 'tabler-icons-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function MoonsamaNav() {
@@ -17,6 +17,15 @@ export default function MoonsamaNav() {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const navgiate = useNavigate()
 
+  const buttons = (
+    <>
+      <Button as="a" href="https://marketplace.moonsama.com" target="_blank" h="50px" rightIcon={<ChevronUpRight color="#3BEFB8"></ChevronUpRight>} variant="moonsamaGhost">MARKETPLACE</Button>
+      <Button as="a" href="https://mcapi.moonsama.com" target="_blank" h="50px" rightIcon={<ChevronUpRight color="#3BEFB8"></ChevronUpRight>} variant="moonsamaGhost">MCAPI</Button>
+      <Button as="a" href="https://wiki.moonsama.com" target="_blank" h="50px" rightIcon={<ChevronUpRight color="#3BEFB8"></ChevronUpRight>} variant="moonsamaGhost">DOCS</Button>
+      <Button h="50px" rightIcon={<Brush color="#3BEFB8"></Brush>} variant="moonsamaGhost" onClick={() => { navgiate("/moonsama/customizer") }}>CUSTOMIZER</Button>
+
+    </>
+  )
   return (
     <Box as="nav" sx={{
 
@@ -39,13 +48,10 @@ export default function MoonsamaNav() {
         }
       </HStack>
       <HStack>
-        {isLargerThanLg
+        {isLargerThanXl
           ?
           <>
-            <NavMenuItem href={'https://marketplace.moonsama.com'} label={`Marketplace`} external={true} />
-            <NavMenuItem href={'https://mcapi.moonsama.com'} label={`MCAPI`} external={true} />
-            <NavMenuItem href={'https://wiki.moonsama.com'} label={`Docs`} external={true} />
-            <NavMenuItem href={'/moonsama/customizer'} label={`Customizer`} />
+            {buttons}
             <ConnectedNetwork />
             <WalletAccount />
             <ServerAccount />
@@ -63,11 +69,8 @@ export default function MoonsamaNav() {
               <DrawerContent background="#1A202C">
 
                 <DrawerBody>
-                  <VStack alignItems={"stretch"}>
-                    <NavMenuItem href={'https://marketplace.moonsama.com'} label={`Marketplace`} external={true} />
-                    <NavMenuItem href={'https://mcapi.moonsama.com'} label={`MCAPI`} external={true} />
-                    <NavMenuItem href={'https://wiki.moonsama.com'} label={`Docs`} external={true} />
-                    <NavMenuItem href={'/moonsama/customizer'} label={`Customizer`} />
+                  <VStack alignItems={"stretch"} paddingBottom="8px">
+                    {buttons}
                   </VStack>
                   <VStack alignItems={"stretch"}>
                     <ConnectedNetwork />
