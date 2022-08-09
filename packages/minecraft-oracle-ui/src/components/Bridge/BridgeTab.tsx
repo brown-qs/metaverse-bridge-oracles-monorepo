@@ -8,13 +8,15 @@ export const BridgeTab: React.FC<{ title: string, children: ReactNode, isLoading
         <VStack maxHeight="100%" height="100%" alignItems={"flex-start"} spacing={0}>
             <HStack
                 alignItems={"center"}
-                width={isSmallerThan285 ? "100%" : "250px"}
+                width={isSmallerThan285 ? "100%" : "inherit"}
                 minHeight="40px"
                 height="40px"
                 borderRadius="8px 8px 0px 0px"
                 background="gray.800"
                 overflow="hidden"
                 whiteSpace="nowrap"
+                padding={isSmallerThan285 ? "0 0 0 0" : "0 24px 0 24px"}
+
             >
                 <VStack
                     color="yellow.300"
