@@ -30,6 +30,32 @@ const Button: ComponentStyleConfig = {
                 bg: "teal.800"
             },
 
+        },
+        moonsamaGhost: {
+            fontFamily: "Orbitron",
+            overflow: "hidden",
+            fontWeight: "normal",
+            fontSize: "12px",
+            borderRadius: "4px",
+            color: "white",
+            border: "1px solid",
+            borderColor: "transparent",
+            bg: "transparent",
+            _hover: {
+                border: "1px solid",
+                borderColor: "teal.200",
+                bg: "whiteAlpha.100",
+                _disabled: {
+                    borderColor: "transparent",
+                    bg: "transparent",
+                }
+            },
+            _active: {
+                border: "1px solid",
+                borderColor: "teal.200",
+                bg: "whiteAlpha.300"
+            },
+
         }
     }
 }
