@@ -18,7 +18,7 @@ import { SKIN_LABELS } from '../../constants/skins';
 import { InGameItemWithStatic } from 'hooks/multiverse/useInGameItems';
 import { BURNABLE_RESOURCES_IDS, DEFAULT_CHAIN, NETWORK_NAME } from "../../constants";
 import { AssetChainDetails } from '../../components/AssetChainDetails/AssetChainDetails';
-import { Text, Box, Container, Grid, List, ListIcon, ListItem, Stack, Tooltip, Button, Flex, SimpleGrid, GridItem, VStack, HStack, background, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useCheckboxGroup, useMediaQuery } from '@chakra-ui/react';
+import { Image, Text, Box, Container, Grid, List, ListIcon, ListItem, Stack, Tooltip, Button, Flex, SimpleGrid, GridItem, VStack, HStack, background, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useCheckboxGroup, useMediaQuery } from '@chakra-ui/react';
 import { BridgeTab } from '../../components/Bridge/BridgeTab';
 import { InGameItem } from '../../components/Bridge/InGameItem';
 import { CaretLeft, CaretRight, DeviceGamepad, UserCircle, Wallet } from 'tabler-icons-react';
@@ -80,30 +80,37 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
     const { value: onChainCheckboxGroupValue, isDisabled: isOnChainCheckboxGroupDisabled, onChange: onOnChainCheckboxGroupChange, setValue: setOnChainCheckboxGroupValue, getCheckboxProps: getOnChainCheckboxGroupProps } = useCheckboxGroup()
 
     const [isSmallerThan285] = useMediaQuery('(max-width: 285px)')
+    const bgSvg = "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPCEtLSBHZW5lcmF0ZWQgYnkgUGl4ZWxtYXRvciBQcm8gMi40LjUgLS0+Cjxzdmcgd2lkdGg9Ijc4OCIgaGVpZ2h0PSI4ODkiIHZpZXdCb3g9IjAgMCA3ODggODg5IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIj4KICAgIDxwYXRoIGlkPSJSZWN0YW5nbGUiIGZpbGw9IiMwODA3MTQiIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlPSJub25lIiBkPSJNIDAgODg5IEwgNzg4IDg4OSBMIDc4OCAwIEwgMCAwIFoiLz4KICAgIDxnIGlkPSJHcm91cCIgc3R5bGU9Im1peC1ibGVuZC1tb2RlOmhhcmQtbGlnaHQ7aXNvbGF0aW9uOmlzb2xhdGUiPgogICAgICAgIDxmaWx0ZXIgaWQ9ImZpbHRlcjEiIHg9IjAiIHk9IjAiIHdpZHRoPSI3ODgiIGhlaWdodD0iODg5IiBmaWx0ZXJVbml0cz0idXNlclNwYWNlT25Vc2UiIHByaW1pdGl2ZVVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgY29sb3ItaW50ZXJwb2xhdGlvbi1maWx0ZXJzPSJzUkdCIj4KICAgICAgICAgICAgPGZlR2F1c3NpYW5CbHVyIHN0ZERldmlhdGlvbj0iMTIxLjk5NiIvPgogICAgICAgIDwvZmlsdGVyPgogICAgICAgIDxnIGlkPSJnMSIgZmlsdGVyPSJ1cmwoI2ZpbHRlcjEpIj4KICAgICAgICAgICAgPHBhdGggaWQ9IlBhdGgiIGZpbGw9IiMwZWViYTgiIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlPSJub25lIiBkPSJNIDUyNi4xNzc5NzkgNjQwLjc0NDAxOSBDIDUwMC41MTkwMTIgNjMwLjc5NDk4MyA0OTAuMjY1MDE1IDYwMC42Njk5ODMgNDc2LjgyNDAwNSA1NzYuNjU5OTczIEMgNDYzLjY2MTAxMSA1NTMuMTQ4MDEgNDQ4LjA0MDAwOSA1MjkuNTAyMDE0IDQ0OC44MzA5OTQgNTAyLjU4MzAwOCBDIDQ0OS42MjUgNDc1LjU1ODk5IDQ2Mi4yMDk5OTEgNDQ5LjMwMzk4NiA0ODEuMTMyOTk2IDQzMC4wMDY5ODkgQyA0OTguNzE0OTk2IDQxMi4wNzY5OTYgNTI2LjAxNzAyOSA0MTEuMDU5OTk4IDU0OC44NDgwMjIgNDAwLjU4ODAxMyBDIDU3Mi45NzYwMTMgMzg5LjUyMDk5NiA1OTIuODUxOTkgMzYyLjg1NDk4IDYxOS4xMzI5OTYgMzY2LjcxMjAzNiBDIDY0NS4zNjYwMjggMzcwLjU2MjAxMiA2NjEuMTEyOTc2IDM5Ny44Mzg5ODkgNjc2LjYzMDAwNSA0MTkuMzQyMDEgQyA2ODkuOTE0OTc4IDQzNy43NSA2OTkuMTkyOTkzIDQ1OC42MDUwMTEgNzAxLjcxOTk3MSA0ODEuMTUzMDE1IEMgNzA0LjAzNjAxMSA1MDEuODIxMDE0IDY5OC41OTAwMjcgNTIyLjEyNzAxNCA2OTAuMjgzOTk3IDU0MS4xODQwMjEgQyA2ODIuNTEzOTc3IDU1OS4wMTAwMSA2NjkuNDM0OTk4IDU3Mi45MTY5OTIgNjU1LjcxNjk4IDU4Ni42OTc5OTggQyA2NDAuMzEyMDEyIDYwMi4xNzQ5ODggNjI1LjUyMDAyIDYxOC4wOTEwMDMgNjA1LjM2MTAyMyA2MjYuNTAyMDE0IEMgNTgwLjEwNDk4IDYzNy4wMzkwMDEgNTUxLjcxMDk5OSA2NTAuNjQ1MDIgNTI2LjE3Nzk3OSA2NDAuNzQ0MDE5IFoiLz4KICAgICAgICA8L2c+CiAgICAgICAgPGZpbHRlciBpZD0iZmlsdGVyMiIgeD0iMCIgeT0iMCIgd2lkdGg9Ijc4OCIgaGVpZ2h0PSI4ODkiIGZpbHRlclVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgcHJpbWl0aXZlVW5pdHM9InVzZXJTcGFjZU9uVXNlIiBjb2xvci1pbnRlcnBvbGF0aW9uLWZpbHRlcnM9InNSR0IiPgogICAgICAgICAgICA8ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIxMjEuOTk2Ii8+CiAgICAgICAgPC9maWx0ZXI+CiAgICAgICAgPGcgaWQ9ImcyIiBmaWx0ZXI9InVybCgjZmlsdGVyMikiPgogICAgICAgICAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImxpbmVhckdyYWRpZW50MSIgeDE9IjM4My4yODgiIHkxPSIxNTIuNDY1IiB4Mj0iNjUuMjk3IiB5Mj0iMTk4LjM2MSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgogICAgICAgICAgICAgICAgPHN0b3Agb2Zmc2V0PSIwLjE2MyIgc3RvcC1jb2xvcj0iI2ZmYzkxNCIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICAgICAgICAgICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwZWViYTgiIHN0b3Atb3BhY2l0eT0iMSIvPgogICAgICAgICAgICA8L2xpbmVhckdyYWRpZW50PgogICAgICAgICAgICA8cGF0aCBpZD0icGF0aDEiIGZpbGw9InVybCgjbGluZWFyR3JhZGllbnQxKSIgZmlsbC1ydWxlPSJldmVub2RkIiBzdHJva2U9Im5vbmUiIGQ9Ik0gMzA1LjY3NDAxMSAzMTguMzE3OTkzIEMgMjg1LjIzMDAxMSAzMTAuMzkwOTkxIDI3Ny4wNTk5OTggMjg2LjM4OTAzOCAyNjYuMzUwMDA2IDI2Ny4yNTc5OTYgQyAyNTUuODYyIDI0OC41MjM5ODcgMjQzLjQxNiAyMjkuNjg0MDIxIDI0NC4wNDYwMDUgMjA4LjIzNDk4NSBDIDI0NC42NzkwMDEgMTg2LjcwMzk3OSAyNTQuNzA3MDAxIDE2NS43ODUwMzQgMjY5Ljc4Mzk5NyAxNTAuNDA4OTk3IEMgMjgzLjc5Mjk5OSAxMzYuMTIyOTg2IDMwNS41NDU5OSAxMzUuMzEyOTg4IDMyMy43MzcgMTI2Ljk2ODk5NCBDIDM0Mi45NjIwMDYgMTE4LjE1MTAwMSAzNTguNzk5MDExIDk2LjkwMzk5MiAzNzkuNzM4MDA3IDk5Ljk3ODAyNyBDIDQwMC42NDAwMTUgMTAzLjA0NDk4MyA0MTMuMTg3MDEyIDEyNC43Nzg5OTIgNDI1LjU0OTk4OCAxNDEuOTExOTg3IEMgNDM2LjEzNTAxIDE1Ni41NzgwMDMgNDQzLjUyODAxNSAxNzMuMTk1MDA3IDQ0NS41NDA5ODUgMTkxLjE2MTAxMSBDIDQ0Ny4zODU5ODYgMjA3LjYyOTAyOCA0NDMuMDQ2OTk3IDIyMy44MDc5ODMgNDM2LjQyODk4NiAyMzguOTkyMDA0IEMgNDMwLjIzOTAxNCAyNTMuMTk1MDA3IDQxOS44MTY5ODYgMjY0LjI3NTAyNCA0MDguODg2OTkzIDI3NS4yNTU5ODEgQyAzOTYuNjEzMDA3IDI4Ny41ODgwMTMgMzg0LjgyNjk5NiAzMDAuMjY5MDQzIDM2OC43NjUwMTUgMzA2Ljk3MTAwOCBDIDM0OC42NDE5OTggMzE1LjM2NTk2NyAzMjYuMDE4MDA1IDMyNi4yMDcwMzEgMzA1LjY3NDAxMSAzMTguMzE3OTkzIFoiLz4KICAgICAgICA8L2c+CiAgICAgICAgPGZpbHRlciBpZD0iZmlsdGVyMyIgeD0iMCIgeT0iMCIgd2lkdGg9Ijc4OCIgaGVpZ2h0PSI4ODkiIGZpbHRlclVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgcHJpbWl0aXZlVW5pdHM9InVzZXJTcGFjZU9uVXNlIiBjb2xvci1pbnRlcnBvbGF0aW9uLWZpbHRlcnM9InNSR0IiPgogICAgICAgICAgICA8ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIxMjEuOTk2Ii8+CiAgICAgICAgPC9maWx0ZXI+CiAgICAgICAgPGcgaWQ9ImczIiBmaWx0ZXI9InVybCgjZmlsdGVyMykiPgogICAgICAgICAgICA8cGF0aCBpZD0icGF0aDIiIGZpbGw9IiNmODRhYTciIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlPSJub25lIiBkPSJNIDM3MS45NTk5OTEgNTYyLjQyNzk3OSBDIDM0My43NTIwMTQgNTU1LjgwOTAyMSAzMTIuMzkxOTk4IDU0My4zNjIgMjk5LjcyNjk5IDUxNy4yOTk5ODggQyAyODcuMDgzMDA4IDQ5MS4yODEwMDYgMzA1LjcyNzk5NyA0NjEuNTM2OTg3IDMwOC45NjM5ODkgNDMyLjc5ODAwNCBDIDMxMS45MTE5ODcgNDA2LjYxODAxMSAzMDQuMTEyIDM3OC4zMjI5OTggMzE3LjkwMzk5MiAzNTUuODgwOTgxIEMgMzMxLjk0NjAxNCAzMzMuMDMxMDA2IDM1Ny41NjUwMDIgMzE5LjQ0Mjk5MyAzODMuMjkwOTg1IDMxMS44NTE5OSBDIDQwNy41NTQ5OTMgMzA0LjY5Mjk5MyA0MzIuOTkzMDExIDMwOC43OTAwMzkgNDU3LjYwODAwMiAzMTQuNjYxMDExIEMgNDgxLjE3NDAxMSAzMjAuMjgyOTU5IDUwNi42MzggMzI2LjI2NTAxNSA1MjIuMDYyMDEyIDM0NC45NTM5NzkgQyA1MzYuOTgxMDE4IDM2My4wMzEwMDYgNTI5LjM1MTk5IDM5MC4xNzMwMDQgNTM3LjkyNjAyNSA0MTEuOTg0OTg1IEMgNTQ4LjM2MiA0MzguNTMzOTk3IDU4Ni4zOTgwMSA0NTguODM3MDA2IDU3Ny40NzMwMjIgNDg1LjkyMDk5IEMgNTY4LjU3MjAyMSA1MTIuOTM0OTk4IDUyNy4yMzE5OTUgNTA4LjcxNzAxIDUwMS44MzQwMTUgNTIxLjUxNTk5MSBDIDQ4Mi43MzU5OTIgNTMxLjE0MDk5MSA0NjcuMTUxMDAxIDU0NS4zNzQwMjMgNDQ2Ljc1MjAxNCA1NTEuNzk5OTg4IEMgNDIyLjIzOTk5IDU1OS41MjA5OTYgMzk2Ljk4NyA1NjguMzAxMDI1IDM3MS45NTk5OTEgNTYyLjQyNzk3OSBaIi8+CiAgICAgICAgPC9nPgogICAgPC9nPgo8L3N2Zz4K"
     return (
         <Container
-            background="#080714"
+            bg="#080714"
             backgroundPosition="top right"
             backgroundRepeat="no-repeat"
-            backgroundSize='630px 816px'
-            backgroundImage="bridge-background-blur.svg"
-            backgroundBlendMode="hard-light"
+            backgroundSize='600px 700px'
             minWidth="100%"
             margin="0"
             padding="0"
             height="100%"
+            position="relative"
             overflow="visible">
+            <Box position="absolute" w="100%" h="100%" bg="#080714">
+                <Image src={bgSvg} w="552px" h="622px" position="absolute" top="0" right="0" opacity=".5" filter="blur(10px)"></Image>
+            </Box>
             <Grid
+                zIndex="2"
                 templateRows={{ base: "275px repeat(5, 450px)", md: '275px repeat(3, 700px)', lg: '275px repeat(2, 700px)' }}
                 templateColumns='repeat(12, 1fr)'
                 maxW="1440px"
                 margin="auto"
-                height="100%">
+                height="100%"
+            >
+
 
 
 
                 {/* START WELCOME MESSAGE & PLAYER ELIGIBILITY */}
                 <GridItem
+                    zIndex="2"
                     padding={{
                         base: "96px 11px 0 11px",
                         md: "96px 40px 0 40px"
@@ -138,6 +145,8 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
                 {/* START SKINS */}
                 <GridItem
+                    zIndex="2"
+
                     padding={{
                         base: "16px 11px 8px 11px",
                         md: "16px 8px 8px 40px"
@@ -207,6 +216,8 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
                 {/* START IN-GAME ITEMS */}
                 <GridItem
+                    zIndex="2"
+
                     padding={{
                         base: "16px 11px 8px 11px",
                         md: "16px 40px 8px 8px",
@@ -296,6 +307,8 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
                 {/* START ON-CHAIN ITEMS */}
                 <GridItem
+                    zIndex="2"
+
                     padding={{
                         base: "16px 11px 8px 11px",
                         md: "8px 8px 8px 40px",
@@ -382,6 +395,8 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
                 {/* START IN-GAME RESOURCES */}
                 <GridItem
+                    zIndex="2"
+
                     padding={{
                         base: "16px 11px 8px 11px",
                         md: "8px 40px 8px 8px",
@@ -428,6 +443,7 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
 
                 {/* START ON-CHAIN RESOURCES */}
                 <GridItem
+                    zIndex="2"
                     padding={{
                         base: "16px 11px 8px 11px",
                         md: "8px 40px 16px 40px",
