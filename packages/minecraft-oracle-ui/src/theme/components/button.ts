@@ -18,13 +18,18 @@ const Button: ComponentStyleConfig = {
             _hover: {
                 border: "1px solid",
                 borderColor: "teal.200",
-                bg: "teal.600"
+                bg: "teal.600",
+                _disabled: {
+                    borderColor: "teal.500",
+                    bg: "teal.500",
+                }
             },
             _active: {
                 border: "1px solid",
                 borderColor: "teal.200",
                 bg: "teal.800"
-            }
+            },
+
         }
     }
 }
