@@ -967,8 +967,8 @@ const CharacterDesignerPage = () => {
       minWidth="100%"
       margin="0"
       padding="0"
-      minHeight={{ base: "calc(100vh - 80px)", xl: "calc(100vh - 164px)" }}
-      height={{ base: "calc(100vh - 80px)", xl: "calc(100vh - 64px)" }}
+      minHeight={{ base: "calc(100vh - 64px)", xl: "calc(100vh - 164px)" }}
+      height={{ base: "calc(100vh - 64px)" }}
       overflowY={{ lg: isTallerThan883 ? "hidden" : "scroll" }}
     >
       <Grid
@@ -977,7 +977,7 @@ const CharacterDesignerPage = () => {
         margin="auto"
 
       >
-        <GridItem w='100%' h={{ base: '100vw', lg: '898' }} padding={{ base: "24px 0 0 0", lg: "54px 0 80px 80px" }} >
+        <GridItem w='100%' h={{ base: 'calc(max(302px, 100vw))', lg: '898' }} padding={{ base: "24px 0 0 0", lg: "54px 0 80px 80px" }} >
           <Box
             h="100%"
             // backgroundPosition="0px 1px"
