@@ -4,6 +4,7 @@ import { save, load } from 'redux-localstorage-simple';
 import { bridgeApi } from './api/bridgeApi';
 import application from './application/reducer';
 import { updateVersion } from './global/actions';
+import authSlice from './slices/authSlice';
 import transactions from './transactions/reducer';
 
 const PERSISTED_KEYS: string[] = ['transactions'];
@@ -12,6 +13,7 @@ const store = configureStore({
   reducer: {
     application,
     transactions,
+    auth: authSlice,
     [bridgeApi.reducerPath]: bridgeApi.reducer
   },
   middleware: (getDefaultMiddleware) => [...getDefaultMiddleware({ thunk: false }), bridgeApi.middleware, save({ states: PERSISTED_KEYS })],
