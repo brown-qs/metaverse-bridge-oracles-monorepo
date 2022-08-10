@@ -15,6 +15,7 @@ const OauthConfirmPage = () => {
 
 
   const getOauthCode = async () => {
+    console.log("OAUTH CONFIRM")
     setIsLoading(true)
     try {
       console.log(oauthData?.params)
