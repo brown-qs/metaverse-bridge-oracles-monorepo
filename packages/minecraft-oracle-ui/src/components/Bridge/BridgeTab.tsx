@@ -15,10 +15,11 @@ export const BridgeTab: React.FC<{ title: string, children: ReactNode, isLoading
                 background="gray.800"
                 overflow="hidden"
                 whiteSpace="nowrap"
-                padding={isSmallerThan285 ? "0 0 0 0" : "0 24px 0 24px"}
+                padding={isSmallerThan285 ? "0 0 1px 0" : "0 24px 1px 24px"}
 
             >
                 <VStack
+
                     color="yellow.300"
                     fontSize="12px"
                     lineHeight="16px"
@@ -38,6 +39,8 @@ export const BridgeTab: React.FC<{ title: string, children: ReactNode, isLoading
                 </VStack>
             </HStack>
             <VStack
+                position="relative"
+                top="-1px"
                 flexGrow="1"
                 borderRadius={footer ? `0px ${topRightCornerRadius} 0px 0px` : `0px ${topRightCornerRadius} 8px 8px`}
                 overflowY="scroll"
@@ -56,6 +59,8 @@ export const BridgeTab: React.FC<{ title: string, children: ReactNode, isLoading
             </VStack>
             {footer &&
                 <Box
+                    position="relative"
+                    top="-2px"
                     padding="9px"
                     width="100%"
                     borderRadius="0px 0px 8px 8px"
