@@ -1,5 +1,5 @@
 import React from 'react';
-import { Switch, Route, Redirect } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from "hooks";
 import HomePage from './home';
 import AuthPage from './auth';
@@ -11,7 +11,6 @@ import { EnraptureDialog } from '../components/EnraptureDialog/EnraptureDialog';
 import { SummonDialog } from '../components/SummonDialog/SummonDialog';
 import { AssetDialog } from '../components/AssetDialog/AssetDialog';
 import AccountPage from './account';
-import LoginPage from './account/login';
 import EmailLoginPage from './account/login/email';
 import KiltLoginPage from './account/login/kilt';
 import EmailVerifyPage from './account/login/email/verify';
@@ -26,92 +25,89 @@ import GamerTagChangePage from './account/gamertag';
 export const Routing = () => {
     const { authData } = useAuth();
     return (
-        <Switch>
-            <Route exact path="/">
-                <Redirect to="/login" />
+        <Routes>
+            <Route path="/" element={<Navigate to="/login" />}>
+
             </Route>
 
-            <Route exact path="/account">
-                {!!authData?.jwt ? <AccountPage></AccountPage> : <Redirect to="/account/login" />}
+            <Route path="/account" element={<>{!!authData?.jwt ? <AccountPage></AccountPage> : <Navigate to="/login" />}</>}>
             </Route>
 
-            <Route exact path="/account/login">
-                {!!authData?.jwt ? <Redirect to="/account" /> : <LoginPage />}
+            <Route path="/account/login" element={<> {!!authData?.jwt ? <Navigate to="/account" /> : <HomePage />}</>}>
+
             </Route>
 
-            <Route exact path="/account/gamertag">
-                {!!authData?.jwt ? <GamerTagChangePage /> : <LoginPage />}
-            </Route>
+            <Route path="/account/login/email" element={<>{!!authData?.jwt ? <Navigate to="/account" /> : <EmailLoginPage />}</>} />
 
-            <Route exact path="/account/login/email">
-                {!!authData?.jwt ? <Redirect to="/account" /> : <EmailLoginPage />}
-            </Route>
 
-            <Route exact path="/account/login/email/change">
-                {!!authData?.jwt ? <EmailChangePage /> : <Redirect to="/account/login" />}
-            </Route>
-
-            <Route exact path="/account/login/email/verify">
-                <EmailVerifyPage />
-            </Route>
-
-            <Route exact path="/account/minecraft/redirect">
-                {!!authData?.jwt ? <MinecraftRedirectPage /> : <LoginPage />}
-            </Route>
-
-            <Route exact path="/account/minecraft/verify">
-                {!!authData?.jwt ? <MinecraftVerifyPage /> : <LoginPage />}
-            </Route>
-
-            <Route exact path="/account/minecraft/unlink">
-                {!!authData?.jwt ? <MinecraftUnlinkPage /> : <LoginPage />}
-            </Route>
-
-            <Route exact path="/account/login/kilt">
-                {!!authData?.jwt ? <Redirect to="/account" /> : <KiltLoginPage />}
-            </Route>
-
-            <Route exact path="/auth/:jwt">
-                <AuthPage />
-            </Route>
-
-            <Route exact path="/login">
-                {!!authData?.jwt ? <Redirect to="/bridge" /> : <HomePage />}
-            </Route>
-
-            <Route exact path="/oauth">
-                <OauthPage />
-            </Route>
-
-            <Route exact path="/oauth/confirm">
-                {!!authData?.jwt ? <OauthConfirmPage /> : <LoginPage />}
+            <Route path="/account/gamertag" element={!!authData?.jwt ? <GamerTagChangePage /> : <HomePage />}>
             </Route>
 
 
-            <Route path="/bridge">
-                {!!authData?.jwt ? (
-                    <>
-                        <ImportDialog />
-                        <ExportDialog />
-                        <EnraptureDialog />
-                        <SummonDialog />
-                        <AssetDialog />
-                        <ProfilePage authData={authData} />
-                    </>
-                ) : <HomePage />}
+
+            <Route path="/account/login/email/change" element={<> {!!authData?.jwt ? <EmailChangePage /> : <Navigate to="/login" />}</>}>
+
             </Route>
 
-            <Route path="/moonsama/customizer/:chainId/:assetAddress/:assetId">
-                <MoonsamaCharacterDesignerPage authData={authData} />
+            <Route path="/account/login/email/verify" element={<><EmailVerifyPage /></>}>
+
             </Route>
 
-            <Route exact path="/moonsama/customizer">
-                <MoonsamaCharacterDesignerPage authData={authData} />
+            <Route path="/account/minecraft/redirect" element={<>{!!authData?.jwt ? <MinecraftRedirectPage /> : <HomePage />}</>}>
+
             </Route>
 
-            <Route path="*">
-                <Redirect to="/bridge" />
+            <Route path="/account/minecraft/verify" element={<>{!!authData?.jwt ? <MinecraftVerifyPage /> : <HomePage />}</>}>
+
             </Route>
-        </Switch >
+
+            <Route path="/account/minecraft/unlink" element={<>{!!authData?.jwt ? <MinecraftUnlinkPage /> : <HomePage />}</>}>
+
+            </Route>
+
+            <Route path="/account/login/kilt" element={<>{!!authData?.jwt ? <Navigate to="/account" /> : <KiltLoginPage />}</>}>
+
+            </Route>
+
+            <Route path="/auth/:jwt" element={<><AuthPage /></>}>
+
+            </Route>
+
+            <Route path="/login" element={<>{!!authData?.jwt ? <Navigate to="/bridge" /> : <HomePage />}</>}>
+
+            </Route>
+
+
+            <Route path="/oauth" element={<OauthPage />}>
+            </Route>
+
+            <Route path="/oauth/confirm" element={!!authData?.jwt ? <OauthConfirmPage /> : <HomePage />}>
+            </Route>
+
+
+            <Route path="/bridge" element={<>{!!authData?.jwt ? (
+                <>
+                    <ImportDialog />
+                    <ExportDialog />
+                    <EnraptureDialog />
+                    <SummonDialog />
+                    <AssetDialog />
+                    <ProfilePage authData={authData} />
+                </>
+            ) : <HomePage />}</>}>
+
+            </Route>
+
+            <Route path="/moonsama/customizer/:chainId/:assetAddress/:assetId" element={<MoonsamaCharacterDesignerPage />}>
+            </Route>
+
+            <Route path="/moonsama/customizer" element={<><MoonsamaCharacterDesignerPage /></>}>
+
+            </Route>
+
+            <Route path="*" element={<><Navigate to="/bridge" /></>}>
+
+            </Route>
+        </Routes >
     )
 };

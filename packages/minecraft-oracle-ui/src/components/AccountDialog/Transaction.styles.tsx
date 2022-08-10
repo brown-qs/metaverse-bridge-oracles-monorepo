@@ -1,4 +1,3 @@
-import { Theme } from '@mui/material';
 
 
 type Props = {
@@ -6,7 +5,7 @@ type Props = {
   pending?: boolean;
 };
 
-export const styles = (theme: Theme) => ({
+export const styles = (theme: any) => ({
   dialogContainer: {
     display: 'flex',
     padding: 32,
@@ -27,15 +26,15 @@ export const styles = (theme: Theme) => ({
     padding: '0.25rem 0rem',
     fontWeight: 500,
     fontSize: '0.825rem',
-    color: theme.palette.text.primary,
+    //  color: theme.palette.text.primary,
   },
   iconWrapperText: {
-    color: theme.palette.text.primary
+    // color: theme.palette.text.primary
   },
   iconWrapperSuccess: {
-    color: theme.palette.success.main
+    //  color: theme.palette.success.main
   },
   iconWrapperError: {
-    color: theme.palette.error.main
+    //   color: theme.palette.error.main
   },
 });

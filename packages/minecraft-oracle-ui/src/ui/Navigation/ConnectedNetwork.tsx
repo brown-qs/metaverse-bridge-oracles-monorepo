@@ -1,5 +1,5 @@
-import Box from '@mui/material/Box';
-import "@fontsource/orbitron/500.css";
+
+import { Box, Text } from '@chakra-ui/react';
 import { useWeb3React } from '@web3-react/core';
 import { useAccountDialog, useActiveWeb3React, useClasses } from 'hooks';
 import { NETWORK_NAME } from '../../constants';
@@ -7,7 +7,7 @@ import { NETWORK_NAME } from '../../constants';
 export default function CarnageStatus() {
   const { chainId } = useActiveWeb3React();
   const { error: err } = useWeb3React();
-  const { setAccountDialogOpen } = useAccountDialog();
+  const { onAccountDialogOpen } = useAccountDialog();
 
   const showError = err ? true : false;
   const errorState = showError || !chainId
@@ -38,8 +38,8 @@ export default function CarnageStatus() {
   } = useClasses(styles)
 
   return (
-    <Box onClick={() => setAccountDialogOpen(true)} className={BoxStyle}>
-      <span>{errorState ? 'Wrong Network' : NETWORK_NAME[chainId]}</span>
+    <Box onClick={() => onAccountDialogOpen()} className={BoxStyle}>
+      <Text color="white">{errorState ? 'Wrong Network' : NETWORK_NAME[chainId]}</Text>
     </Box>
   );
 };

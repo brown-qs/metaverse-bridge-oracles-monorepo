@@ -12,8 +12,9 @@ export type ImportDialogData = {
 } | undefined;
 
 export type ImportDialogContextType = {
-  isImportDialogOpen: boolean;
-  setImportDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isImportDialogOpen: boolean
+  onImportDialogOpen: () => void
+  onImportDialogClose: () => void
   importDialogData?: ImportDialogData;
   setImportDialogData: React.Dispatch<React.SetStateAction<ImportDialogData>>;
 };

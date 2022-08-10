@@ -1,17 +1,14 @@
 import { useDispatch } from 'react-redux';
 
-import { Button, Stack } from '@mui/material';
-import Typography from '@mui/material/Typography';
 import { injected, walletconnect } from 'connectors';
 import { SUPPORTED_WALLETS } from '../../connectors';
 import { useAccountDialog } from 'hooks';
 import { useCallback, useEffect, useState } from 'react';
-import { Dialog } from 'ui';
 import { useClasses } from 'hooks';
-import { styles as accountDialogStyles } from './AccountDialog.styles';
 import { isMobile } from 'react-device-detect';
 import WalletConnectIcon from '../../assets/images/walletConnectIcon.svg';
 import MetamaskIcon from '../../assets/images/metamask.png';
+
 import Identicon from '../Identicon/Identicon';
 import { Transaction } from './Transaction';
 import { clearAllTransactions } from 'state/transactions/actions';
@@ -23,10 +20,13 @@ import { WalletConnectConnector } from '@web3-react/walletconnect-connector';
 import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core';
 import OptionCard from './OptionCard';
 import usePrevious from 'hooks/usePrevious/usePrevious';
-import CircularProgress from '@mui/material/CircularProgress';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 import useAddNetworkToMetamaskCb from 'hooks/useAddNetworkToMetamask/useAddNetworkToMetamask';
 import { ChainId, NETWORK_NAME, PERMISSIONED_CHAINS } from '../../constants';
+import { Image, Box, Button, CircularProgress, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Stack, Text, VStack, HStack } from '@chakra-ui/react';
+import { ArrowsRightLeft, MessageReport } from 'tabler-icons-react';
+import { ModalIcon } from '../MoonsamaModal/ModalIcon';
+import { MoonsamaModal } from '../MoonsamaModal';
 
 const WALLET_VIEWS = {
   OPTIONS: 'options',
@@ -36,7 +36,7 @@ const WALLET_VIEWS = {
 };
 
 export const AccountDialog = () => {
-  const styles = useClasses(accountDialogStyles);
+  const metamaskIcon = "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDIyLjAuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zOmV2PSJodHRwOi8vd3d3LnczLm9yZy8yMDAxL3htbC1ldmVudHMiCgkgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiIHZpZXdCb3g9IjAgMCAzMTguNiAzMTguNiIKCSBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAzMTguNiAzMTguNjsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPgoJLnN0MHtmaWxsOiNFMjc2MUI7c3Ryb2tlOiNFMjc2MUI7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7c3Ryb2tlLWxpbmVqb2luOnJvdW5kO30KCS5zdDF7ZmlsbDojRTQ3NjFCO3N0cm9rZTojRTQ3NjFCO3N0cm9rZS1saW5lY2FwOnJvdW5kO3N0cm9rZS1saW5lam9pbjpyb3VuZDt9Cgkuc3Qye2ZpbGw6I0Q3QzFCMztzdHJva2U6I0Q3QzFCMztzdHJva2UtbGluZWNhcDpyb3VuZDtzdHJva2UtbGluZWpvaW46cm91bmQ7fQoJLnN0M3tmaWxsOiMyMzM0NDc7c3Ryb2tlOiMyMzM0NDc7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7c3Ryb2tlLWxpbmVqb2luOnJvdW5kO30KCS5zdDR7ZmlsbDojQ0Q2MTE2O3N0cm9rZTojQ0Q2MTE2O3N0cm9rZS1saW5lY2FwOnJvdW5kO3N0cm9rZS1saW5lam9pbjpyb3VuZDt9Cgkuc3Q1e2ZpbGw6I0U0NzUxRjtzdHJva2U6I0U0NzUxRjtzdHJva2UtbGluZWNhcDpyb3VuZDtzdHJva2UtbGluZWpvaW46cm91bmQ7fQoJLnN0NntmaWxsOiNGNjg1MUI7c3Ryb2tlOiNGNjg1MUI7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7c3Ryb2tlLWxpbmVqb2luOnJvdW5kO30KCS5zdDd7ZmlsbDojQzBBRDlFO3N0cm9rZTojQzBBRDlFO3N0cm9rZS1saW5lY2FwOnJvdW5kO3N0cm9rZS1saW5lam9pbjpyb3VuZDt9Cgkuc3Q4e2ZpbGw6IzE2MTYxNjtzdHJva2U6IzE2MTYxNjtzdHJva2UtbGluZWNhcDpyb3VuZDtzdHJva2UtbGluZWpvaW46cm91bmQ7fQoJLnN0OXtmaWxsOiM3NjNEMTY7c3Ryb2tlOiM3NjNEMTY7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7c3Ryb2tlLWxpbmVqb2luOnJvdW5kO30KPC9zdHlsZT4KPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSIyNzQuMSwzNS41IDE3NC42LDEwOS40IDE5Myw2NS44ICIvPgo8Zz4KCTxwb2x5Z29uIGNsYXNzPSJzdDEiIHBvaW50cz0iNDQuNCwzNS41IDE0My4xLDExMC4xIDEyNS42LDY1LjggCSIvPgoJPHBvbHlnb24gY2xhc3M9InN0MSIgcG9pbnRzPSIyMzguMywyMDYuOCAyMTEuOCwyNDcuNCAyNjguNSwyNjMgMjg0LjgsMjA3LjcgCSIvPgoJPHBvbHlnb24gY2xhc3M9InN0MSIgcG9pbnRzPSIzMy45LDIwNy43IDUwLjEsMjYzIDEwNi44LDI0Ny40IDgwLjMsMjA2LjggCSIvPgoJPHBvbHlnb24gY2xhc3M9InN0MSIgcG9pbnRzPSIxMDMuNiwxMzguMiA4Ny44LDE2Mi4xIDE0NC4xLDE2NC42IDE0Mi4xLDEwNC4xIAkiLz4KCTxwb2x5Z29uIGNsYXNzPSJzdDEiIHBvaW50cz0iMjE0LjksMTM4LjIgMTc1LjksMTAzLjQgMTc0LjYsMTY0LjYgMjMwLjgsMTYyLjEgCSIvPgoJPHBvbHlnb24gY2xhc3M9InN0MSIgcG9pbnRzPSIxMDYuOCwyNDcuNCAxNDAuNiwyMzAuOSAxMTEuNCwyMDguMSAJIi8+Cgk8cG9seWdvbiBjbGFzcz0ic3QxIiBwb2ludHM9IjE3Ny45LDIzMC45IDIxMS44LDI0Ny40IDIwNy4xLDIwOC4xIAkiLz4KPC9nPgo8Zz4KCTxwb2x5Z29uIGNsYXNzPSJzdDIiIHBvaW50cz0iMjExLjgsMjQ3LjQgMTc3LjksMjMwLjkgMTgwLjYsMjUzIDE4MC4zLDI2Mi4zIAkiLz4KCTxwb2x5Z29uIGNsYXNzPSJzdDIiIHBvaW50cz0iMTA2LjgsMjQ3LjQgMTM4LjMsMjYyLjMgMTM4LjEsMjUzIDE0MC42LDIzMC45IAkiLz4KPC9nPgo8cG9seWdvbiBjbGFzcz0ic3QzIiBwb2ludHM9IjEzOC44LDE5My41IDExMC42LDE4NS4yIDEzMC41LDE3Ni4xICIvPgo8cG9seWdvbiBjbGFzcz0ic3QzIiBwb2ludHM9IjE3OS43LDE5My41IDE4OCwxNzYuMSAyMDgsMTg1LjIgIi8+CjxnPgoJPHBvbHlnb24gY2xhc3M9InN0NCIgcG9pbnRzPSIxMDYuOCwyNDcuNCAxMTEuNiwyMDYuOCA4MC4zLDIwNy43IAkiLz4KCTxwb2x5Z29uIGNsYXNzPSJzdDQiIHBvaW50cz0iMjA3LDIwNi44IDIxMS44LDI0Ny40IDIzOC4zLDIwNy43IAkiLz4KCTxwb2x5Z29uIGNsYXNzPSJzdDQiIHBvaW50cz0iMjMwLjgsMTYyLjEgMTc0LjYsMTY0LjYgMTc5LjgsMTkzLjUgMTg4LjEsMTc2LjEgMjA4LjEsMTg1LjIgCSIvPgoJPHBvbHlnb24gY2xhc3M9InN0NCIgcG9pbnRzPSIxMTAuNiwxODUuMiAxMzAuNiwxNzYuMSAxMzguOCwxOTMuNSAxNDQuMSwxNjQuNiA4Ny44LDE2Mi4xIAkiLz4KPC9nPgo8Zz4KCTxwb2x5Z29uIGNsYXNzPSJzdDUiIHBvaW50cz0iODcuOCwxNjIuMSAxMTEuNCwyMDguMSAxMTAuNiwxODUuMiAJIi8+Cgk8cG9seWdvbiBjbGFzcz0ic3Q1IiBwb2ludHM9IjIwOC4xLDE4NS4yIDIwNy4xLDIwOC4xIDIzMC44LDE2Mi4xIAkiLz4KCTxwb2x5Z29uIGNsYXNzPSJzdDUiIHBvaW50cz0iMTQ0LjEsMTY0LjYgMTM4LjgsMTkzLjUgMTQ1LjQsMjI3LjYgMTQ2LjksMTgyLjcgCSIvPgoJPHBvbHlnb24gY2xhc3M9InN0NSIgcG9pbnRzPSIxNzQuNiwxNjQuNiAxNzEuOSwxODIuNiAxNzMuMSwyMjcuNiAxNzkuOCwxOTMuNSAJIi8+CjwvZz4KPHBvbHlnb24gY2xhc3M9InN0NiIgcG9pbnRzPSIxNzkuOCwxOTMuNSAxNzMuMSwyMjcuNiAxNzcuOSwyMzAuOSAyMDcuMSwyMDguMSAyMDguMSwxODUuMiAiLz4KPHBvbHlnb24gY2xhc3M9InN0NiIgcG9pbnRzPSIxMTAuNiwxODUuMiAxMTEuNCwyMDguMSAxNDAuNiwyMzAuOSAxNDUuNCwyMjcuNiAxMzguOCwxOTMuNSAiLz4KPHBvbHlnb24gY2xhc3M9InN0NyIgcG9pbnRzPSIxODAuMywyNjIuMyAxODAuNiwyNTMgMTc4LjEsMjUwLjggMTQwLjQsMjUwLjggMTM4LjEsMjUzIDEzOC4zLDI2Mi4zIDEwNi44LDI0Ny40IDExNy44LDI1Ni40IAoJMTQwLjEsMjcxLjkgMTc4LjQsMjcxLjkgMjAwLjgsMjU2LjQgMjExLjgsMjQ3LjQgIi8+Cjxwb2x5Z29uIGNsYXNzPSJzdDgiIHBvaW50cz0iMTc3LjksMjMwLjkgMTczLjEsMjI3LjYgMTQ1LjQsMjI3LjYgMTQwLjYsMjMwLjkgMTM4LjEsMjUzIDE0MC40LDI1MC44IDE3OC4xLDI1MC44IDE4MC42LDI1MyAiLz4KPGc+Cgk8cG9seWdvbiBjbGFzcz0ic3Q5IiBwb2ludHM9IjI3OC4zLDExNC4yIDI4Ni44LDczLjQgMjc0LjEsMzUuNSAxNzcuOSwxMDYuOSAyMTQuOSwxMzguMiAyNjcuMiwxNTMuNSAyNzguOCwxNDAgMjczLjgsMTM2LjQgCgkJMjgxLjgsMTI5LjEgMjc1LjYsMTI0LjMgMjgzLjYsMTE4LjIgCSIvPgoJPHBvbHlnb24gY2xhc3M9InN0OSIgcG9pbnRzPSIzMS44LDczLjQgNDAuMywxMTQuMiAzNC45LDExOC4yIDQyLjksMTI0LjMgMzYuOCwxMjkuMSA0NC44LDEzNi40IDM5LjgsMTQwIDUxLjMsMTUzLjUgMTAzLjYsMTM4LjIgCgkJMTQwLjYsMTA2LjkgNDQuNCwzNS41IAkiLz4KPC9nPgo8cG9seWdvbiBjbGFzcz0ic3Q2IiBwb2ludHM9IjI2Ny4yLDE1My41IDIxNC45LDEzOC4yIDIzMC44LDE2Mi4xIDIwNy4xLDIwOC4xIDIzOC4zLDIwNy43IDI4NC44LDIwNy43ICIvPgo8cG9seWdvbiBjbGFzcz0ic3Q2IiBwb2ludHM9IjEwMy42LDEzOC4yIDUxLjMsMTUzLjUgMzMuOSwyMDcuNyA4MC4zLDIwNy43IDExMS40LDIwOC4xIDg3LjgsMTYyLjEgIi8+Cjxwb2x5Z29uIGNsYXNzPSJzdDYiIHBvaW50cz0iMTc0LjYsMTY0LjYgMTc3LjksMTA2LjkgMTkzLjEsNjUuOCAxMjUuNiw2NS44IDE0MC42LDEwNi45IDE0NC4xLDE2NC42IDE0NS4zLDE4Mi44IDE0NS40LDIyNy42IAoJMTczLjEsMjI3LjYgMTczLjMsMTgyLjggIi8+Cjwvc3ZnPgo="
   const dispatch = useDispatch<AppDispatch>();
 
   const [pendingWallet, setPendingWallet] = useState<
@@ -55,7 +55,7 @@ export const AccountDialog = () => {
     .filter((tx) => tx.receipt)
     .map((tx) => tx.hash);
 
-  const { isAccountDialogOpen, setAccountDialogOpen } = useAccountDialog();
+  const { isAccountDialogOpen, onAccountDialogOpen, onAccountDialogClose } = useAccountDialog();
   // error reporting not working (e.g. on unsupported chain id)
   const { chainId, account, connector, active, error, activate, deactivate } =
     useWeb3React();
@@ -64,9 +64,13 @@ export const AccountDialog = () => {
   // close on connection, when logged out before
   useEffect(() => {
     if (account && !previousAccount && isAccountDialogOpen) {
-      setAccountDialogOpen(!isAccountDialogOpen);
+      if (isAccountDialogOpen) {
+        onAccountDialogClose()
+      } else {
+        onAccountDialogOpen()
+      }
     }
-  }, [account, previousAccount, isAccountDialogOpen, setAccountDialogOpen]);
+  }, [account, previousAccount, isAccountDialogOpen, onAccountDialogOpen, onAccountDialogClose]);
 
   // always reset to account view
   useEffect(() => {
@@ -107,19 +111,19 @@ export const AccountDialog = () => {
           (connector !== injected || isMetaMask === (k === 'METAMASK'))
       )
       .map((k) => SUPPORTED_WALLETS[k].name)[0];
-    return <div className={styles.walletName}>Connected with {name}</div>;
+    return <Box w="100%">Connected with {name}</Box>;
   }
 
   function getStatusIcon() {
     if (connector === injected) {
       return (
-        <div className={styles.iconWrapper}>
+        <div >
           <Identicon />
         </div>
       );
     } else if (connector === walletconnect) {
       return (
-        <div className={styles.iconWrapper}>
+        <div >
           <img src={WalletConnectIcon} alt={'wallet connect logo'} />
         </div>
       );
@@ -139,23 +143,16 @@ export const AccountDialog = () => {
 
   const showConnectedAccountDetails = useCallback(
     () => (
-      <>
-        {formatConnectorName()}
-        <div className={styles.row}>
-          {getStatusIcon()}
-          <p> {account && shortenAddress(account)}</p>
-        </div>
-        <Button
-          variant="outlined"
-          color="primary"
-          className={styles.row}
-          onClick={() => setWalletView(WALLET_VIEWS.OPTIONS)}
-        >
-          Change
-        </Button>
-      </>
+      <VStack w="100%">
+        <Box w="100%">{formatConnectorName()}</Box>
+        <HStack w="100%">
+          <Box>{getStatusIcon()}</Box>
+          <Box lineHeight="24px" fontSize="16px" color="whiteAlpha.700" fontFamily="Rubik">{account && shortenAddress(account)}</Box>
+        </HStack>
+      </VStack>
+
     ),
-    [account, activate, deactivate, styles]
+    [account, activate, deactivate]
   );
 
   const clearAllTransactionsCallback = useCallback(() => {
@@ -217,7 +214,8 @@ export const AccountDialog = () => {
               link={option.href}
               header={option.name}
               subheader={null}
-              icon={require('../../assets/images/' + option.iconName)}
+              iconUrl={`../../assets/images/${option.iconName}`}
+            //icon={<img src={require('../../assets/images/' + option.iconName)}></img>}
             />
           );
         }
@@ -230,14 +228,16 @@ export const AccountDialog = () => {
         if (!(window.web3 || window.ethereum)) {
           if (option.name === 'MetaMask') {
             return (
-              <OptionCard
-                id={`connect-${key}`}
+              < OptionCard
+                id={`connect-${key}`
+                }
                 key={key}
                 color={'#E8831D'}
                 header={'Install Metamask'}
                 subheader={null}
                 link={'https://metamask.io/'}
-                icon={MetamaskIcon}
+                iconUrl={metamaskIcon}
+
               />
             );
           } else {
@@ -255,6 +255,7 @@ export const AccountDialog = () => {
       }
 
       // return rest of options
+
       return (
         !isMobile &&
         !option.mobileOnly && (
@@ -269,189 +270,139 @@ export const AccountDialog = () => {
             active={option.connector === connector}
             color={option.color}
             link={option.href}
-            header={option.name}
+            header={option.name.toUpperCase()}
             subheader={null} //use option.descriptio to bring back multi-line
-            icon={require('../../assets/images/' + option.iconName).default}
+            iconUrl={metamaskIcon}
           />
         )
       );
     });
   }
 
-  /*
-  const showConnectionOptions = useCallback(
-    () => (
-      <>
-        <Button
-          variant="outlined"
-          color="primary"
-          className={styles.button}
-          onClick={() => activate(injected)}
-        >
-          MetaMask
-        </Button>
-        <Button
-          variant="outlined"
-          color="primary"
-          className={styles.button}
-          onClick={() => activate(walletconnect)}
-        >
-          Wallet Connect
-        </Button>
-        {error && (
-          <div className={styles.row}>
-            <Typography variant="body2" color="error">{error.message}</Typography>
-          </div>
-        )}
-        <Typography variant="body2" className={styles.row}>
-          New to Ethereum?{' '}
-          <ExternalLink href="https://ethereum.org/wallets">
-            Learn more about wallets
-          </ExternalLink>
-        </Typography>
-      </>
-    ),
-    [activate, styles]
-  );
-  */
 
-  function getModalContent() {
-    if (error) {
-      return (
-        <div className={styles.dialogContainer}>
-          {error instanceof UnsupportedChainIdError && <>
-            <div>
-              Unsupported network
-            </div>
-            <h5>Please connect to a supported Ethereum network.</h5>
-            {PERMISSIONED_CHAINS.map((chainId, i) => {
-              return <Button
-                //className={formButton}
-                key={`${chainId}-${i}`}
-                onClick={() => {
-                  addNetwork(chainId as ChainId)
-                }}
-                color="primary"
+  const newToEthereumElem = (<>
+    <HStack fontFamily="Rubik" alignItems="center" w="100%">
+      <Text color="whiteAlpha.700" fontSize="12px">New to Ethereum?</Text>
+      <ExternalLink href="https://ethereum.org/wallets">
+        <Text color="teal.200" _hover={{ textDecoration: "underline" }}>Learn more about wallets</Text>
+      </ExternalLink>
+    </HStack>
+  </>)
+  if (error && error instanceof UnsupportedChainIdError) {
+    return (<MoonsamaModal
+      title="Unsupported network"
+      isOpen={isAccountDialogOpen}
+      onClose={onAccountDialogClose}
+      TablerIcon={MessageReport}
+      iconBackgroundColor="yellow.300"
+      iconColor="black"
+      message="Please connect to a supported network."
+    >
+      {PERMISSIONED_CHAINS.map((chainId, i) => {
+        return <Button
+          width="100%"
+          key={`${chainId}-${i}`}
+          leftIcon={<ArrowsRightLeft />}
+          onClick={() => {
+            addNetwork(chainId as ChainId)
+          }}
+        >
+          Switch to {NETWORK_NAME[chainId]}
+        </Button>
+      })}
+    </MoonsamaModal>)
+  } else if (error && !(error instanceof UnsupportedChainIdError)) {
+    return (<MoonsamaModal
+      title="Something went wrong"
+      isOpen={isAccountDialogOpen}
+      onClose={onAccountDialogClose}
+      TablerIcon={MessageReport}
+      iconBackgroundColor="yellow.300"
+      iconColor="black"
+      message="Error connecting. Try refreshing the page."
+    >
+    </MoonsamaModal>)
+  } else if (walletView === WALLET_VIEWS.PENDING) {
+    return (<MoonsamaModal
+      title="Initializing wallet..."
+      isOpen={isAccountDialogOpen}
+      onClose={onAccountDialogClose}
+    >
+      <VStack alignItems="center" spacing="0">
+        <Box>
+          <CircularProgress isIndeterminate color="teal" />
+        </Box>
+      </VStack>
+    </MoonsamaModal>)
+  } else if (!account) {
+    return (<MoonsamaModal
+      title="Wallet"
+      isOpen={isAccountDialogOpen}
+      onClose={onAccountDialogClose}
+      message="Connect to a wallet"
+    >
+      <VStack alignItems="center" spacing="0" w="100%">
+        <Box w="100%">
+          {getOptions()}
+        </Box>
+        <Box paddingTop="16px">
+          {newToEthereumElem}
+        </Box>
+      </VStack>
+    </MoonsamaModal>)
+  } else if (account && walletView === WALLET_VIEWS.ACCOUNT) {
+    return (<MoonsamaModal
+      title="Wallet"
+      isOpen={isAccountDialogOpen}
+      onClose={onAccountDialogClose}
+      bottomButtonText="Change Wallet"
+      onBottomButtonClick={() => setWalletView(WALLET_VIEWS.OPTIONS)}
+    >
+      <VStack lineHeight="24px" fontSize="16px" color="whiteAlpha.700" fontFamily="Rubik">
+        {showConnectedAccountDetails()}
+        {account &&
+          (!!pendingTransactions.length || !!confirmedTransactions.length) ? (
+          <Stack fontSize="12px" >
+            <Stack direction={'row'} justifyContent={'space-between'}>
+              <Text>Recent transactions</Text>
+              <Button
+                onClick={clearAllTransactionsCallback}
               >
-                Switch to {NETWORK_NAME[chainId]}
+                (clear all)
               </Button>
-            })}
-          </>}
-
-          {!(error instanceof UnsupportedChainIdError) && <>
-            <div>
-              Something went wrong
-            </div>
-            <h5>Error connecting. Try refreshing the page.</h5>
-          </>}
-        </div>
-      );
-    }
-
-    if (account && walletView === WALLET_VIEWS.ACCOUNT) {
-      return (
-        <>
-          <div className={styles.dialogContainer}>
-            {showConnectedAccountDetails()}
-          </div>
-          {account &&
-            (!!pendingTransactions.length || !!confirmedTransactions.length) ? (
-            <Stack className={styles.lowerSection}>
-              <Stack direction={'row'} justifyContent={'space-between'}>
-                <Typography>Recent transactions</Typography>
-                <Button
-                  //className={styles.linkStyledButton}
-                  onClick={clearAllTransactionsCallback}
-                >
-                  (clear all)
-                </Button>
-              </Stack>
-              {renderTransactions(pendingTransactions)}
-              {renderTransactions(confirmedTransactions)}
             </Stack>
-          ) : (
-            <div className={styles.lowerSection}>
-              <Typography>Your transactions will appear here...</Typography>
-            </div>
-          )}
-        </>
-      );
-    }
-    return (
-      <div className={styles.dialogContainer}>
-        {walletView !== WALLET_VIEWS.ACCOUNT ? (
-          <Button
-            className={styles.titleSlot}
-            variant="outlined"
-            color="primary"
-            onClick={() => {
-              setPendingError(false);
-              setWalletView(WALLET_VIEWS.ACCOUNT);
-            }}
-          >
-            Back
-          </Button>
+            {renderTransactions(pendingTransactions)}
+            {renderTransactions(confirmedTransactions)}
+          </Stack>
         ) : (
-          <span className={styles.titleSlot}>Connect to a wallet</span>
+          <Box fontSize="12px">
+            <Text>Your transactions will appear here...</Text>
+          </Box>
         )}
-        {walletView === WALLET_VIEWS.PENDING ? (
-          <>
-            <CircularProgress />
-            {error ? (
-              <Typography className={styles.walletPendingText}>
-                Error connecting
-              </Typography>
-            ) : (
-              <Typography className={styles.walletPendingText}>
-                Initializing...
-              </Typography>
-            )}
-          </>
-        ) : (
-          getOptions()
-        )}
-        {walletView !== WALLET_VIEWS.PENDING && (
-          <Typography variant="body2" className={styles.row}>
-            New to Ethereum? &nbsp;
-            <ExternalLink href="https://ethereum.org/wallets">
-              Learn more about wallets
-            </ExternalLink>
-          </Typography>
-        )}
-      </div>
-    );
+      </VStack>
+    </MoonsamaModal>)
+  } else if (account && walletView === WALLET_VIEWS.OPTIONS) {
+    return (<MoonsamaModal
+      title="Change wallet"
+      isOpen={isAccountDialogOpen}
+      onClose={onAccountDialogClose}
+      bottomButtonText="Back"
+      onBottomButtonClick={() => {
+        setPendingError(false);
+        setWalletView(WALLET_VIEWS.ACCOUNT);
+      }}
+    >
+      {getOptions()}
+
+    </MoonsamaModal>)
+  } else {
+    return (<MoonsamaModal
+      title="Wallet"
+      isOpen={isAccountDialogOpen}
+      onClose={onAccountDialogClose}
+      message="Connect to a wallet"
+    >
+    </MoonsamaModal>)
   }
 
-  return (
-    <Dialog
-      open={isAccountDialogOpen}
-      onClose={() => setAccountDialogOpen(false)}
-      title="Account"
-      maxWidth='sm'
-      fullWidth={true}
-    >
-      {getModalContent()}
-    </Dialog>
-  );
 };
-
-/**
- * <div className={styles.dialogContainer}>
-        {account ? showConnectedAccountDetails() : getOptions()}
-      </div>
-      {account && (!!pendingTransactions.length || !!confirmedTransactions.length) ? (
-        <div className={styles.lowerSection}>
-          <div className={styles.autoRow}>
-            <Typography>Recent transactions</Typography>
-            <Button className={styles.linkStyledButton} onClick={clearAllTransactionsCallback}>(clear all)</Button>
-          </div>
-          {renderTransactions(pendingTransactions)}
-          {renderTransactions(confirmedTransactions)}
-        </div>
-      ) : (
-        <div className={styles.lowerSection}>
-          <Typography>Your transactions will appear here...</Typography>
-        </div>
-      )}
- * 
- */

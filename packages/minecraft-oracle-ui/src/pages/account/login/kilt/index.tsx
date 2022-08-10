@@ -1,24 +1,14 @@
 import React, { useState } from 'react';
-import { AuthLayout, Loader } from 'ui';
-import { useClasses } from 'hooks';
-import Tooltip from '@mui/material/Tooltip';
-
-import WhiteLogo from 'assets/images/moonsama-glitch-white.svg';
-import LeftImage from 'assets/images/home/left.png';
-import RightImageFlip from 'assets/images/home/right.png';
-import Box from '@mui/material/Box';
-import "@fontsource/orbitron/500.css";
-import { Alert, Button, Stack, Typography, useMediaQuery, Link } from '@mui/material';
-import { theme } from 'theme/Theme';
+import { AuthLayout } from 'ui';
 import { getKiltExtension, walletLogin } from 'utils/kilt';
-import { useHistory } from 'react-router-dom';
-import LoadingButton from '@mui/lab/LoadingButton';
+import { useNavigate } from 'react-router-dom';
+import { Alert, AlertDescription, AlertIcon, Button, Link, Stack } from '@chakra-ui/react';
 
 const KiltLoginPage = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [statusMessage, setStatusMessage] = useState("")
   const [failureMessage, setFailureMessage] = useState("")
-  let history = useHistory();
+  let navigate = useNavigate();
 
 
 
@@ -46,7 +36,7 @@ const KiltLoginPage = () => {
       return
     }
     if (!!result?.jwt) {
-      history.push(`/auth/${result.jwt}`)
+      navigate(`/auth/${result.jwt}`)
     } else if (!!result?.message) {
       setFailureMessage(`Failed: ${result.message}`)
     } else {
@@ -69,13 +59,19 @@ const KiltLoginPage = () => {
 
       <Stack direction="row" spacing={2} margin={0} alignContent='center' textAlign='center' justifyContent="space-between">
         <Stack></Stack>
-        <Alert sx={{ margin: "auto" }} severity="info">Logging in with KILT requires a Sporran desktop wallet. Your wallet must include a <Link sx={{ textDecoration: "underline !important", "&:hover": { "color": "rgb(255, 201, 20) !important" } }} underline="always" href="https://socialkyc.io" target="_blank">SocialKYC</Link> email credential. Your Moonsama account is based on your email.</Alert>
+        <Alert margin="auto" status="info" variant='solid' fontFamily="Rubik" textAlign="left">
+          <AlertIcon />
+          <AlertDescription>
+            Logging in with KILT requires a Sporran desktop wallet. Your wallet must include a <Link sx={{ textDecoration: "underline !important", "&:hover": { "color": "rgb(255, 201, 20) !important" } }} href="https://socialkyc.io" target="_blank">SocialKYC</Link> email credential. Your Moonsama account is based on your email.
+          </AlertDescription>
+
+        </Alert>
         <Stack></Stack>
       </Stack>
       <Stack alignItems="center" spacing={1} margin={2}>
 
-        <LoadingButton disableElevation disableRipple loading={isLoading} variant="contained" onClick={() => handleLogin()}>KILT LOGIN</LoadingButton>
-        <Link sx={{ fontSize: "11px" }} underline="none" onClick={() => { history.push(`/account/login`) }}>OTHER LOGIN METHODS</Link>
+        <Button isDisabled={isLoading} onClick={() => { handleLogin() }}>KILT LOGIN</Button>
+        <Link sx={{ fontSize: "11px" }} onClick={() => { navigate(`/bridge`) }}>OTHER LOGIN METHODS</Link>
       </Stack>
     </AuthLayout >
   );

@@ -1,3 +1,4 @@
+import { useDisclosure } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 
 import { EnraptureDialogContext } from '../enraptureDialogContext/enraptureDialogContext';
@@ -8,7 +9,7 @@ import { EnraptureDialogContextControllerProps } from './enraptureDialogContextC
 export const EnraptureDialogContextController = ({
   children,
 }: EnraptureDialogContextControllerProps) => {
-  const [isEnraptureDialogOpen, setEnraptureDialogOpen] = useState<boolean>(false);
+  const { isOpen: isEnraptureDialogOpen, onOpen: onEnraptureDialogOpen, onClose: onEnraptureDialogClose } = useDisclosure()
   const [enraptureDialogData, setEnraptureDialogData] = useState<EnraptureDialogData>(undefined);
 
   useEffect(() => {
@@ -19,7 +20,7 @@ export const EnraptureDialogContextController = ({
 
   return (
     <EnraptureDialogContext.Provider
-      value={{ isEnraptureDialogOpen, setEnraptureDialogOpen, enraptureDialogData, setEnraptureDialogData }}
+      value={{ isEnraptureDialogOpen, onEnraptureDialogOpen, onEnraptureDialogClose, enraptureDialogData, setEnraptureDialogData }}
     >
       {children}
     </EnraptureDialogContext.Provider>

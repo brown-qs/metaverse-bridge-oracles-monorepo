@@ -3,8 +3,9 @@ export type CancelData = {
 } | null;
 
 export type CancelDialogContextType = {
-  isCancelDialogOpen: boolean;
-  setCancelDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isCancelDialogOpen: boolean
+  onCancelDialogOpen: () => void
+  onCancelDialogClose: () => void
   cancelData?: CancelData;
   setCancelData: React.Dispatch<React.SetStateAction<CancelData>>;
 };

@@ -1,16 +1,14 @@
-import Button from '@mui/material/Button/Button';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
 import React from 'react';
 import { useClasses } from 'hooks'
-import { styles as optionCardStyles } from './OptionCard.styles';
+import { Link, Image, Box, Button, HStack, VStack, Text } from '@chakra-ui/react';
 
 export default function OptionCard({
   link = null,
   onClick = null,
   header,
-  color,
   subheader = null,
-  icon,
+  iconUrl,
   active = false,
   id,
 }: {
@@ -21,19 +19,17 @@ export default function OptionCard({
   color: string;
   header: React.ReactNode;
   subheader: React.ReactNode | null;
-  icon: string;
+  iconUrl?: string
   active?: boolean;
   id: string;
 }) {
-  console.log({ icon });
-  const styles = useClasses(optionCardStyles);
   const content = (
-    <div className={styles.optionElementContainer}>
-      <div className={styles.optionCardLeft}>
-        <div className={styles.headertext}>
+    <div >
+      <div >
+        <div >
           {active ? (
-            <div className={styles.circleWrapper}>
-              <div className={styles.greenCircle}>
+            <div >
+              <div >
                 <div />
               </div>
             </div>
@@ -42,26 +38,41 @@ export default function OptionCard({
           )}
           {header}
         </div>
-        {subheader && <div className={styles.subheader}>{subheader}</div>}
+        {subheader && <div >{subheader}</div>}
       </div>
 
-      <div className={styles.iconWrapper}>
-        <img className={styles.icon} src={icon} alt={'Icon'} />
+      <div >
+
       </div>
     </div>
   );
   if (link) {
-    return <ExternalLink href={link}>{content}</ExternalLink>;
+    return <Link isExternal color="teal.200" lineHeight="24px" fontSize="16px" fontFamily="Rubik" href={link}>{header}</Link >;
   }
 
   return (
-    <Button
-      variant="outlined"
-      style={{ color }}
-      id={id}
-      onClick={() => onClick?.()}
+    <Box
+      position="relative"
     >
-      {content}
-    </Button>
-  );
+      <Image
+        zIndex="1"
+        position="absolute"
+        top="0"
+        right="0"
+        height="100%"
+        padding="8px"
+        left="0"
+        objectFit="contain"
+        pointerEvents="none"  //only hover to pass down to button
+        src={iconUrl}>
+
+      </Image>
+      <Button
+        w="100%"
+        id={id}
+        onClick={() => onClick?.()}
+      >
+        {header}
+      </Button>
+    </Box >)
 }

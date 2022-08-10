@@ -1,3 +1,4 @@
+import { useDisclosure } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 
 import { SummonDialogContext } from '../summonDialogContext/SummonDialogContext';
@@ -8,7 +9,7 @@ import { SummonDialogContextControllerProps } from './SummonDialogContextControl
 export const SummonDialogContextController = ({
   children,
 }: SummonDialogContextControllerProps) => {
-  const [isSummonDialogOpen, setSummonDialogOpen] = useState<boolean>(false);
+  const { isOpen: isSummonDialogOpen, onOpen: onSummonDialogOpen, onClose: onSummonDialogClose } = useDisclosure()
   const [summonDialogData, setSummonDialogData] = useState<SummonDialogData>(undefined);
 
   useEffect(() => {
@@ -19,7 +20,7 @@ export const SummonDialogContextController = ({
 
   return (
     <SummonDialogContext.Provider
-      value={{ isSummonDialogOpen, setSummonDialogOpen, summonDialogData, setSummonDialogData }}
+      value={{ isSummonDialogOpen, onSummonDialogOpen, onSummonDialogClose, summonDialogData, setSummonDialogData }}
     >
       {children}
     </SummonDialogContext.Provider>

@@ -1,6 +1,4 @@
 
-import CircularProgress from '@mui/material/CircularProgress';
-import Typography from '@mui/material/Typography';
 import { ExternalLink } from '../../components/ExternalLink/ExternalLink';
 import { TokenDetails } from '../../components/TokenDetails/TokenDetails';
 import { useActiveWeb3React, useImportDialog, useClasses } from '../../hooks';
@@ -16,44 +14,31 @@ import {
   stringAssetTypeToAssetType,
 } from 'utils/marketplace';
 import { getExplorerLink } from 'utils';
-import { SuccessIcon } from 'icons';
 import { useEffect, useState } from 'react';
-import { Button, Dialog } from 'ui';
 import { styles as appStyles } from '../../app.styles';
-import { styles } from './ImportDialog.styles';
 import { useIsTransactionPending, useSubmittedImportTx } from '../../state/transactions/hooks';
 import { CreateImportAssetCallbackState, useImportAssetCallback } from '../../hooks/multiverse/useImportAsset';
 import { useImportConfirmCallback } from '../../hooks/multiverse/useConfirm';
-import Stack from '@mui/material/Stack/Stack';
+import { Box, Button, CircularProgress, HStack, Link, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Stack, Text, VStack } from '@chakra-ui/react';
+import { Checks, CircleCheck, MessageReport, Wallet } from 'tabler-icons-react';
+import { MoonsamaModal } from '../MoonsamaModal';
 
 
 export const ImportDialog = () => {
   const [finalTxSubmitted, setFinalTxSubmitted] = useState<boolean>(false);
-  const { isImportDialogOpen, importDialogData, setImportDialogOpen } = useImportDialog();
+  const { isImportDialogOpen, onImportDialogOpen, onImportDialogClose, importDialogData, setImportDialogData } = useImportDialog();
   const [importParamsLoaded, setImportParamsLoaded] = useState<boolean>(false);
   const [approvalSubmitted, setApprovalSubmitted] = useState<boolean>(false);
   const [importConfirmed, setImportConfirmed] = useState<boolean>(false);
   const confirmCb = useImportConfirmCallback()
 
-  const {
-    button,
-    formButton,
-  } = useClasses(appStyles);
 
-  const {
-    dialogContainer,
-    loadingContainer,
-    successContainer,
-    successIcon,
-  } = useClasses(styles);
 
   const { chainId, account } = useActiveWeb3React();
 
-  const handleClose = (event: any, reason: string) => {
-    if (reason === 'backdropClick') {
-      return
-    }
-    setImportDialogOpen(false);
+  const handleClose = () => {
+
+    onImportDialogClose();
     setImportParamsLoaded(false);
     setFinalTxSubmitted(false);
     setImportConfirmed(false);
@@ -139,137 +124,157 @@ export const ImportDialog = () => {
 
   console.log('APPROVE FLOW', { showApproveFlow, approvalState, hasEnough });
 
-  const renderBody = () => {
+  if (!importParamsLoaded) {
+    return (<MoonsamaModal
+      title="Loading import details"
 
-    if (!importParamsLoaded) {
-      return (
-        <div className={loadingContainer}>
-          <CircularProgress />
-          <div>
-            <Typography>Loading import details</Typography>
-            <Typography color="textSecondary" variant="h5">
-              Should be a jiffy
-            </Typography>
-          </div>
-        </div>
-      );
-    }
-
-    if (importConfirmed) {
-      return (
-        <div className={successContainer}>
-          <SuccessIcon className={successIcon} />
-          <Typography>{`Import to metaverse confirmed!`}</Typography>
-
-          {importTx && (
-            <ExternalLink
-              href={getExplorerLink(
-                chainId ?? ChainId.MOONRIVER,
-                importTx.hash,
-                'transaction'
-              )}
-            >
-              {importTx.hash}
-            </ExternalLink>
-          )}
-          <Button
-            className={button}
-            onClick={() => handleClose({}, "yada")}
-            variant="outlined"
-            color="primary"
-          >
-            Close
-          </Button>
-        </div>
-      );
-    }
-
-    if (finalTxSubmitted && isPending) {
-      return (
-        <>
-          <div className={loadingContainer}>
-            <CircularProgress />
-            <div>
-              <Typography>Importing asset into the metaverse...</Typography>
-              <Typography color="textSecondary" variant="h5">
-                Check your wallet for potential action
-              </Typography>
-            </div>
-          </div>
-        </>
-      );
-    }
-
-    if (finalTxSubmitted && importSubmitted && !isPending) {
-      return (
-        <div className={successContainer}>
-          <SuccessIcon className={successIcon} />
-          <Typography>{`Transaction success!`}</Typography>
-          <Typography color="textSecondary" variant="h5">
-            Confirming import with the metaverse oracle...
-          </Typography>
-
-          {importTx && (
-            <ExternalLink
-              href={getExplorerLink(
-                chainId ?? ChainId.MOONRIVER,
-                importTx.hash,
-                'transaction'
-              )}
-            >
-              {importTx.hash}
-            </ExternalLink>
-          )}
-        </div>
-      );
-    }
-
-    return (
-      <Stack spacing={1} justifyContent="center">
-        <TokenDetails assetAddress={assetAddress} assetId={assetId} assetType={assetType} />
-        {showApproveFlow ? (
-          <Button
-            onClick={() => {
-              approveCallback();
-              setApprovalSubmitted(true);
-            }}
-            className={button}
-            variant="contained"
-            color="primary"
-            disabled={approvalState === ApprovalState.PENDING || !hasEnough}
-          >
-            Approve
-          </Button>
-        ) : (
-          <Button
-            onClick={() => {
-              importCallbackParams.callback?.();
-              setFinalTxSubmitted(true);
-            }}
-            className={formButton}
-            variant="contained"
-            color="primary"
-            disabled={
-              importCallbackParams.state !== CreateImportAssetCallbackState.VALID || !hasEnough
-            }
-          >
-            Import to metaverse
-          </Button>
-        )}
-        <Button className={formButton} onClick={() => handleClose({}, "yada")} color="primary">
-          Cancel
-        </Button>
-      </Stack>
-    );
-  };
-  return (
-    <Dialog
-      open={isImportDialogOpen}
-      onClose={handleClose}
-      title={'MultiverseBridge: import'}
-      maxWidth="md"
+      isOpen={isImportDialogOpen}
+      onClose={() => handleClose()}
+      message="Should be a jiffy"
+      closeOnOverlayClick={false}
     >
-      <div className={dialogContainer}>{renderBody()}</div>
-    </Dialog>
-  );
-};
+      <VStack alignItems="center">
+        <CircularProgress isIndeterminate color="teal"></CircularProgress>
+      </VStack>
+
+    </MoonsamaModal >)
+  } else if (importConfirmed) {
+    return (<MoonsamaModal
+      title="Import to metaverse confirmed!"
+      TablerIcon={Checks}
+      iconBackgroundColor="teal.200"
+      iconColor="black"
+      isOpen={isImportDialogOpen}
+      onClose={handleClose}
+      closeOnOverlayClick={false}
+    >
+      <VStack spacing="0">
+        <Box w="100%" h="48px" bg="whiteAlpha.100" borderRadius="8px">
+          <HStack padding="12px">
+            <Box flex="1" color="whiteAlpha.700">Transaction</Box>
+            <Box>
+              {importTx && (
+                <Link isExternal
+                  href={getExplorerLink(
+                    chainId ?? ChainId.MOONRIVER,
+                    importTx.hash,
+                    'transaction'
+                  )}
+                >
+                  {importTx.hash}
+                </Link>
+              )}
+            </Box>
+
+          </HStack>
+        </Box>
+        <Box w="100%" paddingTop="16px">
+          <Button
+            onClick={() => {
+              handleClose()
+            }}
+            leftIcon={<Checks />}
+            w="100%">GOT IT!</Button>
+        </Box>
+      </VStack >
+
+    </MoonsamaModal >)
+  } else if (finalTxSubmitted && isPending) {
+    return (<MoonsamaModal
+      title="Importing asset into the metaverse..."
+      isOpen={isImportDialogOpen}
+      onClose={handleClose}
+      closeOnOverlayClick={false}
+      message="Check your wallet for potential action"
+    >
+
+    </MoonsamaModal >)
+  } else if (finalTxSubmitted && importSubmitted && !isPending) {
+    return (<MoonsamaModal
+      title="Transaction success!"
+      TablerIcon={Checks}
+      iconBackgroundColor="teal.200"
+      iconColor="black"
+      isOpen={isImportDialogOpen}
+      onClose={handleClose}
+      closeOnOverlayClick={false}
+      message="Confirming import with the metaverse oracle..."
+    >
+      <VStack spacing="0">
+        <Box w="100%" h="48px" bg="whiteAlpha.100" borderRadius="8px">
+          <HStack padding="12px">
+            <Box flex="1" color="whiteAlpha.700">Transaction</Box>
+            <Box>
+              {importTx && (
+                <Link isExternal
+                  href={getExplorerLink(
+                    chainId ?? ChainId.MOONRIVER,
+                    importTx.hash,
+                    'transaction'
+                  )}
+                >
+                  {importTx.hash}
+                </Link>
+              )}
+            </Box>
+
+          </HStack>
+        </Box>
+        <Box w="100%" paddingTop="16px">
+          <Button
+            onClick={() => {
+              handleClose()
+            }}
+            leftIcon={<Checks />}
+            w="100%">GOT IT!</Button>
+        </Box>
+      </VStack >
+
+    </MoonsamaModal >)
+  } else {
+    return (<MoonsamaModal
+      title="Import to metaverse"
+      isOpen={isImportDialogOpen}
+      onClose={handleClose}
+      message="You are about to import one or more items to the metaverse to use them in-game, and you will be able to export them back to your wallet afterward."
+      closeOnOverlayClick={false}
+      bottomButtonText="Cancel"
+      onBottomButtonClick={handleClose}
+    >
+      <VStack spacing="0">
+
+        <Box w="100%" paddingTop="16px">
+          {showApproveFlow ? (
+            <Button
+              w="100%"
+
+              leftIcon={<Checks></Checks>}
+              onClick={() => {
+                approveCallback();
+                setApprovalSubmitted(true);
+              }}
+
+              disabled={approvalState === ApprovalState.PENDING || !hasEnough}
+            >
+              APPROVE
+            </Button>
+          ) : (
+            <Button
+              w="100%"
+              leftIcon={<Checks></Checks>}
+              onClick={() => {
+                importCallbackParams.callback?.();
+                setFinalTxSubmitted(true);
+              }}
+              disabled={
+                importCallbackParams.state !== CreateImportAssetCallbackState.VALID || !hasEnough
+              }
+            >
+              IMPORT TO METAVERSE
+            </Button>
+          )}
+        </Box>
+      </VStack>
+    </MoonsamaModal>)
+  }
+}

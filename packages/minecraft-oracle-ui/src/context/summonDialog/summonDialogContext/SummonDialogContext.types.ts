@@ -5,8 +5,9 @@ export type SummonDialogData = {
 } | undefined;
 
 export type SummonDialogContextType = {
-  isSummonDialogOpen: boolean;
-  setSummonDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isSummonDialogOpen: boolean
+  onSummonDialogOpen: () => void
+  onSummonDialogClose: () => void
   summonDialogData?: SummonDialogData;
   setSummonDialogData: React.Dispatch<React.SetStateAction<SummonDialogData>>;
 };
