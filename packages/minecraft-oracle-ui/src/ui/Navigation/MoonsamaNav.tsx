@@ -22,7 +22,7 @@ export default function MoonsamaNav() {
       <Button as="a" href="https://marketplace.moonsama.com" target="_blank" h="50px" rightIcon={<ChevronUpRight color="#3BEFB8"></ChevronUpRight>} variant="moonsamaGhost">MARKETPLACE</Button>
       <Button as="a" href="https://mcapi.moonsama.com" target="_blank" h="50px" rightIcon={<ChevronUpRight color="#3BEFB8"></ChevronUpRight>} variant="moonsamaGhost">MCAPI</Button>
       <Button as="a" href="https://wiki.moonsama.com" target="_blank" h="50px" rightIcon={<ChevronUpRight color="#3BEFB8"></ChevronUpRight>} variant="moonsamaGhost">DOCS</Button>
-      <Button h="50px" rightIcon={<Brush color="#3BEFB8"></Brush>} variant="moonsamaGhost" onClick={() => { navgiate("/moonsama/customizer") }}>CUSTOMIZER</Button>
+      <Button h="50px" rightIcon={<Brush color="#3BEFB8"></Brush>} variant="moonsamaGhost" onClick={() => { navgiate("/moonsama/customizer"); onClose() }}>CUSTOMIZER</Button>
 
     </>
   )
@@ -61,12 +61,16 @@ export default function MoonsamaNav() {
             <WalletAccount />
             <Button onClick={onOpen} variant="ghost"><Menu2 color="#66C8FF"></Menu2></Button>
             <Drawer
+
               isOpen={isOpen}
               placement='left'
               onClose={onClose}
             >
               <DrawerOverlay />
-              <DrawerContent background="#1A202C">
+              <DrawerContent background="#1A202C"
+                w="220px"
+                maxW="220px"
+              >
 
                 <DrawerBody>
                   <VStack alignItems={"stretch"} paddingBottom="8px">
@@ -75,7 +79,7 @@ export default function MoonsamaNav() {
                   <VStack alignItems={"stretch"}>
                     <ConnectedNetwork />
                     <WalletAccount />
-                    <ServerAccount />
+                    <ServerAccount onClick={() => { onClose() }} />
                   </VStack>
                 </DrawerBody>
 
