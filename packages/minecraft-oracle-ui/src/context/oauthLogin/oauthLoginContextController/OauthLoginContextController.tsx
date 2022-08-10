@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box } from '@chakra-ui/react';
 import React, { useState } from 'react';
 import { OauthLoginContext } from '../oauthLoginContext/OauthLoginContext';
 import { OauthDataType } from '../oauthLoginContext/OauthLoginContext.types';

@@ -1,17 +1,10 @@
 import React, { useState } from 'react';
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import Typography from '@mui/material/Typography';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import Slider from '@mui/material/Slider';
-import { Button, Drawer } from 'ui';
 import { useClasses } from 'hooks';
 import { styles } from './Filters.style';
-import { Chip } from '@mui/material';
 import { MOONSAMA_TRAITS } from 'utils/constants';
-import FilterIcon from '@mui/icons-material/FilterListSharp';
 import { OrderType } from 'utils/subgraph';
+import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Box, Button, Slider, Tag, Text } from '@chakra-ui/react';
+import { ChevronDown, Filter } from 'tabler-icons-react';
 
 export interface Filters {
   priceRange: number[];
@@ -75,70 +68,77 @@ export const Filters = ({ onFiltersUpdate }: Props) => {
     <>
       <Button
         onClick={() => setIsDrawerOpened(true)}
-        startIcon={<FilterIcon />}
+        //startIcon={<Filter />}
         variant="outlined"
         color="primary"
       >
         Filter
       </Button>
-      <Drawer
+      <Box
+      /*
         anchor="left"
-        hideBackdrop
+         hideBackdrop
         open={isDrawerOpened}
         onClose={() => setIsDrawerOpened(false)}
-        onOpen={() => setIsDrawerOpened(true)}
+        onOpen={() => setIsDrawerOpened(true)}*/
       >
-        <Typography variant="h6" className={filtersTitle}>
+        <Text variant="h6" className={filtersTitle}>
           Filters
-        </Typography>
+        </Text>
         <div className={filtersDrawerContent}>
           <div>
-            <Accordion defaultExpanded square className={filterAccordion}>
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls="panel1a-content"
-                id="panel1a-header"
-              >
-                <Typography className={accordionHeader}>Order Type</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <div className={accordionContent}>
-                  <Chip
-                    label="Active buy order"
-                    variant="outlined"
-                    onClick={() => handleOrderTypeClick(OrderType.BUY)}
-                    className={`${filterChip} ${selectedOrderType == OrderType.BUY && 'selected'}`} />
-                  <Chip
-                    label="Active sell order"
-                    variant="outlined"
-                    onClick={() => handleOrderTypeClick(OrderType.SELL)}
-                    className={`${filterChip} ${selectedOrderType == OrderType.SELL && 'selected'}`} />
-                  <Chip
-                    label="None"
-                    variant="outlined"
-                    onClick={() => handleOrderTypeClick(undefined)}
-                    className={`${filterChip} ${selectedOrderType == undefined && 'selected'}`} />
-                </div>
-              </AccordionDetails>
+            <Accordion /*defaultExpanded square*/ className={filterAccordion}>
+              <AccordionItem>
+                <AccordionButton
+                /* expandIcon={<ChevronDown />}
+                 aria-controls="panel1a-content"
+                 id="panel1a-header"*/
+                >
+                  <Text className={accordionHeader}>Order Type</Text>
+                </AccordionButton>
+                <AccordionPanel>
+                  <div className={accordionContent}>
+                    <Tag
+                      // label="Active buy order"
+                      variant="outlined"
+                      onClick={() => handleOrderTypeClick(OrderType.BUY)}
+                      className={`${filterChip} ${selectedOrderType == OrderType.BUY && 'selected'}`} />
+                    <Tag
+                      // label="Active sell order"
+                      variant="outlined"
+                      onClick={() => handleOrderTypeClick(OrderType.SELL)}
+                      className={`${filterChip} ${selectedOrderType == OrderType.SELL && 'selected'}`} />
+                    <Tag
+                      //  label="None"
+                      variant="outlined"
+                      onClick={() => handleOrderTypeClick(undefined)}
+                      className={`${filterChip} ${selectedOrderType == undefined && 'selected'}`} />
+                  </div>
+                </AccordionPanel>
+              </AccordionItem>
             </Accordion>
-            <Accordion defaultExpanded square className={filterAccordion}>
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls="panel2a-content"
-                id="panel2a-header"
-              >
-                <Typography className={accordionHeader}>Price</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Slider
-                  getAriaLabel={() => 'Price range'}
+            <Accordion /*defaultExpanded square*/ className={filterAccordion}>
+              <AccordionItem>
+
+                <AccordionButton
+                /* expandIcon={<ExpandMoreIcon />}
+                 aria-controls="panel2a-content"
+                 id="panel2a-header"*/
+                >
+                  <Text className={accordionHeader}>Price</Text>
+                </AccordionButton>
+                <AccordionPanel>
+                  <Slider
+                  /*
+                    getAriaLabel={() => 'Price range'}
+                  
                   value={priceRange}
                   onChange={handlePriceRangeChange}
                   valueLabelDisplay="auto"
                   min={0}
                   max={5000}
                   sx={{
-                    "& .MuiSlider-thumb":{
+                    "& .MuiSlider-thumb": {
                       color: "#710021",
                     },
                     "& .MuiSlider-track": {
@@ -147,36 +147,41 @@ export const Filters = ({ onFiltersUpdate }: Props) => {
                     "& .MuiSlider-rail": {
                       color: '#c5c5c5'
                     }
-                  }}
-                />
-                <div className={priceRangeWrapper}>
-                  <div>{`${priceRange[0]} MOVR`}</div>
-                  <div>{`${priceRange[1]} MOVR`}</div>
-                </div>
-              </AccordionDetails>
+                  }}*/
+                  />
+                  <div className={priceRangeWrapper}>
+                    <div>{`${priceRange[0]} MOVR`}</div>
+                    <div>{`${priceRange[1]} MOVR`}</div>
+                  </div>
+                </AccordionPanel>
+              </AccordionItem>
+
             </Accordion>
-            <Accordion defaultExpanded square className={filterAccordion}>
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls="panel2a-content"
-                id="panel2a-header"
-              >
-                <Typography className={accordionHeader}>Traits</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <div className={accordionContent}>
-                  {Object.keys(MOONSAMA_TRAITS).map((trait) => (
-                    <Chip
-                      label={trait}
-                      variant="outlined"
-                      onClick={() => handleTraitClick(trait)}
-                      className={`${filterChip} ${
-                        selectedTraits.includes(trait) && 'selected'
-                      }`}
-                    />
-                  ))}
-                </div>
-              </AccordionDetails>
+            <Accordion /*defaultExpanded square*/ className={filterAccordion}>
+              <AccordionItem>
+
+                <AccordionButton
+                /*
+                  expandIcon={<ExpandMoreIcon />}
+                  aria-controls="panel2a-content"
+                  id="panel2a-header"*/
+                >
+                  <Text className={accordionHeader}>Traits</Text>
+                </AccordionButton>
+                <AccordionPanel>
+                  <div className={accordionContent}>
+                    {Object.keys(MOONSAMA_TRAITS).map((trait) => (
+                      <Tag
+                        //label={trait}
+                        variant="outlined"
+                        onClick={() => handleTraitClick(trait)}
+                        className={`${filterChip} ${selectedTraits.includes(trait) && 'selected'
+                          }`}
+                      />
+                    ))}
+                  </div>
+                </AccordionPanel>
+              </AccordionItem>
             </Accordion>
             <Button
               className={applyFiltersButton}
@@ -188,7 +193,7 @@ export const Filters = ({ onFiltersUpdate }: Props) => {
             </Button>
           </div>
         </div>
-      </Drawer>
+      </Box>
     </>
   );
 };

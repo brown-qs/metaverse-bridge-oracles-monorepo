@@ -1,23 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { AuthLayout, Loader } from 'ui';
 import { useAuth, useClasses } from 'hooks';
-import Tooltip from '@mui/material/Tooltip';
-import CloseIcon from '@mui/icons-material/Close';
 
-import WhiteLogo from 'assets/images/moonsama-glitch-white.svg';
-import LeftImage from 'assets/images/home/left.png';
-import RightImageFlip from 'assets/images/home/right.png';
-import Box from '@mui/material/Box';
-import "@fontsource/orbitron/500.css";
-import { Link, Alert, Button, CircularProgress, Collapse, IconButton, Input, Stack, TextField, Typography, useMediaQuery } from '@mui/material';
-import { theme } from 'theme/Theme';
-import LoadingButton from '@mui/lab/LoadingButton';
-import { Redirect, useHistory, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import { Button, FormControl, FormErrorMessage, FormHelperText, FormLabel, Input, Link, Stack } from '@chakra-ui/react';
 
 const EmailVerifyPage = () => {
   const { authData, setAuthData } = useAuth();
-  let history = useHistory();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [loginKey, setLoginKey] = useState("");
   const [dirtyTextField, setDirtyTextField] = useState(false);
@@ -36,7 +27,7 @@ const EmailVerifyPage = () => {
       });
       if (response?.data?.success) {
         const jwt = response.data.jwt
-        history.push(`/auth/${jwt}`)
+        navigate(`/auth/${jwt}`)
       } else {
         const msg = response?.data?.message
         if (msg) {
@@ -66,24 +57,24 @@ const EmailVerifyPage = () => {
   const handleAlertClose = () => {
     setFailureMessage("")
   }
-
-  const verifyControls = () => {
-    return <Stack alignItems="center" spacing={1}>
-      <TextField disabled={isLoading} inputProps={{ spellCheck: false, autoCapitalize: "off", autoCorrect: "off", onFocus: () => setDirtyTextField(true) }} value={loginKey} error={dirtyTextField && !isValidLoginKey(loginKey)} onKeyPress={(e) => {
-        if (e.key === 'Enter' && !isLoading && isValidLoginKey(loginKey)) {
-          verifyLoginKey(loginKey)
+  /*
+    const verifyControls = () => {
+      return <Stack alignItems="center" spacing={1}>
+        <TextField disabled={isLoading} inputProps={{ spellCheck: false, autoCapitalize: "off", autoCorrect: "off", onFocus: () => setDirtyTextField(true) }} value={loginKey} error={dirtyTextField && !isValidLoginKey(loginKey)} onKeyPress={(e) => {
+          if (e.key === 'Enter' && !isLoading && isValidLoginKey(loginKey)) {
+            verifyLoginKey(loginKey)
+          }
+        }} onChange={(event) => { setLoginKey(event.target.value) }} label="LOGIN CODE" variant="standard" />
+        <div></div>
+        <LoadingButton disableElevation disableRipple loading={isLoading} disabled={!isValidLoginKey(loginKey)} onClick={(e) => verifyLoginKey(loginKey)} variant="contained">USE LOGIN CODE</LoadingButton>
+        {!!authData?.jwt
+          ?
+          <Link sx={{ fontSize: "11px" }} underline="none" onClick={() => { navigate(`/account`) }}>GO BACK</Link>
+          :
+          <Link sx={{ fontSize: "11px" }} underline="none" onClick={() => { navigate(`/account/login/email`) }}>REQUEST A NEW CODE</Link>
         }
-      }} onChange={(event) => { setLoginKey(event.target.value) }} label="LOGIN CODE" variant="standard" />
-      <div></div>
-      <LoadingButton disableElevation disableRipple loading={isLoading} disabled={!isValidLoginKey(loginKey)} onClick={(e) => verifyLoginKey(loginKey)} variant="contained">USE LOGIN CODE</LoadingButton>
-      {!!authData?.jwt
-        ?
-        <Link sx={{ fontSize: "11px" }} underline="none" onClick={() => { history.push(`/account`) }}>GO BACK</Link>
-        :
-        <Link sx={{ fontSize: "11px" }} underline="none" onClick={() => { history.push(`/account/login/email`) }}>REQUEST A NEW CODE</Link>
-      }
-    </Stack >
-  }
+      </Stack >
+    }*/
 
 
   let alert
@@ -92,7 +83,44 @@ const EmailVerifyPage = () => {
   }
 
   return (
-    <AuthLayout title="LOGIN CODE" loading={false} alert={alert} handleAlertClose={handleAlertClose}>{verifyControls()} </AuthLayout >
+    <AuthLayout title="LOGIN CODE" loading={false} alert={alert} handleAlertClose={handleAlertClose}>
+      <Stack alignItems="center" spacing={2}>
+        <FormControl isInvalid={dirtyTextField && !isValidLoginKey(loginKey)} maxW="300px">
+          <FormLabel>Login Code</FormLabel>
+          <Input
+            isDisabled={isLoading}
+            value={loginKey}
+            onChange={(e) => {
+              setLoginKey(e.target.value)
+            }}
+            onFocus={() => setDirtyTextField(true)}
+            onKeyUp={(e) => {
+              if (e.key === 'Enter' && !isLoading && isValidLoginKey(loginKey)) {
+                verifyLoginKey(loginKey)
+              }
+            }}
+            spellCheck="false"
+            autoCapitalize="off"
+            autoCorrect="off"
+          />
+          {dirtyTextField && !isValidLoginKey(loginKey) ? (
+            <FormErrorMessage sx={{}}>Invalid login code.</FormErrorMessage>
+
+          ) : (
+            <FormHelperText>
+              &nbsp;
+            </FormHelperText>
+          )}
+        </FormControl>
+        <Button isLoading={isLoading} isDisabled={!isValidLoginKey(loginKey)} onClick={() => verifyLoginKey(loginKey)} >LOGIN</Button>
+        {!!authData?.jwt
+          ?
+          <Link sx={{ fontSize: "11px" }} onClick={() => { navigate(`/account`) }}>GO BACK</Link>
+          :
+          <Link sx={{ fontSize: "11px" }} onClick={() => { navigate(`/account/login/email`) }}>REQUEST A NEW CODE</Link>
+        }
+      </Stack >
+    </AuthLayout >
   );
 };
 
