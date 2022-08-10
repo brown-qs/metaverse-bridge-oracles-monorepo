@@ -5,7 +5,7 @@ import { useAuth } from 'hooks';
 import { useNavigate } from 'react-router-dom';
 import { UserCircle } from 'tabler-icons-react';
 
-const ServerAccount = () => {
+const ServerAccount = ({ onClick }: { onClick?: () => void }) => {
   let navigate = useNavigate();
   const { authData, setAuthData } = useAuth();
 
@@ -48,7 +48,18 @@ const ServerAccount = () => {
   } = useClasses(styles)
 
   return (
-    <Box color="white" onClick={() => isLoggedIn ? handleAccount() : handleLogin()} className={BoxStyle}>
+    <Box color="white" onClick={() => {
+
+      if (isLoggedIn) {
+        handleAccount()
+      } else {
+        handleLogin()
+      }
+
+      if (onClick) {
+        onClick()
+      }
+    }} className={BoxStyle}>
       <UserCircle color="#3BEFB8"></UserCircle>&nbsp;
     </Box>
   );

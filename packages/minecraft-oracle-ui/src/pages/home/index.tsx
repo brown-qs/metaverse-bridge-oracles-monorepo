@@ -42,7 +42,7 @@ const HomePage = () => {
       <Box
         zIndex="10"
         position="absolute"
-        top="20%"
+        top="18%"
         w="100%"
         flex="1"
         paddingRight="22px"

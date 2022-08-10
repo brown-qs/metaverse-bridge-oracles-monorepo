@@ -144,7 +144,7 @@ export const useOnChainItems = (trigger: string | undefined = undefined): { onCh
           const aidCount = assetIdCount.get(aid) ?? 0
           assetIdCount.set(aid, aidCount + 1)
           return {
-            id: `${aid}~${chainId}~${aidCount}`,
+            id: `${rawCollection.display_name}~${aid}~${chainId}~${aidCount}`,
             collection: rawCollection.display_name,
             meta: sd.meta,
             staticData: sd.staticData,
@@ -160,6 +160,7 @@ export const useOnChainItems = (trigger: string | undefined = undefined): { onCh
 
     }
     await Promise.all(proms)
+    results.sort((a, b) => a.id.localeCompare(b.id))
     setOnChainItems(results)
     setIsLoading(false)
   }, [chainId, blocknumber, account, trigger])
