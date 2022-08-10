@@ -1,12 +1,11 @@
 import React, { ReactNode } from 'react';
-import Button from '@mui/material/Button';
-import { Box, Tooltip, Typography } from '@mui/material';
-import FileCopyOutlinedIcon from '@mui/icons-material/FileCopyOutlined';
+
 import { useClasses } from 'hooks';
-import { styles } from './AddressDisplayComponent.styles';
 import { getExplorerLink } from 'utils';
 import { useActiveWeb3React } from 'hooks';
 import { ExternalLink } from 'components/ExternalLink/ExternalLink';
+import { Box, Tooltip, Text, Button, Link } from '@chakra-ui/react';
+import { Copy } from 'tabler-icons-react';
 
 const CHARS_SHOWN = 3;
 const MIN_LENGTH = 5;
@@ -59,7 +58,6 @@ export const AddressDisplayComponent = (props: {
   const charsShown = props.charsShown ? props.charsShown : CHARS_SHOWN;
   const copyTooltipLabel = props.copyTooltipLabel
 
-  const { copyButton } = useClasses(styles);
   const { chainId } = useActiveWeb3React();
 
   const _apply_ellipsis = (): string => {
@@ -78,34 +76,26 @@ export const AddressDisplayComponent = (props: {
 
   return (
     <React.Fragment>
-      <Box display="flex" alignItems="center">
+      <Box display="flex" alignItems="center" color="teal.200" fontSize="12px">
         <Tooltip title={text}>
           {!props.dontShowLink ? (
-            <Typography className={props.className}>
-              <ExternalLink href={getExplorerLink(chainId, text, 'address')}>
+            <Text className={props.className}>
+              <Link isExternal href={getExplorerLink(chainId, text, 'address')}>
                 {_apply_ellipsis()}
-              </ExternalLink>
-            </Typography>
+              </Link>
+            </Text>
           ) : (
-            <Typography className={props.className}>
-              <ExternalLink>
+            <Text className={props.className}>
+              <Link color="teal.200" isExternal>
                 {_apply_ellipsis()}
-              </ExternalLink>
-            </Typography>
+              </Link>
+            </Text>
           )}
         </Tooltip>
-        <Tooltip title={copyTooltipLabel}>
-          <Button
-            className={`${copyButton} ${props.buttonClassName}`}
-            size="small"
-            onClick={() => {
-              _copyTextToClipboard(text);
-            }}
-          >
-            <FileCopyOutlinedIcon color="secondary" />
-          </Button>
-        </Tooltip>
+        <Box marginLeft="12px" cursor="pointer" onClick={() => { _copyTextToClipboard(text) }}>
+          <Copy color="#3BEFB8" size="18px" />
+        </Box>
       </Box>
-    </React.Fragment>
+    </React.Fragment >
   );
 };

@@ -1,16 +1,9 @@
-import { Box, Select, Grid, Stack } from '@mui/material';
-import CircularProgress from '@mui/material/CircularProgress';
-import Typography from '@mui/material/Typography';
-import MenuItem from '@mui/material/MenuItem';
-import { SortSharp } from '@mui/icons-material';
+
 import 'date-fns';
 import { useActiveWeb3React, useSummonDialog } from 'hooks';
-import { SuccessIcon } from 'icons';
 import { useState } from 'react';
-import { Button, Dialog } from 'ui';
 import { useClasses } from 'hooks';
 import { styles as appStyles } from '../../app.styles';
-import { styles } from './SummonDialog.styles';
 import { useSummonCallback } from 'hooks/multiverse/useSummon';
 import {
   DEFAULT_CHAIN,
@@ -18,124 +11,106 @@ import {
   PERMISSIONED_CHAINS,
 } from '../../constants';
 import { AddressDisplayComponent } from 'components/form/AddressDisplayComponent';
+import { VStack, Box, Button, CircularProgress, MenuItem, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Select, Stack, Text, HStack } from '@chakra-ui/react';
+import { Checks, CircleCheck, Wallet } from 'tabler-icons-react';
+import { MoonsamaModal } from '../MoonsamaModal';
 
 export const SummonDialog = () => {
-  const {
-    isSummonDialogOpen,
-    summonDialogData,
-    setSummonDialogData,
-    setSummonDialogOpen,
-  } = useSummonDialog();
+  const { isSummonDialogOpen, onSummonDialogOpen, onSummonDialogClose, summonDialogData, setSummonDialogData } = useSummonDialog();
   const [summonConfirmed, setSummonConfirmed] = useState<number>(0);
   const [summonSubmitted, setSummonSubmitted] = useState<boolean>(false);
   const [selectedChainId, setSelectedChainId] = useState<number>(DEFAULT_CHAIN);
 
   const { button, formBox, formButton } = useClasses(appStyles);
 
-  const {
-    dialogContainer,
-    loadingContainer,
-    successContainer,
-    successIcon,
-    sortElement,
-    alignSelfCenter
-  } = useClasses(styles);
+
 
   const { account } = useActiveWeb3React();
 
-  const handleClose = (event: any, reason: string) => {
-    if (reason === 'backdropClick') {
-      return;
-    }
-    setSummonDialogOpen(false);
+  const handleClose = () => {
+    onSummonDialogClose();
     setSummonSubmitted(false);
     setSummonConfirmed(0);
   };
 
-  const recipient =  account ?? summonDialogData?.recipient ?? undefined;
+  const recipient = account ?? summonDialogData?.recipient ?? undefined;
 
   const summonCallback = useSummonCallback();
 
-  const renderBody = () => {
-    if (summonSubmitted && summonConfirmed === 1) {
-      return (
-        <div className={successContainer}>
-          <SuccessIcon className={successIcon} />
-          <Typography>{`Summon request received!`}</Typography>
-          <Typography color="textSecondary">
-            {`Your summon request was acknowledged by the Oracle. Depending on the number of requests and Moonriver traffic the transaction can take a while. You can sit back and relax now. Check back later.`}
-          </Typography>
+  /*
+        TablerIcon={MessageReport}
+      iconBackgroundColor="yellow.300"
+      iconColor="black"
+  */
+  if (summonSubmitted && summonConfirmed === 1) {
+    return (<MoonsamaModal
+      title="Summon request received!"
+      TablerIcon={Checks}
+      iconBackgroundColor="teal.200"
+      iconColor="black"
+      isOpen={isSummonDialogOpen}
+      onClose={handleClose}
+      message="Sit back and relax. Depending on the number of requests and network trafic the transaction could take some time."
+      closeOnOverlayClick={false}
+    >
+      <VStack spacing="0">
+        <Box w="100%">
           <Button
-            className={button}
-            onClick={() => handleClose({}, 'yada')}
-            variant="outlined"
-            color="primary"
-          >
-            Close
-          </Button>
-        </div>
-      );
-    }
+            leftIcon={<Checks />}
+            onClick={() => handleClose()}
+            w="100%">GOT IT!</Button>
+        </Box>
+      </VStack >
 
-    if (summonSubmitted && summonConfirmed === 0) {
-      return (
-        <>
-          <div className={loadingContainer}>
-            <CircularProgress />
-            <div>
-              <Typography>
-                Multiverse Bridge Oracle processing your request...
-              </Typography>
-            </div>
-          </div>
-        </>
-      );
-    }
-
-    if (summonSubmitted && summonConfirmed === 2) {
-      return (
-        <>
-          <div className={loadingContainer}>
-            <div>
-              <Typography>Unsuccessful summon</Typography>
-              <Typography color="textSecondary" variant="h5">
-                It seems you didn't have any metaverse resources to summon, or
-                something went wrong. Try again later or contact support.
-              </Typography>
-            </div>
-          </div>
-        </>
-      );
-    }
-
-    return (
-      <Stack spacing={1} justifyContent="center">
-        <Stack className={formBox} spacing={2}>
-          <Typography className="form-subheader">
-            Mint all in-game resources from the metaverse into your connected
-            on-chain wallet address:
-          </Typography>
-          <Box alignSelf={'center'}>
-            <AddressDisplayComponent
-              className={alignSelfCenter}
+    </MoonsamaModal >)
+  } else if (summonSubmitted && summonConfirmed === 0) {
+    return (<MoonsamaModal
+      title="Summon resources"
+      isOpen={isSummonDialogOpen}
+      onClose={() => {
+        setSelectedChainId(0)
+        handleClose()
+      }}
+      message="Your request is being processed."
+      closeOnOverlayClick={false}
+    >
+      <VStack alignItems="center">
+        <CircularProgress isIndeterminate color="teal"></CircularProgress>
+      </VStack>
+    </MoonsamaModal>)
+  } else if (summonSubmitted && summonConfirmed === 2) {
+    return (<MoonsamaModal
+      title="Summon resources"
+      isOpen={isSummonDialogOpen}
+      onClose={handleClose}
+      message="It seems you didn't have any metaverse resources to summon, or something went wrong. Try again later or contact support."
+      closeOnOverlayClick={false}
+    ></MoonsamaModal>)
+  } else {
+    return (<MoonsamaModal
+      title="Summon resources"
+      isOpen={isSummonDialogOpen}
+      onClose={handleClose}
+      message="You are about to mint all your in-game resources to your on-chain wallet address:"
+      closeOnOverlayClick={false}
+      bottomButtonText="Cancel"
+      onBottomButtonClick={handleClose}
+    >
+      <VStack spacing="0">
+        <Box w="100%" h="48px" bg="whiteAlpha.100" borderRadius="8px">
+          <HStack padding="12px">
+            <Box flex="1" color="whiteAlpha.700">Address</Box>
+            <Box><AddressDisplayComponent
               charsShown={7}
               copyTooltipLabel='Copy address'
             >
               {recipient}
-            </AddressDisplayComponent>
-          </Box>
-          <Typography alignSelf={'center'} className="form-subheader">
-            Please select the network to summon to.
-          </Typography>
+            </AddressDisplayComponent></Box>
+
+          </HStack>
+        </Box>
+        <Box w="100%" paddingTop="16px">
           <Select
-            className={sortElement}
-            IconComponent={SortSharp}
-            variant="outlined"
-            color="primary"
-            inputProps={{
-              name: 'sort',
-              id: 'uncontrolled-native',
-            }}
             defaultValue={selectedChainId}
             onChange={(event: any) => {
               setSelectedChainId(event.target.value);
@@ -143,14 +118,13 @@ export const SummonDialog = () => {
           >
             {PERMISSIONED_CHAINS.map((chain) => {
               return (
-                <MenuItem value={chain}>{NETWORK_NAME[chain]}</MenuItem>
+                <option value={chain}>{NETWORK_NAME[chain]}</option>
               );
             })}
           </Select>
-        </Stack>
-
-        <Button
-          onClick={() => {
+        </Box>
+        <Box w="100%" paddingTop="16px">
+          <Button onClick={() => {
             setSelectedChainId(DEFAULT_CHAIN);
             setSummonSubmitted(true);
             (async () => {
@@ -158,34 +132,12 @@ export const SummonDialog = () => {
               setSummonConfirmed(success ? 1 : 2);
             })();
           }}
-          className={formButton}
-          variant="contained"
-          color="primary"
-          disabled={selectedChainId === 0}
-        >
-          Summon
-        </Button>
-        <Button
-          className={formButton}
-          onClick={() => {
-            handleClose({}, 'yada');
-            setSelectedChainId(0);
-          }}
-          color="primary"
-        >
-          Cancel
-        </Button>
-      </Stack>
-    );
-  };
-  return (
-    <Dialog
-      open={isSummonDialogOpen}
-      onClose={handleClose}
-      title={'MultiverseBridge: summon'}
-      maxWidth="sm"
-    >
-      <div className={dialogContainer}>{renderBody()}</div>
-    </Dialog>
-  );
+            leftIcon={<Wallet></Wallet>}
+            isDisabled={false && selectedChainId === 0}
+            w="100%">SUMMON TO WALLET</Button>
+        </Box>
+      </VStack>
+    </MoonsamaModal>)
+  }
+
 };

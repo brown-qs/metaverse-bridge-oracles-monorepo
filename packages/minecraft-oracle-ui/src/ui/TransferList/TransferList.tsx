@@ -1,19 +1,10 @@
 import * as React from 'react';
-import Grid from '@mui/material/Grid';
-import List from '@mui/material/List';
-import Card from '@mui/material/Card';
-import CardHeader from '@mui/material/CardHeader';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import Checkbox from '@mui/material/Checkbox';
-import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import GameIcon from '@mui/icons-material/VideogameAsset';
-import WalletIcon from '@mui/icons-material/AccountBalanceWallet';
+
 
 import { useClasses } from 'hooks';
 import { styles } from './TransferList.styles';
+import { Box, Button, Checkbox, Divider, Grid, List, ListIcon, ListItem } from '@chakra-ui/react';
+import { DeviceGamepad, ListDetails, Wallet } from 'tabler-icons-react';
 
 function not(a: readonly string[], b: readonly string[]) {
     return a.filter((value) => b.indexOf(value) === -1);
@@ -74,25 +65,25 @@ export const TransferList = () => {
     };
 
     const customList = (title: React.ReactNode, items: readonly string[]) => (
-        <Card className={paperStyles}>
-            <CardHeader
+        <Box className={paperStyles}>
+            <Box
                 className={listItemHeader}
                 sx={{ px: 2, py: 1, bgcolor: '#111' }}
-                avatar={
-                    <Checkbox
-                        onClick={handleToggleAll(items)}
-                        checked={numberOfChecked(items) === items.length && items.length !== 0}
-                        indeterminate={
+            /* avatar={
+                 <Checkbox
+                     onClick={handleToggleAll(items)}
+                     checked={numberOfChecked(items) === items.length && items.length !== 0}
+                       indeterminate={
                             numberOfChecked(items) !== items.length && numberOfChecked(items) !== 0
                         }
-                        disabled={items.length === 0}
-                        inputProps={{
-                            'aria-label': 'all items selected',
-                        }}
-                    />
-                }
-                title={title}
-                subheader={`${numberOfChecked(items)}/${items.length} selected`}
+                     disabled={items.length === 0}
+                     inputProps={{
+                         'aria-label': 'all items selected',
+                     }}
+                 />
+             }
+             //  title={title}*/
+            // subheader={`${numberOfChecked(items)}/${items.length} selected`}
             />
             <Divider />
             <List
@@ -102,8 +93,8 @@ export const TransferList = () => {
                     bgcolor: '#111',
                     overflow: 'auto',
                 }}
-                dense
-                component="div"
+
+                as="div"
                 role="list"
             >
                 {items.map((value: string) => {
@@ -114,36 +105,36 @@ export const TransferList = () => {
                             key={value}
                             className={listItemStyles}
                             role="listitem"
-                            button
+                            //button
                             onClick={handleToggle(value)}
                         >
-                            <ListItemIcon>
+                            <ListIcon>
                                 <Checkbox
                                     checked={checked.indexOf(value) !== -1}
                                     tabIndex={-1}
-                                    disableRipple
+
                                     inputProps={{
                                         'aria-labelledby': labelId,
                                     }}
                                 />
-                            </ListItemIcon>
-                            <ListItemText id={labelId} className={listItemTextStyles} primary={value} />
+                            </ListIcon>
+                            <ListDetails id={labelId} className={listItemTextStyles} /*primary={value}*/ />
                         </ListItem>
                     );
                 })}
                 <ListItem />
             </List>
-        </Card>
+        </Box>
     );
 
     return (
-        <Grid container spacing={2} justifyContent="flex-start" alignItems="center">
-            <Grid item>
-                <div className={columnTitle}><GameIcon /> <span className={columnTitleText}>In-Game Assets</span></div>
+        <Grid justifyContent="flex-start" alignItems="center">
+            <Grid /*item*/>
+                <div className={columnTitle}><DeviceGamepad /> <span className={columnTitleText}>In-Game Assets</span></div>
                 {customList(``, left)}
             </Grid>
-            <Grid item>
-                <Grid container direction="column" alignItems="center">
+            <Grid /*item*/>
+                <Grid alignItems="center">
                     <Button
                         className={transferButton}
                         sx={{ my: 0.5 }}
@@ -168,8 +159,8 @@ export const TransferList = () => {
                     </Button>
                 </Grid>
             </Grid>
-            <Grid item>
-                <div className={columnTitle}><WalletIcon /> <span className={columnTitleText}>Wallet Assets</span></div>
+            <Grid /*item*/>
+                <div className={columnTitle}><Wallet /> <span className={columnTitleText}>Wallet Assets</span></div>
                 {customList('', right)}
             </Grid>
         </Grid>

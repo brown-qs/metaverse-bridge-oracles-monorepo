@@ -1,8 +1,7 @@
-import SvgIcon from '@mui/material/SvgIcon';
 
 export const ETHIcon = (props: any) => {
   return (
-    <SvgIcon {...props} width="30" height="30" viewBox="0 0 30 30" fill="none">
+    <svg {...props} width="30" height="30" viewBox="0 0 30 30" fill="none">
       <path
         d="M15.1908 0.364792L14.9986 1.01231V19.8019L15.1908 19.992L23.9914 14.8365L15.1908 0.364792Z"
         fill="#DA3979"
@@ -27,6 +26,6 @@ export const ETHIcon = (props: any) => {
         d="M6.39032 14.8366L15.1908 19.9919V10.8722L6.39032 14.8366Z"
         fill="#DA3979"
       />
-    </SvgIcon>
+    </svg>
   );
 };

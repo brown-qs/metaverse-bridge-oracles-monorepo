@@ -1,3 +1,4 @@
+import { useDisclosure } from '@chakra-ui/react';
 import React, { useState } from 'react';
 import { AccountDialogContext } from '../accountDialogContext/AccountDialogContext';
 import { AccountDialogContextControllerProps } from './AccountDialogContextController.types';
@@ -5,11 +6,11 @@ import { AccountDialogContextControllerProps } from './AccountDialogContextContr
 export const AccountDialogContextController = ({
   children,
 }: AccountDialogContextControllerProps) => {
-  const [isAccountDialogOpen, setAccountDialogOpen] = useState<boolean>(false);
+  const { isOpen: isAccountDialogOpen, onOpen: onAccountDialogOpen, onClose: onAccountDialogClose } = useDisclosure()
 
   return (
     <AccountDialogContext.Provider
-      value={{ isAccountDialogOpen, setAccountDialogOpen }}
+      value={{ isAccountDialogOpen, onAccountDialogOpen, onAccountDialogClose }}
     >
       {children}
     </AccountDialogContext.Provider>

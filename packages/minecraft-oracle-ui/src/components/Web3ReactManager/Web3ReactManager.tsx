@@ -5,7 +5,7 @@ import { useEagerConnect, useInactiveListener } from 'hooks';
 import { useEffect, useState } from 'react';
 import { useClasses } from 'hooks';
 import { styles as web3ReactManagerStyles } from './Web3ReactManager.styles';
-import { CircularProgress } from '@mui/material';
+import { CircularProgress } from '@chakra-ui/react';
 
 export const Web3ReactManager = ({ children }: { children: JSX.Element }) => {
   const styles = useClasses(web3ReactManagerStyles);
@@ -23,7 +23,7 @@ export const Web3ReactManager = ({ children }: { children: JSX.Element }) => {
   //console.log({ active, networkActive, networkError, triedEager });
 
   // after eagerly trying injected, if the network connect ever isn't active or in an error state, activate itd
-  
+
   //console.log('eager', {triedEager, networkActive, networkError, active})
   useEffect(() => {
     if (triedEager && !networkActive && !networkError && !active) {

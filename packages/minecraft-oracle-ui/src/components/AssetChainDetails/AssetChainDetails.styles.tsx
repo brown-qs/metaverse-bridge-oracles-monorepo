@@ -1,19 +1,18 @@
-import { Theme } from '@mui/material';
 
-export const styles = (theme: Theme) => ({
+export const styles = (theme: any) => ({
     row: {
         justifyContent: 'space-between',
     },
     pL: {
-        paddingLeft: theme.spacing(1)
+        // paddingLeft: theme.spacing(1)
     },
     formLabel: {
-        color: theme.palette.grey[500],
+        //  color: theme.palette.grey[500],
         display: 'flex',
         alignItems: 'center',
     },
     formValue: {
-        color: theme.palette.text.primary,
+        // color: theme.palette.text.primary,
     },
     formValueTokenDetails: {
         height: 40,
@@ -23,6 +22,6 @@ export const styles = (theme: Theme) => ({
     chainDetailsContainer: {
         border: 1,
         borderStyle: 'solid',
-        borderColor: theme.palette.grey[900]
+        // borderColor: theme.palette.grey[900]
     }
 });
