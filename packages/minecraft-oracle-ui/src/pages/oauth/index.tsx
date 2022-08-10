@@ -6,6 +6,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
 import { useOauthLogin } from '../../hooks/useOauthLogin/useOauthLogin';
 const OauthPage = () => {
+  console.log("Oauthpage")
   const { authData, setAuthData } = useAuth();
   const [isLoading, setIsLoading] = useState(true)
   const [failureMessage, setFailureMessage] = useState("")
@@ -26,7 +27,8 @@ const OauthPage = () => {
         }
       });
       setOauthData({ ...result.data, params: searchParams })
-      navigate("oauth/confirm")
+      console.log("navigate to oauth/confirm....")
+      navigate("/oauth/confirm")
     } catch (e) {
       const err = e as AxiosError;
 
