@@ -147,8 +147,8 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     zIndex="2"
 
                     padding={{
-                        base: "16px 11px 8px 11px",
-                        md: "16px 8px 8px 40px"
+                        base: "16px 11px 7px 11px",
+                        md: "16px 8px 7px 40px"
                     }}
                     overflow="hidden"
                     rowSpan={1}
@@ -218,9 +218,9 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     zIndex="2"
 
                     padding={{
-                        base: "16px 11px 8px 11px",
-                        md: "16px 40px 8px 8px",
-                        lg: "16px 8px 8px 8px"
+                        base: "16px 11px 6px 11px",
+                        md: "16px 40px 6px 8px",
+                        lg: "16px 8px 6px 8px"
                     }}
                     rowSpan={1}
                     colSpan={{ base: 12, md: 6, lg: 4 }}
@@ -309,9 +309,9 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     zIndex="2"
 
                     padding={{
-                        base: "16px 11px 8px 11px",
-                        md: "8px 8px 8px 40px",
-                        lg: "16px 40px 8px 8px"
+                        base: "16px 11px 6px 11px",
+                        md: "8px 8px 6px 40px",
+                        lg: "16px 40px 6px 8px"
                     }}
                     rowSpan={1}
                     colSpan={{ base: 12, md: 6, lg: 4 }}
@@ -397,9 +397,9 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                     zIndex="2"
 
                     padding={{
-                        base: "16px 11px 8px 11px",
-                        md: "8px 40px 8px 8px",
-                        lg: "8px 8px 16px 40px"
+                        base: "16px 11px 6px 11px",
+                        md: "8px 40px 6px 8px",
+                        lg: "8px 8px 14px 40px"
                     }}
                     rowSpan={1}
                     colSpan={{ base: 12, md: 6, lg: 6 }}
@@ -444,9 +444,9 @@ const ProfilePage = ({ authData }: ProfilePagePropTypes) => {
                 <GridItem
                     zIndex="2"
                     padding={{
-                        base: "16px 11px 8px 11px",
-                        md: "8px 40px 16px 40px",
-                        lg: "8px 40px 16px 8px"
+                        base: "16px 11px 7px 11px",
+                        md: "8px 40px 15px 40px",
+                        lg: "8px 40px 15px 8px"
                     }}
                     rowSpan={1}
                     colSpan={{ base: 12, md: 12, lg: 6 }}
