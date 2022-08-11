@@ -19,26 +19,29 @@ export default function MoonsamaNav() {
 
   const buttons = (
     <>
+      <Button h="50px" variant="moonsamaGhost" onClick={() => { navgiate("/bridge"); onClose() }}>BRIDGE</Button>
       <Button as="a" href="https://marketplace.moonsama.com" target="_blank" h="50px" rightIcon={<ChevronUpRight color="#3BEFB8"></ChevronUpRight>} variant="moonsamaGhost">MARKETPLACE</Button>
-      <Button as="a" href="https://mcapi.moonsama.com" target="_blank" h="50px" rightIcon={<ChevronUpRight color="#3BEFB8"></ChevronUpRight>} variant="moonsamaGhost">MCAPI</Button>
       <Button as="a" href="https://wiki.moonsama.com" target="_blank" h="50px" rightIcon={<ChevronUpRight color="#3BEFB8"></ChevronUpRight>} variant="moonsamaGhost">DOCS</Button>
       <Button h="50px" rightIcon={<Brush color="#3BEFB8"></Brush>} variant="moonsamaGhost" onClick={() => { navgiate("/moonsama/customizer"); onClose() }}>CUSTOMIZER</Button>
-
     </>
   )
   return (
-    <Box as="nav" sx={{
+    <Box
+      minHeight="64px"
+      h="64px"
+      overflow="hidden"
+      sx={{
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "8px 16px",
+        background: "gray.800",
+        zIndex: 1,
+        boxShadow: "0px 20px 25px -5px rgba(0, 0, 0, 0.1), 0px 10px 10px -5px rgba(0, 0, 0, 0.04)"
+      }}
 
-      display: "flex",
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      padding: "8px 16px",
-      height: "64px",
-      background: "gray.800",
-      zIndex: 1,
-      boxShadow: "0px 20px 25px -5px rgba(0, 0, 0, 0.1), 0px 10px 10px -5px rgba(0, 0, 0, 0.04)"
-    }}>
+    >
       <HStack cursor="pointer" onClick={() => { navgiate("/bridge") }}>
         {isLargerThanXl
           ?
