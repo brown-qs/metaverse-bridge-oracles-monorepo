@@ -18,6 +18,8 @@ import { ExportDialogContextController } from '../context/exportDialog/exportDia
 import { AssetDialogContextController } from '../context/assetDialog/assetDialogContextController/assetDialogContextController';
 import { ChakraProvider } from '@chakra-ui/react'
 import { OauthLoginContextController } from '../context/oauthLogin/oauthLoginContextController/OauthLoginContextController';
+import { EmailLoginDialogContextController } from '../context/emailLoginDialog/emailLoginDialogContextController/EmailLoginDialogContextController';
+import { KiltLoginDialogContextController } from '../context/kiltLoginDialog/kiltLoginDialogContextController/KiltLoginDialogContextController';
 
 function Updaters() {
   return (
@@ -43,9 +45,13 @@ export const AppProviders = ({ children }: AppProvidersProps) => (
                       <ExportDialogContextController>
                         <TransferDialogContextController>
                           <AssetDialogContextController>
-                            <Router>
-                              {children}
-                            </Router>
+                            <EmailLoginDialogContextController>
+                              <KiltLoginDialogContextController>
+                                <Router>
+                                  {children}
+                                </Router>
+                              </KiltLoginDialogContextController>
+                            </EmailLoginDialogContextController>
                           </AssetDialogContextController>
                         </TransferDialogContextController>
                       </ExportDialogContextController>

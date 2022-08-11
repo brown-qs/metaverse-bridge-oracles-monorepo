@@ -21,6 +21,8 @@ import MinecraftUnlinkPage from './account/minecraft/unlink';
 import OauthPage from './oauth';
 import OauthConfirmPage from './oauth/confirm';
 import GamerTagChangePage from './account/gamertag';
+import { EmailLoginDialog } from '../components/EmailLoginDialog/EmailLoginDialog';
+import { KiltLoginDialog } from '../components/KiltLoginDialog/KiltLoginDialog';
 
 export const Routing = () => {
     const { authData } = useAuth();
@@ -94,8 +96,19 @@ export const Routing = () => {
                     <AssetDialog />
                     <ProfilePage authData={authData} />
                 </>
-            ) : <HomePage />}</>}>
+            ) : <Navigate to="/login" />}</>}>
+            </Route>
 
+            <Route path="/bridge" element={<>{!!authData?.jwt ? (
+                <Navigate to="/bridge" />
+            ) :
+                <>
+                    <EmailLoginDialog />
+                    <KiltLoginDialog />
+                    <HomePage></HomePage>
+                </>
+
+            }</>}>
             </Route>
 
             <Route path="/moonsama/customizer/:chainId/:assetAddress/:assetId" element={<MoonsamaCharacterDesignerPage />}>

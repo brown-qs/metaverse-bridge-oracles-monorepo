@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Loader } from 'ui';
 import { useAuth, useClasses } from 'hooks';
 import { styles } from './styles';
@@ -6,13 +6,14 @@ import WhiteLogo from 'assets/images/moonsama-glitch-white.svg';
 import LeftImage from 'assets/images/home/left.png';
 import RightImageFlip from 'assets/images/home/right.png';
 import { useNavigate } from 'react-router-dom';
-import { Image, Button, Stack, useMediaQuery, Text, VStack, Box } from '@chakra-ui/react';
-import { Mail } from 'tabler-icons-react';
+import { Image, Button, Stack, useMediaQuery, Text, VStack, Box, FormControl, FormLabel, Input, FormHelperText } from '@chakra-ui/react';
+import { Mail, MailForward } from 'tabler-icons-react';
 import BackgroundImage from '../../assets/images/home/background.jpg'
+import { useDisclosure } from '@chakra-ui/react'
 
 const HomePage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [minecraftWarningOpen, setMinecraftWarningOpen] = React.useState(false);
+  const [emailLoginModalOpen, setEmailLoginModalOpen] = React.useState(true);
   const { authData } = useAuth();
   let navigate = useNavigate();
 
@@ -32,8 +33,9 @@ const HomePage = () => {
   const [shorterThan600] = useMediaQuery('(max-height: 600px)')
   const [shorterThan800] = useMediaQuery('(max-height: 800px)')
 
-
   const loginButtonProps = { h: "80px", w: "100%", fontSize: "20px", bg: "rgba(255, 255, 255, 0.06)", border: "none" }
+
+
   return (
     <>
 
@@ -125,7 +127,9 @@ const HomePage = () => {
                   <Button
                     {...loginButtonProps}
                     leftIcon={<Mail color="#3BEFB8" />}
-                    onClick={() => { navigate("/account/login/email") }}
+                    onClick={() => {
+                      setEmailLoginModalOpen(true)
+                    }}
                   >EMAIL</Button>
 
                 </Box>
@@ -152,7 +156,6 @@ const HomePage = () => {
         {!isMobileViewport && <img src={RightImageFlip} className={rightBgImage} alt="" />}
         {isMobileViewport && <img src={LeftImage} className={centerBgImage} alt="" />}
       </Stack >
-
     </>
   );
 };
