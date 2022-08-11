@@ -118,7 +118,7 @@ export const SummonDialog = () => {
           >
             {PERMISSIONED_CHAINS.map((chain) => {
               return (
-                <option value={chain}>{NETWORK_NAME[chain]}</option>
+                <option key={chain} value={chain}>{NETWORK_NAME[chain]}</option>
               );
             })}
           </Select>
