@@ -22,6 +22,7 @@ import { useWeb3React } from '@web3-react/core';
 import { Box, Button, CircularProgress, Divider, HStack, Link, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Stack, Text, VStack } from '@chakra-ui/react';
 import { ArrowsRightLeft, Checks, CircleCheck, MessageReport, Wallet } from 'tabler-icons-react';
 import { MoonsamaModal } from '../MoonsamaModal';
+import { TransactionLink } from '../TransactionLink';
 
 
 export const ExportDialog = () => {
@@ -218,19 +219,19 @@ export const ExportDialog = () => {
         <Box w="100%" h="48px" bg="whiteAlpha.100" borderRadius="8px">
           <HStack padding="12px">
             <Box flex="1" color="whiteAlpha.700">Transaction</Box>
-            <Box>
-              {exportTx && (
-                <Link isExternal
-                  href={getExplorerLink(
-                    chainId ?? ChainId.MOONRIVER,
-                    exportTx.hash,
-                    'transaction'
-                  )}
-                >
-                  {exportTx.hash}
-                </Link>
-              )}
-            </Box>
+
+            {exportTx && (
+              <TransactionLink
+                href={getExplorerLink(
+                  chainId ?? ChainId.MOONRIVER,
+                  exportTx.hash,
+                  'transaction'
+                )}
+                linkText={exportTx.hash}
+              />
+
+            )}
+
 
           </HStack>
         </Box>

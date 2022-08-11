@@ -22,6 +22,7 @@ import { useImportConfirmCallback } from '../../hooks/multiverse/useConfirm';
 import { Box, Button, CircularProgress, HStack, Link, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Stack, Text, VStack } from '@chakra-ui/react';
 import { Checks, CircleCheck, MessageReport, Wallet } from 'tabler-icons-react';
 import { MoonsamaModal } from '../MoonsamaModal';
+import { TransactionLink } from '../TransactionLink';
 
 
 export const ImportDialog = () => {
@@ -152,19 +153,18 @@ export const ImportDialog = () => {
         <Box w="100%" h="48px" bg="whiteAlpha.100" borderRadius="8px">
           <HStack padding="12px">
             <Box flex="1" color="whiteAlpha.700">Transaction</Box>
-            <Box>
-              {importTx && (
-                <Link isExternal
-                  href={getExplorerLink(
-                    chainId ?? ChainId.MOONRIVER,
-                    importTx.hash,
-                    'transaction'
-                  )}
-                >
-                  {importTx.hash}
-                </Link>
-              )}
-            </Box>
+            <></>
+            {importTx && (
+              <TransactionLink
+                href={getExplorerLink(
+                  chainId ?? ChainId.MOONRIVER,
+                  importTx.hash,
+                  'transaction'
+                )}
+                linkText={importTx.hash}
+              />
+
+            )}
 
           </HStack>
         </Box>
@@ -204,20 +204,17 @@ export const ImportDialog = () => {
         <Box w="100%" h="48px" bg="whiteAlpha.100" borderRadius="8px">
           <HStack padding="12px">
             <Box flex="1" color="whiteAlpha.700">Transaction</Box>
-            <Box>
-              {importTx && (
-                <Link isExternal
-                  href={getExplorerLink(
-                    chainId ?? ChainId.MOONRIVER,
-                    importTx.hash,
-                    'transaction'
-                  )}
-                >
-                  {importTx.hash}
-                </Link>
-              )}
-            </Box>
+            {importTx && (
+              <TransactionLink
+                href={getExplorerLink(
+                  chainId ?? ChainId.MOONRIVER,
+                  importTx.hash,
+                  'transaction'
+                )}
+                linkText={importTx.hash}
+              />
 
+            )}
           </HStack>
         </Box>
         <Box w="100%" paddingTop="16px">

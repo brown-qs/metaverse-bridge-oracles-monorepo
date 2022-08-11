@@ -26,6 +26,7 @@ import { Box, Button, CircularProgress, FormControl, FormErrorMessage, FormHelpe
 import { Checks, CircleCheck } from 'tabler-icons-react';
 import { MoonsamaModal } from '../MoonsamaModal';
 import { isValid } from 'date-fns';
+import { TransactionLink } from '../TransactionLink';
 
 
 export const EnraptureDialog = () => {
@@ -236,19 +237,17 @@ export const EnraptureDialog = () => {
         <Box w="100%" h="48px" bg="whiteAlpha.100" borderRadius="8px">
           <HStack padding="12px">
             <Box flex="1" color="whiteAlpha.700">Transaction</Box>
-            <Box>
-              {enraptureTx && (
-                <Link isExternal
-                  href={getExplorerLink(
-                    chainId ?? ChainId.MOONRIVER,
-                    String(enraptureTx?.hash),
-                    'transaction'
-                  )}
-                >
-                  {enraptureTx?.hash}
-                </Link>
-              )}
-            </Box>
+            {enraptureTx && (
+              <TransactionLink
+                href={getExplorerLink(
+                  chainId ?? ChainId.MOONRIVER,
+                  enraptureTx.hash,
+                  'transaction'
+                )}
+                linkText={enraptureTx.hash}
+              />
+
+            )}
 
           </HStack>
         </Box>
