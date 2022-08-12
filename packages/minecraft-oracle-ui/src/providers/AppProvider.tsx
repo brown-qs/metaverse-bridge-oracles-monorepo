@@ -22,6 +22,7 @@ import { EmailLoginDialogContextController } from '../context/emailLoginDialog/e
 import { KiltLoginDialogContextController } from '../context/kiltLoginDialog/kiltLoginDialogContextController/KiltLoginDialogContextController';
 import { CaptchaContext } from '../context/captcha/captchaContext/captchaContext';
 import { CaptchaContextController } from '../context/captcha/captchaContextController/captchaContextController';
+import { EmailCodeDialogContextController } from '../context/emailCodeDialog/emailCodeDialogContextController/EmailCodeDialogContextController';
 
 function Updaters() {
   return (
@@ -49,11 +50,13 @@ export const AppProviders = ({ children }: AppProvidersProps) => (
                           <TransferDialogContextController>
                             <AssetDialogContextController>
                               <EmailLoginDialogContextController>
-                                <KiltLoginDialogContextController>
-                                  <Router>
-                                    {children}
-                                  </Router>
-                                </KiltLoginDialogContextController>
+                                <EmailCodeDialogContextController>
+                                  <KiltLoginDialogContextController>
+                                    <Router>
+                                      {children}
+                                    </Router>
+                                  </KiltLoginDialogContextController>
+                                </EmailCodeDialogContextController>
                               </EmailLoginDialogContextController>
                             </AssetDialogContextController>
                           </TransferDialogContextController>

@@ -6,3 +6,8 @@ export type EmailLoginCode = {
 export type EmailLoginCodeResponse = {
     success: true
 }
+
+export type EmailLoginCodeVerifyResponse = {
+    success: true
+    jwt: string
+}

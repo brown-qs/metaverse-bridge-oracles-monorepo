@@ -23,31 +23,34 @@ import OauthConfirmPage from './oauth/confirm';
 import GamerTagChangePage from './account/gamertag';
 import { EmailLoginDialog } from '../components/EmailLoginDialog/EmailLoginDialog';
 import { KiltLoginDialog } from '../components/KiltLoginDialog/KiltLoginDialog';
+import { EmailCodeDialog } from '../components/EmailCodeDialog/EmailCodeDialog';
+import { useSelector } from 'react-redux';
+import { selectAccessToken } from '../state/slices/authSlice';
 
 export const Routing = () => {
-    const { authData } = useAuth();
+    const accessToken = useSelector(selectAccessToken)
     return (
         <Routes>
             <Route path="/" element={<Navigate to="/login" />}>
 
             </Route>
 
-            <Route path="/account" element={<>{!!authData?.jwt ? <AccountPage></AccountPage> : <Navigate to="/login" />}</>}>
+            <Route path="/account" element={<>{!!accessToken ? <AccountPage></AccountPage> : <Navigate to="/login" />}</>}>
             </Route>
 
-            <Route path="/account/login" element={<> {!!authData?.jwt ? <Navigate to="/account" /> : <HomePage />}</>}>
+            <Route path="/account/login" element={<> {!!accessToken ? <Navigate to="/account" /> : <HomePage />}</>}>
 
             </Route>
 
-            <Route path="/account/login/email" element={<>{!!authData?.jwt ? <Navigate to="/account" /> : <EmailLoginPage />}</>} />
+            <Route path="/account/login/email" element={<>{!!accessToken ? <Navigate to="/account" /> : <EmailLoginPage />}</>} />
 
 
-            <Route path="/account/gamertag" element={!!authData?.jwt ? <GamerTagChangePage /> : <HomePage />}>
+            <Route path="/account/gamertag" element={!!accessToken ? <GamerTagChangePage /> : <HomePage />}>
             </Route>
 
 
 
-            <Route path="/account/login/email/change" element={<> {!!authData?.jwt ? <EmailChangePage /> : <Navigate to="/login" />}</>}>
+            <Route path="/account/login/email/change" element={<> {!!accessToken ? <EmailChangePage /> : <Navigate to="/login" />}</>}>
 
             </Route>
 
@@ -55,19 +58,19 @@ export const Routing = () => {
 
             </Route>
 
-            <Route path="/account/minecraft/redirect" element={<>{!!authData?.jwt ? <MinecraftRedirectPage /> : <HomePage />}</>}>
+            <Route path="/account/minecraft/redirect" element={<>{!!accessToken ? <MinecraftRedirectPage /> : <HomePage />}</>}>
 
             </Route>
 
-            <Route path="/account/minecraft/verify" element={<>{!!authData?.jwt ? <MinecraftVerifyPage /> : <HomePage />}</>}>
+            <Route path="/account/minecraft/verify" element={<>{!!accessToken ? <MinecraftVerifyPage /> : <HomePage />}</>}>
 
             </Route>
 
-            <Route path="/account/minecraft/unlink" element={<>{!!authData?.jwt ? <MinecraftUnlinkPage /> : <HomePage />}</>}>
+            <Route path="/account/minecraft/unlink" element={<>{!!accessToken ? <MinecraftUnlinkPage /> : <HomePage />}</>}>
 
             </Route>
 
-            <Route path="/account/login/kilt" element={<>{!!authData?.jwt ? <Navigate to="/account" /> : <KiltLoginPage />}</>}>
+            <Route path="/account/login/kilt" element={<>{!!accessToken ? <Navigate to="/account" /> : <KiltLoginPage />}</>}>
 
             </Route>
 
@@ -81,26 +84,27 @@ export const Routing = () => {
             <Route path="/oauth" element={<OauthPage />}>
             </Route>
 
-            <Route path="/oauth/confirm" element={!!authData?.jwt ? <OauthConfirmPage /> : <HomePage />}>
+            <Route path="/oauth/confirm" element={!!accessToken ? <OauthConfirmPage /> : <HomePage />}>
             </Route>
 
 
-            <Route path="/bridge" element={<>{!!authData?.jwt ? (
+            <Route path="/bridge" element={<>{!!accessToken ? (
                 <>
                     <ImportDialog />
                     <ExportDialog />
                     <EnraptureDialog />
                     <SummonDialog />
                     <AssetDialog />
-                    <ProfilePage authData={authData} />
+                    <ProfilePage authData={undefined} />
                 </>
             ) : <Navigate to="/login" />}</>}>
             </Route>
 
-            <Route path="/login" element={<>{!!authData?.jwt ? (
+            <Route path="/login" element={<>{!!accessToken ? (
                 <Navigate to="/bridge" />
             ) :
                 <>
+                    <EmailCodeDialog />
                     <EmailLoginDialog />
                     <KiltLoginDialog />
                     <HomePage></HomePage>
