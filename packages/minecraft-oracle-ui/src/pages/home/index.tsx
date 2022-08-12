@@ -10,6 +10,7 @@ import { Image, Button, Stack, useMediaQuery, Text, VStack, Box, FormControl, Fo
 import { Mail, MailForward } from 'tabler-icons-react';
 import BackgroundImage from '../../assets/images/home/background.jpg'
 import { useDisclosure } from '@chakra-ui/react'
+import { useGetAssetsQuery } from '../../state/api/bridgeApi';
 
 const HomePage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -35,7 +36,7 @@ const HomePage = () => {
 
   const loginButtonProps = { h: "80px", w: "100%", fontSize: "20px", bg: "rgba(255, 255, 255, 0.06)", border: "none" }
 
-
+  const { } = useGetAssetsQuery()
   return (
     <>
 
