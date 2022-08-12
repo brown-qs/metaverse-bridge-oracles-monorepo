@@ -2,7 +2,7 @@ import { SerializedError } from "@reduxjs/toolkit"
 import { BaseQueryFn, createApi, fetchBaseQuery, FetchBaseQueryError } from "@reduxjs/toolkit/query/react"
 import { AppState } from ".."
 import { setTokens } from "../slices/authSlice"
-import { EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse, UserProfileResponse } from "./types"
+import { EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse, SkinResponse, SkinSelectRequest, UserProfileResponse } from "./types"
 
 
 
@@ -18,6 +18,7 @@ export const bridgeApi = createApi({
             return headers
         }
     }),
+    tagTypes: ["Skin"],
     endpoints: (builder) => ({
         emailLoginCode: builder.mutation<EmailLoginCodeResponse, EmailLoginCode>({
             query: (body) => ({
@@ -47,6 +48,42 @@ export const bridgeApi = createApi({
         userProfile: builder.query<UserProfileResponse, void>({
             query: () => `/user/profile`,
         }),
+        getSkins: builder.query<SkinResponse[], void>({
+            query: () => `/user/skins`,
+            providesTags: (result, error, arg) =>
+                result
+                    ? [...result.map(({ id }) => ({ type: 'Skin' as const, id })), 'Skin']
+                    : ['Skin'],
+        }),
+        setSkin: builder.mutation<void, SkinSelectRequest>({
+            query: (body) => ({
+                url: "/user/skin",
+                method: "PUT",
+                body
+            }),
+
+            async onQueryStarted(skin, { dispatch, queryFulfilled }) {
+                const patchResult = dispatch(
+                    bridgeApi.util.updateQueryData('getSkins', undefined, (draft) => {
+                        for (const sk of draft) {
+                            if (sk.id === skin.id) {
+                                Object.assign(sk, { equipped: true })
+                            } else if (sk.equipped === true) {
+                                Object.assign(sk, { equipped: false })
+                            }
+                        }
+                    })
+                )
+                try {
+                    await queryFulfilled
+                } catch {
+                    patchResult.undo()
+
+                    dispatch(bridgeApi.util.invalidateTags(['Skin']))
+
+                }
+            },
+        }),
     }),
 })
 
@@ -63,4 +100,4 @@ export const bridgeApiErrorFormatter = (error: any): string => {
 
 }
 
-export const { useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation } = bridgeApi
+export const { useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
