@@ -9,8 +9,8 @@ const Modal: ComponentStyleConfig = {
             boxShadow: "0px 25px 50px -12px rgba(0, 0, 0, 0.25)",
         },
         overlay: {
-            //  background: "rgba(0, 0, 0, 0.64)",
-            // backdropFilter: "blur(8px)"
+            background: "rgba(0, 0, 0, 0.64)",
+            backdropFilter: "blur(8px)"
         }
     }
 }

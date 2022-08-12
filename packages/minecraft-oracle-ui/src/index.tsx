@@ -10,9 +10,7 @@ initalizeValidation();
 const rootElem = document.getElementById("root")
 const root = createRoot(rootElem!);
 root.render(
-  <React.StrictMode>
-    <ChakraProvider theme={chakraTheme}>
-      <App />
-    </ChakraProvider>
-  </React.StrictMode>
+  <ChakraProvider theme={chakraTheme}>
+    <App />
+  </ChakraProvider>
 );
