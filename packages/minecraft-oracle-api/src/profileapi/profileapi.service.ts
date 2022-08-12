@@ -42,6 +42,24 @@ export class ProfileApiService {
         this.defaultChainId = this.configService.get<number>('network.defaultChainId')
     }
 
+    async getSkins(user: UserEntity): Promise<TextureDto[]> {
+        const userSkins = await this.skinService.findMany({ where: { owner: user.uuid }, relations: ['texture'] })
+        const textures: TextureDto[] = userSkins.map(skin => {
+            return {
+                id: skin.id,
+                assetAddress: skin.texture.assetAddress,
+                assetId: skin.texture.assetId,
+                assetType: skin.texture.assetType,
+                equipped: skin.equipped,
+                selectable: true,
+                textureData: skin.texture.textureData,
+                textureSignature: skin.texture.textureSignature,
+                name: skin.texture.name
+            }
+        })
+        return textures
+    }
+
     async getPlayerItems(user: UserEntity): Promise<ThingsDto> {
         const snapshots = await this.inventoryService.findMany({ relations: ['material', 'owner'], where: { owner: { uuid: user.uuid } } })
 

@@ -27,11 +27,15 @@ import { OnChainResources } from '../../components/Bridge/OnChainResources';
 import { OnChainItem } from '../../components/Bridge/OnChainItem';
 import { ItemDetailsModal } from '../../components/Bridge/ItemDetailsModal';
 import BackgroundImage from '../../assets/images/bridge-background-blur.svg'
-import { useUserProfileQuery } from '../../state/api/bridgeApi';
+import { useSetSkinMutation, useGetSkinsQuery, useUserProfileQuery } from '../../state/api/bridgeApi';
+import { SkinResponse } from '../../state/api/types';
 
 
 const ProfilePage = () => {
     const { data: profile, error, isLoading: profileLoading } = useUserProfileQuery()
+    const { data: skins, error: skinsError, isLoading: skinsLoading } = useGetSkinsQuery()
+    const [setSkin, { error: setSkinError, isUninitialized, isLoading, isSuccess, isError, reset: setSkinReset }] = useSetSkinMutation()
+
     const { account, chainId } = useActiveWeb3React()
     const playAllowedReasonTexts: any = {
         'MSAMA': 'You are eligible to play because you imported a Moonsama.',
@@ -66,7 +70,6 @@ const ProfilePage = () => {
     const inGameItems = useInGameItems(fetchtrigger);
     const inGameAssets = (inGameItems?.assets ?? []).filter(x => x.assetAddress.length === 42);
     const inGameResources = inGameItems?.resources ?? []
-    const inGameTextures: InGameTexture[] = (inGameItems?.textures ?? []).sort((t1, t2) => t1.assetAddress.localeCompare(t2.assetAddress))
 
     const canSummon = !!inGameItems?.resources && inGameItems?.resources.length > 0 && !profile?.blacklisted
     const assetCounter = countGamePassAssets(inGameAssets)
@@ -78,6 +81,13 @@ const ProfilePage = () => {
     const { value: onChainCheckboxGroupValue, isDisabled: isOnChainCheckboxGroupDisabled, onChange: onOnChainCheckboxGroupChange, setValue: setOnChainCheckboxGroupValue, getCheckboxProps: getOnChainCheckboxGroupProps } = useCheckboxGroup()
 
     const [isSmallerThan285] = useMediaQuery('(max-width: 285px)')
+
+    const skinToImageUrl = (skin: SkinResponse): string | undefined => {
+        const decoded = Buffer.from(skin.textureData, 'base64').toString()
+        const textureURL = !!decoded ? JSON.parse(decoded)?.textures?.SKIN?.url : undefined
+        const coverURL = !!textureURL ? `https://api.mineskin.org/render/skin?url=${textureURL}` : undefined
+        return coverURL
+    }
     return (
         <Container
             bg="#080714"
@@ -162,11 +172,15 @@ const ProfilePage = () => {
                             rowSpan={1}
                             colSpan={{ base: 12, md: 6, lg: 4 }}
                         >
-                            <BridgeTab title="Available Skins" icon={<UserCircle size="18px" />}>
-                                {!!inGameTextures.length
+                            <BridgeTab
+                                title="Available Skins"
+                                icon={<UserCircle size="18px" />}
+                                isLoading={skinsLoading}
+                            >
+                                {!!skins
                                     ?
                                     <Grid templateColumns='repeat(2, 1fr)' width="100%">
-                                        {inGameTextures.map((value, ind) => {
+                                        {[...skins].sort((t1, t2) => t1.assetAddress.localeCompare(t2.assetAddress)).map((value, ind) => {
                                             const skinLabel = SKIN_LABELS[value.assetAddress.toLowerCase()]
                                             const firstColumn = ind % 2 === 0
                                             const firstRow = ind < 2
@@ -176,17 +190,15 @@ const ProfilePage = () => {
                                                     position="relative"
                                                     key={`${value?.assetAddress}-${value?.assetId}-${ind}`}
 
-                                                    onClick={async () => {
-                                                        if (!value.equipped) {
-                                                            const success = await callbackSkinEquip({
-                                                                assetAddress: value.assetAddress,
-                                                                assetId: value.assetId,
-                                                                assetType: value.assetType
-                                                            })
-                                                            if (success) {
-                                                                setFetchtrigger(Date.now().toString())
-                                                            }
-                                                        }
+                                                    onClick={() => {
+
+                                                        setSkin({
+                                                            id: value.id,
+                                                            assetAddress: value.assetAddress,
+                                                            assetId: value.assetId,
+                                                            assetType: value.assetType
+                                                        })
+
                                                     }}
                                                 >
                                                     <Box
@@ -204,7 +216,7 @@ const ProfilePage = () => {
                                                         border={value.equipped ? "1px solid" : "1px solid"}
                                                         borderColor={value.equipped ? "teal.400" : "transparent"}
                                                     >
-                                                        <Media padding="12%" uri={value.coverURL} />
+                                                        <Media padding="12%" uri={skinToImageUrl(value)} />
                                                     </Box>
                                                 </GridItem >
                                             );

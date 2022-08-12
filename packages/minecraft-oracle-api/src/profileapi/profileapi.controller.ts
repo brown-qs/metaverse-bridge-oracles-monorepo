@@ -21,7 +21,7 @@ import { ProfileDto } from './dtos/profile.dto';
 import { User } from '../utils/decorators';
 import { UserEntity } from '../user/user/user.entity';
 import { ProfileApiService } from './profileapi.service';
-import { ThingsDto } from './dtos/things.dto';
+import { TextureDto, ThingsDto } from './dtos/things.dto';
 import { SkinselectDto } from './dtos/skinselect.dto';
 import { GameKindInProgressDto } from '../gameapi/dtos/gamekndinprogress.dto';
 import { GameApiService } from '../gameapi/gameapi.service';
@@ -64,6 +64,16 @@ export class ProfileApiController {
     async resources(@User() user: UserEntity): Promise<ThingsDto> {
         const playerItems = await this.profileService.getPlayerItems(user)
         return playerItems
+    }
+
+    @Get('skins')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Get user skins' })
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    async getSkins(@User() user: UserEntity): Promise<TextureDto[]> {
+        const skins = await this.profileService.getSkins(user)
+        return skins
     }
 
     @Get('verifyjwt/:jwttoken')
