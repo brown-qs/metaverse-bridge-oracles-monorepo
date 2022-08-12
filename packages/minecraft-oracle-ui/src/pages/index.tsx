@@ -75,9 +75,7 @@ export const Routing = () => {
 
             </Route>
 
-            <Route path="/login" element={<>{!!authData?.jwt ? <Navigate to="/bridge" /> : <HomePage />}</>}>
 
-            </Route>
 
 
             <Route path="/oauth" element={<OauthPage />}>
@@ -99,7 +97,7 @@ export const Routing = () => {
             ) : <Navigate to="/login" />}</>}>
             </Route>
 
-            <Route path="/bridge" element={<>{!!authData?.jwt ? (
+            <Route path="/login" element={<>{!!authData?.jwt ? (
                 <Navigate to="/bridge" />
             ) :
                 <>
