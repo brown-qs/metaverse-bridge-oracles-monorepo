@@ -10,14 +10,12 @@ import { Image, Button, Stack, useMediaQuery, Text, VStack, Box, FormControl, Fo
 import { Mail, MailForward } from 'tabler-icons-react';
 import BackgroundImage from '../../assets/images/home/background.jpg'
 import { useDisclosure } from '@chakra-ui/react'
-import { useGetAssetsQuery } from '../../state/api/bridgeApi';
 import { useEmailLoginDialog } from '../../hooks/useEmailLoginDialog/useEmailLoginDialog';
 import { useKiltLoginDialog } from '../../hooks/useKiltLoginDialog/useKiltLoginDialog';
 
 const HomePage = () => {
   const { authData } = useAuth();
   let navigate = useNavigate();
-  const { } = useGetAssetsQuery()
   const {
     homeContainer,
     logo,

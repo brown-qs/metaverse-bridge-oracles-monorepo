@@ -2,12 +2,14 @@
 import { Box } from '@chakra-ui/react';
 import { useClasses } from 'hooks';
 import { useAuth } from 'hooks';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { UserCircle } from 'tabler-icons-react';
+import { selectAccessToken } from '../../state/slices/authSlice';
 
 const ServerAccount = ({ onClick }: { onClick?: () => void }) => {
   let navigate = useNavigate();
-  const { authData, setAuthData } = useAuth();
+  const accessToken = useSelector(selectAccessToken)
 
   const handleAccount = () => {
     navigate("/account");
@@ -17,7 +19,7 @@ const ServerAccount = ({ onClick }: { onClick?: () => void }) => {
     navigate("/bridge");
   };
 
-  const isLoggedIn = !!authData && !!authData?.jwt
+  const isLoggedIn = !!accessToken
 
   // rgba(255, 201, 20, 0.2)
   //border 0EEBA8

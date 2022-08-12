@@ -2,7 +2,7 @@ import { SerializedError } from "@reduxjs/toolkit"
 import { BaseQueryFn, createApi, fetchBaseQuery, FetchBaseQueryError } from "@reduxjs/toolkit/query/react"
 import { AppState } from ".."
 import { setTokens } from "../slices/authSlice"
-import { EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse } from "./types"
+import { EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse, UserProfileResponse } from "./types"
 
 
 
@@ -44,6 +44,9 @@ export const bridgeApi = createApi({
         getAssets: builder.query<void, void>({
             query: () => `/user/resources`,
         }),
+        userProfile: builder.query<UserProfileResponse, void>({
+            query: () => `/user/profile`,
+        }),
     }),
 })
 
@@ -60,4 +63,4 @@ export const bridgeApiErrorFormatter = (error: any): string => {
 
 }
 
-export const { useEmailLoginCodeMutation, useGetAssetsQuery, useEmailLoginCodeVerifyMutation } = bridgeApi
+export const { useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation } = bridgeApi
