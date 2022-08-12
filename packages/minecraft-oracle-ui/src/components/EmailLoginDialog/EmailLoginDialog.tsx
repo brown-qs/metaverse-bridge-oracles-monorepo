@@ -1,9 +1,10 @@
 import { FormControl, Input, Button, useDisclosure, FormErrorMessage, FormHelperText, useToast, ToastId } from "@chakra-ui/react"
 import { fetchBaseQuery, FetchBaseQueryError } from "@reduxjs/toolkit/query"
-import { ReactNode, useEffect, useRef, useState } from "react"
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { MailForward } from "tabler-icons-react"
+import { Mail, MailForward } from "tabler-icons-react"
 import { useCaptcha } from "../../hooks/useCaptcha/useCaptcha"
+import { useEmailCodeDialog } from "../../hooks/useEmailCodeDialog/useEmailCodeDialog"
 import { useEmailLoginDialog } from "../../hooks/useEmailLoginDialog/useEmailLoginDialog"
 import { bridgeApiErrorFormatter, useEmailLoginCodeMutation } from "../../state/api/bridgeApi"
 import { MoonsamaModal } from "../MoonsamaModal"
@@ -11,11 +12,17 @@ import { ReCAPTCHA } from "../Recaptcha"
 
 export const EmailLoginDialog: React.FC<{}> = ({ }) => {
     const { isEmailLoginDialogOpen, onEmailLoginDialogOpen, onEmailLoginDialogClose } = useEmailLoginDialog()
+    const { isEmailCodeDialogOpen, onEmailCodeDialogOpen, onEmailCodeDialogClose } = useEmailCodeDialog()
+
     const [submitEmailLoginCode, { error, isUninitialized, isLoading, isSuccess, isError, reset }] = useEmailLoginCodeMutation()
     const { executeCaptcha, resetCaptcha, setCaptchaVisible, isCaptchaLoading, isCaptchaError, isCaptchaSolved, captchaError, captchaSolution } = useCaptcha()
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [submitTried, setSubmitTried] = useState(false);
+
+    //need to do this because there is brief pause between when captcha finishes loading and request starts loading
+    const [somethingLoading, setSomethingLoading] = useState(false);
+
     const toast = useToast()
     const toastIdRef = useRef<ToastId>()
 
@@ -35,12 +42,15 @@ export const EmailLoginDialog: React.FC<{}> = ({ }) => {
         setSubmitTried(false)
         setEmail("")
         reset()
+        setSomethingLoading(false)
+
     }, [isEmailLoginDialogOpen])
 
 
     //CAPTCHA SUCCESS/FAIL
     useEffect(() => {
         if (isCaptchaError && isEmailLoginDialogOpen) {
+            setSomethingLoading(false)
             closeLastToast()
             toastIdRef.current = toast({
                 title: 'Invalid captcha.',
@@ -65,6 +75,7 @@ export const EmailLoginDialog: React.FC<{}> = ({ }) => {
     //HTTP REQ SUCCESS/FAIL
     useEffect(() => {
         if (isError && isEmailLoginDialogOpen) {
+            setSomethingLoading(false)
             let err = String(error)
             closeLastToast()
             toastIdRef.current = toast({
@@ -80,6 +91,9 @@ export const EmailLoginDialog: React.FC<{}> = ({ }) => {
 
     useEffect(() => {
         if (isSuccess && isEmailLoginDialogOpen) {
+
+            setSomethingLoading(false)
+
             closeLastToast()
 
             toast({
@@ -89,17 +103,20 @@ export const EmailLoginDialog: React.FC<{}> = ({ }) => {
                 duration: 5000,
                 isClosable: true,
             })
+            onEmailCodeDialogOpen()
+            onEmailLoginDialogClose()
             reset()
         }
     }, [isSuccess, isEmailLoginDialogOpen])
 
-    const handleSubmit = (em: string) => {
-        console.log("handleSubmit()")
+    //prevent small pause between captcha finish loading and request to bakcend starting
 
+    const handleSubmit = (em: string) => {
         setSubmitTried(true)
         if (!isValidEmail(em)) {
             return
         }
+        setSomethingLoading(true)
         executeCaptcha()
     }
 
@@ -107,13 +124,15 @@ export const EmailLoginDialog: React.FC<{}> = ({ }) => {
     return (<><MoonsamaModal
         isOpen={isEmailLoginDialogOpen}
         onClose={onEmailLoginDialogClose}
-        title="Email"
-    //message="Log in with the code you will receive to the provided email address."
+        TitleTablerIcon={Mail}
+        title="EMAIL"
+        message="Log in with the code you will receive to the provided email address."
     >
 
         <FormControl isInvalid={submitTried && !isValidEmail(email)}>
             <Input
-                isDisabled={isCaptchaLoading || isLoading}
+                placeholder="Email"
+                isDisabled={somethingLoading}
                 value={email}
                 onChange={(e) => {
                     setEmail(e.target.value)
@@ -131,10 +150,10 @@ export const EmailLoginDialog: React.FC<{}> = ({ }) => {
             {(submitTried && !isValidEmail(email)) ?
                 <FormErrorMessage>Email is invalid.</FormErrorMessage>
                 :
-                <FormHelperText>We'll send you a one-time login code.</FormHelperText>
+                <></>
             }
         </FormControl>
-        <Button isDisabled={isCaptchaLoading || isLoading || (submitTried && !isValidEmail(email))} marginTop="16px" leftIcon={<MailForward></MailForward>} w="100%" onClick={() => { handleSubmit(email) }}>LOG IN WITH EMAIL</Button>
+        <Button isLoading={somethingLoading} isDisabled={somethingLoading || (submitTried && !isValidEmail(email))} marginTop="16px" leftIcon={<MailForward></MailForward>} w="100%" onClick={() => { handleSubmit(email) }}>SEND LOGIN CODE</Button>
 
     </MoonsamaModal>
     </>

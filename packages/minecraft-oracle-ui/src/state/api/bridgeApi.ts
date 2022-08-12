@@ -2,7 +2,7 @@ import { SerializedError } from "@reduxjs/toolkit"
 import { BaseQueryFn, createApi, fetchBaseQuery, FetchBaseQueryError } from "@reduxjs/toolkit/query/react"
 import { AppState } from ".."
 import { setTokens } from "../slices/authSlice"
-import { EmailLoginCode, EmailLoginCodeResponse } from "./types"
+import { EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse } from "./types"
 
 
 
@@ -11,7 +11,7 @@ export const bridgeApi = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: `${process.env.REACT_APP_BACKEND_API_URL}`,
         prepareHeaders: (headers, { getState }) => {
-            const token = (getState() as AppState)?.auth?.token
+            const token = (getState() as AppState)?.auth?.accessToken
             if (!!token) {
                 headers.set("Authorization", `Bearer ${token}`)
             }
@@ -26,7 +26,21 @@ export const bridgeApi = createApi({
                 body
             })
         }),
-
+        emailLoginCodeVerify: builder.mutation<EmailLoginCodeVerifyResponse, string>({
+            query: (loginKey) => ({
+                url: `/auth/email/verify?loginKey=${loginKey}`,
+                method: "GET",
+            }),
+            async onQueryStarted(args, { dispatch, queryFulfilled }) {
+                try {
+                    const result = await queryFulfilled;
+                    if (!!result?.data?.jwt) {
+                        dispatch(setTokens({ accessToken: result.data.jwt, refreshToken: null }));
+                        window.localStorage.setItem('accessToken', result.data.jwt);
+                    }
+                } catch (error) { }
+            }
+        }),
         getAssets: builder.query<void, void>({
             query: () => `/user/resources`,
         }),
@@ -46,4 +60,4 @@ export const bridgeApiErrorFormatter = (error: any): string => {
 
 }
 
-export const { useEmailLoginCodeMutation, useGetAssetsQuery } = bridgeApi
+export const { useEmailLoginCodeMutation, useGetAssetsQuery, useEmailLoginCodeVerifyMutation } = bridgeApi
