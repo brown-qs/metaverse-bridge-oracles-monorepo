@@ -13,11 +13,9 @@ import { useDisclosure } from '@chakra-ui/react'
 import { useGetAssetsQuery } from '../../state/api/bridgeApi';
 
 const HomePage = () => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [emailLoginModalOpen, setEmailLoginModalOpen] = React.useState(true);
   const { authData } = useAuth();
   let navigate = useNavigate();
-
+  const { } = useGetAssetsQuery()
   const {
     homeContainer,
     logo,
@@ -129,7 +127,7 @@ const HomePage = () => {
                     {...loginButtonProps}
                     leftIcon={<Mail color="#3BEFB8" />}
                     onClick={() => {
-                      setEmailLoginModalOpen(true)
+                      navigate("/account/login/email")
                     }}
                   >EMAIL</Button>
 
