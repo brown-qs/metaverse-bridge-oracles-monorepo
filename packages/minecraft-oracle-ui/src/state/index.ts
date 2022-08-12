@@ -16,10 +16,10 @@ const store = configureStore({
     auth: authSlice,
     [bridgeApi.reducerPath]: bridgeApi.reducer
   },
-  middleware: (getDefaultMiddleware) => [...getDefaultMiddleware({ thunk: false }), bridgeApi.middleware, save({ states: PERSISTED_KEYS })],
-  preloadedState: load({ states: PERSISTED_KEYS }),
+  middleware: (getDefaultMiddleware) => [...getDefaultMiddleware(), bridgeApi.middleware], //, save({ states: PERSISTED_KEYS })
 });
-store.dispatch(updateVersion());
+//  preloadedState: load({ states: PERSISTED_KEYS }),
+//store.dispatch(updateVersion());
 
 // optional, but required for refetchOnFocus/refetchOnReconnect behaviors
 // see `setupListeners` docs - takes an optional callback as the 2nd arg for customization
