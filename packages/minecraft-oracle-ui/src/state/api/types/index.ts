@@ -34,3 +34,22 @@ export type UserProfileResponse = {
     allowedToPlayReason: string,
     blacklisted: boolean
 }
+
+export type SkinResponse = {
+    id: string
+    assetAddress: string
+    assetId: string
+    assetType: string
+    textureData: string
+    textureSignature: string
+    selectable: boolean
+    name?: string
+    equipped: boolean
+}
+
+export type SkinSelectRequest = {
+    id: string,
+    assetId: string
+    assetType: string
+    assetAddress: string
+}
