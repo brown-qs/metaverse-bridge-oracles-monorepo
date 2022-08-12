@@ -5,42 +5,18 @@ import { useNavigate } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
 import { Alert, AlertDescription, AlertIcon, Box, Button, Stack, Tag, TagCloseButton, TagLabel, TagLeftIcon, TagRightIcon } from '@chakra-ui/react';
 import { DeviceGamepad2, Pencil, Tags, User } from 'tabler-icons-react';
+import { useSelector } from 'react-redux';
+import { selectAccessToken, setTokens } from '../../state/slices/authSlice';
+import { useUserProfileQuery } from '../../state/api/bridgeApi';
+import { useDispatch } from 'react-redux';
 const AccountPage = () => {
-  const { authData, setAuthData } = useAuth();
-  const [isLoading, setIsLoading] = useState(true)
+  const accessToken = useSelector(selectAccessToken)
   const [failureMessage, setFailureMessage] = useState("")
   const { oauthData, setOauthData } = useOauthLogin()
   const navigate = useNavigate();
+  const { data: profile, error, isLoading: profileLoading } = useUserProfileQuery()
+  const dispatch = useDispatch()
 
-  const getAccount = async () => {
-    setIsLoading(true)
-    try {
-      const result = await axios({
-        method: 'get',
-        url: `${process.env.REACT_APP_BACKEND_API_URL}/user/profile`,
-        headers: {
-          "Authorization": `Bearer ${authData?.jwt}`,
-          "Content-Type": "application/json"
-        },
-      });
-      setAuthData(oldAuthData => ({ jwt: oldAuthData?.jwt, userProfile: result.data }))
-    } catch (e) {
-      const err = e as AxiosError;
-
-      if (err?.response?.data.statusCode === 401) {
-        window.localStorage.removeItem('authData');
-        setAuthData(undefined);
-      };
-      setFailureMessage(`Failed to load account: ${e}`)
-    }
-    setIsLoading(false)
-  }
-
-  useEffect(() => {
-    if (!!authData?.jwt) {
-      getAccount()
-    }
-  }, [authData?.jwt])
 
 
   const handleMinecraftLink = () => {
@@ -49,8 +25,10 @@ const AccountPage = () => {
 
   const handleLogout = () => {
     setOauthData(null)
-    window.localStorage.removeItem('authData');
-    setAuthData({ jwt: undefined })
+    window.localStorage.removeItem('accessToken');
+    dispatch(setTokens({ accessToken: null, refreshToken: null }));
+
+    // setAuthData({ jwt: undefined })
   }
 
   const handleMinecraftUnlink = async () => {
@@ -62,12 +40,7 @@ const AccountPage = () => {
 
   }
 
-  const handleAlertClose = () => {
-    setFailureMessage("")
-    getAccount()
-  }
-
-  if (!authData?.jwt) {
+  if (!accessToken) {
     navigate('/bridge')
   }
 
@@ -78,7 +51,7 @@ const AccountPage = () => {
     alert = { severity: "error", text: failureMessage }
   }
   return (
-    <AuthLayout title="ACCOUNT" loading={isLoading} alert={alert} handleAlertClose={handleAlertClose}>
+    <AuthLayout title="ACCOUNT" loading={profileLoading} >
       <Stack direction="column" alignItems='center' textAlign='center' spacing={0}>
         <Tag sx={{ maxWidth: 300 }}
           size={"lg"}
@@ -87,7 +60,7 @@ const AccountPage = () => {
           variant='solid'
         >
           <TagLeftIcon as={User} />
-          <TagLabel>{authData?.userProfile?.email}</TagLabel>
+          <TagLabel>{profile?.email}</TagLabel>
           <TagRightIcon sx={{ cursor: "pointer" }} as={Pencil} onClick={() => { navigate(`/account/login/email/change`) }} />
         </Tag>
 
@@ -102,8 +75,8 @@ const AccountPage = () => {
         </Stack>
         <Stack direction="column" alignItems='center' textAlign='center' spacing={1} margin={2} marginTop={5}>
           <Box paddingTop="30px">LINKED MINECRAFT ACCOUNT</Box>
-          {!authData?.userProfile?.minecraftUuid && <><Alert sx={{ margin: "auto" }} variant='solid' status="warning"><AlertIcon /><AlertDescription textAlign="left" fontFamily="Rubik">Linking a Minecraft account that was used with Moonsama prior to the new login system will migrate over all assets and resources to your Moonsama account. Make sure you do not lose access to your email address.</AlertDescription></Alert><div></div></>}
-          {authData?.userProfile?.minecraftUuid && <>
+          {!profile?.minecraftUuid && <><Alert sx={{ margin: "auto" }} variant='solid' status="warning"><AlertIcon /><AlertDescription textAlign="left" fontFamily="Rubik">Linking a Minecraft account that was used with Moonsama prior to the new login system will migrate over all assets and resources to your Moonsama account. Make sure you do not lose access to your email address.</AlertDescription></Alert><div></div></>}
+          {!!profile?.minecraftUuid && <>
             <Tag sx={{ maxWidth: 300 }}
               size={"lg"}
               key={"lg"}
@@ -112,17 +85,17 @@ const AccountPage = () => {
               colorScheme="green"
             >
               <TagLeftIcon as={DeviceGamepad2} />
-              <TagLabel>{authData?.userProfile?.minecraftUserName}</TagLabel>
+              <TagLabel>{profile?.minecraftUserName}</TagLabel>
             </Tag>
           </>}
-          <Box>{authData?.userProfile?.minecraftUuid
+          <Box>{profile?.minecraftUuid
             ? <Button style={{ maxWidth: '200px', width: '200px', minWidth: '200px' }} marginTop="6px" onClick={() => { handleMinecraftUnlink() }} >UNLINK MINECRAFT</Button>
             : <Button style={{ maxWidth: '200px', width: '200px', minWidth: '200px' }} marginTop="4px" onClick={() => { handleMinecraftLink() }} >LINK MINECRAFT</Button>}
           </Box>
         </Stack>
         <Stack direction="column" alignItems='center' textAlign='center' spacing={1} margin={2} marginTop={3}>
           <Box paddingTop="30px">GAMER TAG</Box>
-          {!!authData?.userProfile?.gamerTag
+          {!!profile?.gamerTag
             ?
             <Tag sx={{ maxWidth: 300 }}
               size={"lg"}
@@ -131,7 +104,7 @@ const AccountPage = () => {
               variant='solid'
             >
               <TagLeftIcon as={Tags} />
-              <TagLabel>{authData?.userProfile?.gamerTag}</TagLabel>
+              <TagLabel>{profile?.gamerTag}</TagLabel>
               <TagRightIcon sx={{ cursor: "pointer" }} as={Pencil} onClick={() => { navigate(`/account/gamertag`) }} />
 
             </Tag>
