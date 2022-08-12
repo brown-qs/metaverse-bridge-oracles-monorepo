@@ -11,9 +11,7 @@ import { EnraptureDialog } from '../components/EnraptureDialog/EnraptureDialog';
 import { SummonDialog } from '../components/SummonDialog/SummonDialog';
 import { AssetDialog } from '../components/AssetDialog/AssetDialog';
 import AccountPage from './account';
-import EmailLoginPage from './account/login/email';
-import KiltLoginPage from './account/login/kilt';
-import EmailVerifyPage from './account/login/email/verify';
+
 import EmailChangePage from './account/login/email/change';
 import MinecraftRedirectPage from './account/minecraft/redirect';
 import MinecraftVerifyPage from './account/minecraft/verify';
@@ -38,23 +36,12 @@ export const Routing = () => {
             <Route path="/account" element={<>{!!accessToken ? <AccountPage></AccountPage> : <Navigate to="/login" />}</>}>
             </Route>
 
-            <Route path="/account/login" element={<> {!!accessToken ? <Navigate to="/account" /> : <HomePage />}</>}>
-
-            </Route>
-
-            <Route path="/account/login/email" element={<>{!!accessToken ? <Navigate to="/account" /> : <EmailLoginPage />}</>} />
-
-
             <Route path="/account/gamertag" element={!!accessToken ? <GamerTagChangePage /> : <HomePage />}>
             </Route>
 
 
 
             <Route path="/account/login/email/change" element={<> {!!accessToken ? <EmailChangePage /> : <Navigate to="/login" />}</>}>
-
-            </Route>
-
-            <Route path="/account/login/email/verify" element={<><EmailVerifyPage /></>}>
 
             </Route>
 
@@ -70,17 +57,6 @@ export const Routing = () => {
 
             </Route>
 
-            <Route path="/account/login/kilt" element={<>{!!accessToken ? <Navigate to="/account" /> : <KiltLoginPage />}</>}>
-
-            </Route>
-
-            <Route path="/auth/:jwt" element={<><AuthPage /></>}>
-
-            </Route>
-
-
-
-
             <Route path="/oauth" element={<OauthPage />}>
             </Route>
 
@@ -95,7 +71,7 @@ export const Routing = () => {
                     <EnraptureDialog />
                     <SummonDialog />
                     <AssetDialog />
-                    <ProfilePage authData={undefined} />
+                    <ProfilePage />
                 </>
             ) : <Navigate to="/login" />}</>}>
             </Route>
