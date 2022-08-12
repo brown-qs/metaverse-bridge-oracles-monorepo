@@ -11,6 +11,8 @@ import { Mail, MailForward } from 'tabler-icons-react';
 import BackgroundImage from '../../assets/images/home/background.jpg'
 import { useDisclosure } from '@chakra-ui/react'
 import { useGetAssetsQuery } from '../../state/api/bridgeApi';
+import { useEmailLoginDialog } from '../../hooks/useEmailLoginDialog/useEmailLoginDialog';
+import { useKiltLoginDialog } from '../../hooks/useKiltLoginDialog/useKiltLoginDialog';
 
 const HomePage = () => {
   const { authData } = useAuth();
@@ -31,10 +33,11 @@ const HomePage = () => {
   const [isMobileViewport] = useMediaQuery('(max-width: 600px)')
   const [shorterThan600] = useMediaQuery('(max-height: 600px)')
   const [shorterThan800] = useMediaQuery('(max-height: 800px)')
+  const { isEmailLoginDialogOpen, onEmailLoginDialogOpen, onEmailLoginDialogClose } = useEmailLoginDialog()
+  const { isKiltLoginDialogOpen, onKiltLoginDialogOpen, onKiltLoginDialogClose } = useKiltLoginDialog()
 
   const loginButtonProps = { h: "80px", w: "100%", fontSize: "20px", bg: "rgba(255, 255, 255, 0.06)", border: "none" }
 
-  const { } = useGetAssetsQuery()
   return (
     <>
 
@@ -127,7 +130,7 @@ const HomePage = () => {
                     {...loginButtonProps}
                     leftIcon={<Mail color="#3BEFB8" />}
                     onClick={() => {
-                      navigate("/account/login/email")
+                      onEmailLoginDialogOpen()
                     }}
                   >EMAIL</Button>
 

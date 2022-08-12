@@ -4,69 +4,55 @@ import { ReCAPTCHA } from 'components/Recaptcha';
 import { useNavigate } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
 import { Button, FormControl, FormErrorMessage, FormHelperText, FormLabel, Input, Stack } from '@chakra-ui/react';
+import { useEmailLoginCodeMutation } from '../../../../state/api/bridgeApi';
 
 const EmailLoginPage = () => {
+  const [submitEmailLoginCode, { error, isUninitialized, isLoading, isSuccess, isError, reset }] = useEmailLoginCodeMutation()
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const [captchaIsLoading, setCaptchaIsLoading] = useState(false);
+  const [captchaFailureMessage, setCaptchaFailureMessage] = useState("")
   const [email, setEmail] = useState("");
   const [dirtyTextField, setDirtyTextField] = useState(false);
-  const [failureMessage, setFailureMessage] = useState("")
 
   const recaptchaEl = useRef<any>(null)
+
+
 
   const isValidEmail = (email: string) => {
     return /\S+@\S+\.\S+/.test(email)
   }
 
   const submitEmail = async (ema: string) => {
-    setIsLoading(true)
+    setCaptchaIsLoading(true)
     let token
     try {
       if (recaptchaEl.current) {
-        console.log("before captcha")
         token = await recaptchaEl.current.executeAsync();
       }
     } catch (e) {
       setDirtyTextField(false)
       setEmail("")
-      setIsLoading(false)
-      setFailureMessage("Invalid captcha")
+      setCaptchaIsLoading(false)
+      setCaptchaFailureMessage("Invalid captcha")
+      window.setTimeout(() => {
+        recaptchaEl.current.reset()
+      }, 1)
+      return
     }
-
+    setCaptchaIsLoading(false)
     window.setTimeout(() => {
       recaptchaEl.current.reset()
     }, 1)
 
-
-    try {
-      const result = await axios({
-        method: 'post',
-        url: `${process.env.REACT_APP_BACKEND_API_URL}/auth/email/login`,
-        headers: {
-          "Content-Type": "application/json"
-        },
-        data: { email: ema, "g-recaptcha-response": token }
-      });
-      navigate('/account/login/email/verify')
-      return
-    } catch (e) {
-      const err = e as AxiosError;
-
-      if (!!err.response?.data?.message) {
-        setFailureMessage(`Error: ${String(err.response?.data?.message)}`)
-      } else {
-        setFailureMessage(String(e))
-      }
-    }
-
-
-    setDirtyTextField(false)
-    setEmail("")
-    setIsLoading(false)
+    submitEmailLoginCode({ email: ema, "g-recaptcha-response": token })
   }
 
   const handleAlertClose = () => {
-    setFailureMessage("")
+    setCaptchaIsLoading(false)
+    setCaptchaFailureMessage("")
+    setDirtyTextField(false)
+    setEmail("")
+    reset()
   }
 
 
@@ -75,8 +61,15 @@ const EmailLoginPage = () => {
   if (!process.env.REACT_APP_RECAPTCHA_SITEKEY) {
     alert = { severity: "error", text: "No recaptcha sitekey defined. Please contact admins." }
     alertClose = undefined
-  } else if (failureMessage) {
-    alert = { severity: "error", text: failureMessage }
+  } else if (captchaFailureMessage) {
+    alert = { severity: "error", text: captchaFailureMessage }
+  } else if (isError) {
+    alert = { severity: "error", text: String(error) }
+  }
+
+  if (isSuccess) {
+    navigate("/acccount/login/email/verify")
+    return <></>
   }
 
   return (
