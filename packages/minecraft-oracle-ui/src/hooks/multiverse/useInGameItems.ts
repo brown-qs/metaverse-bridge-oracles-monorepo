@@ -70,6 +70,11 @@ export interface ProfileInGameItemsWithStatic {
     resources: InGameResourceWithStatic[]
 }
 
+function chunk<T>(arr: Array<T>, size: number) {
+    return Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
+        arr.slice(i * size, i * size + size)
+    );
+}
 export function useInGameItems(trigger: string | undefined = undefined) {
     const { authData, setAuthData } = useAuth();
     const blocknumber = useBlockNumber();
@@ -103,18 +108,31 @@ export function useInGameItems(trigger: string | undefined = undefined) {
 
         //console.log('DEBUG rawData', {assets: rawData.assets, resources: rawData.resources})
         const melange = [...rawData.assets, ...rawData.resources]
-        let staticDatas = await staticCallback(
-            melange.map(x => {
-                //console.log('DEBUG melange', {asset: x})
-                return {
-                    assetId: x.assetId,
-                    assetAddress: x.assetAddress.length === 42 ? x.assetAddress : `${x.assetAddress}${'0'.repeat(42 - x.assetAddress.length)}`,
-                    assetType: stringToStringAssetType(x.assetType),
-                    id: '1',
-                    chainId: x.exportChainId,
-                }
-            })
-        );
+        const chunkedStuff = chunk(melange, 100)
+
+
+        const chunks = chunk(melange, 100);
+        const proms = chunks.map(async (chunk) => {
+            return await staticCallback(
+                chunk.map(x => {
+                    //console.log('DEBUG melange', {asset: x})
+                    return {
+                        assetId: x.assetId,
+                        assetAddress: x.assetAddress.length === 42 ? x.assetAddress : `${x.assetAddress}${'0'.repeat(42 - x.assetAddress.length)}`,
+                        assetType: stringToStringAssetType(x.assetType),
+                        id: '1',
+                        chainId: x.exportChainId,
+                    }
+                })
+            )
+        })
+        const results = await Promise.all(proms)
+        let staticDatas: {
+            meta: any;
+            staticData: StaticTokenData;
+        }[] = results.flat()
+
+
         //console.log('DEBUG staticDataCallbackArrayWithChains', {staticDatas})
         let resultSet: ProfileInGameItemsWithStatic = { assets: [], resources: [], textures: [] }
         if (rawData.assets.length > 0) {
@@ -311,3 +329,5 @@ function checkResultsEqual(a?: ProfileInGameItemsWithStatic, b?: ProfileInGameIt
 
     return true
 }
+
+
