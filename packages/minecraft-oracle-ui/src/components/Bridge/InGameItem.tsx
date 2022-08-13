@@ -4,6 +4,14 @@ import { InGameItemWithStatic } from "../../hooks/multiverse/useInGameItems";
 import { Media } from "../Media/Media";
 
 export const InGameItem: React.FC<{ data: InGameItemWithStatic, checkboxValue: string, isCheckboxDisabled: boolean | undefined, isChecked: boolean, onCheckboxChange: (e: React.ChangeEvent<HTMLInputElement>) => void, onClick?: () => void }> = ({ data, checkboxValue, isCheckboxDisabled, isChecked, onCheckboxChange, onClick }) => {
+
+    let title = `${data.assetAddress} ${data.assetId}`
+    if (!!data?.meta?.name) {
+        title = data?.meta?.name
+        if (data?.name === "Pondsama" && !!data?.assetId) {
+            title = `${title} #${data?.assetId}`
+        }
+    }
     return (
         <HStack
             height="80px"
@@ -32,7 +40,7 @@ export const InGameItem: React.FC<{ data: InGameItemWithStatic, checkboxValue: s
                 paddingLeft="8px"
                 paddingRight="8px"
             >
-                <Box>{data?.meta?.name ?? `${data.assetAddress} ${data.assetId}`}</Box>
+                <Box>{title}</Box>
                 {data.enraptured && <Box fontSize="12px" color="whiteAlpha.600">Enraptured</Box>}
             </Box>
             {!data.enraptured &&
