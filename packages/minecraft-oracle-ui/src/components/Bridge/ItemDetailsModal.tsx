@@ -15,6 +15,7 @@ export const ItemDetailsModal: React.FC<{ data: InGameItemWithStatic, isOpen: bo
                         <div >
                             {data.enraptured ? 'This item is enraptured.' : 'This item is imported.'}
                         </div>
+                        <div>{JSON.stringify(data)}</div>
                     </div>
                     <div >
                         <div >
