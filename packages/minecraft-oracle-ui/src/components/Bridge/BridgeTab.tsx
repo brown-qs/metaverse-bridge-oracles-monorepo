@@ -46,6 +46,7 @@ export const BridgeTab: React.FC<{ title: string, children: ReactNode, isLoading
                 overflowY="scroll"
                 width="100%"
                 background="gray.800"
+                overscrollBehavior="none"
             >
                 {!!isLoading
                     ?
