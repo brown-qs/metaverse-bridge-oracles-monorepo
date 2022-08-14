@@ -75,7 +75,6 @@ export function useInGameItems(trigger: string | undefined = undefined) {
     const blocknumber = useBlockNumber();
     const staticCallback = useTokenStaticDataCallbackArrayWithChains();
 
-    console.log({ authData })
     const { jwt } = authData ?? {}
 
     const [items, setItems] = useState<ProfileInGameItemsWithStatic | undefined>(undefined);
@@ -179,7 +178,6 @@ export function useInGameItemsWithCompositeMetaAndAssets(trigger: string | undef
     //const blocknumber = useBlockNumber();
     const urlCb = useFetchUrlCallback()
 
-    console.log({ authData })
     const { jwt } = authData ?? {}
 
     const [items, setItems] = useState<ProfileInGameItemsWithStatic | undefined>(undefined);
@@ -260,7 +258,6 @@ export function useInGameItemsWithCompositeMetaAndAssets(trigger: string | undef
         }))
 
         if (!checkResultsEqual(resultSet, items)) {
-            console.log('WAAAA 2222')
             setItems(resultSet)
         }
 

@@ -32,7 +32,7 @@ export const AssetDialog = () => {
 
   const erc20Data = useTokenStaticData([{ assetAddress: assetDialogData?.assetAddressERC20 ?? AddressZero, assetId: '0', assetType: StringAssetType.ERC20, id: '1' }])
 
-  console.log('yolo', { assetDialogData, erc20Data })
+  //console.log('yolo', { assetDialogData, erc20Data })
   const { addToken } = useAddTokenToMetamask({
     address: assetDialogData?.assetAddressERC20,
     decimals: erc20Data?.[0]?.decimals,

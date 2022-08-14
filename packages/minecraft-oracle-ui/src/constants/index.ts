@@ -23,7 +23,7 @@ export const PINATA_GATEWAY =
   process.env.REACT_APP_PINATA_IPFS_URL ??
   'https://moonsama.mypinata.cloud/ipfs/';
 
-console.log('SUBGRAPH_URL', { SUBGRAPH_URL, CHAIN_ID });
+//console.log('SUBGRAPH_URL', { SUBGRAPH_URL, CHAIN_ID });
 
 export enum ChainId {
   MAINNET = 1,

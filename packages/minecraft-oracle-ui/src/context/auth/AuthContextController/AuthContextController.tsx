@@ -10,7 +10,7 @@ export const AuthContextController = ({ children }: AuthContextControllerProps) 
         if (!authData) {
             const persistedAuthData = window.localStorage.getItem('authData');
 
-            console.log('Auth Data', { persistedAuthData })
+            // console.log('Auth Data', { persistedAuthData })
             if (!!persistedAuthData && persistedAuthData !== 'undefined') {
                 // @ts-ignore
                 setAuthData(JSON.parse(persistedAuthData));

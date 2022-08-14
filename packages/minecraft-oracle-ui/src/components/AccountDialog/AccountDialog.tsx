@@ -45,7 +45,7 @@ export const AccountDialog = () => {
   const [walletView, setWalletView] = useState(WALLET_VIEWS.ACCOUNT);
 
   const sortedRecentTransactions = useSortedRecentTransactions();
-  console.log("sortedRecentTransactions: ", sortedRecentTransactions)
+  //console.log("sortedRecentTransactions: ", sortedRecentTransactions)
   const { addNetwork } = useAddNetworkToMetamaskCb()
 
   const pendingTransactions = sortedRecentTransactions
