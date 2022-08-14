@@ -135,6 +135,7 @@ export class ProfileApiService {
 
         const textures: TextureDto[] = userSkins.map(skin => {
             return {
+                id: skin.id,
                 assetAddress: skin.texture.assetAddress,
                 assetId: skin.texture.assetId,
                 assetType: skin.texture.assetType,
