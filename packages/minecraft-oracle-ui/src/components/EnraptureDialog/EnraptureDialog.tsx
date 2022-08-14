@@ -131,12 +131,12 @@ export const EnraptureDialog = () => {
   const { enraptureSubmitted, enraptureTx } = useSubmittedEnraptureTx(enraptureCallbackParams?.hash);
   const isPending = useIsTransactionPending(enraptureTx?.hash)
 
-  console.log('enrapture submission', { enraptureSubmitted, enraptureTx, finalTxSubmitted, enraptureConfirmed, hash: enraptureCallbackParams?.hash })
+  //  console.log('enrapture submission', { enraptureSubmitted, enraptureTx, finalTxSubmitted, enraptureConfirmed, hash: enraptureCallbackParams?.hash })
 
   useEffect(() => {
     const x = async () => {
       const confirmed = await confirmCb(enraptureCallbackParams?.hash, chainId)
-      console.log('effect hook', confirmed)
+      //  console.log('effect hook', confirmed)
       setEnraptureConfirmed(confirmed)
     }
     x()
@@ -152,7 +152,7 @@ export const EnraptureDialog = () => {
     approvalState === ApprovalState.NOT_APPROVED ||
     approvalState === ApprovalState.PENDING;
 
-  console.log('APPROVE FLOW', { showApproveFlow, approvalState, hasEnough });
+  //console.log('APPROVE FLOW', { showApproveFlow, approvalState, hasEnough });
 
   const isValidAmount = (amount: string) => {
     return /^\d+$/.test(amount)

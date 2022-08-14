@@ -20,7 +20,7 @@ export interface EnraptureRequest {
         assetType?: AssetType
     },
     owner: string | undefined | null,
-    beneficiary: string| undefined | null,
+    beneficiary: string | undefined | null,
     amount: string,
     chain?: number
 }
@@ -46,13 +46,13 @@ export function useFetchEnraptureAssetArgumentsCallback(enraptureRequest: Enrapt
     const { library, account } = useActiveWeb3React();
 
     const [params, setParams] = useState<EnraptureRequestParams | undefined>(undefined)
-    const { authData } =  useAuth();
+    const { authData } = useAuth();
 
-    const {jwt} = authData ?? {}
+    const { jwt } = authData ?? {}
 
     const stringedRequest = JSON.stringify(enraptureRequest)
 
-    console.log('enrapture request', enraptureRequest)
+    // console.log('enrapture request', enraptureRequest)
 
     const cb = useCallback(async () => {
         if (!library || !account || !enraptureRequest.owner || !enraptureRequest.beneficiary || !enraptureRequest.asset || !enraptureRequest.asset.assetAddress || !enraptureRequest.asset.assetId) {
@@ -66,8 +66,8 @@ export function useFetchEnraptureAssetArgumentsCallback(enraptureRequest: Enrapt
                 headers: { Authorization: `Bearer ${jwt}` }
             });
             setParams(resp.data)
-        } catch(e) {
-            console.error('Error fetching import params.')
+        } catch (e) {
+            //console.error('Error fetching import params.')
             setParams(undefined)
         }
     }, [library, account, stringedRequest, jwt])
@@ -95,7 +95,7 @@ export function useEnraptureAssetCallback(
     //console.log('YOLO', { account, chainId, library });
     // const contract = useMultiverseBridgeV1Contract(true);
     const contract = useMultiverseBridgeV2Contract(true, assetRequest.chainId);
-    
+
     const enraptureRequest = {
         ...assetRequest,
         owner: account,
@@ -112,7 +112,7 @@ export function useEnraptureAssetCallback(
     }
 
     return useMemo(() => {
-        if (!library || !account || !chainId || !contract ) {
+        if (!library || !account || !chainId || !contract) {
             return {
                 state: EnraptureAssetCallbackState.INVALID,
                 callback: null,
@@ -131,13 +131,13 @@ export function useEnraptureAssetCallback(
         }
 
         if (!data || !signature || !hash) {
-          console.error('Error fetching input params from oracle');
-          return {
-            state: EnraptureAssetCallbackState.INVALID,
-            callback: null,
-            error: 'Error fetching input params from oracle',
-            hash
-          };
+            //console.error('Error fetching input params from oracle');
+            return {
+                state: EnraptureAssetCallbackState.INVALID,
+                callback: null,
+                error: 'Error fetching input params from oracle',
+                hash
+            };
         }
 
         const inputParams = [data, signature]
@@ -161,25 +161,25 @@ export function useEnraptureAssetCallback(
                     ...args,
                     inputOptions
                 ).catch((gasError: any) => {
-                    console.debug(
+                    /*console.debug(
                         'Gas estimate failed, trying eth_call to extract error',
                         call
-                    );
+                    );*/
 
                     return contract.callStatic[methodName](...args, inputOptions)
                         .then((result: any) => {
-                            console.debug(
+                            /*console.debug(
                                 'Unexpected successful call after failed estimate gas',
                                 call,
                                 gasError,
                                 result
-                            );
+                            );*/
                             throw new Error(
                                 'Unexpected issue with estimating the gas. Please try again.'
                             );
                         })
                         .catch((callError: any) => {
-                            console.debug('Call threw error', call, callError);
+                            // console.debug('Call threw error', call, callError);
                             let errorMessage = `The transaction cannot succeed due to error: ${callError.reason}`;
                             throw new Error(errorMessage);
                         });
@@ -212,7 +212,7 @@ export function useEnraptureAssetCallback(
                             throw new Error('Transaction rejected.');
                         } else {
                             // otherwise, the error was unexpected and we need to convey that
-                            console.error(`Enrapture asset failed`, error, methodName, args);
+                            // console.error(`Enrapture asset failed`, error, methodName, args);
                             throw new Error(`Enrapture asset failed: ${error.message}`);
                         }
                     });
@@ -224,7 +224,7 @@ export function useEnraptureAssetCallback(
         account,
         chainId,
         data,
-        signature,,
+        signature, ,
         confirmed,
         hash,
         inputOptions.value,

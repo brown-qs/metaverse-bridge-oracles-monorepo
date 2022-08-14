@@ -125,7 +125,6 @@ export const bridgeApiErrorFormatter = (error: any): string => {
     } else {
         return String(error)
     }
-
 }
 
 export const { useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
