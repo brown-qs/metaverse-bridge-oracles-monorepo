@@ -29,7 +29,7 @@ export class UserRelationsUpdatedSaga {
       //map each higher order observable, debounce, then merge back into single observable
       mergeMap(group => {
         return group.pipe(
-          debounceTime(50),
+          debounceTime(1000),
           map(event => { return new UserRelationsUpdatedCommand(event.uuid) })
         )
       }),
