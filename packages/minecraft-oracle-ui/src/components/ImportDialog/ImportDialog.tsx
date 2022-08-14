@@ -123,7 +123,6 @@ export const ImportDialog = () => {
     approvalState === ApprovalState.NOT_APPROVED ||
     approvalState === ApprovalState.PENDING;
 
-  console.log('APPROVE FLOW', { showApproveFlow, approvalState, hasEnough });
 
   if (!importParamsLoaded) {
     return (<MoonsamaModal

@@ -82,13 +82,13 @@ export const ExportDialog = () => {
   const { exportSubmitted, exportTx } = useSubmittedExportTx(exportDialogData?.hash);
   const isPending = useIsTransactionPending(exportTx?.hash)
 
-  console.log('submission', { exportSubmitted, exportTx, finalTxSubmitted, exportConfirmed, hash: exportDialogData?.hash })
+  //console.log('submission', { exportSubmitted, exportTx, finalTxSubmitted, exportConfirmed, hash: exportDialogData?.hash })
 
 
   useEffect(() => {
     const x = async () => {
       const confirmed = await confirmCb(exportDialogData?.hash, chainId)
-      console.log('effect hook', confirmed)
+      //console.log('effect hook', confirmed)
       setExportConfirmed(confirmed)
     }
     x()
