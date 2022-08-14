@@ -191,18 +191,19 @@ const ProfilePage = () => {
                                                     key={`${value?.assetAddress}-${value?.assetId}-${ind}`}
 
                                                     onClick={() => {
-
-                                                        setSkin({
-                                                            id: value.id,
-                                                            assetAddress: value.assetAddress,
-                                                            assetId: value.assetId,
-                                                            assetType: value.assetType
-                                                        })
-
+                                                        //dont set a skin thats already set
+                                                        if (!value.equipped) {
+                                                            setSkin({
+                                                                id: value.id,
+                                                                assetAddress: value.assetAddress,
+                                                                assetId: value.assetId,
+                                                                assetType: value.assetType
+                                                            })
+                                                        }
                                                     }}
                                                 >
                                                     <Box
-                                                        overflow="hidden"
+                                                        overflow="visible"
                                                         position="absolute"
                                                         top={firstRow ? "12px" : "4px"}
                                                         right="12px"
@@ -210,7 +211,7 @@ const ProfilePage = () => {
                                                         left={firstColumn ? "12px" : "4px"}
                                                         bg={value.equipped ? "rgba(14, 235, 168, 0.1)" : "inherit"}
                                                         _hover={value.equipped ? {} : { bg: "rgba(255, 255, 255, 0.06)" }}
-                                                        _before={(value.equipped && !isSmallerThan285) ? { content: `"EQUIPPED"`, fontSize: "12px", bg: "teal.400", color: "#16132B", padding: "4px 8px", borderRadius: "8px 0px 4px 0px", marginTop: "100px", position: "absolute", bottom: "-1px", right: "-1px" } : {}}
+                                                        _after={(value.equipped && !isSmallerThan285) ? { content: `"EQUIPPED"`, fontSize: "12px", bg: "teal.400", color: "#16132B", padding: "4px 8px", borderRadius: "8px 0px 4px 0px", marginTop: "100px", position: "absolute", bottom: "-1px", right: "-1px" } : {}}
                                                         cursor={value.equipped ? "default" : "pointer"}
                                                         borderRadius="4px"
                                                         border={value.equipped ? "1px solid" : "1px solid"}

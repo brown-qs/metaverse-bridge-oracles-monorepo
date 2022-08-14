@@ -1,4 +1,5 @@
 import { extendTheme } from '@chakra-ui/react'
+import Alert from './components/alert'
 import Button from './components/button'
 import Checkbox from './components/checkbox'
 import Modal from './components/modal'
@@ -12,7 +13,8 @@ const overrides = {
     components: {
         Button,
         Modal,
-        Checkbox
+        Checkbox,
+        Alert
     },
 }
 
