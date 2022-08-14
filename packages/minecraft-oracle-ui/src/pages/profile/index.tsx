@@ -100,6 +100,9 @@ const ProfilePage = () => {
             height="100%"
             position="relative"
             overflow="visible">
+            <Box position="absolute" w="100%" h="100%" bg="#080714">
+                <Image src={BackgroundImage} w="552px" h="622px" position="absolute" top="0" right="0" filter="blur(10px)"></Image>
+            </Box>
             {profileLoading
                 ?
                 <VStack className="moonsamaFullHeight">
@@ -110,9 +113,6 @@ const ProfilePage = () => {
                 </VStack>
                 :
                 <>
-                    <Box position="absolute" w="100%" h="100%" bg="#080714">
-                        <Image src={BackgroundImage} w="552px" h="622px" position="absolute" top="0" right="0" filter="blur(10px)"></Image>
-                    </Box>
                     <Grid
                         zIndex="2"
                         templateRows={{ base: "275px repeat(5, 450px)", md: '275px repeat(3, 700px)', lg: '275px repeat(2, 700px)' }}
@@ -137,22 +137,22 @@ const ProfilePage = () => {
                             overflow="hidden"
                         >
                             <Stack lineHeight="40px" fontSize="32px" textAlign="left" direction={{ base: "column" }}>
-                                <Box color="white" whiteSpace="nowrap" textOverflow="ellipsis" overflow="hidden">
+                                <Box fontFamily="heading" color="white" whiteSpace="nowrap" textOverflow="ellipsis" overflow="hidden">
                                     Welcome back,
                                 </Box>
-                                <Box color="yellow.300" whiteSpace="nowrap" textOverflow="ellipsis" overflow="hidden" flex="1">
+                                <Box fontFamily="heading" color="yellow.300" whiteSpace="nowrap" textOverflow="ellipsis" overflow="hidden" flex="1">
                                     {profile?.email}
                                 </Box>
                             </Stack>
                             <HStack marginTop="20px" fontSize="12px">
                                 {!profile?.allowedToPlay &&
-                                    <Box padding="4px 8px" borderRadius="4px" color="white" bg="red.500">BUY YOUR TICKET AT THE MARKETPLACE TO PLAY</Box>
+                                    <Box fontFamily="heading" padding="4px 8px" borderRadius="4px" color="white" bg="red.500">BUY YOUR TICKET AT THE MARKETPLACE TO PLAY</Box>
                                 }
                                 {profile?.allowedToPlay && !profile?.blacklisted &&
-                                    <Box padding="4px 8px" borderRadius="4px" color="#1B1B3A" bg="teal.200">YOU ARE ELIGIBLE TO PLAY</Box>
+                                    <Box fontFamily="heading" padding="4px 8px" borderRadius="4px" color="#1B1B3A" bg="teal.200">YOU ARE ELIGIBLE TO PLAY</Box>
                                 }
                                 {profile?.allowedToPlay && profile?.blacklisted &&
-                                    <Box padding="4px 8px" borderRadius="4px" color="#1B1B3A" bg="yellow.300">BLACKLISTED, BUT ALLOWED TO PLAY</Box>
+                                    <Box fontFamily="heading" padding="4px 8px" borderRadius="4px" color="#1B1B3A" bg="yellow.300">BLACKLISTED, BUT ALLOWED TO PLAY</Box>
                                 }
                             </HStack>
                         </GridItem>
@@ -211,7 +211,7 @@ const ProfilePage = () => {
                                                         left={firstColumn ? "12px" : "4px"}
                                                         bg={value.equipped ? "rgba(14, 235, 168, 0.1)" : "inherit"}
                                                         _hover={value.equipped ? {} : { bg: "rgba(255, 255, 255, 0.06)" }}
-                                                        _after={(value.equipped && !isSmallerThan285) ? { content: `"EQUIPPED"`, fontSize: "12px", bg: "teal.400", color: "#16132B", padding: "4px 8px", borderRadius: "8px 0px 4px 0px", marginTop: "100px", position: "absolute", bottom: "-1px", right: "-1px" } : {}}
+                                                        _after={(value.equipped && !isSmallerThan285) ? { fontFamily: "heading", content: `"EQUIPPED"`, fontSize: "12px", bg: "teal.400", color: "#16132B", padding: "4px 8px", borderRadius: "8px 0px 4px 0px", marginTop: "100px", position: "absolute", bottom: "-1px", right: "-1px" } : {}}
                                                         cursor={value.equipped ? "default" : "pointer"}
                                                         borderRadius="4px"
                                                         border={value.equipped ? "1px solid" : "1px solid"}
