@@ -24,6 +24,7 @@ import { KiltLoginDialog } from '../components/KiltLoginDialog/KiltLoginDialog';
 import { EmailCodeDialog } from '../components/EmailCodeDialog/EmailCodeDialog';
 import { useSelector } from 'react-redux';
 import { selectAccessToken } from '../state/slices/authSlice';
+import TestPage from './test';
 
 export const Routing = () => {
     const accessToken = useSelector(selectAccessToken)
@@ -93,8 +94,11 @@ export const Routing = () => {
             </Route>
 
             <Route path="/moonsama/customizer" element={<><MoonsamaCharacterDesignerPage /></>}>
-
             </Route>
+
+            <Route path="/test" element={<><TestPage /></>}>
+            </Route>
+
 
             <Route path="*" element={<><Navigate to="/bridge" /></>}>
 
