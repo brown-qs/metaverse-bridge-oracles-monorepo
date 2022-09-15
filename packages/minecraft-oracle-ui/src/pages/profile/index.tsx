@@ -100,11 +100,12 @@ const ProfilePage = () => {
             //need to filter out erc1155 that the last transfer went to the connected wallet
             let ownedErc1155 = onChainTokensData?.erc1155TokenOwners?.filter(tok => tok?.token?.transfers?.[0].to?.id?.toLowerCase() === account?.toLowerCase())
             //add balance for erc1155s
-            return [...ownedErc1155.map(tok => ({ balance: tok.balance, ...tok.token })), ...onChainTokensData?.erc721Tokens].sort((a, b) => a.id.localeCompare(b.id))
+            const combinedTokens = [...ownedErc1155.map(tok => ({ balance: tok.balance, ...tok.token })), ...onChainTokensData?.erc721Tokens].sort((a, b) => a.id.localeCompare(b.id))
+            return combinedTokens
         } else {
             return undefined
         }
-    }, [onChainTokensData])
+    }, [onChainTokensData, recognizedAssetsData])
     return (
         <Container
             bg="#080714"
@@ -339,7 +340,7 @@ const ProfilePage = () => {
                                         onClick={(e) => {
                                             /*
                                             e.stopPropagation();
-
+    
                                             const importAssets = []
                                             for (const id of onChainCheckboxGroupValue) {
                                                 const ass = onChainItems.find(ass => ass.id === id)
