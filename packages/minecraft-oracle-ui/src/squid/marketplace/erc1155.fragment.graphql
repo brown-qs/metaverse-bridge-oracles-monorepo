@@ -1,4 +1,4 @@
-fragment erc1155Fragment on ERC1150Token {
+fragment erc1155Fragment on ERC1155Token {
     metadata {
       description
       image
