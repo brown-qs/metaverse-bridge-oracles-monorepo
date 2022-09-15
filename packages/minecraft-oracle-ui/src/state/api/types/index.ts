@@ -53,3 +53,48 @@ export type SkinSelectRequest = {
     assetType: string
     assetAddress: string
 }
+
+export type RecognizedAssetsDto = {
+    chainId: number
+    assetAddress: string
+    assetType: StringAssetType
+    name: string
+    collectionFragments: CollectionFragmentDto[]
+}
+
+export type CollectionFragmentDto = {
+    recognizedAssetType: RecognizedAssetType
+    decimals: number
+    treatAsFungible: boolean
+    enrapturable: boolean
+    importable: boolean
+    exportable: boolean
+    summonable: boolean
+    gamepass: boolean
+    name: string
+    idRange: number[] | null
+}
+
+export enum RecognizedAssetType {
+    NONE = 'NONE',
+    MOONSAMA = 'MSAMA',
+    TICKET = 'TICKET',
+    TEST = 'TEST',
+    PLOT = 'PLOT',
+    OFFHAND = 'OFFHAND',
+    WEAPON_SKIN = 'WEAPON_SKIN',
+    TEMPORARY_TICKET = 'TEMPORARY_TICKET',
+    ITEM = 'ITEM',
+    WEARABLE = 'WEARABLE',
+    RESOURCE = 'RESOURCE',
+    CONSUMABLE = 'CONSUMABLE',
+    PONDSAMA_FISH = 'PONDSAMA_FISH'
+}
+
+export enum StringAssetType {
+    NONE = 'NONE',
+    NATIVE = 'NATIVE',
+    ERC20 = 'ERC20',
+    ERC721 = 'ERC721',
+    ERC1155 = 'ERC1155'
+}
