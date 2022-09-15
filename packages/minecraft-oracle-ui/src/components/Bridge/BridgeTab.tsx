@@ -1,7 +1,7 @@
 import { VStack, HStack, Box, CircularProgress, useMediaQuery } from "@chakra-ui/react";
 import { ReactNode } from "react";
 
-export const BridgeTab: React.FC<{ title: string, children: ReactNode, isLoading?: boolean, icon?: ReactNode, footer?: ReactNode }> = ({ title, children, isLoading, icon, footer }) => {
+export const BridgeTab: React.FC<{ title: string, children: ReactNode, isLoading?: boolean, icon?: ReactNode, footer?: ReactNode, emptyMessage?: string }> = ({ title, children, isLoading, icon, footer, emptyMessage }) => {
     const [isSmallerThan285] = useMediaQuery('(max-width: 285px)')
     const topRightCornerRadius = isSmallerThan285 ? "0px" : "8px"
     return (
@@ -54,7 +54,15 @@ export const BridgeTab: React.FC<{ title: string, children: ReactNode, isLoading
                         <CircularProgress color="teal.500" isIndeterminate ></CircularProgress>
                     </HStack>
                     :
-                    <>{children}</>
+                    <>{!!emptyMessage
+                        ?
+                        <Box padding="24px" color="white" textAlign="left" w="100%" fontFamily='Rubik'>
+                            {emptyMessage}
+                        </Box>
+                        :
+                        <>{children}</>
+                    }</>
+
                 }
 
             </VStack>
