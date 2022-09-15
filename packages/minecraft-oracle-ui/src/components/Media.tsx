@@ -1,4 +1,4 @@
-import { Text, Box, CircularProgress, keyframes, VStack, HStack, BoxProps } from '@chakra-ui/react';
+import { Text, Box, CircularProgress, keyframes, VStack, HStack, BoxProps, ImageProps } from '@chakra-ui/react';
 import { VideoHTMLAttributes, ImgHTMLAttributes, useState } from 'react';
 import { PhotoOff } from 'tabler-icons-react';
 
@@ -9,14 +9,12 @@ import { MoonsamaImage } from './MoonsamaImage';
 
 export interface MediaProps extends BoxProps {
     uri?: string;
+    imageProps?: ImageProps
+    videoProps?: React.DetailedHTMLProps<VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>,
+
 };
-export interface IMoonsamaMedia {
-    mediaBoxProps?: BoxProps,
-    src: string,
-    onLoad: () => void,
-    onError: () => void
-}
-export const Media = ({ uri, ...props }: MediaProps) => {
+
+export const Media = ({ uri, imageProps, videoProps, ...props }: MediaProps) => {
     const { getMediaType, mediaUrl, isLoading } = useFileType(uri);
     const [mediaLoading, setMediaLoading] = useState<boolean>(true)
     const [mediaError, setMediaError] = useState<boolean>(false)
@@ -26,6 +24,7 @@ export const Media = ({ uri, ...props }: MediaProps) => {
     const getMedia = () => {
         if (["xml", "image"].includes(String(mediaType)) && mediaUrl) {
             return <MoonsamaImage
+                imageProps={imageProps}
                 src={mediaUrl}
                 onLoad={() => {
                     setMediaLoading(false)
@@ -41,6 +40,7 @@ export const Media = ({ uri, ...props }: MediaProps) => {
 
         if ((mediaType === 'video' || mediaType === 'audio') && mediaUrl) {
             return <MoonsamaVideo
+                videoProps={videoProps}
                 src={mediaUrl}
                 onLoad={() => {
                     setMediaLoading(false)

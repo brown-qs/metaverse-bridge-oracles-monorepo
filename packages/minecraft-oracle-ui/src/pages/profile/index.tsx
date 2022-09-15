@@ -221,7 +221,7 @@ const ProfilePage = () => {
                                                         border={value.equipped ? "1px solid" : "1px solid"}
                                                         borderColor={value.equipped ? "teal.400" : "transparent"}
                                                     >
-                                                        <Media padding="12%" uri={skinToImageUrl(value)} />
+                                                        <Media imageProps={{ objectFit: "contain" }} padding="12%" uri={skinToImageUrl(value)} />
                                                     </Box>
                                                 </GridItem >
                                             );
