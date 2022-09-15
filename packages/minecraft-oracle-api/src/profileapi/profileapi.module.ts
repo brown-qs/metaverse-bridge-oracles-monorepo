@@ -15,6 +15,7 @@ import { InventoryModule } from '../playerinventory/inventory.module';
 import { SkinModule } from '../skin/skin.module';
 import { ResourceInventoryModule } from '../resourceinventory/resourceinventory.module';
 import { CqrsModule } from '@nestjs/cqrs';
+import { CollectionFragmentModule } from '../collectionfragment/collectionfragment.module';
 
 @Module({
     imports: [
@@ -30,6 +31,7 @@ import { CqrsModule } from '@nestjs/cqrs';
             },
             inject: [ConfigService]
         }),
+
         AssetModule,
         UserModule,
         SecretModule,
@@ -41,7 +43,8 @@ import { CqrsModule } from '@nestjs/cqrs';
         forwardRef(() => GameApiModule),
         SummonModule,
         ProviderModule,
-        ResourceInventoryModule
+        ResourceInventoryModule,
+
     ],
     providers: [ProfileApiService],
     exports: [ProfileApiService],
