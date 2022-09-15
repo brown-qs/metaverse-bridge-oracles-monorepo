@@ -1,8 +1,8 @@
 import { Box, HStack } from "@chakra-ui/react";
 import { ReactNode } from "react";
+import { Media } from "../Media";
 import { UserCollectionElement } from "../../hooks/multiverse/useOnChainItems";
 import { Fraction } from "../../utils/Fraction";
-import { Media } from "../Media/Media";
 
 export const OnChainResources: React.FC<{ data: UserCollectionElement, onClick?: () => void, children: ReactNode }> = ({ data, onClick }) => {
     return (

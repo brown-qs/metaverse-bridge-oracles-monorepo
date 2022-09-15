@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query'
 import { save, load } from 'redux-localstorage-simple';
 import { bridgeApi } from './api/bridgeApi';
+import { api as generatedSquidMarketplaceApi } from './api/generatedSquidMarketplaceApi';
 import application from './application/reducer';
 import { updateVersion } from './global/actions';
 import authSlice from './slices/authSlice';
@@ -14,9 +15,11 @@ const store = configureStore({
     application,
     transactions,
     auth: authSlice,
-    [bridgeApi.reducerPath]: bridgeApi.reducer
+    [bridgeApi.reducerPath]: bridgeApi.reducer,
+    [generatedSquidMarketplaceApi.reducerPath]: generatedSquidMarketplaceApi.reducer
+
   },
-  middleware: (getDefaultMiddleware) => [...getDefaultMiddleware(), bridgeApi.middleware], //, save({ states: PERSISTED_KEYS })
+  middleware: (getDefaultMiddleware) => [...getDefaultMiddleware(), bridgeApi.middleware, generatedSquidMarketplaceApi.middleware], //, save({ states: PERSISTED_KEYS })
 });
 //  preloadedState: load({ states: PERSISTED_KEYS }),
 //store.dispatch(updateVersion());

@@ -1,7 +1,7 @@
 import { Box, Checkbox, HStack } from "@chakra-ui/react";
 import React, { ReactNode } from "react";
+import { Media } from "../Media";
 import { InGameItemWithStatic } from "../../hooks/multiverse/useInGameItems";
-import { Media } from "../Media/Media";
 
 export const InGameItem: React.FC<{ data: InGameItemWithStatic, checkboxValue: string, isCheckboxDisabled: boolean | undefined, isChecked: boolean, onCheckboxChange: (e: React.ChangeEvent<HTMLInputElement>) => void, onClick?: () => void }> = ({ data, checkboxValue, isCheckboxDisabled, isChecked, onCheckboxChange, onClick }) => {
     return (

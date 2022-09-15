@@ -1,7 +1,7 @@
 import { Box, HStack } from "@chakra-ui/react";
 import { ReactNode } from "react";
+import { Media } from "../Media";
 import { InGameResourceWithStatic } from "../../hooks/multiverse/useInGameItems";
-import { Media } from "../Media/Media";
 
 export const InGameResource: React.FC<{ data: InGameResourceWithStatic }> = ({ data }) => {
     return (
