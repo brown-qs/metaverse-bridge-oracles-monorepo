@@ -7,5 +7,9 @@ fragment erc1155Fragment on ERC1155Token {
       type
       composite
     }
+    id
     numericId
+    contract {
+      address
+    }
 }

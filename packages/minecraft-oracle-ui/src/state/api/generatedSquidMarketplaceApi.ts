@@ -1960,16 +1960,16 @@ export type WhereIdInput = {
   id: Scalars['String'];
 };
 
-export type Erc1155FragmentFragment = { __typename?: 'ERC1155Token', numericId: any, metadata?: { __typename?: 'Metadata', description?: string | null, image?: string | null, name?: string | null, layers?: Array<string> | null, type?: string | null, composite?: boolean | null } | null };
+export type Erc1155FragmentFragment = { __typename?: 'ERC1155Token', id: string, numericId: any, metadata?: { __typename?: 'Metadata', description?: string | null, image?: string | null, name?: string | null, layers?: Array<string> | null, type?: string | null, composite?: boolean | null } | null, contract?: { __typename?: 'ERC1155Contract', address?: string | null } | null };
 
-export type Erc721FragmentFragment = { __typename?: 'ERC721Token', numericId: any, id: string, metadata?: { __typename?: 'Metadata', image?: string | null, layers?: Array<string> | null, name?: string | null, type?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', displayType?: string | null, traitType: string, value: string }> | null } | null };
+export type Erc721FragmentFragment = { __typename?: 'ERC721Token', numericId: any, id: string, metadata?: { __typename?: 'Metadata', image?: string | null, layers?: Array<string> | null, name?: string | null, type?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', displayType?: string | null, traitType: string, value: string }> | null } | null, contract: { __typename?: 'ERC721Contract', address?: string | null } };
 
 export type GetOnChainTokensQueryVariables = Exact<{
   owner: Scalars['String'];
 }>;
 
 
-export type GetOnChainTokensQuery = { __typename?: 'Query', erc1155Tokens: Array<{ __typename?: 'ERC1155Token', numericId: any, owners: Array<{ __typename?: 'ERC1155TokenOwner', balance: any }>, metadata?: { __typename?: 'Metadata', description?: string | null, image?: string | null, name?: string | null, layers?: Array<string> | null, type?: string | null, composite?: boolean | null } | null }>, erc721Tokens: Array<{ __typename?: 'ERC721Token', numericId: any, id: string, metadata?: { __typename?: 'Metadata', image?: string | null, layers?: Array<string> | null, name?: string | null, type?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', displayType?: string | null, traitType: string, value: string }> | null } | null }> };
+export type GetOnChainTokensQuery = { __typename?: 'Query', erc1155TokenOwners: Array<{ __typename?: 'ERC1155TokenOwner', id: string, balance: any, token: { __typename?: 'ERC1155Token', id: string, numericId: any, transfers: Array<{ __typename?: 'ERC1155Transfer', id: string, transactionHash: string, to?: { __typename?: 'ERC1155Owner', id: string } | null, from?: { __typename?: 'ERC1155Owner', id: string } | null }>, metadata?: { __typename?: 'Metadata', description?: string | null, image?: string | null, name?: string | null, layers?: Array<string> | null, type?: string | null, composite?: boolean | null } | null, contract?: { __typename?: 'ERC1155Contract', address?: string | null } | null } }>, erc721Tokens: Array<{ __typename?: 'ERC721Token', numericId: any, id: string, metadata?: { __typename?: 'Metadata', image?: string | null, layers?: Array<string> | null, name?: string | null, type?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', displayType?: string | null, traitType: string, value: string }> | null } | null, contract: { __typename?: 'ERC721Contract', address?: string | null } }> };
 
 export const Erc1155FragmentFragmentDoc = `
     fragment erc1155Fragment on ERC1155Token {
@@ -1981,7 +1981,11 @@ export const Erc1155FragmentFragmentDoc = `
     type
     composite
   }
+  id
   numericId
+  contract {
+    address
+  }
 }
     `;
 export const Erc721FragmentFragmentDoc = `
@@ -2001,15 +2005,33 @@ export const Erc721FragmentFragmentDoc = `
     }
   }
   id
+  contract {
+    address
+  }
 }
     `;
 export const GetOnChainTokensDocument = `
     query getOnChainTokens($owner: String!) {
-  erc1155Tokens(where: {owners_some: {owner: {id_containsInsensitive: $owner}}}) {
-    ...erc1155Fragment
-    owners(where: {id_containsInsensitive: $owner}) {
-      balance
+  erc1155TokenOwners(where: {owner: {id_containsInsensitive: $owner}}) {
+    id
+    token {
+      ...erc1155Fragment
+      transfers(
+        where: {from: {id_containsInsensitive: $owner}, OR: {to: {id_containsInsensitive: $owner}}}
+        orderBy: block_DESC
+        limit: 1
+      ) {
+        id
+        to {
+          id
+        }
+        from {
+          id
+        }
+        transactionHash
+      }
     }
+    balance
   }
   erc721Tokens(where: {owner: {id_containsInsensitive: $owner}}) {
     ...erc721Fragment

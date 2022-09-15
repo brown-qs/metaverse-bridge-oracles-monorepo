@@ -1,9 +1,20 @@
 query getOnChainTokens($owner: String!) {
-  erc1155Tokens(where: {owners_some: {owner: {id_containsInsensitive: $owner}}}) {
-    ...erc1155Fragment
-    owners(where: {id_containsInsensitive: $owner}) {
-      balance
+  erc1155TokenOwners(where: {owner: {id_containsInsensitive: $owner}}) {
+    id
+    token {
+      ...erc1155Fragment
+      transfers(where: {from: {id_containsInsensitive: $owner}, OR: {to: {id_containsInsensitive: $owner}}}, orderBy: block_DESC, limit: 1) {
+        id
+        to {
+          id
+        }
+        from {
+          id
+        }
+        transactionHash
+      }
     }
+    balance
   }
   erc721Tokens(where: {owner: {id_containsInsensitive: $owner}}) {
     ...erc721Fragment

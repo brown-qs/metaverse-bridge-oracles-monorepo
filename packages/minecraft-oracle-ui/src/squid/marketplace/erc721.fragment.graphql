@@ -14,4 +14,7 @@ fragment erc721Fragment on ERC721Token {
       }
     }
     id
+    contract {
+      address
+    }
 }
