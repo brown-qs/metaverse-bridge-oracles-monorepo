@@ -1,0 +1,22 @@
+#how to run: yarn graphql-code-generator --verbose --config codegen.yml
+generates:
+  ./src/state/api/generatedSquidMarketplaceApi.ts:
+    schema: https://squid.subsquid.io/moonsama-marketplace/v/all-v3/graphql
+    documents:
+      - src/squid/marketplace/*
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-rtk-query:
+          importBaseApiFrom: ./baseGeneratedSquidMarketplaceApi
+          exportHooks: true
+  # ./src/state/api/generatedSubgraphIndexerAuctionApi.ts:
+  #   schema: https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/raresama-subgraph/graphql
+  #   documents:
+  #     - src/subgraph/auction/*
+  #   plugins:
+  #     - typescript
+  #     - typescript-operations
+  #     - typescript-rtk-query:
+  #         importBaseApiFrom: ./baseGeneratedSubgraphIndexerAuctionApi
+  #         exportHooks: true

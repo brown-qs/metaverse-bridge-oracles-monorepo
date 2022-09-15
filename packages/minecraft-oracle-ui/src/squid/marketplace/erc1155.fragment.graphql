@@ -1,0 +1,11 @@
+fragment erc1155Fragment on ERC1150Token {
+    metadata {
+      description
+      image
+      name
+      layers
+      type
+      composite
+    }
+    numericId
+}
