@@ -4,13 +4,13 @@ import { ReactNode } from "react";
 import { Media } from "..";
 
 export type BridgeTabListItemProps = {
-    mediaUrl: string,
-    lineOne: string,
+    mediaUrl: string | undefined | null,
+    lineOne: string | undefined | null,
     isLoading: boolean,
     mediaRedOutline?: boolean,
     lineTwo?: string,
     highlightable?: boolean,
-    onClick?: () => {},
+    onClick?: () => void,
     children?: ReactNode,
 }
 
@@ -34,7 +34,7 @@ const BridgeTabListItem: React.FC<BridgeTabListItemProps> = ({ mediaUrl, lineOne
                 onClick={onClick}
                 border={mediaRedOutline ? "1px solid red" : "inherit"}
             >
-                <Media uri={mediaUrl} />
+                <Media uri={mediaUrl ?? undefined} />
             </Box>
             <Box
                 cursor="pointer"
@@ -43,7 +43,7 @@ const BridgeTabListItem: React.FC<BridgeTabListItemProps> = ({ mediaUrl, lineOne
                 paddingLeft="8px"
                 paddingRight="8px"
             >
-                <Box>{lineOne}</Box>
+                <Box>{!!lineOne ? lineOne : "Untitled"}</Box>
                 {lineTwo && <Box fontSize="12px" color="whiteAlpha.600">{lineTwo}</Box>}
             </Box>
             {children}
