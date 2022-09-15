@@ -9,7 +9,6 @@ import { useExportDialog } from 'hooks/useExportDialog/useExportDialog';
 import { useSummonDialog } from 'hooks/useSummonDialog/useSummonDialog';
 import { stringToStringAssetType } from 'utils/subgraph';
 import { Fraction } from 'utils/Fraction';
-import { Media } from '../../components/Media/Media';
 import { countGamePassAssets } from 'utils';
 import { useAssetDialog } from '../../hooks/useAssetDialog/useAssetDialog';
 import { useCallbackSkinEquip } from '../../hooks/multiverse/useCallbackSkinEquip';
@@ -28,7 +27,10 @@ import { OnChainItem } from '../../components/Bridge/OnChainItem';
 import { ItemDetailsModal } from '../../components/Bridge/ItemDetailsModal';
 import BackgroundImage from '../../assets/images/bridge-background-blur.svg'
 import { useSetSkinMutation, useGetSkinsQuery, useUserProfileQuery } from '../../state/api/bridgeApi';
+
 import { SkinResponse } from '../../state/api/types';
+import { useGetOnChainTokensQuery } from '../../state/api/generatedSquidMarketplaceApi';
+import { Media } from '../../components';
 
 
 const ProfilePage = () => {
@@ -65,6 +67,8 @@ const ProfilePage = () => {
     const onChainResources = onChainItems.filter((item) => item.collection === "Moonsama Metaverse Asset Factory")
     const onChainBurnableResources = onChainResources.filter(x => BURNABLE_RESOURCES_IDS.includes(x.asset.assetId))
     const onChainImportables = [...onChainItems.filter((item) => ['VIP Ticket', "Moonbrella", "Pondsama", "Moonsama", "Multiverse Art", "Moonsama Minecraft Plots Season 1", "Moonsama Embassy"].includes(item.collection)), ...onChainBurnableResources]
+
+    const { data: onChainTokensData, isLoading: isOnChainTokensLoading, isFetching: isOnChainTokensFetching, isError: isOnChainTokensError, error: onChainTokensError } = useGetOnChainTokensQuery({ owner: account ?? "0x999999999999999999999999999" })
 
     //In Game Items
     const inGameItems = useInGameItems(fetchtrigger);
