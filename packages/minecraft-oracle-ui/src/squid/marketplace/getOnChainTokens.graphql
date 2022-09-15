@@ -1,0 +1,12 @@
+query getOnChainTokens($owner: String!) {
+  erc1155Tokens(where: {owners_some: {owner: {id_containsInsensitive: $owner}}}) {
+    ...erc1155Fragment
+    owners(where: {id_containsInsensitive: $owner}) {
+      balance
+    }
+  }
+  erc721Tokens(where: {owner: {id_containsInsensitive: $owner}}) {
+    ...erc721Fragment
+  }
+}
+

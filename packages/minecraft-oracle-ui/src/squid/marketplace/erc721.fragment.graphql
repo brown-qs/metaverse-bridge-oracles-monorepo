@@ -1,0 +1,17 @@
+fragment erc721Fragment on ERC721Token {
+    numericId
+    metadata {
+      image
+      layers
+      name
+      type
+      description
+      composite
+      attributes {
+        displayType
+        traitType
+        value
+      }
+    }
+    id
+}
