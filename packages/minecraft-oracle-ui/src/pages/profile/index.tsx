@@ -12,7 +12,7 @@ import { Fraction } from 'utils/Fraction';
 import { countGamePassAssets } from 'utils';
 import { useAssetDialog } from '../../hooks/useAssetDialog/useAssetDialog';
 import { useCallbackSkinEquip } from '../../hooks/multiverse/useCallbackSkinEquip';
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import { SKIN_LABELS } from '../../constants/skins';
 import { InGameItemWithStatic } from 'hooks/multiverse/useInGameItems';
 import { BURNABLE_RESOURCES_IDS, DEFAULT_CHAIN, NETWORK_NAME } from "../../constants";
@@ -26,7 +26,7 @@ import { OnChainResource } from '../../components/Bridge/OnChainResource';
 import { OnChainItem } from '../../components/Bridge/OnChainItem';
 import { ItemDetailsModal } from '../../components/Bridge/ItemDetailsModal';
 import BackgroundImage from '../../assets/images/bridge-background-blur.svg'
-import { useSetSkinMutation, useGetSkinsQuery, useUserProfileQuery } from '../../state/api/bridgeApi';
+import { useSetSkinMutation, useGetSkinsQuery, useUserProfileQuery, useGetRecognizedAssetsQuery } from '../../state/api/bridgeApi';
 
 import { SkinResponse } from '../../state/api/types';
 import { useGetOnChainTokensQuery } from '../../state/api/generatedSquidMarketplaceApi';
@@ -41,7 +41,11 @@ const ProfilePage = () => {
     const { data: skins, error: skinsError, isLoading: skinsLoading } = useGetSkinsQuery()
     const [setSkin, { error: setSkinError, isUninitialized, isLoading, isSuccess, isError, reset: setSkinReset }] = useSetSkinMutation()
     const { data: onChainTokensData, isLoading: isOnChainTokensLoading, isFetching: isOnChainTokensFetching, isError: isOnChainTokensError, error: onChainTokensError } = useGetOnChainTokensQuery({ owner: account ?? "0x999999999999999999999999999" })
+    const { data: recognizedAssetsData, isLoading: isRecognizedAssetsLoading, isFetching: isRecognizedAssetsFetching, isError: isRecognizedAssetsError, error: recognizedAssetsError } = useGetRecognizedAssetsQuery()
 
+    useEffect(() => {
+        console.log(JSON.stringify(recognizedAssetsData))
+    }, [recognizedAssetsData])
     const playAllowedReasonTexts: any = {
         'MSAMA': 'You are eligible to play because you imported a Moonsama.',
         'TICKET': 'You are eligible to play because you imported a VIP ticket.',
@@ -91,7 +95,7 @@ const ProfilePage = () => {
     }
 
     const onChainItems = React.useMemo(() => {
-        if (!!onChainTokensData) {
+        if (!!onChainTokensData && !!recognizedAssetsData) {
 
             //need to filter out erc1155 that the last transfer went to the connected wallet
             let ownedErc1155 = onChainTokensData?.erc1155TokenOwners?.filter(tok => tok?.token?.transfers?.[0].to?.id?.toLowerCase() === account?.toLowerCase())

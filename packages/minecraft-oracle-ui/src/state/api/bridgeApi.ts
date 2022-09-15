@@ -2,7 +2,7 @@ import { SerializedError } from "@reduxjs/toolkit"
 import { BaseQueryFn, createApi, FetchArgs, fetchBaseQuery, FetchBaseQueryError } from "@reduxjs/toolkit/query/react"
 import { AppState } from ".."
 import { setTokens } from "../slices/authSlice"
-import { EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse, SkinResponse, SkinSelectRequest, UserProfileResponse } from "./types"
+import { EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse, RecognizedAssetsDto, SkinResponse, SkinSelectRequest, UserProfileResponse } from "./types"
 
 
 // ---------------------------------------------------------- //
@@ -76,6 +76,9 @@ export const bridgeApi = createApi({
         userProfile: builder.query<UserProfileResponse, void>({
             query: () => `/user/profile`,
         }),
+        getRecognizedAssets: builder.query<RecognizedAssetsDto[], void>({
+            query: () => `/asset/recognized-assets`,
+        }),
         getSkins: builder.query<SkinResponse[], void>({
             query: () => `/user/skins`,
             providesTags: (result, error, arg) =>
@@ -127,4 +130,4 @@ export const bridgeApiErrorFormatter = (error: any): string => {
     }
 }
 
-export const { useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
+export const { useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi

@@ -30,6 +30,9 @@ import { QueryPlayerScoreDto } from '../playerscore/dtos/playerscore.dto';
 import { UserService } from '../user/user/user.service';
 import { GamerTagDto } from './dtos/gamertag.dto';
 import xss from "xss"
+import { CollectionFragmentService } from '../collectionfragment/collectionfragment.service';
+import { CollectionFragmentEntity } from '../collectionfragment/collectionfragment.entity';
+import { Not, IsNull } from 'typeorm';
 
 @ApiTags('user')
 @Controller('user')
