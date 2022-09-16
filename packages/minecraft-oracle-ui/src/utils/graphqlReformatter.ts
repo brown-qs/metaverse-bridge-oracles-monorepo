@@ -1,5 +1,5 @@
-import { GetOnChainTokensQuery } from "../state/api/generatedSquidMarketplaceApi"
-import { CollectionFragmentDto, RecognizedAssetsDto, RecognizedAssetType, StringAssetType } from "../state/api/types"
+import { Erc1155TokenWhereInput, Erc721TokenWhereInput, GetMetadataQuery, GetMetadataQueryVariables, GetOnChainTokensQuery } from "../state/api/generatedSquidMarketplaceApi"
+import { AssetDto, CollectionFragmentDto, RecognizedAssetsDto, RecognizedAssetType, StringAssetType } from "../state/api/types"
 
 export type ERC721TokenType = GetOnChainTokensQuery["erc721Tokens"][0]
 export type ERC1155TokenType = GetOnChainTokensQuery["erc1155TokenOwners"][0]
@@ -62,7 +62,14 @@ export const addRegonizedTokenDataToTokens = (tokens: TransformedTokenType[], re
     for (const tok of tokens) {
         const recognizedAsset = recognizedAssetData.find(ra => ra?.assetAddress?.toLowerCase() === tok?.assetAddress?.toLowerCase())
         if (!!recognizedAsset) {
-            const collectionFragment = recognizedAsset.collectionFragments.find((cf) => cf.idRange?.includes(tok?.numericId))
+            const collectionFragment = recognizedAsset.collectionFragments.find((cf) => {
+                if (!!cf.idRange) {
+                    return cf.idRange?.includes(tok?.numericId)
+                } else {
+                    //if no id range everything accepted
+                    return true
+                }
+            })
             if (!!collectionFragment) {
                 const recognizedTokenData: TokenWithRecognizedTokenData = {
                     chainId: recognizedAsset.chainId,
@@ -86,3 +93,47 @@ export const addRegonizedTokenDataToTokens = (tokens: TransformedTokenType[], re
 
     return results
 }
+
+
+export const inGameMetadataParams = (inGameItems: AssetDto[] | undefined): GetMetadataQueryVariables => {
+    const erc1155Or: Erc1155TokenWhereInput[] = []
+    const erc721Or: Erc721TokenWhereInput[] = []
+    if (!!inGameItems) {
+        for (const item of inGameItems) {
+            if (item?.assetType === "ERC721") {
+                erc721Or.push({ numericId_eq: item?.assetId, contract: { address_containsInsensitive: item?.assetAddress } })
+            } else if (item?.assetType === "ERC1155") {
+                erc1155Or.push({ numericId_eq: item?.assetId, contract: { address_containsInsensitive: item?.assetAddress } })
+            }
+        }
+    }
+
+    return { erc1155Where: { OR: erc1155Or }, erc721Where: { OR: erc721Or } }
+}
+
+
+export type InGameItemMaybeMetadata = AssetDto & { metadata?: GetMetadataQuery["erc721Tokens"][0]["metadata"] }
+export const inGameItemsCombineMetadata = (inGameItems: AssetDto[], metadata: GetMetadataQuery | undefined): InGameItemMaybeMetadata[] => {
+    if (!!metadata) {
+        const newInGameItems: InGameItemMaybeMetadata[] = []
+        for (const item of inGameItems) {
+            const newItem: InGameItemMaybeMetadata = { ...item }
+            if (item?.assetType === "ERC721") {
+                const md = metadata?.erc721Tokens?.find(tok => (tok?.contract?.address?.toLowerCase() === item?.assetAddress?.toLowerCase() && String(tok?.numericId) === String(item?.assetId)))
+                if (!!md?.metadata) {
+                    newItem["metadata"] = md?.metadata
+                }
+            } else if (item?.assetType === "ERC1155") {
+                const md = metadata?.erc1155Tokens?.find(tok => (tok?.contract?.address?.toLowerCase() === item?.assetAddress?.toLowerCase() && String(tok?.numericId) === String(item?.assetId)))
+                if (!!md?.metadata) {
+                    newItem["metadata"] = md?.metadata
+                }
+            }
+            newInGameItems.push(newItem)
+        }
+        return newInGameItems
+    } else {
+        return inGameItems
+    }
+}
+

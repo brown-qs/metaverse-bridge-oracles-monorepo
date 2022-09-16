@@ -4,6 +4,7 @@ import { Media } from "../Media";
 import { InGameItemWithStatic } from "../../hooks/multiverse/useInGameItems";
 import { BridgeTabListItemCheckable, BridgeTabListItemCheckableProps } from "./BridgeTabListItem";
 
+
 export const InGameItem: React.FC<BridgeTabListItemCheckableProps> = ({ ...props }) => {
     return (
         <BridgeTabListItemCheckable
