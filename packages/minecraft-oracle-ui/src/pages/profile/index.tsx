@@ -28,10 +28,11 @@ import { ItemDetailsModal } from '../../components/Bridge/ItemDetailsModal';
 import BackgroundImage from '../../assets/images/bridge-background-blur.svg'
 import { useSetSkinMutation, useGetSkinsQuery, useUserProfileQuery, useGetRecognizedAssetsQuery } from '../../state/api/bridgeApi';
 
-import { SkinResponse } from '../../state/api/types';
-import { useGetOnChainTokensQuery } from '../../state/api/generatedSquidMarketplaceApi';
+import { CollectionFragmentDto, SkinResponse } from '../../state/api/types';
+import { useGetOnChainTokensQuery, GetOnChainTokensQuery } from '../../state/api/generatedSquidMarketplaceApi';
 import { Media } from '../../components';
-import { BigNumber } from 'ethers';
+import { BigNumber, utils } from 'ethers';
+import { addRegonizedTokenDataToTokens, TokenWithRecognizedTokenData, TransformedTokenType, transformGraphqlErc1155Token, transformGraphqlErc721Token } from '../../utils/graphqlReformatter';
 
 
 const ProfilePage = () => {
@@ -94,18 +95,45 @@ const ProfilePage = () => {
         return coverURL
     }
 
-    const onChainItems = React.useMemo(() => {
-        if (!!onChainTokensData && !!recognizedAssetsData) {
+    //without merged data about enrapturability, importability etc.
 
-            //need to filter out erc1155 that the last transfer went to the connected wallet
-            let ownedErc1155 = onChainTokensData?.erc1155TokenOwners?.filter(tok => tok?.token?.transfers?.[0].to?.id?.toLowerCase() === account?.toLowerCase())
-            //add balance for erc1155s
-            const combinedTokens = [...ownedErc1155.map(tok => ({ balance: tok.balance, ...tok.token })), ...onChainTokensData?.erc721Tokens].sort((a, b) => a.id.localeCompare(b.id))
-            return combinedTokens
+    /*
+    type ERC721TokenType = Omit<GetOnChainTokensQuery["erc721Tokens"], "__typename">
+    type ERC1155TokenType = Omit<GetOnChainTokensQuery["erc1155TokenOwners"][0]["token"], "transfers" | "__typename">
+    type CombinedTokenType = ERC721TokenType | ERC1155TokenType
+    type BaseOnChainTokenType = CombinedTokenType & { balance?: string }
+    type OnChainTokenType = BaseOnChainTokenType & Omit<CollectionFragmentDto, "idRange">*/
+    const onChainAssets: TransformedTokenType[] | undefined = React.useMemo(() => {
+        if (!!onChainTokensData) {
+            return [...onChainTokensData.erc1155TokenOwners.map(tok => transformGraphqlErc1155Token(tok)), ...onChainTokensData.erc721Tokens.map(tok => transformGraphqlErc721Token(tok))].sort((a, b) => a.id.localeCompare(b.id))
         } else {
             return undefined
         }
-    }, [onChainTokensData, recognizedAssetsData])
+    }, [onChainTokensData])
+
+    const onChainAssetsWithRecognizedTokenData: TokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
+        if (!!onChainAssets && !!recognizedAssetsData) {
+            return addRegonizedTokenDataToTokens(onChainAssets, recognizedAssetsData)
+        } else {
+            return undefined
+        }
+    }, [onChainAssets, recognizedAssetsData])
+
+    const onChainItems: TokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
+        if (!!onChainAssetsWithRecognizedTokenData) {
+            return onChainAssetsWithRecognizedTokenData.filter((tok) => {
+                if (tok?.importable === false || tok?.enrapturable === false) {
+                    return false
+                }
+
+                //tok.treatAsFungible is bait, otherwise it's non fungible make sure last transfer was to current address
+                return tok?.treatAsFungible === true || (tok?.lastTransferredToAddress?.toLowerCase() === account?.toLowerCase())
+            })
+        } else {
+            return undefined
+        }
+    }, [onChainAssetsWithRecognizedTokenData, account])
+
     return (
         <Container
             bg="#080714"
@@ -374,7 +402,7 @@ const ProfilePage = () => {
 
                                         return (
                                             <OnChainItem
-                                                lineOne={item?.metadata?.name}
+                                                lineOne={utils.formatEther(item?.balance ?? "0")}
                                                 mediaUrl={item?.metadata?.image ?? ""}
                                                 isLoading={false}
                                                 key={item.id} //update key

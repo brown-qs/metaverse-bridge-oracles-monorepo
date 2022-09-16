@@ -2,7 +2,24 @@ query getOnChainTokens($owner: String!) {
   erc1155TokenOwners(where: {owner: {id_containsInsensitive: $owner}}) {
     id
     token {
-      ...erc1155Fragment
+      numericId
+      metadata {
+        image
+        layers
+        name
+        type
+        description
+        composite
+        attributes {
+          displayType
+          traitType
+          value
+        }
+      }
+      id
+      contract {
+        address
+      }
       transfers(where: {from: {id_containsInsensitive: $owner}, OR: {to: {id_containsInsensitive: $owner}}}, orderBy: block_DESC, limit: 1) {
         id
         to {
@@ -17,7 +34,23 @@ query getOnChainTokens($owner: String!) {
     balance
   }
   erc721Tokens(where: {owner: {id_containsInsensitive: $owner}}) {
-    ...erc721Fragment
+    numericId
+    metadata {
+      image
+      layers
+      name
+      type
+      description
+      composite
+      attributes {
+        displayType
+        traitType
+        value
+      }
+    }
+    id
+    contract {
+      address
+    }
   }
 }
-
