@@ -180,6 +180,56 @@ export class ProfileApiService {
         }
     }
 
+    async getInGameItems(user: UserEntity): Promise<AssetDto[]> {
+        const importableAssets = await this.getRecognizedAssets(BridgeAssetType.IMPORTED)
+        const enrapturableAssets = await this.getRecognizedAssets(BridgeAssetType.ENRAPTURED)
+        const userAssets = await this.assetService.findMany({ where: { owner: user.uuid, pendingIn: false }, relations: ['collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
+        const assets = []
+        for (const asset of userAssets) {
+            const assetAddress = asset.collectionFragment.collection.assetAddress.toLowerCase()
+            const recongizedEnraptureAsset = findRecognizedAsset(enrapturableAssets, { assetAddress, assetId: asset.assetId })
+
+            if (!!recongizedEnraptureAsset && recongizedEnraptureAsset.recognizedAssetType.valueOf() !== RecognizedAssetType.RESOURCE.valueOf()) {
+                assets.push({
+                    amount: asset.amount,
+                    assetAddress,
+                    assetType: asset.collectionFragment.collection.assetType,
+                    assetId: asset.assetId,
+                    name: recongizedEnraptureAsset.name,
+                    exportable: !asset.enraptured,
+                    hash: asset.hash,
+                    summonable: false,
+                    recognizedAssetType: recongizedEnraptureAsset.recognizedAssetType.valueOf(),
+                    enraptured: asset.enraptured,
+                    exportChainId: asset.collectionFragment.collection.chainId,
+                    exportAddress: asset.assetOwner?.toLowerCase(),
+                })
+                continue
+            }
+
+            const recongizedImportAsset = findRecognizedAsset(importableAssets, { assetAddress, assetId: asset.assetId })
+
+            if (!!recongizedImportAsset) {
+                assets.push({
+                    amount: asset.amount,
+                    assetAddress: asset.collectionFragment.collection.assetAddress.toLowerCase(),
+                    assetType: asset.collectionFragment.collection.assetType,
+                    assetId: asset.assetId,
+                    name: recongizedImportAsset.name,
+                    exportable: !asset.enraptured,
+                    hash: asset.hash,
+                    summonable: false,
+                    recognizedAssetType: recongizedImportAsset.recognizedAssetType.valueOf(),
+                    enraptured: asset.enraptured,
+                    exportChainId: asset.collectionFragment.collection.chainId,
+                    exportAddress: asset.assetOwner?.toLowerCase(),
+                })
+                continue
+            }
+        }
+        return assets
+    }
+
     async userProfile(user: UserEntity): Promise<ProfileDto> {
         let allowedToPlayReason: PlayEligibilityReason = PlayEligibilityReason.NONE;
         if (user.allowedToPlay) {

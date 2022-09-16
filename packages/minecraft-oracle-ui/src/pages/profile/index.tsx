@@ -26,27 +26,30 @@ import { OnChainResource } from '../../components/Bridge/OnChainResource';
 import { OnChainItem } from '../../components/Bridge/OnChainItem';
 import { ItemDetailsModal } from '../../components/Bridge/ItemDetailsModal';
 import BackgroundImage from '../../assets/images/bridge-background-blur.svg'
-import { useSetSkinMutation, useGetSkinsQuery, useUserProfileQuery, useGetRecognizedAssetsQuery } from '../../state/api/bridgeApi';
+import { useSetSkinMutation, useGetSkinsQuery, useUserProfileQuery, useGetRecognizedAssetsQuery, useGetInGameItemsQuery } from '../../state/api/bridgeApi';
 
-import { CollectionFragmentDto, SkinResponse } from '../../state/api/types';
-import { useGetOnChainTokensQuery, GetOnChainTokensQuery } from '../../state/api/generatedSquidMarketplaceApi';
+import { AssetDto, CollectionFragmentDto, SkinResponse } from '../../state/api/types';
+import { useGetOnChainTokensQuery, GetOnChainTokensQuery, useGetMetadataQuery } from '../../state/api/generatedSquidMarketplaceApi';
 import { Media } from '../../components';
 import { BigNumber, utils } from 'ethers';
-import { addRegonizedTokenDataToTokens, TokenWithRecognizedTokenData, TransformedTokenType, transformGraphqlErc1155Token, transformGraphqlErc721Token } from '../../utils/graphqlReformatter';
+import { addRegonizedTokenDataToTokens, InGameItemMaybeMetadata, inGameItemsCombineMetadata, inGameMetadataParams, TokenWithRecognizedTokenData, TransformedTokenType, transformGraphqlErc1155Token, transformGraphqlErc721Token } from '../../utils/graphqlReformatter';
 
 
 const ProfilePage = () => {
     const { account, chainId } = useActiveWeb3React()
 
     const { data: profile, error, isLoading: profileLoading } = useUserProfileQuery()
+
     const { data: skins, error: skinsError, isLoading: skinsLoading } = useGetSkinsQuery()
     const [setSkin, { error: setSkinError, isUninitialized, isLoading, isSuccess, isError, reset: setSkinReset }] = useSetSkinMutation()
     const { data: onChainTokensData, isLoading: isOnChainTokensLoading, isFetching: isOnChainTokensFetching, isError: isOnChainTokensError, error: onChainTokensError } = useGetOnChainTokensQuery({ owner: account ?? "0x999999999999999999999999999" })
     const { data: recognizedAssetsData, isLoading: isRecognizedAssetsLoading, isFetching: isRecognizedAssetsFetching, isError: isRecognizedAssetsError, error: recognizedAssetsError } = useGetRecognizedAssetsQuery()
+    const { data: inGameItemsData, isLoading: isInGameItemsDataLoading, isFetching: isInGameItemsDataFetching, isError: isInGameItemsError, error: inGameItemsError } = useGetInGameItemsQuery()
+    const { data: inGameMetadata, isLoading: isInGameMetadataLoading, isFetching: isInGameMetadataFetching, isError: isInGameMetadataError, error: inGameMetadataError } = useGetMetadataQuery(inGameMetadataParams(inGameItemsData))
 
-    useEffect(() => {
-        console.log(JSON.stringify(recognizedAssetsData))
-    }, [recognizedAssetsData])
+
+
+
     const playAllowedReasonTexts: any = {
         'MSAMA': 'You are eligible to play because you imported a Moonsama.',
         'TICKET': 'You are eligible to play because you imported a VIP ticket.',
@@ -61,7 +64,6 @@ const ProfilePage = () => {
 
     const [itemDetailDialogData, setItemDetailDialogData] = useState({} as InGameItemWithStatic);
 
-    const callbackSkinEquip = useCallbackSkinEquip()
 
     // Dialogs
     const { isImportDialogOpen, onImportDialogOpen, onImportDialogClose, importDialogData, setImportDialogData } = useImportDialog()
@@ -71,15 +73,6 @@ const ProfilePage = () => {
     const { isAssetDialogOpen, onAssetDialogOpen, onAssetDialogClose, assetDialogData, setAssetDialogData } = useAssetDialog()
 
 
-
-    //In Game Items
-    const inGameItems = useInGameItems(fetchtrigger);
-    const inGameAssets = (inGameItems?.assets ?? []).filter(x => x.assetAddress.length === 42);
-    const inGameResources = inGameItems?.resources ?? []
-
-    const canSummon = !!inGameItems?.resources && inGameItems?.resources.length > 0 && !profile?.blacklisted
-    const assetCounter = countGamePassAssets(inGameAssets)
-    const hasImportedTicket = assetCounter.ticketNum > 0
 
 
     // Group checkbox hooks for batch import/export
@@ -111,6 +104,7 @@ const ProfilePage = () => {
         }
     }, [onChainTokensData])
 
+
     const onChainAssetsWithRecognizedTokenData: TokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
         if (!!onChainAssets && !!recognizedAssetsData) {
             return addRegonizedTokenDataToTokens(onChainAssets, recognizedAssetsData)
@@ -119,10 +113,11 @@ const ProfilePage = () => {
         }
     }, [onChainAssets, recognizedAssetsData])
 
+
     const onChainItems: TokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
         if (!!onChainAssetsWithRecognizedTokenData) {
             return onChainAssetsWithRecognizedTokenData.filter((tok) => {
-                if (tok?.importable === false || tok?.enrapturable === false) {
+                if (tok?.importable === false && tok?.enrapturable === false) {
                     return false
                 }
 
@@ -133,6 +128,23 @@ const ProfilePage = () => {
             return undefined
         }
     }, [onChainAssetsWithRecognizedTokenData, account])
+
+    const onChainResources: TokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
+        if (!!onChainAssetsWithRecognizedTokenData) {
+            return onChainAssetsWithRecognizedTokenData.filter((tok) => tok.summonable)
+        } else {
+            return undefined
+        }
+    }, [onChainAssetsWithRecognizedTokenData, account])
+
+
+    const inGameItems: InGameItemMaybeMetadata[] | undefined = React.useMemo(() => {
+        if (!!inGameItemsData) {
+            return [...inGameItemsCombineMetadata(inGameItemsData, inGameMetadata)].sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
+        } else {
+            return undefined
+        }
+    }, [inGameItemsData, inGameMetadata])
 
     return (
         <Container
@@ -289,8 +301,10 @@ const ProfilePage = () => {
                             rowSpan={1}
                             colSpan={{ base: 12, md: 6, lg: 4 }}
                         >
-                            <BridgeTab title="In-Game Items"
-                                emptyMessage={"No in-game items found."}
+                            <BridgeTab
+                                isLoading={isInGameItemsDataLoading}
+                                title="In-Game Items"
+                                emptyMessage={inGameItems?.length ? undefined : "No in-game items found."}
                                 icon={<DeviceGamepad size="18px" />}
                                 footer={<Button
                                     rightIcon={<CaretRight></CaretRight>}
@@ -299,7 +313,7 @@ const ProfilePage = () => {
 
                                         const exportAssets = []
                                         for (const hash of inGameCheckboxGroupValue) {
-                                            const ass = inGameAssets.find(ass => ass.hash === hash)
+                                            const ass = inGameItems?.find(ass => ass.hash === hash)
                                             if (!!ass) {
                                                 exportAssets.push(ass)
                                             }
@@ -308,6 +322,7 @@ const ProfilePage = () => {
                                         //just export one items now but we are setup for multiple later
                                         if (exportAssets.length > 0) {
                                             const value = exportAssets[0]
+                                            /*
                                             onExportDialogOpen();
                                             setExportDialogData(
                                                 {
@@ -321,19 +336,38 @@ const ProfilePage = () => {
                                                     chain: value.exportChainId,
                                                     item: value
                                                 }
-                                            );
+                                            );*/
                                         }
                                     }}
                                     isDisabled={inGameCheckboxGroupValue.length === 0} w="100%">EXPORT TO WALLET</Button>}
                             >
 
                                 <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">
-                                    {inGameAssets.map((value, ind) => {
-                                        const labelId = `checkbox-list-secondary-label-${ind}`;
+
+                                    {!!inGameItems && inGameItems.map((value, ind) => {
                                         const checkBoxProps = getInGameCheckboxGroupProps({ value: value.hash })
                                         return (
+                                            <InGameItem
+                                                lineOne={value?.metadata?.name}
+                                                mediaUrl={value?.metadata?.image}
+                                                isLoading={!!value?.metadata !== true}
+                                                key={value.hash}
+                                                isCheckboxDisabled={isInGameCheckboxGroupDisabled ?? true}
+                                                checkboxValue={String(value.hash)}
+                                                isChecked={onChainCheckboxGroupValue.includes(String(value.hash))}
+                                                onCheckboxChange={(e) => {
+                                                    //hack for now allow only one check
+                                                    if (e.target.checked) {
+                                                        setOnChainCheckboxGroupValue([String(value.hash)])
+                                                    } else {
+                                                        setOnChainCheckboxGroupValue([])
+                                                    }
 
-                                            <></>
+                                                    //do this when ready for multiple values
+                                                    //checkBoxProps.onChange(e)
+                                                }}
+                                            >
+                                            </InGameItem>
                                         );
                                     })}
                                 </VStack>
@@ -359,7 +393,7 @@ const ProfilePage = () => {
                         >
                             <BridgeTab
                                 title="On-Chain Items"
-                                emptyMessage={!!onChainItems ? undefined : "No items found in wallet."}
+                                emptyMessage={onChainItems?.length ? undefined : "No items found in wallet."}
                                 isLoading={isOnChainTokensLoading}
                                 icon={<Wallet size="18px" />}
                                 footer={
@@ -459,15 +493,13 @@ const ProfilePage = () => {
                                                 onAccountDialogOpen()
                                             }
                                         }}
-                                        isDisabled={!canSummon} w="100%">SUMMON ALL RESOURCES
+                                        isDisabled={false} w="100%">SUMMON ALL RESOURCES
                                     </Button>
                                 }
                                 icon={<DeviceGamepad size="18px" />}
                             >
                                 <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">
-                                    {inGameResources.map(resource =>
-                                        <></>
-                                    )}
+
                                 </VStack>
                             </BridgeTab>
                         </GridItem>
@@ -488,35 +520,35 @@ const ProfilePage = () => {
                         >
                             <BridgeTab
                                 title="On-Chain Resources"
-                                emptyMessage="No resources found in wallet."
+                                emptyMessage={onChainResources?.length ? undefined : "No resources found in wallet."}
                                 isLoading={isOnChainTokensLoading}
                                 icon={<Wallet size="18px" />}>
 
                                 <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">
 
-                                    {/**onChainResources.map((value) => {
+                                    {!!onChainResources && onChainResources.map((item) => {
                                         return (
                                             <OnChainResource
-                                                lineOne="Fuck me"
-                                                mediaUrl=""
-                                                balanceWei={BigNumber.from("1")}
+                                                lineOne={item?.metadata?.name}
+                                                mediaUrl={item?.metadata?.image}
+                                                balanceWei={BigNumber.from(item.balance)}
                                                 isLoading={false}
-                                                key={value?.asset?.assetId}
+                                                key={item.id}
                                                 onClick={() => {
                                                     //user will be able to see resources in their metamask wallet as under assets, nothing is moving
-                                                    onAssetDialogOpen()
-                                                    setAssetDialogData({
-                                                        title: value?.staticData?.name,
-                                                        image: value?.meta?.imageRaw,
-                                                        assetERC1155: value?.asset,
-                                                        assetAddressERC20: value?.staticData?.subAssetAddress
-                                                    })
+                                                    /* onAssetDialogOpen()
+                                                     setAssetDialogData({
+                                                         title: item?.metadata?.name ?? undefined,
+                                                         image: item?.metadata?.image ?? undefined,
+                                                         assetERC1155: value?.asset,
+                                                         assetAddressERC20: value?.staticData?.subAssetAddress
+                                                     })*/
                                                     //window.open(getExplorerLink(chainId ?? ChainId.MOONRIVER, value.asset.assetAddress,'address'))
                                                 }}
                                             >
                                             </OnChainResource>
                                         )
-                                    })*/}
+                                    })}
                                 </VStack>
 
                             </BridgeTab>
