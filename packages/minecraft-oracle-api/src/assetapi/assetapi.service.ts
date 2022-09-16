@@ -248,6 +248,8 @@ export class AssetApiService {
                 iRange = null
             } else if (frag.idRange.length === 0) {
                 iRange = []
+            } else if (frag.idRange.length === 1) {
+                iRange = [parseInt(frag.idRange[0])]
             } else {
                 iRange = Array.from({ length: (parseInt(frag.idRange[1]) + 1 - parseInt(frag.idRange[0])) }, (v, k) => k + parseInt(frag.idRange[0]))
             }

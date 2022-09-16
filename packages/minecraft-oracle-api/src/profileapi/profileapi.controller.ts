@@ -21,7 +21,7 @@ import { ProfileDto } from './dtos/profile.dto';
 import { User } from '../utils/decorators';
 import { UserEntity } from '../user/user/user.entity';
 import { ProfileApiService } from './profileapi.service';
-import { TextureDto, ThingsDto } from './dtos/things.dto';
+import { AssetDto, TextureDto, ThingsDto } from './dtos/things.dto';
 import { SkinselectDto } from './dtos/skinselect.dto';
 import { GameKindInProgressDto } from '../gameapi/dtos/gamekndinprogress.dto';
 import { GameApiService } from '../gameapi/gameapi.service';
@@ -67,6 +67,16 @@ export class ProfileApiController {
     async resources(@User() user: UserEntity): Promise<ThingsDto> {
         const playerItems = await this.profileService.getPlayerItems(user)
         return playerItems
+    }
+
+    @Get('in-game-items')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Get user assets' })
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    async inGameItems(@User() user: UserEntity): Promise<AssetDto[]> {
+        const inGameItems = await this.profileService.getInGameItems(user)
+        return inGameItems
     }
 
     @Get('skins')

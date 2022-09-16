@@ -98,3 +98,18 @@ export enum StringAssetType {
     ERC721 = 'ERC721',
     ERC1155 = 'ERC1155'
 }
+
+export type AssetDto = {
+    name: string
+    assetAddress: string
+    assetId: string
+    assetType: string
+    amount: string
+    exportable: boolean
+    summonable: boolean
+    recognizedAssetType: string
+    enraptured: boolean
+    exportChainId?: number
+    exportAddress: string
+    hash?: string
+}
