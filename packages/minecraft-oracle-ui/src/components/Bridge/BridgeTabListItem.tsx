@@ -1,4 +1,4 @@
-import { VStack, HStack, Box, CircularProgress, useMediaQuery, Checkbox } from "@chakra-ui/react";
+import { VStack, HStack, Box, CircularProgress, useMediaQuery, Checkbox, Skeleton } from "@chakra-ui/react";
 import { BigNumber } from "@ethersproject/bignumber";
 import { ReactNode } from "react";
 import { Media } from "..";
@@ -23,7 +23,28 @@ const BridgeTabListItem: React.FC<BridgeTabListItemProps> = ({ mediaUrl, lineOne
             color="white"
             fontFamily="Rubik"
             fontSize="16px"
+            position="relative"
         >
+            <Box
+                display={isLoading ? "block" : "none"}
+                background="gray.800"
+                position="absolute"
+                top="0"
+                left="0"
+                bottom="0"
+                right="0"
+            >
+                <HStack spacing="0" w="100%" h="100%">
+                    <Box>
+                        <Skeleton height='80px' w="80px" borderRadius="10px" />
+                    </Box>
+                    <Box w="20px"></Box>
+                    <Box flex="1" h="100%" paddingTop="20px">
+                        <Skeleton height='30px' borderRadius="20px" w="70%" />
+                    </Box>
+                </HStack>
+
+            </Box>
             <Box
                 borderRadius="4px"
                 cursor="pointer"
@@ -46,7 +67,7 @@ const BridgeTabListItem: React.FC<BridgeTabListItemProps> = ({ mediaUrl, lineOne
                 <Box>{!!lineOne ? lineOne : "Untitled"}</Box>
                 {lineTwo && <Box fontSize="12px" color="whiteAlpha.600">{lineTwo}</Box>}
             </Box>
-            {children}
+            {!isLoading && children}
         </HStack >
     )
 };
