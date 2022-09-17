@@ -4,10 +4,10 @@ import { useAuth, useClasses, useOauthLogin } from 'hooks';
 import { useNavigate } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
 import { Container, Image, Alert, AlertDescription, AlertIcon, Box, Button, CircularProgress, HStack, Stack, Tag, TagCloseButton, TagLabel, TagLeftIcon, TagRightIcon, VStack, Grid, GridItem, FormControl, FormHelperText, FormLabel, Input, FormErrorMessage, InputRightElement, IconButton, useToast } from '@chakra-ui/react';
-import { CircleX, DeviceFloppy, DeviceGamepad2, Pencil, PencilOff, Power, Tags, User } from 'tabler-icons-react';
+import { CircleX, DeviceFloppy, DeviceGamepad2, Link, Pencil, PencilOff, Power, Tags, Unlink, User } from 'tabler-icons-react';
 import { useSelector } from 'react-redux';
 import { selectAccessToken, setTokens } from '../../state/slices/authSlice';
-import { useEmailChangeMutation, useUserProfileQuery } from '../../state/api/bridgeApi';
+import { rtkQueryErrorFormatter, useEmailChangeMutation, useGamerTagSetMutation, useUserProfileQuery } from '../../state/api/bridgeApi';
 import { useDispatch } from 'react-redux';
 import BackgroundImage from '../../assets/images/bridge-background-blur.svg'
 import { isValid } from 'date-fns';
@@ -24,13 +24,17 @@ const AccountPage = () => {
   const navigate = useNavigate();
   const { data: profile, error, isLoading: isProfileLoading } = useUserProfileQuery()
   const [changeEmail, { error: changeEmailError, isUninitialized: isChangeEmailUninitialized, isLoading: isChangeEmailLoading, isSuccess: isChangeEmailSuccess, isError: isChangeEmailError, reset: changeEmailReset }] = useEmailChangeMutation()
+  const [changeGamerTag, { error: gamerTagError, isUninitialized: isGamerTagUninitialized, isLoading: isGamerTagLoading, isSuccess: isGamerTagSuccess, isError: isGamerTagError, reset: gamerTagReset }] = useGamerTagSetMutation()
 
   const [email, setEmail] = useState<string>("")
   const [isEmailEditing, setIsEmailEditing] = useState<boolean>(false)
   const [isEmailChangeLoading, setIsEmailChangeLoading] = useState<boolean>(false)
 
-  const [gamerTag, setGamerTag] = useState<string>("")
+  const [gamerTag, setGamerTag] = useState<string | undefined>("")
   const [isGamerTagEditing, setIsGamerTagEditing] = useState<boolean>(false)
+
+  const [minecraftUserName, setMinecraftUserName] = useState<string | undefined>()
+
 
   //EMAIL
   const isValidEmail = (email: string) => {
@@ -44,6 +48,7 @@ const AccountPage = () => {
     if (!isGamerTagEditing) {
       setGamerTag(profile?.gamerTag ?? "")
     }
+    setMinecraftUserName(profile?.minecraftUserName ?? undefined)
   }, [profile])
 
   React.useEffect(() => {
@@ -78,38 +83,87 @@ const AccountPage = () => {
   }, [isCaptchaSolved])
 
   React.useEffect(() => {
-    setEmail(profile?.email ?? "")
-    setIsEmailChangeLoading(false)
-    setIsEmailEditing(false)
-    toast({
-      title: 'Email change submitted.',
-      description: "Please enter the code to complete the change.",
-      status: 'success',
-      duration: 5000,
-      isClosable: true,
-    })
+    if (isChangeEmailSuccess) {
+      changeEmailReset()
+      setEmail(profile?.email ?? "")
+      setIsEmailChangeLoading(false)
+      setIsEmailEditing(false)
+      toast({
+        title: 'Email change submitted.',
+        description: "Please enter the code to complete the change.",
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      })
+    }
   }, [isChangeEmailSuccess])
 
 
   React.useEffect(() => {
-    setEmail(profile?.email ?? "")
-    setIsEmailChangeLoading(false)
-    setIsEmailEditing(false)
-    toast({
-      title: 'Email change error.',
-      description: "Please refresh and try again.",
-      status: 'error',
-      duration: 5000,
-      isClosable: true,
-    })
+    if (isChangeEmailError) {
+      changeEmailReset()
+      setEmail(profile?.email ?? "")
+      setIsEmailChangeLoading(false)
+      setIsEmailEditing(false)
+      toast({
+        title: 'Email change error.',
+        description: rtkQueryErrorFormatter(changeEmailError),
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      })
+    }
+
   }, [isChangeEmailError])
 
 
 
-  const handleGamerTagSubmit = (gamerTag: string) => {
 
+  //GAMERTAG
+
+  const showGamerTagInvalid = React.useMemo(() => isGamerTagEditing && !gamerTag, [gamerTag, isGamerTagEditing])
+  const gamerTagInputDisabled = React.useMemo(() => {
+    if (isGamerTagEditing) {
+      return false
+    } else {
+      return true
+    }
+  }, [isGamerTagEditing])
+
+  const handleGamerTagSubmit = (gamerTag: string) => {
+    changeGamerTag({ gamerTag })
   }
 
+  React.useEffect(() => {
+    if (isGamerTagSuccess) {
+      gamerTagReset()
+      setIsGamerTagEditing(false)
+      toast({
+        title: 'Gamer tag change success.',
+        description: "You now have a new gamer tag.",
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      })
+    }
+  }, [isGamerTagSuccess])
+
+
+  React.useEffect(() => {
+    if (isGamerTagError) {
+      setGamerTag(profile?.gamerTag ?? undefined)
+      gamerTagReset()
+      setIsGamerTagEditing(false)
+      toast({
+        title: 'Gamer tag change error.',
+        description: rtkQueryErrorFormatter(gamerTagError),
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      })
+    }
+
+  }, [isGamerTagError])
 
 
 
@@ -205,14 +259,14 @@ const AccountPage = () => {
                   </FormControl>
                 </Box>
                 <Box alignSelf="flex-start" paddingLeft="4px" minW="50px" w="50px" visibility={isEmailEditing ? "visible" : "hidden"}>
-                  <IconButton isLoading={isEmailChangeLoading} variant="moonsamaGhost" aria-label='Save' w="100%" isDisabled={showEmailInvalid} onClick={() => handleEmailSubmit(email)} icon={<DeviceFloppy />}></IconButton>
+                  <IconButton isLoading={isEmailChangeLoading} variant="moonsamaGhost" aria-label='Save' w="100%" isDisabled={showEmailInvalid} onClick={() => handleEmailSubmit(email)} icon={<DeviceFloppy color="#3BEFB8" />}></IconButton>
                 </Box>
                 <Box alignSelf="flex-start" paddingLeft="4px" minW="50px" w="50px">
                   {isEmailEditing
                     ?
-                    <IconButton isDisabled={isEmailChangeLoading} variant="moonsamaGhost" aria-label='Cancel' w="100%" onClick={() => { setEmail(profile?.email ?? ""); setIsEmailEditing(false) }} icon={<PencilOff />}></IconButton>
+                    <IconButton isDisabled={isEmailChangeLoading} variant="moonsamaGhost" aria-label='Cancel' w="100%" onClick={() => { setEmail(profile?.email ?? ""); setIsEmailEditing(false) }} icon={<PencilOff color="#3BEFB8" />}></IconButton>
                     :
-                    <IconButton variant="moonsamaGhost" aria-label='Edit' w="100%" onClick={() => { setIsEmailEditing(true) }} icon={<Pencil />}></IconButton>
+                    <IconButton variant="moonsamaGhost" aria-label='Edit' w="100%" onClick={() => { setIsEmailEditing(true) }} icon={<Pencil color="#3BEFB8" />}></IconButton>
                   }
                 </Box>
 
@@ -232,10 +286,33 @@ const AccountPage = () => {
           </GridItem>
           <GridItem zIndex="2" paddingTop="24px">
             <Box {...sectionInputProps}>
-              <FormControl>
-                <Input type='text' />
-                <FormHelperText>We'll never share your email.</FormHelperText>
-              </FormControl>
+              {
+                !!minecraftUserName
+                  ?
+                  <HStack spacing='0' w="100%">
+                    <Box flex="1">
+                      <FormControl>
+                        <Input
+                          isDisabled={true}
+                          value={minecraftUserName}
+                          spellCheck="false"
+                          autoCapitalize="off"
+                          autoCorrect="off"
+                        />
+                        <FormHelperText>&nbsp;</FormHelperText>
+                      </FormControl>
+                    </Box>
+                    <Box alignSelf="flex-start" paddingLeft="4px" minW="50px" w="50px">
+                    </Box>
+                    <Box alignSelf="flex-start" paddingLeft="4px" minW="50px" w="50px">
+                      <IconButton isDisabled={isEmailChangeLoading} variant="moonsamaGhost" aria-label='Unlink' w="100%" onClick={() => { }} icon={<Unlink color="#3BEFB8" />}></IconButton>
+
+                    </Box>
+                  </HStack>
+                  :
+                  <Button marginBottom="25px" aria-label='Link' w="100%" onClick={() => { }} rightIcon={<Link />}>Link Account</Button>
+              }
+
             </Box>
           </GridItem>
           {/** END minecraft */}
@@ -249,11 +326,47 @@ const AccountPage = () => {
           </GridItem>
           <GridItem zIndex="2" paddingTop="24px">
             <Box {...sectionInputProps}>
-              <FormControl>
-                <Input type='text' />
-                <FormHelperText>&nbsp;</FormHelperText>
-                <FormErrorMessage>Invalid Gamer Tag.</FormErrorMessage>
-              </FormControl>
+              <HStack spacing='0' w="100%">
+                <Box flex="1">
+                  <FormControl isInvalid={showGamerTagInvalid}>
+                    <Input
+                      isDisabled={gamerTagInputDisabled}
+                      value={gamerTag}
+                      onChange={(e) => {
+                        setGamerTag(e.target.value)
+                      }}
+                      onKeyUp={(e) => {
+                        if (e.key === 'Enter') {
+                          if (!gamerTagInputDisabled && !showGamerTagInvalid) {
+                            handleGamerTagSubmit(gamerTag ?? "")
+                          }
+                        }
+                      }}
+                      //onBlur={() => { console.log("on blur"); setIsEmailEditing(false) }}
+                      spellCheck="false"
+                      autoCapitalize="off"
+                      autoCorrect="off"
+                    />
+                    {showGamerTagInvalid
+                      ?
+                      <FormErrorMessage>Invalid Gamer Tag.</FormErrorMessage>
+                      :
+                      <FormHelperText>&nbsp;</FormHelperText>
+                    }
+                  </FormControl>
+                </Box>
+                <Box alignSelf="flex-start" paddingLeft="4px" minW="50px" w="50px" visibility={isGamerTagEditing ? "visible" : "hidden"}>
+                  <IconButton isLoading={isGamerTagLoading} variant="moonsamaGhost" aria-label='Save' w="100%" isDisabled={showGamerTagInvalid} onClick={() => handleGamerTagSubmit(gamerTag ?? "")} icon={<DeviceFloppy color="#3BEFB8" />}></IconButton>
+                </Box>
+                <Box alignSelf="flex-start" paddingLeft="4px" minW="50px" w="50px">
+                  {isGamerTagEditing
+                    ?
+                    <IconButton isDisabled={isGamerTagLoading} variant="moonsamaGhost" aria-label='Cancel' w="100%" onClick={() => { setGamerTag(profile?.gamerTag ?? undefined); setIsGamerTagEditing(false) }} icon={<PencilOff color="#3BEFB8" />}></IconButton>
+                    :
+                    <IconButton variant="moonsamaGhost" aria-label='Edit' w="100%" onClick={() => { setIsGamerTagEditing(true) }} icon={<Pencil color="#3BEFB8" />}></IconButton>
+                  }
+                </Box>
+              </HStack>
             </Box>
           </GridItem>
           {/** END gamertag */}

@@ -77,6 +77,14 @@ export const bridgeApi = createApi({
                 body
             })
         }),
+        gamerTagSet: builder.mutation<void, { gamerTag: string }>({
+            query: (body) => ({
+                url: "/user/gamertag",
+                method: "PUT",
+                body
+            }),
+            invalidatesTags: ["Profile"]
+        }),
         getInGameItems: builder.query<AssetDto[], void>({
             query: () => `/user/in-game-items`,
         }),
@@ -129,16 +137,19 @@ export const bridgeApi = createApi({
 })
 
 
-export const bridgeApiErrorFormatter = (error: any): string => {
+export const rtkQueryErrorFormatter = (error: any): string => {
+    let strErr = ""
     if (!!error?.data?.message) {
-        return String(error?.data?.message)
+        strErr = String(error?.data?.message)
     } else if (!!error?.data?.error) {
-        return String(error?.data?.error)
+        strErr = String(error?.data?.error)
     } else if (!!error?.error) {
-        return String(error?.error)
+        strErr = String(error?.error)
     } else {
-        return String(error)
+        strErr = String(error)
     }
+    strErr = strErr.replace("BadRequestException: ", "")
+    return strErr
 }
 
-export const { useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
+export const { useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
