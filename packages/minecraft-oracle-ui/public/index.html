@@ -51,6 +51,10 @@
       height: calc(100dvh - 64px);
     }
   </style>
+  <script>
+    //chakra uses old color modes sometimes
+    localStorage.removeItem("chakra-ui-color-mode")
+  </script>
 </head>
 
 <body>
