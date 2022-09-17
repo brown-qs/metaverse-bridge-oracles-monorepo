@@ -46,7 +46,7 @@ const baseQueryWithAuth: BaseQueryFn<
 export const bridgeApi = createApi({
     reducerPath: 'bridgeApi',
     baseQuery: baseQueryWithAuth,
-    tagTypes: ["Skin"],
+    tagTypes: ["Skin", "Profile"],
     endpoints: (builder) => ({
         emailLoginCode: builder.mutation<EmailLoginCodeResponse, EmailLoginCode>({
             query: (body) => ({
@@ -70,6 +70,13 @@ export const bridgeApi = createApi({
                 } catch (error) { }
             }
         }),
+        emailChange: builder.mutation<EmailLoginCodeResponse, EmailLoginCode>({
+            query: (body) => ({
+                url: "/auth/email/change",
+                method: "PUT",
+                body
+            })
+        }),
         getInGameItems: builder.query<AssetDto[], void>({
             query: () => `/user/in-game-items`,
         }),
@@ -78,6 +85,7 @@ export const bridgeApi = createApi({
         }),
         userProfile: builder.query<UserProfileResponse, void>({
             query: () => `/user/profile`,
+            providesTags: ["Profile"]
         }),
         getRecognizedAssets: builder.query<RecognizedAssetsDto[], void>({
             query: () => `/asset/recognized-assets`,
@@ -133,4 +141,4 @@ export const bridgeApiErrorFormatter = (error: any): string => {
     }
 }
 
-export const { useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
+export const { useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi

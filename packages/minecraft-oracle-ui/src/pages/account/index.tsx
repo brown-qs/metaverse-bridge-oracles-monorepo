@@ -3,29 +3,121 @@ import { AuthLayout, Loader } from 'ui';
 import { useAuth, useClasses, useOauthLogin } from 'hooks';
 import { useNavigate } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
-import { Container, Image, Alert, AlertDescription, AlertIcon, Box, Button, CircularProgress, HStack, Stack, Tag, TagCloseButton, TagLabel, TagLeftIcon, TagRightIcon, VStack, Grid, GridItem, FormControl, FormHelperText, FormLabel, Input, FormErrorMessage } from '@chakra-ui/react';
-import { DeviceGamepad2, Pencil, Power, Tags, User } from 'tabler-icons-react';
+import { Container, Image, Alert, AlertDescription, AlertIcon, Box, Button, CircularProgress, HStack, Stack, Tag, TagCloseButton, TagLabel, TagLeftIcon, TagRightIcon, VStack, Grid, GridItem, FormControl, FormHelperText, FormLabel, Input, FormErrorMessage, InputRightElement, IconButton, useToast } from '@chakra-ui/react';
+import { CircleX, DeviceFloppy, DeviceGamepad2, Pencil, PencilOff, Power, Tags, User } from 'tabler-icons-react';
 import { useSelector } from 'react-redux';
 import { selectAccessToken, setTokens } from '../../state/slices/authSlice';
-import { useUserProfileQuery } from '../../state/api/bridgeApi';
+import { useEmailChangeMutation, useUserProfileQuery } from '../../state/api/bridgeApi';
 import { useDispatch } from 'react-redux';
 import BackgroundImage from '../../assets/images/bridge-background-blur.svg'
+import { isValid } from 'date-fns';
+import { useCaptcha } from '../../hooks/useCaptcha/useCaptcha';
 
 const AccountPage = () => {
+  const toast = useToast()
   const accessToken = useSelector(selectAccessToken)
+  const dispatch = useDispatch()
+  const { executeCaptcha, resetCaptcha, setCaptchaVisible, isCaptchaLoading, isCaptchaVisible, isCaptchaError, isCaptchaSolved, captchaError, captchaSolution } = useCaptcha()
+
   const [failureMessage, setFailureMessage] = useState("")
   const { oauthData, setOauthData } = useOauthLogin()
   const navigate = useNavigate();
-  const { data: profile, error, isLoading: profileLoading } = useUserProfileQuery()
-  const [email, setEmail] = useState<string>(profile?.email ?? "")
-  const [gamerTag, setGamerTag] = useState<string | null>(profile?.gamerTag ?? null)
+  const { data: profile, error, isLoading: isProfileLoading } = useUserProfileQuery()
+  const [changeEmail, { error: changeEmailError, isUninitialized: isChangeEmailUninitialized, isLoading: isChangeEmailLoading, isSuccess: isChangeEmailSuccess, isError: isChangeEmailError, reset: changeEmailReset }] = useEmailChangeMutation()
 
-  const dispatch = useDispatch()
+  const [email, setEmail] = useState<string>("")
+  const [isEmailEditing, setIsEmailEditing] = useState<boolean>(false)
+  const [isEmailChangeLoading, setIsEmailChangeLoading] = useState<boolean>(false)
+
+  const [gamerTag, setGamerTag] = useState<string>("")
+  const [isGamerTagEditing, setIsGamerTagEditing] = useState<boolean>(false)
+
+  //EMAIL
+  const isValidEmail = (email: string) => {
+    return /\S+@\S+\.\S+/.test(email)
+  }
+
+  React.useEffect(() => {
+    if (!isEmailEditing) {
+      setEmail(profile?.email ?? "")
+    }
+    if (!isGamerTagEditing) {
+      setGamerTag(profile?.gamerTag ?? "")
+    }
+  }, [profile])
+
+  React.useEffect(() => {
+    if (isEmailEditing) {
+      setCaptchaVisible(true)
+    } else {
+      setCaptchaVisible(false)
+    }
+  }, [isEmailEditing])
+
+
+  const emailInputDisabled = React.useMemo(() => {
+    if (isEmailEditing && !isEmailChangeLoading) {
+      return false
+    } else {
+      return true
+    }
+  }, [isEmailEditing, isEmailChangeLoading])
+
+  const showEmailInvalid = React.useMemo(() => isEmailEditing && !isValidEmail(email), [email, isEmailEditing])
+
+
+  const handleEmailSubmit = (email: string) => {
+    setIsEmailChangeLoading(true)
+    executeCaptcha()
+  }
+
+  React.useEffect(() => {
+    if (isCaptchaSolved && !!captchaSolution) {
+      changeEmail({ email: email, "g-recaptcha-response": captchaSolution })
+    }
+  }, [isCaptchaSolved])
+
+  React.useEffect(() => {
+    setEmail(profile?.email ?? "")
+    setIsEmailChangeLoading(false)
+    setIsEmailEditing(false)
+    toast({
+      title: 'Email change submitted.',
+      description: "Please enter the code to complete the change.",
+      status: 'success',
+      duration: 5000,
+      isClosable: true,
+    })
+  }, [isChangeEmailSuccess])
+
+
+  React.useEffect(() => {
+    setEmail(profile?.email ?? "")
+    setIsEmailChangeLoading(false)
+    setIsEmailEditing(false)
+    toast({
+      title: 'Email change error.',
+      description: "Please refresh and try again.",
+      status: 'error',
+      duration: 5000,
+      isClosable: true,
+    })
+  }, [isChangeEmailError])
+
+
+
+  const handleGamerTagSubmit = (gamerTag: string) => {
+
+  }
+
+
+
+
 
 
   const sectionTitleProps = { fontFamily: "heading", color: "teal.200", fontSize: "16px", lineHeight: "19px" }
   const sectionDescriptionProps = { fontSize: "14px", lineHeight: "20px", color: "gray.400", paddingTop: "4px" }
-  const sectionInputProps = { paddingLeft: { base: '0px', md: '60px' }, maxWidth: { base: "300px", md: "none" } }
+  const sectionInputProps = { paddingLeft: { base: '0px', md: '60px' }, maxWidth: { base: "400px", md: "none" } }
 
   return (
     <Container
@@ -43,7 +135,7 @@ const AccountPage = () => {
       <Box position="absolute" w="100%" h="100%" bg="#080714">
         <Image src={BackgroundImage} w="552px" h="622px" position="absolute" top="0" right="0" filter="blur(10px)"></Image>
       </Box>
-      {false
+      {isProfileLoading
         ?
         <VStack className="moonsamaFullHeight">
           <HStack h="100%">
@@ -82,27 +174,51 @@ const AccountPage = () => {
           </GridItem>
           <GridItem zIndex="2" paddingTop="24px" borderTop="1px solid" borderColor={{ base: "transparent", md: "gray.500" }}>
             <Box {...sectionInputProps}>
-              <FormControl>
-                <Input
-                  isDisabled={false}
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value)
-                  }}
-                  onFocus={() => { }}
-                  onKeyUp={(e) => {
-                    /*
-                    if (e.key === 'Enter' && !isLoading && isValidEmail(email)) {
-                      submitEmail(email)
-                    }*/
-                  }}
-                  spellCheck="false"
-                  autoCapitalize="off"
-                  autoCorrect="off"
-                />
-                <FormHelperText>&nbsp;</FormHelperText>
-                <FormErrorMessage>Invalid Gamer Tag.</FormErrorMessage>
-              </FormControl>
+              <HStack spacing='0' w="100%">
+                <Box flex="1">
+                  <FormControl isInvalid={showEmailInvalid}>
+                    <Input
+                      isDisabled={emailInputDisabled}
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value)
+                      }}
+                      onFocus={() => { }}
+                      onKeyUp={(e) => {
+                        if (e.key === 'Enter') {
+                          if (!emailInputDisabled && isValidEmail(email)) {
+                            handleEmailSubmit(email)
+                          }
+                        }
+                      }}
+                      //onBlur={() => { console.log("on blur"); setIsEmailEditing(false) }}
+                      spellCheck="false"
+                      autoCapitalize="off"
+                      autoCorrect="off"
+                    />
+                    {showEmailInvalid
+                      ?
+                      <FormErrorMessage>Invalid Email.</FormErrorMessage>
+                      :
+                      <FormHelperText>&nbsp;</FormHelperText>
+                    }
+                  </FormControl>
+                </Box>
+                <Box alignSelf="flex-start" paddingLeft="4px" minW="50px" w="50px" visibility={isEmailEditing ? "visible" : "hidden"}>
+                  <IconButton isLoading={isEmailChangeLoading} variant="moonsamaGhost" aria-label='Save' w="100%" isDisabled={showEmailInvalid} onClick={() => handleEmailSubmit(email)} icon={<DeviceFloppy />}></IconButton>
+                </Box>
+                <Box alignSelf="flex-start" paddingLeft="4px" minW="50px" w="50px">
+                  {isEmailEditing
+                    ?
+                    <IconButton isDisabled={isEmailChangeLoading} variant="moonsamaGhost" aria-label='Cancel' w="100%" onClick={() => { setEmail(profile?.email ?? ""); setIsEmailEditing(false) }} icon={<PencilOff />}></IconButton>
+                    :
+                    <IconButton variant="moonsamaGhost" aria-label='Edit' w="100%" onClick={() => { setIsEmailEditing(true) }} icon={<Pencil />}></IconButton>
+                  }
+                </Box>
+
+
+
+              </HStack>
             </Box>
           </GridItem>
           {/** END email */}
@@ -117,7 +233,7 @@ const AccountPage = () => {
           <GridItem zIndex="2" paddingTop="24px">
             <Box {...sectionInputProps}>
               <FormControl>
-                <Input type='email' />
+                <Input type='text' />
                 <FormHelperText>We'll never share your email.</FormHelperText>
               </FormControl>
             </Box>
