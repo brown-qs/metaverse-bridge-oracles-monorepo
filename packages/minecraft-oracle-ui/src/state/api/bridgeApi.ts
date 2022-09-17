@@ -85,6 +85,20 @@ export const bridgeApi = createApi({
             }),
             invalidatesTags: ["Profile"]
         }),
+        minecraftRedirect: builder.mutation<{ redirectUrl: string }, void>({
+            query: () => ("/auth/minecraft/login")
+        }),
+        minecraftLink: builder.mutation<void, string>({
+            query: (qs) => (`/auth/minecraft/link${qs}`),
+            invalidatesTags: ["Profile"]
+        }),
+        minecraftUnlink: builder.mutation<void, void>({
+            query: () => ({
+                url: `/auth/minecraft/unlink`,
+                method: "DELETE"
+            }),
+            invalidatesTags: ["Profile"]
+        }),
         getInGameItems: builder.query<AssetDto[], void>({
             query: () => `/user/in-game-items`,
         }),
@@ -152,4 +166,4 @@ export const rtkQueryErrorFormatter = (error: any): string => {
     return strErr
 }
 
-export const { useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
+export const { useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
