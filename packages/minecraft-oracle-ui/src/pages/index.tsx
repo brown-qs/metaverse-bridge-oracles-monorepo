@@ -11,14 +11,8 @@ import { EnraptureDialog } from '../components/EnraptureDialog/EnraptureDialog';
 import { SummonDialog } from '../components/SummonDialog/SummonDialog';
 import { AssetDialog } from '../components/AssetDialog/AssetDialog';
 import AccountPage from './account';
-
-import EmailChangePage from './account/login/email/change';
-import MinecraftRedirectPage from './account/minecraft/redirect';
-import MinecraftVerifyPage from './account/minecraft/verify';
-import MinecraftUnlinkPage from './account/minecraft/unlink';
 import OauthPage from './oauth';
 import OauthConfirmPage from './oauth/confirm';
-import GamerTagChangePage from './account/gamertag';
 import { EmailLoginDialog } from '../components/EmailLoginDialog/EmailLoginDialog';
 import { KiltLoginDialog } from '../components/KiltLoginDialog/KiltLoginDialog';
 import { EmailCodeDialog } from '../components/EmailCodeDialog/EmailCodeDialog';
@@ -37,26 +31,7 @@ export const Routing = () => {
             <Route path="/account" element={<>{!!accessToken ? <AccountPage></AccountPage> : <Navigate to="/login" />}</>}>
             </Route>
 
-            <Route path="/account/gamertag" element={!!accessToken ? <GamerTagChangePage /> : <HomePage />}>
-            </Route>
 
-
-
-            <Route path="/account/login/email/change" element={<> {!!accessToken ? <EmailChangePage /> : <Navigate to="/login" />}</>}>
-
-            </Route>
-
-            <Route path="/account/minecraft/redirect" element={<>{!!accessToken ? <MinecraftRedirectPage /> : <HomePage />}</>}>
-
-            </Route>
-
-            <Route path="/account/minecraft/verify" element={<>{!!accessToken ? <MinecraftVerifyPage /> : <HomePage />}</>}>
-
-            </Route>
-
-            <Route path="/account/minecraft/unlink" element={<>{!!accessToken ? <MinecraftUnlinkPage /> : <HomePage />}</>}>
-
-            </Route>
 
             <Route path="/oauth" element={<OauthPage />}>
             </Route>
