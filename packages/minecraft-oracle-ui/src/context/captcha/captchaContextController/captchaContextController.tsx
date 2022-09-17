@@ -19,7 +19,12 @@ export const CaptchaContextController = ({
   //on show or hide, reset state
   //initial state is set so don't have to worry about first mount
   useEffect(() => {
-    resetCaptcha()
+    if (!isCaptchaVisible) {
+      resetCaptcha()
+      window.setTimeout(() => {
+        recaptchaEl.current.reset()
+      }, 1)
+    }
   }, [isCaptchaVisible])
 
   const resetCaptcha = () => {
@@ -29,7 +34,6 @@ export const CaptchaContextController = ({
     setCaptchaSolution(undefined)
     setCaptchaError(undefined)
   }
-
 
   //deal with sitekey not set
   //!process.env.REACT_APP_RECAPTCHA_SITEKEY
@@ -47,11 +51,15 @@ export const CaptchaContextController = ({
 
     setCaptchaVisible(true)
     setIsCaptchaLoading(true)
-
     let token
     try {
       if (recaptchaEl.current) {
         token = await recaptchaEl.current.executeAsync();
+      } else {
+        setIsCaptchaLoading(false)
+        setIsCaptchaError(true)
+        setCaptchaError("Captcha needs to be set visible before using.")
+        return
       }
 
 
@@ -72,17 +80,18 @@ export const CaptchaContextController = ({
         recaptchaEl.current.reset()
       }, 1)
     }
+
   }
   return (
     <>
       {/* <Box>isCaptchaLoading: {String(isCaptchaLoading)} isCaptchaError: {String(isCaptchaError)} isCaptchaSolved: {String(isCaptchaSolved)} captchaError: {String(captchaError)} captchaSolution: {String(captchaSolution)}</Box>*/}
       <CaptchaContext.Provider
-        value={{ executeCaptcha, resetCaptcha, setCaptchaVisible, isCaptchaLoading, isCaptchaError, isCaptchaSolved, captchaError, captchaSolution }}
+        value={{ executeCaptcha, resetCaptcha, setCaptchaVisible, isCaptchaVisible, isCaptchaLoading, isCaptchaError, isCaptchaSolved, captchaError, captchaSolution }}
       >
         {children}
       </CaptchaContext.Provider>
-      {!!process.env.REACT_APP_RECAPTCHA_SITEKEY && isCaptchaVisible &&
-        <Box opacity={isCaptchaVisible ? "1" : "0"}>
+      {!!process.env.REACT_APP_RECAPTCHA_SITEKEY &&
+        <Box visibility={isCaptchaVisible ? "visible" : "hidden"}>
           < ReCAPTCHA ref={recaptchaEl} grecaptcha={window.grecaptcha} sitekey={process.env.REACT_APP_RECAPTCHA_SITEKEY || ""} size="invisible" theme="dark" />
         </Box>
       }
