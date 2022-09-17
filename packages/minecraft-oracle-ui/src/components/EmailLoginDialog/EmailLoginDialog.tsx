@@ -6,7 +6,7 @@ import { Mail, MailForward } from "tabler-icons-react"
 import { useCaptcha } from "../../hooks/useCaptcha/useCaptcha"
 import { useEmailCodeDialog } from "../../hooks/useEmailCodeDialog/useEmailCodeDialog"
 import { useEmailLoginDialog } from "../../hooks/useEmailLoginDialog/useEmailLoginDialog"
-import { bridgeApiErrorFormatter, useEmailLoginCodeMutation } from "../../state/api/bridgeApi"
+import { rtkQueryErrorFormatter, useEmailLoginCodeMutation } from "../../state/api/bridgeApi"
 import { MoonsamaModal } from "../MoonsamaModal"
 import { ReCAPTCHA } from "../Recaptcha"
 
@@ -80,7 +80,7 @@ export const EmailLoginDialog: React.FC<{}> = ({ }) => {
             closeLastToast()
             toastIdRef.current = toast({
                 title: 'Failed to send login code.',
-                description: bridgeApiErrorFormatter(error),
+                description: rtkQueryErrorFormatter(error),
                 status: 'error',
                 duration: 5000,
                 isClosable: true,

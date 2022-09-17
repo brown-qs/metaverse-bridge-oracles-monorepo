@@ -4,7 +4,7 @@ import { ReactNode, useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Checks, Mail, MailForward } from "tabler-icons-react"
 import { useEmailCodeDialog } from "../../hooks/useEmailCodeDialog/useEmailCodeDialog"
-import { bridgeApiErrorFormatter, useEmailLoginCodeVerifyMutation } from "../../state/api/bridgeApi"
+import { rtkQueryErrorFormatter, useEmailLoginCodeVerifyMutation } from "../../state/api/bridgeApi"
 import { MoonsamaModal } from "../MoonsamaModal"
 
 export const EmailCodeDialog: React.FC<{}> = ({ }) => {
@@ -38,7 +38,7 @@ export const EmailCodeDialog: React.FC<{}> = ({ }) => {
             closeLastToast()
             toastIdRef.current = toast({
                 title: 'Failed to verify login code.',
-                description: bridgeApiErrorFormatter(error),
+                description: rtkQueryErrorFormatter(error),
                 status: 'error',
                 duration: 5000,
                 isClosable: true,
