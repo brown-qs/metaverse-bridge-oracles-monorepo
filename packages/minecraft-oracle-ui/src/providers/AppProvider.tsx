@@ -23,6 +23,7 @@ import { KiltLoginDialogContextController } from '../context/kiltLoginDialog/kil
 import { CaptchaContext } from '../context/captcha/captchaContext/captchaContext';
 import { CaptchaContextController } from '../context/captcha/captchaContextController/captchaContextController';
 import { EmailCodeDialogContextController } from '../context/emailCodeDialog/emailCodeDialogContextController/EmailCodeDialogContextController';
+import ScrollToTop from '../components/ScrollToTop';
 
 function Updaters() {
   return (
@@ -53,6 +54,7 @@ export const AppProviders = ({ children }: AppProvidersProps) => (
                                 <EmailCodeDialogContextController>
                                   <KiltLoginDialogContextController>
                                     <Router>
+                                      <ScrollToTop></ScrollToTop>
                                       {children}
                                     </Router>
                                   </KiltLoginDialogContextController>
