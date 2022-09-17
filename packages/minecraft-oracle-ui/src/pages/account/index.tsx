@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { AuthLayout, Loader } from 'ui';
 import { useAuth, useClasses, useOauthLogin } from 'hooks';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
 import { Container, Image, Alert, AlertDescription, AlertIcon, Box, Button, CircularProgress, HStack, Stack, Tag, TagCloseButton, TagLabel, TagLeftIcon, TagRightIcon, VStack, Grid, GridItem, FormControl, FormHelperText, FormLabel, Input, FormErrorMessage, InputRightElement, IconButton, useToast } from '@chakra-ui/react';
 import { CircleX, DeviceFloppy, DeviceGamepad2, Link, Pencil, PencilOff, Power, Tags, Unlink, User } from 'tabler-icons-react';
 import { useSelector } from 'react-redux';
 import { selectAccessToken, setTokens } from '../../state/slices/authSlice';
-import { rtkQueryErrorFormatter, useEmailChangeMutation, useGamerTagSetMutation, useUserProfileQuery } from '../../state/api/bridgeApi';
+import { rtkQueryErrorFormatter, useEmailChangeMutation, useGamerTagSetMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useMinecraftUnlinkMutation, useUserProfileQuery } from '../../state/api/bridgeApi';
 import { useDispatch } from 'react-redux';
 import BackgroundImage from '../../assets/images/bridge-background-blur.svg'
 import { isValid } from 'date-fns';
 import { useCaptcha } from '../../hooks/useCaptcha/useCaptcha';
 
 const AccountPage = () => {
+  const { search } = useLocation()
   const toast = useToast()
   const accessToken = useSelector(selectAccessToken)
   const dispatch = useDispatch()
@@ -25,15 +26,22 @@ const AccountPage = () => {
   const { data: profile, error, isLoading: isProfileLoading } = useUserProfileQuery()
   const [changeEmail, { error: changeEmailError, isUninitialized: isChangeEmailUninitialized, isLoading: isChangeEmailLoading, isSuccess: isChangeEmailSuccess, isError: isChangeEmailError, reset: changeEmailReset }] = useEmailChangeMutation()
   const [changeGamerTag, { error: gamerTagError, isUninitialized: isGamerTagUninitialized, isLoading: isGamerTagLoading, isSuccess: isGamerTagSuccess, isError: isGamerTagError, reset: gamerTagReset }] = useGamerTagSetMutation()
+  const [minecraftRedirect, { data: minecraftRedirectData, error: minecraftRedirectError, isUninitialized: isMinecraftRedirectUninitialized, isLoading: isMinecraftRedirectLoading, isSuccess: isMinecraftRedirectSuccess, isError: isMinecraftRedirectError, reset: minecraftRedirectReset }] = useMinecraftRedirectMutation()
+  const [minecraftLink, { error: minecraftLinkError, isUninitialized: isMinecraftLinkUninitialized, isLoading: isMinecraftLinkLoading, isSuccess: isMinecraftLinkSuccess, isError: isMinecraftLinkError, reset: minecraftLinkReset }] = useMinecraftLinkMutation()
+  const [minecraftUnlink, { error: minecraftUnlinkError, isUninitialized: isMinecraftUnlinkUninitialized, isLoading: isMinecraftUnlinkLoading, isSuccess: isMinecraftUnlinkSuccess, isError: isMinecraftUnlinkError, reset: minecraftUnlinkReset }] = useMinecraftUnlinkMutation()
 
-  const [email, setEmail] = useState<string>("")
+
+
+
+
+  const [email, setEmail] = useState<string>(profile?.email ?? "")
   const [isEmailEditing, setIsEmailEditing] = useState<boolean>(false)
   const [isEmailChangeLoading, setIsEmailChangeLoading] = useState<boolean>(false)
-
-  const [gamerTag, setGamerTag] = useState<string | undefined>("")
+  const [profileLoading, setProfileLoading] = useState<boolean>(isProfileLoading)
+  const [gamerTag, setGamerTag] = useState<string | undefined>(profile?.gamerTag ?? "")
   const [isGamerTagEditing, setIsGamerTagEditing] = useState<boolean>(false)
 
-  const [minecraftUserName, setMinecraftUserName] = useState<string | undefined>()
+  const [minecraftUserName, setMinecraftUserName] = useState<string | undefined>(profile?.minecraftUserName ?? undefined)
 
 
   //EMAIL
@@ -50,6 +58,11 @@ const AccountPage = () => {
     }
     setMinecraftUserName(profile?.minecraftUserName ?? undefined)
   }, [profile])
+
+
+  React.useEffect(() => {
+    setProfileLoading(isProfileLoading)
+  }, [isProfileLoading])
 
   React.useEffect(() => {
     if (isEmailEditing) {
@@ -117,10 +130,116 @@ const AccountPage = () => {
   }, [isChangeEmailError])
 
 
+  //MINECRAFT LINK
+
+  React.useEffect(() => {
+    if (!!search && search.includes("code") && isMinecraftLinkUninitialized) {
+      minecraftLink(search)
+      toast({
+        title: 'Currently linking your Minecraft account.',
+        description: "Please wait.",
+        status: 'info',
+        duration: 5000,
+        isClosable: true,
+      })
+    }
+  }, [search, isMinecraftLinkUninitialized])
+
+  React.useEffect(() => {
+    if (isMinecraftLinkSuccess) {
+      toast({
+        title: 'Success.',
+        description: "Your Minecraft account has been successfully linked",
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      })
+      navigate("/account")
+    }
+  }, [isMinecraftLinkSuccess])
+
+
+  React.useEffect(() => {
+    if (isMinecraftLinkError) {
+      toast({
+        title: 'Error linking Minecraft account.',
+        description: rtkQueryErrorFormatter(minecraftLinkError),
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      })
+      navigate("/account")
+    }
+
+  }, [isMinecraftLinkError])
+
+  React.useEffect(() => {
+    if (isMinecraftUnlinkSuccess) {
+      toast({
+        title: 'Success.',
+        description: "Your Minecraft account has been successfully unlinked.",
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      })
+    }
+  }, [isMinecraftUnlinkSuccess])
+
+
+  React.useEffect(() => {
+    if (isMinecraftUnlinkError) {
+      toast({
+        title: 'Error unlinking Minecraft account.',
+        description: rtkQueryErrorFormatter(minecraftUnlinkError),
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      })
+      minecraftUnlinkReset()
+
+    }
+
+  }, [isMinecraftUnlinkError])
+
+
+
+  React.useEffect(() => {
+    if (isMinecraftRedirectSuccess) {
+      toast({
+        title: 'Success.',
+        description: "You will be redirected to Minecraft login.",
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      })
+      if (!!minecraftRedirectData?.redirectUrl) {
+        window.location.href = minecraftRedirectData?.redirectUrl
+      } else {
+        minecraftRedirectReset()
+
+      }
+
+
+    }
+  }, [isMinecraftRedirectSuccess])
+
+
+  React.useEffect(() => {
+    if (isMinecraftRedirectError) {
+      minecraftRedirectReset()
+      toast({
+        title: 'Error redirecting to Minecraft login.',
+        description: rtkQueryErrorFormatter(gamerTagError),
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      })
+    }
+
+  }, [isMinecraftRedirectError, minecraftRedirectData])
 
 
   //GAMERTAG
-
   const showGamerTagInvalid = React.useMemo(() => isGamerTagEditing && !gamerTag, [gamerTag, isGamerTagEditing])
   const gamerTagInputDisabled = React.useMemo(() => {
     if (isGamerTagEditing) {
@@ -189,7 +308,7 @@ const AccountPage = () => {
       <Box position="absolute" w="100%" h="100%" bg="#080714">
         <Image src={BackgroundImage} w="552px" h="622px" position="absolute" top="0" right="0" filter="blur(10px)"></Image>
       </Box>
-      {isProfileLoading
+      {profileLoading
         ?
         <VStack className="moonsamaFullHeight">
           <HStack h="100%">
@@ -305,12 +424,12 @@ const AccountPage = () => {
                     <Box alignSelf="flex-start" paddingLeft="4px" minW="50px" w="50px">
                     </Box>
                     <Box alignSelf="flex-start" paddingLeft="4px" minW="50px" w="50px">
-                      <IconButton isDisabled={isEmailChangeLoading} variant="moonsamaGhost" aria-label='Unlink' w="100%" onClick={() => { }} icon={<Unlink color="#3BEFB8" />}></IconButton>
+                      <IconButton isLoading={isMinecraftUnlinkLoading} variant="moonsamaGhost" aria-label='Unlink' w="100%" onClick={() => { minecraftUnlink() }} icon={<Unlink color="#3BEFB8" />}></IconButton>
 
                     </Box>
                   </HStack>
                   :
-                  <Button marginBottom="25px" aria-label='Link' w="100%" onClick={() => { }} rightIcon={<Link />}>Link Account</Button>
+                  <Button isDisabled={isMinecraftRedirectSuccess} isLoading={isMinecraftRedirectLoading || isMinecraftLinkLoading} marginBottom="25px" aria-label='Link' w="100%" onClick={() => { minecraftRedirect() }} rightIcon={<Link />}>Link Account</Button>
               }
 
             </Box>
