@@ -3,7 +3,7 @@ import { AuthLayout, Loader } from 'ui';
 import { useAuth, useClasses, useOauthLogin } from 'hooks';
 import { useNavigate } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
-import { Container, Image, Alert, AlertDescription, AlertIcon, Box, Button, CircularProgress, HStack, Stack, Tag, TagCloseButton, TagLabel, TagLeftIcon, TagRightIcon, VStack, Grid, GridItem } from '@chakra-ui/react';
+import { Container, Image, Alert, AlertDescription, AlertIcon, Box, Button, CircularProgress, HStack, Stack, Tag, TagCloseButton, TagLabel, TagLeftIcon, TagRightIcon, VStack, Grid, GridItem, FormControl, FormHelperText, FormLabel, Input, FormErrorMessage } from '@chakra-ui/react';
 import { DeviceGamepad2, Pencil, Power, Tags, User } from 'tabler-icons-react';
 import { useSelector } from 'react-redux';
 import { selectAccessToken, setTokens } from '../../state/slices/authSlice';
@@ -17,11 +17,16 @@ const AccountPage = () => {
   const { oauthData, setOauthData } = useOauthLogin()
   const navigate = useNavigate();
   const { data: profile, error, isLoading: profileLoading } = useUserProfileQuery()
+  const [email, setEmail] = useState<string>(profile?.email ?? "")
+  const [gamerTag, setGamerTag] = useState<string | null>(profile?.gamerTag ?? null)
+
   const dispatch = useDispatch()
 
 
   const sectionTitleProps = { fontFamily: "heading", color: "teal.200", fontSize: "16px", lineHeight: "19px" }
   const sectionDescriptionProps = { fontSize: "14px", lineHeight: "20px", color: "gray.400", paddingTop: "4px" }
+  const sectionInputProps = { paddingLeft: { base: '0px', md: '60px' }, maxWidth: { base: "300px", md: "none" } }
+
   return (
     <Container
       bg="#080714"
@@ -76,7 +81,29 @@ const AccountPage = () => {
             </VStack>
           </GridItem>
           <GridItem zIndex="2" paddingTop="24px" borderTop="1px solid" borderColor={{ base: "transparent", md: "gray.500" }}>
-            <Box>aaa</Box>
+            <Box {...sectionInputProps}>
+              <FormControl>
+                <Input
+                  isDisabled={false}
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value)
+                  }}
+                  onFocus={() => { }}
+                  onKeyUp={(e) => {
+                    /*
+                    if (e.key === 'Enter' && !isLoading && isValidEmail(email)) {
+                      submitEmail(email)
+                    }*/
+                  }}
+                  spellCheck="false"
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                />
+                <FormHelperText>&nbsp;</FormHelperText>
+                <FormErrorMessage>Invalid Gamer Tag.</FormErrorMessage>
+              </FormControl>
+            </Box>
           </GridItem>
           {/** END email */}
 
@@ -88,7 +115,12 @@ const AccountPage = () => {
             </VStack>
           </GridItem>
           <GridItem zIndex="2" paddingTop="24px">
-            <Box>aaa</Box>
+            <Box {...sectionInputProps}>
+              <FormControl>
+                <Input type='email' />
+                <FormHelperText>We'll never share your email.</FormHelperText>
+              </FormControl>
+            </Box>
           </GridItem>
           {/** END minecraft */}
 
@@ -100,7 +132,13 @@ const AccountPage = () => {
             </VStack>
           </GridItem>
           <GridItem zIndex="2" paddingTop="24px">
-            <Box>aaa</Box>
+            <Box {...sectionInputProps}>
+              <FormControl>
+                <Input type='text' />
+                <FormHelperText>&nbsp;</FormHelperText>
+                <FormErrorMessage>Invalid Gamer Tag.</FormErrorMessage>
+              </FormControl>
+            </Box>
           </GridItem>
           {/** END gamertag */}
 
