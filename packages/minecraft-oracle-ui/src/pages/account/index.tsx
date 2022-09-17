@@ -12,9 +12,15 @@ import { useDispatch } from 'react-redux';
 import BackgroundImage from '../../assets/images/bridge-background-blur.svg'
 import { isValid } from 'date-fns';
 import { useCaptcha } from '../../hooks/useCaptcha/useCaptcha';
+import { EmailLoginDialog } from '../../components/EmailLoginDialog/EmailLoginDialog';
+import { useEmailLoginDialog } from '../../hooks/useEmailLoginDialog/useEmailLoginDialog';
+import { useEmailCodeDialog } from '../../hooks/useEmailCodeDialog/useEmailCodeDialog';
+import { EmailCodeDialog } from '../../components/EmailCodeDialog/EmailCodeDialog';
 
 const AccountPage = () => {
   const { search } = useLocation()
+  const { isEmailCodeDialogOpen, onEmailCodeDialogOpen, onEmailCodeDialogClose } = useEmailCodeDialog()
+
   const toast = useToast()
   const accessToken = useSelector(selectAccessToken)
   const dispatch = useDispatch()
@@ -108,6 +114,7 @@ const AccountPage = () => {
         duration: 5000,
         isClosable: true,
       })
+      onEmailCodeDialogOpen()
     }
   }, [isChangeEmailSuccess])
 
@@ -492,6 +499,8 @@ const AccountPage = () => {
 
         </Grid>
       }
+      <EmailCodeDialog />
+
     </Container>
   );
 };
