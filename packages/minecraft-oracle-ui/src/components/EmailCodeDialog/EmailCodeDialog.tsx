@@ -58,6 +58,7 @@ export const EmailCodeDialog: React.FC<{}> = ({ }) => {
                 isClosable: true,
             })
             reset()
+            onEmailCodeDialogClose()
         }
     }, [isSuccess, isEmailCodeDialogOpen])
 

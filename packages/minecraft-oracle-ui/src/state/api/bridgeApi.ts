@@ -60,6 +60,7 @@ export const bridgeApi = createApi({
                 url: `/auth/email/verify?loginKey=${loginKey}`,
                 method: "GET",
             }),
+            invalidatesTags: ["Profile"],
             async onQueryStarted(args, { dispatch, queryFulfilled }) {
                 try {
                     const result = await queryFulfilled;
