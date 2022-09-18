@@ -2,7 +2,7 @@ import { VStack, HStack, Box, CircularProgress, useMediaQuery, Checkbox, Skeleto
 import { BigNumber } from "@ethersproject/bignumber";
 import { ReactNode } from "react";
 import { Media } from "..";
-
+import { utils } from "ethers"
 export type BridgeTabListItemProps = {
     mediaUrl: string | undefined | null,
     lineOne: string | undefined | null,
@@ -101,7 +101,7 @@ export const BridgeTabListItemWithBalance: React.FC<BridgeTabListItemWithBalance
             fontFamily="Orbitron"
             fontSize="14px !important"
         >
-            {balanceWei.toString()}
+            {parseFloat(utils.formatEther(balanceWei)).toFixed(2)}
         </Box>
     </BridgeTabListItem>)
 }
