@@ -1,7 +1,10 @@
 #how to run: yarn graphql-code-generator --verbose --config codegen.yml
+config:
+  namingConvention:
+    enumValues: keep
 generates:
   ./src/state/api/generatedSquidMarketplaceApi.ts:
-    schema: https://squid.subsquid.io/moonsama-marketplace/v/all-v3/graphql
+    schema: https://squid.subsquid.io/moonsama-multiverse/graphql
     documents:
       - src/squid/marketplace/*
     plugins:
