@@ -2413,7 +2413,7 @@ export type GetOnChainTokensQueryVariables = Exact<{
 }>;
 
 
-export type GetOnChainTokensQuery = { __typename?: 'Query', erc1155TokenOwners: Array<{ __typename?: 'ERC1155TokenOwner', id: string, balance: any, token: { __typename?: 'ERC1155Token', numericId: any, id: string, metadata?: { __typename?: 'Metadata', image?: string | null, layers?: Array<string> | null, name?: string | null, type?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', displayType?: string | null, traitType: string, value: string }> | null } | null, contract: { __typename?: 'ERC1155Contract', address?: string | null }, transfers: Array<{ __typename?: 'ERC1155Transfer', id: string, transactionHash: string, to: { __typename?: 'ERC1155Owner', id: string }, from: { __typename?: 'ERC1155Owner', id: string } }> } }>, erc721Tokens: Array<{ __typename?: 'ERC721Token', numericId: any, id: string, metadata?: { __typename?: 'Metadata', image?: string | null, layers?: Array<string> | null, name?: string | null, type?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', displayType?: string | null, traitType: string, value: string }> | null } | null, contract: { __typename?: 'ERC721Contract', address?: string | null } }> };
+export type GetOnChainTokensQuery = { __typename?: 'Query', erc1155TokenOwners: Array<{ __typename?: 'ERC1155TokenOwner', id: string, balance: any, token: { __typename?: 'ERC1155Token', numericId: any, id: string, metadata?: { __typename?: 'Metadata', image?: string | null, layers?: Array<string> | null, name?: string | null, type?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', displayType?: string | null, traitType: string, value: string }> | null } | null, contract: { __typename?: 'ERC1155Contract', address?: string | null } } }>, erc721Tokens: Array<{ __typename?: 'ERC721Token', numericId: any, id: string, metadata?: { __typename?: 'Metadata', image?: string | null, layers?: Array<string> | null, name?: string | null, type?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', displayType?: string | null, traitType: string, value: string }> | null } | null, contract: { __typename?: 'ERC721Contract', address?: string | null } }> };
 
 
 export const GetMetadataDocument = `
@@ -2460,7 +2460,7 @@ export const GetMetadataDocument = `
     `;
 export const GetOnChainTokensDocument = `
     query getOnChainTokens($owner: String!) {
-  erc1155TokenOwners(where: {owner: {id_containsInsensitive: $owner}}) {
+  erc1155TokenOwners(where: {owner: {id_containsInsensitive: $owner}}, limit: 50) {
     id
     token {
       numericId
@@ -2481,24 +2481,10 @@ export const GetOnChainTokensDocument = `
       contract {
         address
       }
-      transfers(
-        where: {from: {id_containsInsensitive: $owner}, OR: {to: {id_containsInsensitive: $owner}}}
-        orderBy: block_DESC
-        limit: 1
-      ) {
-        id
-        to {
-          id
-        }
-        from {
-          id
-        }
-        transactionHash
-      }
     }
     balance
   }
-  erc721Tokens(where: {owner: {id_containsInsensitive: $owner}}) {
+  erc721Tokens(where: {owner: {id_containsInsensitive: $owner}}, limit: 200) {
     numericId
     metadata {
       image

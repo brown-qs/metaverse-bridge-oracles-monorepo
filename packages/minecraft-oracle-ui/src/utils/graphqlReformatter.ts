@@ -12,7 +12,6 @@ export type TransformedTokenType = {
     numericId: number,
     balance?: string,
     metadata?: NonNullable<ERC721TokenType["metadata"]>,
-    lastTransferredToAddress?: string
 }
 export const transformGraphqlErc721Token = (token: ERC721TokenType): TransformedTokenType => {
     return {
@@ -21,7 +20,6 @@ export const transformGraphqlErc721Token = (token: ERC721TokenType): Transformed
         numericId: parseInt(token.numericId),
         balance: undefined, //non fungible
         metadata: token.metadata ?? undefined,
-        lastTransferredToAddress: undefined //not relevant here dont need this to determine ownership
     }
 }
 
@@ -37,7 +35,6 @@ export const transformGraphqlErc1155Token = (token: ERC1155TokenType): Transform
         numericId: parseInt(token.token.numericId),
         balance: bal,
         metadata: token.token.metadata ?? undefined,
-        lastTransferredToAddress: token?.token?.transfers?.[0].to?.id?.toLowerCase()
     }
 }
 
@@ -56,9 +53,9 @@ export type RecognizedTokenDataType = {
     gamepass: boolean
 
 }
-export type TokenWithRecognizedTokenData = TransformedTokenType & RecognizedTokenDataType
-export const addRegonizedTokenDataToTokens = (tokens: TransformedTokenType[], recognizedAssetData: RecognizedAssetsDto[]): TokenWithRecognizedTokenData[] => {
-    const results: TokenWithRecognizedTokenData[] = []
+export type OnChainTokenWithRecognizedTokenData = TransformedTokenType & RecognizedTokenDataType
+export const addRegonizedTokenDataToTokens = (tokens: TransformedTokenType[], recognizedAssetData: RecognizedAssetsDto[]): OnChainTokenWithRecognizedTokenData[] => {
+    const results: OnChainTokenWithRecognizedTokenData[] = []
     for (const tok of tokens) {
         const recognizedAsset = recognizedAssetData.find(ra => ra?.assetAddress?.toLowerCase() === tok?.assetAddress?.toLowerCase())
         if (!!recognizedAsset) {
@@ -71,7 +68,7 @@ export const addRegonizedTokenDataToTokens = (tokens: TransformedTokenType[], re
                 }
             })
             if (!!collectionFragment) {
-                const recognizedTokenData: TokenWithRecognizedTokenData = {
+                const recognizedTokenData: OnChainTokenWithRecognizedTokenData = {
                     chainId: recognizedAsset.chainId,
                     assetType: recognizedAsset.assetType,
                     recognizedCollectionName: recognizedAsset.name,
@@ -137,3 +134,11 @@ export const inGameItemsCombineMetadata = (inGameItems: AssetDto[], metadata: Ge
     }
 }
 
+export const formatTokenName = (token: OnChainTokenWithRecognizedTokenData): string => {
+    let name = token?.metadata?.name ?? ""
+
+    if (!!token?.numericId && token?.treatAsFungible === false) {
+        name = `${name} #${token?.numericId}`
+    }
+    return name
+}
