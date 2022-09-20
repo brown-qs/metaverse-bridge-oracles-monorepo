@@ -32,7 +32,8 @@ import { AssetDto, CollectionFragmentDto, SkinResponse } from '../../state/api/t
 import { useGetOnChainTokensQuery, GetOnChainTokensQuery, useGetMetadataQuery } from '../../state/api/generatedSquidMarketplaceApi';
 import { Media } from '../../components';
 import { BigNumber, utils } from 'ethers';
-import { addRegonizedTokenDataToTokens, InGameItemMaybeMetadata, inGameItemsCombineMetadata, inGameMetadataParams, TokenWithRecognizedTokenData, TransformedTokenType, transformGraphqlErc1155Token, transformGraphqlErc721Token } from '../../utils/graphqlReformatter';
+import { addRegonizedTokenDataToTokens, formatTokenName, InGameItemMaybeMetadata, inGameItemsCombineMetadata, inGameMetadataParams, OnChainTokenWithRecognizedTokenData, TransformedTokenType, transformGraphqlErc1155Token, transformGraphqlErc721Token } from '../../utils/graphqlReformatter';
+import { ImportEnraptureModal } from '../../components/modals/ImportEnraptureModal';
 
 
 const ProfilePage = () => {
@@ -105,7 +106,7 @@ const ProfilePage = () => {
     }, [onChainTokensData])
 
 
-    const onChainAssetsWithRecognizedTokenData: TokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
+    const onChainAssetsWithRecognizedTokenData: OnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
         if (!!onChainAssets && !!recognizedAssetsData) {
             return addRegonizedTokenDataToTokens(onChainAssets, recognizedAssetsData)
         } else {
@@ -114,22 +115,20 @@ const ProfilePage = () => {
     }, [onChainAssets, recognizedAssetsData])
 
 
-    const onChainItems: TokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
+    const onChainItems: OnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
         if (!!onChainAssetsWithRecognizedTokenData) {
             return onChainAssetsWithRecognizedTokenData.filter((tok) => {
                 if (tok?.importable === false && tok?.enrapturable === false) {
                     return false
                 }
-
-                //tok.treatAsFungible is bait, otherwise it's non fungible make sure last transfer was to current address
-                return tok?.treatAsFungible === true || (tok?.lastTransferredToAddress?.toLowerCase() === account?.toLowerCase())
+                return true
             })
         } else {
             return undefined
         }
     }, [onChainAssetsWithRecognizedTokenData, account])
 
-    const onChainResources: TokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
+    const onChainResources: OnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
         if (!!onChainAssetsWithRecognizedTokenData) {
             return onChainAssetsWithRecognizedTokenData.filter((tok) => tok.summonable)
         } else {
@@ -147,421 +146,426 @@ const ProfilePage = () => {
     }, [inGameItemsData, inGameMetadata])
 
     return (
-        <Container
-            bg="#080714"
-            backgroundPosition="top right"
-            backgroundRepeat="no-repeat"
-            backgroundSize='600px 700px'
-            minWidth="100%"
-            margin="0"
-            padding="0"
-            height="100%"
-            position="relative"
-            overflow="visible">
-            <Box position="absolute" w="100%" h="100%" bg="#080714">
-                <Image src={BackgroundImage} w="552px" h="622px" position="absolute" top="0" right="0" filter="blur(10px)"></Image>
-            </Box>
-            {profileLoading
-                ?
-                <VStack className="moonsamaFullHeight">
-                    <HStack h="100%">
-                        <CircularProgress isIndeterminate color="teal"></CircularProgress>
-                    </HStack>
+        <>
+            <Container
+                bg="#080714"
+                backgroundPosition="top right"
+                backgroundRepeat="no-repeat"
+                backgroundSize='600px 700px'
+                minWidth="100%"
+                margin="0"
+                padding="0"
+                height="100%"
+                position="relative"
+                overflow="visible">
+                <Box position="absolute" w="100%" h="100%" bg="#080714">
+                    <Image src={BackgroundImage} w="552px" h="622px" position="absolute" top="0" right="0" filter="blur(10px)"></Image>
+                </Box>
+                {profileLoading
+                    ?
+                    <VStack className="moonsamaFullHeight">
+                        <HStack h="100%">
+                            <CircularProgress isIndeterminate color="teal"></CircularProgress>
+                        </HStack>
 
-                </VStack>
-                :
-                <>
-                    <Grid
-                        zIndex="2"
-                        templateRows={{ base: "275px repeat(5, 450px)", md: '275px repeat(3, 700px)', lg: '275px repeat(2, 700px)' }}
-                        templateColumns='repeat(12, 1fr)'
-                        maxW="1440px"
-                        margin="auto"
-                        height="100%"
-                    >
-
-
-
-
-                        {/* START WELCOME MESSAGE & PLAYER ELIGIBILITY */}
-                        <GridItem
+                    </VStack>
+                    :
+                    <>
+                        <Grid
                             zIndex="2"
-                            padding={{
-                                base: "96px 11px 0 11px",
-                                md: "96px 40px 0 40px"
-                            }}
-                            rowSpan={1}
-                            colSpan={{ base: 12, md: 12, lg: 12 }}
-                            overflow="hidden"
+                            templateRows={{ base: "275px repeat(5, 450px)", md: '275px repeat(3, 700px)', lg: '275px repeat(2, 700px)' }}
+                            templateColumns='repeat(12, 1fr)'
+                            maxW="1440px"
+                            margin="auto"
+                            height="100%"
                         >
-                            <Stack lineHeight="40px" fontSize="32px" textAlign="left" direction={{ base: "column" }}>
-                                <Box fontFamily="heading" color="white" whiteSpace="nowrap" textOverflow="ellipsis" overflow="hidden">
-                                    Welcome back,
-                                </Box>
-                                <Box fontFamily="heading" color="yellow.300" whiteSpace="nowrap" textOverflow="ellipsis" overflow="hidden" flex="1">
-                                    {profile?.email}
-                                </Box>
-                            </Stack>
-                            <HStack marginTop="20px" fontSize="12px">
-                                {!profile?.allowedToPlay &&
-                                    <Box fontFamily="heading" padding="4px 8px" borderRadius="4px" color="white" bg="red.500">BUY YOUR TICKET AT THE MARKETPLACE TO PLAY</Box>
-                                }
-                                {profile?.allowedToPlay && !profile?.blacklisted &&
-                                    <Box fontFamily="heading" padding="4px 8px" borderRadius="4px" color="#1B1B3A" bg="teal.200">YOU ARE ELIGIBLE TO PLAY</Box>
-                                }
-                                {profile?.allowedToPlay && profile?.blacklisted &&
-                                    <Box fontFamily="heading" padding="4px 8px" borderRadius="4px" color="#1B1B3A" bg="yellow.300">BLACKLISTED, BUT ALLOWED TO PLAY</Box>
-                                }
-                            </HStack>
-                        </GridItem>
-                        {/* END WELCOME MESSAGE & PLAYER ELIGIBILITY */}
 
 
 
-                        {/* START SKINS */}
-                        <GridItem
-                            zIndex="2"
 
-                            padding={{
-                                base: "16px 11px 7px 11px",
-                                md: "16px 8px 7px 40px"
-                            }}
-                            overflow="hidden"
-                            rowSpan={1}
-                            colSpan={{ base: 12, md: 6, lg: 4 }}
-                        >
-                            <BridgeTab
-                                title="Available Skins"
-                                emptyMessage={!!skins ? undefined : "No available skins found."}
-                                icon={<UserCircle size="18px" />}
-                                isLoading={skinsLoading}
+                            {/* START WELCOME MESSAGE & PLAYER ELIGIBILITY */}
+                            <GridItem
+                                zIndex="2"
+                                padding={{
+                                    base: "96px 11px 0 11px",
+                                    md: "96px 40px 0 40px"
+                                }}
+                                rowSpan={1}
+                                colSpan={{ base: 12, md: 12, lg: 12 }}
+                                overflow="hidden"
                             >
-                                {!!skins &&
-                                    <Grid templateColumns='repeat(2, 1fr)' width="100%">
-                                        {[...skins].sort((t1, t2) => t1.assetAddress.localeCompare(t2.assetAddress)).map((value, ind) => {
-                                            const skinLabel = SKIN_LABELS[value.assetAddress.toLowerCase()]
-                                            const firstColumn = ind % 2 === 0
-                                            const firstRow = ind < 2
-                                            return (
-                                                < GridItem
-                                                    paddingTop="100%"
-                                                    position="relative"
-                                                    key={`${value?.assetAddress}-${value?.assetId}-${ind}`}
+                                <Stack lineHeight="40px" fontSize="32px" textAlign="left" direction={{ base: "column" }}>
+                                    <Box fontFamily="heading" color="white" whiteSpace="nowrap" textOverflow="ellipsis" overflow="hidden">
+                                        Welcome back,
+                                    </Box>
+                                    <Box fontFamily="heading" color="yellow.300" whiteSpace="nowrap" textOverflow="ellipsis" overflow="hidden" flex="1">
+                                        {profile?.email}
+                                    </Box>
+                                </Stack>
+                                <HStack marginTop="20px" fontSize="12px">
+                                    {!profile?.allowedToPlay &&
+                                        <Box fontFamily="heading" padding="4px 8px" borderRadius="4px" color="white" bg="red.500">BUY YOUR TICKET AT THE MARKETPLACE TO PLAY</Box>
+                                    }
+                                    {profile?.allowedToPlay && !profile?.blacklisted &&
+                                        <Box fontFamily="heading" padding="4px 8px" borderRadius="4px" color="#1B1B3A" bg="teal.200">YOU ARE ELIGIBLE TO PLAY</Box>
+                                    }
+                                    {profile?.allowedToPlay && profile?.blacklisted &&
+                                        <Box fontFamily="heading" padding="4px 8px" borderRadius="4px" color="#1B1B3A" bg="yellow.300">BLACKLISTED, BUT ALLOWED TO PLAY</Box>
+                                    }
+                                </HStack>
+                            </GridItem>
+                            {/* END WELCOME MESSAGE & PLAYER ELIGIBILITY */}
 
-                                                    onClick={() => {
-                                                        //dont set a skin thats already set
-                                                        if (!value.equipped) {
-                                                            setSkin({
-                                                                id: value.id,
-                                                                assetAddress: value.assetAddress,
-                                                                assetId: value.assetId,
-                                                                assetType: value.assetType
-                                                            })
+
+
+                            {/* START SKINS */}
+                            <GridItem
+                                zIndex="2"
+
+                                padding={{
+                                    base: "16px 11px 7px 11px",
+                                    md: "16px 8px 7px 40px"
+                                }}
+                                overflow="hidden"
+                                rowSpan={1}
+                                colSpan={{ base: 12, md: 6, lg: 4 }}
+                            >
+                                <BridgeTab
+                                    title="Available Skins"
+                                    emptyMessage={!!skins ? undefined : "No available skins found."}
+                                    icon={<UserCircle size="18px" />}
+                                    isLoading={skinsLoading}
+                                >
+                                    {!!skins &&
+                                        <Grid templateColumns='repeat(2, 1fr)' width="100%">
+                                            {[...skins].sort((t1, t2) => t1.assetAddress.localeCompare(t2.assetAddress)).map((value, ind) => {
+                                                const skinLabel = SKIN_LABELS[value.assetAddress.toLowerCase()]
+                                                const firstColumn = ind % 2 === 0
+                                                const firstRow = ind < 2
+                                                return (
+                                                    < GridItem
+                                                        paddingTop="100%"
+                                                        position="relative"
+                                                        key={`${value?.assetAddress}-${value?.assetId}-${ind}`}
+
+                                                        onClick={() => {
+                                                            //dont set a skin thats already set
+                                                            if (!value.equipped) {
+                                                                setSkin({
+                                                                    id: value.id,
+                                                                    assetAddress: value.assetAddress,
+                                                                    assetId: value.assetId,
+                                                                    assetType: value.assetType
+                                                                })
+                                                            }
+                                                        }}
+                                                    >
+                                                        <Box
+                                                            overflow="visible"
+                                                            position="absolute"
+                                                            top={firstRow ? "12px" : "4px"}
+                                                            right="12px"
+                                                            bottom="12px"
+                                                            left={firstColumn ? "12px" : "4px"}
+                                                            bg={value.equipped ? "rgba(14, 235, 168, 0.1)" : "inherit"}
+                                                            _hover={value.equipped ? {} : { bg: "rgba(255, 255, 255, 0.06)" }}
+                                                            _after={(value.equipped && !isSmallerThan285) ? { fontFamily: "heading", content: `"EQUIPPED"`, fontSize: "12px", bg: "teal.400", color: "#16132B", padding: "4px 8px", borderRadius: "8px 0px 4px 0px", marginTop: "100px", position: "absolute", bottom: "-1px", right: "-1px" } : {}}
+                                                            cursor={value.equipped ? "default" : "pointer"}
+                                                            borderRadius="4px"
+                                                            border={value.equipped ? "1px solid" : "1px solid"}
+                                                            borderColor={value.equipped ? "teal.400" : "transparent"}
+                                                        >
+                                                            <Media imageProps={{ objectFit: "contain" }} padding="12%" uri={skinToImageUrl(value)} />
+                                                        </Box>
+                                                    </GridItem >
+                                                );
+                                            })}
+
+                                        </Grid>
+                                    }
+                                </BridgeTab>
+                            </GridItem>
+                            {/* END SKINS */}
+
+
+
+                            {/* START IN-GAME ITEMS */}
+                            <GridItem
+                                zIndex="2"
+
+                                padding={{
+                                    base: "16px 11px 6px 11px",
+                                    md: "16px 40px 6px 8px",
+                                    lg: "16px 8px 6px 8px"
+                                }}
+                                rowSpan={1}
+                                colSpan={{ base: 12, md: 6, lg: 4 }}
+                            >
+                                <BridgeTab
+                                    isLoading={isInGameItemsDataLoading}
+                                    title="In-Game Items"
+                                    emptyMessage={inGameItems?.length ? undefined : "No in-game items found."}
+                                    icon={<DeviceGamepad size="18px" />}
+                                    footer={<Button
+                                        rightIcon={<CaretRight></CaretRight>}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+
+                                            const exportAssets = []
+                                            for (const hash of inGameCheckboxGroupValue) {
+                                                const ass = inGameItems?.find(ass => ass.hash === hash)
+                                                if (!!ass) {
+                                                    exportAssets.push(ass)
+                                                }
+                                            }
+
+                                            //just export one items now but we are setup for multiple later
+                                            if (exportAssets.length > 0) {
+                                                const value = exportAssets[0]
+                                                /*
+                                                onExportDialogOpen();
+                                                setExportDialogData(
+                                                    {
+                                                        hash: value.hash,
+                                                        asset: {
+                                                            assetAddress: value.assetAddress,
+                                                            assetId: value.assetId,
+                                                            assetType: stringToStringAssetType(value.assetType),
+                                                            id: 'x'
+                                                        },
+                                                        chain: value.exportChainId,
+                                                        item: value
+                                                    }
+                                                );*/
+                                            }
+                                        }}
+                                        isDisabled={inGameCheckboxGroupValue.length === 0} w="100%">EXPORT TO WALLET</Button>}
+                                >
+
+                                    <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">
+
+                                        {!!inGameItems && inGameItems.map((value, ind) => {
+                                            const checkBoxProps = getInGameCheckboxGroupProps({ value: value.hash })
+                                            return (
+                                                <InGameItem
+                                                    lineOne={value?.metadata?.name}
+                                                    mediaUrl={value?.metadata?.image}
+                                                    isLoading={!!value?.metadata !== true}
+                                                    key={value.hash}
+                                                    isCheckboxDisabled={isInGameCheckboxGroupDisabled ?? true}
+                                                    checkboxValue={String(value.hash)}
+                                                    isChecked={onChainCheckboxGroupValue.includes(String(value.hash))}
+                                                    onCheckboxChange={(e) => {
+                                                        //hack for now allow only one check
+                                                        if (e.target.checked) {
+                                                            setOnChainCheckboxGroupValue([String(value.hash)])
+                                                        } else {
+                                                            setOnChainCheckboxGroupValue([])
                                                         }
+
+                                                        //do this when ready for multiple values
+                                                        //checkBoxProps.onChange(e)
                                                     }}
                                                 >
-                                                    <Box
-                                                        overflow="visible"
-                                                        position="absolute"
-                                                        top={firstRow ? "12px" : "4px"}
-                                                        right="12px"
-                                                        bottom="12px"
-                                                        left={firstColumn ? "12px" : "4px"}
-                                                        bg={value.equipped ? "rgba(14, 235, 168, 0.1)" : "inherit"}
-                                                        _hover={value.equipped ? {} : { bg: "rgba(255, 255, 255, 0.06)" }}
-                                                        _after={(value.equipped && !isSmallerThan285) ? { fontFamily: "heading", content: `"EQUIPPED"`, fontSize: "12px", bg: "teal.400", color: "#16132B", padding: "4px 8px", borderRadius: "8px 0px 4px 0px", marginTop: "100px", position: "absolute", bottom: "-1px", right: "-1px" } : {}}
-                                                        cursor={value.equipped ? "default" : "pointer"}
-                                                        borderRadius="4px"
-                                                        border={value.equipped ? "1px solid" : "1px solid"}
-                                                        borderColor={value.equipped ? "teal.400" : "transparent"}
-                                                    >
-                                                        <Media imageProps={{ objectFit: "contain" }} padding="12%" uri={skinToImageUrl(value)} />
-                                                    </Box>
-                                                </GridItem >
+                                                </InGameItem>
                                             );
                                         })}
-
-                                    </Grid>
-                                }
-                            </BridgeTab>
-                        </GridItem>
-                        {/* END SKINS */}
+                                    </VStack>
 
 
+                                </BridgeTab>
+                            </GridItem>
+                            {/* END IN-GAME ITEMS */}
 
-                        {/* START IN-GAME ITEMS */}
-                        <GridItem
-                            zIndex="2"
 
-                            padding={{
-                                base: "16px 11px 6px 11px",
-                                md: "16px 40px 6px 8px",
-                                lg: "16px 8px 6px 8px"
-                            }}
-                            rowSpan={1}
-                            colSpan={{ base: 12, md: 6, lg: 4 }}
-                        >
-                            <BridgeTab
-                                isLoading={isInGameItemsDataLoading}
-                                title="In-Game Items"
-                                emptyMessage={inGameItems?.length ? undefined : "No in-game items found."}
-                                icon={<DeviceGamepad size="18px" />}
-                                footer={<Button
-                                    rightIcon={<CaretRight></CaretRight>}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
 
-                                        const exportAssets = []
-                                        for (const hash of inGameCheckboxGroupValue) {
-                                            const ass = inGameItems?.find(ass => ass.hash === hash)
-                                            if (!!ass) {
-                                                exportAssets.push(ass)
-                                            }
-                                        }
+                            {/* START ON-CHAIN ITEMS */}
+                            <GridItem
+                                zIndex="2"
 
-                                        //just export one items now but we are setup for multiple later
-                                        if (exportAssets.length > 0) {
-                                            const value = exportAssets[0]
-                                            /*
-                                            onExportDialogOpen();
-                                            setExportDialogData(
-                                                {
-                                                    hash: value.hash,
-                                                    asset: {
-                                                        assetAddress: value.assetAddress,
-                                                        assetId: value.assetId,
-                                                        assetType: stringToStringAssetType(value.assetType),
-                                                        id: 'x'
-                                                    },
-                                                    chain: value.exportChainId,
-                                                    item: value
-                                                }
-                                            );*/
-                                        }
-                                    }}
-                                    isDisabled={inGameCheckboxGroupValue.length === 0} w="100%">EXPORT TO WALLET</Button>}
+                                padding={{
+                                    base: "16px 11px 6px 11px",
+                                    md: "8px 8px 6px 40px",
+                                    lg: "16px 40px 6px 8px"
+                                }}
+                                rowSpan={1}
+                                colSpan={{ base: 12, md: 6, lg: 4 }}
                             >
+                                <BridgeTab
+                                    title="On-Chain Items"
+                                    emptyMessage={onChainItems?.length ? undefined : "No items found in wallet."}
+                                    isLoading={isOnChainTokensLoading}
+                                    icon={<Wallet size="18px" />}
+                                    footer={
+                                        <Button
+                                            leftIcon={<CaretLeft></CaretLeft>}
+                                            onClick={(e) => {
 
-                                <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">
+                                                e.stopPropagation();
 
-                                    {!!inGameItems && inGameItems.map((value, ind) => {
-                                        const checkBoxProps = getInGameCheckboxGroupProps({ value: value.hash })
-                                        return (
-                                            <InGameItem
-                                                lineOne={value?.metadata?.name}
-                                                mediaUrl={value?.metadata?.image}
-                                                isLoading={!!value?.metadata !== true}
-                                                key={value.hash}
-                                                isCheckboxDisabled={isInGameCheckboxGroupDisabled ?? true}
-                                                checkboxValue={String(value.hash)}
-                                                isChecked={onChainCheckboxGroupValue.includes(String(value.hash))}
-                                                onCheckboxChange={(e) => {
-                                                    //hack for now allow only one check
-                                                    if (e.target.checked) {
-                                                        setOnChainCheckboxGroupValue([String(value.hash)])
-                                                    } else {
-                                                        setOnChainCheckboxGroupValue([])
+                                                const importAssets = []
+                                                for (const id of onChainCheckboxGroupValue) {
+                                                    const ass = onChainItems?.find(ass => ass.id === id)
+                                                    if (!!ass) {
+                                                        importAssets.push(ass)
                                                     }
-
-                                                    //do this when ready for multiple values
-                                                    //checkBoxProps.onChange(e)
-                                                }}
-                                            >
-                                            </InGameItem>
-                                        );
-                                    })}
-                                </VStack>
-
-
-                            </BridgeTab>
-                        </GridItem>
-                        {/* END IN-GAME ITEMS */}
-
-
-
-                        {/* START ON-CHAIN ITEMS */}
-                        <GridItem
-                            zIndex="2"
-
-                            padding={{
-                                base: "16px 11px 6px 11px",
-                                md: "8px 8px 6px 40px",
-                                lg: "16px 40px 6px 8px"
-                            }}
-                            rowSpan={1}
-                            colSpan={{ base: 12, md: 6, lg: 4 }}
-                        >
-                            <BridgeTab
-                                title="On-Chain Items"
-                                emptyMessage={onChainItems?.length ? undefined : "No items found in wallet."}
-                                isLoading={isOnChainTokensLoading}
-                                icon={<Wallet size="18px" />}
-                                footer={
-                                    <Button
-                                        leftIcon={<CaretLeft></CaretLeft>}
-                                        onClick={(e) => {
-                                            /*
-                                            e.stopPropagation();
-    
-                                            const importAssets = []
-                                            for (const id of onChainCheckboxGroupValue) {
-                                                const ass = onChainItems.find(ass => ass.id === id)
-                                                if (!!ass) {
-                                                    importAssets.push(ass)
                                                 }
-                                            }
-                                            if (importAssets.length > 0) {
-                                                const item = importAssets[0]
-                                                if (item.importable) {
-                                                    onImportDialogOpen();
-                                                    setImportDialogData({ asset: item.asset });
-                                                } else if (item.enrapturable) {
-                                                    onEnraptureDialogOpen();
-                                                    setEnraptureDialogData({ asset: item.asset });
-                                                }
-                                            }*/
-
-                                            /*
-                                            onImportDialogOpen();
-                                            setImportDialogData({ asset: item.asset });*/
-
-                                        }}
-                                        isDisabled={onChainCheckboxGroupValue.length === 0} w="100%">IMPORT TO GAME
-                                    </Button>}
-                            >
-
-                                <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">
-                                    {!!onChainItems && onChainItems.map((item, ind) => {
-                                        const checkBoxProps = getOnChainCheckboxGroupProps({ value: item.id })
-
-                                        return (
-                                            <OnChainItem
-                                                lineOne={utils.formatEther(item?.balance ?? "0")}
-                                                mediaUrl={item?.metadata?.image ?? ""}
-                                                isLoading={false}
-                                                key={item.id} //update key
-                                                isCheckboxDisabled={isOnChainCheckboxGroupDisabled ?? true}
-                                                checkboxValue={item.id}
-                                                isChecked={onChainCheckboxGroupValue.includes(item.id)}
-                                                onCheckboxChange={(e) => {
-                                                    //hack for now allow only one check
-                                                    if (e.target.checked) {
-                                                        setOnChainCheckboxGroupValue([item.id])
-                                                    } else {
-                                                        setOnChainCheckboxGroupValue([])
+                                                if (importAssets.length > 0) {
+                                                    const item = importAssets[0]
+                                                    if (item.importable) {
+                                                        onImportDialogOpen();
+                                                        setImportDialogData(item);
+                                                    } else if (item.enrapturable) {
+                                                        onEnraptureDialogOpen();
+                                                        setEnraptureDialogData(item);
                                                     }
+                                                }
 
-                                                    //do this when ready for multiple values
-                                                    //checkBoxProps.onChange(e)
-                                                }}
-                                            >
-                                            </OnChainItem>
-                                        );
-                                    })}
-                                </VStack>
+                                                /*
+                                                onImportDialogOpen();
+                                                setImportDialogData({ asset: item.asset });*/
+
+                                            }}
+                                            isDisabled={onChainCheckboxGroupValue.length === 0} w="100%">IMPORT TO GAME
+                                        </Button>}
+                                >
+
+                                    <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">
+                                        {!!onChainItems && onChainItems.map((item, ind) => {
+                                            const checkBoxProps = getOnChainCheckboxGroupProps({ value: item.id })
+
+                                            return (
+                                                <OnChainItem
+                                                    lineOne={formatTokenName(item)}
+                                                    lineTwo={item.enrapturable ? "This item will be burned into your account." : undefined}
+                                                    mediaRedOutline={item.enrapturable === true}
+                                                    mediaUrl={item?.metadata?.image ?? ""}
+                                                    isLoading={false}
+                                                    key={item.id} //update key
+                                                    isCheckboxDisabled={isOnChainCheckboxGroupDisabled ?? true}
+                                                    checkboxValue={item.id}
+                                                    isChecked={onChainCheckboxGroupValue.includes(item.id)}
+                                                    onCheckboxChange={(e) => {
+                                                        //hack for now allow only one check
+                                                        if (e.target.checked) {
+                                                            setOnChainCheckboxGroupValue([item.id])
+                                                        } else {
+                                                            setOnChainCheckboxGroupValue([])
+                                                        }
+
+                                                        //do this when ready for multiple values
+                                                        //checkBoxProps.onChange(e)
+                                                    }}
+                                                >
+                                                </OnChainItem>
+                                            );
+                                        })}
+                                    </VStack>
 
 
-                            </BridgeTab>
-                        </GridItem>
-                        {/* END ON-CHAIN ITEMS */}
+                                </BridgeTab>
+                            </GridItem>
+                            {/* END ON-CHAIN ITEMS */}
 
 
 
-                        {/* START IN-GAME RESOURCES */}
-                        <GridItem
-                            zIndex="2"
+                            {/* START IN-GAME RESOURCES */}
+                            <GridItem
+                                zIndex="2"
 
-                            padding={{
-                                base: "16px 11px 6px 11px",
-                                md: "8px 40px 6px 8px",
-                                lg: "8px 8px 14px 40px"
-                            }}
-                            rowSpan={1}
-                            colSpan={{ base: 12, md: 6, lg: 6 }}
-                        >
-                            <BridgeTab
-                                title="In-Game Resources"
-                                emptyMessage={"No in-game resources available."}
-                                footer={
-                                    <Button
-                                        rightIcon={<CaretRight></CaretRight>}
-                                        onClick={() => {
-                                            if (!!account) {
-                                                onSummonDialogOpen();
-                                                setSummonDialogData({ recipient: account ?? undefined });
-                                            } else {
-                                                onAccountDialogOpen()
-                                            }
-                                        }}
-                                        isDisabled={false} w="100%">SUMMON ALL RESOURCES
-                                    </Button>
-                                }
-                                icon={<DeviceGamepad size="18px" />}
+                                padding={{
+                                    base: "16px 11px 6px 11px",
+                                    md: "8px 40px 6px 8px",
+                                    lg: "8px 8px 14px 40px"
+                                }}
+                                rowSpan={1}
+                                colSpan={{ base: 12, md: 6, lg: 6 }}
                             >
-                                <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">
+                                <BridgeTab
+                                    title="In-Game Resources"
+                                    emptyMessage={"No in-game resources available."}
+                                    footer={
+                                        <Button
+                                            rightIcon={<CaretRight></CaretRight>}
+                                            onClick={() => {
+                                                if (!!account) {
+                                                    onSummonDialogOpen();
+                                                    setSummonDialogData({ recipient: account ?? undefined });
+                                                } else {
+                                                    onAccountDialogOpen()
+                                                }
+                                            }}
+                                            isDisabled={false} w="100%">SUMMON ALL RESOURCES
+                                        </Button>
+                                    }
+                                    icon={<DeviceGamepad size="18px" />}
+                                >
+                                    <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">
 
-                                </VStack>
-                            </BridgeTab>
-                        </GridItem>
-                        {/* END IN-GAME RESOURCES */}
-
-
-
-                        {/* START ON-CHAIN RESOURCES */}
-                        <GridItem
-                            zIndex="2"
-                            padding={{
-                                base: "16px 11px 7px 11px",
-                                md: "8px 40px 15px 40px",
-                                lg: "8px 40px 15px 8px"
-                            }}
-                            rowSpan={1}
-                            colSpan={{ base: 12, md: 12, lg: 6 }}
-                        >
-                            <BridgeTab
-                                title="On-Chain Resources"
-                                emptyMessage={onChainResources?.length ? undefined : "No resources found in wallet."}
-                                isLoading={isOnChainTokensLoading}
-                                icon={<Wallet size="18px" />}>
-
-                                <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">
-
-                                    {!!onChainResources && onChainResources.map((item) => {
-                                        return (
-                                            <OnChainResource
-                                                lineOne={item?.metadata?.name}
-                                                mediaUrl={item?.metadata?.image}
-                                                balanceWei={BigNumber.from(item.balance)}
-                                                isLoading={false}
-                                                key={item.id}
-                                                onClick={() => {
-                                                    //user will be able to see resources in their metamask wallet as under assets, nothing is moving
-                                                    /* onAssetDialogOpen()
-                                                     setAssetDialogData({
-                                                         title: item?.metadata?.name ?? undefined,
-                                                         image: item?.metadata?.image ?? undefined,
-                                                         assetERC1155: value?.asset,
-                                                         assetAddressERC20: value?.staticData?.subAssetAddress
-                                                     })*/
-                                                    //window.open(getExplorerLink(chainId ?? ChainId.MOONRIVER, value.asset.assetAddress,'address'))
-                                                }}
-                                            >
-                                            </OnChainResource>
-                                        )
-                                    })}
-                                </VStack>
-
-                            </BridgeTab>
-                        </GridItem>
-                        {/* END ON-CHAIN RESOURCES */}
+                                    </VStack>
+                                </BridgeTab>
+                            </GridItem>
+                            {/* END IN-GAME RESOURCES */}
 
 
-                    </Grid >
 
-                    <ItemDetailsModal data={itemDetailDialogData} isOpen={isItemDetailDialogOpen} onClose={onItemDetailDialogClose}></ItemDetailsModal>
-                </>
-            }
-        </Container >
+                            {/* START ON-CHAIN RESOURCES */}
+                            <GridItem
+                                zIndex="2"
+                                padding={{
+                                    base: "16px 11px 7px 11px",
+                                    md: "8px 40px 15px 40px",
+                                    lg: "8px 40px 15px 8px"
+                                }}
+                                rowSpan={1}
+                                colSpan={{ base: 12, md: 12, lg: 6 }}
+                            >
+                                <BridgeTab
+                                    title="On-Chain Resources"
+                                    emptyMessage={onChainResources?.length ? undefined : "No resources found in wallet."}
+                                    isLoading={isOnChainTokensLoading}
+                                    icon={<Wallet size="18px" />}>
+
+                                    <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">
+
+                                        {!!onChainResources && onChainResources.map((item) => {
+                                            return (
+                                                <OnChainResource
+                                                    lineOne={formatTokenName(item)}
+                                                    mediaUrl={item?.metadata?.image}
+                                                    balanceWei={BigNumber.from(item.balance)}
+                                                    isLoading={false}
+                                                    key={item.id}
+                                                    onClick={() => {
+                                                        //user will be able to see resources in their metamask wallet as under assets, nothing is moving
+                                                        /* onAssetDialogOpen()
+                                                         setAssetDialogData({
+                                                             title: item?.metadata?.name ?? undefined,
+                                                             image: item?.metadata?.image ?? undefined,
+                                                             assetERC1155: value?.asset,
+                                                             assetAddressERC20: value?.staticData?.subAssetAddress
+                                                         })*/
+                                                        //window.open(getExplorerLink(chainId ?? ChainId.MOONRIVER, value.asset.assetAddress,'address'))
+                                                    }}
+                                                >
+                                                </OnChainResource>
+                                            )
+                                        })}
+                                    </VStack>
+
+                                </BridgeTab>
+                            </GridItem>
+                            {/* END ON-CHAIN RESOURCES */}
+
+
+                        </Grid >
+
+                        <ItemDetailsModal data={itemDetailDialogData} isOpen={isItemDetailDialogOpen} onClose={onItemDetailDialogClose}></ItemDetailsModal>
+                    </>
+                }
+            </Container >
+            <ImportEnraptureModal></ImportEnraptureModal>
+        </>
     )
 };
 

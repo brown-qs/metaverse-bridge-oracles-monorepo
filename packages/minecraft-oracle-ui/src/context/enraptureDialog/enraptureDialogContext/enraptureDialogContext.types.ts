@@ -1,19 +1,12 @@
 import { Asset } from 'hooks/marketplace/types';
+import { OnChainTokenWithRecognizedTokenData } from '../../../utils/graphqlReformatter';
 
-export type EnraptureDialogData = {
-  asset?: Asset;
-  amount?: string;
-  owner?: string;
-  beneficiary?: string;
-  enrapturable?: boolean,
-  importable?: boolean,
-  isResource?: boolean,
-} | undefined;
+
 
 export type EnraptureDialogContextType = {
   isEnraptureDialogOpen: boolean
   onEnraptureDialogOpen: () => void
   onEnraptureDialogClose: () => void
-  enraptureDialogData?: EnraptureDialogData;
-  setEnraptureDialogData: React.Dispatch<React.SetStateAction<EnraptureDialogData>>;
+  enraptureDialogData?: OnChainTokenWithRecognizedTokenData;
+  setEnraptureDialogData: React.Dispatch<React.SetStateAction<OnChainTokenWithRecognizedTokenData | undefined>>;
 };
