@@ -230,6 +230,27 @@ export class ProfileApiService {
         return assets
     }
 
+    async getInGameResources(user: UserEntity): Promise<AssetDto[]> {
+        const snapshots = await this.inventoryService.findMany({ relations: ['material', 'owner'], where: { owner: { uuid: user.uuid } } })
+
+        const resources: AssetDto[] = snapshots.map(snapshot => {
+            return {
+                amount: snapshot.amount,
+                assetAddress: snapshot.material.assetAddress,
+                assetType: snapshot.material.assetType,
+                assetId: snapshot.material.assetId,
+                name: snapshot.material.name,
+                exportable: false,
+                summonable: true,
+                recognizedAssetType: '',
+                enraptured: false,
+                exportChainId: 1285, // resources are multi chain
+                exportAddress: undefined,
+            }
+        })
+        return resources
+    }
+
     async userProfile(user: UserEntity): Promise<ProfileDto> {
         let allowedToPlayReason: PlayEligibilityReason = PlayEligibilityReason.NONE;
         if (user.allowedToPlay) {

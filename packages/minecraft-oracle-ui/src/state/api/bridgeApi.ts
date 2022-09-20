@@ -103,6 +103,9 @@ export const bridgeApi = createApi({
         getInGameItems: builder.query<AssetDto[], void>({
             query: () => `/user/in-game-items`,
         }),
+        getInGameResources: builder.query<AssetDto[], void>({
+            query: () => `/user/in-game-resources`,
+        }),
         getAssets: builder.query<void, void>({
             query: () => `/user/resources`,
         }),
@@ -167,4 +170,4 @@ export const rtkQueryErrorFormatter = (error: any): string => {
     return strErr
 }
 
-export const { useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
+export const { useGetInGameResourcesQuery, useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
