@@ -71,13 +71,24 @@ export class ProfileApiController {
 
     @Get('in-game-items')
     @HttpCode(200)
-    @ApiOperation({ summary: 'Get user assets' })
+    @ApiOperation({ summary: 'Get in game items' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async inGameItems(@User() user: UserEntity): Promise<AssetDto[]> {
         const inGameItems = await this.profileService.getInGameItems(user)
         return inGameItems
     }
+
+    @Get('in-game-resources')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Get in game resources' })
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    async inGameResources(@User() user: UserEntity): Promise<AssetDto[]> {
+        const inGameItems = await this.profileService.getInGameResources(user)
+        return inGameItems
+    }
+
 
     @Get('skins')
     @HttpCode(200)
