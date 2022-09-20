@@ -26,13 +26,13 @@ import { OnChainResource } from '../../components/Bridge/OnChainResource';
 import { OnChainItem } from '../../components/Bridge/OnChainItem';
 import { ItemDetailsModal } from '../../components/Bridge/ItemDetailsModal';
 import BackgroundImage from '../../assets/images/bridge-background-blur.svg'
-import { useSetSkinMutation, useGetSkinsQuery, useUserProfileQuery, useGetRecognizedAssetsQuery, useGetInGameItemsQuery } from '../../state/api/bridgeApi';
+import { useSetSkinMutation, useGetSkinsQuery, useUserProfileQuery, useGetRecognizedAssetsQuery, useGetInGameItemsQuery, useGetInGameResourcesQuery } from '../../state/api/bridgeApi';
 
 import { AssetDto, CollectionFragmentDto, SkinResponse } from '../../state/api/types';
 import { useGetOnChainTokensQuery, GetOnChainTokensQuery, useGetMetadataQuery } from '../../state/api/generatedSquidMarketplaceApi';
 import { Media } from '../../components';
 import { BigNumber, utils } from 'ethers';
-import { addRegonizedTokenDataToTokens, formatTokenName, InGameItemMaybeMetadata, inGameItemsCombineMetadata, inGameMetadataParams, OnChainTokenWithRecognizedTokenData, TransformedTokenType, transformGraphqlErc1155Token, transformGraphqlErc721Token } from '../../utils/graphqlReformatter';
+import { addRegonizedTokenDataToTokens, formatTokenName, inGameMetadataParams, InGameTokenMaybeMetadata, inGameTokensCombineMetadata, OnChainTokenWithRecognizedTokenData, TransformedTokenType, transformGraphqlErc1155Token, transformGraphqlErc721Token } from '../../utils/graphqlReformatter';
 import { ImportEnraptureModal } from '../../components/modals/ImportEnraptureModal';
 
 
@@ -46,7 +46,9 @@ const ProfilePage = () => {
     const { data: onChainTokensData, isLoading: isOnChainTokensLoading, isFetching: isOnChainTokensFetching, isError: isOnChainTokensError, error: onChainTokensError } = useGetOnChainTokensQuery({ owner: account ?? "0x999999999999999999999999999" })
     const { data: recognizedAssetsData, isLoading: isRecognizedAssetsLoading, isFetching: isRecognizedAssetsFetching, isError: isRecognizedAssetsError, error: recognizedAssetsError } = useGetRecognizedAssetsQuery()
     const { data: inGameItemsData, isLoading: isInGameItemsDataLoading, isFetching: isInGameItemsDataFetching, isError: isInGameItemsError, error: inGameItemsError } = useGetInGameItemsQuery()
-    const { data: inGameMetadata, isLoading: isInGameMetadataLoading, isFetching: isInGameMetadataFetching, isError: isInGameMetadataError, error: inGameMetadataError } = useGetMetadataQuery(inGameMetadataParams(inGameItemsData))
+    const { data: inGameResourcesData, isLoading: isInGameResourcesLoading, isFetching: isInGameResourcesFetching, isError: isInGameResourcesError, error: inGameResourcesError } = useGetInGameResourcesQuery()
+    const { data: inGameItemsMetadata, isLoading: isInGameItemsMetadataLoading, isFetching: isInGameItemsMetadataFetching, isError: isInGameItemsMetadataError, error: inGameItemsMetadataError } = useGetMetadataQuery(inGameMetadataParams(inGameItemsData))
+    const { data: inGameResourcesMetadata, isLoading: isInGameResourcesMetadataLoading, isFetching: isInGameResourcesMetadataFetching, isError: isInGameResourcesMetadataError, error: inGameResourcesMetadataError } = useGetMetadataQuery(inGameMetadataParams(inGameResourcesData))
 
 
 
@@ -137,13 +139,22 @@ const ProfilePage = () => {
     }, [onChainAssetsWithRecognizedTokenData, account])
 
 
-    const inGameItems: InGameItemMaybeMetadata[] | undefined = React.useMemo(() => {
+    const inGameItems: InGameTokenMaybeMetadata[] | undefined = React.useMemo(() => {
         if (!!inGameItemsData) {
-            return [...inGameItemsCombineMetadata(inGameItemsData, inGameMetadata)].sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
+            return [...inGameTokensCombineMetadata(inGameItemsData, inGameItemsMetadata)].sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
         } else {
             return undefined
         }
-    }, [inGameItemsData, inGameMetadata])
+    }, [inGameItemsData, inGameItemsMetadata])
+
+
+    const inGameResources: InGameTokenMaybeMetadata[] | undefined = React.useMemo(() => {
+        if (!!inGameResourcesData) {
+            return [...inGameTokensCombineMetadata(inGameResourcesData, inGameResourcesMetadata)].sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
+        } else {
+            return undefined
+        }
+    }, [inGameResourcesData, inGameResourcesMetadata])
 
     return (
         <>
@@ -483,7 +494,8 @@ const ProfilePage = () => {
                             >
                                 <BridgeTab
                                     title="In-Game Resources"
-                                    emptyMessage={"No in-game resources available."}
+                                    isLoading={isInGameResourcesLoading}
+                                    emptyMessage={inGameResources?.length ? undefined : "No in-game resources available."}
                                     footer={
                                         <Button
                                             rightIcon={<CaretRight></CaretRight>}
@@ -501,7 +513,19 @@ const ProfilePage = () => {
                                     icon={<DeviceGamepad size="18px" />}
                                 >
                                     <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">
+                                        {!!inGameResources && inGameResources.map((item, ind) => {
 
+                                            return (
+                                                <InGameResource
+                                                    isLoading={!!item?.metadata !== true}
+                                                    lineOne={item?.metadata?.name}
+                                                    mediaUrl={item?.metadata?.image ?? ""}
+                                                    key={`${item.assetAddress}~${item.assetId}`} //update key
+                                                    balanceWei={utils.parseEther(item?.amount)}
+                                                >
+                                                </InGameResource>
+                                            );
+                                        })}
                                     </VStack>
                                 </BridgeTab>
                             </GridItem>

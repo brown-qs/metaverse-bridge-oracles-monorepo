@@ -109,28 +109,28 @@ export const inGameMetadataParams = (inGameItems: AssetDto[] | undefined): GetMe
 }
 
 
-export type InGameItemMaybeMetadata = AssetDto & { metadata?: GetMetadataQuery["erc721Tokens"][0]["metadata"] }
-export const inGameItemsCombineMetadata = (inGameItems: AssetDto[], metadata: GetMetadataQuery | undefined): InGameItemMaybeMetadata[] => {
+export type InGameTokenMaybeMetadata = AssetDto & { metadata?: GetMetadataQuery["erc721Tokens"][0]["metadata"] }
+export const inGameTokensCombineMetadata = (inGameTokens: AssetDto[], metadata: GetMetadataQuery | undefined): InGameTokenMaybeMetadata[] => {
     if (!!metadata) {
-        const newInGameItems: InGameItemMaybeMetadata[] = []
-        for (const item of inGameItems) {
-            const newItem: InGameItemMaybeMetadata = { ...item }
+        const newInGameTokens: InGameTokenMaybeMetadata[] = []
+        for (const item of inGameTokens) {
+            const newToken: InGameTokenMaybeMetadata = { ...item }
             if (item?.assetType === "ERC721") {
                 const md = metadata?.erc721Tokens?.find(tok => (tok?.contract?.address?.toLowerCase() === item?.assetAddress?.toLowerCase() && String(tok?.numericId) === String(item?.assetId)))
                 if (!!md?.metadata) {
-                    newItem["metadata"] = md?.metadata
+                    newToken["metadata"] = md?.metadata
                 }
             } else if (item?.assetType === "ERC1155") {
                 const md = metadata?.erc1155Tokens?.find(tok => (tok?.contract?.address?.toLowerCase() === item?.assetAddress?.toLowerCase() && String(tok?.numericId) === String(item?.assetId)))
                 if (!!md?.metadata) {
-                    newItem["metadata"] = md?.metadata
+                    newToken["metadata"] = md?.metadata
                 }
             }
-            newInGameItems.push(newItem)
+            newInGameTokens.push(newToken)
         }
-        return newInGameItems
+        return newInGameTokens
     } else {
-        return inGameItems
+        return inGameTokens
     }
 }
 
