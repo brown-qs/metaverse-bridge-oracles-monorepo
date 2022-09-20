@@ -507,7 +507,7 @@ const ProfilePage = () => {
                                                     onAccountDialogOpen()
                                                 }
                                             }}
-                                            isDisabled={false} w="100%">SUMMON ALL RESOURCES
+                                            isDisabled={!inGameResources?.length} w="100%">SUMMON ALL RESOURCES
                                         </Button>
                                     }
                                     icon={<DeviceGamepad size="18px" />}
