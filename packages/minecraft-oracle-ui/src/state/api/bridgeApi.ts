@@ -46,7 +46,7 @@ const baseQueryWithAuth: BaseQueryFn<
 export const bridgeApi = createApi({
     reducerPath: 'bridgeApi',
     baseQuery: baseQueryWithAuth,
-    tagTypes: ["Skin", "Profile"],
+    tagTypes: ["Skin", "Profile", "InGameResources"],
     endpoints: (builder) => ({
         emailLoginCode: builder.mutation<EmailLoginCodeResponse, EmailLoginCode>({
             query: (body) => ({
@@ -105,6 +105,15 @@ export const bridgeApi = createApi({
         }),
         getInGameResources: builder.query<AssetDto[], void>({
             query: () => `/user/in-game-resources`,
+            providesTags: ["InGameResources"]
+        }),
+        summon: builder.mutation<boolean, { recipient: string, chainId: number }>({
+            query: (body) => ({
+                url: `/oracle/summon`,
+                method: "PUT",
+                body
+            }),
+            invalidatesTags: ["Profile"]
         }),
         getAssets: builder.query<void, void>({
             query: () => `/user/resources`,
@@ -170,4 +179,4 @@ export const rtkQueryErrorFormatter = (error: any): string => {
     return strErr
 }
 
-export const { useGetInGameResourcesQuery, useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
+export const { useSummonMutation, useGetInGameResourcesQuery, useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
