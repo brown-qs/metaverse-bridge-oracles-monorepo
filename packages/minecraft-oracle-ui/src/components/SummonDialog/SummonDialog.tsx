@@ -14,23 +14,21 @@ import { AddressDisplayComponent } from 'components/form/AddressDisplayComponent
 import { VStack, Box, Button, CircularProgress, MenuItem, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Select, Stack, Text, HStack } from '@chakra-ui/react';
 import { Checks, CircleCheck, Wallet } from 'tabler-icons-react';
 import { MoonsamaModal } from '../MoonsamaModal';
+import { useSummonMutation } from '../../state/api/bridgeApi';
 
 export const SummonDialog = () => {
-  const { isSummonDialogOpen, onSummonDialogOpen, onSummonDialogClose, summonDialogData, setSummonDialogData } = useSummonDialog();
-  const [summonConfirmed, setSummonConfirmed] = useState<number>(0);
-  const [summonSubmitted, setSummonSubmitted] = useState<boolean>(false);
-  const [selectedChainId, setSelectedChainId] = useState<number>(DEFAULT_CHAIN);
+  const [summon, { data, error, isUninitialized, isLoading, isSuccess, isError, reset }] = useSummonMutation()
 
-  const { button, formBox, formButton } = useClasses(appStyles);
+  const { isSummonDialogOpen, onSummonDialogOpen, onSummonDialogClose, summonDialogData, setSummonDialogData } = useSummonDialog();
+  const [selectedChainId, setSelectedChainId] = useState<number>(DEFAULT_CHAIN);
 
 
 
   const { account } = useActiveWeb3React();
 
   const handleClose = () => {
+    reset()
     onSummonDialogClose();
-    setSummonSubmitted(false);
-    setSummonConfirmed(0);
   };
 
   const recipient = account ?? summonDialogData?.recipient ?? undefined;
@@ -42,7 +40,7 @@ export const SummonDialog = () => {
       iconBackgroundColor="yellow.300"
       iconColor="black"
   */
-  if (summonSubmitted && summonConfirmed === 1) {
+  if (!!data && data === true) {
     return (<MoonsamaModal
       title="Summon request received!"
       TablerIcon={Checks}
@@ -63,7 +61,7 @@ export const SummonDialog = () => {
       </VStack >
 
     </MoonsamaModal >)
-  } else if (summonSubmitted && summonConfirmed === 0) {
+  } else if (isLoading) {
     return (<MoonsamaModal
       title="Summon resources"
       isOpen={isSummonDialogOpen}
@@ -78,7 +76,7 @@ export const SummonDialog = () => {
         <CircularProgress isIndeterminate color="teal"></CircularProgress>
       </VStack>
     </MoonsamaModal>)
-  } else if (summonSubmitted && summonConfirmed === 2) {
+  } else if (isError || (!!data && data === false)) {
     return (<MoonsamaModal
       title="Summon resources"
       isOpen={isSummonDialogOpen}
@@ -126,18 +124,14 @@ export const SummonDialog = () => {
         <Box w="100%" paddingTop="16px">
           <Button onClick={() => {
             setSelectedChainId(DEFAULT_CHAIN);
-            setSummonSubmitted(true);
-            (async () => {
-              const success = await summonCallback?.(recipient, selectedChainId);
-              setSummonConfirmed(success ? 1 : 2);
-            })();
+            summon({ recipient: account ?? "", chainId: selectedChainId })
           }}
             leftIcon={<Wallet></Wallet>}
             isDisabled={false && selectedChainId === 0}
             w="100%">SUMMON TO WALLET</Button>
         </Box>
       </VStack>
-    </MoonsamaModal>)
+    </MoonsamaModal >)
   }
 
 };
