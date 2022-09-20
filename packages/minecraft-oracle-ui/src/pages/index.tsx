@@ -42,9 +42,7 @@ export const Routing = () => {
 
             <Route path="/bridge" element={<>{!!accessToken ? (
                 <>
-                    <ImportDialog />
                     <ExportDialog />
-                    <EnraptureDialog />
                     <SummonDialog />
                     <AssetDialog />
                     <ProfilePage />

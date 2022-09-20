@@ -45,7 +45,8 @@ export const ImportDialog = () => {
     setImportConfirmed(false);
     setApprovalSubmitted(false)
   };
-
+  return <></>
+  /*
   if (!importParamsLoaded && !!importDialogData?.asset) {
     setImportParamsLoaded(true);
   }
@@ -272,5 +273,5 @@ export const ImportDialog = () => {
         </Box>
       </VStack>
     </MoonsamaModal>)
-  }
+  }*/
 }

@@ -1,16 +1,14 @@
 import { useDisclosure } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-
+import { OnChainTokenWithRecognizedTokenData } from '../../../utils/graphqlReformatter';
 import { EnraptureDialogContext } from '../enraptureDialogContext/enraptureDialogContext';
-import { EnraptureDialogData } from '../enraptureDialogContext/enraptureDialogContext.types';
-
 import { EnraptureDialogContextControllerProps } from './enraptureDialogContextController.types';
 
 export const EnraptureDialogContextController = ({
   children,
 }: EnraptureDialogContextControllerProps) => {
   const { isOpen: isEnraptureDialogOpen, onOpen: onEnraptureDialogOpen, onClose: onEnraptureDialogClose } = useDisclosure()
-  const [enraptureDialogData, setEnraptureDialogData] = useState<EnraptureDialogData>(undefined);
+  const [enraptureDialogData, setEnraptureDialogData] = useState<OnChainTokenWithRecognizedTokenData | undefined>(undefined);
 
   useEffect(() => {
     if (!isEnraptureDialogOpen) {

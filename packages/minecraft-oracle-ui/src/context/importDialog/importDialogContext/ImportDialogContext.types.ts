@@ -1,20 +1,12 @@
 import { Asset } from '../../../hooks/marketplace/types';
 import { InGameItemWithStatic } from '../../../hooks/multiverse/useInGameItems';
+import { OnChainTokenWithRecognizedTokenData } from '../../../utils/graphqlReformatter';
 
-export type ImportDialogData = {
-  asset?: Asset;
-  amount?: string;
-  owner?: string;
-  beneficiary?: string;
-  enrapturable?: boolean,
-  importable?: boolean,
-  item?: InGameItemWithStatic
-} | undefined;
 
 export type ImportDialogContextType = {
   isImportDialogOpen: boolean
   onImportDialogOpen: () => void
   onImportDialogClose: () => void
-  importDialogData?: ImportDialogData;
-  setImportDialogData: React.Dispatch<React.SetStateAction<ImportDialogData>>;
+  importDialogData?: OnChainTokenWithRecognizedTokenData;
+  setImportDialogData: React.Dispatch<React.SetStateAction<OnChainTokenWithRecognizedTokenData | undefined>>;
 };

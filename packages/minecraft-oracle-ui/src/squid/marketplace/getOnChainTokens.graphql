@@ -1,5 +1,5 @@
 query getOnChainTokens($owner: String!) {
-  erc1155TokenOwners(where: {owner: {id_containsInsensitive: $owner}}) {
+  erc1155TokenOwners(where: {owner: {id_containsInsensitive: $owner}}, limit: 50) {
     id
     token {
       numericId
@@ -20,20 +20,10 @@ query getOnChainTokens($owner: String!) {
       contract {
         address
       }
-      transfers(where: {from: {id_containsInsensitive: $owner}, OR: {to: {id_containsInsensitive: $owner}}}, orderBy: block_DESC, limit: 1) {
-        id
-        to {
-          id
-        }
-        from {
-          id
-        }
-        transactionHash
-      }
     }
     balance
   }
-  erc721Tokens(where: {owner: {id_containsInsensitive: $owner}}) {
+  erc721Tokens(where: {owner: {id_containsInsensitive: $owner}}, limit: 200) {
     numericId
     metadata {
       image
