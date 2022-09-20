@@ -56,36 +56,36 @@ export type Erc721ContractEdge = {
 };
 
 export enum Erc721ContractOrderByInput {
-  AddressAsc = 'address_ASC',
-  AddressDesc = 'address_DESC',
-  ArtistUrlAsc = 'artistUrl_ASC',
-  ArtistUrlDesc = 'artistUrl_DESC',
-  ArtistAsc = 'artist_ASC',
-  ArtistDesc = 'artist_DESC',
-  ContractUriUpdatedAsc = 'contractURIUpdated_ASC',
-  ContractUriUpdatedDesc = 'contractURIUpdated_DESC',
-  ContractUriAsc = 'contractURI_ASC',
-  ContractUriDesc = 'contractURI_DESC',
-  DecimalsAsc = 'decimals_ASC',
-  DecimalsDesc = 'decimals_DESC',
-  DescriptionAsc = 'description_ASC',
-  DescriptionDesc = 'description_DESC',
-  ExternalLinkAsc = 'externalLink_ASC',
-  ExternalLinkDesc = 'externalLink_DESC',
-  IdAsc = 'id_ASC',
-  IdDesc = 'id_DESC',
-  ImageAsc = 'image_ASC',
-  ImageDesc = 'image_DESC',
-  MetadataNameAsc = 'metadataName_ASC',
-  MetadataNameDesc = 'metadataName_DESC',
-  NameAsc = 'name_ASC',
-  NameDesc = 'name_DESC',
-  StartBlockAsc = 'startBlock_ASC',
-  StartBlockDesc = 'startBlock_DESC',
-  SymbolAsc = 'symbol_ASC',
-  SymbolDesc = 'symbol_DESC',
-  TotalSupplyAsc = 'totalSupply_ASC',
-  TotalSupplyDesc = 'totalSupply_DESC'
+  address_ASC = 'address_ASC',
+  address_DESC = 'address_DESC',
+  artistUrl_ASC = 'artistUrl_ASC',
+  artistUrl_DESC = 'artistUrl_DESC',
+  artist_ASC = 'artist_ASC',
+  artist_DESC = 'artist_DESC',
+  contractURIUpdated_ASC = 'contractURIUpdated_ASC',
+  contractURIUpdated_DESC = 'contractURIUpdated_DESC',
+  contractURI_ASC = 'contractURI_ASC',
+  contractURI_DESC = 'contractURI_DESC',
+  decimals_ASC = 'decimals_ASC',
+  decimals_DESC = 'decimals_DESC',
+  description_ASC = 'description_ASC',
+  description_DESC = 'description_DESC',
+  externalLink_ASC = 'externalLink_ASC',
+  externalLink_DESC = 'externalLink_DESC',
+  id_ASC = 'id_ASC',
+  id_DESC = 'id_DESC',
+  image_ASC = 'image_ASC',
+  image_DESC = 'image_DESC',
+  metadataName_ASC = 'metadataName_ASC',
+  metadataName_DESC = 'metadataName_DESC',
+  name_ASC = 'name_ASC',
+  name_DESC = 'name_DESC',
+  startBlock_ASC = 'startBlock_ASC',
+  startBlock_DESC = 'startBlock_DESC',
+  symbol_ASC = 'symbol_ASC',
+  symbol_DESC = 'symbol_DESC',
+  totalSupply_ASC = 'totalSupply_ASC',
+  totalSupply_DESC = 'totalSupply_DESC'
 }
 
 export type Erc721ContractWhereInput = {
@@ -348,10 +348,10 @@ export type Erc721OwnerEdge = {
 };
 
 export enum Erc721OwnerOrderByInput {
-  BalanceAsc = 'balance_ASC',
-  BalanceDesc = 'balance_DESC',
-  IdAsc = 'id_ASC',
-  IdDesc = 'id_DESC'
+  balance_ASC = 'balance_ASC',
+  balance_DESC = 'balance_DESC',
+  id_ASC = 'id_ASC',
+  id_DESC = 'id_DESC'
 }
 
 export type Erc721OwnerWhereInput = {
@@ -398,11 +398,14 @@ export type Erc721OwnersConnection = {
 export type Erc721Token = {
   __typename?: 'ERC721Token';
   contract: Erc721Contract;
+  contractId: Scalars['String'];
   createdAt: Scalars['BigInt'];
   id: Scalars['String'];
   metadata?: Maybe<Metadata>;
+  metadataId?: Maybe<Scalars['String']>;
   numericId: Scalars['BigInt'];
-  owner?: Maybe<Erc721Owner>;
+  owner: Erc721Owner;
+  ownerId: Scalars['String'];
   tokenUri?: Maybe<Scalars['String']>;
   transfers: Array<Erc721Transfer>;
   updatedAt: Scalars['BigInt'];
@@ -423,74 +426,97 @@ export type Erc721TokenEdge = {
 };
 
 export enum Erc721TokenOrderByInput {
-  ContractAddressAsc = 'contract_address_ASC',
-  ContractAddressDesc = 'contract_address_DESC',
-  ContractArtistUrlAsc = 'contract_artistUrl_ASC',
-  ContractArtistUrlDesc = 'contract_artistUrl_DESC',
-  ContractArtistAsc = 'contract_artist_ASC',
-  ContractArtistDesc = 'contract_artist_DESC',
-  ContractContractUriUpdatedAsc = 'contract_contractURIUpdated_ASC',
-  ContractContractUriUpdatedDesc = 'contract_contractURIUpdated_DESC',
-  ContractContractUriAsc = 'contract_contractURI_ASC',
-  ContractContractUriDesc = 'contract_contractURI_DESC',
-  ContractDecimalsAsc = 'contract_decimals_ASC',
-  ContractDecimalsDesc = 'contract_decimals_DESC',
-  ContractDescriptionAsc = 'contract_description_ASC',
-  ContractDescriptionDesc = 'contract_description_DESC',
-  ContractExternalLinkAsc = 'contract_externalLink_ASC',
-  ContractExternalLinkDesc = 'contract_externalLink_DESC',
-  ContractIdAsc = 'contract_id_ASC',
-  ContractIdDesc = 'contract_id_DESC',
-  ContractImageAsc = 'contract_image_ASC',
-  ContractImageDesc = 'contract_image_DESC',
-  ContractMetadataNameAsc = 'contract_metadataName_ASC',
-  ContractMetadataNameDesc = 'contract_metadataName_DESC',
-  ContractNameAsc = 'contract_name_ASC',
-  ContractNameDesc = 'contract_name_DESC',
-  ContractStartBlockAsc = 'contract_startBlock_ASC',
-  ContractStartBlockDesc = 'contract_startBlock_DESC',
-  ContractSymbolAsc = 'contract_symbol_ASC',
-  ContractSymbolDesc = 'contract_symbol_DESC',
-  ContractTotalSupplyAsc = 'contract_totalSupply_ASC',
-  ContractTotalSupplyDesc = 'contract_totalSupply_DESC',
-  CreatedAtAsc = 'createdAt_ASC',
-  CreatedAtDesc = 'createdAt_DESC',
-  IdAsc = 'id_ASC',
-  IdDesc = 'id_DESC',
-  MetadataArtistUrlAsc = 'metadata_artistUrl_ASC',
-  MetadataArtistUrlDesc = 'metadata_artistUrl_DESC',
-  MetadataArtistAsc = 'metadata_artist_ASC',
-  MetadataArtistDesc = 'metadata_artist_DESC',
-  MetadataCompositeAsc = 'metadata_composite_ASC',
-  MetadataCompositeDesc = 'metadata_composite_DESC',
-  MetadataDescriptionAsc = 'metadata_description_ASC',
-  MetadataDescriptionDesc = 'metadata_description_DESC',
-  MetadataExternalUrlAsc = 'metadata_externalUrl_ASC',
-  MetadataExternalUrlDesc = 'metadata_externalUrl_DESC',
-  MetadataIdAsc = 'metadata_id_ASC',
-  MetadataIdDesc = 'metadata_id_DESC',
-  MetadataImageAsc = 'metadata_image_ASC',
-  MetadataImageDesc = 'metadata_image_DESC',
-  MetadataNameAsc = 'metadata_name_ASC',
-  MetadataNameDesc = 'metadata_name_DESC',
-  MetadataTypeAsc = 'metadata_type_ASC',
-  MetadataTypeDesc = 'metadata_type_DESC',
-  NumericIdAsc = 'numericId_ASC',
-  NumericIdDesc = 'numericId_DESC',
-  OwnerBalanceAsc = 'owner_balance_ASC',
-  OwnerBalanceDesc = 'owner_balance_DESC',
-  OwnerIdAsc = 'owner_id_ASC',
-  OwnerIdDesc = 'owner_id_DESC',
-  TokenUriAsc = 'tokenUri_ASC',
-  TokenUriDesc = 'tokenUri_DESC',
-  UpdatedAtAsc = 'updatedAt_ASC',
-  UpdatedAtDesc = 'updatedAt_DESC'
+  contractId_ASC = 'contractId_ASC',
+  contractId_DESC = 'contractId_DESC',
+  contract_address_ASC = 'contract_address_ASC',
+  contract_address_DESC = 'contract_address_DESC',
+  contract_artistUrl_ASC = 'contract_artistUrl_ASC',
+  contract_artistUrl_DESC = 'contract_artistUrl_DESC',
+  contract_artist_ASC = 'contract_artist_ASC',
+  contract_artist_DESC = 'contract_artist_DESC',
+  contract_contractURIUpdated_ASC = 'contract_contractURIUpdated_ASC',
+  contract_contractURIUpdated_DESC = 'contract_contractURIUpdated_DESC',
+  contract_contractURI_ASC = 'contract_contractURI_ASC',
+  contract_contractURI_DESC = 'contract_contractURI_DESC',
+  contract_decimals_ASC = 'contract_decimals_ASC',
+  contract_decimals_DESC = 'contract_decimals_DESC',
+  contract_description_ASC = 'contract_description_ASC',
+  contract_description_DESC = 'contract_description_DESC',
+  contract_externalLink_ASC = 'contract_externalLink_ASC',
+  contract_externalLink_DESC = 'contract_externalLink_DESC',
+  contract_id_ASC = 'contract_id_ASC',
+  contract_id_DESC = 'contract_id_DESC',
+  contract_image_ASC = 'contract_image_ASC',
+  contract_image_DESC = 'contract_image_DESC',
+  contract_metadataName_ASC = 'contract_metadataName_ASC',
+  contract_metadataName_DESC = 'contract_metadataName_DESC',
+  contract_name_ASC = 'contract_name_ASC',
+  contract_name_DESC = 'contract_name_DESC',
+  contract_startBlock_ASC = 'contract_startBlock_ASC',
+  contract_startBlock_DESC = 'contract_startBlock_DESC',
+  contract_symbol_ASC = 'contract_symbol_ASC',
+  contract_symbol_DESC = 'contract_symbol_DESC',
+  contract_totalSupply_ASC = 'contract_totalSupply_ASC',
+  contract_totalSupply_DESC = 'contract_totalSupply_DESC',
+  createdAt_ASC = 'createdAt_ASC',
+  createdAt_DESC = 'createdAt_DESC',
+  id_ASC = 'id_ASC',
+  id_DESC = 'id_DESC',
+  metadataId_ASC = 'metadataId_ASC',
+  metadataId_DESC = 'metadataId_DESC',
+  metadata_artistUrl_ASC = 'metadata_artistUrl_ASC',
+  metadata_artistUrl_DESC = 'metadata_artistUrl_DESC',
+  metadata_artist_ASC = 'metadata_artist_ASC',
+  metadata_artist_DESC = 'metadata_artist_DESC',
+  metadata_composite_ASC = 'metadata_composite_ASC',
+  metadata_composite_DESC = 'metadata_composite_DESC',
+  metadata_description_ASC = 'metadata_description_ASC',
+  metadata_description_DESC = 'metadata_description_DESC',
+  metadata_externalUrl_ASC = 'metadata_externalUrl_ASC',
+  metadata_externalUrl_DESC = 'metadata_externalUrl_DESC',
+  metadata_id_ASC = 'metadata_id_ASC',
+  metadata_id_DESC = 'metadata_id_DESC',
+  metadata_image_ASC = 'metadata_image_ASC',
+  metadata_image_DESC = 'metadata_image_DESC',
+  metadata_name_ASC = 'metadata_name_ASC',
+  metadata_name_DESC = 'metadata_name_DESC',
+  metadata_type_ASC = 'metadata_type_ASC',
+  metadata_type_DESC = 'metadata_type_DESC',
+  numericId_ASC = 'numericId_ASC',
+  numericId_DESC = 'numericId_DESC',
+  ownerId_ASC = 'ownerId_ASC',
+  ownerId_DESC = 'ownerId_DESC',
+  owner_balance_ASC = 'owner_balance_ASC',
+  owner_balance_DESC = 'owner_balance_DESC',
+  owner_id_ASC = 'owner_id_ASC',
+  owner_id_DESC = 'owner_id_DESC',
+  tokenUri_ASC = 'tokenUri_ASC',
+  tokenUri_DESC = 'tokenUri_DESC',
+  updatedAt_ASC = 'updatedAt_ASC',
+  updatedAt_DESC = 'updatedAt_DESC'
 }
 
 export type Erc721TokenWhereInput = {
   AND?: InputMaybe<Array<Erc721TokenWhereInput>>;
   OR?: InputMaybe<Array<Erc721TokenWhereInput>>;
   contract?: InputMaybe<Erc721ContractWhereInput>;
+  contractId_contains?: InputMaybe<Scalars['String']>;
+  contractId_containsInsensitive?: InputMaybe<Scalars['String']>;
+  contractId_endsWith?: InputMaybe<Scalars['String']>;
+  contractId_eq?: InputMaybe<Scalars['String']>;
+  contractId_gt?: InputMaybe<Scalars['String']>;
+  contractId_gte?: InputMaybe<Scalars['String']>;
+  contractId_in?: InputMaybe<Array<Scalars['String']>>;
+  contractId_isNull?: InputMaybe<Scalars['Boolean']>;
+  contractId_lt?: InputMaybe<Scalars['String']>;
+  contractId_lte?: InputMaybe<Scalars['String']>;
+  contractId_not_contains?: InputMaybe<Scalars['String']>;
+  contractId_not_containsInsensitive?: InputMaybe<Scalars['String']>;
+  contractId_not_endsWith?: InputMaybe<Scalars['String']>;
+  contractId_not_eq?: InputMaybe<Scalars['String']>;
+  contractId_not_in?: InputMaybe<Array<Scalars['String']>>;
+  contractId_not_startsWith?: InputMaybe<Scalars['String']>;
+  contractId_startsWith?: InputMaybe<Scalars['String']>;
   contract_isNull?: InputMaybe<Scalars['Boolean']>;
   createdAt_eq?: InputMaybe<Scalars['BigInt']>;
   createdAt_gt?: InputMaybe<Scalars['BigInt']>;
@@ -519,6 +545,23 @@ export type Erc721TokenWhereInput = {
   id_not_startsWith?: InputMaybe<Scalars['String']>;
   id_startsWith?: InputMaybe<Scalars['String']>;
   metadata?: InputMaybe<MetadataWhereInput>;
+  metadataId_contains?: InputMaybe<Scalars['String']>;
+  metadataId_containsInsensitive?: InputMaybe<Scalars['String']>;
+  metadataId_endsWith?: InputMaybe<Scalars['String']>;
+  metadataId_eq?: InputMaybe<Scalars['String']>;
+  metadataId_gt?: InputMaybe<Scalars['String']>;
+  metadataId_gte?: InputMaybe<Scalars['String']>;
+  metadataId_in?: InputMaybe<Array<Scalars['String']>>;
+  metadataId_isNull?: InputMaybe<Scalars['Boolean']>;
+  metadataId_lt?: InputMaybe<Scalars['String']>;
+  metadataId_lte?: InputMaybe<Scalars['String']>;
+  metadataId_not_contains?: InputMaybe<Scalars['String']>;
+  metadataId_not_containsInsensitive?: InputMaybe<Scalars['String']>;
+  metadataId_not_endsWith?: InputMaybe<Scalars['String']>;
+  metadataId_not_eq?: InputMaybe<Scalars['String']>;
+  metadataId_not_in?: InputMaybe<Array<Scalars['String']>>;
+  metadataId_not_startsWith?: InputMaybe<Scalars['String']>;
+  metadataId_startsWith?: InputMaybe<Scalars['String']>;
   metadata_isNull?: InputMaybe<Scalars['Boolean']>;
   numericId_eq?: InputMaybe<Scalars['BigInt']>;
   numericId_gt?: InputMaybe<Scalars['BigInt']>;
@@ -530,6 +573,23 @@ export type Erc721TokenWhereInput = {
   numericId_not_eq?: InputMaybe<Scalars['BigInt']>;
   numericId_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
   owner?: InputMaybe<Erc721OwnerWhereInput>;
+  ownerId_contains?: InputMaybe<Scalars['String']>;
+  ownerId_containsInsensitive?: InputMaybe<Scalars['String']>;
+  ownerId_endsWith?: InputMaybe<Scalars['String']>;
+  ownerId_eq?: InputMaybe<Scalars['String']>;
+  ownerId_gt?: InputMaybe<Scalars['String']>;
+  ownerId_gte?: InputMaybe<Scalars['String']>;
+  ownerId_in?: InputMaybe<Array<Scalars['String']>>;
+  ownerId_isNull?: InputMaybe<Scalars['Boolean']>;
+  ownerId_lt?: InputMaybe<Scalars['String']>;
+  ownerId_lte?: InputMaybe<Scalars['String']>;
+  ownerId_not_contains?: InputMaybe<Scalars['String']>;
+  ownerId_not_containsInsensitive?: InputMaybe<Scalars['String']>;
+  ownerId_not_endsWith?: InputMaybe<Scalars['String']>;
+  ownerId_not_eq?: InputMaybe<Scalars['String']>;
+  ownerId_not_in?: InputMaybe<Array<Scalars['String']>>;
+  ownerId_not_startsWith?: InputMaybe<Scalars['String']>;
+  ownerId_startsWith?: InputMaybe<Scalars['String']>;
   owner_isNull?: InputMaybe<Scalars['Boolean']>;
   tokenUri_contains?: InputMaybe<Scalars['String']>;
   tokenUri_containsInsensitive?: InputMaybe<Scalars['String']>;
@@ -572,11 +632,14 @@ export type Erc721TokensConnection = {
 export type Erc721Transfer = {
   __typename?: 'ERC721Transfer';
   block: Scalars['BigInt'];
-  from?: Maybe<Erc721Owner>;
+  from: Erc721Owner;
+  fromId: Scalars['String'];
   id: Scalars['String'];
   timestamp: Scalars['BigInt'];
-  to?: Maybe<Erc721Owner>;
+  to: Erc721Owner;
+  toId: Scalars['String'];
   token: Erc721Token;
+  tokenId: Scalars['String'];
   transactionHash: Scalars['String'];
 };
 
@@ -587,32 +650,44 @@ export type Erc721TransferEdge = {
 };
 
 export enum Erc721TransferOrderByInput {
-  BlockAsc = 'block_ASC',
-  BlockDesc = 'block_DESC',
-  FromBalanceAsc = 'from_balance_ASC',
-  FromBalanceDesc = 'from_balance_DESC',
-  FromIdAsc = 'from_id_ASC',
-  FromIdDesc = 'from_id_DESC',
-  IdAsc = 'id_ASC',
-  IdDesc = 'id_DESC',
-  TimestampAsc = 'timestamp_ASC',
-  TimestampDesc = 'timestamp_DESC',
-  ToBalanceAsc = 'to_balance_ASC',
-  ToBalanceDesc = 'to_balance_DESC',
-  ToIdAsc = 'to_id_ASC',
-  ToIdDesc = 'to_id_DESC',
-  TokenCreatedAtAsc = 'token_createdAt_ASC',
-  TokenCreatedAtDesc = 'token_createdAt_DESC',
-  TokenIdAsc = 'token_id_ASC',
-  TokenIdDesc = 'token_id_DESC',
-  TokenNumericIdAsc = 'token_numericId_ASC',
-  TokenNumericIdDesc = 'token_numericId_DESC',
-  TokenTokenUriAsc = 'token_tokenUri_ASC',
-  TokenTokenUriDesc = 'token_tokenUri_DESC',
-  TokenUpdatedAtAsc = 'token_updatedAt_ASC',
-  TokenUpdatedAtDesc = 'token_updatedAt_DESC',
-  TransactionHashAsc = 'transactionHash_ASC',
-  TransactionHashDesc = 'transactionHash_DESC'
+  block_ASC = 'block_ASC',
+  block_DESC = 'block_DESC',
+  fromId_ASC = 'fromId_ASC',
+  fromId_DESC = 'fromId_DESC',
+  from_balance_ASC = 'from_balance_ASC',
+  from_balance_DESC = 'from_balance_DESC',
+  from_id_ASC = 'from_id_ASC',
+  from_id_DESC = 'from_id_DESC',
+  id_ASC = 'id_ASC',
+  id_DESC = 'id_DESC',
+  timestamp_ASC = 'timestamp_ASC',
+  timestamp_DESC = 'timestamp_DESC',
+  toId_ASC = 'toId_ASC',
+  toId_DESC = 'toId_DESC',
+  to_balance_ASC = 'to_balance_ASC',
+  to_balance_DESC = 'to_balance_DESC',
+  to_id_ASC = 'to_id_ASC',
+  to_id_DESC = 'to_id_DESC',
+  tokenId_ASC = 'tokenId_ASC',
+  tokenId_DESC = 'tokenId_DESC',
+  token_contractId_ASC = 'token_contractId_ASC',
+  token_contractId_DESC = 'token_contractId_DESC',
+  token_createdAt_ASC = 'token_createdAt_ASC',
+  token_createdAt_DESC = 'token_createdAt_DESC',
+  token_id_ASC = 'token_id_ASC',
+  token_id_DESC = 'token_id_DESC',
+  token_metadataId_ASC = 'token_metadataId_ASC',
+  token_metadataId_DESC = 'token_metadataId_DESC',
+  token_numericId_ASC = 'token_numericId_ASC',
+  token_numericId_DESC = 'token_numericId_DESC',
+  token_ownerId_ASC = 'token_ownerId_ASC',
+  token_ownerId_DESC = 'token_ownerId_DESC',
+  token_tokenUri_ASC = 'token_tokenUri_ASC',
+  token_tokenUri_DESC = 'token_tokenUri_DESC',
+  token_updatedAt_ASC = 'token_updatedAt_ASC',
+  token_updatedAt_DESC = 'token_updatedAt_DESC',
+  transactionHash_ASC = 'transactionHash_ASC',
+  transactionHash_DESC = 'transactionHash_DESC'
 }
 
 export type Erc721TransferWhereInput = {
@@ -628,6 +703,23 @@ export type Erc721TransferWhereInput = {
   block_not_eq?: InputMaybe<Scalars['BigInt']>;
   block_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
   from?: InputMaybe<Erc721OwnerWhereInput>;
+  fromId_contains?: InputMaybe<Scalars['String']>;
+  fromId_containsInsensitive?: InputMaybe<Scalars['String']>;
+  fromId_endsWith?: InputMaybe<Scalars['String']>;
+  fromId_eq?: InputMaybe<Scalars['String']>;
+  fromId_gt?: InputMaybe<Scalars['String']>;
+  fromId_gte?: InputMaybe<Scalars['String']>;
+  fromId_in?: InputMaybe<Array<Scalars['String']>>;
+  fromId_isNull?: InputMaybe<Scalars['Boolean']>;
+  fromId_lt?: InputMaybe<Scalars['String']>;
+  fromId_lte?: InputMaybe<Scalars['String']>;
+  fromId_not_contains?: InputMaybe<Scalars['String']>;
+  fromId_not_containsInsensitive?: InputMaybe<Scalars['String']>;
+  fromId_not_endsWith?: InputMaybe<Scalars['String']>;
+  fromId_not_eq?: InputMaybe<Scalars['String']>;
+  fromId_not_in?: InputMaybe<Array<Scalars['String']>>;
+  fromId_not_startsWith?: InputMaybe<Scalars['String']>;
+  fromId_startsWith?: InputMaybe<Scalars['String']>;
   from_isNull?: InputMaybe<Scalars['Boolean']>;
   id_contains?: InputMaybe<Scalars['String']>;
   id_containsInsensitive?: InputMaybe<Scalars['String']>;
@@ -656,8 +748,42 @@ export type Erc721TransferWhereInput = {
   timestamp_not_eq?: InputMaybe<Scalars['BigInt']>;
   timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
   to?: InputMaybe<Erc721OwnerWhereInput>;
+  toId_contains?: InputMaybe<Scalars['String']>;
+  toId_containsInsensitive?: InputMaybe<Scalars['String']>;
+  toId_endsWith?: InputMaybe<Scalars['String']>;
+  toId_eq?: InputMaybe<Scalars['String']>;
+  toId_gt?: InputMaybe<Scalars['String']>;
+  toId_gte?: InputMaybe<Scalars['String']>;
+  toId_in?: InputMaybe<Array<Scalars['String']>>;
+  toId_isNull?: InputMaybe<Scalars['Boolean']>;
+  toId_lt?: InputMaybe<Scalars['String']>;
+  toId_lte?: InputMaybe<Scalars['String']>;
+  toId_not_contains?: InputMaybe<Scalars['String']>;
+  toId_not_containsInsensitive?: InputMaybe<Scalars['String']>;
+  toId_not_endsWith?: InputMaybe<Scalars['String']>;
+  toId_not_eq?: InputMaybe<Scalars['String']>;
+  toId_not_in?: InputMaybe<Array<Scalars['String']>>;
+  toId_not_startsWith?: InputMaybe<Scalars['String']>;
+  toId_startsWith?: InputMaybe<Scalars['String']>;
   to_isNull?: InputMaybe<Scalars['Boolean']>;
   token?: InputMaybe<Erc721TokenWhereInput>;
+  tokenId_contains?: InputMaybe<Scalars['String']>;
+  tokenId_containsInsensitive?: InputMaybe<Scalars['String']>;
+  tokenId_endsWith?: InputMaybe<Scalars['String']>;
+  tokenId_eq?: InputMaybe<Scalars['String']>;
+  tokenId_gt?: InputMaybe<Scalars['String']>;
+  tokenId_gte?: InputMaybe<Scalars['String']>;
+  tokenId_in?: InputMaybe<Array<Scalars['String']>>;
+  tokenId_isNull?: InputMaybe<Scalars['Boolean']>;
+  tokenId_lt?: InputMaybe<Scalars['String']>;
+  tokenId_lte?: InputMaybe<Scalars['String']>;
+  tokenId_not_contains?: InputMaybe<Scalars['String']>;
+  tokenId_not_containsInsensitive?: InputMaybe<Scalars['String']>;
+  tokenId_not_endsWith?: InputMaybe<Scalars['String']>;
+  tokenId_not_eq?: InputMaybe<Scalars['String']>;
+  tokenId_not_in?: InputMaybe<Array<Scalars['String']>>;
+  tokenId_not_startsWith?: InputMaybe<Scalars['String']>;
+  tokenId_startsWith?: InputMaybe<Scalars['String']>;
   token_isNull?: InputMaybe<Scalars['Boolean']>;
   transactionHash_contains?: InputMaybe<Scalars['String']>;
   transactionHash_containsInsensitive?: InputMaybe<Scalars['String']>;
@@ -702,7 +828,7 @@ export type Erc1155Contract = {
   name?: Maybe<Scalars['String']>;
   startBlock: Scalars['Int'];
   symbol?: Maybe<Scalars['String']>;
-  totalSupply: Scalars['BigInt'];
+  totalSupply?: Maybe<Scalars['BigInt']>;
 };
 
 
@@ -720,36 +846,36 @@ export type Erc1155ContractEdge = {
 };
 
 export enum Erc1155ContractOrderByInput {
-  AddressAsc = 'address_ASC',
-  AddressDesc = 'address_DESC',
-  ArtistUrlAsc = 'artistUrl_ASC',
-  ArtistUrlDesc = 'artistUrl_DESC',
-  ArtistAsc = 'artist_ASC',
-  ArtistDesc = 'artist_DESC',
-  ContractUriUpdatedAsc = 'contractURIUpdated_ASC',
-  ContractUriUpdatedDesc = 'contractURIUpdated_DESC',
-  ContractUriAsc = 'contractURI_ASC',
-  ContractUriDesc = 'contractURI_DESC',
-  DecimalsAsc = 'decimals_ASC',
-  DecimalsDesc = 'decimals_DESC',
-  DescriptionAsc = 'description_ASC',
-  DescriptionDesc = 'description_DESC',
-  ExternalLinkAsc = 'externalLink_ASC',
-  ExternalLinkDesc = 'externalLink_DESC',
-  IdAsc = 'id_ASC',
-  IdDesc = 'id_DESC',
-  ImageAsc = 'image_ASC',
-  ImageDesc = 'image_DESC',
-  MetadataNameAsc = 'metadataName_ASC',
-  MetadataNameDesc = 'metadataName_DESC',
-  NameAsc = 'name_ASC',
-  NameDesc = 'name_DESC',
-  StartBlockAsc = 'startBlock_ASC',
-  StartBlockDesc = 'startBlock_DESC',
-  SymbolAsc = 'symbol_ASC',
-  SymbolDesc = 'symbol_DESC',
-  TotalSupplyAsc = 'totalSupply_ASC',
-  TotalSupplyDesc = 'totalSupply_DESC'
+  address_ASC = 'address_ASC',
+  address_DESC = 'address_DESC',
+  artistUrl_ASC = 'artistUrl_ASC',
+  artistUrl_DESC = 'artistUrl_DESC',
+  artist_ASC = 'artist_ASC',
+  artist_DESC = 'artist_DESC',
+  contractURIUpdated_ASC = 'contractURIUpdated_ASC',
+  contractURIUpdated_DESC = 'contractURIUpdated_DESC',
+  contractURI_ASC = 'contractURI_ASC',
+  contractURI_DESC = 'contractURI_DESC',
+  decimals_ASC = 'decimals_ASC',
+  decimals_DESC = 'decimals_DESC',
+  description_ASC = 'description_ASC',
+  description_DESC = 'description_DESC',
+  externalLink_ASC = 'externalLink_ASC',
+  externalLink_DESC = 'externalLink_DESC',
+  id_ASC = 'id_ASC',
+  id_DESC = 'id_DESC',
+  image_ASC = 'image_ASC',
+  image_DESC = 'image_DESC',
+  metadataName_ASC = 'metadataName_ASC',
+  metadataName_DESC = 'metadataName_DESC',
+  name_ASC = 'name_ASC',
+  name_DESC = 'name_DESC',
+  startBlock_ASC = 'startBlock_ASC',
+  startBlock_DESC = 'startBlock_DESC',
+  symbol_ASC = 'symbol_ASC',
+  symbol_DESC = 'symbol_DESC',
+  totalSupply_ASC = 'totalSupply_ASC',
+  totalSupply_DESC = 'totalSupply_DESC'
 }
 
 export type Erc1155ContractWhereInput = {
@@ -1011,8 +1137,8 @@ export type Erc1155OwnerEdge = {
 };
 
 export enum Erc1155OwnerOrderByInput {
-  IdAsc = 'id_ASC',
-  IdDesc = 'id_DESC'
+  id_ASC = 'id_ASC',
+  id_DESC = 'id_DESC'
 }
 
 export type Erc1155OwnerWhereInput = {
@@ -1049,10 +1175,12 @@ export type Erc1155OwnersConnection = {
 
 export type Erc1155Token = {
   __typename?: 'ERC1155Token';
-  contract?: Maybe<Erc1155Contract>;
+  contract: Erc1155Contract;
+  contractId: Scalars['String'];
   createdAt: Scalars['BigInt'];
   id: Scalars['String'];
   metadata?: Maybe<Metadata>;
+  metadataId?: Maybe<Scalars['String']>;
   numericId: Scalars['BigInt'];
   owners: Array<Erc1155TokenOwner>;
   tokenUri?: Maybe<Scalars['String']>;
@@ -1084,66 +1212,70 @@ export type Erc1155TokenEdge = {
 };
 
 export enum Erc1155TokenOrderByInput {
-  ContractAddressAsc = 'contract_address_ASC',
-  ContractAddressDesc = 'contract_address_DESC',
-  ContractArtistUrlAsc = 'contract_artistUrl_ASC',
-  ContractArtistUrlDesc = 'contract_artistUrl_DESC',
-  ContractArtistAsc = 'contract_artist_ASC',
-  ContractArtistDesc = 'contract_artist_DESC',
-  ContractContractUriUpdatedAsc = 'contract_contractURIUpdated_ASC',
-  ContractContractUriUpdatedDesc = 'contract_contractURIUpdated_DESC',
-  ContractContractUriAsc = 'contract_contractURI_ASC',
-  ContractContractUriDesc = 'contract_contractURI_DESC',
-  ContractDecimalsAsc = 'contract_decimals_ASC',
-  ContractDecimalsDesc = 'contract_decimals_DESC',
-  ContractDescriptionAsc = 'contract_description_ASC',
-  ContractDescriptionDesc = 'contract_description_DESC',
-  ContractExternalLinkAsc = 'contract_externalLink_ASC',
-  ContractExternalLinkDesc = 'contract_externalLink_DESC',
-  ContractIdAsc = 'contract_id_ASC',
-  ContractIdDesc = 'contract_id_DESC',
-  ContractImageAsc = 'contract_image_ASC',
-  ContractImageDesc = 'contract_image_DESC',
-  ContractMetadataNameAsc = 'contract_metadataName_ASC',
-  ContractMetadataNameDesc = 'contract_metadataName_DESC',
-  ContractNameAsc = 'contract_name_ASC',
-  ContractNameDesc = 'contract_name_DESC',
-  ContractStartBlockAsc = 'contract_startBlock_ASC',
-  ContractStartBlockDesc = 'contract_startBlock_DESC',
-  ContractSymbolAsc = 'contract_symbol_ASC',
-  ContractSymbolDesc = 'contract_symbol_DESC',
-  ContractTotalSupplyAsc = 'contract_totalSupply_ASC',
-  ContractTotalSupplyDesc = 'contract_totalSupply_DESC',
-  CreatedAtAsc = 'createdAt_ASC',
-  CreatedAtDesc = 'createdAt_DESC',
-  IdAsc = 'id_ASC',
-  IdDesc = 'id_DESC',
-  MetadataArtistUrlAsc = 'metadata_artistUrl_ASC',
-  MetadataArtistUrlDesc = 'metadata_artistUrl_DESC',
-  MetadataArtistAsc = 'metadata_artist_ASC',
-  MetadataArtistDesc = 'metadata_artist_DESC',
-  MetadataCompositeAsc = 'metadata_composite_ASC',
-  MetadataCompositeDesc = 'metadata_composite_DESC',
-  MetadataDescriptionAsc = 'metadata_description_ASC',
-  MetadataDescriptionDesc = 'metadata_description_DESC',
-  MetadataExternalUrlAsc = 'metadata_externalUrl_ASC',
-  MetadataExternalUrlDesc = 'metadata_externalUrl_DESC',
-  MetadataIdAsc = 'metadata_id_ASC',
-  MetadataIdDesc = 'metadata_id_DESC',
-  MetadataImageAsc = 'metadata_image_ASC',
-  MetadataImageDesc = 'metadata_image_DESC',
-  MetadataNameAsc = 'metadata_name_ASC',
-  MetadataNameDesc = 'metadata_name_DESC',
-  MetadataTypeAsc = 'metadata_type_ASC',
-  MetadataTypeDesc = 'metadata_type_DESC',
-  NumericIdAsc = 'numericId_ASC',
-  NumericIdDesc = 'numericId_DESC',
-  TokenUriAsc = 'tokenUri_ASC',
-  TokenUriDesc = 'tokenUri_DESC',
-  TotalSupplyAsc = 'totalSupply_ASC',
-  TotalSupplyDesc = 'totalSupply_DESC',
-  UpdatedAtAsc = 'updatedAt_ASC',
-  UpdatedAtDesc = 'updatedAt_DESC'
+  contractId_ASC = 'contractId_ASC',
+  contractId_DESC = 'contractId_DESC',
+  contract_address_ASC = 'contract_address_ASC',
+  contract_address_DESC = 'contract_address_DESC',
+  contract_artistUrl_ASC = 'contract_artistUrl_ASC',
+  contract_artistUrl_DESC = 'contract_artistUrl_DESC',
+  contract_artist_ASC = 'contract_artist_ASC',
+  contract_artist_DESC = 'contract_artist_DESC',
+  contract_contractURIUpdated_ASC = 'contract_contractURIUpdated_ASC',
+  contract_contractURIUpdated_DESC = 'contract_contractURIUpdated_DESC',
+  contract_contractURI_ASC = 'contract_contractURI_ASC',
+  contract_contractURI_DESC = 'contract_contractURI_DESC',
+  contract_decimals_ASC = 'contract_decimals_ASC',
+  contract_decimals_DESC = 'contract_decimals_DESC',
+  contract_description_ASC = 'contract_description_ASC',
+  contract_description_DESC = 'contract_description_DESC',
+  contract_externalLink_ASC = 'contract_externalLink_ASC',
+  contract_externalLink_DESC = 'contract_externalLink_DESC',
+  contract_id_ASC = 'contract_id_ASC',
+  contract_id_DESC = 'contract_id_DESC',
+  contract_image_ASC = 'contract_image_ASC',
+  contract_image_DESC = 'contract_image_DESC',
+  contract_metadataName_ASC = 'contract_metadataName_ASC',
+  contract_metadataName_DESC = 'contract_metadataName_DESC',
+  contract_name_ASC = 'contract_name_ASC',
+  contract_name_DESC = 'contract_name_DESC',
+  contract_startBlock_ASC = 'contract_startBlock_ASC',
+  contract_startBlock_DESC = 'contract_startBlock_DESC',
+  contract_symbol_ASC = 'contract_symbol_ASC',
+  contract_symbol_DESC = 'contract_symbol_DESC',
+  contract_totalSupply_ASC = 'contract_totalSupply_ASC',
+  contract_totalSupply_DESC = 'contract_totalSupply_DESC',
+  createdAt_ASC = 'createdAt_ASC',
+  createdAt_DESC = 'createdAt_DESC',
+  id_ASC = 'id_ASC',
+  id_DESC = 'id_DESC',
+  metadataId_ASC = 'metadataId_ASC',
+  metadataId_DESC = 'metadataId_DESC',
+  metadata_artistUrl_ASC = 'metadata_artistUrl_ASC',
+  metadata_artistUrl_DESC = 'metadata_artistUrl_DESC',
+  metadata_artist_ASC = 'metadata_artist_ASC',
+  metadata_artist_DESC = 'metadata_artist_DESC',
+  metadata_composite_ASC = 'metadata_composite_ASC',
+  metadata_composite_DESC = 'metadata_composite_DESC',
+  metadata_description_ASC = 'metadata_description_ASC',
+  metadata_description_DESC = 'metadata_description_DESC',
+  metadata_externalUrl_ASC = 'metadata_externalUrl_ASC',
+  metadata_externalUrl_DESC = 'metadata_externalUrl_DESC',
+  metadata_id_ASC = 'metadata_id_ASC',
+  metadata_id_DESC = 'metadata_id_DESC',
+  metadata_image_ASC = 'metadata_image_ASC',
+  metadata_image_DESC = 'metadata_image_DESC',
+  metadata_name_ASC = 'metadata_name_ASC',
+  metadata_name_DESC = 'metadata_name_DESC',
+  metadata_type_ASC = 'metadata_type_ASC',
+  metadata_type_DESC = 'metadata_type_DESC',
+  numericId_ASC = 'numericId_ASC',
+  numericId_DESC = 'numericId_DESC',
+  tokenUri_ASC = 'tokenUri_ASC',
+  tokenUri_DESC = 'tokenUri_DESC',
+  totalSupply_ASC = 'totalSupply_ASC',
+  totalSupply_DESC = 'totalSupply_DESC',
+  updatedAt_ASC = 'updatedAt_ASC',
+  updatedAt_DESC = 'updatedAt_DESC'
 }
 
 export type Erc1155TokenOwner = {
@@ -1151,7 +1283,9 @@ export type Erc1155TokenOwner = {
   balance: Scalars['BigInt'];
   id: Scalars['String'];
   owner: Erc1155Owner;
+  ownerId: Scalars['String'];
   token: Erc1155Token;
+  tokenId: Scalars['String'];
 };
 
 export type Erc1155TokenOwnerEdge = {
@@ -1161,24 +1295,32 @@ export type Erc1155TokenOwnerEdge = {
 };
 
 export enum Erc1155TokenOwnerOrderByInput {
-  BalanceAsc = 'balance_ASC',
-  BalanceDesc = 'balance_DESC',
-  IdAsc = 'id_ASC',
-  IdDesc = 'id_DESC',
-  OwnerIdAsc = 'owner_id_ASC',
-  OwnerIdDesc = 'owner_id_DESC',
-  TokenCreatedAtAsc = 'token_createdAt_ASC',
-  TokenCreatedAtDesc = 'token_createdAt_DESC',
-  TokenIdAsc = 'token_id_ASC',
-  TokenIdDesc = 'token_id_DESC',
-  TokenNumericIdAsc = 'token_numericId_ASC',
-  TokenNumericIdDesc = 'token_numericId_DESC',
-  TokenTokenUriAsc = 'token_tokenUri_ASC',
-  TokenTokenUriDesc = 'token_tokenUri_DESC',
-  TokenTotalSupplyAsc = 'token_totalSupply_ASC',
-  TokenTotalSupplyDesc = 'token_totalSupply_DESC',
-  TokenUpdatedAtAsc = 'token_updatedAt_ASC',
-  TokenUpdatedAtDesc = 'token_updatedAt_DESC'
+  balance_ASC = 'balance_ASC',
+  balance_DESC = 'balance_DESC',
+  id_ASC = 'id_ASC',
+  id_DESC = 'id_DESC',
+  ownerId_ASC = 'ownerId_ASC',
+  ownerId_DESC = 'ownerId_DESC',
+  owner_id_ASC = 'owner_id_ASC',
+  owner_id_DESC = 'owner_id_DESC',
+  tokenId_ASC = 'tokenId_ASC',
+  tokenId_DESC = 'tokenId_DESC',
+  token_contractId_ASC = 'token_contractId_ASC',
+  token_contractId_DESC = 'token_contractId_DESC',
+  token_createdAt_ASC = 'token_createdAt_ASC',
+  token_createdAt_DESC = 'token_createdAt_DESC',
+  token_id_ASC = 'token_id_ASC',
+  token_id_DESC = 'token_id_DESC',
+  token_metadataId_ASC = 'token_metadataId_ASC',
+  token_metadataId_DESC = 'token_metadataId_DESC',
+  token_numericId_ASC = 'token_numericId_ASC',
+  token_numericId_DESC = 'token_numericId_DESC',
+  token_tokenUri_ASC = 'token_tokenUri_ASC',
+  token_tokenUri_DESC = 'token_tokenUri_DESC',
+  token_totalSupply_ASC = 'token_totalSupply_ASC',
+  token_totalSupply_DESC = 'token_totalSupply_DESC',
+  token_updatedAt_ASC = 'token_updatedAt_ASC',
+  token_updatedAt_DESC = 'token_updatedAt_DESC'
 }
 
 export type Erc1155TokenOwnerWhereInput = {
@@ -1211,8 +1353,42 @@ export type Erc1155TokenOwnerWhereInput = {
   id_not_startsWith?: InputMaybe<Scalars['String']>;
   id_startsWith?: InputMaybe<Scalars['String']>;
   owner?: InputMaybe<Erc1155OwnerWhereInput>;
+  ownerId_contains?: InputMaybe<Scalars['String']>;
+  ownerId_containsInsensitive?: InputMaybe<Scalars['String']>;
+  ownerId_endsWith?: InputMaybe<Scalars['String']>;
+  ownerId_eq?: InputMaybe<Scalars['String']>;
+  ownerId_gt?: InputMaybe<Scalars['String']>;
+  ownerId_gte?: InputMaybe<Scalars['String']>;
+  ownerId_in?: InputMaybe<Array<Scalars['String']>>;
+  ownerId_isNull?: InputMaybe<Scalars['Boolean']>;
+  ownerId_lt?: InputMaybe<Scalars['String']>;
+  ownerId_lte?: InputMaybe<Scalars['String']>;
+  ownerId_not_contains?: InputMaybe<Scalars['String']>;
+  ownerId_not_containsInsensitive?: InputMaybe<Scalars['String']>;
+  ownerId_not_endsWith?: InputMaybe<Scalars['String']>;
+  ownerId_not_eq?: InputMaybe<Scalars['String']>;
+  ownerId_not_in?: InputMaybe<Array<Scalars['String']>>;
+  ownerId_not_startsWith?: InputMaybe<Scalars['String']>;
+  ownerId_startsWith?: InputMaybe<Scalars['String']>;
   owner_isNull?: InputMaybe<Scalars['Boolean']>;
   token?: InputMaybe<Erc1155TokenWhereInput>;
+  tokenId_contains?: InputMaybe<Scalars['String']>;
+  tokenId_containsInsensitive?: InputMaybe<Scalars['String']>;
+  tokenId_endsWith?: InputMaybe<Scalars['String']>;
+  tokenId_eq?: InputMaybe<Scalars['String']>;
+  tokenId_gt?: InputMaybe<Scalars['String']>;
+  tokenId_gte?: InputMaybe<Scalars['String']>;
+  tokenId_in?: InputMaybe<Array<Scalars['String']>>;
+  tokenId_isNull?: InputMaybe<Scalars['Boolean']>;
+  tokenId_lt?: InputMaybe<Scalars['String']>;
+  tokenId_lte?: InputMaybe<Scalars['String']>;
+  tokenId_not_contains?: InputMaybe<Scalars['String']>;
+  tokenId_not_containsInsensitive?: InputMaybe<Scalars['String']>;
+  tokenId_not_endsWith?: InputMaybe<Scalars['String']>;
+  tokenId_not_eq?: InputMaybe<Scalars['String']>;
+  tokenId_not_in?: InputMaybe<Array<Scalars['String']>>;
+  tokenId_not_startsWith?: InputMaybe<Scalars['String']>;
+  tokenId_startsWith?: InputMaybe<Scalars['String']>;
   token_isNull?: InputMaybe<Scalars['Boolean']>;
 };
 
@@ -1227,6 +1403,23 @@ export type Erc1155TokenWhereInput = {
   AND?: InputMaybe<Array<Erc1155TokenWhereInput>>;
   OR?: InputMaybe<Array<Erc1155TokenWhereInput>>;
   contract?: InputMaybe<Erc1155ContractWhereInput>;
+  contractId_contains?: InputMaybe<Scalars['String']>;
+  contractId_containsInsensitive?: InputMaybe<Scalars['String']>;
+  contractId_endsWith?: InputMaybe<Scalars['String']>;
+  contractId_eq?: InputMaybe<Scalars['String']>;
+  contractId_gt?: InputMaybe<Scalars['String']>;
+  contractId_gte?: InputMaybe<Scalars['String']>;
+  contractId_in?: InputMaybe<Array<Scalars['String']>>;
+  contractId_isNull?: InputMaybe<Scalars['Boolean']>;
+  contractId_lt?: InputMaybe<Scalars['String']>;
+  contractId_lte?: InputMaybe<Scalars['String']>;
+  contractId_not_contains?: InputMaybe<Scalars['String']>;
+  contractId_not_containsInsensitive?: InputMaybe<Scalars['String']>;
+  contractId_not_endsWith?: InputMaybe<Scalars['String']>;
+  contractId_not_eq?: InputMaybe<Scalars['String']>;
+  contractId_not_in?: InputMaybe<Array<Scalars['String']>>;
+  contractId_not_startsWith?: InputMaybe<Scalars['String']>;
+  contractId_startsWith?: InputMaybe<Scalars['String']>;
   contract_isNull?: InputMaybe<Scalars['Boolean']>;
   createdAt_eq?: InputMaybe<Scalars['BigInt']>;
   createdAt_gt?: InputMaybe<Scalars['BigInt']>;
@@ -1255,6 +1448,23 @@ export type Erc1155TokenWhereInput = {
   id_not_startsWith?: InputMaybe<Scalars['String']>;
   id_startsWith?: InputMaybe<Scalars['String']>;
   metadata?: InputMaybe<MetadataWhereInput>;
+  metadataId_contains?: InputMaybe<Scalars['String']>;
+  metadataId_containsInsensitive?: InputMaybe<Scalars['String']>;
+  metadataId_endsWith?: InputMaybe<Scalars['String']>;
+  metadataId_eq?: InputMaybe<Scalars['String']>;
+  metadataId_gt?: InputMaybe<Scalars['String']>;
+  metadataId_gte?: InputMaybe<Scalars['String']>;
+  metadataId_in?: InputMaybe<Array<Scalars['String']>>;
+  metadataId_isNull?: InputMaybe<Scalars['Boolean']>;
+  metadataId_lt?: InputMaybe<Scalars['String']>;
+  metadataId_lte?: InputMaybe<Scalars['String']>;
+  metadataId_not_contains?: InputMaybe<Scalars['String']>;
+  metadataId_not_containsInsensitive?: InputMaybe<Scalars['String']>;
+  metadataId_not_endsWith?: InputMaybe<Scalars['String']>;
+  metadataId_not_eq?: InputMaybe<Scalars['String']>;
+  metadataId_not_in?: InputMaybe<Array<Scalars['String']>>;
+  metadataId_not_startsWith?: InputMaybe<Scalars['String']>;
+  metadataId_startsWith?: InputMaybe<Scalars['String']>;
   metadata_isNull?: InputMaybe<Scalars['Boolean']>;
   numericId_eq?: InputMaybe<Scalars['BigInt']>;
   numericId_gt?: InputMaybe<Scalars['BigInt']>;
@@ -1318,12 +1528,16 @@ export type Erc1155TokensConnection = {
 export type Erc1155Transfer = {
   __typename?: 'ERC1155Transfer';
   block: Scalars['BigInt'];
-  from?: Maybe<Erc1155Owner>;
+  from: Erc1155Owner;
+  fromId: Scalars['String'];
   id: Scalars['String'];
   timestamp: Scalars['BigInt'];
-  to?: Maybe<Erc1155Owner>;
+  to: Erc1155Owner;
+  toId: Scalars['String'];
   token: Erc1155Token;
+  tokenId: Scalars['String'];
   transactionHash: Scalars['String'];
+  value: Scalars['BigInt'];
 };
 
 export type Erc1155TransferEdge = {
@@ -1333,30 +1547,42 @@ export type Erc1155TransferEdge = {
 };
 
 export enum Erc1155TransferOrderByInput {
-  BlockAsc = 'block_ASC',
-  BlockDesc = 'block_DESC',
-  FromIdAsc = 'from_id_ASC',
-  FromIdDesc = 'from_id_DESC',
-  IdAsc = 'id_ASC',
-  IdDesc = 'id_DESC',
-  TimestampAsc = 'timestamp_ASC',
-  TimestampDesc = 'timestamp_DESC',
-  ToIdAsc = 'to_id_ASC',
-  ToIdDesc = 'to_id_DESC',
-  TokenCreatedAtAsc = 'token_createdAt_ASC',
-  TokenCreatedAtDesc = 'token_createdAt_DESC',
-  TokenIdAsc = 'token_id_ASC',
-  TokenIdDesc = 'token_id_DESC',
-  TokenNumericIdAsc = 'token_numericId_ASC',
-  TokenNumericIdDesc = 'token_numericId_DESC',
-  TokenTokenUriAsc = 'token_tokenUri_ASC',
-  TokenTokenUriDesc = 'token_tokenUri_DESC',
-  TokenTotalSupplyAsc = 'token_totalSupply_ASC',
-  TokenTotalSupplyDesc = 'token_totalSupply_DESC',
-  TokenUpdatedAtAsc = 'token_updatedAt_ASC',
-  TokenUpdatedAtDesc = 'token_updatedAt_DESC',
-  TransactionHashAsc = 'transactionHash_ASC',
-  TransactionHashDesc = 'transactionHash_DESC'
+  block_ASC = 'block_ASC',
+  block_DESC = 'block_DESC',
+  fromId_ASC = 'fromId_ASC',
+  fromId_DESC = 'fromId_DESC',
+  from_id_ASC = 'from_id_ASC',
+  from_id_DESC = 'from_id_DESC',
+  id_ASC = 'id_ASC',
+  id_DESC = 'id_DESC',
+  timestamp_ASC = 'timestamp_ASC',
+  timestamp_DESC = 'timestamp_DESC',
+  toId_ASC = 'toId_ASC',
+  toId_DESC = 'toId_DESC',
+  to_id_ASC = 'to_id_ASC',
+  to_id_DESC = 'to_id_DESC',
+  tokenId_ASC = 'tokenId_ASC',
+  tokenId_DESC = 'tokenId_DESC',
+  token_contractId_ASC = 'token_contractId_ASC',
+  token_contractId_DESC = 'token_contractId_DESC',
+  token_createdAt_ASC = 'token_createdAt_ASC',
+  token_createdAt_DESC = 'token_createdAt_DESC',
+  token_id_ASC = 'token_id_ASC',
+  token_id_DESC = 'token_id_DESC',
+  token_metadataId_ASC = 'token_metadataId_ASC',
+  token_metadataId_DESC = 'token_metadataId_DESC',
+  token_numericId_ASC = 'token_numericId_ASC',
+  token_numericId_DESC = 'token_numericId_DESC',
+  token_tokenUri_ASC = 'token_tokenUri_ASC',
+  token_tokenUri_DESC = 'token_tokenUri_DESC',
+  token_totalSupply_ASC = 'token_totalSupply_ASC',
+  token_totalSupply_DESC = 'token_totalSupply_DESC',
+  token_updatedAt_ASC = 'token_updatedAt_ASC',
+  token_updatedAt_DESC = 'token_updatedAt_DESC',
+  transactionHash_ASC = 'transactionHash_ASC',
+  transactionHash_DESC = 'transactionHash_DESC',
+  value_ASC = 'value_ASC',
+  value_DESC = 'value_DESC'
 }
 
 export type Erc1155TransferWhereInput = {
@@ -1372,6 +1598,23 @@ export type Erc1155TransferWhereInput = {
   block_not_eq?: InputMaybe<Scalars['BigInt']>;
   block_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
   from?: InputMaybe<Erc1155OwnerWhereInput>;
+  fromId_contains?: InputMaybe<Scalars['String']>;
+  fromId_containsInsensitive?: InputMaybe<Scalars['String']>;
+  fromId_endsWith?: InputMaybe<Scalars['String']>;
+  fromId_eq?: InputMaybe<Scalars['String']>;
+  fromId_gt?: InputMaybe<Scalars['String']>;
+  fromId_gte?: InputMaybe<Scalars['String']>;
+  fromId_in?: InputMaybe<Array<Scalars['String']>>;
+  fromId_isNull?: InputMaybe<Scalars['Boolean']>;
+  fromId_lt?: InputMaybe<Scalars['String']>;
+  fromId_lte?: InputMaybe<Scalars['String']>;
+  fromId_not_contains?: InputMaybe<Scalars['String']>;
+  fromId_not_containsInsensitive?: InputMaybe<Scalars['String']>;
+  fromId_not_endsWith?: InputMaybe<Scalars['String']>;
+  fromId_not_eq?: InputMaybe<Scalars['String']>;
+  fromId_not_in?: InputMaybe<Array<Scalars['String']>>;
+  fromId_not_startsWith?: InputMaybe<Scalars['String']>;
+  fromId_startsWith?: InputMaybe<Scalars['String']>;
   from_isNull?: InputMaybe<Scalars['Boolean']>;
   id_contains?: InputMaybe<Scalars['String']>;
   id_containsInsensitive?: InputMaybe<Scalars['String']>;
@@ -1400,8 +1643,42 @@ export type Erc1155TransferWhereInput = {
   timestamp_not_eq?: InputMaybe<Scalars['BigInt']>;
   timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
   to?: InputMaybe<Erc1155OwnerWhereInput>;
+  toId_contains?: InputMaybe<Scalars['String']>;
+  toId_containsInsensitive?: InputMaybe<Scalars['String']>;
+  toId_endsWith?: InputMaybe<Scalars['String']>;
+  toId_eq?: InputMaybe<Scalars['String']>;
+  toId_gt?: InputMaybe<Scalars['String']>;
+  toId_gte?: InputMaybe<Scalars['String']>;
+  toId_in?: InputMaybe<Array<Scalars['String']>>;
+  toId_isNull?: InputMaybe<Scalars['Boolean']>;
+  toId_lt?: InputMaybe<Scalars['String']>;
+  toId_lte?: InputMaybe<Scalars['String']>;
+  toId_not_contains?: InputMaybe<Scalars['String']>;
+  toId_not_containsInsensitive?: InputMaybe<Scalars['String']>;
+  toId_not_endsWith?: InputMaybe<Scalars['String']>;
+  toId_not_eq?: InputMaybe<Scalars['String']>;
+  toId_not_in?: InputMaybe<Array<Scalars['String']>>;
+  toId_not_startsWith?: InputMaybe<Scalars['String']>;
+  toId_startsWith?: InputMaybe<Scalars['String']>;
   to_isNull?: InputMaybe<Scalars['Boolean']>;
   token?: InputMaybe<Erc1155TokenWhereInput>;
+  tokenId_contains?: InputMaybe<Scalars['String']>;
+  tokenId_containsInsensitive?: InputMaybe<Scalars['String']>;
+  tokenId_endsWith?: InputMaybe<Scalars['String']>;
+  tokenId_eq?: InputMaybe<Scalars['String']>;
+  tokenId_gt?: InputMaybe<Scalars['String']>;
+  tokenId_gte?: InputMaybe<Scalars['String']>;
+  tokenId_in?: InputMaybe<Array<Scalars['String']>>;
+  tokenId_isNull?: InputMaybe<Scalars['Boolean']>;
+  tokenId_lt?: InputMaybe<Scalars['String']>;
+  tokenId_lte?: InputMaybe<Scalars['String']>;
+  tokenId_not_contains?: InputMaybe<Scalars['String']>;
+  tokenId_not_containsInsensitive?: InputMaybe<Scalars['String']>;
+  tokenId_not_endsWith?: InputMaybe<Scalars['String']>;
+  tokenId_not_eq?: InputMaybe<Scalars['String']>;
+  tokenId_not_in?: InputMaybe<Array<Scalars['String']>>;
+  tokenId_not_startsWith?: InputMaybe<Scalars['String']>;
+  tokenId_startsWith?: InputMaybe<Scalars['String']>;
   token_isNull?: InputMaybe<Scalars['Boolean']>;
   transactionHash_contains?: InputMaybe<Scalars['String']>;
   transactionHash_containsInsensitive?: InputMaybe<Scalars['String']>;
@@ -1420,6 +1697,15 @@ export type Erc1155TransferWhereInput = {
   transactionHash_not_in?: InputMaybe<Array<Scalars['String']>>;
   transactionHash_not_startsWith?: InputMaybe<Scalars['String']>;
   transactionHash_startsWith?: InputMaybe<Scalars['String']>;
+  value_eq?: InputMaybe<Scalars['BigInt']>;
+  value_gt?: InputMaybe<Scalars['BigInt']>;
+  value_gte?: InputMaybe<Scalars['BigInt']>;
+  value_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  value_isNull?: InputMaybe<Scalars['Boolean']>;
+  value_lt?: InputMaybe<Scalars['BigInt']>;
+  value_lte?: InputMaybe<Scalars['BigInt']>;
+  value_not_eq?: InputMaybe<Scalars['BigInt']>;
+  value_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
 };
 
 export type Erc1155TransfersConnection = {
@@ -1458,24 +1744,24 @@ export type MetadataEdge = {
 };
 
 export enum MetadataOrderByInput {
-  ArtistUrlAsc = 'artistUrl_ASC',
-  ArtistUrlDesc = 'artistUrl_DESC',
-  ArtistAsc = 'artist_ASC',
-  ArtistDesc = 'artist_DESC',
-  CompositeAsc = 'composite_ASC',
-  CompositeDesc = 'composite_DESC',
-  DescriptionAsc = 'description_ASC',
-  DescriptionDesc = 'description_DESC',
-  ExternalUrlAsc = 'externalUrl_ASC',
-  ExternalUrlDesc = 'externalUrl_DESC',
-  IdAsc = 'id_ASC',
-  IdDesc = 'id_DESC',
-  ImageAsc = 'image_ASC',
-  ImageDesc = 'image_DESC',
-  NameAsc = 'name_ASC',
-  NameDesc = 'name_DESC',
-  TypeAsc = 'type_ASC',
-  TypeDesc = 'type_DESC'
+  artistUrl_ASC = 'artistUrl_ASC',
+  artistUrl_DESC = 'artistUrl_DESC',
+  artist_ASC = 'artist_ASC',
+  artist_DESC = 'artist_DESC',
+  composite_ASC = 'composite_ASC',
+  composite_DESC = 'composite_DESC',
+  description_ASC = 'description_ASC',
+  description_DESC = 'description_DESC',
+  externalUrl_ASC = 'externalUrl_ASC',
+  externalUrl_DESC = 'externalUrl_DESC',
+  id_ASC = 'id_ASC',
+  id_DESC = 'id_DESC',
+  image_ASC = 'image_ASC',
+  image_DESC = 'image_DESC',
+  name_ASC = 'name_ASC',
+  name_DESC = 'name_DESC',
+  type_ASC = 'type_ASC',
+  type_DESC = 'type_DESC'
 }
 
 export type MetadataWhereInput = {
@@ -1956,6 +2242,160 @@ export type SquidStatus = {
   height?: Maybe<Scalars['Int']>;
 };
 
+export type Subscription = {
+  __typename?: 'Subscription';
+  erc721ContractById?: Maybe<Erc721Contract>;
+  erc721Contracts: Array<Erc721Contract>;
+  erc721OwnerById?: Maybe<Erc721Owner>;
+  erc721Owners: Array<Erc721Owner>;
+  erc721TokenById?: Maybe<Erc721Token>;
+  erc721Tokens: Array<Erc721Token>;
+  erc721TransferById?: Maybe<Erc721Transfer>;
+  erc721Transfers: Array<Erc721Transfer>;
+  erc1155ContractById?: Maybe<Erc1155Contract>;
+  erc1155Contracts: Array<Erc1155Contract>;
+  erc1155OwnerById?: Maybe<Erc1155Owner>;
+  erc1155Owners: Array<Erc1155Owner>;
+  erc1155TokenById?: Maybe<Erc1155Token>;
+  erc1155TokenOwnerById?: Maybe<Erc1155TokenOwner>;
+  erc1155TokenOwners: Array<Erc1155TokenOwner>;
+  erc1155Tokens: Array<Erc1155Token>;
+  erc1155TransferById?: Maybe<Erc1155Transfer>;
+  erc1155Transfers: Array<Erc1155Transfer>;
+  metadata: Array<Metadata>;
+  metadataById?: Maybe<Metadata>;
+};
+
+
+export type SubscriptionErc721ContractByIdArgs = {
+  id: Scalars['String'];
+};
+
+
+export type SubscriptionErc721ContractsArgs = {
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<Array<Erc721ContractOrderByInput>>;
+  where?: InputMaybe<Erc721ContractWhereInput>;
+};
+
+
+export type SubscriptionErc721OwnerByIdArgs = {
+  id: Scalars['String'];
+};
+
+
+export type SubscriptionErc721OwnersArgs = {
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<Array<Erc721OwnerOrderByInput>>;
+  where?: InputMaybe<Erc721OwnerWhereInput>;
+};
+
+
+export type SubscriptionErc721TokenByIdArgs = {
+  id: Scalars['String'];
+};
+
+
+export type SubscriptionErc721TokensArgs = {
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<Array<Erc721TokenOrderByInput>>;
+  where?: InputMaybe<Erc721TokenWhereInput>;
+};
+
+
+export type SubscriptionErc721TransferByIdArgs = {
+  id: Scalars['String'];
+};
+
+
+export type SubscriptionErc721TransfersArgs = {
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<Array<Erc721TransferOrderByInput>>;
+  where?: InputMaybe<Erc721TransferWhereInput>;
+};
+
+
+export type SubscriptionErc1155ContractByIdArgs = {
+  id: Scalars['String'];
+};
+
+
+export type SubscriptionErc1155ContractsArgs = {
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<Array<Erc1155ContractOrderByInput>>;
+  where?: InputMaybe<Erc1155ContractWhereInput>;
+};
+
+
+export type SubscriptionErc1155OwnerByIdArgs = {
+  id: Scalars['String'];
+};
+
+
+export type SubscriptionErc1155OwnersArgs = {
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<Array<Erc1155OwnerOrderByInput>>;
+  where?: InputMaybe<Erc1155OwnerWhereInput>;
+};
+
+
+export type SubscriptionErc1155TokenByIdArgs = {
+  id: Scalars['String'];
+};
+
+
+export type SubscriptionErc1155TokenOwnerByIdArgs = {
+  id: Scalars['String'];
+};
+
+
+export type SubscriptionErc1155TokenOwnersArgs = {
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<Array<Erc1155TokenOwnerOrderByInput>>;
+  where?: InputMaybe<Erc1155TokenOwnerWhereInput>;
+};
+
+
+export type SubscriptionErc1155TokensArgs = {
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<Array<Erc1155TokenOrderByInput>>;
+  where?: InputMaybe<Erc1155TokenWhereInput>;
+};
+
+
+export type SubscriptionErc1155TransferByIdArgs = {
+  id: Scalars['String'];
+};
+
+
+export type SubscriptionErc1155TransfersArgs = {
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<Array<Erc1155TransferOrderByInput>>;
+  where?: InputMaybe<Erc1155TransferWhereInput>;
+};
+
+
+export type SubscriptionMetadataArgs = {
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<Array<MetadataOrderByInput>>;
+  where?: InputMaybe<MetadataWhereInput>;
+};
+
+
+export type SubscriptionMetadataByIdArgs = {
+  id: Scalars['String'];
+};
+
 export type WhereIdInput = {
   id: Scalars['String'];
 };
@@ -1966,14 +2406,14 @@ export type GetMetadataQueryVariables = Exact<{
 }>;
 
 
-export type GetMetadataQuery = { __typename?: 'Query', erc721Tokens: Array<{ __typename?: 'ERC721Token', numericId: any, metadata?: { __typename?: 'Metadata', type?: string | null, name?: string | null, layers?: Array<string> | null, image?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', value: string, traitType: string, displayType?: string | null }> | null } | null, contract: { __typename?: 'ERC721Contract', address?: string | null } }>, erc1155Tokens: Array<{ __typename?: 'ERC1155Token', numericId: any, metadata?: { __typename?: 'Metadata', type?: string | null, name?: string | null, layers?: Array<string> | null, image?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', value: string, traitType: string, displayType?: string | null }> | null } | null, contract?: { __typename?: 'ERC1155Contract', address?: string | null } | null }> };
+export type GetMetadataQuery = { __typename?: 'Query', erc721Tokens: Array<{ __typename?: 'ERC721Token', numericId: any, metadata?: { __typename?: 'Metadata', type?: string | null, name?: string | null, layers?: Array<string> | null, image?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', value: string, traitType: string, displayType?: string | null }> | null } | null, contract: { __typename?: 'ERC721Contract', address?: string | null } }>, erc1155Tokens: Array<{ __typename?: 'ERC1155Token', numericId: any, metadata?: { __typename?: 'Metadata', type?: string | null, name?: string | null, layers?: Array<string> | null, image?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', value: string, traitType: string, displayType?: string | null }> | null } | null, contract: { __typename?: 'ERC1155Contract', address?: string | null } }> };
 
 export type GetOnChainTokensQueryVariables = Exact<{
   owner: Scalars['String'];
 }>;
 
 
-export type GetOnChainTokensQuery = { __typename?: 'Query', erc1155TokenOwners: Array<{ __typename?: 'ERC1155TokenOwner', id: string, balance: any, token: { __typename?: 'ERC1155Token', numericId: any, id: string, metadata?: { __typename?: 'Metadata', image?: string | null, layers?: Array<string> | null, name?: string | null, type?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', displayType?: string | null, traitType: string, value: string }> | null } | null, contract?: { __typename?: 'ERC1155Contract', address?: string | null } | null, transfers: Array<{ __typename?: 'ERC1155Transfer', id: string, transactionHash: string, to?: { __typename?: 'ERC1155Owner', id: string } | null, from?: { __typename?: 'ERC1155Owner', id: string } | null }> } }>, erc721Tokens: Array<{ __typename?: 'ERC721Token', numericId: any, id: string, metadata?: { __typename?: 'Metadata', image?: string | null, layers?: Array<string> | null, name?: string | null, type?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', displayType?: string | null, traitType: string, value: string }> | null } | null, contract: { __typename?: 'ERC721Contract', address?: string | null } }> };
+export type GetOnChainTokensQuery = { __typename?: 'Query', erc1155TokenOwners: Array<{ __typename?: 'ERC1155TokenOwner', id: string, balance: any, token: { __typename?: 'ERC1155Token', numericId: any, id: string, metadata?: { __typename?: 'Metadata', image?: string | null, layers?: Array<string> | null, name?: string | null, type?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', displayType?: string | null, traitType: string, value: string }> | null } | null, contract: { __typename?: 'ERC1155Contract', address?: string | null }, transfers: Array<{ __typename?: 'ERC1155Transfer', id: string, transactionHash: string, to: { __typename?: 'ERC1155Owner', id: string }, from: { __typename?: 'ERC1155Owner', id: string } }> } }>, erc721Tokens: Array<{ __typename?: 'ERC721Token', numericId: any, id: string, metadata?: { __typename?: 'Metadata', image?: string | null, layers?: Array<string> | null, name?: string | null, type?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', displayType?: string | null, traitType: string, value: string }> | null } | null, contract: { __typename?: 'ERC721Contract', address?: string | null } }> };
 
 
 export const GetMetadataDocument = `
