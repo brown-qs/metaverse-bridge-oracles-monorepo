@@ -1,5 +1,5 @@
 query getMetadata($erc721Where: ERC721TokenWhereInput, $erc1155Where:ERC1155TokenWhereInput) {
-  erc721Tokens(where: $erc721Where, limit: 300) {
+  erc721Tokens(where: $erc721Where, limit: 1000) {
     metadata {
       type
       name
@@ -18,7 +18,7 @@ query getMetadata($erc721Where: ERC721TokenWhereInput, $erc1155Where:ERC1155Toke
       address
     }
   }
-  erc1155Tokens(where: $erc1155Where, limit:50) {
+  erc1155Tokens(where: $erc1155Where, limit:1000) {
     metadata {
       type
       name

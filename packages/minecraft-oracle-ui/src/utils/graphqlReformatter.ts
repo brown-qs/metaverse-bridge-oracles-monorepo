@@ -98,9 +98,9 @@ export const inGameMetadataParams = (inGameItems: AssetDto[] | undefined): GetMe
     if (!!inGameItems) {
         for (const item of inGameItems) {
             if (item?.assetType === "ERC721") {
-                erc721Or.push({ numericId_eq: item?.assetId, contract: { address_containsInsensitive: item?.assetAddress } })
+                erc721Or.push({ numericId_eq: item?.assetId, contract: { address_eq: item?.assetAddress?.toLowerCase() } })
             } else if (item?.assetType === "ERC1155") {
-                erc1155Or.push({ numericId_eq: item?.assetId, contract: { address_containsInsensitive: item?.assetAddress } })
+                erc1155Or.push({ numericId_eq: item?.assetId, contract: { address_eq: item?.assetAddress?.toLowerCase() } })
             }
         }
     }
