@@ -43,7 +43,7 @@ const ProfilePage = () => {
 
     const { data: skins, error: skinsError, isLoading: skinsLoading } = useGetSkinsQuery()
     const [setSkin, { error: setSkinError, isUninitialized, isLoading, isSuccess, isError, reset: setSkinReset }] = useSetSkinMutation()
-    const { data: onChainTokensData, isLoading: isOnChainTokensLoading, isFetching: isOnChainTokensFetching, isError: isOnChainTokensError, error: onChainTokensError } = useGetOnChainTokensQuery({ owner: account ?? "0x999999999999999999999999999" })
+    const { data: onChainTokensData, isLoading: isOnChainTokensLoading, isFetching: isOnChainTokensFetching, isError: isOnChainTokensError, error: onChainTokensError } = useGetOnChainTokensQuery({ owner: account?.toLowerCase() ?? "0x999999999999999999999999999" })
     const { data: recognizedAssetsData, isLoading: isRecognizedAssetsLoading, isFetching: isRecognizedAssetsFetching, isError: isRecognizedAssetsError, error: recognizedAssetsError } = useGetRecognizedAssetsQuery()
     const { data: inGameItemsData, isLoading: isInGameItemsDataLoading, isFetching: isInGameItemsDataFetching, isError: isInGameItemsError, error: inGameItemsError } = useGetInGameItemsQuery()
     const { data: inGameResourcesData, isLoading: isInGameResourcesLoading, isFetching: isInGameResourcesFetching, isError: isInGameResourcesError, error: inGameResourcesError } = useGetInGameResourcesQuery()
@@ -101,7 +101,12 @@ const ProfilePage = () => {
     type OnChainTokenType = BaseOnChainTokenType & Omit<CollectionFragmentDto, "idRange">*/
     const onChainAssets: TransformedTokenType[] | undefined = React.useMemo(() => {
         if (!!onChainTokensData) {
-            return [...onChainTokensData.erc1155TokenOwners.map(tok => transformGraphqlErc1155Token(tok)), ...onChainTokensData.erc721Tokens.map(tok => transformGraphqlErc721Token(tok))].sort((a, b) => a.id.localeCompare(b.id))
+            return [
+                ...onChainTokensData.erc1155TokenOwners.map(tok => transformGraphqlErc1155Token(tok)),
+                ...onChainTokensData.erc721Tokens.map(tok => transformGraphqlErc721Token(tok))
+            ]
+                .filter(tok => tok?.balance !== "0")
+                .sort((a, b) => a.id.localeCompare(b.id))
         } else {
             return undefined
         }

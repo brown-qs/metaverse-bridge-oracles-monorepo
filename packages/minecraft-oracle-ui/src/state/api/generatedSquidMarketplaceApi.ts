@@ -2418,7 +2418,7 @@ export type GetOnChainTokensQuery = { __typename?: 'Query', erc1155TokenOwners: 
 
 export const GetMetadataDocument = `
     query getMetadata($erc721Where: ERC721TokenWhereInput, $erc1155Where: ERC1155TokenWhereInput) {
-  erc721Tokens(where: $erc721Where, limit: 300) {
+  erc721Tokens(where: $erc721Where, limit: 1000) {
     metadata {
       type
       name
@@ -2437,7 +2437,7 @@ export const GetMetadataDocument = `
       address
     }
   }
-  erc1155Tokens(where: $erc1155Where, limit: 50) {
+  erc1155Tokens(where: $erc1155Where, limit: 1000) {
     metadata {
       type
       name
@@ -2460,7 +2460,7 @@ export const GetMetadataDocument = `
     `;
 export const GetOnChainTokensDocument = `
     query getOnChainTokens($owner: String!) {
-  erc1155TokenOwners(where: {owner: {id_containsInsensitive: $owner}}, limit: 50) {
+  erc1155TokenOwners(where: {ownerId_eq: $owner}, limit: 1000) {
     id
     token {
       numericId
@@ -2484,7 +2484,7 @@ export const GetOnChainTokensDocument = `
     }
     balance
   }
-  erc721Tokens(where: {owner: {id_containsInsensitive: $owner}}, limit: 200) {
+  erc721Tokens(where: {ownerId_eq: $owner}, limit: 1000) {
     numericId
     metadata {
       image
