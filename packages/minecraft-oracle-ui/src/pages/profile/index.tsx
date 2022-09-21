@@ -34,9 +34,13 @@ import { Media } from '../../components';
 import { BigNumber, utils } from 'ethers';
 import { addRegonizedTokenDataToTokens, formatTokenName, inGameMetadataParams, InGameTokenMaybeMetadata, inGameTokensCombineMetadata, OnChainTokenWithRecognizedTokenData, TransformedTokenType, transformGraphqlErc1155Token, transformGraphqlErc721Token } from '../../utils/graphqlReformatter';
 import { ImportEnraptureModal } from '../../components/modals/ImportEnraptureModal';
+import { useDispatch } from 'react-redux';
+import { openImportEnraptureModal, setImportEnraptureTokens } from '../../state/slices/importEnraptureModalSlice';
 
 
 const ProfilePage = () => {
+    const dispatch = useDispatch()
+
     const { account, chainId } = useActiveWeb3React()
 
     const { data: profile, error, isLoading: profileLoading } = useUserProfileQuery()
@@ -419,7 +423,7 @@ const ProfilePage = () => {
 
                                                 e.stopPropagation();
 
-                                                const importAssets = []
+                                                const importAssets: OnChainTokenWithRecognizedTokenData[] = []
                                                 for (const id of onChainCheckboxGroupValue) {
                                                     const ass = onChainItems?.find(ass => ass.id === id)
                                                     if (!!ass) {
@@ -436,7 +440,8 @@ const ProfilePage = () => {
                                                         setEnraptureDialogData(item);
                                                     }
                                                 }
-
+                                                dispatch(setImportEnraptureTokens(importAssets))
+                                                dispatch(openImportEnraptureModal())
                                                 /*
                                                 onImportDialogOpen();
                                                 setImportDialogData({ asset: item.asset });*/
@@ -458,7 +463,7 @@ const ProfilePage = () => {
                                                     mediaUrl={item?.metadata?.image ?? ""}
                                                     isLoading={false}
                                                     key={item.id} //update key
-                                                    isCheckboxDisabled={isOnChainCheckboxGroupDisabled ?? true}
+                                                    isCheckboxDisabled={false}
                                                     checkboxValue={item.id}
                                                     isChecked={onChainCheckboxGroupValue.includes(item.id)}
                                                     onCheckboxChange={(e) => {
