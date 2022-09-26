@@ -15,7 +15,7 @@ export type BridgeTabListItemProps = {
 }
 
 const BridgeTabListItem: React.FC<BridgeTabListItemProps> = ({ mediaUrl, lineOne, isLoading, mediaRedOutline, lineTwo, highlightable, onClick, children }) => {
-    const _hover: CSSObject = { bg: "whiteAlpha.200", borderRadius: "4px" }
+    const _hover: CSSObject = highlightable ? { bg: "whiteAlpha.200", borderRadius: "4px" } : {}
     return (
         <HStack
             height="80px"
