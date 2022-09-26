@@ -381,6 +381,7 @@ const ProfilePage = () => {
                                                         //do this when ready for multiple values
                                                         //checkBoxProps.onChange(e)
                                                     }}
+                                                    highlightable={true}
                                                 >
                                                 </InGameItem>
                                             );

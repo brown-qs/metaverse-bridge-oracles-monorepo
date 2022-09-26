@@ -7,6 +7,7 @@ import application from './application/reducer';
 import { updateVersion } from './global/actions';
 import authSlice from './slices/authSlice';
 import importEnraptureModalSlice from './slices/importEnraptureModalSlice';
+import inGameItemModalSlice from './slices/inGameItemModalSlice';
 import transactions from './transactions/reducer';
 
 const PERSISTED_KEYS: string[] = ['transactions'];
@@ -17,6 +18,7 @@ const store = configureStore({
     transactions,
     auth: authSlice,
     importEnraptureModal: importEnraptureModalSlice,
+    inGameItemModal: inGameItemModalSlice,
     [bridgeApi.reducerPath]: bridgeApi.reducer,
     [generatedSquidMarketplaceApi.reducerPath]: generatedSquidMarketplaceApi.reducer
 
