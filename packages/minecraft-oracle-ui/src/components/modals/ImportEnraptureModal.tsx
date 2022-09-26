@@ -1,22 +1,24 @@
 import { Box, Button, CircularProgress, HStack, VStack } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Checks } from "tabler-icons-react";
 import { ReduxModal } from ".";
 import { ChainId } from "../../constants";
 import { useImportDialog, useActiveWeb3React } from "../../hooks";
 import { useImportConfirmCallback } from "../../hooks/multiverse/useConfirm";
-import { useImportAssetCallback, CreateImportAssetCallbackState } from "../../hooks/multiverse/useImportAsset";
+import { useImportAssetCallback, CreateImportAssetCallbackState, AssetRequest } from "../../hooks/multiverse/useImportAsset";
 import { useApproveCallback, ApprovalState } from "../../hooks/useApproveCallback/useApproveCallback";
 import { useBalances } from "../../hooks/useBalances/useBalances";
 import { closeImportEnraptureModal, selectImportEnraptureModalOpen, selectImportEnraptureModalTokens } from "../../state/slices/importEnraptureModalSlice";
 import { useSubmittedImportTx, useIsTransactionPending } from "../../state/transactions/hooks";
 import { getExplorerLink } from "../../utils";
 import { stringAssetTypeToAssetType } from "../../utils/marketplace";
+import { StringAssetType, stringToStringAssetType } from "../../utils/subgraph";
 import { MoonsamaModal } from "../MoonsamaModal";
 import { TransactionLink } from "../TransactionLink";
 
 export function ImportEnraptureModal() {
+    const dispatch = useDispatch()
     const isOpen = useSelector(selectImportEnraptureModalOpen)
     const importEnraptureTokens = useSelector(selectImportEnraptureModalTokens)
 
@@ -45,33 +47,21 @@ export function ImportEnraptureModal() {
     let callbackError: string | undefined;
 
 
-    return (<ReduxModal
-        title="Import/enrapture"
-        isOpenSelector={selectImportEnraptureModalOpen}
-        closeActionCreator={closeImportEnraptureModal}
-        closeOnOverlayClick={false}
-        message="Coming soon."
-    >
 
-    </ReduxModal >)
-    /*
     const assetAddress = importEnraptureTokens?.[0]?.assetAddress?.toLowerCase()
-    const assetId = importEnraptureTokens?.[0]?.numericId
+    const assId = importEnraptureTokens?.[0]?.numericId
+    const assetId = !!assId ? String(assId) : undefined
     const assetType = importEnraptureTokens?.[0]?.assetType
-
     const amount = '1' //todo set for enrapture
     const owner = account?.toLowerCase()
     const beneficiary = account?.toLowerCase()
-
-    const importObject = {
+    const importObject: AssetRequest = {
         asset: {
             assetAddress,
             assetId,
             assetType: stringAssetTypeToAssetType(assetType)
         },
         amount,
-        owner,
-        beneficiary,
         chainId
     }
 
@@ -79,7 +69,7 @@ export function ImportEnraptureModal() {
         {
             assetAddress,
             assetId,
-            assetType,
+            assetType: stringToStringAssetType(assetType),
             id: '1',
         },
     ])?.[0];
@@ -157,7 +147,7 @@ export function ImportEnraptureModal() {
                 <Box w="100%" paddingTop="16px">
                     <Button
                         onClick={() => {
-                            handleClose()
+                            dispatch(closeImportEnraptureModal())
                         }}
                         leftIcon={<Checks />}
                         w="100%">GOT IT!</Button>
@@ -206,7 +196,7 @@ export function ImportEnraptureModal() {
                 <Box w="100%" paddingTop="16px">
                     <Button
                         onClick={() => {
-                            handleClose()
+                            dispatch(closeImportEnraptureModal())
                         }}
                         leftIcon={<Checks />}
                         w="100%">GOT IT!</Button>
@@ -222,7 +212,7 @@ export function ImportEnraptureModal() {
             message="You are about to import one or more items to the metaverse to use them in-game, and you will be able to export them back to your wallet afterward."
             closeOnOverlayClick={false}
             bottomButtonText="Cancel"
-            onBottomButtonClick={handleClose}
+            onBottomButtonClick={() => dispatch(closeImportEnraptureModal())}
         >
             <VStack spacing="0">
 
@@ -259,5 +249,5 @@ export function ImportEnraptureModal() {
                 </Box>
             </VStack>
         </ReduxModal>)
-    };*/
+    };
 }
