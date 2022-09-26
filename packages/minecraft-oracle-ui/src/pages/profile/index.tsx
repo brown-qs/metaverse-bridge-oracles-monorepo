@@ -359,23 +359,25 @@ const ProfilePage = () => {
 
                                     <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">
 
-                                        {!!inGameItems && inGameItems.map((value, ind) => {
-                                            const checkBoxProps = getInGameCheckboxGroupProps({ value: value.hash })
+                                        {!!inGameItems && inGameItems.map((item, ind) => {
+                                            const checkBoxProps = getInGameCheckboxGroupProps({ value: item.hash })
                                             return (
                                                 <InGameItem
-                                                    lineOne={value?.metadata?.name}
-                                                    mediaUrl={value?.metadata?.image}
-                                                    isLoading={!!value?.metadata !== true}
-                                                    key={value.hash}
-                                                    isCheckboxDisabled={isInGameCheckboxGroupDisabled ?? true}
-                                                    checkboxValue={String(value.hash)}
-                                                    isChecked={onChainCheckboxGroupValue.includes(String(value.hash))}
+                                                    lineOne={item?.metadata?.name}
+                                                    lineTwo={item.enraptured ? "Enraptured. Not exportable." : undefined}
+                                                    mediaRedOutline={item.enraptured === true}
+                                                    mediaUrl={item?.metadata?.image}
+                                                    isLoading={!!item?.metadata !== true}
+                                                    key={item.hash}
+                                                    isCheckboxDisabled={item.enraptured === true}
+                                                    checkboxValue={String(item.hash)}
+                                                    isChecked={inGameCheckboxGroupValue.includes(String(item.hash))}
                                                     onCheckboxChange={(e) => {
                                                         //hack for now allow only one check
                                                         if (e.target.checked) {
-                                                            setOnChainCheckboxGroupValue([String(value.hash)])
+                                                            setInGameCheckboxGroupValue([String(item.hash)])
                                                         } else {
-                                                            setOnChainCheckboxGroupValue([])
+                                                            setInGameCheckboxGroupValue([])
                                                         }
 
                                                         //do this when ready for multiple values
