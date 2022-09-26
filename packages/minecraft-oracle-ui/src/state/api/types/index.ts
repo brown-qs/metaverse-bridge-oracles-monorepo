@@ -1,3 +1,5 @@
+import { StringAssetType } from "../../../utils/subgraph"
+
 export type EmailLoginCode = {
     email: string
     "g-recaptcha-response": string
@@ -89,14 +91,6 @@ export enum RecognizedAssetType {
     RESOURCE = 'RESOURCE',
     CONSUMABLE = 'CONSUMABLE',
     PONDSAMA_FISH = 'PONDSAMA_FISH'
-}
-
-export enum StringAssetType {
-    NONE = 'NONE',
-    NATIVE = 'NATIVE',
-    ERC20 = 'ERC20',
-    ERC721 = 'ERC721',
-    ERC1155 = 'ERC1155'
 }
 
 export type AssetDto = {
