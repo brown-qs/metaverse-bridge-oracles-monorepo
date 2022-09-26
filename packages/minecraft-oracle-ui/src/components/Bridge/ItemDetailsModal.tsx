@@ -1,10 +1,10 @@
 import { VStack, HStack, Box, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, Grid, Tooltip } from "@chakra-ui/react";
 import { ReactNode } from "react";
-import { InGameItemWithStatic } from "../../hooks/multiverse/useInGameItems";
+import { InGameTokenMaybeMetadata } from "../../utils/graphqlReformatter";
 import { AssetChainDetails } from "../AssetChainDetails/AssetChainDetails";
 import { MoonsamaModal } from "../MoonsamaModal";
 
-export const ItemDetailsModal: React.FC<{ data: InGameItemWithStatic, isOpen: boolean, onClose: () => void, children?: ReactNode }> = ({ data, isOpen, onClose }) => {
+export const ItemDetailsModal: React.FC<{ data: InGameTokenMaybeMetadata, isOpen: boolean, onClose: () => void, children?: ReactNode }> = ({ data, isOpen, onClose }) => {
 
     return (
 

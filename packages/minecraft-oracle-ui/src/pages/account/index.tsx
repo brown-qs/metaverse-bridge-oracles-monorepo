@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AuthLayout, Loader } from 'ui';
-import { useAuth, useClasses, useOauthLogin } from 'hooks';
+import { useClasses, useOauthLogin } from 'hooks';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
 import { Container, Image, Alert, AlertDescription, AlertIcon, Box, Button, CircularProgress, HStack, Stack, Tag, TagCloseButton, TagLabel, TagLeftIcon, TagRightIcon, VStack, Grid, GridItem, FormControl, FormHelperText, FormLabel, Input, FormErrorMessage, InputRightElement, IconButton, useToast } from '@chakra-ui/react';

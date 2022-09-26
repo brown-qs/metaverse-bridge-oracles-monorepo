@@ -1,7 +1,6 @@
 
 import { Box } from '@chakra-ui/react';
 import { useClasses } from 'hooks';
-import { useAuth } from 'hooks';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { UserCircle } from 'tabler-icons-react';

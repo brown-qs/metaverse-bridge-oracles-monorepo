@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Loader } from 'ui';
-import { useAuth, useClasses } from 'hooks';
+import { useClasses } from 'hooks';
 import { styles } from './styles';
 import WhiteLogo from 'assets/images/moonsama-glitch-white.svg';
 import LeftImage from 'assets/images/home/left.png';
@@ -14,7 +14,6 @@ import { useEmailLoginDialog } from '../../hooks/useEmailLoginDialog/useEmailLog
 import { useKiltLoginDialog } from '../../hooks/useKiltLoginDialog/useKiltLoginDialog';
 
 const HomePage = () => {
-  const { authData } = useAuth();
   let navigate = useNavigate();
   const {
     homeContainer,

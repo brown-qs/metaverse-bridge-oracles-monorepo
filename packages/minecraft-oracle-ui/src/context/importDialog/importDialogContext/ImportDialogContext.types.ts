@@ -1,5 +1,3 @@
-import { Asset } from '../../../hooks/marketplace/types';
-import { InGameItemWithStatic } from '../../../hooks/multiverse/useInGameItems';
 import { OnChainTokenWithRecognizedTokenData } from '../../../utils/graphqlReformatter';
 
 

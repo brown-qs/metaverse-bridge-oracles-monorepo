@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { calculateGasMargin } from '../../utils';
 import { useMultiverseBridgeV1Contract, useMultiverseBridgeV2Contract } from '../../hooks/useContracts/useContracts';
-import { useActiveWeb3React, useAuth } from '../../hooks';
+import { useActiveWeb3React } from '../../hooks';
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import axios from 'axios'
 import { AssetType } from 'utils/marketplace';
+import { useSelector } from 'react-redux';
+import { selectAccessToken } from '../../state/slices/authSlice';
 
 export enum CreateImportAssetCallbackState {
     INVALID,
@@ -20,7 +22,7 @@ export interface ImportRequest {
         assetType?: AssetType
     },
     owner: string | undefined | null,
-    beneficiary: string| undefined | null,
+    beneficiary: string | undefined | null,
     amount: string,
     chainId?: number
 }
@@ -46,10 +48,9 @@ export function useFetchImportAssetArgumentsCallback(importRequest: ImportReques
     const { library, account } = useActiveWeb3React();
 
     const [params, setParams] = useState<ImportRequestParams | undefined>(undefined)
-    const { authData } =  useAuth();
-    
-    const {jwt} = authData ?? {}
-    
+    const accessToken = useSelector(selectAccessToken)
+
+
     const stringedRequest = JSON.stringify(importRequest)
 
     const cb = useCallback(async () => {
@@ -61,21 +62,21 @@ export function useFetchImportAssetArgumentsCallback(importRequest: ImportReques
                 method: 'put',
                 url: `${process.env.REACT_APP_BACKEND_API_URL}/oracle/import`,
                 data: importRequest,
-                headers: { Authorization: `Bearer ${jwt}` }
+                headers: { Authorization: `Bearer ${accessToken}` }
             });
             setParams(resp.data)
-        } catch(e) {
+        } catch (e) {
             console.error('Error fetching import params.')
             setParams(undefined)
         }
-    }, [library, account, stringedRequest, jwt])
+    }, [library, account, stringedRequest, accessToken])
 
 
     useEffect(() => {
         if (library && account && importRequest) {
             cb()
         }
-    }, [library, account, stringedRequest, jwt])
+    }, [library, account, stringedRequest, accessToken])
 
     return params
 }
@@ -109,7 +110,7 @@ export function useImportAssetCallback(
     }
 
     return useMemo(() => {
-        if (!library || !account || !chainId || !contract ) {
+        if (!library || !account || !chainId || !contract) {
             return {
                 state: CreateImportAssetCallbackState.INVALID,
                 callback: null,
@@ -128,13 +129,13 @@ export function useImportAssetCallback(
         }
 
         if (!data || !signature || !hash) {
-          console.error('Error fetching input params from oracle');
-          return {
-            state: CreateImportAssetCallbackState.INVALID,
-            callback: null,
-            error: 'Error fetching input params from oracle',
-            hash
-          };
+            console.error('Error fetching input params from oracle');
+            return {
+                state: CreateImportAssetCallbackState.INVALID,
+                callback: null,
+                error: 'Error fetching input params from oracle',
+                hash
+            };
         }
 
         const inputParams = [data, signature]
@@ -220,7 +221,7 @@ export function useImportAssetCallback(
         account,
         chainId,
         data,
-        signature,,
+        signature, ,
         confirmed,
         hash,
         inputOptions.value,
