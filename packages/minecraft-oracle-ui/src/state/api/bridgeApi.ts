@@ -2,7 +2,7 @@ import { SerializedError } from "@reduxjs/toolkit"
 import { BaseQueryFn, createApi, FetchArgs, fetchBaseQuery, FetchBaseQueryError } from "@reduxjs/toolkit/query/react"
 import { AppState } from ".."
 import { setTokens } from "../slices/authSlice"
-import { AssetDto, EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse, RecognizedAssetsDto, SkinResponse, SkinSelectRequest, UserProfileResponse } from "./types"
+import { AssetDto, CallparamDto, EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse, ImportDto, RecognizedAssetsDto, SkinResponse, SkinSelectRequest, UserProfileResponse } from "./types"
 
 
 // ---------------------------------------------------------- //
@@ -115,6 +115,13 @@ export const bridgeApi = createApi({
             }),
             invalidatesTags: ["Profile"]
         }),
+        getImportParams: builder.mutation<CallparamDto, ImportDto>({
+            query: (body) => ({
+                url: `/oracle/summon`,
+                method: "PUT",
+                body
+            }),
+        }),
         getAssets: builder.query<void, void>({
             query: () => `/user/resources`,
         }),
@@ -179,4 +186,4 @@ export const rtkQueryErrorFormatter = (error: any): string => {
     return strErr
 }
 
-export const { useSummonMutation, useGetInGameResourcesQuery, useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
+export const { useGetImportParamsMutation, useSummonMutation, useGetInGameResourcesQuery, useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi

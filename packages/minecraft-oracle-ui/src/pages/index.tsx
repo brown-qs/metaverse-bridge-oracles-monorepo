@@ -1,8 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from "hooks";
 import HomePage from './home';
-import AuthPage from './auth';
 import ProfilePage from './profile';
 import MoonsamaCharacterDesignerPage from './moonsama/designer';
 import { ExportDialog } from '../components/ExportDialog/ExportDialog';

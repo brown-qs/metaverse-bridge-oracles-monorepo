@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { calculateGasMargin } from '../../utils';
 import { useMultiverseBridgeV1Contract, useMultiverseBridgeV2Contract } from '../../hooks/useContracts/useContracts';
-import { useActiveWeb3React, useAuth } from '../../hooks';
+import { useActiveWeb3React } from '../../hooks';
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import axios from 'axios'
 import { AssetType } from 'utils/marketplace';
+import { useSelector } from 'react-redux';
+import { selectAccessToken } from '../../state/slices/authSlice';
 
 export enum EnraptureAssetCallbackState {
     INVALID,
@@ -46,9 +48,7 @@ export function useFetchEnraptureAssetArgumentsCallback(enraptureRequest: Enrapt
     const { library, account } = useActiveWeb3React();
 
     const [params, setParams] = useState<EnraptureRequestParams | undefined>(undefined)
-    const { authData } = useAuth();
-
-    const { jwt } = authData ?? {}
+    const accessToken = useSelector(selectAccessToken)
 
     const stringedRequest = JSON.stringify(enraptureRequest)
 
@@ -63,21 +63,21 @@ export function useFetchEnraptureAssetArgumentsCallback(enraptureRequest: Enrapt
                 method: 'put',
                 url: `${process.env.REACT_APP_BACKEND_API_URL}/oracle/enrapture`,
                 data: enraptureRequest,
-                headers: { Authorization: `Bearer ${jwt}` }
+                headers: { Authorization: `Bearer ${accessToken}` }
             });
             setParams(resp.data)
         } catch (e) {
             //console.error('Error fetching import params.')
             setParams(undefined)
         }
-    }, [library, account, stringedRequest, jwt])
+    }, [library, account, stringedRequest, accessToken])
 
 
     useEffect(() => {
         if (library && account && enraptureRequest) {
             cb()
         }
-    }, [library, account, stringedRequest, jwt])
+    }, [library, account, stringedRequest, accessToken])
 
     return params
 }

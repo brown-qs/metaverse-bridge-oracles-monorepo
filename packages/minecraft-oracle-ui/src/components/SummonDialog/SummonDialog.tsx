@@ -4,7 +4,6 @@ import { useActiveWeb3React, useSummonDialog } from 'hooks';
 import { useState } from 'react';
 import { useClasses } from 'hooks';
 import { styles as appStyles } from '../../app.styles';
-import { useSummonCallback } from 'hooks/multiverse/useSummon';
 import {
   DEFAULT_CHAIN,
   NETWORK_NAME,
@@ -33,7 +32,6 @@ export const SummonDialog = () => {
 
   const recipient = account ?? summonDialogData?.recipient ?? undefined;
 
-  const summonCallback = useSummonCallback();
 
   /*
         TablerIcon={MessageReport}

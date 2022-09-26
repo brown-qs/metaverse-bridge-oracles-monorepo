@@ -1,12 +1,12 @@
 import { Asset } from '../../../hooks/marketplace/types';
-import { InGameItemWithStatic } from '../../../hooks/multiverse/useInGameItems';
+import { InGameTokenMaybeMetadata } from '../../../utils/graphqlReformatter';
 
 export type ExportDialogData = {
   asset?: Asset;
   address?: string;
   chain?: number;
   hash?: string,
-  item?: InGameItemWithStatic
+  item?: InGameTokenMaybeMetadata
 } | undefined;
 
 export type ExportDialogContextType = {

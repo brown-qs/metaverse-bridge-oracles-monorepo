@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import axios, { AxiosError } from 'axios';
 import { useBlockNumber } from 'state/application/hooks';
-import { useAuth } from 'hooks';
+import { useSelector } from 'react-redux';
+import { selectAccessToken } from '../../state/slices/authSlice';
 
 export interface InGameItem {
     name: string
@@ -14,8 +15,7 @@ export interface InGameItem {
 
 export function useActiveGame() {
     const blocknumber = useBlockNumber();
-    const { authData, setAuthData } =  useAuth();
-    const {jwt} = authData ?? {}
+    const accessToken = useSelector(selectAccessToken)
 
     const [items, setItems] = useState<boolean>(false)
 
@@ -24,19 +24,19 @@ export function useActiveGame() {
             const resp = await axios.request<boolean>({
                 method: 'get',
                 url: `${process.env.REACT_APP_BACKEND_API_URL}/user/inprogress`,
-                headers: { Authorization: `Bearer ${authData?.jwt}` }
+                headers: { Authorization: `Bearer ${accessToken}` }
             });
             setItems(resp.data)
-        } catch(e) {
+        } catch (e) {
             const err = e as AxiosError;
             console.error('Error fetching active game. Try again later.')
             setItems(false)
         }
-    }, [blocknumber, jwt])
+    }, [blocknumber, accessToken])
 
     useEffect(() => {
         getActive()
-    }, [blocknumber, jwt])
+    }, [blocknumber, accessToken])
 
     return items
 }

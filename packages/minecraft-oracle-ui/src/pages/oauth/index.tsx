@@ -1,13 +1,14 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthLayout, Loader } from 'ui';
-import { useAuth, useClasses } from 'hooks';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import axios, { AxiosError } from 'axios';
 import { useOauthLogin } from '../../hooks/useOauthLogin/useOauthLogin';
+import { useSelector } from 'react-redux';
+import { selectAccessToken } from '../../state/slices/authSlice';
 const OauthPage = () => {
   console.log("Oauthpage")
-  const { authData, setAuthData } = useAuth();
+  const accessToken = useSelector(selectAccessToken)
   const [isLoading, setIsLoading] = useState(true)
   const [failureMessage, setFailureMessage] = useState("")
   let navigate = useNavigate();
@@ -22,7 +23,7 @@ const OauthPage = () => {
         method: 'get',
         url: `${process.env.REACT_APP_BACKEND_API_URL}/oauth2/client/${searchParams.get("client_id")}/public`,
         headers: {
-          "Authorization": `Bearer ${authData?.jwt}`,
+          "Authorization": `Bearer ${accessToken}`,
           "Content-Type": "application/json"
         }
       });
