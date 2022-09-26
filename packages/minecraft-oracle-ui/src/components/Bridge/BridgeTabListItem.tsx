@@ -1,4 +1,4 @@
-import { VStack, HStack, Box, CircularProgress, useMediaQuery, Checkbox, Skeleton } from "@chakra-ui/react";
+import { VStack, HStack, Box, CircularProgress, useMediaQuery, Checkbox, Skeleton, CSSObject } from "@chakra-ui/react";
 import { BigNumber } from "@ethersproject/bignumber";
 import { ReactNode } from "react";
 import { Media } from "..";
@@ -15,6 +15,7 @@ export type BridgeTabListItemProps = {
 }
 
 const BridgeTabListItem: React.FC<BridgeTabListItemProps> = ({ mediaUrl, lineOne, isLoading, mediaRedOutline, lineTwo, highlightable, onClick, children }) => {
+    const _hover: CSSObject = { bg: "whiteAlpha.200", borderRadius: "4px" }
     return (
         <HStack
             height="80px"
@@ -24,6 +25,7 @@ const BridgeTabListItem: React.FC<BridgeTabListItemProps> = ({ mediaUrl, lineOne
             fontFamily="Rubik"
             fontSize="16px"
             position="relative"
+            _hover={_hover}
         >
             <Box
                 display={isLoading ? "block" : "none"}
