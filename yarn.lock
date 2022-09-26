@@ -5859,6 +5859,7 @@ __metadata:
     ethereum-multicall: ^2.6.1
     faker: ^5.5.3
     file-type: ^16.5.3
+    focus-visible: ^5.2.0
     framer-motion: ^6.5.1
     graphql: ^16.6.0
     graphql-request: ^4.3.0
@@ -15115,6 +15116,13 @@ __metadata:
   dependencies:
     tslib: ^2.0.3
   checksum: f1a62ea7bbdf71fcc7311a49d84e2f0a37f479539007152c887802e44d4910638611421aec915867353c63212c513e5aab4194bb7fe693d1d8dc1c4c7d43366b
+  languageName: node
+  linkType: hard
+
+"focus-visible@npm:^5.2.0":
+  version: 5.2.0
+  resolution: "focus-visible@npm:5.2.0"
+  checksum: 876f646ef453680d3d34e9f9b23961527ffd5ccaed8690f423d4fbfa37ff023d98a490972bc1387850e37ec2e44958c81f6096ef95b67462e5c4b5404cf1dbb9
   languageName: node
   linkType: hard
 
