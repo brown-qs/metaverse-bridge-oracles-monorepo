@@ -1,5 +1,6 @@
 import { Erc1155TokenWhereInput, Erc721TokenWhereInput, GetMetadataQuery, GetMetadataQueryVariables, GetOnChainTokensQuery } from "../state/api/generatedSquidMarketplaceApi"
-import { AssetDto, CollectionFragmentDto, RecognizedAssetsDto, RecognizedAssetType, StringAssetType } from "../state/api/types"
+import { AssetDto, CollectionFragmentDto, RecognizedAssetsDto, RecognizedAssetType } from "../state/api/types"
+import { StringAssetType } from "./subgraph"
 
 export type ERC721TokenType = GetOnChainTokensQuery["erc721Tokens"][0]
 export type ERC1155TokenType = GetOnChainTokensQuery["erc1155TokenOwners"][0]
