@@ -107,3 +107,21 @@ export type AssetDto = {
     exportAddress: string
     hash?: string
 }
+
+
+
+export interface ImportDto {
+    asset: AssetDto
+    owner: string
+    beneficiary: string
+    amount: string
+    chainId: number
+}
+
+
+export interface CallparamDto {
+    data: string
+    signature: string
+    hash?: string
+    confirmed: boolean
+}

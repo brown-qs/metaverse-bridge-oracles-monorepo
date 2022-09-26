@@ -1,9 +1,7 @@
 import { useClasses } from 'hooks';
 import { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 
-import { useProfile } from 'hooks/multiverse/useProfile';
 import { useOnChainItems } from 'hooks/multiverse/useOnChainItems';
-import { InGameTexture, useInGameItems } from 'hooks/multiverse/useInGameItems';
 import { useAccountDialog, useActiveWeb3React, useImportDialog, useEnraptureDialog } from 'hooks';
 import { useExportDialog } from 'hooks/useExportDialog/useExportDialog';
 import { useSummonDialog } from 'hooks/useSummonDialog/useSummonDialog';
@@ -11,10 +9,8 @@ import { stringToStringAssetType } from 'utils/subgraph';
 import { Fraction } from 'utils/Fraction';
 import { countGamePassAssets } from 'utils';
 import { useAssetDialog } from '../../hooks/useAssetDialog/useAssetDialog';
-import { useCallbackSkinEquip } from '../../hooks/multiverse/useCallbackSkinEquip';
 import React, { ReactNode, useEffect, useState } from 'react';
 import { SKIN_LABELS } from '../../constants/skins';
-import { InGameItemWithStatic } from 'hooks/multiverse/useInGameItems';
 import { BURNABLE_RESOURCES_IDS, DEFAULT_CHAIN, NETWORK_NAME } from "../../constants";
 import { AssetChainDetails } from '../../components/AssetChainDetails/AssetChainDetails';
 import { Image, Text, Box, Container, Grid, List, ListIcon, ListItem, Stack, Tooltip, Button, Flex, SimpleGrid, GridItem, VStack, HStack, background, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useCheckboxGroup, useMediaQuery, CircularProgress } from '@chakra-ui/react';
@@ -69,7 +65,6 @@ const ProfilePage = () => {
 
     const { isOpen: isItemDetailDialogOpen, onOpen: onItemDetailDialogOpen, onClose: onItemDetailDialogClose } = useDisclosure()
 
-    const [itemDetailDialogData, setItemDetailDialogData] = useState({} as InGameItemWithStatic);
 
 
     // Dialogs
@@ -594,7 +589,7 @@ const ProfilePage = () => {
 
                         </Grid >
 
-                        <ItemDetailsModal data={itemDetailDialogData} isOpen={isItemDetailDialogOpen} onClose={onItemDetailDialogClose}></ItemDetailsModal>
+                        {/**  <ItemDetailsModal data={itemDetailDialogData} isOpen={isItemDetailDialogOpen} onClose={onItemDetailDialogClose}></ItemDetailsModal>*/}
                     </>
                 }
             </Container >

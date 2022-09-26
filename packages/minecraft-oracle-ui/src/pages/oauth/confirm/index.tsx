@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { AuthLayout, Loader } from 'ui';
-import { useAuth, useClasses } from 'hooks';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
 import { useOauthLogin } from '../../../hooks/useOauthLogin/useOauthLogin';
 import { Button, Stack } from '@chakra-ui/react';
+import { useSelector } from 'react-redux';
+import { selectAccessToken } from '../../../state/slices/authSlice';
 const OauthConfirmPage = () => {
-  const { authData, setAuthData } = useAuth();
+  const accessToken = useSelector(selectAccessToken)
   const [isLoading, setIsLoading] = useState(false)
   const [failureMessage, setFailureMessage] = useState("")
   let navigate = useNavigate();
@@ -27,7 +28,7 @@ const OauthConfirmPage = () => {
         method: 'get',
         url: `${process.env.REACT_APP_BACKEND_API_URL}/oauth2/authorize`,
         headers: {
-          "Authorization": `Bearer ${authData?.jwt}`,
+          "Authorization": `Bearer ${accessToken}`,
           "Content-Type": "application/json"
         },
         params: Object.fromEntries(oauthData?.params)
@@ -40,8 +41,8 @@ const OauthConfirmPage = () => {
       const err = e as AxiosError;
 
       if (err?.response?.data.statusCode === 401) {
-        window.localStorage.removeItem('authData');
-        setAuthData(undefined);
+        //      window.localStorage.removeItem('authData');
+        //    setAuthData(undefined);
       } else if (!!err.response?.data?.message) {
         setFailureMessage(`Error: ${String(err.response?.data?.message)}`)
       } else {
