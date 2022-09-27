@@ -337,7 +337,7 @@ const AccountPage = () => {
           </GridItem>
           <GridItem zIndex="2" paddingBottom="40px">
             <VStack alignItems={{ base: "flex-end", md: "flex-end" }} spacing="0">
-              <Button variant="moonsamaGhost" rightIcon={<Power color="#3BEFB8" />}>Log Out</Button>
+              <Button variant="moonsamaGhost" rightIcon={<Power color="#3BEFB8" />} onClick={() => { dispatch(setTokens({ accessToken: null, refreshToken: null })) }}>Log Out</Button>
             </VStack>
           </GridItem>
           {/** END title + logout */}
