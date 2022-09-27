@@ -18,11 +18,9 @@ import { ExportDialogContextController } from '../context/exportDialog/exportDia
 import { AssetDialogContextController } from '../context/assetDialog/assetDialogContextController/assetDialogContextController';
 import { ChakraProvider } from '@chakra-ui/react'
 import { OauthLoginContextController } from '../context/oauthLogin/oauthLoginContextController/OauthLoginContextController';
-import { EmailLoginDialogContextController } from '../context/emailLoginDialog/emailLoginDialogContextController/EmailLoginDialogContextController';
 import { KiltLoginDialogContextController } from '../context/kiltLoginDialog/kiltLoginDialogContextController/KiltLoginDialogContextController';
 import { CaptchaContext } from '../context/captcha/captchaContext/captchaContext';
 import { CaptchaContextController } from '../context/captcha/captchaContextController/captchaContextController';
-import { EmailCodeDialogContextController } from '../context/emailCodeDialog/emailCodeDialogContextController/EmailCodeDialogContextController';
 import ScrollToTop from '../components/ScrollToTop';
 
 function Updaters() {
@@ -50,16 +48,12 @@ export const AppProviders = ({ children }: AppProvidersProps) => (
                         <ExportDialogContextController>
                           <TransferDialogContextController>
                             <AssetDialogContextController>
-                              <EmailLoginDialogContextController>
-                                <EmailCodeDialogContextController>
-                                  <KiltLoginDialogContextController>
-                                    <Router>
-                                      <ScrollToTop></ScrollToTop>
-                                      {children}
-                                    </Router>
-                                  </KiltLoginDialogContextController>
-                                </EmailCodeDialogContextController>
-                              </EmailLoginDialogContextController>
+                              <KiltLoginDialogContextController>
+                                <Router>
+                                  <ScrollToTop></ScrollToTop>
+                                  {children}
+                                </Router>
+                              </KiltLoginDialogContextController>
                             </AssetDialogContextController>
                           </TransferDialogContextController>
                         </ExportDialogContextController>
