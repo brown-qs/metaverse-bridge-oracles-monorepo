@@ -5,7 +5,7 @@ import { Checks } from "tabler-icons-react";
 import { ReduxModal } from ".";
 import { closeInGameItemModal, selectInGameItem, selectInGameItemModalOpen } from "../../state/slices/inGameItemModalSlice";
 
-export function InGameItemModal() {
+export function EmailCodeModal() {
     const inGameItem = useSelector(selectInGameItem)
     return (<ReduxModal
         title="Import to metaverse confirmed!"
