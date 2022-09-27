@@ -6,6 +6,8 @@ import { api as generatedSquidMarketplaceApi } from './api/generatedSquidMarketp
 import application from './application/reducer';
 import { updateVersion } from './global/actions';
 import authSlice from './slices/authSlice';
+import emailCodeModalSlice from './slices/emailCodeModalSlice';
+import emailLoginModalSlice from './slices/emailLoginModalSlice';
 import importEnraptureModalSlice from './slices/importEnraptureModalSlice';
 import inGameItemModalSlice from './slices/inGameItemModalSlice';
 import transactions from './transactions/reducer';
@@ -19,6 +21,8 @@ const store = configureStore({
     auth: authSlice,
     importEnraptureModal: importEnraptureModalSlice,
     inGameItemModal: inGameItemModalSlice,
+    emailCodeModal: emailCodeModalSlice,
+    emailLoginModal: emailLoginModalSlice,
     [bridgeApi.reducerPath]: bridgeApi.reducer,
     [generatedSquidMarketplaceApi.reducerPath]: generatedSquidMarketplaceApi.reducer
 
