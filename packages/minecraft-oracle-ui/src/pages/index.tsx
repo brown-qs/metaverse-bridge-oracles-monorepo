@@ -11,9 +11,7 @@ import { AssetDialog } from '../components/AssetDialog/AssetDialog';
 import AccountPage from './account';
 import OauthPage from './oauth';
 import OauthConfirmPage from './oauth/confirm';
-import { EmailLoginDialog } from '../components/EmailLoginDialog/EmailLoginDialog';
 import { KiltLoginDialog } from '../components/KiltLoginDialog/KiltLoginDialog';
-import { EmailCodeDialog } from '../components/EmailCodeDialog/EmailCodeDialog';
 import { useSelector } from 'react-redux';
 import { selectAccessToken } from '../state/slices/authSlice';
 import TestPage from './test';
@@ -52,8 +50,6 @@ export const Routing = () => {
                 <Navigate to="/bridge" />
             ) :
                 <>
-                    <EmailCodeDialog />
-                    <EmailLoginDialog />
                     <KiltLoginDialog />
                     <HomePage></HomePage>
                 </>
