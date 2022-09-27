@@ -8,14 +8,12 @@ import { ReactNode, useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Mail, MailForward } from "tabler-icons-react"
 import { useCaptcha } from "../../hooks/useCaptcha/useCaptcha"
-import { useEmailCodeDialog } from "../../hooks/useEmailCodeDialog/useEmailCodeDialog"
-import { useEmailLoginDialog } from "../../hooks/useEmailLoginDialog/useEmailLoginDialog"
 import { rtkQueryErrorFormatter, useEmailLoginCodeMutation } from "../../state/api/bridgeApi"
 import { closeEmailLoginModal, selectEmailLoginModalOpen } from "../../state/slices/emailLoginModalSlice";
 import { openEmailCodeModal } from "../../state/slices/emailCodeModalSlice";
 
 
-export function EmailCodeModal() {
+export function EmailLoginModal() {
     const isOpen = useSelector(selectEmailLoginModalOpen)
     const dispatch = useDispatch()
 
