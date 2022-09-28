@@ -2,7 +2,7 @@ import { useClasses } from 'hooks';
 import { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 
 import { useOnChainItems } from 'hooks/multiverse/useOnChainItems';
-import { useAccountDialog, useActiveWeb3React, useImportDialog, useEnraptureDialog } from 'hooks';
+import { useAccountDialog, useActiveWeb3React } from 'hooks';
 import { stringToStringAssetType } from 'utils/subgraph';
 import { Fraction } from 'utils/Fraction';
 import { countGamePassAssets } from 'utils';
@@ -23,10 +23,10 @@ import BackgroundImage from '../assets/images/bridge-background-blur.svg'
 import { useSetSkinMutation, useGetSkinsQuery, useUserProfileQuery, useGetRecognizedAssetsQuery, useGetInGameItemsQuery, useGetInGameResourcesQuery } from '../state/api/bridgeApi';
 
 import { AssetDto, CollectionFragmentDto, SkinResponse } from '../state/api/types';
-import { useGetOnChainTokensQuery, GetOnChainTokensQuery, useGetMetadataQuery } from '../state/api/generatedSquidMarketplaceApi';
+import { useGetMarketplaceMetadataQuery, useGetMarketplaceOnChainTokensQuery } from '../state/api/generatedSquidMarketplaceApi';
 import { Media } from '../components';
 import { BigNumber, utils } from 'ethers';
-import { addRegonizedTokenDataToTokens, formatTokenName, inGameMetadataParams, InGameTokenMaybeMetadata, inGameTokensCombineMetadata, OnChainTokenWithRecognizedTokenData, TransformedTokenType, transformGraphqlErc1155Token, transformGraphqlErc721Token } from '../utils/graphqlReformatter';
+import { addRegonizedTokenDataToStandardizedOnChainTokens, formatTokenName, inGameMarketplaceMetadataParams, InGameTokenMaybeMetadata, inGameTokensCombineMetadata, StandardizedOnChainToken, StandardizedOnChainTokenWithRecognizedTokenData, standardizeMarketplaceOnChainTokens } from '../utils/graphqlReformatter';
 import { ImportEnraptureModal } from '../components/modals/ImportEnraptureModal';
 import { useDispatch } from 'react-redux';
 import { openImportEnraptureModal, setImportEnraptureTokens } from '../state/slices/importEnraptureModalSlice';
@@ -34,6 +34,7 @@ import { openSummonModal } from '../state/slices/summonModalSlice';
 import { SummonModal } from '../components/modals/SummonModal';
 import { ExportModal } from '../components/modals/ExportModal';
 import { openExportModal, setExportTokens } from '../state/slices/exportModalSlice';
+import { useGetRaresamaOnChainTokensQuery } from '../state/api/generatedSquidRaresamaApi';
 
 
 const ProfilePage = () => {
@@ -41,16 +42,27 @@ const ProfilePage = () => {
 
     const { account, chainId } = useActiveWeb3React()
 
+    const address: string = React.useMemo(() => account?.toLowerCase() ?? "0x999999999999999999999999999", [account])
+
+    //profile
     const { data: profile, error, isLoading: profileLoading } = useUserProfileQuery()
 
+    //skins
     const { data: skins, error: skinsError, isLoading: skinsLoading } = useGetSkinsQuery()
     const [setSkin, { error: setSkinError, isUninitialized, isLoading, isSuccess, isError, reset: setSkinReset }] = useSetSkinMutation()
-    const { data: onChainTokensData, isLoading: isOnChainTokensLoading, isFetching: isOnChainTokensFetching, isError: isOnChainTokensError, error: onChainTokensError } = useGetOnChainTokensQuery({ owner: account?.toLowerCase() ?? "0x999999999999999999999999999" })
+
+    //on chain tokens (from indexers)
+    const { data: raresamaOnChainTokensData, isLoading: isRaresamaOnChainTokensDataLoading, isFetching: isRaresamaOnChainTokensDataFetching, isError: isRaresamaOnChainTokensDataError, error: raresamaOnChainTokensError } = useGetRaresamaOnChainTokensQuery({ where: { owner: { id_eq: address } } })
+    const { data: marketplaceOnChainTokensData, isLoading: isMarketplaceOnChainTokensLoading, isFetching: isMarketplaceOnChainTokensFetching, isError: isMarketplaceOnChainTokensError, error: marketplaceOnChainTokensError } = useGetMarketplaceOnChainTokensQuery({ owner: address })
+
+    //in game tokens (from nestjs server)
     const { data: recognizedAssetsData, isLoading: isRecognizedAssetsLoading, isFetching: isRecognizedAssetsFetching, isError: isRecognizedAssetsError, error: recognizedAssetsError } = useGetRecognizedAssetsQuery()
     const { data: inGameItemsData, isLoading: isInGameItemsDataLoading, isFetching: isInGameItemsDataFetching, isError: isInGameItemsError, error: inGameItemsError } = useGetInGameItemsQuery()
     const { data: inGameResourcesData, isLoading: isInGameResourcesLoading, isFetching: isInGameResourcesFetching, isError: isInGameResourcesError, error: inGameResourcesError } = useGetInGameResourcesQuery()
-    const { data: inGameItemsMetadata, isLoading: isInGameItemsMetadataLoading, isFetching: isInGameItemsMetadataFetching, isError: isInGameItemsMetadataError, error: inGameItemsMetadataError } = useGetMetadataQuery(inGameMetadataParams(inGameItemsData))
-    const { data: inGameResourcesMetadata, isLoading: isInGameResourcesMetadataLoading, isFetching: isInGameResourcesMetadataFetching, isError: isInGameResourcesMetadataError, error: inGameResourcesMetadataError } = useGetMetadataQuery(inGameMetadataParams(inGameResourcesData))
+
+    //metadata
+    const { data: inGameItemsMetadata, isLoading: isInGameItemsMetadataLoading, isFetching: isInGameItemsMetadataFetching, isError: isInGameItemsMetadataError, error: inGameItemsMetadataError } = useGetMarketplaceMetadataQuery(inGameMarketplaceMetadataParams(inGameItemsData))
+    const { data: inGameResourcesMetadata, isLoading: isInGameResourcesMetadataLoading, isFetching: isInGameResourcesMetadataFetching, isError: isInGameResourcesMetadataError, error: inGameResourcesMetadataError } = useGetMarketplaceMetadataQuery(inGameMarketplaceMetadataParams(inGameResourcesData))
 
 
 
@@ -70,8 +82,6 @@ const ProfilePage = () => {
 
 
     // Dialogs
-    const { isImportDialogOpen, onImportDialogOpen, onImportDialogClose, importDialogData, setImportDialogData } = useImportDialog()
-    const { isEnraptureDialogOpen, onEnraptureDialogOpen, onEnraptureDialogClose, enraptureDialogData, setEnraptureDialogData } = useEnraptureDialog()
     const { isAssetDialogOpen, onAssetDialogOpen, onAssetDialogClose, assetDialogData, setAssetDialogData } = useAssetDialog()
 
 
@@ -90,40 +100,14 @@ const ProfilePage = () => {
         return coverURL
     }
 
-    //without merged data about enrapturability, importability etc.
-
-    /*
-    type ERC721TokenType = Omit<GetOnChainTokensQuery["erc721Tokens"], "__typename">
-    type ERC1155TokenType = Omit<GetOnChainTokensQuery["erc1155TokenOwners"][0]["token"], "transfers" | "__typename">
-    type CombinedTokenType = ERC721TokenType | ERC1155TokenType
-    type BaseOnChainTokenType = CombinedTokenType & { balance?: string }
-    type OnChainTokenType = BaseOnChainTokenType & Omit<CollectionFragmentDto, "idRange">*/
-    const onChainAssets: TransformedTokenType[] | undefined = React.useMemo(() => {
-        if (!!onChainTokensData) {
-            return [
-                ...onChainTokensData.erc1155TokenOwners.map(tok => transformGraphqlErc1155Token(tok)),
-                ...onChainTokensData.erc721Tokens.map(tok => transformGraphqlErc721Token(tok))
-            ]
-                .filter(tok => tok?.balance !== "0")
-                .sort((a, b) => a.id.localeCompare(b.id))
-        } else {
-            return undefined
-        }
-    }, [onChainTokensData])
+    const standardizedMarketplaceOnChainTokens: StandardizedOnChainToken[] | undefined = React.useMemo(() => standardizeMarketplaceOnChainTokens(marketplaceOnChainTokensData), [marketplaceOnChainTokensData])
+    const standardizedMarketplaceOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(standardizedMarketplaceOnChainTokens, recognizedAssetsData), [standardizedMarketplaceOnChainTokens, recognizedAssetsData])
 
 
-    const onChainAssetsWithRecognizedTokenData: OnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
-        if (!!onChainAssets && !!recognizedAssetsData) {
-            return addRegonizedTokenDataToTokens(onChainAssets, recognizedAssetsData)
-        } else {
-            return undefined
-        }
-    }, [onChainAssets, recognizedAssetsData])
 
-
-    const onChainItems: OnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
-        if (!!onChainAssetsWithRecognizedTokenData) {
-            return onChainAssetsWithRecognizedTokenData.filter((tok) => {
+    const onChainItems: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
+        if (!!standardizedMarketplaceOnChainTokensWithRecognizedTokenData) {
+            return standardizedMarketplaceOnChainTokensWithRecognizedTokenData.filter((tok) => {
                 if (tok?.importable === false && tok?.enrapturable === false) {
                     return false
                 }
@@ -132,15 +116,15 @@ const ProfilePage = () => {
         } else {
             return undefined
         }
-    }, [onChainAssetsWithRecognizedTokenData, account])
+    }, [standardizedMarketplaceOnChainTokensWithRecognizedTokenData, account])
 
-    const onChainResources: OnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
-        if (!!onChainAssetsWithRecognizedTokenData) {
-            return onChainAssetsWithRecognizedTokenData.filter((tok) => tok.summonable)
+    const onChainResources: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
+        if (!!standardizedMarketplaceOnChainTokensWithRecognizedTokenData) {
+            return standardizedMarketplaceOnChainTokensWithRecognizedTokenData.filter((tok) => tok.summonable)
         } else {
             return undefined
         }
-    }, [onChainAssetsWithRecognizedTokenData, account])
+    }, [standardizedMarketplaceOnChainTokensWithRecognizedTokenData, account])
 
 
     const inGameItems: InGameTokenMaybeMetadata[] | undefined = React.useMemo(() => {
@@ -399,7 +383,7 @@ const ProfilePage = () => {
                                 <BridgeTab
                                     title="On-Chain Items"
                                     emptyMessage={onChainItems?.length ? undefined : "No items found in wallet."}
-                                    isLoading={isOnChainTokensLoading}
+                                    isLoading={isMarketplaceOnChainTokensLoading}
                                     icon={<Wallet size="18px" />}
                                     footer={
                                         <Button
@@ -408,7 +392,7 @@ const ProfilePage = () => {
 
                                                 e.stopPropagation();
 
-                                                const importAssets: OnChainTokenWithRecognizedTokenData[] = []
+                                                const importAssets: StandardizedOnChainTokenWithRecognizedTokenData[] = []
                                                 for (const id of onChainCheckboxGroupValue) {
                                                     const ass = onChainItems?.find(ass => ass.id === id)
                                                     if (!!ass) {
@@ -416,17 +400,10 @@ const ProfilePage = () => {
                                                     }
                                                 }
                                                 if (importAssets.length > 0) {
-                                                    const item = importAssets[0]
-                                                    if (item.importable) {
-                                                        onImportDialogOpen();
-                                                        setImportDialogData(item);
-                                                    } else if (item.enrapturable) {
-                                                        onEnraptureDialogOpen();
-                                                        setEnraptureDialogData(item);
-                                                    }
+                                                    dispatch(setImportEnraptureTokens(importAssets))
+                                                    dispatch(openImportEnraptureModal())
                                                 }
-                                                dispatch(setImportEnraptureTokens(importAssets))
-                                                dispatch(openImportEnraptureModal())
+
 
                                             }}
                                             isDisabled={onChainCheckboxGroupValue.length === 0} w="100%">IMPORT TO GAME
@@ -539,7 +516,7 @@ const ProfilePage = () => {
                                 <BridgeTab
                                     title="On-Chain Resources"
                                     emptyMessage={onChainResources?.length ? undefined : "No resources found in wallet."}
-                                    isLoading={isOnChainTokensLoading}
+                                    isLoading={isMarketplaceOnChainTokensLoading}
                                     icon={<Wallet size="18px" />}>
 
                                     <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">

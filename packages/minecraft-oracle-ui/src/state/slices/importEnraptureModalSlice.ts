@@ -1,10 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { AppState } from ".."
-import { OnChainTokenWithRecognizedTokenData } from "../../utils/graphqlReformatter"
+import { StandardizedOnChainTokenWithRecognizedTokenData } from "../../utils/graphqlReformatter"
 
 export interface ImportEnraptureModalSlice {
     modalOpen: boolean,
-    importEnraptureTokens: OnChainTokenWithRecognizedTokenData[]
+    importEnraptureTokens: StandardizedOnChainTokenWithRecognizedTokenData[]
 }
 
 const importEnraptureModalSlice = createSlice({
@@ -17,7 +17,7 @@ const importEnraptureModalSlice = createSlice({
         openImportEnraptureModal: (state) => {
             state.modalOpen = true
         },
-        setImportEnraptureTokens: (state, importEnraptureTokens: PayloadAction<OnChainTokenWithRecognizedTokenData[]>) => {
+        setImportEnraptureTokens: (state, importEnraptureTokens: PayloadAction<StandardizedOnChainTokenWithRecognizedTokenData[]>) => {
             state.importEnraptureTokens = importEnraptureTokens.payload
         }
     }

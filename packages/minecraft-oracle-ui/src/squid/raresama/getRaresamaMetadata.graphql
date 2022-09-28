@@ -1,23 +1,21 @@
-query getOnChainTokens($where: TokenWhereInput) {
+query getRaresamaMetadata($where: TokenWhereInput) {
   tokens(where: $where, limit: 1000) {
-    id
-    numericId
     metadata {
-      image
-      layers
-      name
       type
+      name
+      layers
+      image
       description
       composite
       attributes {
-        displayType
-        traitType
         value
+        traitType
+        displayType
       }
     }
-    id
+    numericId
     contract {
-      id
+      address: id
     }
   }
 }
