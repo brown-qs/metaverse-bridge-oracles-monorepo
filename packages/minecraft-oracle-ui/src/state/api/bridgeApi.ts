@@ -2,7 +2,7 @@ import { SerializedError } from "@reduxjs/toolkit"
 import { BaseQueryFn, createApi, FetchArgs, fetchBaseQuery, FetchBaseQueryError } from "@reduxjs/toolkit/query/react"
 import { AppState } from ".."
 import { setTokens } from "../slices/authSlice"
-import { AssetDto, CallparamDto, EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse, ImportDto, RecognizedAssetsDto, SkinResponse, SkinSelectRequest, UserProfileResponse } from "./types"
+import { AssetDto, CallparamDto, EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse, ImportDto, Oauth2PublicClientDto, RecognizedAssetsDto, SkinResponse, SkinSelectRequest, UserProfileResponse } from "./types"
 
 
 // ---------------------------------------------------------- //
@@ -167,7 +167,21 @@ export const bridgeApi = createApi({
                 }
             },
         }),
+        oauthCode: builder.query<Oauth2PublicClientDto, string>({
+            query: (clientId) => ({
+                url: `oauth2/client/${clientId}/public`,
+                method: "GET"
+            }),
+        }),
+        oauthAuthorize: builder.mutation<{ url: string }, URLSearchParams>({
+            query: (urlSearchParams) => ({
+                url: `/oauth2/authorize`,
+                method: "GET",
+                params: Object.fromEntries(urlSearchParams)
+            }),
+        }),
     }),
+
 })
 
 
@@ -186,4 +200,4 @@ export const rtkQueryErrorFormatter = (error: any): string => {
     return strErr
 }
 
-export const { useGetImportParamsMutation, useSummonMutation, useGetInGameResourcesQuery, useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
+export const { useOauthCodeQuery, useOauthAuthorizeMutation, useGetImportParamsMutation, useSummonMutation, useGetInGameResourcesQuery, useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi

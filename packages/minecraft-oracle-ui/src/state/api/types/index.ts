@@ -125,3 +125,13 @@ export interface CallparamDto {
     hash?: string
     confirmed: boolean
 }
+
+export interface Oauth2PublicClientDto {
+    appName: string
+    scopes: { scope: Oauth2Scope, prettyScope: string }[]
+}
+
+export enum Oauth2Scope {
+    UserUuidRead = 'user:uuid.read',
+    UserGamerTagRead = 'user:gamer_tag.read'
+}

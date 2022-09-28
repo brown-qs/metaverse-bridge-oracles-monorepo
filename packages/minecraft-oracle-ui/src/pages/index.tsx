@@ -11,7 +11,6 @@ import { AssetDialog } from '../components/AssetDialog/AssetDialog';
 import AccountPage from './account';
 import OauthPage from './oauth';
 import OauthConfirmPage from './oauth/confirm';
-import { KiltLoginDialog } from '../components/KiltLoginDialog/KiltLoginDialog';
 import { useSelector } from 'react-redux';
 import { selectAccessToken } from '../state/slices/authSlice';
 import TestPage from './test';
@@ -49,10 +48,7 @@ export const Routing = () => {
             <Route path="/login" element={<>{!!accessToken ? (
                 <Navigate to="/bridge" />
             ) :
-                <>
-                    <KiltLoginDialog />
-                    <HomePage></HomePage>
-                </>
+                <HomePage></HomePage>
 
             }</>}>
             </Route>
