@@ -1224,7 +1224,7 @@ export type GetMetadataQueryVariables = Exact<{
 export type GetMetadataQuery = { __typename?: 'Query', tokens: Array<{ __typename?: 'Token', numericId: any, metadata?: { __typename?: 'Metadata', type?: string | null, name?: string | null, layers?: Array<string> | null, image?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', value: string, traitType: string, displayType?: string | null }> | null } | null, contract: { __typename?: 'Contract', id: string } }> };
 
 export type GetOnChainTokensQueryVariables = Exact<{
-  owner: Scalars['String'];
+  where?: InputMaybe<TokenWhereInput>;
 }>;
 
 
@@ -1255,8 +1255,8 @@ export const GetMetadataDocument = `
 }
     `;
 export const GetOnChainTokensDocument = `
-    query getOnChainTokens($owner: String!) {
-  tokens(where: {owner: {id_eq: $owner}}, limit: 1000) {
+    query getOnChainTokens($where: TokenWhereInput) {
+  tokens(where: $where, limit: 1000) {
     id
     numericId
     metadata {
@@ -1285,7 +1285,7 @@ const injectedRtkApi = api.injectEndpoints({
     getMetadata: build.query<GetMetadataQuery, GetMetadataQueryVariables | void>({
       query: (variables) => ({ document: GetMetadataDocument, variables })
     }),
-    getOnChainTokens: build.query<GetOnChainTokensQuery, GetOnChainTokensQueryVariables>({
+    getOnChainTokens: build.query<GetOnChainTokensQuery, GetOnChainTokensQueryVariables | void>({
       query: (variables) => ({ document: GetOnChainTokensDocument, variables })
     }),
   }),
