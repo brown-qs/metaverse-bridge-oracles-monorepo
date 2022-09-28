@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import HomePage from './home';
+import HomePage from './HomePage';
 import ProfilePage from './ProfilePage';
 import MoonsamaCharacterDesignerPage from './moonsama/designer';
 import AccountPage from './AccountPage';
