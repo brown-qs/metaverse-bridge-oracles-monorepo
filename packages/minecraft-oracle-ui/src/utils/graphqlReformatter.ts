@@ -1,11 +1,12 @@
 import { Erc1155TokenWhereInput, Erc721TokenWhereInput, GetMarketplaceMetadataQuery, GetMarketplaceMetadataQueryVariables, GetMarketplaceOnChainTokensQuery, useGetMarketplaceOnChainTokensQuery } from "../state/api/generatedSquidMarketplaceApi"
+import { GetRaresamaOnChainTokensQuery } from "../state/api/generatedSquidRaresamaApi"
 import { AssetDto, CollectionFragmentDto, RecognizedAssetsDto, RecognizedAssetType, } from "../state/api/types"
 import { StringAssetType } from "./subgraph"
 
 
 
 
-
+//generic on chain token stuff for all squids
 export type StandardizedOnChainToken = {
     id: string,
     assetAddress?: string,
@@ -31,47 +32,11 @@ export type RecognizedTokenDataType = {
 }
 export type StandardizedOnChainTokenWithRecognizedTokenData = StandardizedOnChainToken & RecognizedTokenDataType
 
-//marketplace squid
-type ERC721MarketplaceOnChainTokenType = GetMarketplaceOnChainTokensQuery["erc721Tokens"][0]
-type ERC1155MarketplaceOnChainTokenType = GetMarketplaceOnChainTokensQuery["erc1155TokenOwners"][0]
-
-export const standardizeMarketplaceOnChainTokens = (tokens: GetMarketplaceOnChainTokensQuery | undefined): StandardizedOnChainToken[] | undefined => {
-    if (!!tokens) {
-        return [
-            ...tokens.erc1155TokenOwners.map(tok => standardizeMarketplaceOnChainErc1155Token(tok)),
-            ...tokens.erc721Tokens.map(tok => standardizeMarketplaceOnChainErc721Token(tok))
-        ]
-            .filter(tok => tok?.balance !== "0")
-            .sort((a, b) => a.id.localeCompare(b.id))
-    } else {
-        return undefined
-    }
+const sortAndFilterStandardizedOnChainTokens = (tokens: StandardizedOnChainToken[]): StandardizedOnChainToken[] => {
+    return tokens
+        .filter(tok => tok?.balance !== "0")
+        .sort((a, b) => a.id.localeCompare(b.id))
 }
-
-const standardizeMarketplaceOnChainErc721Token = (token: ERC721MarketplaceOnChainTokenType): StandardizedOnChainToken => {
-    return {
-        id: token.id,
-        assetAddress: token?.contract?.address ?? undefined,
-        numericId: parseInt(token.numericId),
-        balance: undefined, //non fungible
-        metadata: token.metadata ?? undefined,
-    }
-}
-
-const standardizeMarketplaceOnChainErc1155Token = (token: ERC1155MarketplaceOnChainTokenType): StandardizedOnChainToken => {
-    let bal: string | undefined
-    if (typeof token.balance === "string") {
-        bal = token.balance
-    }
-    return {
-        id: token.id,
-        assetAddress: token?.token?.contract?.address ?? undefined,
-        numericId: parseInt(token.token.numericId),
-        balance: bal,
-        metadata: token.token.metadata ?? undefined,
-    }
-}
-
 
 export const addRegonizedTokenDataToStandardizedOnChainTokens = (tokens: StandardizedOnChainToken[] | undefined, recognizedAssetData: RecognizedAssetsDto[] | undefined): StandardizedOnChainTokenWithRecognizedTokenData[] | undefined => {
     if (!!tokens && !!recognizedAssetData) {
@@ -114,7 +79,80 @@ export const addRegonizedTokenDataToStandardizedOnChainTokens = (tokens: Standar
     }
 }
 
+export const formatTokenName = (token: StandardizedOnChainTokenWithRecognizedTokenData): string => {
+    let name = token?.metadata?.name ?? ""
 
+    if (!!token?.numericId && token?.treatAsFungible === false) {
+        name = `${name} #${token?.numericId}`
+    }
+    return name
+}
+
+//marketplace squid
+type ERC721MarketplaceOnChainTokenType = GetMarketplaceOnChainTokensQuery["erc721Tokens"][0]
+type ERC1155MarketplaceOnChainTokenType = GetMarketplaceOnChainTokensQuery["erc1155TokenOwners"][0]
+
+export const standardizeMarketplaceOnChainTokens = (tokens: GetMarketplaceOnChainTokensQuery | undefined): StandardizedOnChainToken[] | undefined => {
+    if (!!tokens) {
+        return sortAndFilterStandardizedOnChainTokens([
+            ...tokens.erc1155TokenOwners.map(tok => standardizeMarketplaceOnChainErc1155Token(tok)),
+            ...tokens.erc721Tokens.map(tok => standardizeMarketplaceOnChainErc721Token(tok))
+        ])
+    } else {
+        return undefined
+    }
+}
+
+const standardizeMarketplaceOnChainErc721Token = (token: ERC721MarketplaceOnChainTokenType): StandardizedOnChainToken => {
+    return {
+        id: token.id,
+        assetAddress: token?.contract?.address ?? undefined,
+        numericId: parseInt(token.numericId),
+        balance: undefined, //non fungible
+        metadata: token.metadata ?? undefined,
+    }
+}
+
+const standardizeMarketplaceOnChainErc1155Token = (token: ERC1155MarketplaceOnChainTokenType): StandardizedOnChainToken => {
+    let bal: string | undefined
+    if (typeof token.balance === "string") {
+        bal = token.balance
+    }
+    return {
+        id: token.id,
+        assetAddress: token?.token?.contract?.address ?? undefined,
+        numericId: parseInt(token.token.numericId),
+        balance: bal,
+        metadata: token.token.metadata ?? undefined,
+    }
+}
+
+
+//raresama squid
+type RaresamaOnChainTokenType = GetRaresamaOnChainTokensQuery["tokens"][0]
+
+export const standardizeRaresamaOnChainTokens = (tokens: GetRaresamaOnChainTokensQuery | undefined): StandardizedOnChainToken[] | undefined => {
+    const tok = tokens?.tokens[0]
+    if (!!tokens?.tokens) {
+        return [...sortAndFilterStandardizedOnChainTokens(tokens.tokens.map(standardizeRaresamaOnChainToken))]
+    } else {
+        return undefined
+    }
+}
+
+const standardizeRaresamaOnChainToken = (token: RaresamaOnChainTokenType): StandardizedOnChainToken => {
+    return {
+        id: token.id,
+        assetAddress: token?.contract?.address ?? undefined,
+        numericId: parseInt(token.numericId),
+        balance: undefined, //non fungible
+        metadata: token.metadata ?? undefined,
+    }
+}
+
+
+
+//in game items
 export const inGameMarketplaceMetadataParams = (inGameItems: AssetDto[] | undefined): GetMarketplaceMetadataQueryVariables => {
     const erc1155Or: Erc1155TokenWhereInput[] = []
     const erc721Or: Erc721TokenWhereInput[] = []
@@ -157,11 +195,3 @@ export const inGameTokensCombineMetadata = (inGameTokens: AssetDto[], metadata: 
     }
 }
 
-export const formatTokenName = (token: StandardizedOnChainTokenWithRecognizedTokenData): string => {
-    let name = token?.metadata?.name ?? ""
-
-    if (!!token?.numericId && token?.treatAsFungible === false) {
-        name = `${name} #${token?.numericId}`
-    }
-    return name
-}
