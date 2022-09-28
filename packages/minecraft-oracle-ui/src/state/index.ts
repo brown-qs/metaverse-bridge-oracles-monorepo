@@ -3,6 +3,7 @@ import { setupListeners } from '@reduxjs/toolkit/query'
 import { save, load } from 'redux-localstorage-simple';
 import { bridgeApi } from './api/bridgeApi';
 import { api as generatedSquidMarketplaceApi } from './api/generatedSquidMarketplaceApi';
+import { api as generatedSquidRaresamaApi } from './api/generatedSquidRaresamaApi';
 import application from './application/reducer';
 import { updateVersion } from './global/actions';
 import authSlice from './slices/authSlice';
@@ -32,7 +33,8 @@ const store = configureStore({
     summonModal: summonModalSlice,
     oauth: oauthSlice,
     [bridgeApi.reducerPath]: bridgeApi.reducer,
-    [generatedSquidMarketplaceApi.reducerPath]: generatedSquidMarketplaceApi.reducer
+    [generatedSquidMarketplaceApi.reducerPath]: generatedSquidMarketplaceApi.reducer,
+    [generatedSquidRaresamaApi.reducerPath]: generatedSquidRaresamaApi.reducer
 
   },
   middleware: (getDefaultMiddleware) => [...getDefaultMiddleware(), bridgeApi.middleware, generatedSquidMarketplaceApi.middleware], //, save({ states: PERSISTED_KEYS })

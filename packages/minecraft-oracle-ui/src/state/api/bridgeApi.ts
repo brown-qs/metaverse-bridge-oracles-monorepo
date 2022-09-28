@@ -180,6 +180,9 @@ export const bridgeApi = createApi({
                 params: Object.fromEntries(urlSearchParams)
             }),
         }),
+        activeGame: builder.query<boolean, void>({
+            query: () => (`/user/inprogress`),
+        }),
     }),
 
 })
@@ -200,4 +203,4 @@ export const rtkQueryErrorFormatter = (error: any): string => {
     return strErr
 }
 
-export const { useOauthInfoQuery, useOauthAuthorizeMutation, useGetImportParamsMutation, useSummonMutation, useGetInGameResourcesQuery, useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
+export const { useActiveGameQuery, useOauthInfoQuery, useOauthAuthorizeMutation, useGetImportParamsMutation, useSummonMutation, useGetInGameResourcesQuery, useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi

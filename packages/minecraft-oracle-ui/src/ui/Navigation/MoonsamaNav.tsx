@@ -1,7 +1,6 @@
 import { MAX_WIDTH_TO_SHOW_NAVIGATION } from '../../constants';
 import { useRef, useState } from 'react';
 import { Box, Button, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Flex, HStack, Input, useDisclosure, useToast, VStack } from '@chakra-ui/react'
-import CarnageStatus from './CarnageStatus';
 import ConnectedNetwork from './ConnectedNetwork';
 import WalletAccount from './WalletAccount';
 import ServerAccount from './ServerAccount';
