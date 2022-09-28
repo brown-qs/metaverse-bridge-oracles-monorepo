@@ -6,7 +6,7 @@ import WhiteLogo from 'assets/images/moonsama-glitch-white.svg';
 import LeftImage from 'assets/images/home/left.png';
 import RightImageFlip from 'assets/images/home/right.png';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Image, Button, Stack, useMediaQuery, Text, VStack, Box, FormControl, FormLabel, Input, FormHelperText } from '@chakra-ui/react';
+import { Image, Button, Stack, useMediaQuery, Text, VStack, Box, FormControl, FormLabel, Input, FormHelperText, useToast } from '@chakra-ui/react';
 import { Mail, MailForward } from 'tabler-icons-react';
 import BackgroundImage from '../../assets/images/home/background.jpg'
 import { useDisclosure } from '@chakra-ui/react'
@@ -17,14 +17,15 @@ import { EmailLoginModal } from '../../components/modals/EmailLoginModal';
 import { KiltLoginModal } from '../../components/modals/KiltLoginModal';
 import { openKiltLoginModal } from '../../state/slices/kiltLoginModalSlice';
 import { selectAccessToken } from '../../state/slices/authSlice';
-import { closeOauthModal, openOauthModal, selectOauthData, selectOauthModalOpen, setOauthInProgress } from '../../state/slices/oauthSlice';
+import { closeOauthModal, openOauthModal, selectOauthData, selectOauthModalOpen } from '../../state/slices/oauthSlice';
 import { OauthModal } from '../../components/modals/OauthModal';
 
 const HomePage = () => {
+  const toast = useToast()
   const accessToken = useSelector(selectAccessToken)
   const isOauthModalOpen = useSelector(selectOauthModalOpen)
   const oauthData = useSelector(selectOauthData)
-
+  const oauthToastIdRef = React.useRef<any>()
   const { pathname, search } = useLocation()
   const dispatch = useDispatch()
   let navigate = useNavigate();
@@ -38,14 +39,13 @@ const HomePage = () => {
   }, [pathname])
 
   React.useEffect(() => {
-    dispatch(setOauthInProgress(isOauth))
-  }, [isOauth])
-
-  React.useEffect(() => {
     if (isOauth) {
       if (!!oauthData) {
+
+
         //open modal to confirm oauth if logged in
         if (!!accessToken) {
+
           dispatch(openOauthModal())
         } else {
           //close oauth modal so user can log in
@@ -147,7 +147,7 @@ const HomePage = () => {
               overflow="hidden"
               textAlign="center"
             >
-              Login Method isOauth {String(isOauth)}</Box>
+              Login Method</Box>
             <Box w="100%" h="100%" paddingTop="24px">
               <Stack direction={{ base: "column", md: "row" }} w="100%" spacing="0">
                 <Box flex="1" padding={{ base: "0 0 4px 0", md: "0 4px 0 0" }}>
