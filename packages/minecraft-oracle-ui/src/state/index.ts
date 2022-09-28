@@ -10,6 +10,7 @@ import emailCodeModalSlice from './slices/emailCodeModalSlice';
 import emailLoginModalSlice from './slices/emailLoginModalSlice';
 import importEnraptureModalSlice from './slices/importEnraptureModalSlice';
 import inGameItemModalSlice from './slices/inGameItemModalSlice';
+import kiltLoginModalSlice from './slices/kiltLoginModalSlice';
 import transactions from './transactions/reducer';
 
 const PERSISTED_KEYS: string[] = ['transactions'];
@@ -23,6 +24,7 @@ const store = configureStore({
     inGameItemModal: inGameItemModalSlice,
     emailCodeModal: emailCodeModalSlice,
     emailLoginModal: emailLoginModalSlice,
+    kiltLoginModal: kiltLoginModalSlice,
     [bridgeApi.reducerPath]: bridgeApi.reducer,
     [generatedSquidMarketplaceApi.reducerPath]: generatedSquidMarketplaceApi.reducer
 
