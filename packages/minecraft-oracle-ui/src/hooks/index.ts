@@ -8,4 +8,3 @@ export { useContract } from './useContracts/useContracts';
 export { useActiveWeb3React } from './useActiveWeb3React/useActiveWeb3React';
 export { useFileType } from './useFileType/useFileType';
 export { useClasses } from './useClasses/useClasses'
-export { useOauthLogin } from "./useOauthLogin/useOauthLogin"

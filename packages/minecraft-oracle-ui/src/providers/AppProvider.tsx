@@ -17,8 +17,6 @@ import { TransferDialogContextController } from '../context/transferDialog/trans
 import { ExportDialogContextController } from '../context/exportDialog/exportDialogContextController/ExportDialogContextController';
 import { AssetDialogContextController } from '../context/assetDialog/assetDialogContextController/assetDialogContextController';
 import { ChakraProvider } from '@chakra-ui/react'
-import { OauthLoginContextController } from '../context/oauthLogin/oauthLoginContextController/OauthLoginContextController';
-import { KiltLoginDialogContextController } from '../context/kiltLoginDialog/kiltLoginDialogContextController/KiltLoginDialogContextController';
 import { CaptchaContext } from '../context/captcha/captchaContext/captchaContext';
 import { CaptchaContextController } from '../context/captcha/captchaContextController/captchaContextController';
 import ScrollToTop from '../components/ScrollToTop';
@@ -39,30 +37,26 @@ export const AppProviders = ({ children }: AppProvidersProps) => (
         <AuthContextController>
           <Provider store={store}>
             <Updaters />
-            <OauthLoginContextController>
-              <Web3ReactManager>
-                <AccountDialogContextController>
-                  <SummonDialogContextController>
-                    <ImportDialogContextController>
-                      <EnraptureDialogContextController>
-                        <ExportDialogContextController>
-                          <TransferDialogContextController>
-                            <AssetDialogContextController>
-                              <KiltLoginDialogContextController>
-                                <Router>
-                                  <ScrollToTop></ScrollToTop>
-                                  {children}
-                                </Router>
-                              </KiltLoginDialogContextController>
-                            </AssetDialogContextController>
-                          </TransferDialogContextController>
-                        </ExportDialogContextController>
-                      </EnraptureDialogContextController>
-                    </ImportDialogContextController>
-                  </SummonDialogContextController>
-                </AccountDialogContextController>
-              </Web3ReactManager>
-            </OauthLoginContextController>
+            <Web3ReactManager>
+              <AccountDialogContextController>
+                <SummonDialogContextController>
+                  <ImportDialogContextController>
+                    <EnraptureDialogContextController>
+                      <ExportDialogContextController>
+                        <TransferDialogContextController>
+                          <AssetDialogContextController>
+                            <Router>
+                              <ScrollToTop></ScrollToTop>
+                              {children}
+                            </Router>
+                          </AssetDialogContextController>
+                        </TransferDialogContextController>
+                      </ExportDialogContextController>
+                    </EnraptureDialogContextController>
+                  </ImportDialogContextController>
+                </SummonDialogContextController>
+              </AccountDialogContextController>
+            </Web3ReactManager>
           </Provider>
         </AuthContextController>
       </Web3ReactProviderNetwork>

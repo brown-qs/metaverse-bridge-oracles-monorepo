@@ -16,6 +16,7 @@ export interface MoonsamaModalProps {
     TitleTablerIcon?: Icon
     message?: string,
     bottomButtonText?: string,
+    isBottomButtonDisabled?: boolean,
     onBottomButtonClick?: () => void,
     TablerIcon?: Icon,
     iconBackgroundColor?: string,
@@ -26,7 +27,7 @@ export interface MoonsamaModalProps {
 };
 
 
-export const ReduxModal: React.FC<MoonsamaModalProps> = ({ closeActionCreator, isOpenSelector, title, TitleTablerIcon, message, bottomButtonText, onBottomButtonClick, TablerIcon, iconBackgroundColor, iconColor, closeOnOverlayClick, closeable, children }) => {
+export const ReduxModal: React.FC<MoonsamaModalProps> = ({ closeActionCreator, isOpenSelector, title, TitleTablerIcon, message, bottomButtonText, onBottomButtonClick, TablerIcon, iconBackgroundColor, iconColor, closeOnOverlayClick, closeable, children, isBottomButtonDisabled }) => {
 
     const isOpen = useSelector(isOpenSelector)
     const dispatch = useDispatch()
@@ -72,10 +73,10 @@ export const ReduxModal: React.FC<MoonsamaModalProps> = ({ closeActionCreator, i
                                 <Box paddingTop="16px"></Box>
                                 <Box
                                     alignSelf="center"
-                                    cursor="pointer"
+                                    cursor={(isBottomButtonDisabled === true) ? "not-allowed" : "pointer"}
                                     lineHeight="24px"
                                     fontFamily="Rubik"
-                                    color="whiteAlpha.700"
+                                    color={(isBottomButtonDisabled === true) ? "whiteAlpha.400" : "whiteAlpha.700"}
                                     onClick={onBottomButtonClick}
                                 >{bottomButtonText}</Box></>}
                     </VStack>
