@@ -37,7 +37,7 @@ const store = configureStore({
     [generatedSquidRaresamaApi.reducerPath]: generatedSquidRaresamaApi.reducer
 
   },
-  middleware: (getDefaultMiddleware) => [...getDefaultMiddleware(), bridgeApi.middleware, generatedSquidMarketplaceApi.middleware], //, save({ states: PERSISTED_KEYS })
+  middleware: (getDefaultMiddleware) => [...getDefaultMiddleware(), bridgeApi.middleware, generatedSquidMarketplaceApi.middleware, generatedSquidRaresamaApi.middleware], //, save({ states: PERSISTED_KEYS })
 });
 //  preloadedState: load({ states: PERSISTED_KEYS }),
 //store.dispatch(updateVersion());

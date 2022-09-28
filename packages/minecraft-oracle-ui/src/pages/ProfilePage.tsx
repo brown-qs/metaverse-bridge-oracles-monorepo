@@ -52,7 +52,7 @@ const ProfilePage = () => {
     const [setSkin, { error: setSkinError, isUninitialized, isLoading, isSuccess, isError, reset: setSkinReset }] = useSetSkinMutation()
 
     //on chain tokens (from indexers)
-    const { data: raresamaOnChainTokensData, isLoading: isRaresamaOnChainTokensDataLoading, isFetching: isRaresamaOnChainTokensDataFetching, isError: isRaresamaOnChainTokensDataError, error: raresamaOnChainTokensError } = useGetRaresamaOnChainTokensQuery({ where: { owner: { id_eq: address } } })
+    const { data: raresamaOnChainTokensData, isLoading: isRaresamaOnChainTokensDataLoading, isFetching: isRaresamaOnChainTokensDataFetching, isError: isRaresamaOnChainTokensDataError, error: raresamaOnChainTokensError } = useGetRaresamaOnChainTokensQuery({ where: { owner: { id_eq: address }, contract: { id_eq: "0xf27a6c72398eb7e25543d19fda370b7083474735" } } })
     const { data: marketplaceOnChainTokensData, isLoading: isMarketplaceOnChainTokensLoading, isFetching: isMarketplaceOnChainTokensFetching, isError: isMarketplaceOnChainTokensError, error: marketplaceOnChainTokensError } = useGetMarketplaceOnChainTokensQuery({ owner: address })
 
     //in game tokens (from nestjs server)
