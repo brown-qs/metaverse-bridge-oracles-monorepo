@@ -1,24 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { Loader } from 'ui';
-import { useClasses } from 'hooks';
-import { styles } from './styles';
 import WhiteLogo from 'assets/images/moonsama-glitch-white.svg';
 import LeftImage from 'assets/images/home/left.png';
 import RightImageFlip from 'assets/images/home/right.png';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Image, Button, Stack, useMediaQuery, Text, VStack, Box, FormControl, FormLabel, Input, FormHelperText, useToast } from '@chakra-ui/react';
 import { Mail, MailForward } from 'tabler-icons-react';
-import BackgroundImage from '../../assets/images/home/background.jpg'
+import BackgroundImage from '../assets/images/home/background.jpg'
 import { useDisclosure } from '@chakra-ui/react'
 import { useDispatch, useSelector } from 'react-redux';
-import { openEmailLoginModal } from '../../state/slices/emailLoginModalSlice';
-import { EmailCodeModal } from '../../components/modals/EmailCodeModal';
-import { EmailLoginModal } from '../../components/modals/EmailLoginModal';
-import { KiltLoginModal } from '../../components/modals/KiltLoginModal';
-import { openKiltLoginModal } from '../../state/slices/kiltLoginModalSlice';
-import { selectAccessToken } from '../../state/slices/authSlice';
-import { closeOauthModal, openOauthModal, selectOauthData, selectOauthModalOpen } from '../../state/slices/oauthSlice';
-import { OauthModal } from '../../components/modals/OauthModal';
+import { openEmailLoginModal } from '../state/slices/emailLoginModalSlice';
+import { EmailCodeModal } from '../components/modals/EmailCodeModal';
+import { EmailLoginModal } from '../components/modals/EmailLoginModal';
+import { KiltLoginModal } from '../components/modals/KiltLoginModal';
+import { openKiltLoginModal } from '../state/slices/kiltLoginModalSlice';
+import { selectAccessToken } from '../state/slices/authSlice';
+import { closeOauthModal, openOauthModal, selectOauthData, selectOauthModalOpen } from '../state/slices/oauthSlice';
+import { OauthModal } from '../components/modals/OauthModal';
 
 const HomePage = () => {
   const toast = useToast()
@@ -58,15 +56,6 @@ const HomePage = () => {
     }
   }, [isOauth, isOauthModalOpen, accessToken, oauthData])
 
-  const {
-    homeContainer,
-    logo,
-    leftBgImage,
-    rightBgImage,
-    glitchText,
-    loginButtonStyleV2,
-    centerBgImage
-  } = useClasses(styles);
 
 
 
@@ -194,9 +183,9 @@ const HomePage = () => {
         backgroundSize="cover"
         backgroundRepeat="no-repeat"
       >
-        {!isMobileViewport && <img src={LeftImage} className={leftBgImage} alt="" />}
-        {!isMobileViewport && <img src={RightImageFlip} className={rightBgImage} alt="" />}
-        {isMobileViewport && <img src={LeftImage} className={centerBgImage} alt="" />}
+        {!isMobileViewport && <Image src={LeftImage} sx={{ position: "absolute", left: 0, bottom: 0, maxHeight: "70%", maxWidth: "50%" }} alt="" />}
+        {!isMobileViewport && <Image src={RightImageFlip} sx={{ position: "absolute", "right": 0, bottom: 0, maxHeight: "70%", maxWidth: "50%" }} alt="" />}
+        {isMobileViewport && <Image src={LeftImage} sx={{ position: "absolute", "right": '50%', bottom: 0, transform: 'translateX(50%)', maxHeight: "40%" }} alt="" />}
       </Stack >
       {isOauth && <>
         <OauthModal />
