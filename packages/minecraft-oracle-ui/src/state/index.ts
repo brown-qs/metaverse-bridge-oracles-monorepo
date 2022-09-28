@@ -8,10 +8,12 @@ import { updateVersion } from './global/actions';
 import authSlice from './slices/authSlice';
 import emailCodeModalSlice from './slices/emailCodeModalSlice';
 import emailLoginModalSlice from './slices/emailLoginModalSlice';
+import exportModalSlice from './slices/exportModalSlice';
 import importEnraptureModalSlice from './slices/importEnraptureModalSlice';
 import inGameItemModalSlice from './slices/inGameItemModalSlice';
 import kiltLoginModalSlice from './slices/kiltLoginModalSlice';
 import oauthSlice from './slices/oauthSlice';
+import summonModalSlice from './slices/summonModalSlice';
 import transactions from './transactions/reducer';
 
 const PERSISTED_KEYS: string[] = ['transactions'];
@@ -26,6 +28,8 @@ const store = configureStore({
     emailCodeModal: emailCodeModalSlice,
     emailLoginModal: emailLoginModalSlice,
     kiltLoginModal: kiltLoginModalSlice,
+    exportModal: exportModalSlice,
+    summonModal: summonModalSlice,
     oauth: oauthSlice,
     [bridgeApi.reducerPath]: bridgeApi.reducer,
     [generatedSquidMarketplaceApi.reducerPath]: generatedSquidMarketplaceApi.reducer
