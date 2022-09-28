@@ -22,6 +22,7 @@ export const Routing = () => {
             <Route path="/" element={!!accessToken ? <Navigate to="/bridge" /> : <HomePage />} />
             <Route path="/account" element={!!accessToken ? <AccountPage /> : <Navigate to="/" />} />
             <Route path="/bridge" element={!!accessToken ? <ProfilePage /> : <Navigate to="/" />} />
+            <Route path="/oauth" element={<HomePage />} />
             <Route path="/moonsama/customizer/:chainId/:assetAddress/:assetId" element={<MoonsamaCharacterDesignerPage />} />
             <Route path="/moonsama/customizer" element={<MoonsamaCharacterDesignerPage />} />
             <Route path="/test" element={<TestPage />} />
