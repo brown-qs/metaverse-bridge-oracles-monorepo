@@ -1,7 +1,5 @@
 import { Provider } from 'react-redux';
 import { AuthContextController } from '../context/auth/AuthContextController/AuthContextController';
-import { ImportDialogContextController } from '../context/importDialog/importDialogContextController/ImportDialogContextController';
-import { EnraptureDialogContextController } from '../context/enraptureDialog/enraptureDialogContextController/enraptureDialogContextController';
 import { AccountDialogContextController } from '../context/accountDialog/accountDialogContextController/AccountDialogContextController';
 import { AppProvidersProps } from './AppProviders.types';
 import { getLibrary } from '../connectors';
@@ -12,9 +10,7 @@ import Web3ReactProviderNetwork from '../components/Web3ReactProviderNetwork/Web
 import ApplicationUpdater from '../state/application/updater';
 import TransactionUpdater from '../state/transactions/updater';
 import store from '../state';
-import { SummonDialogContextController } from '../context/summonDialog/summonDialogContextController/SummonDialogContextController';
 import { TransferDialogContextController } from '../context/transferDialog/transferDialogContextController/TransferDialogContextController';
-import { ExportDialogContextController } from '../context/exportDialog/exportDialogContextController/ExportDialogContextController';
 import { AssetDialogContextController } from '../context/assetDialog/assetDialogContextController/assetDialogContextController';
 import { ChakraProvider } from '@chakra-ui/react'
 import { CaptchaContext } from '../context/captcha/captchaContext/captchaContext';
@@ -39,22 +35,15 @@ export const AppProviders = ({ children }: AppProvidersProps) => (
             <Updaters />
             <Web3ReactManager>
               <AccountDialogContextController>
-                <SummonDialogContextController>
-                  <ImportDialogContextController>
-                    <EnraptureDialogContextController>
-                      <ExportDialogContextController>
-                        <TransferDialogContextController>
-                          <AssetDialogContextController>
-                            <Router>
-                              <ScrollToTop></ScrollToTop>
-                              {children}
-                            </Router>
-                          </AssetDialogContextController>
-                        </TransferDialogContextController>
-                      </ExportDialogContextController>
-                    </EnraptureDialogContextController>
-                  </ImportDialogContextController>
-                </SummonDialogContextController>
+                <TransferDialogContextController>
+                  <AssetDialogContextController>
+                    <Router>
+                      <ScrollToTop></ScrollToTop>
+                      {children}
+                    </Router>
+                  </AssetDialogContextController>
+                </TransferDialogContextController>
+
               </AccountDialogContextController>
             </Web3ReactManager>
           </Provider>

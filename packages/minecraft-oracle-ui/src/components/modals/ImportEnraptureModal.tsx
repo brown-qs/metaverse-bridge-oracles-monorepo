@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Checks } from "tabler-icons-react";
 import { ReduxModal } from ".";
 import { ChainId } from "../../constants";
-import { useImportDialog, useActiveWeb3React } from "../../hooks";
+import { useActiveWeb3React } from "../../hooks";
 import { useImportConfirmCallback } from "../../hooks/multiverse/useConfirm";
 import { useImportAssetCallback, CreateImportAssetCallbackState, AssetRequest } from "../../hooks/multiverse/useImportAsset";
 import { useApproveCallback, ApprovalState } from "../../hooks/useApproveCallback/useApproveCallback";

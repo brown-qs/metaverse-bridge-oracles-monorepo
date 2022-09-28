@@ -1,4 +1,4 @@
-query getMetadata($erc721Where: ERC721TokenWhereInput, $erc1155Where:ERC1155TokenWhereInput) {
+query getMarketplaceMetadata($erc721Where: ERC721TokenWhereInput, $erc1155Where:ERC1155TokenWhereInput) {
   erc721Tokens(where: $erc721Where, limit: 1000) {
     metadata {
       type

@@ -1216,23 +1216,23 @@ export type WhereIdInput = {
   id: Scalars['String'];
 };
 
-export type GetMetadataQueryVariables = Exact<{
+export type GetRaresamaMetadataQueryVariables = Exact<{
   where?: InputMaybe<TokenWhereInput>;
 }>;
 
 
-export type GetMetadataQuery = { __typename?: 'Query', tokens: Array<{ __typename?: 'Token', numericId: any, metadata?: { __typename?: 'Metadata', type?: string | null, name?: string | null, layers?: Array<string> | null, image?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', value: string, traitType: string, displayType?: string | null }> | null } | null, contract: { __typename?: 'Contract', id: string } }> };
+export type GetRaresamaMetadataQuery = { __typename?: 'Query', tokens: Array<{ __typename?: 'Token', numericId: any, metadata?: { __typename?: 'Metadata', type?: string | null, name?: string | null, layers?: Array<string> | null, image?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', value: string, traitType: string, displayType?: string | null }> | null } | null, contract: { __typename?: 'Contract', address: string } }> };
 
-export type GetOnChainTokensQueryVariables = Exact<{
+export type GetRaresamaOnChainTokensQueryVariables = Exact<{
   where?: InputMaybe<TokenWhereInput>;
 }>;
 
 
-export type GetOnChainTokensQuery = { __typename?: 'Query', tokens: Array<{ __typename?: 'Token', id: string, numericId: any, metadata?: { __typename?: 'Metadata', image?: string | null, layers?: Array<string> | null, name?: string | null, type?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', displayType?: string | null, traitType: string, value: string }> | null } | null, contract: { __typename?: 'Contract', id: string } }> };
+export type GetRaresamaOnChainTokensQuery = { __typename?: 'Query', tokens: Array<{ __typename?: 'Token', numericId: any, id: string, metadata?: { __typename?: 'Metadata', image?: string | null, layers?: Array<string> | null, name?: string | null, type?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', displayType?: string | null, traitType: string, value: string }> | null } | null, contract: { __typename?: 'Contract', address: string } }> };
 
 
-export const GetMetadataDocument = `
-    query getMetadata($where: TokenWhereInput) {
+export const GetRaresamaMetadataDocument = `
+    query getRaresamaMetadata($where: TokenWhereInput) {
   tokens(where: $where, limit: 1000) {
     metadata {
       type
@@ -1249,15 +1249,14 @@ export const GetMetadataDocument = `
     }
     numericId
     contract {
-      id
+      address: id
     }
   }
 }
     `;
-export const GetOnChainTokensDocument = `
-    query getOnChainTokens($where: TokenWhereInput) {
+export const GetRaresamaOnChainTokensDocument = `
+    query getRaresamaOnChainTokens($where: TokenWhereInput) {
   tokens(where: $where, limit: 1000) {
-    id
     numericId
     metadata {
       image
@@ -1274,7 +1273,7 @@ export const GetOnChainTokensDocument = `
     }
     id
     contract {
-      id
+      address: id
     }
   }
 }
@@ -1282,15 +1281,15 @@ export const GetOnChainTokensDocument = `
 
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
-    getMetadata: build.query<GetMetadataQuery, GetMetadataQueryVariables | void>({
-      query: (variables) => ({ document: GetMetadataDocument, variables })
+    getRaresamaMetadata: build.query<GetRaresamaMetadataQuery, GetRaresamaMetadataQueryVariables | void>({
+      query: (variables) => ({ document: GetRaresamaMetadataDocument, variables })
     }),
-    getOnChainTokens: build.query<GetOnChainTokensQuery, GetOnChainTokensQueryVariables | void>({
-      query: (variables) => ({ document: GetOnChainTokensDocument, variables })
+    getRaresamaOnChainTokens: build.query<GetRaresamaOnChainTokensQuery, GetRaresamaOnChainTokensQueryVariables | void>({
+      query: (variables) => ({ document: GetRaresamaOnChainTokensDocument, variables })
     }),
   }),
 });
 
 export { injectedRtkApi as api };
-export const { useGetMetadataQuery, useLazyGetMetadataQuery, useGetOnChainTokensQuery, useLazyGetOnChainTokensQuery } = injectedRtkApi;
+export const { useGetRaresamaMetadataQuery, useLazyGetRaresamaMetadataQuery, useGetRaresamaOnChainTokensQuery, useLazyGetRaresamaOnChainTokensQuery } = injectedRtkApi;
 
