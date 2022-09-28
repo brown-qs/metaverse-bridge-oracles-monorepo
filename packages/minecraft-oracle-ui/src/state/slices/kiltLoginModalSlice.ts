@@ -2,24 +2,24 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { AppState } from ".."
 import { InGameTokenMaybeMetadata, OnChainTokenWithRecognizedTokenData } from "../../utils/graphqlReformatter"
 
-export interface EmailCodeModalSlice {
+export interface KiltLoginModalSlice {
     modalOpen: boolean,
 }
 
-const emailCodeModalSlice = createSlice({
-    name: "emailCodeModalSlice",
-    initialState: { modalOpen: false } as EmailCodeModalSlice,
+const kiltLoginModalSlice = createSlice({
+    name: "kiltLoginModalSlice",
+    initialState: { modalOpen: false } as KiltLoginModalSlice,
     reducers: {
-        closeEmailCodeModal: (state) => {
+        closeKiltLoginModal: (state) => {
             state.modalOpen = false
         },
-        openEmailCodeModal: (state) => {
+        openKiltLoginModal: (state) => {
             state.modalOpen = true
         }
     }
 })
 
-export const { closeEmailCodeModal, openEmailCodeModal } = emailCodeModalSlice.actions
-export default emailCodeModalSlice.reducer
+export const { closeKiltLoginModal, openKiltLoginModal } = kiltLoginModalSlice.actions
+export default kiltLoginModalSlice.reducer
 
-export const selectEmailCodeModalOpen = (state: AppState) => state?.emailCodeModal?.modalOpen
+export const selectKiltLoginModalOpen = (state: AppState) => state?.kiltLoginModal?.modalOpen
