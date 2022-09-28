@@ -167,7 +167,7 @@ export const bridgeApi = createApi({
                 }
             },
         }),
-        oauthCode: builder.query<Oauth2PublicClientDto, string>({
+        oauthInfo: builder.query<Oauth2PublicClientDto, string>({
             query: (clientId) => ({
                 url: `oauth2/client/${clientId}/public`,
                 method: "GET"
@@ -200,4 +200,4 @@ export const rtkQueryErrorFormatter = (error: any): string => {
     return strErr
 }
 
-export const { useOauthCodeQuery, useOauthAuthorizeMutation, useGetImportParamsMutation, useSummonMutation, useGetInGameResourcesQuery, useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
+export const { useOauthInfoQuery, useOauthAuthorizeMutation, useGetImportParamsMutation, useSummonMutation, useGetInGameResourcesQuery, useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
