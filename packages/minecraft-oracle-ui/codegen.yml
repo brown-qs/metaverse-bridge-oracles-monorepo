@@ -14,7 +14,7 @@ generates:
           importBaseApiFrom: ./baseGeneratedSquidMarketplaceApi
           exportHooks: true
   ./src/state/api/generatedSquidRaresamaApi.ts:
-    schema: https://squid.subsquid.io/raresama/graphql
+    schema: https://squid.subsquid.io/raresama-moonbeam/graphql
     documents:
       - src/squid/raresama/*
     plugins:
