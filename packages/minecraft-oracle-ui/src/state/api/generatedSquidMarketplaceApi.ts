@@ -2400,24 +2400,24 @@ export type WhereIdInput = {
   id: Scalars['String'];
 };
 
-export type GetMetadataQueryVariables = Exact<{
+export type GetMarketplaceMetadataQueryVariables = Exact<{
   erc721Where?: InputMaybe<Erc721TokenWhereInput>;
   erc1155Where?: InputMaybe<Erc1155TokenWhereInput>;
 }>;
 
 
-export type GetMetadataQuery = { __typename?: 'Query', erc721Tokens: Array<{ __typename?: 'ERC721Token', numericId: any, metadata?: { __typename?: 'Metadata', type?: string | null, name?: string | null, layers?: Array<string> | null, image?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', value: string, traitType: string, displayType?: string | null }> | null } | null, contract: { __typename?: 'ERC721Contract', address?: string | null } }>, erc1155Tokens: Array<{ __typename?: 'ERC1155Token', numericId: any, metadata?: { __typename?: 'Metadata', type?: string | null, name?: string | null, layers?: Array<string> | null, image?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', value: string, traitType: string, displayType?: string | null }> | null } | null, contract: { __typename?: 'ERC1155Contract', address?: string | null } }> };
+export type GetMarketplaceMetadataQuery = { __typename?: 'Query', erc721Tokens: Array<{ __typename?: 'ERC721Token', numericId: any, metadata?: { __typename?: 'Metadata', type?: string | null, name?: string | null, layers?: Array<string> | null, image?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', value: string, traitType: string, displayType?: string | null }> | null } | null, contract: { __typename?: 'ERC721Contract', address?: string | null } }>, erc1155Tokens: Array<{ __typename?: 'ERC1155Token', numericId: any, metadata?: { __typename?: 'Metadata', type?: string | null, name?: string | null, layers?: Array<string> | null, image?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', value: string, traitType: string, displayType?: string | null }> | null } | null, contract: { __typename?: 'ERC1155Contract', address?: string | null } }> };
 
-export type GetOnChainTokensQueryVariables = Exact<{
+export type GetMarketplaceOnChainTokensQueryVariables = Exact<{
   owner: Scalars['String'];
 }>;
 
 
-export type GetOnChainTokensQuery = { __typename?: 'Query', erc1155TokenOwners: Array<{ __typename?: 'ERC1155TokenOwner', id: string, balance: any, token: { __typename?: 'ERC1155Token', numericId: any, id: string, metadata?: { __typename?: 'Metadata', image?: string | null, layers?: Array<string> | null, name?: string | null, type?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', displayType?: string | null, traitType: string, value: string }> | null } | null, contract: { __typename?: 'ERC1155Contract', address?: string | null } } }>, erc721Tokens: Array<{ __typename?: 'ERC721Token', numericId: any, id: string, metadata?: { __typename?: 'Metadata', image?: string | null, layers?: Array<string> | null, name?: string | null, type?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', displayType?: string | null, traitType: string, value: string }> | null } | null, contract: { __typename?: 'ERC721Contract', address?: string | null } }> };
+export type GetMarketplaceOnChainTokensQuery = { __typename?: 'Query', erc1155TokenOwners: Array<{ __typename?: 'ERC1155TokenOwner', id: string, balance: any, token: { __typename?: 'ERC1155Token', numericId: any, id: string, metadata?: { __typename?: 'Metadata', image?: string | null, layers?: Array<string> | null, name?: string | null, type?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', displayType?: string | null, traitType: string, value: string }> | null } | null, contract: { __typename?: 'ERC1155Contract', address?: string | null } } }>, erc721Tokens: Array<{ __typename?: 'ERC721Token', numericId: any, id: string, metadata?: { __typename?: 'Metadata', image?: string | null, layers?: Array<string> | null, name?: string | null, type?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', displayType?: string | null, traitType: string, value: string }> | null } | null, contract: { __typename?: 'ERC721Contract', address?: string | null } }> };
 
 
-export const GetMetadataDocument = `
-    query getMetadata($erc721Where: ERC721TokenWhereInput, $erc1155Where: ERC1155TokenWhereInput) {
+export const GetMarketplaceMetadataDocument = `
+    query getMarketplaceMetadata($erc721Where: ERC721TokenWhereInput, $erc1155Where: ERC1155TokenWhereInput) {
   erc721Tokens(where: $erc721Where, limit: 1000) {
     metadata {
       type
@@ -2458,8 +2458,8 @@ export const GetMetadataDocument = `
   }
 }
     `;
-export const GetOnChainTokensDocument = `
-    query getOnChainTokens($owner: String!) {
+export const GetMarketplaceOnChainTokensDocument = `
+    query getMarketplaceOnChainTokens($owner: String!) {
   erc1155TokenOwners(where: {ownerId_eq: $owner}, limit: 1000) {
     id
     token {
@@ -2509,15 +2509,15 @@ export const GetOnChainTokensDocument = `
 
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
-    getMetadata: build.query<GetMetadataQuery, GetMetadataQueryVariables | void>({
-      query: (variables) => ({ document: GetMetadataDocument, variables })
+    getMarketplaceMetadata: build.query<GetMarketplaceMetadataQuery, GetMarketplaceMetadataQueryVariables | void>({
+      query: (variables) => ({ document: GetMarketplaceMetadataDocument, variables })
     }),
-    getOnChainTokens: build.query<GetOnChainTokensQuery, GetOnChainTokensQueryVariables>({
-      query: (variables) => ({ document: GetOnChainTokensDocument, variables })
+    getMarketplaceOnChainTokens: build.query<GetMarketplaceOnChainTokensQuery, GetMarketplaceOnChainTokensQueryVariables>({
+      query: (variables) => ({ document: GetMarketplaceOnChainTokensDocument, variables })
     }),
   }),
 });
 
 export { injectedRtkApi as api };
-export const { useGetMetadataQuery, useLazyGetMetadataQuery, useGetOnChainTokensQuery, useLazyGetOnChainTokensQuery } = injectedRtkApi;
+export const { useGetMarketplaceMetadataQuery, useLazyGetMarketplaceMetadataQuery, useGetMarketplaceOnChainTokensQuery, useLazyGetMarketplaceOnChainTokensQuery } = injectedRtkApi;
 

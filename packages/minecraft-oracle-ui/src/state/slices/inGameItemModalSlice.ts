@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { AppState } from ".."
-import { InGameTokenMaybeMetadata, OnChainTokenWithRecognizedTokenData } from "../../utils/graphqlReformatter"
+import { InGameTokenMaybeMetadata } from "../../utils/graphqlReformatter"
 
 export interface InGameItemModalSlice {
     modalOpen: boolean,

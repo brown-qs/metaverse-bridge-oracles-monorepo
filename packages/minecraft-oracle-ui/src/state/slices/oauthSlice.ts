@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { AppState } from ".."
-import { InGameTokenMaybeMetadata, OnChainTokenWithRecognizedTokenData } from "../../utils/graphqlReformatter"
 import { Oauth2PublicClientDto } from "../api/types"
 
 export interface OauthSlice {

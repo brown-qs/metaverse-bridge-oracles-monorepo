@@ -21,12 +21,12 @@ import { useParams } from 'react-router';
 import { AccordionPanel, AccordionItem, Text, Accordion, Box, Button, CircularProgress, IconButton, Stack, useMediaQuery, Modal, Container, Grid, GridItem, AccordionButton, AccordionIcon, ExpandedIndex, HStack } from '@chakra-ui/react';
 import { MoonsamaLayout } from '../../../components';
 import { ChevronDown, ChevronUp } from 'tabler-icons-react';
-import { inGameMetadataParams, InGameTokenMaybeMetadata, inGameTokensCombineMetadata } from '../../../utils/graphqlReformatter';
+import { inGameMarketplaceMetadataParams, InGameTokenMaybeMetadata, inGameTokensCombineMetadata } from '../../../utils/graphqlReformatter';
 import React from 'react';
 import { useGetInGameItemsQuery } from '../../../state/api/bridgeApi';
-import { useGetMetadataQuery } from '../../../state/api/generatedSquidMarketplaceApi';
 import { useSelector } from 'react-redux';
 import { selectAccessToken } from '../../../state/slices/authSlice';
+import { useGetMarketplaceMetadataQuery } from '../../../state/api/generatedSquidMarketplaceApi';
 
 
 //fix for type checks
@@ -562,7 +562,7 @@ const CharacterDesignerPage = () => {
   const accessToken = useSelector(selectAccessToken)
   const { data: inGameItemsData, isLoading: isInGameItemsDataLoading, isFetching: isInGameItemsDataFetching, isError: isInGameItemsError, error: inGameItemsError } = useGetInGameItemsQuery()
 
-  const { data: inGameItemsMetadata, isLoading: isInGameItemsMetadataLoading, isFetching: isInGameItemsMetadataFetching, isError: isInGameItemsMetadataError, error: inGameItemsMetadataError } = useGetMetadataQuery(inGameMetadataParams(inGameItemsData))
+  const { data: inGameItemsMetadata, isLoading: isInGameItemsMetadataLoading, isFetching: isInGameItemsMetadataFetching, isError: isInGameItemsMetadataError, error: inGameItemsMetadataError } = useGetMarketplaceMetadataQuery(inGameMarketplaceMetadataParams(inGameItemsData))
 
   const [isTallerThan883] = useMediaQuery('(min-height: 883px)')
   const [isMobileViewport] = useMediaQuery('(max-width: 992px)')
