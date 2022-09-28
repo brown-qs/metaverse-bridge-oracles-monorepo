@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { AuthLayout, Loader } from 'ui';
-import { useClasses, useOauthLogin } from 'hooks';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
 import { Container, Image, Alert, AlertDescription, AlertIcon, Box, Button, CircularProgress, HStack, Stack, Tag, TagCloseButton, TagLabel, TagLeftIcon, TagRightIcon, VStack, Grid, GridItem, FormControl, FormHelperText, FormLabel, Input, FormErrorMessage, InputRightElement, IconButton, useToast } from '@chakra-ui/react';
@@ -24,7 +23,6 @@ const AccountPage = () => {
   const { executeCaptcha, resetCaptcha, setCaptchaVisible, isCaptchaLoading, isCaptchaVisible, isCaptchaError, isCaptchaSolved, captchaError, captchaSolution } = useCaptcha()
 
   const [failureMessage, setFailureMessage] = useState("")
-  const { oauthData, setOauthData } = useOauthLogin()
   const navigate = useNavigate();
   const { data: profile, error, isLoading: isProfileLoading } = useUserProfileQuery()
   const [changeEmail, { error: changeEmailError, isUninitialized: isChangeEmailUninitialized, isLoading: isChangeEmailLoading, isSuccess: isChangeEmailSuccess, isError: isChangeEmailError, reset: changeEmailReset }] = useEmailChangeMutation()
@@ -337,7 +335,10 @@ const AccountPage = () => {
           </GridItem>
           <GridItem zIndex="2" paddingBottom="40px">
             <VStack alignItems={{ base: "flex-end", md: "flex-end" }} spacing="0">
-              <Button variant="moonsamaGhost" rightIcon={<Power color="#3BEFB8" />} onClick={() => { dispatch(setTokens({ accessToken: null, refreshToken: null })) }}>Log Out</Button>
+              <Button variant="moonsamaGhost" rightIcon={<Power color="#3BEFB8" />} onClick={() => {
+                window.localStorage.removeItem('accessToken')
+                dispatch(setTokens({ accessToken: null, refreshToken: null }))
+              }}>Log Out</Button>
             </VStack>
           </GridItem>
           {/** END title + logout */}

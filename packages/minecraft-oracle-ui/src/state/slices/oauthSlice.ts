@@ -6,21 +6,17 @@ import { Oauth2PublicClientDto } from "../api/types"
 export interface OauthSlice {
     modalOpen: boolean,
     data: Oauth2PublicClientDto | null,
-    inProgress: boolean
 }
 
 const oauthSlice = createSlice({
     name: "oauthSlice",
-    initialState: { modalOpen: false, data: null, inProgress: false } as OauthSlice,
+    initialState: { modalOpen: false, data: null } as OauthSlice,
     reducers: {
         closeOauthModal: (state) => {
             state.modalOpen = false
         },
         openOauthModal: (state) => {
             state.modalOpen = true
-        },
-        setOauthInProgress: (state, action: PayloadAction<boolean>) => {
-            state.inProgress = action.payload
         },
         setOauthData: (state, action: PayloadAction<Oauth2PublicClientDto>) => {
             state.data = action.payload
@@ -31,7 +27,7 @@ const oauthSlice = createSlice({
     }
 })
 
-export const { closeOauthModal, openOauthModal, setOauthData, removeOauthData, setOauthInProgress } = oauthSlice.actions
+export const { closeOauthModal, openOauthModal, setOauthData, removeOauthData } = oauthSlice.actions
 export default oauthSlice.reducer
 
 export const selectOauthModalOpen = (state: AppState) => state?.oauth?.modalOpen
