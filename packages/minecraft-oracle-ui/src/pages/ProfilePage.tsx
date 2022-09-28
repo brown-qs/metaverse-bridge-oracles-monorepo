@@ -4,7 +4,6 @@ import { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 import { useOnChainItems } from 'hooks/multiverse/useOnChainItems';
 import { useAccountDialog, useActiveWeb3React, useImportDialog, useEnraptureDialog } from 'hooks';
 import { useExportDialog } from 'hooks/useExportDialog/useExportDialog';
-import { useSummonDialog } from 'hooks/useSummonDialog/useSummonDialog';
 import { stringToStringAssetType } from 'utils/subgraph';
 import { Fraction } from 'utils/Fraction';
 import { countGamePassAssets } from 'utils';
@@ -32,6 +31,8 @@ import { addRegonizedTokenDataToTokens, formatTokenName, inGameMetadataParams, I
 import { ImportEnraptureModal } from '../components/modals/ImportEnraptureModal';
 import { useDispatch } from 'react-redux';
 import { openImportEnraptureModal, setImportEnraptureTokens } from '../state/slices/importEnraptureModalSlice';
+import { openSummonModal } from '../state/slices/summonModalSlice';
+import { SummonModal } from '../components/modals/SummonModal';
 
 
 const ProfilePage = () => {
@@ -71,7 +72,6 @@ const ProfilePage = () => {
     const { isImportDialogOpen, onImportDialogOpen, onImportDialogClose, importDialogData, setImportDialogData } = useImportDialog()
     const { isEnraptureDialogOpen, onEnraptureDialogOpen, onEnraptureDialogClose, enraptureDialogData, setEnraptureDialogData } = useEnraptureDialog()
     const { isExportDialogOpen, onExportDialogOpen, onExportDialogClose, exportDialogData, setExportDialogData } = useExportDialog()
-    const { isSummonDialogOpen, onSummonDialogOpen, onSummonDialogClose, summonDialogData, setSummonDialogData } = useSummonDialog()
     const { isAssetDialogOpen, onAssetDialogOpen, onAssetDialogClose, assetDialogData, setAssetDialogData } = useAssetDialog()
 
 
@@ -509,8 +509,8 @@ const ProfilePage = () => {
                                             rightIcon={<CaretRight></CaretRight>}
                                             onClick={() => {
                                                 if (!!account) {
-                                                    onSummonDialogOpen();
-                                                    setSummonDialogData({ recipient: account ?? undefined });
+                                                    console.log("open summon modal")
+                                                    dispatch(openSummonModal())
                                                 } else {
                                                     onAccountDialogOpen()
                                                 }
@@ -596,7 +596,8 @@ const ProfilePage = () => {
                     </>
                 }
             </Container >
-            <ImportEnraptureModal></ImportEnraptureModal>
+            <SummonModal />
+            <ImportEnraptureModal />
         </>
     )
 };
