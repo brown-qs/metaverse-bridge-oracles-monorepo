@@ -13,13 +13,14 @@ generates:
       - typescript-rtk-query:
           importBaseApiFrom: ./baseGeneratedSquidMarketplaceApi
           exportHooks: true
-  # ./src/state/api/generatedSubgraphIndexerAuctionApi.ts:
-  #   schema: https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/raresama-subgraph/graphql
-  #   documents:
-  #     - src/subgraph/auction/*
-  #   plugins:
-  #     - typescript
-  #     - typescript-operations
-  #     - typescript-rtk-query:
-  #         importBaseApiFrom: ./baseGeneratedSubgraphIndexerAuctionApi
-  #         exportHooks: true
+  ./src/state/api/generatedSquidRaresamaApi.ts:
+    schema: https://squid.subsquid.io/raresama/graphql
+    documents:
+      - src/squid/raresama/*
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-rtk-query:
+          importBaseApiFrom: ./baseGeneratedSquidRaresamaApi
+          exportHooks: true
+  
