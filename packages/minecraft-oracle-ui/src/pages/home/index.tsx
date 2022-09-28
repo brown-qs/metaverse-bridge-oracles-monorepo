@@ -10,11 +10,12 @@ import { Image, Button, Stack, useMediaQuery, Text, VStack, Box, FormControl, Fo
 import { Mail, MailForward } from 'tabler-icons-react';
 import BackgroundImage from '../../assets/images/home/background.jpg'
 import { useDisclosure } from '@chakra-ui/react'
-import { useKiltLoginDialog } from '../../hooks/useKiltLoginDialog/useKiltLoginDialog';
 import { useDispatch } from 'react-redux';
 import { openEmailLoginModal } from '../../state/slices/emailLoginModalSlice';
 import { EmailCodeModal } from '../../components/modals/EmailCodeModal';
 import { EmailLoginModal } from '../../components/modals/EmailLoginModal';
+import { KiltLoginModal } from '../../components/modals/KiltLoginModal';
+import { openKiltLoginModal } from '../../state/slices/kiltLoginModalSlice';
 
 const HomePage = () => {
   const dispatch = useDispatch()
@@ -34,7 +35,6 @@ const HomePage = () => {
   const [isMobileViewport] = useMediaQuery('(max-width: 600px)')
   const [shorterThan600] = useMediaQuery('(max-height: 600px)')
   const [shorterThan800] = useMediaQuery('(max-height: 800px)')
-  const { isKiltLoginDialogOpen, onKiltLoginDialogOpen, onKiltLoginDialogClose } = useKiltLoginDialog()
 
   const loginButtonProps = { h: "80px", w: "100%", fontSize: "20px", bg: "rgba(255, 255, 255, 0.06)", border: "none" }
 
@@ -121,7 +121,9 @@ const HomePage = () => {
                       <path d="M14.414 0.36071V3.25149L2.08228 11.8211C1.67157 12.1412 1.33954 12.5497 1.11128 13.0158C0.883012 13.4819 0.764486 13.9933 0.764649 14.5115V7.19453L11.1207 0H13.8969C14.1547 0.00655837 14.367 0.159587 14.414 0.36071Z" fill="#3BEFB8" />
                     </svg>
                     }
-                    onClick={() => { onKiltLoginDialogOpen() }}
+                    onClick={() => {
+                      dispatch(openKiltLoginModal())
+                    }}
 
                   >KILT</Button>
                 </Box>
@@ -160,7 +162,7 @@ const HomePage = () => {
       </Stack >
       <EmailCodeModal />
       <EmailLoginModal />
-
+      <KiltLoginModal />
     </>
   );
 };
