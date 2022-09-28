@@ -26,7 +26,7 @@ import { AssetDto, CollectionFragmentDto, SkinResponse } from '../state/api/type
 import { useGetMarketplaceMetadataQuery, useGetMarketplaceOnChainTokensQuery } from '../state/api/generatedSquidMarketplaceApi';
 import { Media } from '../components';
 import { BigNumber, utils } from 'ethers';
-import { addRegonizedTokenDataToStandardizedOnChainTokens, formatTokenName, inGameMarketplaceMetadataParams, InGameTokenMaybeMetadata, inGameTokensCombineMetadata, StandardizedOnChainToken, StandardizedOnChainTokenWithRecognizedTokenData, standardizeMarketplaceOnChainTokens } from '../utils/graphqlReformatter';
+import { addRegonizedTokenDataToStandardizedOnChainTokens, formatTokenName, inGameMarketplaceMetadataParams, InGameTokenMaybeMetadata, inGameTokensCombineMetadata, StandardizedOnChainToken, StandardizedOnChainTokenWithRecognizedTokenData, standardizeMarketplaceOnChainTokens, standardizeRaresamaOnChainTokens } from '../utils/graphqlReformatter';
 import { ImportEnraptureModal } from '../components/modals/ImportEnraptureModal';
 import { useDispatch } from 'react-redux';
 import { openImportEnraptureModal, setImportEnraptureTokens } from '../state/slices/importEnraptureModalSlice';
@@ -75,17 +75,6 @@ const ProfilePage = () => {
     }
     const { isAccountDialogOpen, onAccountDialogOpen, onAccountDialogClose } = useAccountDialog();
 
-    const [fetchtrigger, setFetchtrigger] = useState<string | undefined>(undefined)
-
-    const { isOpen: isItemDetailDialogOpen, onOpen: onItemDetailDialogOpen, onClose: onItemDetailDialogClose } = useDisclosure()
-
-
-
-    // Dialogs
-    const { isAssetDialogOpen, onAssetDialogOpen, onAssetDialogClose, assetDialogData, setAssetDialogData } = useAssetDialog()
-
-
-
 
     // Group checkbox hooks for batch import/export
     const { value: inGameCheckboxGroupValue, isDisabled: isInGameCheckboxGroupDisabled, onChange: onInGameCheckboxGroupChange, setValue: setInGameCheckboxGroupValue, getCheckboxProps: getInGameCheckboxGroupProps } = useCheckboxGroup()
@@ -103,11 +92,24 @@ const ProfilePage = () => {
     const standardizedMarketplaceOnChainTokens: StandardizedOnChainToken[] | undefined = React.useMemo(() => standardizeMarketplaceOnChainTokens(marketplaceOnChainTokensData), [marketplaceOnChainTokensData])
     const standardizedMarketplaceOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(standardizedMarketplaceOnChainTokens, recognizedAssetsData), [standardizedMarketplaceOnChainTokens, recognizedAssetsData])
 
+    const standardizedRaresamaOnChainTokens: StandardizedOnChainToken[] | undefined = React.useMemo(() => standardizeRaresamaOnChainTokens(raresamaOnChainTokensData), [raresamaOnChainTokensData])
+    const standardizedRaresamaOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(standardizedRaresamaOnChainTokens, recognizedAssetsData), [standardizedRaresamaOnChainTokens, recognizedAssetsData])
+
+    const allStandardizedOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
+        if (!!standardizedMarketplaceOnChainTokensWithRecognizedTokenData || !!standardizedRaresamaOnChainTokensWithRecognizedTokenData) {
+            return [
+                ...(standardizedMarketplaceOnChainTokensWithRecognizedTokenData ?? []),
+                ...(standardizedRaresamaOnChainTokensWithRecognizedTokenData ?? [])
+            ]
+        } else {
+            return undefined
+        }
+    }, [standardizedMarketplaceOnChainTokensWithRecognizedTokenData, standardizedRaresamaOnChainTokensWithRecognizedTokenData])
 
 
     const onChainItems: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
-        if (!!standardizedMarketplaceOnChainTokensWithRecognizedTokenData) {
-            return standardizedMarketplaceOnChainTokensWithRecognizedTokenData.filter((tok) => {
+        if (!!allStandardizedOnChainTokensWithRecognizedTokenData) {
+            return allStandardizedOnChainTokensWithRecognizedTokenData.filter((tok) => {
                 if (tok?.importable === false && tok?.enrapturable === false) {
                     return false
                 }
@@ -116,15 +118,16 @@ const ProfilePage = () => {
         } else {
             return undefined
         }
-    }, [standardizedMarketplaceOnChainTokensWithRecognizedTokenData, account])
+    }, [allStandardizedOnChainTokensWithRecognizedTokenData])
+
 
     const onChainResources: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
-        if (!!standardizedMarketplaceOnChainTokensWithRecognizedTokenData) {
-            return standardizedMarketplaceOnChainTokensWithRecognizedTokenData.filter((tok) => tok.summonable)
+        if (!!allStandardizedOnChainTokensWithRecognizedTokenData) {
+            return allStandardizedOnChainTokensWithRecognizedTokenData.filter((tok) => tok.summonable)
         } else {
             return undefined
         }
-    }, [standardizedMarketplaceOnChainTokensWithRecognizedTokenData, account])
+    }, [allStandardizedOnChainTokensWithRecognizedTokenData])
 
 
     const inGameItems: InGameTokenMaybeMetadata[] | undefined = React.useMemo(() => {
