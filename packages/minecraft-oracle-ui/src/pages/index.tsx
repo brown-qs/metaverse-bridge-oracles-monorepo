@@ -19,53 +19,13 @@ export const Routing = () => {
     const accessToken = useSelector(selectAccessToken)
     return (
         <Routes>
-            <Route path="/" element={<Navigate to="/login" />}>
-
-            </Route>
-
-            <Route path="/account" element={<>{!!accessToken ? <AccountPage></AccountPage> : <Navigate to="/login" />}</>}>
-            </Route>
-
-
-
-            <Route path="/oauth" element={<OauthPage />}>
-            </Route>
-
-            <Route path="/oauth/confirm" element={!!accessToken ? <OauthConfirmPage /> : <HomePage />}>
-            </Route>
-
-
-            <Route path="/bridge" element={<>{!!accessToken ? (
-                <>
-                    <ExportDialog />
-                    <SummonDialog />
-                    <AssetDialog />
-                    <ProfilePage />
-                </>
-            ) : <Navigate to="/login" />}</>}>
-            </Route>
-
-            <Route path="/login" element={<>{!!accessToken ? (
-                <Navigate to="/bridge" />
-            ) :
-                <HomePage></HomePage>
-
-            }</>}>
-            </Route>
-
-            <Route path="/moonsama/customizer/:chainId/:assetAddress/:assetId" element={<MoonsamaCharacterDesignerPage />}>
-            </Route>
-
-            <Route path="/moonsama/customizer" element={<><MoonsamaCharacterDesignerPage /></>}>
-            </Route>
-
-            <Route path="/test" element={<><TestPage /></>}>
-            </Route>
-
-
-            <Route path="*" element={<><Navigate to="/bridge" /></>}>
-
-            </Route>
-        </Routes >
+            <Route path="/" element={!!accessToken ? <Navigate to="/bridge" /> : <HomePage />} />
+            <Route path="/account" element={!!accessToken ? <AccountPage /> : <Navigate to="/" />} />
+            <Route path="/bridge" element={!!accessToken ? <ProfilePage /> : <Navigate to="/" />} />
+            <Route path="/moonsama/customizer/:chainId/:assetAddress/:assetId" element={<MoonsamaCharacterDesignerPage />} />
+            <Route path="/moonsama/customizer" element={<MoonsamaCharacterDesignerPage />} />
+            <Route path="/test" element={<TestPage />} />
+            <Route path="*" element={<Navigate to="/bridge" />} />
+        </Routes>
     )
 };
