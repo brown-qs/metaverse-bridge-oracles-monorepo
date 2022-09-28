@@ -8,30 +8,30 @@ import { useSummonDialog } from 'hooks/useSummonDialog/useSummonDialog';
 import { stringToStringAssetType } from 'utils/subgraph';
 import { Fraction } from 'utils/Fraction';
 import { countGamePassAssets } from 'utils';
-import { useAssetDialog } from '../../hooks/useAssetDialog/useAssetDialog';
+import { useAssetDialog } from '../hooks/useAssetDialog/useAssetDialog';
 import React, { ReactNode, useEffect, useState } from 'react';
-import { SKIN_LABELS } from '../../constants/skins';
-import { BURNABLE_RESOURCES_IDS, DEFAULT_CHAIN, NETWORK_NAME } from "../../constants";
-import { AssetChainDetails } from '../../components/AssetChainDetails/AssetChainDetails';
+import { SKIN_LABELS } from '../constants/skins';
+import { BURNABLE_RESOURCES_IDS, DEFAULT_CHAIN, NETWORK_NAME } from "../constants";
+import { AssetChainDetails } from '../components/AssetChainDetails/AssetChainDetails';
 import { Image, Text, Box, Container, Grid, List, ListIcon, ListItem, Stack, Tooltip, Button, Flex, SimpleGrid, GridItem, VStack, HStack, background, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useCheckboxGroup, useMediaQuery, CircularProgress } from '@chakra-ui/react';
-import { BridgeTab } from '../../components/Bridge/BridgeTab';
-import { InGameItem } from '../../components/Bridge/InGameItem';
+import { BridgeTab } from '../components/Bridge/BridgeTab';
+import { InGameItem } from '../components/Bridge/InGameItem';
 import { CaretLeft, CaretRight, DeviceGamepad, UserCircle, Wallet } from 'tabler-icons-react';
-import { InGameResource } from '../../components/Bridge/InGameResource';
-import { OnChainResource } from '../../components/Bridge/OnChainResource';
-import { OnChainItem } from '../../components/Bridge/OnChainItem';
-import { ItemDetailsModal } from '../../components/Bridge/ItemDetailsModal';
-import BackgroundImage from '../../assets/images/bridge-background-blur.svg'
-import { useSetSkinMutation, useGetSkinsQuery, useUserProfileQuery, useGetRecognizedAssetsQuery, useGetInGameItemsQuery, useGetInGameResourcesQuery } from '../../state/api/bridgeApi';
+import { InGameResource } from '../components/Bridge/InGameResource';
+import { OnChainResource } from '../components/Bridge/OnChainResource';
+import { OnChainItem } from '../components/Bridge/OnChainItem';
+import { ItemDetailsModal } from '../components/Bridge/ItemDetailsModal';
+import BackgroundImage from '../assets/images/bridge-background-blur.svg'
+import { useSetSkinMutation, useGetSkinsQuery, useUserProfileQuery, useGetRecognizedAssetsQuery, useGetInGameItemsQuery, useGetInGameResourcesQuery } from '../state/api/bridgeApi';
 
-import { AssetDto, CollectionFragmentDto, SkinResponse } from '../../state/api/types';
-import { useGetOnChainTokensQuery, GetOnChainTokensQuery, useGetMetadataQuery } from '../../state/api/generatedSquidMarketplaceApi';
-import { Media } from '../../components';
+import { AssetDto, CollectionFragmentDto, SkinResponse } from '../state/api/types';
+import { useGetOnChainTokensQuery, GetOnChainTokensQuery, useGetMetadataQuery } from '../state/api/generatedSquidMarketplaceApi';
+import { Media } from '../components';
 import { BigNumber, utils } from 'ethers';
-import { addRegonizedTokenDataToTokens, formatTokenName, inGameMetadataParams, InGameTokenMaybeMetadata, inGameTokensCombineMetadata, OnChainTokenWithRecognizedTokenData, TransformedTokenType, transformGraphqlErc1155Token, transformGraphqlErc721Token } from '../../utils/graphqlReformatter';
-import { ImportEnraptureModal } from '../../components/modals/ImportEnraptureModal';
+import { addRegonizedTokenDataToTokens, formatTokenName, inGameMetadataParams, InGameTokenMaybeMetadata, inGameTokensCombineMetadata, OnChainTokenWithRecognizedTokenData, TransformedTokenType, transformGraphqlErc1155Token, transformGraphqlErc721Token } from '../utils/graphqlReformatter';
+import { ImportEnraptureModal } from '../components/modals/ImportEnraptureModal';
 import { useDispatch } from 'react-redux';
-import { openImportEnraptureModal, setImportEnraptureTokens } from '../../state/slices/importEnraptureModalSlice';
+import { openImportEnraptureModal, setImportEnraptureTokens } from '../state/slices/importEnraptureModalSlice';
 
 
 const ProfilePage = () => {
