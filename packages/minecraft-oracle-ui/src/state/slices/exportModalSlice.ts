@@ -4,22 +4,27 @@ import { InGameTokenMaybeMetadata, OnChainTokenWithRecognizedTokenData } from ".
 
 export interface ExportModalSlice {
     modalOpen: boolean,
+    exportTokens: InGameTokenMaybeMetadata[]
 }
 
 const exportModalSlice = createSlice({
     name: "exportModalSlice",
-    initialState: { modalOpen: false } as ExportModalSlice,
+    initialState: { modalOpen: false, exportTokens: [] } as ExportModalSlice,
     reducers: {
         closeExportModal: (state) => {
             state.modalOpen = false
         },
         openExportModal: (state) => {
             state.modalOpen = true
+        },
+        setExportTokens: (state, exportTokens: PayloadAction<InGameTokenMaybeMetadata[]>) => {
+            state.exportTokens = exportTokens.payload
         }
     }
 })
 
-export const { closeExportModal, openExportModal } = exportModalSlice.actions
+export const { setExportTokens, closeExportModal, openExportModal } = exportModalSlice.actions
 export default exportModalSlice.reducer
 
 export const selectExportModalOpen = (state: AppState) => state?.exportModal?.modalOpen
+export const selectExportTokens = (state: AppState) => state?.exportModal?.exportTokens

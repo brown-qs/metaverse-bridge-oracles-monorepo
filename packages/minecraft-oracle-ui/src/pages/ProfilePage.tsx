@@ -3,7 +3,6 @@ import { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 
 import { useOnChainItems } from 'hooks/multiverse/useOnChainItems';
 import { useAccountDialog, useActiveWeb3React, useImportDialog, useEnraptureDialog } from 'hooks';
-import { useExportDialog } from 'hooks/useExportDialog/useExportDialog';
 import { stringToStringAssetType } from 'utils/subgraph';
 import { Fraction } from 'utils/Fraction';
 import { countGamePassAssets } from 'utils';
@@ -33,6 +32,8 @@ import { useDispatch } from 'react-redux';
 import { openImportEnraptureModal, setImportEnraptureTokens } from '../state/slices/importEnraptureModalSlice';
 import { openSummonModal } from '../state/slices/summonModalSlice';
 import { SummonModal } from '../components/modals/SummonModal';
+import { ExportModal } from '../components/modals/ExportModal';
+import { openExportModal, setExportTokens } from '../state/slices/exportModalSlice';
 
 
 const ProfilePage = () => {
@@ -71,7 +72,6 @@ const ProfilePage = () => {
     // Dialogs
     const { isImportDialogOpen, onImportDialogOpen, onImportDialogClose, importDialogData, setImportDialogData } = useImportDialog()
     const { isEnraptureDialogOpen, onEnraptureDialogOpen, onEnraptureDialogClose, enraptureDialogData, setEnraptureDialogData } = useEnraptureDialog()
-    const { isExportDialogOpen, onExportDialogOpen, onExportDialogClose, exportDialogData, setExportDialogData } = useExportDialog()
     const { isAssetDialogOpen, onAssetDialogOpen, onAssetDialogClose, assetDialogData, setAssetDialogData } = useAssetDialog()
 
 
@@ -337,21 +337,8 @@ const ProfilePage = () => {
                                             //just export one items now but we are setup for multiple later
                                             if (exportAssets.length > 0) {
                                                 const value = exportAssets[0]
-                                                /*
-                                                onExportDialogOpen();
-                                                setExportDialogData(
-                                                    {
-                                                        hash: value.hash,
-                                                        asset: {
-                                                            assetAddress: value.assetAddress,
-                                                            assetId: value.assetId,
-                                                            assetType: stringToStringAssetType(value.assetType),
-                                                            id: 'x'
-                                                        },
-                                                        chain: value.exportChainId,
-                                                        item: value
-                                                    }
-                                                );*/
+                                                dispatch(setExportTokens([value]))
+                                                dispatch(openExportModal())
                                             }
                                         }}
                                         isDisabled={inGameCheckboxGroupValue.length === 0} w="100%">EXPORT TO WALLET</Button>}
@@ -440,9 +427,6 @@ const ProfilePage = () => {
                                                 }
                                                 dispatch(setImportEnraptureTokens(importAssets))
                                                 dispatch(openImportEnraptureModal())
-                                                /*
-                                                onImportDialogOpen();
-                                                setImportDialogData({ asset: item.asset });*/
 
                                             }}
                                             isDisabled={onChainCheckboxGroupValue.length === 0} w="100%">IMPORT TO GAME
@@ -596,6 +580,7 @@ const ProfilePage = () => {
                     </>
                 }
             </Container >
+            <ExportModal />
             <SummonModal />
             <ImportEnraptureModal />
         </>

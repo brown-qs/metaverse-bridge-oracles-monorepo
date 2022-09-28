@@ -1,0 +1,23 @@
+query getOnChainTokens($owner: String!) {
+  tokens(where: {owner: {id_eq: $owner}}, limit: 1000) {
+    id
+    numericId
+    metadata {
+      image
+      layers
+      name
+      type
+      description
+      composite
+      attributes {
+        displayType
+        traitType
+        value
+      }
+    }
+    id
+    contract {
+      id
+    }
+  }
+}
