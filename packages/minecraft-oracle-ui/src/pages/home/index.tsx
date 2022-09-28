@@ -5,21 +5,34 @@ import { styles } from './styles';
 import WhiteLogo from 'assets/images/moonsama-glitch-white.svg';
 import LeftImage from 'assets/images/home/left.png';
 import RightImageFlip from 'assets/images/home/right.png';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Image, Button, Stack, useMediaQuery, Text, VStack, Box, FormControl, FormLabel, Input, FormHelperText } from '@chakra-ui/react';
 import { Mail, MailForward } from 'tabler-icons-react';
 import BackgroundImage from '../../assets/images/home/background.jpg'
 import { useDisclosure } from '@chakra-ui/react'
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { openEmailLoginModal } from '../../state/slices/emailLoginModalSlice';
 import { EmailCodeModal } from '../../components/modals/EmailCodeModal';
 import { EmailLoginModal } from '../../components/modals/EmailLoginModal';
 import { KiltLoginModal } from '../../components/modals/KiltLoginModal';
 import { openKiltLoginModal } from '../../state/slices/kiltLoginModalSlice';
+import { selectAccessToken } from '../../state/slices/authSlice';
 
 const HomePage = () => {
+  const accessToken = useSelector(selectAccessToken)
+  const { pathname, search } = useLocation()
+  console.log("search", search)
   const dispatch = useDispatch()
   let navigate = useNavigate();
+
+  const isOauth = React.useMemo(() => {
+    if (!!pathname && typeof pathname === "string" && pathname.includes("oauth")) {
+      return true
+    } else {
+      return false
+    }
+  }, [pathname])
+
   const {
     homeContainer,
     logo,
@@ -62,7 +75,7 @@ const HomePage = () => {
           textOverflow="ellipsis"
           overflow="hidden"
         >
-          <Text fontFamily={'Orbitron'} color="white" textAlign="center">MULTIVERSE BRIDGE</Text>
+          <Text fontFamily={'Orbitron'} color="white" textAlign="center">{isOauth ? "OAUTH" : "MULTIVERSE BRIDGE"}</Text>
         </Box>
       </Box>
 
@@ -98,7 +111,7 @@ const HomePage = () => {
             borderRadius="8px"
             padding="24px"
             width="min(calc(100% - 70px), 456px)"
-
+            visibility={(isOauth && !!accessToken) ? "hidden" : "visible"} //hide login shit when we are oauthing logged in user
           >
             <Box
               fontSize="24px"
@@ -109,7 +122,7 @@ const HomePage = () => {
               overflow="hidden"
               textAlign="center"
             >
-              Login Method</Box>
+              Login Method isOauth {String(isOauth)}</Box>
             <Box w="100%" h="100%" paddingTop="24px">
               <Stack direction={{ base: "column", md: "row" }} w="100%" spacing="0">
                 <Box flex="1" padding={{ base: "0 0 4px 0", md: "0 4px 0 0" }}>
