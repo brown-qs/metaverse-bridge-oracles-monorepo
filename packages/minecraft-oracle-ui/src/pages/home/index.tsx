@@ -17,11 +17,15 @@ import { EmailLoginModal } from '../../components/modals/EmailLoginModal';
 import { KiltLoginModal } from '../../components/modals/KiltLoginModal';
 import { openKiltLoginModal } from '../../state/slices/kiltLoginModalSlice';
 import { selectAccessToken } from '../../state/slices/authSlice';
+import { closeOauthModal, openOauthModal, selectOauthData, selectOauthModalOpen, setOauthInProgress } from '../../state/slices/oauthSlice';
+import { OauthModal } from '../../components/modals/OauthModal';
 
 const HomePage = () => {
   const accessToken = useSelector(selectAccessToken)
+  const isOauthModalOpen = useSelector(selectOauthModalOpen)
+  const oauthData = useSelector(selectOauthData)
+
   const { pathname, search } = useLocation()
-  console.log("search", search)
   const dispatch = useDispatch()
   let navigate = useNavigate();
 
@@ -32,6 +36,27 @@ const HomePage = () => {
       return false
     }
   }, [pathname])
+
+  React.useEffect(() => {
+    dispatch(setOauthInProgress(isOauth))
+  }, [isOauth])
+
+  React.useEffect(() => {
+    if (isOauth) {
+      if (!!oauthData) {
+        //open modal to confirm oauth if logged in
+        if (!!accessToken) {
+          dispatch(openOauthModal())
+        } else {
+          //close oauth modal so user can log in
+          dispatch(closeOauthModal())
+        }
+      } else {
+        //open modal 
+        dispatch(openOauthModal())
+      }
+    }
+  }, [isOauth, isOauthModalOpen, accessToken, oauthData])
 
   const {
     homeContainer,
@@ -173,6 +198,9 @@ const HomePage = () => {
         {!isMobileViewport && <img src={RightImageFlip} className={rightBgImage} alt="" />}
         {isMobileViewport && <img src={LeftImage} className={centerBgImage} alt="" />}
       </Stack >
+      {isOauth && <>
+        <OauthModal />
+      </>}
       <EmailCodeModal />
       <EmailLoginModal />
       <KiltLoginModal />

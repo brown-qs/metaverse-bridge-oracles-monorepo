@@ -11,8 +11,7 @@ import emailLoginModalSlice from './slices/emailLoginModalSlice';
 import importEnraptureModalSlice from './slices/importEnraptureModalSlice';
 import inGameItemModalSlice from './slices/inGameItemModalSlice';
 import kiltLoginModalSlice from './slices/kiltLoginModalSlice';
-import oauthAuthorizeModalSlice from './slices/oauthAuthorizeModalSlice';
-import oauthStartModalSlice from './slices/oauthStartModalSlice';
+import oauthSlice from './slices/oauthSlice';
 import transactions from './transactions/reducer';
 
 const PERSISTED_KEYS: string[] = ['transactions'];
@@ -27,8 +26,7 @@ const store = configureStore({
     emailCodeModal: emailCodeModalSlice,
     emailLoginModal: emailLoginModalSlice,
     kiltLoginModal: kiltLoginModalSlice,
-    oauthAuthorizeModal: oauthAuthorizeModalSlice,
-    oauthStartModal: oauthStartModalSlice,
+    oauth: oauthSlice,
     [bridgeApi.reducerPath]: bridgeApi.reducer,
     [generatedSquidMarketplaceApi.reducerPath]: generatedSquidMarketplaceApi.reducer
 

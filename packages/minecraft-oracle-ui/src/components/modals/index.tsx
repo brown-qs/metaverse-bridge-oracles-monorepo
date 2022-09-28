@@ -21,11 +21,12 @@ export interface MoonsamaModalProps {
     iconBackgroundColor?: string,
     iconColor?: string,
     closeOnOverlayClick?: boolean,
+    closeable?: boolean,
     children?: ReactNode
 };
 
 
-export const ReduxModal: React.FC<MoonsamaModalProps> = ({ closeActionCreator, isOpenSelector, title, TitleTablerIcon, message, bottomButtonText, onBottomButtonClick, TablerIcon, iconBackgroundColor, iconColor, closeOnOverlayClick, children }) => {
+export const ReduxModal: React.FC<MoonsamaModalProps> = ({ closeActionCreator, isOpenSelector, title, TitleTablerIcon, message, bottomButtonText, onBottomButtonClick, TablerIcon, iconBackgroundColor, iconColor, closeOnOverlayClick, closeable, children }) => {
 
     const isOpen = useSelector(isOpenSelector)
     const dispatch = useDispatch()
@@ -34,7 +35,7 @@ export const ReduxModal: React.FC<MoonsamaModalProps> = ({ closeActionCreator, i
         <Modal isOpen={isOpen} onClose={() => dispatch(closeActionCreator())} isCentered closeOnOverlayClick={closeOnOverlayClick}>
             <ModalOverlay />
             <ModalContent>
-                <ModalCloseButton />
+                {(closeable !== false) && <ModalCloseButton />}
                 <ModalBody>
                     <VStack alignItems="flex-start" marginTop="16px" marginBottom="16px" spacing="0">
                         {TablerIcon &&
@@ -49,7 +50,7 @@ export const ReduxModal: React.FC<MoonsamaModalProps> = ({ closeActionCreator, i
                                 lineHeight="24px"
                                 paddingBottom="16px"
                             >
-                                {TitleTablerIcon && <Box paddingRight="6px"><TitleTablerIcon color="#3BEFB8" size="21px"></TitleTablerIcon></Box>}
+                                {TitleTablerIcon && <Box paddingRight="6px"><TitleTablerIcon color="var(--chakra-colors-teal-200)" size="21px"></TitleTablerIcon></Box>}
                                 <Box >{title}</Box>
 
                             </HStack>
