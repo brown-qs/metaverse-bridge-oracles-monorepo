@@ -6,14 +6,14 @@ import axios, { AxiosError } from 'axios';
 import { Container, Image, Alert, AlertDescription, AlertIcon, Box, Button, CircularProgress, HStack, Stack, Tag, TagCloseButton, TagLabel, TagLeftIcon, TagRightIcon, VStack, Grid, GridItem, FormControl, FormHelperText, FormLabel, Input, FormErrorMessage, InputRightElement, IconButton, useToast } from '@chakra-ui/react';
 import { CircleX, DeviceFloppy, DeviceGamepad2, Link, Pencil, PencilOff, Power, Tags, Unlink, User } from 'tabler-icons-react';
 import { useSelector } from 'react-redux';
-import { selectAccessToken, setTokens } from '../../state/slices/authSlice';
-import { rtkQueryErrorFormatter, useEmailChangeMutation, useGamerTagSetMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useMinecraftUnlinkMutation, useUserProfileQuery } from '../../state/api/bridgeApi';
+import { selectAccessToken, setTokens } from '../state/slices/authSlice';
+import { rtkQueryErrorFormatter, useEmailChangeMutation, useGamerTagSetMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useMinecraftUnlinkMutation, useUserProfileQuery } from '../state/api/bridgeApi';
 import { useDispatch } from 'react-redux';
-import BackgroundImage from '../../assets/images/bridge-background-blur.svg'
+import BackgroundImage from '../assets/images/bridge-background-blur.svg'
 import { isValid } from 'date-fns';
-import { useCaptcha } from '../../hooks/useCaptcha/useCaptcha';
-import { openEmailCodeModal } from '../../state/slices/emailCodeModalSlice';
-import { EmailCodeModal } from '../../components/modals/EmailCodeModal';
+import { useCaptcha } from '../hooks/useCaptcha/useCaptcha';
+import { openEmailCodeModal } from '../state/slices/emailCodeModalSlice';
+import { EmailCodeModal } from '../components/modals/EmailCodeModal';
 
 const AccountPage = () => {
   const { search } = useLocation()

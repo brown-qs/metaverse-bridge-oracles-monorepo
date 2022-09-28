@@ -1,19 +1,19 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './home';
-import ProfilePage from './profile';
+import ProfilePage from './ProfilePage';
 import MoonsamaCharacterDesignerPage from './moonsama/designer';
 import { ExportDialog } from '../components/ExportDialog/ExportDialog';
 import { ImportDialog } from '../components/ImportDialog/ImportDialog';
 import { EnraptureDialog } from '../components/EnraptureDialog/EnraptureDialog';
 import { SummonDialog } from '../components/SummonDialog/SummonDialog';
 import { AssetDialog } from '../components/AssetDialog/AssetDialog';
-import AccountPage from './account';
+import AccountPage from './AccountPage';
 import OauthPage from './oauth';
 import OauthConfirmPage from './oauth/confirm';
 import { useSelector } from 'react-redux';
 import { selectAccessToken } from '../state/slices/authSlice';
-import TestPage from './test';
+import TestPage from './TestPage';
 
 export const Routing = () => {
     const accessToken = useSelector(selectAccessToken)
