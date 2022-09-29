@@ -48,21 +48,23 @@ const ProfilePage = () => {
     const { data: profile, error, isLoading: profileLoading } = useUserProfileQuery()
 
     //skins
-    const { data: skins, error: skinsError, isLoading: skinsLoading } = useGetSkinsQuery()
+    const { data: skins, error: skinsError, isLoading: skinsLoading, refetch: refetchSkins } = useGetSkinsQuery()
     const [setSkin, { error: setSkinError, isUninitialized, isLoading, isSuccess, isError, reset: setSkinReset }] = useSetSkinMutation()
 
     //on chain tokens (from indexers)
-    const { data: raresamaOnChainTokensData, isLoading: isRaresamaOnChainTokensDataLoading, isFetching: isRaresamaOnChainTokensDataFetching, isError: isRaresamaOnChainTokensDataError, error: raresamaOnChainTokensError } = useGetRaresamaOnChainTokensQuery({ where: { owner: { id_eq: address }, contract: { id_eq: "0xf27a6c72398eb7e25543d19fda370b7083474735" } } })
-    const { data: marketplaceOnChainTokensData, isLoading: isMarketplaceOnChainTokensLoading, isFetching: isMarketplaceOnChainTokensFetching, isError: isMarketplaceOnChainTokensError, error: marketplaceOnChainTokensError } = useGetMarketplaceOnChainTokensQuery({ owner: address })
+    const { data: raresamaOnChainTokensData, currentData: currentRaresamaOnChainTokensData, isLoading: isRaresamaOnChainTokensDataLoading, isFetching: isRaresamaOnChainTokensDataFetching, isError: isRaresamaOnChainTokensDataError, error: raresamaOnChainTokensError, refetch: refetchRaresamaOnChainTokens } = useGetRaresamaOnChainTokensQuery({ where: { owner: { id_eq: address }, contract: { id_eq: "0xf27a6c72398eb7e25543d19fda370b7083474735" } } })
+    const { data: marketplaceOnChainTokensData, currentData: currentMarketplaceOnChainTokensData, isLoading: isMarketplaceOnChainTokensLoading, isFetching: isMarketplaceOnChainTokensFetching, isError: isMarketplaceOnChainTokensError, error: marketplaceOnChainTokensError, refetch: refetchMarketplaceOnChainTokens } = useGetMarketplaceOnChainTokensQuery({ owner: address })
 
     //in game tokens (from nestjs server)
-    const { data: recognizedAssetsData, isLoading: isRecognizedAssetsLoading, isFetching: isRecognizedAssetsFetching, isError: isRecognizedAssetsError, error: recognizedAssetsError } = useGetRecognizedAssetsQuery()
-    const { data: inGameItemsData, isLoading: isInGameItemsDataLoading, isFetching: isInGameItemsDataFetching, isError: isInGameItemsError, error: inGameItemsError } = useGetInGameItemsQuery()
-    const { data: inGameResourcesData, isLoading: isInGameResourcesLoading, isFetching: isInGameResourcesFetching, isError: isInGameResourcesError, error: inGameResourcesError } = useGetInGameResourcesQuery()
+    const { data: recognizedAssetsData, isLoading: isRecognizedAssetsLoading, isFetching: isRecognizedAssetsFetching, isError: isRecognizedAssetsError, error: recognizedAssetsError, refetch: refetchRecognizedAssets } = useGetRecognizedAssetsQuery()
+    const { data: inGameItemsData, isLoading: isInGameItemsDataLoading, isFetching: isInGameItemsDataFetching, isError: isInGameItemsError, error: inGameItemsError, refetch: refetchInGameItems } = useGetInGameItemsQuery()
+    const { data: inGameResourcesData, isLoading: isInGameResourcesLoading, isFetching: isInGameResourcesFetching, isError: isInGameResourcesError, error: inGameResourcesError, refetch: refetchInGameResources } = useGetInGameResourcesQuery()
 
     //metadata
-    const { data: inGameItemsMetadata, isLoading: isInGameItemsMetadataLoading, isFetching: isInGameItemsMetadataFetching, isError: isInGameItemsMetadataError, error: inGameItemsMetadataError } = useGetMarketplaceMetadataQuery(inGameMarketplaceMetadataParams(inGameItemsData))
-    const { data: inGameResourcesMetadata, isLoading: isInGameResourcesMetadataLoading, isFetching: isInGameResourcesMetadataFetching, isError: isInGameResourcesMetadataError, error: inGameResourcesMetadataError } = useGetMarketplaceMetadataQuery(inGameMarketplaceMetadataParams(inGameResourcesData))
+    const inGameItemsMetadataQuery = React.useMemo(() => inGameMarketplaceMetadataParams(inGameItemsData), [inGameItemsData])
+    const inGameResourcesMetadataQuery = React.useMemo(() => inGameMarketplaceMetadataParams(inGameResourcesData), [inGameResourcesData])
+    const { data: inGameItemsMetadata, isLoading: isInGameItemsMetadataLoading, isFetching: isInGameItemsMetadataFetching, isError: isInGameItemsMetadataError, error: inGameItemsMetadataError } = useGetMarketplaceMetadataQuery(inGameItemsMetadataQuery)
+    const { data: inGameResourcesMetadata, isLoading: isInGameResourcesMetadataLoading, isFetching: isInGameResourcesMetadataFetching, isError: isInGameResourcesMetadataError, error: inGameResourcesMetadataError } = useGetMarketplaceMetadataQuery(inGameResourcesMetadataQuery)
 
 
 
@@ -146,6 +148,23 @@ const ProfilePage = () => {
             return undefined
         }
     }, [inGameResourcesData, inGameResourcesMetadata])
+
+    //TODO: raresama loading
+    const isOnChainItemsLoading: boolean = React.useMemo(() => {
+        if (isMarketplaceOnChainTokensFetching && !currentMarketplaceOnChainTokensData) {
+            return true
+        } else {
+            return false
+        }
+    }, [currentMarketplaceOnChainTokensData, isMarketplaceOnChainTokensFetching])
+
+    const isOnChainResourcesLoading: boolean = React.useMemo(() => {
+        if (isMarketplaceOnChainTokensFetching && !currentMarketplaceOnChainTokensData) {
+            return true
+        } else {
+            return false
+        }
+    }, [currentMarketplaceOnChainTokensData, isMarketplaceOnChainTokensFetching])
 
     return (
         <>
@@ -386,7 +405,7 @@ const ProfilePage = () => {
                                 <BridgeTab
                                     title="On-Chain Items"
                                     emptyMessage={onChainItems?.length ? undefined : "No items found in wallet."}
-                                    isLoading={isMarketplaceOnChainTokensLoading}
+                                    isLoading={isOnChainItemsLoading}
                                     icon={<Wallet size="18px" />}
                                     footer={
                                         <Button
@@ -519,7 +538,7 @@ const ProfilePage = () => {
                                 <BridgeTab
                                     title="On-Chain Resources"
                                     emptyMessage={onChainResources?.length ? undefined : "No resources found in wallet."}
-                                    isLoading={isMarketplaceOnChainTokensLoading}
+                                    isLoading={isOnChainResourcesLoading}
                                     icon={<Wallet size="18px" />}>
 
                                     <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">
