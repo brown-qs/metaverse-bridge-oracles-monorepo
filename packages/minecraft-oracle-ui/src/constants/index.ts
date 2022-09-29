@@ -38,13 +38,13 @@ export enum ChainId {
   MOONBEAM = 1284
 }
 
-export const PERMISSIONED_CHAINS = [ChainId.MOONRIVER]
+export const PERMISSIONED_CHAINS = [ChainId.MOONRIVER, ChainId.MOONBEAM, ChainId.MAINNET]
 export const DEFAULT_CHAIN = ChainId.MOONRIVER
 
 export const RPC_URLS: { [chainId: number]: string } = {
   [ChainId.MOONRIVER]: 'https://rpc.api.moonriver.moonbeam.network',
   [ChainId.MOONBEAM]: 'https://moonbeam-rpc.moonsama.com',
-  [ChainId.MAINNET]: 'https://mainnet.infura.io/v3/',
+  [ChainId.MAINNET]: 'https://cloudflare-eth.com',
   [ChainId.ROPSTEN]: 'https://ropsten.infura.io/v3/'
 };
 

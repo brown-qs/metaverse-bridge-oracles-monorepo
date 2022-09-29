@@ -9,7 +9,7 @@ import { countGamePassAssets } from 'utils';
 import { useAssetDialog } from '../hooks/useAssetDialog/useAssetDialog';
 import React, { ReactNode, useEffect, useState } from 'react';
 import { SKIN_LABELS } from '../constants/skins';
-import { BURNABLE_RESOURCES_IDS, DEFAULT_CHAIN, NETWORK_NAME } from "../constants";
+import { BURNABLE_RESOURCES_IDS, ChainId, DEFAULT_CHAIN, NETWORK_NAME } from "../constants";
 import { AssetChainDetails } from '../components/AssetChainDetails/AssetChainDetails';
 import { Image, Text, Box, Container, Grid, List, ListIcon, ListItem, Stack, Tooltip, Button, Flex, SimpleGrid, GridItem, VStack, HStack, background, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useCheckboxGroup, useMediaQuery, CircularProgress } from '@chakra-ui/react';
 import { BridgeTab } from '../components/Bridge/BridgeTab';
@@ -28,18 +28,19 @@ import { Media } from '../components';
 import { BigNumber, utils } from 'ethers';
 import { addRegonizedTokenDataToStandardizedOnChainTokens, formatTokenName, inGameMarketplaceMetadataParams, InGameTokenMaybeMetadata, inGameTokensCombineMetadata, StandardizedOnChainToken, StandardizedOnChainTokenWithRecognizedTokenData, standardizeMarketplaceOnChainTokens, standardizeRaresamaOnChainTokens } from '../utils/graphqlReformatter';
 import { ImportEnraptureModal } from '../components/modals/ImportEnraptureModal';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { openImportEnraptureModal, setImportEnraptureTokens } from '../state/slices/importEnraptureModalSlice';
 import { openSummonModal } from '../state/slices/summonModalSlice';
 import { SummonModal } from '../components/modals/SummonModal';
 import { ExportModal } from '../components/modals/ExportModal';
 import { openExportModal, setExportTokens } from '../state/slices/exportModalSlice';
 import { useGetRaresamaOnChainTokensQuery } from '../state/api/generatedSquidRaresamaApi';
+import { selectBlockNumbers } from '../state/slices/blockNumbersSlice';
 
 
 const ProfilePage = () => {
     const dispatch = useDispatch()
-
+    const blockNumbers = useSelector(selectBlockNumbers)
     const { account, chainId } = useActiveWeb3React()
 
     const address: string = React.useMemo(() => account?.toLowerCase() ?? "0x999999999999999999999999999", [account])
@@ -133,6 +134,7 @@ const ProfilePage = () => {
 
 
     const inGameItems: InGameTokenMaybeMetadata[] | undefined = React.useMemo(() => {
+        console.log("IN GAME ITEMS CHANGE")
         if (!!inGameItemsData) {
             return [...inGameTokensCombineMetadata(inGameItemsData, inGameItemsMetadata)].sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
         } else {
@@ -165,6 +167,27 @@ const ProfilePage = () => {
             return false
         }
     }, [currentMarketplaceOnChainTokensData, isMarketplaceOnChainTokensFetching])
+
+
+
+    React.useEffect(() => {
+
+    }, [blockNumbers[ChainId.MAINNET]])
+
+    React.useEffect(() => {
+        refetchRaresamaOnChainTokens()
+    }, [blockNumbers[ChainId.MOONBEAM]])
+
+    React.useEffect(() => {
+        console.log("movr block change")
+        refetchMarketplaceOnChainTokens()
+    }, [blockNumbers[ChainId.MOONRIVER]])
+
+    React.useEffect(() => {
+        refetchInGameItems()
+        refetchInGameResources()
+        refetchSkins()
+    }, [blockNumbers[ChainId.MOONRIVER], blockNumbers[ChainId.MOONBEAM], blockNumbers[ChainId.MAINNET]])
 
     return (
         <>

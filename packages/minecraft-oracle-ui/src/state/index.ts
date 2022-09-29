@@ -7,6 +7,7 @@ import { api as generatedSquidRaresamaApi } from './api/generatedSquidRaresamaAp
 import application from './application/reducer';
 import { updateVersion } from './global/actions';
 import authSlice from './slices/authSlice';
+import blockNumbersSlice from './slices/blockNumbersSlice';
 import emailCodeModalSlice from './slices/emailCodeModalSlice';
 import emailLoginModalSlice from './slices/emailLoginModalSlice';
 import exportModalSlice from './slices/exportModalSlice';
@@ -31,6 +32,7 @@ const store = configureStore({
     kiltLoginModal: kiltLoginModalSlice,
     exportModal: exportModalSlice,
     summonModal: summonModalSlice,
+    blockNumbers: blockNumbersSlice,
     oauth: oauthSlice,
     [bridgeApi.reducerPath]: bridgeApi.reducer,
     [generatedSquidMarketplaceApi.reducerPath]: generatedSquidMarketplaceApi.reducer,
