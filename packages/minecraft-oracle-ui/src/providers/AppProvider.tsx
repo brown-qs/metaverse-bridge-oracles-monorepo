@@ -16,6 +16,7 @@ import { ChakraProvider } from '@chakra-ui/react'
 import { CaptchaContext } from '../context/captcha/captchaContext/captchaContext';
 import { CaptchaContextController } from '../context/captcha/captchaContextController/captchaContextController';
 import ScrollToTop from '../components/ScrollToTop';
+import { BlockNumberManager } from '../components/BlockNumberManager';
 
 function Updaters() {
   return (
@@ -34,17 +35,20 @@ export const AppProviders = ({ children }: AppProvidersProps) => (
           <Provider store={store}>
             <Updaters />
             <Web3ReactManager>
-              <AccountDialogContextController>
-                <TransferDialogContextController>
-                  <AssetDialogContextController>
-                    <Router>
-                      <ScrollToTop></ScrollToTop>
-                      {children}
-                    </Router>
-                  </AssetDialogContextController>
-                </TransferDialogContextController>
+              <>
+                <BlockNumberManager />
+                <AccountDialogContextController>
+                  <TransferDialogContextController>
+                    <AssetDialogContextController>
+                      <Router>
+                        <ScrollToTop></ScrollToTop>
+                        {children}
+                      </Router>
+                    </AssetDialogContextController>
+                  </TransferDialogContextController>
 
-              </AccountDialogContextController>
+                </AccountDialogContextController>
+              </>
             </Web3ReactManager>
           </Provider>
         </AuthContextController>
