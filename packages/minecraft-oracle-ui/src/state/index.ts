@@ -21,18 +21,17 @@ import storage from 'redux-persist/lib/storage'
 
 
 
-/*
+
 const authPersistConfig = {
   key: 'auth',
   storage: storage,
-  whitelist: ['accessTokens']
-}*/
+  whitelist: ['accessToken']
+}
 
 const rootReducer = combineReducers({
-  // auth: persistReducer(authPersistConfig, authSlice),
   application,
   transactions,
-  auth: authSlice,
+  auth: persistReducer(authPersistConfig, authSlice),
   importEnraptureModal: importEnraptureModalSlice,
   inGameItemModal: inGameItemModalSlice,
   emailCodeModal: emailCodeModalSlice,
