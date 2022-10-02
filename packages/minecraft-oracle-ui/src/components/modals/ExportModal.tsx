@@ -1,6 +1,7 @@
 import { Link as ChakraLink, Box, Button, CircularProgress, FormControl, FormErrorMessage, HStack, Input, ToastId, useToast, VStack } from "@chakra-ui/react";
 import { isPending } from "@reduxjs/toolkit";
 import { useWeb3React } from "@web3-react/core";
+import React from "react";
 import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
@@ -23,6 +24,11 @@ import { TransactionLink } from "../TransactionLink";
 export function ExportModal() {
     const dispatch = useDispatch()
     const exportTokens = useSelector(selectExportTokens)
+    const isOpen = useSelector(selectExportModalOpen)
+    const { chainId } = useActiveWeb3React();
+    const { error: networkError, chainId: networkChainId } = useWeb3React();
+    const { addNetwork } = useAddNetworkToMetamaskCb()
+
     const { data: gameInProgressData, isLoading: isGameInProgressLoading, isFetching: isGameInProgressFetching, isError: isGameInProgressError, error: gameInProgressError } = useActiveGameQuery()
     const [finalTxSubmitted, setFinalTxSubmitted] = useState<boolean>(false);
     const [exportParamsLoaded, setExportParamsLoaded] = useState<boolean>(false);
@@ -30,9 +36,12 @@ export function ExportModal() {
     const [exportConfirmed, setExportConfirmed] = useState<boolean>(false);
     const confirmCb = useExportConfirmCallback()
 
-    const { chainId } = useActiveWeb3React();
-    const { error: networkError, chainId: networkChainId } = useWeb3React();
-    const { addNetwork } = useAddNetworkToMetamaskCb()
+
+    React.useEffect(() => {
+        if (isOpen) {
+
+        }
+    }, [isOpen])
 
     const handleClose = (() => {
 
