@@ -32,7 +32,6 @@ const baseQueryWithAuth: BaseQueryFn<
         console.log(`bridgeApi:: 401 error accessTokenBeforeRequest: ${accessTokenBeforeRequest} accessTokenAfterRequest: ${accessTokenAfterRequest}`)
         if (!!accessTokenBeforeRequest && !!accessTokenAfterRequest && (accessTokenBeforeRequest === accessTokenAfterRequest)) {
             console.log("bridgeApi:: user was logged out because of 401 (token expired)")
-            window.localStorage.removeItem('accessToken');
             api.dispatch(setTokens({ accessToken: null, refreshToken: null }));
         }
     }
@@ -66,7 +65,6 @@ export const bridgeApi = createApi({
                     const result = await queryFulfilled;
                     if (!!result?.data?.jwt) {
                         dispatch(setTokens({ accessToken: result.data.jwt, refreshToken: null }));
-                        window.localStorage.setItem('accessToken', result.data.jwt);
                     }
                 } catch (error) { }
             }
