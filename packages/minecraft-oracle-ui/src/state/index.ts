@@ -1,6 +1,5 @@
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query'
-import { save, load } from 'redux-localstorage-simple';
 import { bridgeApi } from './api/bridgeApi';
 import { api as generatedSquidMarketplaceApi } from './api/generatedSquidMarketplaceApi';
 import { api as generatedSquidRaresamaApi } from './api/generatedSquidRaresamaApi';
@@ -17,36 +16,56 @@ import kiltLoginModalSlice from './slices/kiltLoginModalSlice';
 import oauthSlice from './slices/oauthSlice';
 import summonModalSlice from './slices/summonModalSlice';
 import transactions from './transactions/reducer';
+import { persistStore, persistReducer } from 'redux-persist'
+import storage from 'redux-persist/lib/storage'
 
-const PERSISTED_KEYS: string[] = ['transactions'];
+
+
+/*
+const authPersistConfig = {
+  key: 'auth',
+  storage: storage,
+  whitelist: ['accessTokens']
+}*/
+
+const rootReducer = combineReducers({
+  // auth: persistReducer(authPersistConfig, authSlice),
+  application,
+  transactions,
+  auth: authSlice,
+  importEnraptureModal: importEnraptureModalSlice,
+  inGameItemModal: inGameItemModalSlice,
+  emailCodeModal: emailCodeModalSlice,
+  emailLoginModal: emailLoginModalSlice,
+  kiltLoginModal: kiltLoginModalSlice,
+  exportModal: exportModalSlice,
+  summonModal: summonModalSlice,
+  blockNumbers: blockNumbersSlice,
+  oauth: oauthSlice,
+  [bridgeApi.reducerPath]: bridgeApi.reducer,
+  [generatedSquidMarketplaceApi.reducerPath]: generatedSquidMarketplaceApi.reducer,
+  [generatedSquidRaresamaApi.reducerPath]: generatedSquidRaresamaApi.reducer
+});
+
+const rootPersistConfig = {
+  key: 'root',
+  storage,
+  whitelist: []
+}
+
+const persistedReducer = persistReducer(rootPersistConfig, rootReducer)
+
 
 const store = configureStore({
-  reducer: {
-    application,
-    transactions,
-    auth: authSlice,
-    importEnraptureModal: importEnraptureModalSlice,
-    inGameItemModal: inGameItemModalSlice,
-    emailCodeModal: emailCodeModalSlice,
-    emailLoginModal: emailLoginModalSlice,
-    kiltLoginModal: kiltLoginModalSlice,
-    exportModal: exportModalSlice,
-    summonModal: summonModalSlice,
-    blockNumbers: blockNumbersSlice,
-    oauth: oauthSlice,
-    [bridgeApi.reducerPath]: bridgeApi.reducer,
-    [generatedSquidMarketplaceApi.reducerPath]: generatedSquidMarketplaceApi.reducer,
-    [generatedSquidRaresamaApi.reducerPath]: generatedSquidRaresamaApi.reducer
-
-  },
-  middleware: (getDefaultMiddleware) => [...getDefaultMiddleware(), bridgeApi.middleware, generatedSquidMarketplaceApi.middleware, generatedSquidRaresamaApi.middleware], //, save({ states: PERSISTED_KEYS })
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) => [...getDefaultMiddleware(), bridgeApi.middleware, generatedSquidMarketplaceApi.middleware, generatedSquidRaresamaApi.middleware],
 });
-//  preloadedState: load({ states: PERSISTED_KEYS }),
-//store.dispatch(updateVersion());
-
+export const persistor = persistStore(store)
 // optional, but required for refetchOnFocus/refetchOnReconnect behaviors
 // see `setupListeners` docs - takes an optional callback as the 2nd arg for customization
 setupListeners(store.dispatch)
+
+
 
 export default store;
 
