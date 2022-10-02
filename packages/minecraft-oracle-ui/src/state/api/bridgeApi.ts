@@ -2,7 +2,7 @@ import { SerializedError } from "@reduxjs/toolkit"
 import { BaseQueryFn, createApi, FetchArgs, fetchBaseQuery, FetchBaseQueryError } from "@reduxjs/toolkit/query/react"
 import { AppState } from ".."
 import { setTokens } from "../slices/authSlice"
-import { AssetDto, CallparamDto, EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse, ImportDto, Oauth2PublicClientDto, RecognizedAssetsDto, SkinResponse, SkinSelectRequest, UserProfileResponse } from "./types"
+import { AssetDto, CallparamDto, ConfirmDto, EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse, ExportDto, ImportDto, Oauth2PublicClientDto, RecognizedAssetsDto, SkinResponse, SkinSelectRequest, UserProfileResponse } from "./types"
 
 
 // ---------------------------------------------------------- //
@@ -115,9 +115,44 @@ export const bridgeApi = createApi({
             }),
             invalidatesTags: ["Profile"]
         }),
-        getImportParams: builder.mutation<CallparamDto, ImportDto>({
+        import: builder.mutation<CallparamDto, ImportDto>({
             query: (body) => ({
-                url: `/oracle/summon`,
+                url: `/oracle/import`,
+                method: "PUT",
+                body
+            }),
+        }),
+        enrapture: builder.mutation<CallparamDto, ImportDto>({
+            query: (body) => ({
+                url: `/oracle/enrapture`,
+                method: "PUT",
+                body
+            }),
+        }),
+        export: builder.mutation<CallparamDto, ExportDto>({
+            query: (body) => ({
+                url: `/oracle/export`,
+                method: "PUT",
+                body
+            }),
+        }),
+        importConfirm: builder.query<boolean, ConfirmDto>({
+            query: (body) => ({
+                url: `/oracle/import/confirm`,
+                method: "PUT",
+                body
+            }),
+        }),
+        enraptureConfirm: builder.query<boolean, ConfirmDto>({
+            query: (body) => ({
+                url: `/oracle/enrapture/confirm`,
+                method: "PUT",
+                body
+            }),
+        }),
+        exportConfirm: builder.query<boolean, ConfirmDto>({
+            query: (body) => ({
+                url: `/oracle/export/confirm`,
                 method: "PUT",
                 body
             }),
@@ -203,4 +238,4 @@ export const rtkQueryErrorFormatter = (error: any): string => {
     return strErr
 }
 
-export const { useActiveGameQuery, useOauthInfoQuery, useOauthAuthorizeMutation, useGetImportParamsMutation, useSummonMutation, useGetInGameResourcesQuery, useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
+export const { useImportMutation, useEnraptureMutation, useExportMutation, useImportConfirmQuery, useEnraptureConfirmQuery, useExportConfirmQuery, useActiveGameQuery, useOauthInfoQuery, useOauthAuthorizeMutation, useSummonMutation, useGetInGameResourcesQuery, useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
