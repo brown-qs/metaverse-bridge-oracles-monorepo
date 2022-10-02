@@ -5,12 +5,11 @@ export interface AuthSliceState {
     accessToken: string | null,
     refreshToken: string | null
 }
-
-let initialAccessToken = window.localStorage.getItem('accessToken') || null
+//refresh token not implemented and probably won't be
 
 const authSlice = createSlice({
     name: "auth",
-    initialState: { accessToken: initialAccessToken, refreshToken: null } as AuthSliceState,
+    initialState: { accessToken: null, refreshToken: null } as AuthSliceState,
     reducers: {
         setTokens: (state, action: PayloadAction<AuthSliceState>) => {
             const { accessToken, refreshToken } = action.payload
