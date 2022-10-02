@@ -118,6 +118,11 @@ export interface ImportDto {
     chainId: number
 }
 
+export interface ExportDto {
+    hash: string
+    chainId: number
+}
+
 
 export interface CallparamDto {
     data: string
@@ -134,4 +139,9 @@ export interface Oauth2PublicClientDto {
 export enum Oauth2Scope {
     UserUuidRead = 'user:uuid.read',
     UserGamerTagRead = 'user:gamer_tag.read'
+}
+
+export interface ConfirmDto {
+    hash: string
+    chainId: number
 }
