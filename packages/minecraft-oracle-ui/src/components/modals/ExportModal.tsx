@@ -15,7 +15,7 @@ import useAddNetworkToMetamaskCb from "../../hooks/useAddNetworkToMetamask/useAd
 import { rtkQueryErrorFormatter, useActiveGameQuery, useEmailLoginCodeVerifyMutation, useSummonMutation } from "../../state/api/bridgeApi";
 import { closeEmailCodeModal, selectEmailCodeModalOpen } from "../../state/slices/emailCodeModalSlice";
 import { closeExportModal, selectExportModalOpen, selectExportTokens } from "../../state/slices/exportModalSlice";
-import { closeInGameItemModal, selectInGameItem, selectInGameItemModalOpen } from "../../state/slices/inGameItemModalSlice";
+import { closeInGameItemModal, selectInGameItemModalOpen } from "../../state/slices/inGameItemModalSlice";
 import { useSubmittedExportTx, useIsTransactionPending } from "../../state/transactions/hooks";
 import { getExplorerLink } from "../../utils";
 import { AddressDisplayComponent } from "../form/AddressDisplayComponent";
