@@ -15,6 +15,7 @@ import inGameItemModalSlice from './slices/inGameItemModalSlice';
 import kiltLoginModalSlice from './slices/kiltLoginModalSlice';
 import oauthSlice from './slices/oauthSlice';
 import summonModalSlice from './slices/summonModalSlice';
+import onChainResourceModalSlice from './slices/onChainResourceModalSlice';
 import transactions from './transactions/reducer';
 import { persistStore, persistReducer } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
@@ -39,6 +40,7 @@ const rootReducer = combineReducers({
   auth: persistReducer(authPersistConfig, authSlice),
   importEnraptureModal: importEnraptureModalSlice,
   inGameItemModal: inGameItemModalSlice,
+  onChainResourceModal: onChainResourceModalSlice,
   emailCodeModal: emailCodeModalSlice,
   emailLoginModal: emailLoginModalSlice,
   kiltLoginModal: kiltLoginModalSlice,
