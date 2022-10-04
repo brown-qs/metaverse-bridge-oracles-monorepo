@@ -5,7 +5,7 @@ import { Checks } from "tabler-icons-react";
 import { ReduxModal } from ".";
 import { SUB_ASSETS } from "../../constants";
 import useAddTokenToMetamask from "../../hooks/useAddTokenToMetamask/useAddTokenToMetamask";
-import { closeInGameItemModal, selectInGameItem, selectInGameItemModalOpen } from "../../state/slices/inGameItemModalSlice";
+import { closeInGameItemModal, selectInGameItemModalOpen } from "../../state/slices/inGameItemModalSlice";
 import { closeOnChainResourceModal, selectOnChainResource, selectOnChainResourceModalOpen } from "../../state/slices/onChainResourceModalSlice";
 import { AddressDisplayComponent } from "../form/AddressDisplayComponent";
 

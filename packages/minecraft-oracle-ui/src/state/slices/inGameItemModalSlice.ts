@@ -4,12 +4,12 @@ import { InGameTokenMaybeMetadata } from "../../utils/graphqlReformatter"
 
 export interface InGameItemModalSlice {
     modalOpen: boolean,
-    inGameItem: InGameTokenMaybeMetadata | null
+    inGameItemModalToken: InGameTokenMaybeMetadata | null
 }
 
 const inGameItemModalSlice = createSlice({
     name: "inGameItemModalSlice",
-    initialState: { modalOpen: false, inGameItem: null } as InGameItemModalSlice,
+    initialState: { modalOpen: false, inGameItemModalToken: null } as InGameItemModalSlice,
     reducers: {
         closeInGameItemModal: (state) => {
             state.modalOpen = false
@@ -17,14 +17,14 @@ const inGameItemModalSlice = createSlice({
         openInGameItemModal: (state) => {
             state.modalOpen = true
         },
-        setInGameItem: (state, inGameItem: PayloadAction<InGameTokenMaybeMetadata>) => {
-            state.inGameItem = inGameItem.payload
+        setInGameItemModalToken: (state, action: PayloadAction<InGameTokenMaybeMetadata>) => {
+            state.inGameItemModalToken = action.payload
         }
     }
 })
 
-export const { closeInGameItemModal, openInGameItemModal, setInGameItem } = inGameItemModalSlice.actions
+export const { closeInGameItemModal, openInGameItemModal, setInGameItemModalToken } = inGameItemModalSlice.actions
 export default inGameItemModalSlice.reducer
 
 export const selectInGameItemModalOpen = (state: AppState) => state?.inGameItemModal?.modalOpen
-export const selectInGameItem = (state: AppState) => state?.inGameItemModal?.inGameItem
+export const selectInGameItemModalToken = (state: AppState) => state?.inGameItemModal?.inGameItemModalToken

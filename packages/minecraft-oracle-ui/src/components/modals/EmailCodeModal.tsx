@@ -6,7 +6,7 @@ import { Checks, Mail } from "tabler-icons-react";
 import { ReduxModal } from ".";
 import { rtkQueryErrorFormatter, useEmailLoginCodeVerifyMutation } from "../../state/api/bridgeApi";
 import { closeEmailCodeModal, selectEmailCodeModalOpen } from "../../state/slices/emailCodeModalSlice";
-import { closeInGameItemModal, selectInGameItem, selectInGameItemModalOpen } from "../../state/slices/inGameItemModalSlice";
+import { closeInGameItemModal, selectInGameItemModalOpen } from "../../state/slices/inGameItemModalSlice";
 
 export function EmailCodeModal() {
     const isOpen = useSelector(selectEmailCodeModalOpen)
