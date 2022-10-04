@@ -26,5 +26,5 @@ const onChainResourceModalSlice = createSlice({
 export const { closeOnChainResourceModal, openOnChainResourceModal, setOnChainResource } = onChainResourceModalSlice.actions
 export default onChainResourceModalSlice.reducer
 
-export const selectOnChainResourceModalOpen = (state: AppState) => state?.inGameItemModal?.modalOpen
-export const selectOnChainResource = (state: AppState) => state?.inGameItemModal?.inGameItem
+export const selectOnChainResourceModalOpen = (state: AppState) => state?.onChainResourceModal?.modalOpen
+export const selectOnChainResource = (state: AppState) => state?.onChainResourceModal?.onChainResource
