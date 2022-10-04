@@ -24,9 +24,7 @@ import { useGetMarketplaceMetadataQuery, useGetMarketplaceOnChainTokensQuery } f
 import { Media } from '../components';
 import { BigNumber, utils } from 'ethers';
 import { addRegonizedTokenDataToStandardizedOnChainTokens, formatTokenName, inGameMarketplaceMetadataParams, InGameTokenMaybeMetadata, inGameTokensCombineMetadata, StandardizedOnChainToken, StandardizedOnChainTokenWithRecognizedTokenData, standardizeMarketplaceOnChainTokens, standardizeRaresamaOnChainTokens } from '../utils/graphqlReformatter';
-import { ImportEnraptureModal } from '../components/modals/ImportEnraptureModal';
 import { useDispatch, useSelector } from 'react-redux';
-import { openImportEnraptureModal, setImportEnraptureTokens } from '../state/slices/importEnraptureModalSlice';
 import { openSummonModal } from '../state/slices/summonModalSlice';
 import { SummonModal } from '../components/modals/SummonModal';
 import { ExportModal } from '../components/modals/ExportModal';
@@ -35,6 +33,10 @@ import { useGetRaresamaOnChainTokensQuery } from '../state/api/generatedSquidRar
 import { selectBlockNumbers } from '../state/slices/blockNumbersSlice';
 import { openOnChainResourceModal, setOnChainResource } from '../state/slices/onChainResourceModalSlice';
 import { OnChainResourceModal } from '../components/modals/OnChainResourceModal';
+import { EnraptureModal } from '../components/modals/EnraptureModal';
+import { ImportModal } from '../components/modals/ImportModal';
+import { openEnraptureModal, setEnraptureModalTokens } from '../state/slices/enraptureModalSlice';
+import { openImportModal, setImportModalTokens } from '../state/slices/importModalSlice';
 
 
 const ProfilePage = () => {
@@ -444,8 +446,13 @@ const ProfilePage = () => {
                                                     }
                                                 }
                                                 if (importAssets.length > 0) {
-                                                    dispatch(setImportEnraptureTokens(importAssets))
-                                                    dispatch(openImportEnraptureModal())
+                                                    if (importAssets[0].enrapturable) {
+                                                        dispatch(setEnraptureModalTokens(importAssets))
+                                                        dispatch(openEnraptureModal())
+                                                    } else {
+                                                        dispatch(setImportModalTokens(importAssets))
+                                                        dispatch(openImportModal())
+                                                    }
                                                 }
 
 
@@ -598,7 +605,9 @@ const ProfilePage = () => {
             <OnChainResourceModal />
             <ExportModal />
             <SummonModal />
-            <ImportEnraptureModal />
+            <ImportModal />
+            <EnraptureModal />
+
         </>
     )
 };
