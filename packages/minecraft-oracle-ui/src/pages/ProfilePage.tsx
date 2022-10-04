@@ -1,7 +1,4 @@
-import { useClasses } from 'hooks';
-import { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 
-import { useOnChainItems } from 'hooks/multiverse/useOnChainItems';
 import { useAccountDialog, useActiveWeb3React } from 'hooks';
 import { stringToStringAssetType } from 'utils/subgraph';
 import { Fraction } from 'utils/Fraction';

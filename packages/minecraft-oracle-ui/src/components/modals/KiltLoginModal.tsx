@@ -87,7 +87,6 @@ export function KiltLoginModal() {
                 duration: 5000,
                 isClosable: true,
             })
-            window.localStorage.setItem('accessToken', result?.jwt);
             dispatch(setTokens({ accessToken: result?.jwt, refreshToken: null }));
 
         } else if (!!result?.message) {

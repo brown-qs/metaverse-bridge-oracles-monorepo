@@ -11,7 +11,6 @@ import { ComponentType } from "react";
 import { FixedSizeGrid as _FixedSizeGrid, GridChildComponentProps, areEqual, FixedSizeGridProps } from 'react-window';
 
 import axios from 'axios';
-import type { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 import { downloadAsImage, saveCustomization, shareCustomization } from 'utils/customizers';
 import MOONSAMA_CUSTOMIZER_CATEGORIES from './fixtures/CustomizerCategories';
 import { MOONSAMA_ATTR_TO_ID_MAP } from './fixtures/AttributeToAssetMap';
