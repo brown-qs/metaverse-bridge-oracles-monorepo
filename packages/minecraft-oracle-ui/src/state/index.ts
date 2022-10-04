@@ -10,7 +10,6 @@ import blockNumbersSlice from './slices/blockNumbersSlice';
 import emailCodeModalSlice from './slices/emailCodeModalSlice';
 import emailLoginModalSlice from './slices/emailLoginModalSlice';
 import exportModalSlice from './slices/exportModalSlice';
-import importEnraptureModalSlice from './slices/importEnraptureModalSlice';
 import inGameItemModalSlice from './slices/inGameItemModalSlice';
 import kiltLoginModalSlice from './slices/kiltLoginModalSlice';
 import oauthSlice from './slices/oauthSlice';
@@ -19,6 +18,8 @@ import onChainResourceModalSlice from './slices/onChainResourceModalSlice';
 import transactions from './transactions/reducer';
 import { persistStore, persistReducer } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
+import importModalSlice from './slices/importModalSlice';
+import enraptureModalSlice from './slices/enraptureModalSlice';
 
 
 
@@ -38,7 +39,8 @@ const rootReducer = combineReducers({
   application,
   transactions: persistReducer(transactionsPersistConfig, transactions),
   auth: persistReducer(authPersistConfig, authSlice),
-  importEnraptureModal: importEnraptureModalSlice,
+  importModal: importModalSlice,
+  enraptureModal: enraptureModalSlice,
   inGameItemModal: inGameItemModalSlice,
   onChainResourceModal: onChainResourceModalSlice,
   emailCodeModal: emailCodeModalSlice,
