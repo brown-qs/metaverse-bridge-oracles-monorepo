@@ -9,7 +9,7 @@ import { useImportConfirmCallback } from "../../hooks/multiverse/useConfirm";
 import { useImportAssetCallback, CreateImportAssetCallbackState, AssetRequest } from "../../hooks/multiverse/useImportAsset";
 import { useApproveCallback, ApprovalState } from "../../hooks/useApproveCallback/useApproveCallback";
 import { useBalances } from "../../hooks/useBalances/useBalances";
-import { closeImportEnraptureModal, selectImportEnraptureModalOpen, selectImportEnraptureModalTokens } from "../../state/slices/importEnraptureModalSlice";
+import { closeImportModal, selectImportModalOpen, selectImportModalTokens } from "../../state/slices/importModalSlice";
 import { useSubmittedImportTx, useIsTransactionPending } from "../../state/transactions/hooks";
 import { getExplorerLink } from "../../utils";
 import { stringAssetTypeToAssetType } from "../../utils/marketplace";
@@ -17,10 +17,10 @@ import { StringAssetType, stringToStringAssetType } from "../../utils/subgraph";
 import { MoonsamaModal } from "../MoonsamaModal";
 import { TransactionLink } from "../TransactionLink";
 
-export function ImportEnraptureModal() {
+export function ImportModal() {
     const dispatch = useDispatch()
-    const isOpen = useSelector(selectImportEnraptureModalOpen)
-    const importEnraptureTokens = useSelector(selectImportEnraptureModalTokens)
+    const isOpen = useSelector(selectImportModalOpen)
+    const importTokens = useSelector(selectImportModalTokens)
 
 
     //selectImportEnraptureModalOpen
@@ -48,10 +48,10 @@ export function ImportEnraptureModal() {
 
 
 
-    const assetAddress = importEnraptureTokens?.[0]?.assetAddress?.toLowerCase()
-    const assId = importEnraptureTokens?.[0]?.numericId
+    const assetAddress = importTokens?.[0]?.assetAddress?.toLowerCase()
+    const assId = importTokens?.[0]?.numericId
     const assetId = !!assId ? String(assId) : undefined
-    const assetType = importEnraptureTokens?.[0]?.assetType
+    const assetType = importTokens?.[0]?.assetType
     const amount = '1' //todo set for enrapture
     const owner = account?.toLowerCase()
     const beneficiary = account?.toLowerCase()
@@ -121,8 +121,8 @@ export function ImportEnraptureModal() {
             TablerIcon={Checks}
             iconBackgroundColor="teal.200"
             iconColor="black"
-            isOpenSelector={selectImportEnraptureModalOpen}
-            closeActionCreator={closeImportEnraptureModal}
+            isOpenSelector={selectImportModalOpen}
+            closeActionCreator={closeImportModal}
             closeOnOverlayClick={false}
         >
             <VStack spacing="0">
@@ -147,7 +147,7 @@ export function ImportEnraptureModal() {
                 <Box w="100%" paddingTop="16px">
                     <Button
                         onClick={() => {
-                            dispatch(closeImportEnraptureModal())
+                            dispatch(closeImportModal())
                         }}
                         leftIcon={<Checks />}
                         w="100%">GOT IT!</Button>
@@ -158,8 +158,8 @@ export function ImportEnraptureModal() {
     } else if (finalTxSubmitted && isPending) {
         return (<ReduxModal
             title="Importing asset into the metaverse..."
-            isOpenSelector={selectImportEnraptureModalOpen}
-            closeActionCreator={closeImportEnraptureModal}
+            isOpenSelector={selectImportModalOpen}
+            closeActionCreator={closeImportModal}
             closeOnOverlayClick={false}
             message="Check your wallet for potential action"
         >
@@ -171,8 +171,8 @@ export function ImportEnraptureModal() {
             TablerIcon={Checks}
             iconBackgroundColor="teal.200"
             iconColor="black"
-            isOpenSelector={selectImportEnraptureModalOpen}
-            closeActionCreator={closeImportEnraptureModal}
+            isOpenSelector={selectImportModalOpen}
+            closeActionCreator={closeImportModal}
             closeOnOverlayClick={false}
             message="Confirming import with the metaverse oracle..."
         >
@@ -196,7 +196,7 @@ export function ImportEnraptureModal() {
                 <Box w="100%" paddingTop="16px">
                     <Button
                         onClick={() => {
-                            dispatch(closeImportEnraptureModal())
+                            dispatch(closeImportModal())
                         }}
                         leftIcon={<Checks />}
                         w="100%">GOT IT!</Button>
@@ -207,12 +207,12 @@ export function ImportEnraptureModal() {
     } else {
         return (<ReduxModal
             title="Import to metaverse"
-            isOpenSelector={selectImportEnraptureModalOpen}
-            closeActionCreator={closeImportEnraptureModal}
+            isOpenSelector={selectImportModalOpen}
+            closeActionCreator={closeImportModal}
             message="You are about to import one or more items to the metaverse to use them in-game, and you will be able to export them back to your wallet afterward."
             closeOnOverlayClick={false}
             bottomButtonText="Cancel"
-            onBottomButtonClick={() => dispatch(closeImportEnraptureModal())}
+            onBottomButtonClick={() => dispatch(closeImportModal())}
         >
             <VStack spacing="0">
 
