@@ -15,7 +15,6 @@ import { CaretLeft, CaretRight, DeviceGamepad, UserCircle, Wallet } from 'tabler
 import { InGameResource } from '../components/Bridge/InGameResource';
 import { OnChainResource } from '../components/Bridge/OnChainResource';
 import { OnChainItem } from '../components/Bridge/OnChainItem';
-import { ItemDetailsModal } from '../components/Bridge/ItemDetailsModal';
 import BackgroundImage from '../assets/images/bridge-background-blur.svg'
 import { useSetSkinMutation, useGetSkinsQuery, useUserProfileQuery, useGetRecognizedAssetsQuery, useGetInGameItemsQuery, useGetInGameResourcesQuery } from '../state/api/bridgeApi';
 
@@ -37,6 +36,8 @@ import { EnraptureModal } from '../components/modals/EnraptureModal';
 import { ImportModal } from '../components/modals/ImportModal';
 import { openEnraptureModal, setEnraptureModalTokens } from '../state/slices/enraptureModalSlice';
 import { openImportModal, setImportModalTokens } from '../state/slices/importModalSlice';
+import { openInGameItemModal, setInGameItemModalToken } from '../state/slices/inGameItemModalSlice';
+import { InGameItemModal } from '../components/modals/InGameItemModal';
 
 
 const ProfilePage = () => {
@@ -135,7 +136,6 @@ const ProfilePage = () => {
 
 
     const inGameItems: InGameTokenMaybeMetadata[] | undefined = React.useMemo(() => {
-        console.log("IN GAME ITEMS CHANGE")
         if (!!inGameItemsData) {
             return [...inGameTokensCombineMetadata(inGameItemsData, inGameItemsMetadata)].sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
         } else {
@@ -180,7 +180,6 @@ const ProfilePage = () => {
     }, [blockNumbers[ChainId.MOONBEAM]])
 
     React.useEffect(() => {
-        console.log("movr block change")
         refetchMarketplaceOnChainTokens()
     }, [blockNumbers[ChainId.MOONRIVER]])
 
@@ -401,6 +400,10 @@ const ProfilePage = () => {
                                                         //checkBoxProps.onChange(e)
                                                     }}
                                                     highlightable={true}
+                                                    onClick={() => {
+                                                        dispatch(setInGameItemModalToken(item))
+                                                        dispatch(openInGameItemModal())
+                                                    }}
                                                 >
                                                 </InGameItem>
                                             );
@@ -602,6 +605,7 @@ const ProfilePage = () => {
                     </>
                 }
             </Container >
+            <InGameItemModal />
             <OnChainResourceModal />
             <ExportModal />
             <SummonModal />

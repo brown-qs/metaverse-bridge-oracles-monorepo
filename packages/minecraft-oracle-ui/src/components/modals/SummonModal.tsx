@@ -8,7 +8,7 @@ import { DEFAULT_CHAIN, NETWORK_NAME, PERMISSIONED_CHAINS } from "../../constant
 import { useActiveWeb3React } from "../../hooks";
 import { rtkQueryErrorFormatter, useEmailLoginCodeVerifyMutation, useSummonMutation } from "../../state/api/bridgeApi";
 import { closeEmailCodeModal, selectEmailCodeModalOpen } from "../../state/slices/emailCodeModalSlice";
-import { closeInGameItemModal, selectInGameItem, selectInGameItemModalOpen } from "../../state/slices/inGameItemModalSlice";
+import { closeInGameItemModal, selectInGameItemModalOpen } from "../../state/slices/inGameItemModalSlice";
 import { closeSummonModal, selectSummonModalOpen } from "../../state/slices/summonModalSlice";
 import { AddressDisplayComponent } from "../form/AddressDisplayComponent";
 

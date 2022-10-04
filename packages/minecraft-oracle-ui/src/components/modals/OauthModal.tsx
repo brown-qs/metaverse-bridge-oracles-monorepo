@@ -7,7 +7,7 @@ import { Apps, Checks, Mail } from "tabler-icons-react";
 import { ReduxModal } from ".";
 import { rtkQueryErrorFormatter, useEmailLoginCodeVerifyMutation, useOauthAuthorizeMutation, useOauthInfoQuery } from "../../state/api/bridgeApi";
 import { closeEmailCodeModal, selectEmailCodeModalOpen } from "../../state/slices/emailCodeModalSlice";
-import { closeInGameItemModal, selectInGameItem, selectInGameItemModalOpen } from "../../state/slices/inGameItemModalSlice";
+import { closeInGameItemModal, selectInGameItemModalOpen } from "../../state/slices/inGameItemModalSlice";
 import { closeOauthModal, selectOauthData, selectOauthModalOpen, setOauthData } from "../../state/slices/oauthSlice";
 import { MoonsamaSpinner } from "../MoonsamaSpinner";
 

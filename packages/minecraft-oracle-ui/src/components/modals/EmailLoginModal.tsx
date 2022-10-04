@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import { Checks } from "tabler-icons-react";
 import { ReduxModal } from ".";
-import { closeInGameItemModal, selectInGameItem, selectInGameItemModalOpen } from "../../state/slices/inGameItemModalSlice";
+import { closeInGameItemModal, selectInGameItemModalOpen } from "../../state/slices/inGameItemModalSlice";
 import { FormControl, Input, Button, useDisclosure, FormErrorMessage, FormHelperText, useToast, ToastId } from "@chakra-ui/react"
 import { fetchBaseQuery, FetchBaseQueryError } from "@reduxjs/toolkit/query"
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react"
