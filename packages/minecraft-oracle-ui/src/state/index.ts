@@ -28,9 +28,14 @@ const authPersistConfig = {
   whitelist: ['accessToken']
 }
 
+const transactionsPersistConfig = {
+  key: 'transactions',
+  storage: storage,
+}
+
 const rootReducer = combineReducers({
   application,
-  transactions,
+  transactions: persistReducer(transactionsPersistConfig, transactions),
   auth: persistReducer(authPersistConfig, authSlice),
   importEnraptureModal: importEnraptureModalSlice,
   inGameItemModal: inGameItemModalSlice,
