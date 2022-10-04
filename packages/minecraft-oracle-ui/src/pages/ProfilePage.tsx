@@ -33,6 +33,8 @@ import { ExportModal } from '../components/modals/ExportModal';
 import { openExportModal, setExportTokens } from '../state/slices/exportModalSlice';
 import { useGetRaresamaOnChainTokensQuery } from '../state/api/generatedSquidRaresamaApi';
 import { selectBlockNumbers } from '../state/slices/blockNumbersSlice';
+import { openOnChainResourceModal, setOnChainResource } from '../state/slices/onChainResourceModalSlice';
+import { OnChainResourceModal } from '../components/modals/OnChainResourceModal';
 
 
 const ProfilePage = () => {
@@ -573,14 +575,8 @@ const ProfilePage = () => {
                                                     key={item.id}
                                                     onClick={() => {
                                                         //user will be able to see resources in their metamask wallet as under assets, nothing is moving
-                                                        /* onAssetDialogOpen()
-                                                         setAssetDialogData({
-                                                             title: item?.metadata?.name ?? undefined,
-                                                             image: item?.metadata?.image ?? undefined,
-                                                             assetERC1155: value?.asset,
-                                                             assetAddressERC20: value?.staticData?.subAssetAddress
-                                                         })*/
-                                                        //window.open(getExplorerLink(chainId ?? ChainId.MOONRIVER, value.asset.assetAddress,'address'))
+                                                        dispatch(setOnChainResource(item))
+                                                        dispatch(openOnChainResourceModal())
                                                     }}
                                                 >
                                                 </OnChainResource>
@@ -599,6 +595,7 @@ const ProfilePage = () => {
                     </>
                 }
             </Container >
+            <OnChainResourceModal />
             <ExportModal />
             <SummonModal />
             <ImportEnraptureModal />
