@@ -2,7 +2,6 @@ import axios from 'axios';
 import type { CustomizationType } from 'pages/moonsama/designer/index'
 import type { Asset as AssetType } from 'pages/moonsama/designer/index'
 import type { AssetIdentifier } from 'pages/moonsama/designer/index'
-import type { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 
 
 const downloadAsImage = (layers: Array<AssetType>) => {
@@ -36,7 +35,7 @@ const downloadAsImage = (layers: Array<AssetType>) => {
   });
 }
 
-const saveCustomization = async ({parent, children}: CustomizationType, authData: AuthData) => {
+const saveCustomization = async ({ parent, children }: CustomizationType, jwt: string) => {
   const payload = {
     compositeChildren: children.map((childAsset: AssetIdentifier) => ({
       assetAddress: childAsset.assetAddress,
@@ -53,11 +52,11 @@ const saveCustomization = async ({parent, children}: CustomizationType, authData
   }
 
   return await axios.put(`${process.env.REACT_APP_BACKEND_API_URL}/composite/save`, payload, {
-    headers: { Authorization: `Bearer ${authData?.jwt}` }
+    headers: { Authorization: `Bearer ${jwt}` }
   })
 }
 
-const shareCustomization = async ({parent, children}: CustomizationType, setShowShareModal: (show: boolean) => void) => {
+const shareCustomization = async ({ parent, children }: CustomizationType, setShowShareModal: (show: boolean) => void) => {
   if (navigator.share) {
     await navigator.share({
       title: 'Check out my customized Moonsama!',

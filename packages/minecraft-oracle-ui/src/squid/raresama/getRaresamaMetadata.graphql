@@ -1,0 +1,21 @@
+query getRaresamaMetadata($where: TokenWhereInput) {
+  tokens(where: $where, limit: 1000) {
+    metadata {
+      type
+      name
+      layers
+      image
+      description
+      composite
+      attributes {
+        value
+        traitType
+        displayType
+      }
+    }
+    numericId
+    contract {
+      address: id
+    }
+  }
+}

@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { calculateGasMargin, getSigner } from '../../utils';
 import { useMultiverseBridgeV1Contract, useMultiverseBridgeV2Contract } from '../../hooks/useContracts/useContracts';
-import { useActiveWeb3React, useAuth } from '../../hooks';
+import { useActiveWeb3React } from '../../hooks';
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import axios from 'axios'
+import { useSelector } from 'react-redux';
+import { selectAccessToken } from '../../state/slices/authSlice';
 
 export enum ExportAssetCallbackState {
     INVALID,
@@ -37,10 +39,9 @@ export function useFetchExportAssetArgumentsCallback(exportRequest: ExportReques
     const { library, account } = useActiveWeb3React();
 
     const [params, setParams] = useState<ExportRequestParams | undefined>(undefined)
-    const { authData } =  useAuth();
+    const accessToken = useSelector(selectAccessToken)
 
-    const {hash, chainId} = exportRequest ?? {}
-    const {jwt} = authData ?? {}
+    const { hash, chainId } = exportRequest ?? {}
 
     const cb = useCallback(async () => {
         if (!library || !account || !hash || !chainId) {
@@ -51,21 +52,21 @@ export function useFetchExportAssetArgumentsCallback(exportRequest: ExportReques
                 method: 'put',
                 url: `${process.env.REACT_APP_BACKEND_API_URL}/oracle/export`,
                 data: exportRequest,
-                headers: { Authorization: `Bearer ${jwt}` }
+                headers: { Authorization: `Bearer ${accessToken}` }
             });
             setParams(resp.data)
-        } catch(e) {
+        } catch (e) {
             console.error('Error fetching export params.')
             setParams(undefined)
         }
-    }, [library, account, hash, jwt, chainId])
+    }, [library, account, hash, accessToken, chainId])
 
 
     useEffect(() => {
         if (library && account && exportRequest) {
             cb()
         }
-    }, [library, account, hash, jwt])
+    }, [library, account, hash, accessToken])
 
     return params
 }
@@ -91,7 +92,7 @@ export function useExportAssetCallback(
     const inputOptions = {}
 
     return useMemo(() => {
-        if (!library || !account || !chainId || !contract ) {
+        if (!library || !account || !chainId || !contract) {
             return {
                 state: ExportAssetCallbackState.INVALID,
                 callback: null,
@@ -108,12 +109,12 @@ export function useExportAssetCallback(
         }
 
         if (!data || !signature || !hash) {
-          console.error('Error fetching input params from oracle');
-          return {
-            state: ExportAssetCallbackState.INVALID,
-            callback: null,
-            error: 'Error fetching input params from oracle',
-          };
+            console.error('Error fetching input params from oracle');
+            return {
+                state: ExportAssetCallbackState.INVALID,
+                callback: null,
+                error: 'Error fetching input params from oracle',
+            };
         }
 
         const inputParams = [data, signature]
@@ -199,7 +200,7 @@ export function useExportAssetCallback(
         account,
         chainId,
         data,
-        signature,,
+        signature, ,
         confirmed,
         hash,
         addTransaction,

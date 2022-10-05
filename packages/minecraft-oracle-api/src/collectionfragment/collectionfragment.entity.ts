@@ -27,11 +27,11 @@ export class CollectionFragmentEntity {
     })
     recognizedAssetType: RecognizedAssetType;
 
-    @Column({nullable: true, default: 1})
+    @Column({ nullable: true, default: 1 })
     @IsNumber()
     decimals?: number;
 
-    @Column({nullable: true, default: false})
+    @Column({ nullable: true, default: false })
     @IsBoolean()
     treatAsFungible?: boolean;
 

@@ -1,7 +1,4 @@
 import { Provider } from 'react-redux';
-import { AuthContextController } from '../context/auth/AuthContextController/AuthContextController';
-import { ImportDialogContextController } from '../context/importDialog/importDialogContextController/ImportDialogContextController';
-import { EnraptureDialogContextController } from '../context/enraptureDialog/enraptureDialogContextController/enraptureDialogContextController';
 import { AccountDialogContextController } from '../context/accountDialog/accountDialogContextController/AccountDialogContextController';
 import { AppProvidersProps } from './AppProviders.types';
 import { getLibrary } from '../connectors';
@@ -12,12 +9,13 @@ import Web3ReactProviderNetwork from '../components/Web3ReactProviderNetwork/Web
 import ApplicationUpdater from '../state/application/updater';
 import TransactionUpdater from '../state/transactions/updater';
 import store from '../state';
-import { SummonDialogContextController } from '../context/summonDialog/summonDialogContextController/SummonDialogContextController';
 import { TransferDialogContextController } from '../context/transferDialog/transferDialogContextController/TransferDialogContextController';
-import { ExportDialogContextController } from '../context/exportDialog/exportDialogContextController/ExportDialogContextController';
 import { AssetDialogContextController } from '../context/assetDialog/assetDialogContextController/assetDialogContextController';
 import { ChakraProvider } from '@chakra-ui/react'
-import { OauthLoginContextController } from '../context/oauthLogin/oauthLoginContextController/OauthLoginContextController';
+import { CaptchaContext } from '../context/captcha/captchaContext/captchaContext';
+import { CaptchaContextController } from '../context/captcha/captchaContextController/captchaContextController';
+import ScrollToTop from '../components/ScrollToTop';
+import { BlockNumberManager } from '../components/BlockNumberManager';
 
 function Updaters() {
   return (
@@ -29,34 +27,29 @@ function Updaters() {
 }
 
 export const AppProviders = ({ children }: AppProvidersProps) => (
-  <Web3ReactProvider getLibrary={getLibrary}>
-    <Web3ReactProviderNetwork getLibrary={getLibrary}>
-      <AuthContextController>
+  <CaptchaContextController>
+    <Web3ReactProvider getLibrary={getLibrary}>
+      <Web3ReactProviderNetwork getLibrary={getLibrary}>
         <Provider store={store}>
           <Updaters />
-          <OauthLoginContextController>
-            <Web3ReactManager>
+          <Web3ReactManager>
+            <>
+              <BlockNumberManager />
               <AccountDialogContextController>
-                <SummonDialogContextController>
-                  <ImportDialogContextController>
-                    <EnraptureDialogContextController>
-                      <ExportDialogContextController>
-                        <TransferDialogContextController>
-                          <AssetDialogContextController>
-                            <Router>
-                              {children}
-                            </Router>
-                          </AssetDialogContextController>
-                        </TransferDialogContextController>
-                      </ExportDialogContextController>
-                    </EnraptureDialogContextController>
-                  </ImportDialogContextController>
-                </SummonDialogContextController>
+                <TransferDialogContextController>
+                  <AssetDialogContextController>
+                    <Router>
+                      <ScrollToTop></ScrollToTop>
+                      {children}
+                    </Router>
+                  </AssetDialogContextController>
+                </TransferDialogContextController>
+
               </AccountDialogContextController>
-            </Web3ReactManager>
-          </OauthLoginContextController>
+            </>
+          </Web3ReactManager>
         </Provider>
-      </AuthContextController>
-    </Web3ReactProviderNetwork>
-  </Web3ReactProvider>
+      </Web3ReactProviderNetwork>
+    </Web3ReactProvider>
+  </CaptchaContextController>
 );

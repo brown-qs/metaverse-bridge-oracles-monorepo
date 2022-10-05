@@ -153,8 +153,7 @@ function newTransactionsFirst(a: TransactionDetails, b: TransactionDetails) {
 }
 
 export function useSortedRecentTransactions() {
-  const allTransactions = useAllTransactions();
-
+  let allTransactions = useAllTransactions();
   return useMemo(() => {
     const txs = Object.values(allTransactions);
     return txs.filter(isTransactionRecent).sort(newTransactionsFirst);
@@ -287,7 +286,7 @@ export function useSubmittedTransferTx(
         amount.eq(tx.transfer.amount) &&
         tx.transfer.asset &&
         tx.transfer.asset.assetAddress.toLowerCase() ===
-          asset?.assetAddress?.toLowerCase() &&
+        asset?.assetAddress?.toLowerCase() &&
         tx.transfer.asset.id === asset.id &&
         tx.transfer.asset.assetType.valueOf() === asset?.assetType?.valueOf()
       );
