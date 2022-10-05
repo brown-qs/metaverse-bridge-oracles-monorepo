@@ -16,9 +16,9 @@ import { OauthSetGamerTagRequestDto } from './dto/oauthsetgamertagrequest.dto';
 @Controller('oauth2/resource')
 export class Oauth2ResourceController {
     private readonly context: string;
-    private readonly userService: UserService;
     constructor(
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger,
+        private readonly userService: UserService,
 
     ) {
         this.context = Oauth2ResourceController.name;
