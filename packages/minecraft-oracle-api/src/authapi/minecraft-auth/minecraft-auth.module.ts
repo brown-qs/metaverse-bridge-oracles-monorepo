@@ -24,7 +24,6 @@ import { MinecraftUuidModule } from '../../user/minecraft-uuid/minecraft-uuid.mo
         MinecraftLinkModule,
         UserModule,
         SecretModule,
-        CacheModule,
         PassportModule,
         TextureModule,
         SkinModule,
