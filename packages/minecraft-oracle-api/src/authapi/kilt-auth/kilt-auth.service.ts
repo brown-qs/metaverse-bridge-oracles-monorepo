@@ -225,7 +225,8 @@ export class KiltAuthService {
         // construct the message
         const cType = {
             name: this.configService.get<string>('kilt.cTypeName'),
-            cTypeHash: this.configService.get<string>('kilt.cTypeHash')
+            cTypeHash: this.configService.get<string>('kilt.cTypeHash'),
+            requiredProperties: ["Email"]
         }
         const cTypes = [cType]
         const content = { cTypes, challenge: walletLoginChallenge } as any;
