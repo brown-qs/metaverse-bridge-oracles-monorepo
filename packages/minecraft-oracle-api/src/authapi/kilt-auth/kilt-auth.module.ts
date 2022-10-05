@@ -23,7 +23,6 @@ import { EmailModule } from '../../user/email/email.module';
     UserModule,
     KiltSessionModule,
     SecretModule,
-    CacheModule,
     PassportModule,
     TextureModule,
     SkinModule,

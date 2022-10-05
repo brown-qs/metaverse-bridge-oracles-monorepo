@@ -5,7 +5,6 @@ import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import { nestLikeConsoleFormat } from './utils';
 import { ProviderModule } from './provider/provider.module';
-import { RedisModule } from 'nestjs-redis';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TextureEntity } from './texture/texture.entity';
 import { UserEntity } from './user/user/user.entity';
@@ -183,6 +182,7 @@ import { MoonsamaCqrsModule } from './cqrs/moonsama-cqrs.module';
             }),
             inject: [ConfigService]
         }),
+        /*
         RedisModule.forRootAsync({
             useFactory: (configService: ConfigService) => [
                 {
@@ -194,7 +194,7 @@ import { MoonsamaCqrsModule } from './cqrs/moonsama-cqrs.module';
                 }
             ],
             inject: [ConfigService]
-        }),
+        }),*/
         Oauth2Module,
         AssetApiModule,
         EmailChangeModule,
@@ -202,7 +202,6 @@ import { MoonsamaCqrsModule } from './cqrs/moonsama-cqrs.module';
         PlaySessionModule,
         CronModule,
         ProviderModule,
-        CacheModule,
         SecretModule,
         AssetModule,
         EmailLoginKeyModule,
