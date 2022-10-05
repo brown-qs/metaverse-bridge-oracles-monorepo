@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, memo } from 'react';
 import { useOnChainItemsWithCompositeMetaAndAssets } from 'hooks/multiverse/useOnChainItems';
-import { useAuth, useClasses } from 'hooks';
+import { useClasses } from 'hooks';
 import { cx } from '@emotion/css';
 import { styles } from './styles';
 
@@ -10,9 +10,7 @@ import ImageStack from 'components/ImageStacks/Moonsama2';
 import { ComponentType } from "react";
 import { FixedSizeGrid as _FixedSizeGrid, GridChildComponentProps, areEqual, FixedSizeGridProps } from 'react-window';
 
-import { InGameItemWithStatic, useInGameItemsWithCompositeMetaAndAssets } from 'hooks/multiverse/useInGameItems'
 import axios from 'axios';
-import type { AuthData } from 'context/auth/AuthContext/AuthContext.types';
 import { downloadAsImage, saveCustomization, shareCustomization } from 'utils/customizers';
 import MOONSAMA_CUSTOMIZER_CATEGORIES from './fixtures/CustomizerCategories';
 import { MOONSAMA_ATTR_TO_ID_MAP } from './fixtures/AttributeToAssetMap';
@@ -22,6 +20,12 @@ import { useParams } from 'react-router';
 import { AccordionPanel, AccordionItem, Text, Accordion, Box, Button, CircularProgress, IconButton, Stack, useMediaQuery, Modal, Container, Grid, GridItem, AccordionButton, AccordionIcon, ExpandedIndex, HStack } from '@chakra-ui/react';
 import { MoonsamaLayout } from '../../../components';
 import { ChevronDown, ChevronUp } from 'tabler-icons-react';
+import { inGameMarketplaceMetadataParams, InGameTokenMaybeMetadata, inGameTokensCombineMetadata } from '../../../utils/graphqlReformatter';
+import React from 'react';
+import { useGetInGameItemsQuery } from '../../../state/api/bridgeApi';
+import { useSelector } from 'react-redux';
+import { selectAccessToken } from '../../../state/slices/authSlice';
+import { useGetMarketplaceMetadataQuery } from '../../../state/api/generatedSquidMarketplaceApi';
 
 
 //fix for type checks
@@ -112,12 +116,12 @@ export type CompositeMetadataType = {
   youtube_url?: string
 }
 
-const getCustomization = async ({ chainId, assetAddress, assetId }: { chainId: number, assetAddress: string, assetId: string }, authData: AuthData) => {
+const getCustomization = async ({ chainId, assetAddress, assetId }: { chainId: number, assetAddress: string, assetId: string }, jwt: string) => {
   try {
     const result = await axios.request<getCustomizationsResponse>({
       method: 'get',
       url: `${process.env.REACT_APP_BACKEND_API_URL}/composite/metadata/${chainId}/${assetAddress}/${assetId}`,
-      headers: { Authorization: `Bearer ${authData?.jwt}` }
+      headers: { Authorization: `Bearer ${jwt}` }
     })
     return result
   } catch (error) {
@@ -215,7 +219,7 @@ const createLayerAssets = (parent: Asset, layers: CompositeMetadataType[]): Asse
   return res as Asset[]
 }
 
-const transformBridgedAssets = (inGameAssets: Array<InGameItemWithStatic> | undefined) => {
+const transformBridgedAssets = (inGameAssets: Array<InGameTokenMaybeMetadata> | undefined) => {
   if (typeof inGameAssets === 'undefined') return { assets: [], attributes: [] }
 
   const assets: AssetIdentifier[] = []
@@ -232,7 +236,8 @@ const transformBridgedAssets = (inGameAssets: Array<InGameItemWithStatic> | unde
 
     // we fetch attributeLabels of moonsamas only
     if (assets[assets.length - 1].assetAddress.toLowerCase() === '0xb654611f84a8dc429ba3cb4fda9fad236c505a1a') {
-      attributeLabels = attributeLabels.concat(inGameAsset?.meta?.attributes.map((attr: any) => attr?.value))
+      const toConcat = inGameAsset?.metadata?.attributes?.map((attr: any) => String(attr?.value)) ?? []
+      attributeLabels = attributeLabels.concat(toConcat)
     }
   })
 
@@ -553,12 +558,16 @@ const Cell = memo(({ columnIndex, rowIndex, style, data }: GridChildComponentPro
 
 const CharacterDesignerPage = () => {
   //883px is where designer container stops, is on lg or greater dont show scroll bar for padding
-  const { authData, setAuthData } = useAuth();
+  const accessToken = useSelector(selectAccessToken)
+  const { data: inGameItemsData, isLoading: isInGameItemsDataLoading, isFetching: isInGameItemsDataFetching, isError: isInGameItemsError, error: inGameItemsError } = useGetInGameItemsQuery()
+
+  const { data: inGameItemsMetadata, isLoading: isInGameItemsMetadataLoading, isFetching: isInGameItemsMetadataFetching, isError: isInGameItemsMetadataError, error: inGameItemsMetadataError } = useGetMarketplaceMetadataQuery(inGameMarketplaceMetadataParams(inGameItemsData))
+
   const [isTallerThan883] = useMediaQuery('(min-height: 883px)')
   const [isMobileViewport] = useMediaQuery('(max-width: 992px)')
   const { assetAddress, assetId, chainId } = useParams<{ assetAddress?: string, assetId?: string, chainId?: string }>();
   console.log('PARAMS', { assetAddress, assetId, chainId })
-  const isLoggedIn = !!authData && !!authData.userProfile
+  const isLoggedIn = !!accessToken
   const numCols = 3
   const urlCb = useFetchUrlCallback()
 
@@ -577,9 +586,15 @@ const CharacterDesignerPage = () => {
   const [saveProgress, setSaveProgress] = useState<{ inProgress?: boolean, errorMessage?: string }>({});
   const [fetchingCustomizations, setFetchingCustomizations] = useState<Array<AssetIdentifier>>([]);
   const [bullshit, setBullshit] = useState<boolean>(false);
+  const inGameItems: InGameTokenMaybeMetadata[] | undefined = React.useMemo(() => {
+    if (!!inGameItemsData) {
+      return [...inGameTokensCombineMetadata(inGameItemsData, inGameItemsMetadata)].sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
+    } else {
+      return undefined
+    }
+  }, [inGameItemsData, inGameItemsMetadata])
 
   const onChainItems = useOnChainItemsWithCompositeMetaAndAssets();
-  const inGameItems = useInGameItemsWithCompositeMetaAndAssets();
 
   console.log('BINNNNNGGGG')
 
@@ -594,7 +609,7 @@ const CharacterDesignerPage = () => {
 
   useEffect(() => {
     console.log('TRIGGERED')
-    const myBridgedAssets = transformBridgedAssets(inGameItems?.assets)
+    const myBridgedAssets = transformBridgedAssets(inGameItems)
     const myMoonsamas = transformOnChainAssets(onChainItems?.['Moonsama'] ?? [])
     const my1155s = transformOnChainAssets(onChainItems?.['???'] ?? [])
 
@@ -605,7 +620,7 @@ const CharacterDesignerPage = () => {
       walletAttributes: [...(myMoonsamas?.attributes ?? [])]
     })
 
-  }, [JSON.stringify(onChainMoonsamas), JSON.stringify(onChainQQQs), JSON.stringify(inGameItems?.assets)])
+  }, [JSON.stringify(onChainMoonsamas), JSON.stringify(onChainQQQs), JSON.stringify(inGameItems)])
 
 
   /**
@@ -643,7 +658,7 @@ const CharacterDesignerPage = () => {
           chainId: ownedAssetsArray[i].chainId,
           assetAddress: ownedAssetsArray[i].assetAddress,
           assetId: ownedAssetsArray[i].assetId,
-        }, authData)
+        }, String(accessToken))
 
         setFetchingCustomizations(fetchingCustomizations.filter((customization: AssetIdentifier) => {
           return (
@@ -660,10 +675,10 @@ const CharacterDesignerPage = () => {
       setMyCustomizations(customizations)
     }
 
-    if (!!authData && !!authData.jwt) {
+    if (!!accessToken) {
       getCustomizations()
     }
-  }, [JSON.stringify(ownedAssets), authData?.jwt])
+  }, [JSON.stringify(ownedAssets), accessToken])
 
   useEffect(() => {
     if (!!assetAddress && !!assetId && !!chainId) {
@@ -954,7 +969,7 @@ const CharacterDesignerPage = () => {
       setShowSaveConfigModal(true)
     }
     try {
-      await saveCustomization(currentCustomization, authData)
+      await saveCustomization(currentCustomization, String(accessToken))
       setSaveProgress({ inProgress: false, errorMessage: undefined })
     } catch (err) {
       setSaveProgress({ inProgress: false, errorMessage: (err as any)?.toString() })

@@ -20,6 +20,9 @@ import { fromTokenizer } from 'file-type';
 import { EventBus } from '@nestjs/cqrs';
 import { ResourceInventoryUpdatedEvent } from '../cqrs/events/resource-inventory-updated.event';
 import { ResourceInventoryOffsetUpdatedEvent } from '../cqrs/events/resource-inventory-offset-updated.event';
+import { RecognizedAssetsDto } from './dtos/recognized-assets.dto';
+import { CollectionEntity } from '../collection/collection.entity';
+import { StringAssetType } from '../common/enums/AssetType';
 
 @Injectable()
 export class AssetApiService {
@@ -235,5 +238,42 @@ export class AssetApiService {
         }
 
         return { results }
+    }
+
+    collectionEntityToDto(row: CollectionEntity): RecognizedAssetsDto {
+
+        const collectionFragments = row.collectionFragments.map((frag) => {
+            let iRange: null | number[];
+            if (frag.idRange === null) {
+                iRange = null
+            } else if (frag.idRange.length === 0) {
+                iRange = []
+            } else if (frag.idRange.length === 1) {
+                iRange = [parseInt(frag.idRange[0])]
+            } else {
+                iRange = Array.from({ length: (parseInt(frag.idRange[1]) + 1 - parseInt(frag.idRange[0])) }, (v, k) => k + parseInt(frag.idRange[0]))
+            }
+            return {
+                recognizedAssetType: frag.recognizedAssetType,
+                decimals: frag.decimals,
+                treatAsFungible: frag.treatAsFungible,
+                enrapturable: frag.enrapturable,
+                importable: frag.importable,
+                exportable: frag.exportable,
+                summonable: frag.summonable,
+                gamepass: frag.gamepass,
+                name: frag.name,
+                idRange: iRange
+            }
+        })
+        const collection = {
+            chainId: row.chainId,
+            assetAddress: row.assetAddress,
+            assetType: row.assetType,
+            name: row.name,
+            collectionFragments
+        }
+        return collection
+
     }
 }

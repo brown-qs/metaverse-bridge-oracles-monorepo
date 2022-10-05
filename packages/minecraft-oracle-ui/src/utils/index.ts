@@ -5,15 +5,15 @@ import { Contract } from '@ethersproject/contracts';
 import { BigNumber } from '@ethersproject/bignumber';
 import { ChainId } from '../constants';
 import { hexZeroPad } from '@ethersproject/bytes';
-import { InGameItem } from '../hooks/multiverse/useInGameItems';
 import { RecognizedAssetType, RECOGNIZED_ASSETS } from '../assets/data/recognized';
 import { ethers } from 'ethers';
+import { InGameTokenMaybeMetadata } from './graphqlReformatter';
 
 export * as marketplace from './marketplace';
 export * as subgraph from './subgraph';
 
-export const truncateAddress = (address: string, beginnerCharNum=0) =>
-  `${address.slice(0, 2+beginnerCharNum)}...${address.slice(address.length - 4)}`;
+export const truncateAddress = (address: string, beginnerCharNum = 0) =>
+  `${address.slice(0, 2 + beginnerCharNum)}...${address.slice(address.length - 4)}`;
 
 export const truncateHexString = (str?: string, chars = 4) => {
   if (!str) {
@@ -153,8 +153,8 @@ export const numberToBytes32HexString = (num?: string | number) => {
   }
 
   const hv = `0x${typeof num === 'string'
-      ? Number.parseInt(num as string).toString(16)
-      : num.toString(16)
+    ? Number.parseInt(num as string).toString(16)
+    : num.toString(16)
     }`;
   const final = hexZeroPad(hv, 32);
 
@@ -179,7 +179,7 @@ export const parseTokenUri = (uri?: string, tokenID?: string | number) => {
   return uri;
 };
 
-export const countGamePassAssets = (assets: InGameItem[]) => {
+export const countGamePassAssets = (assets: InGameTokenMaybeMetadata[]) => {
 
   let assetCounter = {
     moonsamaNum: 0,
@@ -208,7 +208,7 @@ export const countGamePassAssets = (assets: InGameItem[]) => {
   return assetCounter
 }
 
-export const countVIPTickets = (assets: InGameItem[]) => {
+export const countVIPTickets = (assets: InGameTokenMaybeMetadata[]) => {
 
   let ticketNum = 0
 

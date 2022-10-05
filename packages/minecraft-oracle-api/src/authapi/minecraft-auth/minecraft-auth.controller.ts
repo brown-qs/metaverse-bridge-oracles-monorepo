@@ -64,7 +64,7 @@ export class MinecraftAuthController {
         if (!!query.error) {
             this.logger.error(`Response query:: ${query?.error}: ${query?.error_description}`, null, this.context)
         }
-        const redirectUrl = `${this.configService.get<number>('frontend.url')}/account/minecraft/verify?${new URLSearchParams(query).toString()}`
+        const redirectUrl = `${this.configService.get<number>('frontend.url')}/account?${new URLSearchParams(query).toString()}`
         console.log("redirectUrl: " + redirectUrl)
         return { statusCode: HttpStatus.TEMPORARY_REDIRECT, url: redirectUrl }
     }

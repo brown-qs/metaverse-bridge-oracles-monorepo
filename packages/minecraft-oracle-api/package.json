@@ -61,8 +61,6 @@
     "fast-safe-stringify": "^2.1.1",
     "file-type": "16",
     "fp-ts": "^2.11.4",
-    "graphql": "^16.0.1",
-    "graphql-request": "^3.6.1",
     "http-client-methods": "^1.0.3",
     "io-ts": "^2.2.16",
     "io-ts-types": "^0.5.16",

@@ -10,7 +10,6 @@ import { Wallet } from 'tabler-icons-react';
 export default function WalletAccount() {
   const { account } = useActiveWeb3React();
   const { isAccountDialogOpen, onAccountDialogOpen, onAccountDialogClose } = useAccountDialog();
-  const [isSmallerThan400] = useMediaQuery('(max-width: 400px)')
   const styles = () => ({
     WalletDetailsStyle: {
       backgroundColor: 'rgba(14, 235, 168, 0.2)',
@@ -38,11 +37,9 @@ export default function WalletAccount() {
     WalletDetailsStyle,
   } = useClasses(styles)
 
-  let buttonText = "Connect Wallet"
+  let buttonText = "Connect"
 
-  if (isSmallerThan400) {
-    buttonText = "Connect"
-  }
+
   return (
     <>
       {
