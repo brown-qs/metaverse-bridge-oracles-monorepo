@@ -45,6 +45,7 @@ export const AccountDialog = () => {
   const [walletView, setWalletView] = useState(WALLET_VIEWS.ACCOUNT);
 
   const sortedRecentTransactions = useSortedRecentTransactions();
+  //console.log("sortedRecentTransactions: ", sortedRecentTransactions)
   const { addNetwork } = useAddNetworkToMetamaskCb()
 
   const pendingTransactions = sortedRecentTransactions
@@ -132,11 +133,11 @@ export const AccountDialog = () => {
 
   function renderTransactions(transactions: string[]) {
     return (
-      <Stack direction={'row'}>
+      <>
         {transactions.map((hash, i) => {
           return <Transaction key={i} hash={hash} />;
         })}
-      </Stack>
+      </>
     );
   }
 
@@ -357,21 +358,28 @@ export const AccountDialog = () => {
       bottomButtonText="Change Wallet"
       onBottomButtonClick={() => setWalletView(WALLET_VIEWS.OPTIONS)}
     >
-      <VStack lineHeight="24px" fontSize="16px" color="whiteAlpha.700" fontFamily="Rubik">
+      <VStack lineHeight="24px" fontSize="16px" color="whiteAlpha.700" fontFamily="Rubik" w="100%">
         {showConnectedAccountDetails()}
         {account &&
           (!!pendingTransactions.length || !!confirmedTransactions.length) ? (
-          <Stack fontSize="12px" >
-            <Stack direction={'row'} justifyContent={'space-between'}>
-              <Text>Recent transactions</Text>
-              <Button
-                onClick={clearAllTransactionsCallback}
-              >
-                (clear all)
-              </Button>
-            </Stack>
-            {renderTransactions(pendingTransactions)}
-            {renderTransactions(confirmedTransactions)}
+          <Stack fontSize="12px" w="100%">
+            <VStack w="100%">
+              <Box>
+                <Text>Recent transactions</Text>
+              </Box>
+
+              {renderTransactions(pendingTransactions)}
+              {renderTransactions(confirmedTransactions)}
+              <Box w="100%">
+                <Button
+                  w="100%"
+                  onClick={clearAllTransactionsCallback}
+                >
+                  CLEAR ALL
+                </Button>
+              </Box>
+            </VStack>
+
           </Stack>
         ) : (
           <Box fontSize="12px">

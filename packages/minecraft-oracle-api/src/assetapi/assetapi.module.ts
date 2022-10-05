@@ -10,6 +10,7 @@ import { SecretModule } from '../secret/secret.module';
 import { ProfileApiModule } from '../profileapi/profileapi.module';
 import { GameApiModule } from '../gameapi/gameapi.module';
 import { CqrsModule } from '@nestjs/cqrs';
+import { CollectionModule } from '../collection/collection.module';
 
 @Module({
     imports: [
@@ -21,7 +22,8 @@ import { CqrsModule } from '@nestjs/cqrs';
         AssetModule,
         ResourceInventoryModule,
         ResourceInventoryOffsetModule,
-        CollectionFragmentModule
+        CollectionModule,
+        CollectionFragmentModule,
     ],
     providers: [AssetApiService],
     exports: [AssetApiService],

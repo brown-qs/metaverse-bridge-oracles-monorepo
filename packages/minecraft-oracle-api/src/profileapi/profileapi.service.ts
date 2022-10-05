@@ -42,6 +42,24 @@ export class ProfileApiService {
         this.defaultChainId = this.configService.get<number>('network.defaultChainId')
     }
 
+    async getSkins(user: UserEntity): Promise<TextureDto[]> {
+        const userSkins = await this.skinService.findMany({ where: { owner: user.uuid }, relations: ['texture'] })
+        const textures: TextureDto[] = userSkins.map(skin => {
+            return {
+                id: skin.id,
+                assetAddress: skin.texture.assetAddress,
+                assetId: skin.texture.assetId,
+                assetType: skin.texture.assetType,
+                equipped: skin.equipped,
+                selectable: true,
+                textureData: skin.texture.textureData,
+                textureSignature: skin.texture.textureSignature,
+                name: skin.texture.name
+            }
+        })
+        return textures
+    }
+
     async getPlayerItems(user: UserEntity): Promise<ThingsDto> {
         const snapshots = await this.inventoryService.findMany({ relations: ['material', 'owner'], where: { owner: { uuid: user.uuid } } })
 
@@ -117,6 +135,7 @@ export class ProfileApiService {
 
         const textures: TextureDto[] = userSkins.map(skin => {
             return {
+                id: skin.id,
                 assetAddress: skin.texture.assetAddress,
                 assetId: skin.texture.assetId,
                 assetType: skin.texture.assetType,
@@ -159,6 +178,77 @@ export class ProfileApiService {
             assets,
             textures
         }
+    }
+
+    async getInGameItems(user: UserEntity): Promise<AssetDto[]> {
+        const importableAssets = await this.getRecognizedAssets(BridgeAssetType.IMPORTED)
+        const enrapturableAssets = await this.getRecognizedAssets(BridgeAssetType.ENRAPTURED)
+        const userAssets = await this.assetService.findMany({ where: { owner: user.uuid, pendingIn: false }, relations: ['collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
+        const assets = []
+        for (const asset of userAssets) {
+            const assetAddress = asset.collectionFragment.collection.assetAddress.toLowerCase()
+            const recongizedEnraptureAsset = findRecognizedAsset(enrapturableAssets, { assetAddress, assetId: asset.assetId })
+
+            if (!!recongizedEnraptureAsset && recongizedEnraptureAsset.recognizedAssetType.valueOf() !== RecognizedAssetType.RESOURCE.valueOf()) {
+                assets.push({
+                    amount: asset.amount,
+                    assetAddress,
+                    assetType: asset.collectionFragment.collection.assetType,
+                    assetId: asset.assetId,
+                    name: recongizedEnraptureAsset.name,
+                    exportable: !asset.enraptured,
+                    hash: asset.hash,
+                    summonable: false,
+                    recognizedAssetType: recongizedEnraptureAsset.recognizedAssetType.valueOf(),
+                    enraptured: asset.enraptured,
+                    exportChainId: asset.collectionFragment.collection.chainId,
+                    exportAddress: asset.assetOwner?.toLowerCase(),
+                })
+                continue
+            }
+
+            const recongizedImportAsset = findRecognizedAsset(importableAssets, { assetAddress, assetId: asset.assetId })
+
+            if (!!recongizedImportAsset) {
+                assets.push({
+                    amount: asset.amount,
+                    assetAddress: asset.collectionFragment.collection.assetAddress.toLowerCase(),
+                    assetType: asset.collectionFragment.collection.assetType,
+                    assetId: asset.assetId,
+                    name: recongizedImportAsset.name,
+                    exportable: !asset.enraptured,
+                    hash: asset.hash,
+                    summonable: false,
+                    recognizedAssetType: recongizedImportAsset.recognizedAssetType.valueOf(),
+                    enraptured: asset.enraptured,
+                    exportChainId: asset.collectionFragment.collection.chainId,
+                    exportAddress: asset.assetOwner?.toLowerCase(),
+                })
+                continue
+            }
+        }
+        return assets
+    }
+
+    async getInGameResources(user: UserEntity): Promise<AssetDto[]> {
+        const snapshots = await this.inventoryService.findMany({ relations: ['material', 'owner'], where: { owner: { uuid: user.uuid } } })
+
+        const resources: AssetDto[] = snapshots.map(snapshot => {
+            return {
+                amount: snapshot.amount,
+                assetAddress: snapshot.material.assetAddress,
+                assetType: snapshot.material.assetType,
+                assetId: snapshot.material.assetId,
+                name: snapshot.material.name,
+                exportable: false,
+                summonable: true,
+                recognizedAssetType: '',
+                enraptured: false,
+                exportChainId: 1285, // resources are multi chain
+                exportAddress: undefined,
+            }
+        })
+        return resources
     }
 
     async userProfile(user: UserEntity): Promise<ProfileDto> {

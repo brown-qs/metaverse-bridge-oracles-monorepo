@@ -53,6 +53,9 @@ export class AssetDto {
 }
 
 export class TextureDto {
+    @ApiProperty({ description: 'Skin id from database' })
+    @IsString()
+    id: string
 
     @ApiProperty({ description: 'Asset address' })
     @IsString()

@@ -43,7 +43,7 @@ export function useAllowance(
   const type = assetType ?? StringAssetType.ERC20;
 
   const allowanceCheck = useCallback(async () => {
-    console.log('useAllowance', { spender, account, type });
+    // console.log('useAllowance', { spender, account, type });
     if (!spender) {
       setAllowance(undefined);
       return;
@@ -54,12 +54,12 @@ export function useAllowance(
       return;
     } else if (StringAssetType.ERC20.valueOf() === type.valueOf()) {
       if (!erc20) {
-        console.error('ERC20) contract null');
+        //console.error('ERC20) contract null');
         setAllowance(undefined);
         return;
       }
       const a = await erc20.allowance(account, spender);
-      console.error('ERC20 allowance', a?.toString());
+      // console.error('ERC20 allowance', a?.toString());
       setAllowance(a);
     } else if (StringAssetType.ERC721.valueOf() === type.valueOf()) {
       if (!erc721) {
@@ -119,22 +119,22 @@ export function useApproveCallback(
 
   // check the current approval status
   const approvalState: ApprovalState = useMemo(() => {
-    console.error({
-      operator,
-      currentAllowance: currentAllowance?.toString(),
-      toApprove: toApprove?.toString(),
-    });
+    /* console.error({
+       operator,
+       currentAllowance: currentAllowance?.toString(),
+       toApprove: toApprove?.toString(),
+     });*/
     if (!assetAddress || !account || !operator || !currentAllowance)
       return ApprovalState.UNKNOWN;
 
-    console.error('approvalState', {
-      pendingApproval,
-      assetAddress,
-      account,
-      operator,
-      currentAllowance: currentAllowance.toString(),
-      toApprove: toApprove?.toString(),
-    });
+    /* console.error('approvalState', {
+       pendingApproval,
+       assetAddress,
+       account,
+       operator,
+       currentAllowance: currentAllowance.toString(),
+       toApprove: toApprove?.toString(),
+     });*/
     // amountToApprove will be defined if currentAllowance is
     return currentAllowance.lt(toApprove)
       ? pendingApproval
@@ -239,7 +239,7 @@ export function useApproveCallback(
       if (!erc1155) {
         return;
       }
-      console.log({ assetType, assetAddress, assetId, account });
+      // console.log({ assetType, assetAddress, assetId, account });
       const estimatedGas = await erc1155.estimateGas
         .setApprovalForAll(operator, true)
         .catch((e: Error) => {
