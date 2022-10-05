@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { RedisService } from 'nestjs-redis';
+//import { RedisService } from 'nestjs-redis';
 import { SESSION_CACHE_FIELD_USER } from '../config/constants';
 import IORedis from 'ioredis';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
@@ -13,17 +13,18 @@ export class CacheService {
     private readonly expirationTime: number;
 
     constructor(
-        readonly redisService: RedisService,
+        // readonly redisService: RedisService,
         private configService: ConfigService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
-        this.context = CacheService.name;
-        this.expirationTime = this.configService.get<number>('redis.expiration');
-        const rname = this.configService.get<string>('redis.name')
-        this.redisSession = this.redisService.getClient(
-            rname
-        );
-        logger.log(`CacheService:: Redis connected with name ${rname} and default expiration time ${this.expirationTime}`, this.context)
+        /*      this.context = CacheService.name;
+              this.expirationTime = this.configService.get<number>('redis.expiration');
+              const rname = this.configService.get<string>('redis.name')
+              this.redisSession = this.redisService.getClient(
+                  rname
+              );
+              logger.log(`CacheService:: Redis connected with name ${rname} and default expiration time ${this.expirationTime}`, this.context)
+         */
     }
 
     public async createSession(sessionKey: string, uuid: string): Promise<boolean> {
