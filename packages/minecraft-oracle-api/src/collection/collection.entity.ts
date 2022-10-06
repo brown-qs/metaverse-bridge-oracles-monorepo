@@ -8,6 +8,7 @@ import { StringAssetType } from '../common/enums/AssetType';
 import { Column, Entity, Index, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 import { CollectionFragmentEntity } from '../collectionfragment/collectionfragment.entity';
 import { CompositeCollectionFragmentEntity } from '../compositecollectionfragment/compositecollectionfragment.entity';
+import { MultiverseVersion } from '../config/constants';
 
 @Entity()
 @Index(['chainId', 'assetAddress'], { unique: true })
@@ -25,7 +26,15 @@ export class CollectionEntity {
     })
     assetType: StringAssetType;
 
-    @Column({nullable: true})
+    @Column({
+        type: 'enum',
+        nullable: false,
+        enum: MultiverseVersion,
+        default: MultiverseVersion.V1
+    })
+    multiverseVersion: MultiverseVersion;
+
+    @Column({ nullable: true })
     @IsString()
     name?: string;
 

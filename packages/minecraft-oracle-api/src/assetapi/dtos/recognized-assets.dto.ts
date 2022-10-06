@@ -1,11 +1,14 @@
 import { StringAssetType } from "../../common/enums/AssetType"
-import { RecognizedAssetType } from "../../config/constants"
+import { MultiverseVersion, RecognizedAssetType } from "../../config/constants"
 
 export class RecognizedAssetsDto {
     chainId: number
+    multiverseV1Address: string
+    multiverseV2Address: string
     assetAddress: string
     assetType: StringAssetType
     name: string
+    multiverseVersion: MultiverseVersion
     collectionFragments: CollectionFragmentDto[]
 }
 
