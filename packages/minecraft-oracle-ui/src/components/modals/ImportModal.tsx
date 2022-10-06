@@ -3,12 +3,13 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Checks } from "tabler-icons-react";
 import { ReduxModal } from ".";
-import { ChainId } from "../../constants";
+import { ChainId, DEFAULT_CHAIN } from "../../constants";
 import { useActiveWeb3React } from "../../hooks";
 import { useImportConfirmCallback } from "../../hooks/multiverse/useConfirm";
 import { useImportAssetCallback, CreateImportAssetCallbackState, AssetRequest } from "../../hooks/multiverse/useImportAsset";
 import { useApproveCallback, ApprovalState } from "../../hooks/useApproveCallback/useApproveCallback";
 import { useBalances } from "../../hooks/useBalances/useBalances";
+import { MultiverseVersion } from "../../state/api/types";
 import { closeImportModal, selectImportModalOpen, selectImportModalTokens } from "../../state/slices/importModalSlice";
 import { useSubmittedImportTx, useIsTransactionPending } from "../../state/transactions/hooks";
 import { getExplorerLink } from "../../utils";
@@ -62,7 +63,8 @@ export function ImportModal() {
             assetType: stringAssetTypeToAssetType(assetType)
         },
         amount,
-        chainId
+        chainId,
+        multiverseVersion: importTokens?.[0]?.multiverseVersion
     }
 
     const bal = useBalances([

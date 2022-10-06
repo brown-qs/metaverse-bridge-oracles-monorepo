@@ -19,14 +19,14 @@ export const RecognizedChainAssetsProvider: FactoryProvider<TypeRecognizedChainA
             }
 
             if (bridgeAssetType.valueOf() === BridgeAssetType.ENRAPTURED.valueOf()) {
-                const enrapturableAssets = await collectionFragmentService.findMany({ where: { collection: { chainId: chain.chainId }, enrapturable: true }, relations: ['collection'] })
+                const enrapturableAssets = await collectionFragmentService.findMany({ where: { collection: { chainId: chain.chainId }, enrapturable: true }, relations: ['collection', 'collection.chain'] })
                 return enrapturableAssets
             } else if (bridgeAssetType.valueOf() === BridgeAssetType.IMPORTED.valueOf()) {
-                const importableAssets = await collectionFragmentService.findMany({ where: { collection: { chainId: chain.chainId }, importable: true }, relations: ['collection'] })
+                const importableAssets = await collectionFragmentService.findMany({ where: { collection: { chainId: chain.chainId }, importable: true }, relations: ['collection', 'collection.chain'] })
                 //console.log(importableAssets)
                 return importableAssets
             } else if (bridgeAssetType.valueOf() === BridgeAssetType.EXPORTED.valueOf()) {
-                const exportableAssets = await collectionFragmentService.findMany({ where: { collection: { chainId: chain.chainId }, exportable: true }, relations: ['collection'] })
+                const exportableAssets = await collectionFragmentService.findMany({ where: { collection: { chainId: chain.chainId }, exportable: true }, relations: ['collection', 'collection.chain'] })
                 return exportableAssets
             } else {
                 return []
@@ -43,13 +43,13 @@ export const RecognizedAssetsProvider: FactoryProvider<TypeRecognizedAssetsProvi
     useFactory: (collectionFragmentService: CollectionFragmentService) => {
         const getRecognizedAssets = async (bridgeAssetType: BridgeAssetType) => {
             if (bridgeAssetType.valueOf() === BridgeAssetType.ENRAPTURED.valueOf()) {
-                const enrapturableAssets = await collectionFragmentService.findMany({ where: { enrapturable: true }, relations: ['collection'] })
+                const enrapturableAssets = await collectionFragmentService.findMany({ where: { enrapturable: true }, relations: ['collection', 'collection.chain'] })
                 return enrapturableAssets
             } else if (bridgeAssetType.valueOf() === BridgeAssetType.IMPORTED.valueOf()) {
-                const importableAssets = await collectionFragmentService.findMany({ where: { importable: true }, relations: ['collection'] })
+                const importableAssets = await collectionFragmentService.findMany({ where: { importable: true }, relations: ['collection', 'collection.chain'] })
                 return importableAssets
             } else if (bridgeAssetType.valueOf() === BridgeAssetType.EXPORTED.valueOf()) {
-                const exportableAssets = await collectionFragmentService.findMany({ where: { exportable: true }, relations: ['collection'] })
+                const exportableAssets = await collectionFragmentService.findMany({ where: { exportable: true }, relations: ['collection', 'collection.chain'] })
                 return exportableAssets
             } else {
                 return []
