@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { calculateGasMargin, getSigner } from '../../utils';
-import { useMultiverseBridgeV1Contract, useMultiverseBridgeV2Contract } from '../../hooks/useContracts/useContracts';
+import { useMultiverseBridgeV1Contract, useMultiverseBridgeContract } from '../../hooks/useContracts/useContracts';
 import { useActiveWeb3React } from '../../hooks';
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import axios from 'axios'
 import { useSelector } from 'react-redux';
 import { selectAccessToken } from '../../state/slices/authSlice';
+import { MultiverseVersion } from '../../state/api/types';
 
 export enum ExportAssetCallbackState {
     INVALID,
@@ -82,7 +83,7 @@ export function useExportAssetCallback(
 
     //console.log('YOLO', { account, chainId, library });
     // const contract = useMultiverseBridgeV1Contract(true);
-    const contract = useMultiverseBridgeV2Contract(true, exportRequest.chainId);
+    const contract = useMultiverseBridgeContract(MultiverseVersion.V1, true, exportRequest.chainId);
 
     const { confirmed, data, hash, signature } = useFetchExportAssetArgumentsCallback(exportRequest) ?? {}
 
