@@ -59,8 +59,11 @@ export async function encodeImportWithSigData(data: ImportData, expiration: stri
     } = data;
 
     if (multiverseVersion === MultiverseVersion.V2) {
-        const types = ["tuple(address assetAddress, uint256 assetType, bytes32 metaverse, address owner, bytes32 data, uint256[] assetIds, uint256[] assetAmounts, bytes32[] salts)", "bool"]
-        const params = [{ assetAddress, assetType, metaverse, owner, data: ethers.utils.formatBytes32String(""), assetIds: [assetId], assetAmounts: [amount], salts: [salt] }, false]
+        console.log("IMPORT V2")
+        const _data = ethers.utils.formatBytes32String("")
+        const types = ['address', 'uint256', 'bytes32', 'address', 'bytes32', 'uint256[]', 'uint256[]', 'bytes32[]', 'uint256', 'bool']
+        const params = [assetAddress, assetType, metaverse, owner, _data, [assetId], [amount], [salt], expiration, false]
+        console.log("PARAMS: " + JSON.stringify(params))
         return encodeParameters(types, params)
     }
 
