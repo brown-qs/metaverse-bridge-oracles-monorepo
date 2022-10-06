@@ -98,8 +98,8 @@ export function useEnraptureAssetCallback(
 
     const enraptureRequest = {
         ...assetRequest,
-        owner: account,
-        beneficiary: account,
+        owner: account?.toLowerCase(),
+        beneficiary: account?.toLowerCase(),
     }
 
     const { confirmed, data, hash, signature } = useFetchEnraptureAssetArgumentsCallback(enraptureRequest) ?? {}

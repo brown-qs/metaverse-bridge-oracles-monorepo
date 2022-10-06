@@ -96,8 +96,8 @@ export function useImportAssetCallback(
 
     const importRequest = {
         ...assetRequest,
-        owner: account,
-        beneficiary: account
+        owner: account?.toLowerCase(),
+        beneficiary: account?.toLowerCase()
     }
 
     const { confirmed, data, hash, signature } = useFetchImportAssetArgumentsCallback(importRequest) ?? {}
