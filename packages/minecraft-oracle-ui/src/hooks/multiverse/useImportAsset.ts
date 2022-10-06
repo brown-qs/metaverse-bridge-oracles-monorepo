@@ -7,6 +7,7 @@ import axios from 'axios'
 import { AssetType } from 'utils/marketplace';
 import { useSelector } from 'react-redux';
 import { selectAccessToken } from '../../state/slices/authSlice';
+import { MultiverseVersion } from '../../state/api/types';
 
 export enum CreateImportAssetCallbackState {
     INVALID,
@@ -34,7 +35,8 @@ export interface AssetRequest {
         assetType?: AssetType
     },
     amount: string,
-    chainId?: number
+    chainId?: number,
+    multiverseVersion?: MultiverseVersion
 }
 
 export type ImportRequestParams = {

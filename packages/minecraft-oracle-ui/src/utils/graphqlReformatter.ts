@@ -1,6 +1,6 @@
 import { Erc1155TokenWhereInput, Erc721TokenWhereInput, GetMarketplaceMetadataQuery, GetMarketplaceMetadataQueryVariables, GetMarketplaceOnChainTokensQuery, useGetMarketplaceOnChainTokensQuery } from "../state/api/generatedSquidMarketplaceApi"
 import { GetRaresamaOnChainTokensQuery } from "../state/api/generatedSquidRaresamaApi"
-import { AssetDto, CollectionFragmentDto, RecognizedAssetsDto, RecognizedAssetType, } from "../state/api/types"
+import { AssetDto, CollectionFragmentDto, MultiverseVersion, RecognizedAssetsDto, RecognizedAssetType, } from "../state/api/types"
 import { StringAssetType } from "./subgraph"
 
 
@@ -28,7 +28,7 @@ export type RecognizedTokenDataType = {
     exportable: boolean
     summonable: boolean
     gamepass: boolean
-
+    multiverseVersion: MultiverseVersion
 }
 export type StandardizedOnChainTokenWithRecognizedTokenData = StandardizedOnChainToken & RecognizedTokenDataType
 
@@ -66,6 +66,7 @@ export const addRegonizedTokenDataToStandardizedOnChainTokens = (tokens: Standar
                         exportable: collectionFragment.exportable,
                         summonable: collectionFragment.summonable,
                         gamepass: collectionFragment.gamepass,
+                        multiverseVersion: recognizedAsset.multiverseVersion,
                         ...tok
                     }
                     results.push(recognizedTokenData)

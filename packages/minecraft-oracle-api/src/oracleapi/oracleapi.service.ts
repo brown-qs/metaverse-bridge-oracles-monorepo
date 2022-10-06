@@ -6,7 +6,7 @@ import { TextureService } from '../texture/texture.service';
 import { UserEntity } from '../user/user/user.entity';
 import { GameService } from '../game/game.service';
 import { ImportDto } from './dtos/import.dto';
-import { CALLDATA_EXPIRATION_MS, CALLDATA_EXPIRATION_THRESHOLD, METAVERSE, RecognizedAssetType } from '../config/constants';
+import { CALLDATA_EXPIRATION_MS, CALLDATA_EXPIRATION_THRESHOLD, METAVERSE, MultiverseVersion, RecognizedAssetType } from '../config/constants';
 import { calculateMetaAssetHash, encodeEnraptureWithSigData, encodeExportWithSigData, encodeImportWithSigData, getSalt, getSignature, utf8ToKeccak } from './oracleapi.utils';
 import { BigNumber, Contract, ethers } from 'ethers';
 import { ProviderToken } from '../provider/token';
@@ -41,6 +41,7 @@ import { ResourceInventoryUpdatedEvent } from '../cqrs/events/resource-inventory
 import { SkinRemovedEvent } from '../cqrs/events/skin-removed.event';
 import { SkinSelectedEvent } from '../cqrs/events/skin-selected.event';
 import { AssetRemovedEvent } from '../cqrs/events/asset-removed.event';
+import { METAVERSE_V2_ABI } from '../common/contracts/MetaverseV2';
 
 @Injectable()
 export class OracleApiService {
@@ -88,6 +89,8 @@ export class OracleApiService {
             throw new UnprocessableEntityException(`Not permissioned asset`)
         }
 
+        const multiverseVersion = collectionFragment.collection.multiverseVersion
+
         const oracle = await this.getOracle(sanitizedChainId)
 
         if (!oracle) {
@@ -114,9 +117,9 @@ export class OracleApiService {
                 salt
             }
             const expirationContract = (Math.floor(Number.parseInt(existingEntry.expiration) / 1000)).toString()
-            const payload = enraptured ? await encodeEnraptureWithSigData(ma, expirationContract) : await encodeImportWithSigData(ma, expirationContract)
+            const payload = enraptured ? await encodeEnraptureWithSigData(ma, expirationContract, multiverseVersion) : await encodeImportWithSigData(ma, expirationContract, multiverseVersion)
             const signature = await getSignature(oracle, payload)
-            const hash = await calculateMetaAssetHash(ma)
+            const hash = await calculateMetaAssetHash(ma, multiverseVersion)
 
             this.logger.debug(`InData: request prepared: ${[hash, payload, signature]}`, this.context)
 
@@ -156,10 +159,10 @@ export class OracleApiService {
         }
         const expiration = (Date.now() + CALLDATA_EXPIRATION_MS)
         const expirationContract = (Math.floor(expiration / 1000)).toString()
-        const payload = enraptured ? await encodeEnraptureWithSigData(ma, expirationContract) : await encodeImportWithSigData(ma, expirationContract)
+        const payload = enraptured ? await encodeEnraptureWithSigData(ma, expirationContract, multiverseVersion) : await encodeImportWithSigData(ma, expirationContract, multiverseVersion)
 
         const signature = await getSignature(oracle, payload)
-        const hash = await calculateMetaAssetHash(ma)
+        const hash = await calculateMetaAssetHash(ma, multiverseVersion)
 
         await this.assetService.create({
             assetId: ma.asset.assetId,
@@ -213,7 +216,7 @@ export class OracleApiService {
         const salt = await getSalt()
         const expiration = Date.now() + CALLDATA_EXPIRATION_MS
         const expirationContract = (Math.floor(expiration / 1000)).toString()
-        const payload = await encodeExportWithSigData({ hash }, expirationContract)
+        const payload = await encodeExportWithSigData({ hash }, expirationContract, MultiverseVersion.V1)
         const signature = await getSignature(oracle, payload)
 
         this.logger.debug(`OutData: request prepared: ${[hash, payload, signature]}`, this.context)
@@ -368,7 +371,7 @@ export class OracleApiService {
         if (assetEntry.pendingIn === false) {
             return true
         }
-
+        const multiverseVersion = assetEntry.collectionFragment.collection.multiverseVersion
         const assetAddress = assetEntry.collectionFragment.collection.assetAddress.toLowerCase()
         const assetType = assetEntry.collectionFragment.collection.assetType
         const assetId = assetEntry.assetId
@@ -377,14 +380,34 @@ export class OracleApiService {
         const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
 
         let contract: Contract;
-        if (chainEntity.multiverseV1Address)
-            contract = new Contract(chainEntity.multiverseV1Address, METAVERSE_ABI, oracle)
-        else {
-            this.logger.error(`Summon: failiure not find MultiverseAddress`)
-            throw new UnprocessableEntityException('Summon MultiverseAddress error.')
+
+        if (multiverseVersion === MultiverseVersion.V1) {
+            if (chainEntity.multiverseV1Address)
+                contract = new Contract(chainEntity.multiverseV1Address, METAVERSE_ABI, oracle)
+            else {
+                this.logger.error(`Summon: failiure not find MultiverseAddress`)
+                throw new UnprocessableEntityException('Summon MultiverseAddress error.')
+            }
+        } else if (multiverseVersion === MultiverseVersion.V2) {
+            if (chainEntity.multiverseV2Address)
+                contract = new Contract(chainEntity.multiverseV2Address, METAVERSE_V2_ABI, oracle)
+            else {
+                this.logger.error(`Summon: failiure not find MultiverseAddress`)
+                throw new UnprocessableEntityException('Summon MultiverseAddress error.')
+            }
+        } else {
+            this.logger.error(`Summon: failiure not find multiverse version`)
+            throw new UnprocessableEntityException('Couldnt find multiverse version')
+
         }
 
-        const mAsset: MetaAsset = await contract.getImportedMetaAsset(hash)
+        let mAsset: MetaAsset
+
+        if (multiverseVersion === MultiverseVersion.V1) {
+            mAsset = await contract.getImportedMetaAsset(hash)
+        } else if (multiverseVersion === MultiverseVersion.V2) {
+            mAsset = await contract.getMetaAsset(hash, false)
+        }
 
         if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress.toLowerCase() !== assetAddress) {
             this.logger.error(`ImportConfirm: on-chaind data didn't match for hash: ${hash}`, null, this.context)
