@@ -113,7 +113,7 @@ export const MULTIVERSE_BRIDGE_V1_ADDRESS: { [chainId in ChainId]?: string } = {
 };
 
 export const MULTIVERSE_BRIDGE_V2_ADDRESS: { [chainId in ChainId]?: string } = {
-  [ChainId.MOONRIVER]: '0x9a5f7f3679664675ab286b70648d23f8933a3831'
+  [ChainId.MOONRIVER]: '0x1ff3097f4a82913d690d2a59de613378ae2b3c05'
 };
 
 export const PROTOCOL_FEE_BPS = '200';
