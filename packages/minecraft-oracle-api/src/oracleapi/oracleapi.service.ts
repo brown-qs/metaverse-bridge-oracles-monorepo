@@ -102,7 +102,7 @@ export class OracleApiService {
 
         // we try to confirm
         if (!!existingEntry) {
-            //console.log('exists?')
+            console.log('exists?')
             const salt = existingEntry.salt
             const ma = {
                 asset: data.asset,
@@ -300,8 +300,8 @@ export class OracleApiService {
             const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
 
             let contract: Contract;
-            if (chainEntity.multiverseAddress)
-                contract = new Contract(chainEntity.multiverseAddress, METAVERSE_ABI, oracle)
+            if (chainEntity.multiverseV1Address)
+                contract = new Contract(chainEntity.multiverseV1Address, METAVERSE_ABI, oracle)
             else {
                 this.logger.error(`Summon: failiure not find MultiverseAddress`)
                 throw new UnprocessableEntityException('Summon MultiverseAddress error.')
@@ -377,8 +377,8 @@ export class OracleApiService {
         const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
 
         let contract: Contract;
-        if (chainEntity.multiverseAddress)
-            contract = new Contract(chainEntity.multiverseAddress, METAVERSE_ABI, oracle)
+        if (chainEntity.multiverseV1Address)
+            contract = new Contract(chainEntity.multiverseV1Address, METAVERSE_ABI, oracle)
         else {
             this.logger.error(`Summon: failiure not find MultiverseAddress`)
             throw new UnprocessableEntityException('Summon MultiverseAddress error.')
@@ -505,8 +505,8 @@ export class OracleApiService {
         const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
 
         let contract: Contract;
-        if (chainEntity.multiverseAddress)
-            contract = new Contract(chainEntity.multiverseAddress, METAVERSE_ABI, oracle)
+        if (chainEntity.multiverseV1Address)
+            contract = new Contract(chainEntity.multiverseV1Address, METAVERSE_ABI, oracle)
         else {
             this.logger.error(`Summon: failiure not find MultiverseAddress`)
             throw new UnprocessableEntityException('Summon MultiverseAddress error.')
@@ -665,8 +665,8 @@ export class OracleApiService {
         const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
 
         let contract: Contract;
-        if (chainEntity.multiverseAddress)
-            contract = new Contract(chainEntity.multiverseAddress, METAVERSE_ABI, oracle)
+        if (chainEntity.multiverseV1Address)
+            contract = new Contract(chainEntity.multiverseV1Address, METAVERSE_ABI, oracle)
         else {
             this.logger.error(`Summon: failiure not find MultiverseAddress`)
             throw new UnprocessableEntityException('Summon MultiverseAddress error.')
