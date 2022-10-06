@@ -11,7 +11,7 @@ import { ReduxModal } from ".";
 import { DEFAULT_CHAIN, PERMISSIONED_CHAINS, NETWORK_NAME, ChainId, BURNABLE_RESOURCES_IDS } from "../../constants";
 import { useActiveWeb3React, useClasses } from "../../hooks";
 import { useEnraptureConfirmCallback, useExportConfirmCallback } from "../../hooks/multiverse/useConfirm";
-import { EnraptureAssetCallbackState, useEnraptureAssetCallback } from "../../hooks/multiverse/useEnraptureAsset";
+import { AssetRequest, EnraptureAssetCallbackState, useEnraptureAssetCallback } from "../../hooks/multiverse/useEnraptureAsset";
 import { ExportAssetCallbackState, useExportAssetCallback } from "../../hooks/multiverse/useExportAsset";
 import useAddNetworkToMetamaskCb from "../../hooks/useAddNetworkToMetamask/useAddNetworkToMetamask";
 import { ApprovalState, useApproveCallback } from "../../hooks/useApproveCallback/useApproveCallback";
@@ -89,16 +89,15 @@ export function EnraptureModal() {
         }
     };
 
-    const enraptureObject = {
+    const enraptureObject: AssetRequest = {
         asset: {
             assetAddress,
             assetId,
             assetType: stringAssetTypeToAssetType(assetType),
         },
         amount: finalAmount,
-        owner,
-        beneficiary,
-        chainId
+        chainId,
+        multiverseVersion: enraptureTokens?.[0]?.multiverseVersion
     }
 
     const bal = useBalances([
