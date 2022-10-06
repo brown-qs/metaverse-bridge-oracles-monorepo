@@ -268,9 +268,12 @@ export class AssetApiService {
         })
         const collection = {
             chainId: row.chainId,
+            multiverseV1Address: row.chain.multiverseV1Address,
+            multiverseV2Address: row.chain.multiverseV2Address,
             assetAddress: row.assetAddress,
             assetType: row.assetType,
             name: row.name,
+            multiverseVersion: row.multiverseVersion,
             collectionFragments
         }
         return collection
