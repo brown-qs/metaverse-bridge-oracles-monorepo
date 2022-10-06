@@ -56,11 +56,19 @@ export type SkinSelectRequest = {
     assetAddress: string
 }
 
+export enum MultiverseVersion {
+    V1 = 1,
+    V2 = 2
+}
+
 export type RecognizedAssetsDto = {
     chainId: number
+    multiverseV1Address: string
+    multiverseV2Address: string
     assetAddress: string
     assetType: StringAssetType
     name: string
+    multiverseVersion: MultiverseVersion
     collectionFragments: CollectionFragmentDto[]
 }
 

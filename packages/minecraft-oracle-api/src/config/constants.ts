@@ -46,6 +46,11 @@ export enum RecognizedAssetType {
   PONDSAMA_FISH = 'PONDSAMA_FISH'
 }
 
+export enum MultiverseVersion {
+  V1 = 1,
+  V2 = 2
+}
+
 export enum PlayEligibilityReason {
   NONE = 'NONE',
   MOONSAMA = 'MSAMA',
