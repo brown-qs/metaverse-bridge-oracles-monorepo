@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { calculateGasMargin } from '../../utils';
-import { useMultiverseBridgeV1Contract, useMultiverseBridgeV2Contract } from '../../hooks/useContracts/useContracts';
+import { useMultiverseBridgeV1Contract, useMultiverseBridgeContract } from '../../hooks/useContracts/useContracts';
 import { useActiveWeb3React } from '../../hooks';
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import axios from 'axios'
@@ -96,7 +96,7 @@ export function useEnraptureAssetCallback(
 
     //console.log('YOLO', { account, chainId, library });
     // const contract = useMultiverseBridgeV1Contract(true);
-    const contract = useMultiverseBridgeV2Contract(true, assetRequest.chainId);
+    const contract = useMultiverseBridgeContract(assetRequest.multiverseVersion, true, assetRequest.chainId);
 
     const enraptureRequest = {
         ...assetRequest,

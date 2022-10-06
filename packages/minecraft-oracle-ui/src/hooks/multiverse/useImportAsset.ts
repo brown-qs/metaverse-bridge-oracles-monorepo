@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { calculateGasMargin } from '../../utils';
-import { useMultiverseBridgeV1Contract, useMultiverseBridgeV2Contract } from '../../hooks/useContracts/useContracts';
+import { useMultiverseBridgeV1Contract, useMultiverseBridgeContract } from '../../hooks/useContracts/useContracts';
 import { useActiveWeb3React } from '../../hooks';
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import axios from 'axios'
@@ -94,7 +94,7 @@ export function useImportAssetCallback(
     const { account, chainId, library } = useActiveWeb3React();
 
     // const contract = useMultiverseBridgeV1Contract(true);
-    const contract = useMultiverseBridgeV2Contract(true, assetRequest.chainId);
+    const contract = useMultiverseBridgeContract(assetRequest.multiverseVersion, true, assetRequest.chainId);
 
     const importRequest = {
         ...assetRequest,
@@ -146,7 +146,10 @@ export function useImportAssetCallback(
             hash,
             callback: async function onImportAsset(): Promise<string> {
                 const args = inputParams;
-                const methodName = 'importToMetaverseSig';
+                let methodName = 'importToMetaverseSig';
+                if (assetRequest.multiverseVersion === MultiverseVersion.V2) {
+                    methodName = 'stakeSig'
+                }
 
                 const call = {
                     contract: contract.address,
@@ -223,10 +226,11 @@ export function useImportAssetCallback(
         account,
         chainId,
         data,
-        signature, ,
+        signature,
         confirmed,
         hash,
         inputOptions.value,
         addTransaction,
+        assetRequest.multiverseVersion
     ]);
 }
