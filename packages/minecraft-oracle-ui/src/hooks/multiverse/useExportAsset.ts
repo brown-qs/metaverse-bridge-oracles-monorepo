@@ -124,21 +124,22 @@ export function useExportAssetCallback(
         return {
             state: ExportAssetCallbackState.VALID,
             callback: async function onEnraptureAsset(): Promise<string> {
-                const args = inputParams;
                 let methodName = 'exportFromMetaverseSig';
+                let parameters: any = inputParams
                 if (exportRequest.multiverseVersion === MultiverseVersion.V2) {
                     methodName = 'unstakeSig'
+                    parameters = [[inputParams[0]], [inputParams[1]]]
                 }
                 const call = {
                     contract: contract.address,
-                    parameters: inputParams,
+                    parameters,
                     methodName,
                 };
 
                 console.log(call);
 
                 const gasEstimate = await contract.estimateGas[methodName](
-                    ...args,
+                    ...parameters,
                     inputOptions
                 ).catch((gasError: any) => {
                     console.debug(
@@ -146,7 +147,7 @@ export function useExportAssetCallback(
                         call
                     );
 
-                    return contract.callStatic[methodName](...args, inputOptions)
+                    return contract.callStatic[methodName](...parameters, inputOptions)
                         .then((result: any) => {
                             console.debug(
                                 'Unexpected successful call after failed estimate gas',
@@ -171,7 +172,7 @@ export function useExportAssetCallback(
                     );
                 }
 
-                return contract[methodName](...args, {
+                return contract[methodName](...parameters, {
                     gasLimit: calculateGasMargin(gasEstimate),
                     from: account,
                     ...inputOptions,
@@ -192,7 +193,7 @@ export function useExportAssetCallback(
                             throw new Error('Transaction rejected.');
                         } else {
                             // otherwise, the error was unexpected and we need to convey that
-                            console.error(`Export asset failed`, error, methodName, args);
+                            console.error(`Export asset failed`, error, methodName, parameters);
                             throw new Error(`Export asset failed: ${error.message}`);
                         }
                     });

@@ -57,7 +57,7 @@ export function ExportModal() {
         setExportParamsLoaded(true);
     }
     const assetAddress = exportTokens?.[0]?.assetAddress;
-    const multiverseVersion = MultiverseVersion.V1
+    const multiverseVersion = exportTokens?.[0]?.multiverseVersion ?? MultiverseVersion.V1
     /*const assetId = exportDialogData?.asset?.assetId;
     const assetType = exportDialogData?.asset?.assetType;
     const item = exportDialogData?.item;*/
@@ -156,9 +156,9 @@ export function ExportModal() {
                 <Box w="100%" h="48px" bg="whiteAlpha.100" borderRadius="8px">
                     <HStack padding="12px">
                         <Box flex="1" color="whiteAlpha.700">Transaction</Box>
-                        <Box>
+                        <Box w="100%" overflow="hidden">
                             {exportTx && (
-                                <ChakraLink isExternal
+                                <ChakraLink whiteSpace="nowrap" isExternal textOverflow={"ellipsis"} w="100%" overflow="hidden"
                                     href={getExplorerLink(
                                         chainId ?? ChainId.MOONRIVER,
                                         exportTx.hash,
