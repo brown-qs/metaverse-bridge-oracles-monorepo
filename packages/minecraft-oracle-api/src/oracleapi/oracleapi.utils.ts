@@ -175,6 +175,23 @@ export async function utf8ToKeccak(data: string) {
     return hash
 }
 
+
+
+async function calculateMultiverseAssetStaticPartHash(data: ImportData) {
+    const {
+        metaverse,
+        asset: {
+            assetAddress,
+            assetType
+        }
+    } = data;
+    const hash = await ethers.utils.solidityKeccak256(
+        ['bytes32', 'address', 'uint8'],
+        [metaverse, assetAddress, assetType]
+    )
+    return hash
+}
+
 export async function calculateMetaAssetHash(data: ImportData, multiverseVersion: MultiverseVersion) {
     const {
         asset: {
@@ -194,10 +211,13 @@ export async function calculateMetaAssetHash(data: ImportData, multiverseVersion
         [assetAddress, assetId, metaverse, owner, beneficiary, amount, salt]
     )
     if (multiverseVersion === MultiverseVersion.V2) {
+        const staticHash = await calculateMultiverseAssetStaticPartHash(data)
         const _data = ethers.utils.formatBytes32String("")
-        const types = ['bytes32', 'address', 'uint256', 'uint256', 'uint256', 'address', 'bytes32', 'bytes32']
-        const params = [metaverse, assetAddress, assetId, assetType, amount, owner, salt, _data]
-        encoded = encodeParameters(types, params)
+        const hash = await ethers.utils.solidityKeccak256(
+            ['bytes32', 'uint256', 'uint256', 'address', 'bytes32', 'bytes'],
+            [staticHash, assetId, amount, owner, salt, _data]
+        )
+        return hash
     }
 
     const hash = await ethers.utils.keccak256(encoded)
