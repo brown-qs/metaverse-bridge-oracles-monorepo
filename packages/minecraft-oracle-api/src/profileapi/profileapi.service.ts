@@ -74,7 +74,7 @@ export class ProfileApiService {
                 summonable: true,
                 recognizedAssetType: '',
                 enraptured: false,
-                exportChainId: 1285, // resources are multi chain
+                chainId: 1285, // resources are multi chain
                 exportAddress: undefined,
             }
         })
@@ -106,7 +106,7 @@ export class ProfileApiService {
                     summonable: false,
                     recognizedAssetType: recongizedEnraptureAsset.recognizedAssetType.valueOf(),
                     enraptured: asset.enraptured,
-                    exportChainId: asset.collectionFragment.collection.chainId,
+                    chainId: asset.collectionFragment.collection.chainId,
                     exportAddress: asset.assetOwner?.toLowerCase(),
                 })
                 continue
@@ -126,7 +126,7 @@ export class ProfileApiService {
                     summonable: false,
                     recognizedAssetType: recongizedImportAsset.recognizedAssetType.valueOf(),
                     enraptured: asset.enraptured,
-                    exportChainId: asset.collectionFragment.collection.chainId,
+                    chainId: asset.collectionFragment.collection.chainId,
                     exportAddress: asset.assetOwner?.toLowerCase(),
                 })
                 continue
@@ -166,7 +166,7 @@ export class ProfileApiService {
                         summonable: false,
                         recognizedAssetType: baitAsset.recognizedAssetType.valueOf(),
                         enraptured: baitAsset.enraptured,
-                        exportChainId: baitAsset.collectionFragment.collection.chainId,
+                        chainId: baitAsset.collectionFragment.collection.chainId,
                         exportAddress: baitAsset.assetOwner?.toLowerCase(),
                     }
                 )
@@ -201,7 +201,7 @@ export class ProfileApiService {
                     summonable: false,
                     recognizedAssetType: recongizedEnraptureAsset.recognizedAssetType.valueOf(),
                     enraptured: asset.enraptured,
-                    exportChainId: asset.collectionFragment.collection.chainId,
+                    chainId: asset.collectionFragment.collection.chainId,
                     exportAddress: asset.assetOwner?.toLowerCase(),
                 })
                 continue
@@ -221,7 +221,7 @@ export class ProfileApiService {
                     summonable: false,
                     recognizedAssetType: recongizedImportAsset.recognizedAssetType.valueOf(),
                     enraptured: asset.enraptured,
-                    exportChainId: asset.collectionFragment.collection.chainId,
+                    chainId: asset.collectionFragment.collection.chainId,
                     exportAddress: asset.assetOwner?.toLowerCase(),
                 })
                 continue
@@ -244,7 +244,7 @@ export class ProfileApiService {
                 summonable: true,
                 recognizedAssetType: '',
                 enraptured: false,
-                exportChainId: 1285, // resources are multi chain
+                chainId: 1285, // resources are multi chain
                 exportAddress: undefined,
             }
         })
