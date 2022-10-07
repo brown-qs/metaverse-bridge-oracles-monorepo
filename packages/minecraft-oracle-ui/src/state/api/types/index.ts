@@ -63,8 +63,6 @@ export enum MultiverseVersion {
 
 export type RecognizedAssetsDto = {
     chainId: number
-    multiverseV1Address: string
-    multiverseV2Address: string
     assetAddress: string
     assetType: StringAssetType
     name: string

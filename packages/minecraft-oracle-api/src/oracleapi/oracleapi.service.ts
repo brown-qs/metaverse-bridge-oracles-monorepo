@@ -382,16 +382,17 @@ export class OracleApiService {
         let contract: Contract;
 
         if (multiverseVersion === MultiverseVersion.V1) {
-            if (chainEntity.multiverseV1Address)
+            if (chainEntity.multiverseV1Address) {
                 contract = new Contract(chainEntity.multiverseV1Address, METAVERSE_ABI, oracle)
-            else {
+            } else {
                 this.logger.error(`Summon: failiure not find MultiverseAddress`)
                 throw new UnprocessableEntityException('Summon MultiverseAddress error.')
             }
         } else if (multiverseVersion === MultiverseVersion.V2) {
-            if (chainEntity.multiverseV2Address)
+            if (chainEntity.multiverseV2Address) {
+                console.log("IMPORT CONFIRM USING V2 contract")
                 contract = new Contract(chainEntity.multiverseV2Address, METAVERSE_V2_ABI, oracle)
-            else {
+            } else {
                 this.logger.error(`Summon: failiure not find MultiverseAddress`)
                 throw new UnprocessableEntityException('Summon MultiverseAddress error.')
             }
@@ -403,14 +404,22 @@ export class OracleApiService {
 
         let mAsset: MetaAsset
 
+        console.log(`hash: ${hash}`)
+
         if (multiverseVersion === MultiverseVersion.V1) {
             mAsset = await contract.getImportedMetaAsset(hash)
         } else if (multiverseVersion === MultiverseVersion.V2) {
+            console.log("Using M ASSSET V2")
             mAsset = await contract.getMetaAsset(hash, false)
+            /*
+            if hash doesnt exist masset will be:
+            ["0x0000000000000000000000000000000000000000000000000000000000000000","0x0000000000000000000000000000000000000000",{"type":"BigNumber","hex":"0x00"},0,{"type":"BigNumber","hex":"0x00"},"0x0000000000000000000000000000000000000000","0x0000000000000000000000000000000000000000000000000000000000000000","0x0000000000000000000000000000000000000000000000000000000000000000"]
+            */
         }
 
-        if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress.toLowerCase() !== assetAddress) {
-            this.logger.error(`ImportConfirm: on-chaind data didn't match for hash: ${hash}`, null, this.context)
+        console.log("mAsset" + JSON.stringify(mAsset))
+        if (!mAsset || mAsset?.amount?.toString() !== assetEntry.amount || mAsset?.asset?.assetAddress?.toLowerCase() !== assetAddress) {
+            this.logger.error(`ImportConfirm: on-chaind data didn't match for hash: ${hash} mAsset: ${JSON.stringify(mAsset)}`, null, this.context)
             throw new UnprocessableEntityException(`On-chain data didn't match`)
         }
         const importableAssets = await this.getRecognizedAsset(chainId, BridgeAssetType.IMPORTED)
