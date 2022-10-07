@@ -118,39 +118,63 @@ const ProfilePage = () => {
                 if (tok?.importable === false && tok?.enrapturable === false) {
                     return false
                 }
+
+                //if there's a connected chain, only show items on that chain
+                if (!!chainId && tok.chainId !== chainId) {
+                    return false
+                }
                 return true
             })
         } else {
             return undefined
         }
-    }, [allStandardizedOnChainTokensWithRecognizedTokenData])
+    }, [allStandardizedOnChainTokensWithRecognizedTokenData, chainId])
 
 
     const onChainResources: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
         if (!!allStandardizedOnChainTokensWithRecognizedTokenData) {
-            return allStandardizedOnChainTokensWithRecognizedTokenData.filter((tok) => tok.summonable)
+            return allStandardizedOnChainTokensWithRecognizedTokenData.filter((tok) => {
+                if (!!chainId && chainId !== ChainId.MOONRIVER) {
+                    return false
+                }
+                return tok.summonable
+            })
         } else {
             return undefined
         }
-    }, [allStandardizedOnChainTokensWithRecognizedTokenData])
+    }, [allStandardizedOnChainTokensWithRecognizedTokenData, chainId])
 
 
     const inGameItems: InGameTokenMaybeMetadata[] | undefined = React.useMemo(() => {
         if (!!inGameItemsData) {
-            return [...inGameTokensCombineMetadata(inGameItemsData, inGameItemsMetadata)].sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
+            return [...inGameTokensCombineMetadata(inGameItemsData, inGameItemsMetadata)]
+                .sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
+                .filter((tok) => {
+                    if (!!chainId && tok.chainId !== chainId) {
+                        return false
+                    }
+                    return true
+                })
         } else {
             return undefined
         }
-    }, [inGameItemsData, inGameItemsMetadata])
+    }, [inGameItemsData, inGameItemsMetadata, chainId])
 
 
     const inGameResources: InGameTokenMaybeMetadata[] | undefined = React.useMemo(() => {
         if (!!inGameResourcesData) {
-            return [...inGameTokensCombineMetadata(inGameResourcesData, inGameResourcesMetadata)].sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
+            return [...inGameTokensCombineMetadata(inGameResourcesData, inGameResourcesMetadata)]
+                .sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
+                .filter((tok) => {
+                    if (!!chainId && chainId !== ChainId.MOONRIVER) {
+                        return false
+                    }
+                    return true
+                })
         } else {
             return undefined
         }
-    }, [inGameResourcesData, inGameResourcesMetadata])
+    }, [inGameResourcesData, inGameResourcesMetadata, chainId])
 
     //TODO: raresama loading
     const isOnChainItemsLoading: boolean = React.useMemo(() => {
