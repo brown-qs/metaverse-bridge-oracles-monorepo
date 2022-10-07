@@ -17,7 +17,8 @@ export enum ExportAssetCallbackState {
 
 export interface ExportRequest {
     hash?: string,
-    chainId?: number
+    chainId?: number,
+    multiverseVersion?: MultiverseVersion
 }
 
 export interface AssetRequest {
@@ -83,7 +84,7 @@ export function useExportAssetCallback(
 
     //console.log('YOLO', { account, chainId, library });
     // const contract = useMultiverseBridgeV1Contract(true);
-    const contract = useMultiverseBridgeContract(MultiverseVersion.V1, true, exportRequest.chainId);
+    const contract = useMultiverseBridgeContract(exportRequest.multiverseVersion, true, exportRequest.chainId);
 
     const { confirmed, data, hash, signature } = useFetchExportAssetArgumentsCallback(exportRequest) ?? {}
 
@@ -124,8 +125,10 @@ export function useExportAssetCallback(
             state: ExportAssetCallbackState.VALID,
             callback: async function onEnraptureAsset(): Promise<string> {
                 const args = inputParams;
-                const methodName = 'exportFromMetaverseSig';
-
+                let methodName = 'exportFromMetaverseSig';
+                if (exportRequest.multiverseVersion === MultiverseVersion.V2) {
+                    methodName = 'unstakeSig'
+                }
                 const call = {
                     contract: contract.address,
                     parameters: inputParams,
