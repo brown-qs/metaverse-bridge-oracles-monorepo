@@ -22,7 +22,7 @@ import { AssetDto, CollectionFragmentDto, SkinResponse } from '../state/api/type
 import { useGetMarketplaceMetadataQuery, useGetMarketplaceOnChainTokensQuery } from '../state/api/generatedSquidMarketplaceApi';
 import { Media } from '../components';
 import { BigNumber, utils } from 'ethers';
-import { addRegonizedTokenDataToStandardizedOnChainTokens, formatTokenName, inGameMetadataParams, InGameTokenMaybeMetadata, inGameTokensCombineMetadata, StandardizedMetadata, StandardizedOnChainToken, StandardizedOnChainTokenWithRecognizedTokenData, standardizeMarketplaceMetadata, standardizeMarketplaceOnChainTokens, standardizeRaresamaMetadata, standardizeRaresamaOnChainTokens } from '../utils/graphqlReformatter';
+import { addRegonizedTokenDataToStandardizedOnChainTokens, formatTokenName, inGameMetadataParams, InGameTokenMaybeMetadata, inGameTokensCombineMetadata, StandardizedMetadata, StandardizedOnChainToken, StandardizedOnChainTokenWithRecognizedTokenData, standardizeExosamaMetadata, standardizeExosamaOnChainTokens, standardizeMarketplaceMetadata, standardizeMarketplaceOnChainTokens, standardizeRaresamaMetadata, standardizeRaresamaOnChainTokens } from '../utils/graphqlReformatter';
 import { useDispatch, useSelector } from 'react-redux';
 import { openSummonModal } from '../state/slices/summonModalSlice';
 import { SummonModal } from '../components/modals/SummonModal';
@@ -38,6 +38,7 @@ import { openEnraptureModal, setEnraptureModalTokens } from '../state/slices/enr
 import { openImportModal, setImportModalTokens } from '../state/slices/importModalSlice';
 import { openInGameItemModal, setInGameItemModalToken } from '../state/slices/inGameItemModalSlice';
 import { InGameItemModal } from '../components/modals/InGameItemModal';
+import { useGetExosamaMetadataQuery, useGetExosamaOnChainTokensQuery } from '../state/api/generatedSquidExosamaApi';
 
 
 const ProfilePage = () => {
@@ -57,6 +58,7 @@ const ProfilePage = () => {
     //on chain tokens (from indexers)
     const { data: raresamaOnChainTokensData, currentData: currentRaresamaOnChainTokensData, isLoading: isRaresamaOnChainTokensDataLoading, isFetching: isRaresamaOnChainTokensDataFetching, isError: isRaresamaOnChainTokensDataError, error: raresamaOnChainTokensError, refetch: refetchRaresamaOnChainTokens } = useGetRaresamaOnChainTokensQuery({ where: { owner: { id_eq: address }, contract: { OR: [{ id_eq: "0xf27a6c72398eb7e25543d19fda370b7083474735" }, { id_eq: "0xe4bf451271d8d1b9d2a7531aa551b7c45ec95048" }] } } })
     const { data: marketplaceOnChainTokensData, currentData: currentMarketplaceOnChainTokensData, isLoading: isMarketplaceOnChainTokensLoading, isFetching: isMarketplaceOnChainTokensFetching, isError: isMarketplaceOnChainTokensError, error: marketplaceOnChainTokensError, refetch: refetchMarketplaceOnChainTokens } = useGetMarketplaceOnChainTokensQuery({ owner: address })
+    const { data: exosamaOnChainTokensData, currentData: exosamaMarketplaceOnChainTokensData, isLoading: isExosamaOnChainTokensLoading, isFetching: isExosamaOnChainTokensFetching, isError: isExosamaOnChainTokensError, error: exosamaOnChainTokensError, refetch: refetchExosamaOnChainTokens } = useGetExosamaOnChainTokensQuery({ owner: address })
 
     //in game tokens (from nestjs server)
     const { data: recognizedAssetsData, isLoading: isRecognizedAssetsLoading, isFetching: isRecognizedAssetsFetching, isError: isRecognizedAssetsError, error: recognizedAssetsError, refetch: refetchRecognizedAssets } = useGetRecognizedAssetsQuery()
@@ -70,6 +72,7 @@ const ProfilePage = () => {
     const { data: marketplaceInGameResourcesMetadata, isLoading: isMarketplaceInGameResourcesMetadataLoading, isFetching: isMarketplaceInGameResourcesMetadataFetching, isError: isMarketplaceInGameResourcesMetadataError, error: marketplaceInGameResourcesMetadataError } = useGetMarketplaceMetadataQuery(inGameResourcesMetadataQuery.marketplace)
 
     const { data: raresamaInGameItemsMetadata, isLoading: isRaresamaInGameItemsMetadataLoading, isFetching: isRaresamaInGameItemsMetadataFetching, isError: isRaresamaInGameItemsMetadataError, error: raresamaInGameItemsMetadataError } = useGetRaresamaMetadataQuery(inGameItemsMetadataQuery.raresama)
+    const { data: exosamaInGameItemsMetadata, isLoading: isExosamaInGameItemsMetadataLoading, isFetching: isExosamaInGameItemsMetadataFetching, isError: isExosamaInGameItemsMetadataError, error: exosamaInGameItemsMetadataError } = useGetExosamaMetadataQuery(inGameItemsMetadataQuery.exosama)
 
 
 
@@ -101,16 +104,21 @@ const ProfilePage = () => {
     const standardizedRaresamaOnChainTokens: StandardizedOnChainToken[] | undefined = React.useMemo(() => standardizeRaresamaOnChainTokens(raresamaOnChainTokensData), [raresamaOnChainTokensData])
     const standardizedRaresamaOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(standardizedRaresamaOnChainTokens, recognizedAssetsData), [standardizedRaresamaOnChainTokens, recognizedAssetsData])
 
+    const standardizedExosamaOnChainTokens: StandardizedOnChainToken[] | undefined = React.useMemo(() => standardizeExosamaOnChainTokens(exosamaOnChainTokensData), [exosamaOnChainTokensData])
+    const standardizedExosamaOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(standardizedExosamaOnChainTokens, recognizedAssetsData), [standardizedExosamaOnChainTokens, recognizedAssetsData])
+
     const allStandardizedOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
-        if (!!standardizedMarketplaceOnChainTokensWithRecognizedTokenData || !!standardizedRaresamaOnChainTokensWithRecognizedTokenData) {
+        if (!!standardizedMarketplaceOnChainTokensWithRecognizedTokenData || !!standardizedRaresamaOnChainTokensWithRecognizedTokenData || !!standardizedExosamaOnChainTokensWithRecognizedTokenData) {
             return [
                 ...(standardizedMarketplaceOnChainTokensWithRecognizedTokenData ?? []),
-                ...(standardizedRaresamaOnChainTokensWithRecognizedTokenData ?? [])
+                ...(standardizedRaresamaOnChainTokensWithRecognizedTokenData ?? []),
+                ...(standardizedExosamaOnChainTokensWithRecognizedTokenData ?? [])
+
             ]
         } else {
             return undefined
         }
-    }, [standardizedMarketplaceOnChainTokensWithRecognizedTokenData, standardizedRaresamaOnChainTokensWithRecognizedTokenData])
+    }, [standardizedMarketplaceOnChainTokensWithRecognizedTokenData, standardizedRaresamaOnChainTokensWithRecognizedTokenData, standardizedExosamaOnChainTokensWithRecognizedTokenData])
 
 
     const onChainItems: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
@@ -150,12 +158,13 @@ const ProfilePage = () => {
         if (!!marketplaceInGameItemsMetadata || !!raresamaInGameItemsMetadata) {
             return [
                 ...(standardizeMarketplaceMetadata(marketplaceInGameItemsMetadata) ?? []),
-                ...(standardizeRaresamaMetadata(raresamaInGameItemsMetadata) ?? [])
+                ...(standardizeRaresamaMetadata(raresamaInGameItemsMetadata) ?? []),
+                ...(standardizeExosamaMetadata(exosamaInGameItemsMetadata) ?? [])
             ]
         } else {
             return undefined
         }
-    }, [marketplaceInGameItemsMetadata, raresamaInGameItemsMetadata])
+    }, [marketplaceInGameItemsMetadata, raresamaInGameItemsMetadata, exosamaInGameItemsMetadata])
 
     const inGameItems: InGameTokenMaybeMetadata[] | undefined = React.useMemo(() => {
         if (!!inGameItemsData) {
@@ -199,7 +208,7 @@ const ProfilePage = () => {
         }
     }, [inGameResourcesData, inGameResourcesMetadata, chainId])
 
-    //TODO: raresama loading
+    //TODO: raresama/exosama loading
     const isOnChainItemsLoading: boolean = React.useMemo(() => {
         if (isMarketplaceOnChainTokensFetching && !currentMarketplaceOnChainTokensData) {
             return true

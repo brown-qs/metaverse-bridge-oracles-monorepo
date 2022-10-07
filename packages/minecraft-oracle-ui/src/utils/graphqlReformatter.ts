@@ -1,3 +1,4 @@
+import { GetExosamaMetadataQuery, GetExosamaMetadataQueryVariables, GetExosamaOnChainTokensQuery } from "../state/api/generatedSquidExosamaApi"
 import { Erc1155TokenWhereInput, Erc721TokenWhereInput, GetMarketplaceMetadataQuery, GetMarketplaceMetadataQueryVariables, GetMarketplaceOnChainTokensQuery, useGetMarketplaceOnChainTokensQuery } from "../state/api/generatedSquidMarketplaceApi"
 import { GetRaresamaMetadataQuery, GetRaresamaMetadataQueryVariables, GetRaresamaOnChainTokensQuery, TokenWhereInput } from "../state/api/generatedSquidRaresamaApi"
 import { AssetDto, CollectionFragmentDto, MultiverseVersion, RecognizedAssetsDto, RecognizedAssetType, } from "../state/api/types"
@@ -93,6 +94,17 @@ export const formatTokenName = (token: StandardizedOnChainTokenWithRecognizedTok
 type ERC721MarketplaceOnChainTokenType = GetMarketplaceOnChainTokensQuery["erc721Tokens"][0]
 type ERC1155MarketplaceOnChainTokenType = GetMarketplaceOnChainTokensQuery["erc1155TokenOwners"][0]
 
+export const standardizeExosamaOnChainTokens = (tokens: GetExosamaOnChainTokensQuery | undefined): StandardizedOnChainToken[] | undefined => {
+    if (!!tokens) {
+        return sortAndFilterStandardizedOnChainTokens([
+            ...tokens.erc721Tokens.map(tok => standardizeMarketplaceOnChainErc721Token(tok))
+        ])
+    } else {
+        return undefined
+    }
+}
+
+
 export const standardizeMarketplaceOnChainTokens = (tokens: GetMarketplaceOnChainTokensQuery | undefined): StandardizedOnChainToken[] | undefined => {
     if (!!tokens) {
         return sortAndFilterStandardizedOnChainTokens([
@@ -157,6 +169,7 @@ const standardizeRaresamaOnChainToken = (token: RaresamaOnChainTokenType): Stand
 export type InGameMetadataParams = {
     marketplace: GetMarketplaceMetadataQueryVariables,
     raresama: GetRaresamaMetadataQueryVariables,
+    exosama: GetExosamaMetadataQueryVariables
 }
 
 export const inGameMetadataParams = (inGameItems: AssetDto[] | undefined): InGameMetadataParams => {
@@ -176,7 +189,8 @@ export const inGameMetadataParams = (inGameItems: AssetDto[] | undefined): InGam
 
     return {
         marketplace: { erc1155Where: { OR: erc1155Or }, erc721Where: { OR: erc721Or } },
-        raresama: { where: { OR: raresamaOr } }
+        raresama: { where: { OR: raresamaOr } },
+        exosama: { erc721Where: { OR: erc721Or } }
     }
 }
 
@@ -239,8 +253,28 @@ export const standardizeMarketplaceMetadata = (metadata: GetMarketplaceMetadataQ
     }
 }
 
+export const standardizeExosamaMetadata = (metadata: GetExosamaMetadataQuery | undefined): StandardizedMetadata[] | undefined => {
+    if (!!metadata) {
+        const combinedMetadata: StandardizedMetadata[] = []
+        if (!!metadata?.erc721Tokens) {
+            for (const tok of metadata.erc721Tokens) {
+                if (!!tok?.metadata && !!tok?.contract?.address && !isNaN(parseInt(tok?.numericId))) {
+                    const standardizedMetadata = {
+                        assetAddress: tok.contract.address.toLowerCase(),
+                        assetId: parseInt(tok.numericId),
+                        metadata: tok.metadata
+                    }
+                    combinedMetadata.push(standardizedMetadata)
+                }
+            }
+        }
+        return combinedMetadata;
+    } else {
+        return undefined
+    }
+}
+
 export const standardizeRaresamaMetadata = (metadata: GetRaresamaMetadataQuery | undefined): StandardizedMetadata[] | undefined => {
-    console.log("standardizeRaresamaMetadata():: ", metadata)
     if (!!metadata) {
         const combinedMetadata: StandardizedMetadata[] = []
         if (!!metadata?.tokens) {
