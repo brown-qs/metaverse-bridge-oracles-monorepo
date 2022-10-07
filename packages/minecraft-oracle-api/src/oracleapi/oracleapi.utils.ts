@@ -59,11 +59,9 @@ export async function encodeImportWithSigData(data: ImportData, expiration: stri
     } = data;
 
     if (multiverseVersion === MultiverseVersion.V2) {
-        console.log("IMPORT V2")
         const _data = ethers.utils.formatBytes32String("")
         const types = ['address', 'uint256', 'bytes32', 'address', 'bytes32', 'uint256[]', 'uint256[]', 'bytes32[]', 'uint256', 'bool']
         const params = [assetAddress, assetType, metaverse, owner, _data, [assetId], [amount], [salt], expiration, false]
-        console.log("PARAMS: " + JSON.stringify(params))
         return encodeParameters(types, params)
     }
 
@@ -88,8 +86,9 @@ export async function encodeEnraptureWithSigData(data: ImportData, expiration: s
     } = data;
 
     if (multiverseVersion === MultiverseVersion.V2) {
-        const types = ["tuple(address assetAddress, uint256 assetType, bytes32 metaverse, address owner, bytes32 data, uint256[] assetIds, uint256[] assetAmounts, bytes32[] salts)", "bool"]
-        const params = [{ assetAddress, assetType, metaverse, owner, data: ethers.utils.formatBytes32String(""), assetIds: [assetId], assetAmounts: [amount], salts: [salt] }, true]
+        const _data = ethers.utils.formatBytes32String("")
+        const types = ['address', 'uint256', 'bytes32', 'address', 'bytes32', 'uint256[]', 'uint256[]', 'bytes32[]', 'uint256', 'bool']
+        const params = [assetAddress, assetType, metaverse, owner, _data, [assetId], [amount], [salt], expiration, true]
         return encodeParameters(types, params)
     }
 
@@ -195,8 +194,9 @@ export async function calculateMetaAssetHash(data: ImportData, multiverseVersion
         [assetAddress, assetId, metaverse, owner, beneficiary, amount, salt]
     )
     if (multiverseVersion === MultiverseVersion.V2) {
-        const types = ["tuple(bytes32 metaverse, address assetAddress, uint256 assetId, uint256 assetType, uint256 assetAmount, address owner, bytes32 salt, bytes32 data)"]
-        const params = [{ metaverse, assetAddress, assetId, assetType, assetAmount: amount, owner, salt, data: ethers.utils.formatBytes32String("") }]
+        const _data = ethers.utils.formatBytes32String("")
+        const types = ['bytes32', 'address', 'uint256', 'uint256', 'uint256', 'address', 'bytes32', 'bytes32']
+        const params = [metaverse, assetAddress, assetId, assetType, amount, owner, salt, _data]
         encoded = encodeParameters(types, params)
     }
 

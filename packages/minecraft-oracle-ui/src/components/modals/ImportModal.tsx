@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Checks } from "tabler-icons-react";
 import { ReduxModal } from ".";
-import { ChainId, DEFAULT_CHAIN } from "../../constants";
+import { ChainId, DEFAULT_CHAIN, MULTIVERSE_BRIDGE_V1_WAREHOUSE_ADDRESS, MULTIVERSE_BRIDGE_V2_WAREHOUSE_ADDRESS } from "../../constants";
 import { useActiveWeb3React } from "../../hooks";
 import { useImportConfirmCallback } from "../../hooks/multiverse/useConfirm";
 import { useImportAssetCallback, CreateImportAssetCallbackState, AssetRequest } from "../../hooks/multiverse/useImportAsset";
@@ -53,9 +53,11 @@ export function ImportModal() {
     const assId = importTokens?.[0]?.numericId
     const assetId = !!assId ? String(assId) : undefined
     const assetType = importTokens?.[0]?.assetType
-    const amount = '1' //todo set for enrapture
+    const amount = '1'
     const owner = account?.toLowerCase()
     const beneficiary = account?.toLowerCase()
+    const multiverseVersion = importTokens?.[0]?.multiverseVersion ?? MultiverseVersion.V1
+    const warehouseAddress = (multiverseVersion === MultiverseVersion.V1) ? MULTIVERSE_BRIDGE_V1_WAREHOUSE_ADDRESS[chainId ?? 1285] : MULTIVERSE_BRIDGE_V2_WAREHOUSE_ADDRESS[chainId ?? 1285]
     const importObject: AssetRequest = {
         asset: {
             assetAddress,
@@ -64,7 +66,7 @@ export function ImportModal() {
         },
         amount,
         chainId,
-        multiverseVersion: importTokens?.[0]?.multiverseVersion
+        multiverseVersion: multiverseVersion
     }
 
     const bal = useBalances([
@@ -86,6 +88,7 @@ export function ImportModal() {
     const hasEnough = bal?.gte(amount);
 
     const [approvalState, approveCallback] = useApproveCallback({
+        operator: warehouseAddress,
         assetAddress: assetAddress,
         assetId: assetId,
         assetType: assetType,
