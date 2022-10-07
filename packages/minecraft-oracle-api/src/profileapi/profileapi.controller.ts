@@ -59,16 +59,6 @@ export class ProfileApiController {
         return this.profileService.userProfile(user)
     }
 
-    @Get('resources')
-    @HttpCode(200)
-    @ApiOperation({ summary: 'User resources available to summon from the Metaverse' })
-    @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard)
-    async resources(@User() user: UserEntity): Promise<ThingsDto> {
-        const playerItems = await this.profileService.getPlayerItems(user)
-        return playerItems
-    }
-
     @Get('in-game-items')
     @HttpCode(200)
     @ApiOperation({ summary: 'Get in game items' })

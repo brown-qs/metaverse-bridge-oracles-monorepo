@@ -112,6 +112,7 @@ export type AssetDto = {
     chainId: number
     exportAddress: string
     hash?: string
+    multiverseVersion: MultiverseVersion
 }
 
 
