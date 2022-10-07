@@ -23,4 +23,13 @@ generates:
       - typescript-rtk-query:
           importBaseApiFrom: ./baseGeneratedSquidRaresamaApi
           exportHooks: true
-  
+  ./src/state/api/generatedSquidExosamaApi.ts:
+    schema: https://squid.subsquid.io/exosama-squid/graphql
+    documents:
+      - src/squid/exosama/*
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-rtk-query:
+          importBaseApiFrom: ./baseGeneratedSquidExosamaApi
+          exportHooks: true
