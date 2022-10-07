@@ -3,6 +3,7 @@ import { setupListeners } from '@reduxjs/toolkit/query'
 import { bridgeApi } from './api/bridgeApi';
 import { api as generatedSquidMarketplaceApi } from './api/generatedSquidMarketplaceApi';
 import { api as generatedSquidRaresamaApi } from './api/generatedSquidRaresamaApi';
+import { api as generatedSquidExosamaApi } from './api/generatedSquidExosamaApi';
 import application from './application/reducer';
 import { updateVersion } from './global/actions';
 import authSlice from './slices/authSlice';
@@ -52,7 +53,9 @@ const rootReducer = combineReducers({
   oauth: oauthSlice,
   [bridgeApi.reducerPath]: bridgeApi.reducer,
   [generatedSquidMarketplaceApi.reducerPath]: generatedSquidMarketplaceApi.reducer,
-  [generatedSquidRaresamaApi.reducerPath]: generatedSquidRaresamaApi.reducer
+  [generatedSquidRaresamaApi.reducerPath]: generatedSquidRaresamaApi.reducer,
+  [generatedSquidExosamaApi.reducerPath]: generatedSquidExosamaApi.reducer
+
 });
 
 const rootPersistConfig = {
