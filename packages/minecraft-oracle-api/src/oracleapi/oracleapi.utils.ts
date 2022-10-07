@@ -20,8 +20,8 @@ export async function encodeExportWithSigData(data: { hash: string }, expiration
 
     if (multiverseVersion === MultiverseVersion.V2) {
         return encodeParameters(
-            ['bytes32[]', 'uint256'],
-            [[hash], expiration]
+            ['bytes32', 'uint256'],
+            [hash, expiration]
         )
     }
 
@@ -59,7 +59,8 @@ export async function encodeImportWithSigData(data: ImportData, expiration: stri
     } = data;
 
     if (multiverseVersion === MultiverseVersion.V2) {
-        const _data = ethers.utils.formatBytes32String("")
+        // const _data = ethers.utils.formatBytes32String("")
+        const _data: any = []
         const types = ['address', 'uint256', 'bytes32', 'address', 'bytes32', 'uint256[]', 'uint256[]', 'bytes32[]', 'uint256', 'bool']
         const params = [assetAddress, assetType, metaverse, owner, _data, [assetId], [amount], [salt], expiration, false]
         return encodeParameters(types, params)
@@ -86,7 +87,9 @@ export async function encodeEnraptureWithSigData(data: ImportData, expiration: s
     } = data;
 
     if (multiverseVersion === MultiverseVersion.V2) {
-        const _data = ethers.utils.formatBytes32String("")
+        //const _data = ethers.utils.formatBytes32String("")
+        const _data: any = []
+
         const types = ['address', 'uint256', 'bytes32', 'address', 'bytes32', 'uint256[]', 'uint256[]', 'bytes32[]', 'uint256', 'bool']
         const params = [assetAddress, assetType, metaverse, owner, _data, [assetId], [amount], [salt], expiration, true]
         return encodeParameters(types, params)
@@ -212,7 +215,9 @@ export async function calculateMetaAssetHash(data: ImportData, multiverseVersion
     )
     if (multiverseVersion === MultiverseVersion.V2) {
         const staticHash = await calculateMultiverseAssetStaticPartHash(data)
-        const _data = ethers.utils.formatBytes32String("")
+        // const _data = ethers.utils.formatBytes32String("")
+        const _data: any = []
+
         const hash = await ethers.utils.solidityKeccak256(
             ['bytes32', 'uint256', 'uint256', 'address', 'bytes32', 'bytes'],
             [staticHash, assetId, amount, owner, salt, _data]
