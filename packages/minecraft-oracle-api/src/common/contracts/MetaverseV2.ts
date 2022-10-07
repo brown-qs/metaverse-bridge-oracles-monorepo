@@ -1510,51 +1510,6 @@ export const METAVERSE_V2_ABI = [
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "assetAddress",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "assetId",
-            "type": "uint256"
-          },
-          {
-            "internalType": "enum DomainV2.AssetType",
-            "name": "assetType",
-            "type": "uint8"
-          }
-        ],
-        "internalType": "struct DomainV2.Asset",
-        "name": "_asset",
-        "type": "tuple"
-      },
-      {
-        "internalType": "address",
-        "name": "_from",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_to",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "warehouseTransferAssetFrom",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "stateMutability": "payable",
     "type": "receive"
   }
