@@ -122,9 +122,9 @@ export function ExportModal() {
                 <CircularProgress isIndeterminate color="teal"></CircularProgress>
             </VStack>
         </ReduxModal>)
-    } else if (!chainId || !!networkError || exportTokens?.[0]?.exportChainId !== chainId) {
-        const chainToConnect: ChainId = exportTokens?.[0]?.exportChainId ?? DEFAULT_CHAIN as ChainId
-        const networkName = NETWORK_NAME[exportTokens?.[0]?.exportChainId ?? DEFAULT_CHAIN]
+    } else if (!chainId || !!networkError || exportTokens?.[0]?.chainId !== chainId) {
+        const chainToConnect: ChainId = exportTokens?.[0]?.chainId ?? DEFAULT_CHAIN as ChainId
+        const networkName = NETWORK_NAME[exportTokens?.[0]?.chainId ?? DEFAULT_CHAIN]
         return (<ReduxModal
             {...baseProps}
             title="Export"
