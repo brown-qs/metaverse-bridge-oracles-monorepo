@@ -112,8 +112,17 @@ export const MULTIVERSE_BRIDGE_V1_ADDRESS: { [chainId in ChainId]?: string } = {
   [ChainId.MOONRIVER]: '0x59C481548CE7BA13f3288df9f4FCf44a10A589A0'//'0x7D5ebDb88D3bd969CC909FD49f1FF3A7bA1F4878',
 };
 
+export const MULTIVERSE_BRIDGE_V1_WAREHOUSE_ADDRESS: { [chainId in ChainId]?: string } = {
+  [ChainId.VOLTA]: '0x58df3876BcE94941DE59088c5963781984EF264b',
+  [ChainId.MOONRIVER]: '0x59C481548CE7BA13f3288df9f4FCf44a10A589A0'
+};
+
 export const MULTIVERSE_BRIDGE_V2_ADDRESS: { [chainId in ChainId]?: string } = {
   [ChainId.MOONRIVER]: '0x1ff3097f4a82913d690d2a59de613378ae2b3c05'
+};
+
+export const MULTIVERSE_BRIDGE_V2_WAREHOUSE_ADDRESS: { [chainId in ChainId]?: string } = {
+  [ChainId.MOONRIVER]: '0x59C481548CE7BA13f3288df9f4FCf44a10A589A0'
 };
 
 export const PROTOCOL_FEE_BPS = '200';
