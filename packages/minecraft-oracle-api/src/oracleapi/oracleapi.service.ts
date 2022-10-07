@@ -42,6 +42,7 @@ import { SkinRemovedEvent } from '../cqrs/events/skin-removed.event';
 import { SkinSelectedEvent } from '../cqrs/events/skin-selected.event';
 import { AssetRemovedEvent } from '../cqrs/events/asset-removed.event';
 import { METAVERSE_V2_ABI } from '../common/contracts/MetaverseV2';
+import { ChainEntity } from '../chain/chain.entity';
 
 @Injectable()
 export class OracleApiService {
@@ -213,10 +214,11 @@ export class OracleApiService {
             throw new UnprocessableEntityException(`Exportable asset not found`)
         }
 
+        const multiverseVersion = existingEntry.collectionFragment.collection.multiverseVersion
         const salt = await getSalt()
         const expiration = Date.now() + CALLDATA_EXPIRATION_MS
         const expirationContract = (Math.floor(expiration / 1000)).toString()
-        const payload = await encodeExportWithSigData({ hash }, expirationContract, MultiverseVersion.V1)
+        const payload = await encodeExportWithSigData({ hash }, expirationContract, multiverseVersion)
         const signature = await getSignature(oracle, payload)
 
         this.logger.debug(`OutData: request prepared: ${[hash, payload, signature]}`, this.context)
@@ -379,49 +381,33 @@ export class OracleApiService {
         const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
         const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
 
-        let contract: Contract;
+        let contract: Contract = this.getContract(multiverseVersion, chainEntity, oracle)
 
-        if (multiverseVersion === MultiverseVersion.V1) {
-            if (chainEntity.multiverseV1Address) {
-                contract = new Contract(chainEntity.multiverseV1Address, METAVERSE_ABI, oracle)
-            } else {
-                this.logger.error(`Summon: failiure not find MultiverseAddress`)
-                throw new UnprocessableEntityException('Summon MultiverseAddress error.')
-            }
-        } else if (multiverseVersion === MultiverseVersion.V2) {
-            if (chainEntity.multiverseV2Address) {
-                console.log("IMPORT CONFIRM USING V2 contract")
-                contract = new Contract(chainEntity.multiverseV2Address, METAVERSE_V2_ABI, oracle)
-            } else {
-                this.logger.error(`Summon: failiure not find MultiverseAddress`)
-                throw new UnprocessableEntityException('Summon MultiverseAddress error.')
-            }
-        } else {
-            this.logger.error(`Summon: failiure not find multiverse version`)
-            throw new UnprocessableEntityException('Couldnt find multiverse version')
-
-        }
-
-        let mAsset: MetaAsset
+        let mAsset: any
 
         console.log(`hash: ${hash}`)
 
         if (multiverseVersion === MultiverseVersion.V1) {
             mAsset = await contract.getImportedMetaAsset(hash)
         } else if (multiverseVersion === MultiverseVersion.V2) {
-            console.log("Using M ASSSET V2")
             mAsset = await contract.getMetaAsset(hash, false)
-            /*
-            if hash doesnt exist masset will be:
-            ["0x0000000000000000000000000000000000000000000000000000000000000000","0x0000000000000000000000000000000000000000",{"type":"BigNumber","hex":"0x00"},0,{"type":"BigNumber","hex":"0x00"},"0x0000000000000000000000000000000000000000","0x0000000000000000000000000000000000000000000000000000000000000000","0x0000000000000000000000000000000000000000000000000000000000000000"]
-            */
         }
 
-        console.log("mAsset" + JSON.stringify(mAsset))
-        if (!mAsset || mAsset?.amount?.toString() !== assetEntry.amount || mAsset?.asset?.assetAddress?.toLowerCase() !== assetAddress) {
-            this.logger.error(`ImportConfirm: on-chaind data didn't match for hash: ${hash} mAsset: ${JSON.stringify(mAsset)}`, null, this.context)
-            throw new UnprocessableEntityException(`On-chain data didn't match`)
+
+        if (multiverseVersion === MultiverseVersion.V1) {
+            if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress.toLowerCase() !== assetAddress) {
+                this.logger.error(`ImportConfirm: on-chaind data didn't match for hash: ${hash} mAsset: ${JSON.stringify(mAsset)}`, null, this.context)
+                throw new UnprocessableEntityException(`On-chain data didn't match`)
+            }
+        } else if (multiverseVersion === MultiverseVersion.V2) {
+            if (!mAsset || mAsset.assetAmount.toString() !== assetEntry.amount || mAsset.assetAddress.toLowerCase() !== assetAddress.toLowerCase()) {
+                this.logger.error(`ImportConfirm: on-chaind data didn't match for hash: ${hash} mAsset: ${JSON.stringify(mAsset)}`, null, this.context)
+                throw new UnprocessableEntityException(`On-chain data didn't match`)
+            }
         }
+
+
+
         const importableAssets = await this.getRecognizedAsset(chainId, BridgeAssetType.IMPORTED)
         const recognizedAsset = findRecognizedAsset(importableAssets, { assetAddress, assetId })
 
@@ -528,7 +514,7 @@ export class OracleApiService {
         if (assetEntry.pendingIn === false) {
             return true
         }
-
+        const multiverseVersion = assetEntry.collectionFragment.collection.multiverseVersion
         const chainEntity = await this.chainService.findOne({ chainId })
         const assetAddress = assetEntry.collectionFragment.collection.assetAddress.toLowerCase()
         const assetType = assetEntry.collectionFragment.collection.assetType
@@ -536,20 +522,30 @@ export class OracleApiService {
         const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
         const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
 
-        let contract: Contract;
-        if (chainEntity.multiverseV1Address)
-            contract = new Contract(chainEntity.multiverseV1Address, METAVERSE_ABI, oracle)
-        else {
-            this.logger.error(`Summon: failiure not find MultiverseAddress`)
-            throw new UnprocessableEntityException('Summon MultiverseAddress error.')
+        let contract: Contract = this.getContract(multiverseVersion, chainEntity, oracle)
+
+
+        let mAsset: any = await contract.getEnrapturedMetaAsset(hash)
+
+        if (multiverseVersion === MultiverseVersion.V1) {
+            mAsset = await contract.getEnrapturedMetaAsset(hash)
+        } else if (multiverseVersion === MultiverseVersion.V2) {
+            mAsset = await contract.getMetaAsset(hash, true)
         }
 
-        const mAsset: MetaAsset = await contract.getEnrapturedMetaAsset(hash)
 
-        if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress.toLowerCase() !== assetAddress) {
-            this.logger.error(`EnraptureConfirm: on-chaind data didn't match for hash: ${hash}`, null, this.context)
-            throw new UnprocessableEntityException(`On-chain data didn't match`)
+        if (multiverseVersion === MultiverseVersion.V1) {
+            if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress.toLowerCase() !== assetAddress) {
+                this.logger.error(`EnraptureConfirm: on-chaind data didn't match for hash: ${hash}`, null, this.context)
+                throw new UnprocessableEntityException(`On-chain data didn't match`)
+            }
+        } else if (multiverseVersion === MultiverseVersion.V2) {
+            if (!mAsset || mAsset.assetAmount.toString() !== assetEntry.amount || mAsset.assetAddress.toLowerCase() !== assetAddress.toLowerCase()) {
+                this.logger.error(`EnraptureConfirm: on-chaind data didn't match for hash: ${hash} mAsset: ${JSON.stringify(mAsset)}`, null, this.context)
+                throw new UnprocessableEntityException(`On-chain data didn't match`)
+            }
         }
+
 
         const enrapturableAssets = await this.getRecognizedAsset(chainId, BridgeAssetType.ENRAPTURED)
         const recognizedAsset = findRecognizedAsset(enrapturableAssets, { assetAddress, assetId })
@@ -691,20 +687,20 @@ export class OracleApiService {
 
         const assetAddress = assetEntry.collectionFragment.collection.assetAddress
         const assetId = assetEntry.assetId
+        const multiverseVersion = assetEntry.collectionFragment.collection.multiverseVersion
 
         const chainEntity = await this.chainService.findOne({ chainId })
         const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
         const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
 
-        let contract: Contract;
-        if (chainEntity.multiverseV1Address)
-            contract = new Contract(chainEntity.multiverseV1Address, METAVERSE_ABI, oracle)
-        else {
-            this.logger.error(`Summon: failiure not find MultiverseAddress`)
-            throw new UnprocessableEntityException('Summon MultiverseAddress error.')
-        }
+        let contract: Contract = this.getContract(multiverseVersion, chainEntity, oracle)
 
-        const exists = await contract.existsImported(hash)
+        let exists: any;
+        if (multiverseVersion === MultiverseVersion.V1) {
+            exists = await contract.existsImported(hash)
+        } else if (multiverseVersion === MultiverseVersion.V2) {
+            exists = await contract.exists(hash, false)
+        }
 
         if (exists) {
             this.logger.error(`ExportConfirm: not exported yet: ${hash}`, null, this.context)
@@ -794,6 +790,28 @@ export class OracleApiService {
         }
         this.eventBus.publish(new AssetRemovedEvent(user.uuid))
         return true
+    }
+
+    private getContract(multiverseVersion: MultiverseVersion, chainEntity: ChainEntity, oracle: ethers.Wallet): Contract {
+        if (multiverseVersion === MultiverseVersion.V1) {
+            if (chainEntity.multiverseV1Address) {
+                return new Contract(chainEntity.multiverseV1Address, METAVERSE_ABI, oracle)
+            } else {
+                this.logger.error(`getContract:: failure not find MultiverseAddress`)
+                throw new UnprocessableEntityException('getContract:: confirm MultiverseAddress error.')
+            }
+        } else if (multiverseVersion === MultiverseVersion.V2) {
+            if (chainEntity.multiverseV2Address) {
+                return new Contract(chainEntity.multiverseV2Address, METAVERSE_V2_ABI, oracle)
+            } else {
+                this.logger.error(`getContract:: failure not find MultiverseAddress`)
+                throw new UnprocessableEntityException('getContract:: confirm MultiverseAddress error.')
+            }
+        } else {
+            this.logger.error(`getContract:: failiure not find multiverse version`)
+            throw new UnprocessableEntityException('getContract:: find multiverse version')
+
+        }
     }
 
     private ensureLock(key: string) {

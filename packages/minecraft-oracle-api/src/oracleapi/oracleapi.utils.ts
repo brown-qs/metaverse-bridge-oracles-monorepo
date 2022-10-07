@@ -20,8 +20,8 @@ export async function encodeExportWithSigData(data: { hash: string }, expiration
 
     if (multiverseVersion === MultiverseVersion.V2) {
         return encodeParameters(
-            ['bytes32[]'],
-            [[hash]]
+            ['bytes32[]', 'uint256'],
+            [[hash], expiration]
         )
     }
 
