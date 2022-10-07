@@ -149,8 +149,10 @@ export function useEnraptureAssetCallback(
             hash,
             callback: async function onEnraptureAsset(): Promise<string> {
                 const args = inputParams;
-                const methodName = 'enraptureToMetaverseSig';
-
+                let methodName = 'enraptureToMetaverseSig';
+                if (assetRequest.multiverseVersion === MultiverseVersion.V2) {
+                    methodName = 'stakeSig'
+                }
                 const call = {
                     contract: contract.address,
                     parameters: inputParams,

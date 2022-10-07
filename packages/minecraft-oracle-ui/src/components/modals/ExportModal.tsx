@@ -13,6 +13,7 @@ import { useExportConfirmCallback } from "../../hooks/multiverse/useConfirm";
 import { ExportAssetCallbackState, useExportAssetCallback } from "../../hooks/multiverse/useExportAsset";
 import useAddNetworkToMetamaskCb from "../../hooks/useAddNetworkToMetamask/useAddNetworkToMetamask";
 import { rtkQueryErrorFormatter, useActiveGameQuery, useEmailLoginCodeVerifyMutation, useSummonMutation } from "../../state/api/bridgeApi";
+import { MultiverseVersion } from "../../state/api/types";
 import { closeEmailCodeModal, selectEmailCodeModalOpen } from "../../state/slices/emailCodeModalSlice";
 import { closeExportModal, selectExportModalOpen, selectExportTokens } from "../../state/slices/exportModalSlice";
 import { closeInGameItemModal, selectInGameItemModalOpen } from "../../state/slices/inGameItemModalSlice";
@@ -56,13 +57,14 @@ export function ExportModal() {
         setExportParamsLoaded(true);
     }
     const assetAddress = exportTokens?.[0]?.assetAddress;
+    const multiverseVersion = MultiverseVersion.V1
     /*const assetId = exportDialogData?.asset?.assetId;
     const assetType = exportDialogData?.asset?.assetType;
     const item = exportDialogData?.item;*/
 
     let callbackError: string | undefined;
 
-    const exportCallbackParams = useExportAssetCallback({ hash: exportTokens?.[0]?.hash, chainId })
+    const exportCallbackParams = useExportAssetCallback({ multiverseVersion, hash: exportTokens?.[0]?.hash, chainId })
 
 
     if (!!exportCallbackParams.error) {
