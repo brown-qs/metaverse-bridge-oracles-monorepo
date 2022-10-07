@@ -59,8 +59,7 @@ export async function encodeImportWithSigData(data: ImportData, expiration: stri
     } = data;
 
     if (multiverseVersion === MultiverseVersion.V2) {
-        // const _data = ethers.utils.formatBytes32String("")
-        const _data: any = []
+        const _data = ethers.utils.formatBytes32String("")
         const types = ['address', 'uint256', 'bytes32', 'address', 'bytes32', 'uint256[]', 'uint256[]', 'bytes32[]', 'uint256', 'bool']
         const params = [assetAddress, assetType, metaverse, owner, _data, [assetId], [amount], [salt], expiration, false]
         return encodeParameters(types, params)
@@ -87,8 +86,7 @@ export async function encodeEnraptureWithSigData(data: ImportData, expiration: s
     } = data;
 
     if (multiverseVersion === MultiverseVersion.V2) {
-        //const _data = ethers.utils.formatBytes32String("")
-        const _data: any = []
+        const _data = ethers.utils.formatBytes32String("")
 
         const types = ['address', 'uint256', 'bytes32', 'address', 'bytes32', 'uint256[]', 'uint256[]', 'bytes32[]', 'uint256', 'bool']
         const params = [assetAddress, assetType, metaverse, owner, _data, [assetId], [amount], [salt], expiration, true]
@@ -215,8 +213,7 @@ export async function calculateMetaAssetHash(data: ImportData, multiverseVersion
     )
     if (multiverseVersion === MultiverseVersion.V2) {
         const staticHash = await calculateMultiverseAssetStaticPartHash(data)
-        // const _data = ethers.utils.formatBytes32String("")
-        const _data: any = []
+        const _data = ethers.utils.formatBytes32String("")
 
         const hash = await ethers.utils.solidityKeccak256(
             ['bytes32', 'uint256', 'uint256', 'address', 'bytes32', 'bytes'],
