@@ -23,7 +23,7 @@ export const PINATA_GATEWAY =
   process.env.REACT_APP_PINATA_IPFS_URL ??
   'https://moonsama.mypinata.cloud/ipfs/';
 
-console.log('SUBGRAPH_URL', { SUBGRAPH_URL, CHAIN_ID });
+//console.log('SUBGRAPH_URL', { SUBGRAPH_URL, CHAIN_ID });
 
 export enum ChainId {
   MAINNET = 1,
@@ -38,13 +38,13 @@ export enum ChainId {
   MOONBEAM = 1284
 }
 
-export const PERMISSIONED_CHAINS = [ChainId.MOONRIVER]
+export const PERMISSIONED_CHAINS = [ChainId.MOONRIVER, ChainId.MOONBEAM, ChainId.MAINNET]
 export const DEFAULT_CHAIN = ChainId.MOONRIVER
 
 export const RPC_URLS: { [chainId: number]: string } = {
   [ChainId.MOONRIVER]: 'https://rpc.api.moonriver.moonbeam.network',
   [ChainId.MOONBEAM]: 'https://moonbeam-rpc.moonsama.com',
-  [ChainId.MAINNET]: 'https://mainnet.infura.io/v3/',
+  [ChainId.MAINNET]: 'https://cloudflare-eth.com',
   [ChainId.ROPSTEN]: 'https://ropsten.infura.io/v3/'
 };
 
@@ -63,14 +63,14 @@ export const NETWORK_NAME: { [chainId: number]: string } = {
 };
 
 export const MULTICALL_NETWORKS: { [chainId: number]: string } = {
-  [ChainId.MAINNET]: '0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441',
+  [ChainId.MAINNET]: '0x5ba1e12693dc8f9c48aad8770482f4739beed696', // latest V2
   [ChainId.ROPSTEN]: '0x53C43764255c17BD724F74c4eF150724AC50a3ed',
   [ChainId.KOVAN]: '0x2cc8688C5f75E365aaEEb4ea8D6a480405A48D2A',
   [ChainId.RINKEBY]: '0x42Ad527de7d4e9d9d011aC45B31D8551f8Fe9821',
   [ChainId.GÖRLI]: '0x77dCa2C955b15e9dE4dbBCf1246B4B85b651e50e',
   [ChainId.VOLTA]: '0xf097d0eAb2dC8B6396a6433978567C443a691815', // latest multicall 2 deployments
   [ChainId.MOONRIVER]: '0x8B60499C8e99d1218Df15ba6e8f0937e1878b86c', // latest multicall 2 deployments
-  [ChainId.MOONBEAM]: '0x62614aee098C7a84dC070fF06688F4C35D3868F9'
+  [ChainId.MOONBEAM]: '0x7A88A713F806073e0027179E2DfeD4100b888F25' // latest multicall v2
 };
 
 export enum SUPPORTED_CONTRACTS {
@@ -112,6 +112,21 @@ export const MULTIVERSE_BRIDGE_V1_ADDRESS: { [chainId in ChainId]?: string } = {
   [ChainId.MOONRIVER]: '0x59C481548CE7BA13f3288df9f4FCf44a10A589A0'//'0x7D5ebDb88D3bd969CC909FD49f1FF3A7bA1F4878',
 };
 
+export const MULTIVERSE_BRIDGE_V1_WAREHOUSE_ADDRESS: { [chainId in ChainId]?: string } = {
+  [ChainId.VOLTA]: '0x58df3876BcE94941DE59088c5963781984EF264b',
+  [ChainId.MOONRIVER]: '0x59C481548CE7BA13f3288df9f4FCf44a10A589A0'
+};
+
+export const MULTIVERSE_BRIDGE_V2_ADDRESS: { [chainId in ChainId]?: string } = {
+  [ChainId.MOONRIVER]: '0x1ff3097f4a82913d690d2a59de613378ae2b3c05',
+  [ChainId.MOONBEAM]: '0x694665f738fa1d9349744098d6cecdccc2adbfb4'
+};
+
+export const MULTIVERSE_BRIDGE_V2_WAREHOUSE_ADDRESS: { [chainId in ChainId]?: string } = {
+  [ChainId.MOONRIVER]: '0x59C481548CE7BA13f3288df9f4FCf44a10A589A0',
+  [ChainId.MOONBEAM]: '0xC816967B73d6e7E12D5FDE30d20c4561fBAa5C3D'
+};
+
 export const PROTOCOL_FEE_BPS = '200';
 export const FRACTION_TO_BPS = '10000';
 
@@ -128,3 +143,118 @@ export const MAX_WIDTH_TO_SHOW_NAVIGATION = 1360;
 
 
 export const BURNABLE_RESOURCES_IDS = ['14']
+
+export interface SubAsset {
+  assetAddress: string,
+  assetId: number,
+  imageUrl: string,
+  symbol: string,
+  subAssetAddress: string
+}
+export const SUB_ASSETS: SubAsset[] = [
+  {
+    assetAddress: '0x1b30a3b5744e733d8d2f19f0812e3f79152a8777',
+    assetId: 1,
+    imageUrl: 'https://moonsama.mypinata.cloud/ipfs/QmNdUtqAh5LUvZkBggP5nhwwdCMxw7pybY7Zd4NXq52yAr',
+    symbol: 'aWOOD',
+    subAssetAddress: '0x8ce2bdc6e0319cea87337d027382f09b715c9601'
+  },
+  {
+    assetAddress: '0x1b30a3b5744e733d8d2f19f0812e3f79152a8777',
+    assetId: 2,
+    imageUrl: 'https://moonsama.mypinata.cloud/ipfs/QmcNaV3KZJQWAVCxZHzZe4ocTY3ZGSnjmk3SL8s6s8mpDR',
+    symbol: 'aSTONE',
+    subAssetAddress: '0x77709c42d43f2e53c24b8fa623a207abdc89857c'
+  },
+  {
+    assetAddress: '0x1b30a3b5744e733d8d2f19f0812e3f79152a8777',
+    assetId: 3,
+    imageUrl: 'https://moonsama.mypinata.cloud/ipfs/QmYYrvPNCrXzxqvmPPZZjFLvbJ91dWNsDDfJjw8YRq2LT9',
+    symbol: 'aIRON',
+    subAssetAddress: '0x9e403aa2dfef9ba2a2b82286d13864a64d90bf36'
+  },
+  {
+    assetAddress: '0x1b30a3b5744e733d8d2f19f0812e3f79152a8777',
+    assetId: 4,
+    imageUrl: 'https://moonsama.mypinata.cloud/ipfs/Qme4L8AzwAMLGSyXA9m3toLtGMUGxgWGcHuJ3PoBhbtA5f',
+    symbol: 'aGOLD',
+    subAssetAddress: '0x088fe6e0e1caca1ee45e8de96abe79e4e139f4ab'
+  },
+  {
+    assetAddress: '0x1b30a3b5744e733d8d2f19f0812e3f79152a8777',
+    assetId: 5,
+    imageUrl: 'https://moonsama.mypinata.cloud/ipfs/QmRzPjD55zpp3ped7CQFxypgtVktZt7MXQuKpv5PrnaDrq',
+    symbol: 'aEXP',
+    subAssetAddress: '0x138a90f246abb23a157da7a1d9db19dcf1691362'
+  },
+  {
+    assetAddress: '0x1b30a3b5744e733d8d2f19f0812e3f79152a8777',
+    assetId: 6,
+    imageUrl: 'https://moonsama.mypinata.cloud/ipfs/QmUdTmBYLzbRhy815mqR8JkKZy6zvNpwTDdEor181Jvyxj',
+    symbol: 'BULLETS',
+    subAssetAddress: '0x43dd3267e5a5737e6436cda7ac93e9ff155a36e4'
+  },
+  {
+    assetAddress: '0x1b30a3b5744e733d8d2f19f0812e3f79152a8777',
+    assetId: 7,
+    imageUrl: 'https://moonsama.mypinata.cloud/ipfs/QmYWbqnd2siDPif48BLrT7LCECqAM3LQRMCdgPiATokEQK',
+    symbol: 'GRENADES',
+    subAssetAddress: '0x69c78473bf164876e503937f5b853b289e2aeb95'
+  },
+  {
+    assetAddress: '0x1b30a3b5744e733d8d2f19f0812e3f79152a8777',
+    assetId: 8,
+    imageUrl: 'https://moonsama.mypinata.cloud/ipfs/QmS7J3D3EwdvvUfc6tMWBpJMXnMkUgwwNQsdgGygJCBhXD',
+    symbol: 'SHAMPOO',
+    subAssetAddress: '0xd94b75617f756561294695f87d530b25aaed6204'
+  },
+  {
+    assetAddress: '0x1b30a3b5744e733d8d2f19f0812e3f79152a8777',
+    assetId: 9,
+    imageUrl: 'https://moonsama.mypinata.cloud/ipfs/QmdVcVq4kScs6KLohfAb61vdpduaMvLuqS7ddHGffa3Swr',
+    symbol: 'SNACKS',
+    subAssetAddress: '0x20ca4c5e273e38676daeacf0fd6662bf6839159d'
+  },
+  {
+    assetAddress: '0x1b30a3b5744e733d8d2f19f0812e3f79152a8777',
+    assetId: 10,
+    imageUrl: 'https://moonsama.mypinata.cloud/ipfs/QmWGg5vweosfLjz1BVse44SqZumJZ1yoo65HnNqGuUoFXo',
+    symbol: 'aGRAIN',
+    subAssetAddress: '0xf93e1d54c939eca89240ff3a4311a490306f0e2d'
+  },
+  {
+    assetAddress: '0x1b30a3b5744e733d8d2f19f0812e3f79152a8777',
+    assetId: 12,
+    imageUrl: 'https://moonsama.mypinata.cloud/ipfs/QmdwFN7e2HgDLFf4wNe4KyjCfMg3znhQHdcw3jeRTyA2HD',
+    symbol: 'aSTRING',
+    subAssetAddress: '0x0c0e3977c00ab4121d52ac8c6aeef9421d174458'
+  },
+  {
+    assetAddress: '0x1b30a3b5744e733d8d2f19f0812e3f79152a8777',
+    assetId: 13,
+    imageUrl: 'https://moonsama.mypinata.cloud/ipfs/QmS7NmoqwcaDhARhmZKw6BZ4qc2m5bKAkEF2GUwrs1URz6',
+    symbol: 'aFISH',
+    subAssetAddress: '0xa42c342bc0a9d9e64ee3c552ea8991b06a2fdbb5'
+  },
+  {
+    assetAddress: '0x1b30a3b5744e733d8d2f19f0812e3f79152a8777',
+    assetId: 14,
+    imageUrl: 'https://moonsama.mypinata.cloud/ipfs/QmUWaPzTvCdbBboDM4Xm82K43cxNaiYRdoiSGdt1s4iF7E',
+    symbol: 'aBAIT',
+    subAssetAddress: '0x96ae34020803cdee1aa4969076627aa473795ee7'
+  },
+  {
+    assetAddress: '0x1b30a3b5744e733d8d2f19f0812e3f79152a8777',
+    assetId: 15,
+    imageUrl: 'https://moonsama.mypinata.cloud/ipfs/QmVwiBPyiEir6udSzCqwdpq4R3dpZiz7vdg39u3yUCsoGN',
+    symbol: 'aPOOP',
+    subAssetAddress: '0x6e086cd25f280a048acd9046ebc83d998addbe88'
+  },
+  {
+    assetAddress: '0x1b30a3b5744e733d8d2f19f0812e3f79152a8777',
+    assetId: 16,
+    imageUrl: 'https://moonsama.mypinata.cloud/ipfs/QmUE5kvmGgEwL7dwSCyhdTgtRw72NYBRbqkwXJuXWKLzyY',
+    symbol: 'aMOONSTONE',
+    subAssetAddress: '0xbe0b5b87ceb3eb1b05d11dc83332409291b35746'
+  }
+]

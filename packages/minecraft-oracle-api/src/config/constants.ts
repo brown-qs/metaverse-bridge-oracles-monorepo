@@ -43,12 +43,22 @@ export enum RecognizedAssetType {
   WEARABLE = 'WEARABLE',
   RESOURCE = 'RESOURCE',
   CONSUMABLE = 'CONSUMABLE',
-  PONDSAMA_FISH = 'PONDSAMA_FISH'
+  PONDSAMA_FISH = 'PONDSAMA_FISH',
+  GROMLIN = 'GROMLIN',
+  EXOSAMA = 'EXOSAMA',
+  MISC_ART = 'MISC_ART'
+}
+
+export enum MultiverseVersion {
+  V1 = 1,
+  V2 = 2
 }
 
 export enum PlayEligibilityReason {
   NONE = 'NONE',
   MOONSAMA = 'MSAMA',
+  GROMLIN = 'GROMLIN',
+  EXOSAMA = 'EXOSAMA',
   TICKET = 'TICKET',
   TEMPORARY_TICKET = 'TEMPORARY_TICKET',
 }

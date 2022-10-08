@@ -26,7 +26,7 @@ export const styles = (theme: any) => ({
   // Column
   col: {
     '[class*=formValue]': {
-      'min-height': 30,
+      'minHeight': 30,
       color: 'fucsia',
     },
   },

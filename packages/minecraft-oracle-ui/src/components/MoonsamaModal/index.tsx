@@ -3,7 +3,21 @@ import React, { ReactNode } from "react";
 import { Icon } from "tabler-icons-react";
 import { ModalIcon } from "./ModalIcon";
 
-export const MoonsamaModal: React.FC<{ isOpen: boolean, onClose: () => void, title: string, message?: string, bottomButtonText?: string, onBottomButtonClick?: () => void, TablerIcon?: Icon, iconBackgroundColor?: string, iconColor?: string, closeOnOverlayClick?: boolean, children?: ReactNode }> = ({ isOpen, onClose, title, message, bottomButtonText, onBottomButtonClick, TablerIcon, iconBackgroundColor, iconColor, closeOnOverlayClick, children }) => {
+export type MoonModal = React.FC<{
+    isOpen: boolean,
+    onClose: () => void,
+    title?: string,
+    TitleTablerIcon?: Icon
+    message?: string,
+    bottomButtonText?: string,
+    onBottomButtonClick?: () => void,
+    TablerIcon?: Icon,
+    iconBackgroundColor?: string,
+    iconColor?: string,
+    closeOnOverlayClick?: boolean,
+    children?: ReactNode
+}>
+export const MoonsamaModal: MoonModal = ({ isOpen, onClose, title, TitleTablerIcon, message, bottomButtonText, onBottomButtonClick, TablerIcon, iconBackgroundColor, iconColor, closeOnOverlayClick, children }) => {
     return (
         <Modal isOpen={isOpen} onClose={onClose} isCentered closeOnOverlayClick={closeOnOverlayClick}>
             <ModalOverlay />
@@ -17,13 +31,16 @@ export const MoonsamaModal: React.FC<{ isOpen: boolean, onClose: () => void, tit
                             </Box>
                         }
                         {!!title &&
-                            <Box
+                            <HStack
+                                spacing="0"
                                 fontSize="16px"
                                 lineHeight="24px"
                                 paddingBottom="16px"
                             >
-                                {title}
-                            </Box>
+                                {TitleTablerIcon && <Box paddingRight="6px"><TitleTablerIcon color="#3BEFB8" size="21px"></TitleTablerIcon></Box>}
+                                <Box >{title}</Box>
+
+                            </HStack>
                         }
                         {!!message &&
                             <Box

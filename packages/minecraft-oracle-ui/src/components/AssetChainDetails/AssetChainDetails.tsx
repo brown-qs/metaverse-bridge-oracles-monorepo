@@ -1,4 +1,3 @@
-import { InGameItemWithStatic } from '../../hooks/multiverse/useInGameItems';
 import { useClasses } from '../../hooks';
 import { AddressDisplayComponent } from '../form/AddressDisplayComponent';
 import { ChainDataDisplayComponent } from '../form/ChainDataDisplayComponent';
@@ -6,8 +5,9 @@ import { ChainDataDisplayComponent } from '../form/ChainDataDisplayComponent';
 import { styles } from './AssetChainDetails.styles';
 import { NETWORK_NAME } from '../../constants';
 import { Box, Stack, VStack } from '@chakra-ui/react';
+import { InGameTokenMaybeMetadata } from '../../utils/graphqlReformatter';
 
-export const AssetChainDetails = ({ data, borderOn }: { data?: InGameItemWithStatic, borderOn?: boolean }) => {
+export const AssetChainDetails = ({ data, borderOn }: { data?: InGameTokenMaybeMetadata, borderOn?: boolean }) => {
 
     const {
         row,
@@ -18,7 +18,7 @@ export const AssetChainDetails = ({ data, borderOn }: { data?: InGameItemWithSta
         pL
     } = useClasses(styles);
 
-    const exportChainId = data?.exportChainId
+    const exportChainId = data?.chainId
     const hash = data?.hash
     const exportAddress = data?.exportAddress
 

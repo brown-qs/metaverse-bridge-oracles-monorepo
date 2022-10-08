@@ -1,34 +1,12 @@
 import { useCallback } from 'react';
 import axios from 'axios'
-import { useAuth } from 'hooks';
+import { useSelector } from 'react-redux';
+import { selectAccessToken } from '../../state/slices/authSlice';
 
 
 export function useImportConfirmCallback() {
-    const { authData } =  useAuth();
-    const {jwt} = authData ?? {}
-    
-    return useCallback(async (hash?: string, chainId?:number) => {
-        if (!hash) {
-            return false;
-        }
-        try {
-            const resp = await axios.request<boolean>({
-                method: 'put',
-                url: `${process.env.REACT_APP_BACKEND_API_URL}/oracle/import/confirm`,
-                data: {hash, chainId},
-                headers: { Authorization: `Bearer ${jwt}` }
-            });
-            return resp.data
-        } catch(e) {
-            console.error('Error confirming import hash. Try again later.')
-            return false
-        }
-    }, [jwt])
-}
+    const accessToken = useSelector(selectAccessToken)
 
-export function useExportConfirmCallback() {
-    const { authData } =  useAuth();
-    const {jwt} = authData ?? {}
 
     return useCallback(async (hash?: string, chainId?: number) => {
         if (!hash) {
@@ -37,21 +15,50 @@ export function useExportConfirmCallback() {
         try {
             const resp = await axios.request<boolean>({
                 method: 'put',
-                url: `${process.env.REACT_APP_BACKEND_API_URL}/oracle/export/confirm`,
-                data: {hash, chainId},
-                headers: { Authorization: `Bearer ${jwt}` }
+                url: `${process.env.REACT_APP_BACKEND_API_URL}/oracle/import/confirm`,
+                data: { hash, chainId },
+                headers: { Authorization: `Bearer ${accessToken}` }
             });
             return resp.data
-        } catch(e) {
+        } catch (e) {
+            console.error('Error confirming import hash. Try again later.')
+            return false
+        }
+    }, [accessToken])
+}
+
+export function useExportConfirmCallback() {
+    const accessToken = useSelector(selectAccessToken)
+
+
+    return useCallback(async (hash?: string, chainId?: number) => {
+        console.log("useExportConfirmCallback:: inside useCallback")
+        if (!hash) {
+            return false;
+        }
+        try {
+            const resp = await axios.request<boolean>({
+                method: 'put',
+                url: `${process.env.REACT_APP_BACKEND_API_URL}/oracle/export/confirm`,
+                data: { hash, chainId },
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            console.log(`useExportConfirmCallback:: resp.data: ${resp.data}`)
+
+            return resp.data
+
+        } catch (e) {
+            console.log(`useExportConfirmCallback:: try/catch`)
+
             console.error('Error confirming export hash. Try again later.')
             return false
         }
-    }, [jwt])
+    }, [accessToken])
 }
 
 export function useEnraptureConfirmCallback() {
-    const { authData } =  useAuth();
-    const {jwt} = authData ?? {}
+    const accessToken = useSelector(selectAccessToken)
+
 
     return useCallback(async (hash?: string, chainId?: number) => {
         if (!hash) {
@@ -61,13 +68,13 @@ export function useEnraptureConfirmCallback() {
             const resp = await axios.request<boolean>({
                 method: 'put',
                 url: `${process.env.REACT_APP_BACKEND_API_URL}/oracle/enrapture/confirm`,
-                data: {hash, chainId},
-                headers: { Authorization: `Bearer ${jwt}` }
+                data: { hash, chainId },
+                headers: { Authorization: `Bearer ${accessToken}` }
             });
             return resp.data
-        } catch(e) {
+        } catch (e) {
             console.error('Error confirming enrapture hash. Try again later.')
             return false
         }
-    }, [jwt])
+    }, [accessToken])
 }
