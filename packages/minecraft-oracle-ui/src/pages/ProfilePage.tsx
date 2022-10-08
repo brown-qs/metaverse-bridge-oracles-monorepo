@@ -170,12 +170,12 @@ const ProfilePage = () => {
         if (!!inGameItemsData) {
             return [...inGameTokensCombineMetadata(inGameItemsData, inGameItemsMetadata)]
                 .sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
-                .filter((tok) => {
-                    if (!!chainId && tok.chainId !== chainId) {
-                        return false
-                    }
-                    return true
-                })
+            /* .filter((tok) => {
+                 if (!!chainId && tok.chainId !== chainId) {
+                     return false
+                 }
+                 return true
+             })*/
         } else {
             return undefined
         }
@@ -197,12 +197,12 @@ const ProfilePage = () => {
         if (!!inGameResourcesData) {
             return [...inGameTokensCombineMetadata(inGameResourcesData, inGameResourcesMetadata)]
                 .sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
-                .filter((tok) => {
-                    if (!!chainId && chainId !== ChainId.MOONRIVER) {
-                        return false
-                    }
-                    return true
-                })
+            /* .filter((tok) => {
+                 if (!!chainId && chainId !== ChainId.MOONRIVER) {
+                     return false
+                 }
+                 return true
+             })*/
         } else {
             return undefined
         }

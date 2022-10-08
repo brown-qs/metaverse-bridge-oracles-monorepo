@@ -32,6 +32,7 @@ export function useExportConfirmCallback() {
 
 
     return useCallback(async (hash?: string, chainId?: number) => {
+        console.log("useExportConfirmCallback:: inside useCallback")
         if (!hash) {
             return false;
         }
@@ -42,8 +43,13 @@ export function useExportConfirmCallback() {
                 data: { hash, chainId },
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
+            console.log(`useExportConfirmCallback:: resp.data: ${resp.data}`)
+
             return resp.data
+
         } catch (e) {
+            console.log(`useExportConfirmCallback:: try/catch`)
+
             console.error('Error confirming export hash. Try again later.')
             return false
         }
