@@ -218,17 +218,17 @@ const ProfilePage = () => {
     }, [currentMarketplaceOnChainTokensData, isMarketplaceOnChainTokensFetching])
 
     const isOnChainResourcesLoading: boolean = React.useMemo(() => {
-        if (isMarketplaceOnChainTokensFetching && !currentMarketplaceOnChainTokensData) {
+        if (!!chainId && chainId === ChainId.MOONRIVER && isMarketplaceOnChainTokensFetching && !currentMarketplaceOnChainTokensData) {
             return true
         } else {
             return false
         }
-    }, [currentMarketplaceOnChainTokensData, isMarketplaceOnChainTokensFetching])
+    }, [currentMarketplaceOnChainTokensData, isMarketplaceOnChainTokensFetching, chainId])
 
 
 
     React.useEffect(() => {
-
+        refetchExosamaOnChainTokens()
     }, [blockNumbers[ChainId.MAINNET]])
 
     React.useEffect(() => {
