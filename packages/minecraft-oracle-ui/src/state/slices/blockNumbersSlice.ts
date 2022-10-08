@@ -9,7 +9,6 @@ const blockNumbersSlice = createSlice({
   initialState: {} as BlockNumbersSlice,
   reducers: {
     setBlockNumber: (state, action: PayloadAction<{ chainId: ChainId, blockNumber: number }>) => {
-      console.log("UPDATE BLOCK : " + JSON.stringify(action.payload))
       const { chainId, blockNumber } = action.payload
       if (!chainId) {
         return
