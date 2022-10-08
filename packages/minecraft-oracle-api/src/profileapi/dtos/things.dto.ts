@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger"
-import { IsBoolean, IsString } from "class-validator"
+import { IsBoolean, IsEnum, IsString } from "class-validator"
+import { MultiverseVersion } from "../../config/constants"
 
 
 export class AssetDto {
@@ -39,9 +40,9 @@ export class AssetDto {
     @IsBoolean()
     enraptured: boolean
 
-    @ApiPropertyOptional({ description: 'Id of Chain where the asset can be exported to' })
+    @ApiPropertyOptional({ description: 'Chain id where asset lives' })
     @IsString()
-    exportChainId?: number
+    chainId: number
 
     @ApiProperty({ description: 'Address where the asset can be exported to' })
     @IsString()
@@ -50,6 +51,10 @@ export class AssetDto {
     @ApiProperty({ description: 'Hash of the entry. Needed for exports.' })
     @IsString()
     hash?: string
+
+    @ApiProperty({ description: 'Hash of the entry. Needed for exports.' })
+    @IsEnum(MultiverseVersion)
+    multiverseVersion: MultiverseVersion
 }
 
 export class TextureDto {

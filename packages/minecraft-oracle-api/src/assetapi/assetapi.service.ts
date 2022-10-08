@@ -271,6 +271,7 @@ export class AssetApiService {
             assetAddress: row.assetAddress,
             assetType: row.assetType,
             name: row.name,
+            multiverseVersion: row.multiverseVersion,
             collectionFragments
         }
         return collection

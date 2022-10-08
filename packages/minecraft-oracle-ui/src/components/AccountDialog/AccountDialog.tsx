@@ -300,6 +300,7 @@ export const AccountDialog = () => {
     >
       {PERMISSIONED_CHAINS.map((chainId, i) => {
         return <Button
+          marginTop={(i > 0) ? "24px" : "0px"}
           width="100%"
           key={`${chainId}-${i}`}
           leftIcon={<ArrowsRightLeft />}

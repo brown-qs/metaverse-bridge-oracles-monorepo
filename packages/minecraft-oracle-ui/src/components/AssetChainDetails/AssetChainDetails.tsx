@@ -18,7 +18,7 @@ export const AssetChainDetails = ({ data, borderOn }: { data?: InGameTokenMaybeM
         pL
     } = useClasses(styles);
 
-    const exportChainId = data?.exportChainId
+    const exportChainId = data?.chainId
     const hash = data?.hash
     const exportAddress = data?.exportAddress
 
