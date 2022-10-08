@@ -1,5 +1,5 @@
 query getRaresamaOnChainTokens($where: TokenWhereInput) {
-  tokens(where: $where, limit: 1000) {
+  tokens(where: $where, limit: 500) {
     numericId
     metadata {
       image
