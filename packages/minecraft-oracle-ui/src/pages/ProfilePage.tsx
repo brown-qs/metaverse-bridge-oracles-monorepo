@@ -22,7 +22,7 @@ import { AssetDto, CollectionFragmentDto, SkinResponse } from '../state/api/type
 import { useGetMarketplaceMetadataQuery, useGetMarketplaceOnChainTokensQuery } from '../state/api/generatedSquidMarketplaceApi';
 import { Media } from '../components';
 import { BigNumber, utils } from 'ethers';
-import { addRegonizedTokenDataToStandardizedOnChainTokens, formatTokenName, inGameMetadataParams, InGameTokenMaybeMetadata, inGameTokensCombineMetadata, StandardizedMetadata, StandardizedOnChainToken, StandardizedOnChainTokenWithRecognizedTokenData, standardizeExosamaMetadata, standardizeExosamaOnChainTokens, standardizeMarketplaceMetadata, standardizeMarketplaceOnChainTokens, standardizeRaresamaMetadata, standardizeRaresamaOnChainTokens } from '../utils/graphqlReformatter';
+import { addRegonizedTokenDataToStandardizedOnChainTokens, formatInGameTokenName, formatOnChainTokenName, inGameMetadataParams, InGameTokenMaybeMetadata, inGameTokensCombineMetadata, StandardizedMetadata, StandardizedOnChainToken, StandardizedOnChainTokenWithRecognizedTokenData, standardizeExosamaMetadata, standardizeExosamaOnChainTokens, standardizeMarketplaceMetadata, standardizeMarketplaceOnChainTokens, standardizeRaresamaMetadata, standardizeRaresamaOnChainTokens } from '../utils/graphqlReformatter';
 import { useDispatch, useSelector } from 'react-redux';
 import { openSummonModal } from '../state/slices/summonModalSlice';
 import { SummonModal } from '../components/modals/SummonModal';
@@ -435,7 +435,7 @@ const ProfilePage = () => {
                                             const checkBoxProps = getInGameCheckboxGroupProps({ value: item.hash })
                                             return (
                                                 <InGameItem
-                                                    lineOne={item?.metadata?.name}
+                                                    lineOne={formatInGameTokenName(item)}
                                                     lineTwo={item.enraptured ? "Enraptured. Not exportable." : undefined}
                                                     mediaRedOutline={item.enraptured === true}
                                                     mediaUrl={item?.metadata?.image}
@@ -526,7 +526,7 @@ const ProfilePage = () => {
 
                                             return (
                                                 <OnChainItem
-                                                    lineOne={formatTokenName(item)}
+                                                    lineOne={formatOnChainTokenName(item)}
                                                     lineTwo={item.enrapturable ? "This item will be burned into your account." : undefined}
                                                     mediaRedOutline={item.enrapturable === true}
                                                     mediaUrl={item?.metadata?.image ?? ""}
@@ -634,7 +634,7 @@ const ProfilePage = () => {
                                         {!!onChainResources && onChainResources.map((item) => {
                                             return (
                                                 <OnChainResource
-                                                    lineOne={formatTokenName(item)}
+                                                    lineOne={formatOnChainTokenName(item)}
                                                     mediaUrl={item?.metadata?.image}
                                                     balanceWei={BigNumber.from(item.balance)}
                                                     isLoading={false}
