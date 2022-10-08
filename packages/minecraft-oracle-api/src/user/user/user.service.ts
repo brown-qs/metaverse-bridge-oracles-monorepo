@@ -1,6 +1,6 @@
 import { InjectConnection, InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Like, Not, In, MoreThanOrEqual } from "typeorm"
-import { Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Connection, DeepPartial, EntityManager, FindConditions, FindManyOptions, FindOneOptions, ObjectID, Repository, UpdateResult } from 'typeorm';
 import { UserEntity, userUuid } from './user.entity';
@@ -30,6 +30,7 @@ import { MinecraftUserNameEntity } from '../minecraft-user-name/minecraft-user-n
 import { EmailEntity } from '../email/email.entity';
 import { EventBus } from "@nestjs/cqrs";
 import { UserProfileUpdatedEvent } from '../../cqrs/events/user-profile-updated.event';
+import { SanitizeService, TextNormalizationMode } from '../../sanitize/sanitize.service';
 @Injectable()
 export class UserService {
     context: string;
@@ -39,7 +40,8 @@ export class UserService {
         @InjectRepository(UserEntity)
         private readonly repository: Repository<UserEntity>,
         private readonly eventBus: EventBus,
-        private readonly configService: ConfigService
+        private readonly configService: ConfigService,
+        private readonly sanitizeService: SanitizeService
     ) {
         this.context = UserService.name
     }
@@ -426,8 +428,40 @@ export class UserService {
     }
 
     public async setGamerTag(uuid: string, gamerTag: string) {
-        await this.repository.update({ uuid }, { gamerTag })
+        if (typeof gamerTag !== "string") {
+            throw new BadRequestException("Gamer Tag must be a string")
+        }
+        this.logger.debug(`setGamerTag:: user ${uuid} wants to set gamerTag encodeURIComponent() ${encodeURIComponent(gamerTag)}`, this.context)
+
+        const sanitizeOptions = {
+            textNormalizationMode: TextNormalizationMode.NFKC,
+            removeNewlineAndTab: true,
+            removeControlCharacters: true,
+            removeEmoji: true,
+            removeXss: true,
+            removeWhitespaceBeforeAfter: true
+        }
+
+        const sanitizedGamerTag = this.sanitizeService.sanitize(gamerTag, sanitizeOptions)
+        if (sanitizedGamerTag.length === 0) {
+            throw new BadRequestException("Gamer Tag is either blank or contains invalid characters")
+        }
+
+        if (sanitizedGamerTag.length > 30) {
+            throw new BadRequestException("Gamer Tag is too long")
+        }
+
+        try {
+            await this.repository.update({ uuid }, { gamerTag: sanitizedGamerTag })
+        } catch (e) {
+            if (String(e).includes("duplicate key")) {
+                throw new BadRequestException("Gamer Tag is already taken")
+            } else {
+                throw e
+            }
+        }
         this.eventBus.publish(new UserProfileUpdatedEvent(uuid))
+        return sanitizedGamerTag
     }
 
     public async minecraftUuidMap(offset: number, minecraftUuids: string[] | undefined, limit: number | undefined) {

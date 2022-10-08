@@ -10,7 +10,7 @@ import { Column, Entity, Index, OneToMany, PrimaryColumn } from 'typeorm';
 @Index(['chainId'])
 export class ChainEntity {
 
-    @PrimaryColumn({unique: true})
+    @PrimaryColumn({ unique: true })
     @IsNumber()
     chainId: number;
 
@@ -24,7 +24,11 @@ export class ChainEntity {
 
     @Column({ nullable: true, default: null })
     @IsString()
-    multiverseAddress: string;
+    multiverseV1Address: string;
+
+    @Column({ nullable: true, default: null })
+    @IsString()
+    multiverseV2Address: string;
 
     @Column({ nullable: true, default: null })
     @IsString()

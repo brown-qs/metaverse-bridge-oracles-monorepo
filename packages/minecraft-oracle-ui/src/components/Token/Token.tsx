@@ -1,5 +1,4 @@
 
-import { Media } from 'components';
 import { useLastTradedPriceOnce } from 'hooks/marketplace/useLastTradedPrice';
 import { useNavigate } from 'react-router-dom';
 import { PriceBox } from 'ui';
@@ -16,6 +15,7 @@ import { useEffect, useState } from 'react';
 import { useOrder } from 'hooks/marketplace/useOrder';
 import { useAssetOrders, useAssetOrdersCallback } from 'hooks/marketplace/useAssetOrders';
 import { Container, Text } from '@chakra-ui/react';
+import { Media } from '../Media';
 
 export interface TokenData {
   meta: TokenMeta | undefined;

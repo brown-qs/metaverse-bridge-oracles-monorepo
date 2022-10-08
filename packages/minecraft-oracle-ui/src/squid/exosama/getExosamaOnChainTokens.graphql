@@ -1,0 +1,22 @@
+query getExosamaOnChainTokens($owner: String!) {
+  erc721Tokens(where: {ownerId_eq: $owner}, limit: 500) {
+    numericId
+    metadata {
+      image
+      layers
+      name
+      type
+      description
+      composite
+      attributes {
+        displayType
+        traitType
+        value
+      }
+    }
+    id
+    contract {
+      address
+    }
+  }
+}

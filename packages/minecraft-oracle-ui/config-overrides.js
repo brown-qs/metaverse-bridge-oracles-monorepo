@@ -12,6 +12,7 @@ module.exports = function override(config) {
         "os": require.resolve("os-browserify"),
         "url": require.resolve("url")
     })
+
     config.resolve.fallback = fallback;
     config.plugins = (config.plugins || []).concat([
         new webpack.ProvidePlugin({
@@ -19,5 +20,6 @@ module.exports = function override(config) {
             Buffer: ['buffer', 'Buffer']
         }),
     ])
+    config.ignoreWarnings = (config.ignoreWarnings || []).concat([/Failed to parse source map/])
     return config;
 }

@@ -1,11 +1,14 @@
 export enum Oauth2Scope {
     UserUuidRead = 'user:uuid.read',
-    UserGamerTagRead = 'user:gamer_tag.read'
+    UserGamerTagRead = 'user:gamer_tag.read',
+    UserGamerTagWrite = 'user:gamer_tag.write'
+
 }
 
 export enum Oauth2PrettyScope {
     UserUuidRead = 'Read your Moonsama user id',
-    UserGamerTagRead = 'Read your Moonsama gamer tag'
+    UserGamerTagRead = 'Read your Moonsama gamer tag',
+    UserGamerTagWrite = 'Set your Moonsama gamer tag'
 }
 
 export function scopeToPrettyScope(sc: Oauth2Scope): Oauth2PrettyScope {
