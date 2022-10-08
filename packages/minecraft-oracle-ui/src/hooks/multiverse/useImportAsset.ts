@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { calculateGasMargin } from '../../utils';
-import { useMultiverseBridgeV1Contract, useMultiverseBridgeV2Contract } from '../../hooks/useContracts/useContracts';
+import { useMultiverseBridgeV1Contract, useMultiverseBridgeContract } from '../../hooks/useContracts/useContracts';
 import { useActiveWeb3React } from '../../hooks';
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import axios from 'axios'
 import { AssetType } from 'utils/marketplace';
 import { useSelector } from 'react-redux';
 import { selectAccessToken } from '../../state/slices/authSlice';
+import { MultiverseVersion } from '../../state/api/types';
 
 export enum CreateImportAssetCallbackState {
     INVALID,
@@ -34,7 +35,8 @@ export interface AssetRequest {
         assetType?: AssetType
     },
     amount: string,
-    chainId?: number
+    chainId?: number,
+    multiverseVersion?: MultiverseVersion
 }
 
 export type ImportRequestParams = {
@@ -92,12 +94,12 @@ export function useImportAssetCallback(
     const { account, chainId, library } = useActiveWeb3React();
 
     // const contract = useMultiverseBridgeV1Contract(true);
-    const contract = useMultiverseBridgeV2Contract(true, assetRequest.chainId);
+    const contract = useMultiverseBridgeContract(assetRequest.multiverseVersion, true, assetRequest.chainId);
 
     const importRequest = {
         ...assetRequest,
-        owner: account,
-        beneficiary: account
+        owner: account?.toLowerCase(),
+        beneficiary: account?.toLowerCase()
     }
 
     const { confirmed, data, hash, signature } = useFetchImportAssetArgumentsCallback(importRequest) ?? {}
@@ -144,7 +146,10 @@ export function useImportAssetCallback(
             hash,
             callback: async function onImportAsset(): Promise<string> {
                 const args = inputParams;
-                const methodName = 'importToMetaverseSig';
+                let methodName = 'importToMetaverseSig';
+                if (assetRequest.multiverseVersion === MultiverseVersion.V2) {
+                    methodName = 'stakeSig'
+                }
 
                 const call = {
                     contract: contract.address,
@@ -221,10 +226,11 @@ export function useImportAssetCallback(
         account,
         chainId,
         data,
-        signature, ,
+        signature,
         confirmed,
         hash,
         inputOptions.value,
         addTransaction,
+        assetRequest.multiverseVersion
     ]);
 }

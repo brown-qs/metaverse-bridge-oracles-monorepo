@@ -251,7 +251,7 @@ export class AssetApiController {
     @ApiOperation({ summary: 'Gets recognized assets' })
     @UseGuards(JwtAuthGuard)
     async getRecognizedAssets(): Promise<RecognizedAssetsDto[]> {
-        const data = await this.collectionService.findMany({ where: { chainId: Not(IsNull()) }, relations: ["collectionFragments"] });
+        const data = await this.collectionService.findMany({ where: { chainId: Not(IsNull()) }, relations: ["collectionFragments", "chain"] });
         return data.map(d => this.assetApiService.collectionEntityToDto(d))
     }
 }

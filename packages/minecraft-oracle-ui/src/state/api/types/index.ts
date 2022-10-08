@@ -56,11 +56,17 @@ export type SkinSelectRequest = {
     assetAddress: string
 }
 
+export enum MultiverseVersion {
+    V1 = 1,
+    V2 = 2
+}
+
 export type RecognizedAssetsDto = {
     chainId: number
     assetAddress: string
     assetType: StringAssetType
     name: string
+    multiverseVersion: MultiverseVersion
     collectionFragments: CollectionFragmentDto[]
 }
 
@@ -103,9 +109,10 @@ export type AssetDto = {
     summonable: boolean
     recognizedAssetType: string
     enraptured: boolean
-    exportChainId?: number
+    chainId: number
     exportAddress: string
     hash?: string
+    multiverseVersion: MultiverseVersion
 }
 
 

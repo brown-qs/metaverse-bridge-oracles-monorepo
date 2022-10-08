@@ -8,10 +8,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowsRightLeft, Checks, Mail, MessageReport, Select, Wallet } from "tabler-icons-react";
 import { ReduxModal } from ".";
-import { DEFAULT_CHAIN, PERMISSIONED_CHAINS, NETWORK_NAME, ChainId, BURNABLE_RESOURCES_IDS } from "../../constants";
+import { DEFAULT_CHAIN, PERMISSIONED_CHAINS, NETWORK_NAME, ChainId, BURNABLE_RESOURCES_IDS, MULTIVERSE_BRIDGE_V1_WAREHOUSE_ADDRESS, MULTIVERSE_BRIDGE_V2_WAREHOUSE_ADDRESS } from "../../constants";
 import { useActiveWeb3React, useClasses } from "../../hooks";
 import { useEnraptureConfirmCallback, useExportConfirmCallback } from "../../hooks/multiverse/useConfirm";
-import { EnraptureAssetCallbackState, useEnraptureAssetCallback } from "../../hooks/multiverse/useEnraptureAsset";
+import { AssetRequest, EnraptureAssetCallbackState, useEnraptureAssetCallback } from "../../hooks/multiverse/useEnraptureAsset";
 import { ExportAssetCallbackState, useExportAssetCallback } from "../../hooks/multiverse/useExportAsset";
 import useAddNetworkToMetamaskCb from "../../hooks/useAddNetworkToMetamask/useAddNetworkToMetamask";
 import { ApprovalState, useApproveCallback } from "../../hooks/useApproveCallback/useApproveCallback";
@@ -26,6 +26,7 @@ import { getExplorerLink } from "../../utils";
 import { stringAssetTypeToAssetType } from "../../utils/marketplace";
 import { AddressDisplayComponent } from "../form/AddressDisplayComponent";
 import { TransactionLink } from "../TransactionLink";
+import { MultiverseVersion } from "../../state/api/types";
 
 export function EnraptureModal() {
     const dispatch = useDispatch()
@@ -65,6 +66,9 @@ export function EnraptureModal() {
     const assId = enraptureTokens?.[0]?.numericId
     const assetId = !!assId ? String(assId) : undefined
     const assetType = enraptureTokens?.[0]?.assetType
+    const multiverseVersion = enraptureTokens?.[0]?.multiverseVersion ?? MultiverseVersion.V1
+    const warehouseAddress = (multiverseVersion === MultiverseVersion.V1) ? MULTIVERSE_BRIDGE_V1_WAREHOUSE_ADDRESS[chainId ?? 1285] : MULTIVERSE_BRIDGE_V2_WAREHOUSE_ADDRESS[chainId ?? 1285]
+
 
     //TO DO IMPLEMENT AMOUNT
     const amount = '1'
@@ -89,16 +93,15 @@ export function EnraptureModal() {
         }
     };
 
-    const enraptureObject = {
+    const enraptureObject: AssetRequest = {
         asset: {
             assetAddress,
             assetId,
             assetType: stringAssetTypeToAssetType(assetType),
         },
         amount: finalAmount,
-        owner,
-        beneficiary,
-        chainId
+        chainId,
+        multiverseVersion: enraptureTokens?.[0]?.multiverseVersion
     }
 
     const bal = useBalances([
@@ -120,6 +123,7 @@ export function EnraptureModal() {
 
     const hasEnough = bal?.gte(finalAmount);
     const [approvalState, approveCallback] = useApproveCallback({
+        operator: warehouseAddress,
         assetAddress: assetAddress,
         assetId: assetId,
         assetType: assetType,

@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { calculateGasMargin } from '../../utils';
-import { useMultiverseBridgeV1Contract, useMultiverseBridgeV2Contract } from '../../hooks/useContracts/useContracts';
+import { useMultiverseBridgeV1Contract, useMultiverseBridgeContract } from '../../hooks/useContracts/useContracts';
 import { useActiveWeb3React } from '../../hooks';
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import axios from 'axios'
 import { AssetType } from 'utils/marketplace';
 import { useSelector } from 'react-redux';
 import { selectAccessToken } from '../../state/slices/authSlice';
+import { MultiverseVersion } from '../../state/api/types';
 
 export enum EnraptureAssetCallbackState {
     INVALID,
@@ -34,7 +35,8 @@ export interface AssetRequest {
         assetType?: AssetType,
     },
     amount: string,
-    chainId?: number
+    chainId?: number,
+    multiverseVersion?: MultiverseVersion
 }
 
 export type EnraptureRequestParams = {
@@ -94,12 +96,12 @@ export function useEnraptureAssetCallback(
 
     //console.log('YOLO', { account, chainId, library });
     // const contract = useMultiverseBridgeV1Contract(true);
-    const contract = useMultiverseBridgeV2Contract(true, assetRequest.chainId);
+    const contract = useMultiverseBridgeContract(assetRequest.multiverseVersion, true, assetRequest.chainId);
 
     const enraptureRequest = {
         ...assetRequest,
-        owner: account,
-        beneficiary: account,
+        owner: account?.toLowerCase(),
+        beneficiary: account?.toLowerCase(),
     }
 
     const { confirmed, data, hash, signature } = useFetchEnraptureAssetArgumentsCallback(enraptureRequest) ?? {}
@@ -147,8 +149,10 @@ export function useEnraptureAssetCallback(
             hash,
             callback: async function onEnraptureAsset(): Promise<string> {
                 const args = inputParams;
-                const methodName = 'enraptureToMetaverseSig';
-
+                let methodName = 'enraptureToMetaverseSig';
+                if (assetRequest.multiverseVersion === MultiverseVersion.V2) {
+                    methodName = 'stakeSig'
+                }
                 const call = {
                     contract: contract.address,
                     parameters: inputParams,

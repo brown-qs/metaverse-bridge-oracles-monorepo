@@ -22,13 +22,13 @@ import { AssetDto, CollectionFragmentDto, SkinResponse } from '../state/api/type
 import { useGetMarketplaceMetadataQuery, useGetMarketplaceOnChainTokensQuery } from '../state/api/generatedSquidMarketplaceApi';
 import { Media } from '../components';
 import { BigNumber, utils } from 'ethers';
-import { addRegonizedTokenDataToStandardizedOnChainTokens, formatTokenName, inGameMarketplaceMetadataParams, InGameTokenMaybeMetadata, inGameTokensCombineMetadata, StandardizedOnChainToken, StandardizedOnChainTokenWithRecognizedTokenData, standardizeMarketplaceOnChainTokens, standardizeRaresamaOnChainTokens } from '../utils/graphqlReformatter';
+import { addRegonizedTokenDataToStandardizedOnChainTokens, formatTokenName, inGameMetadataParams, InGameTokenMaybeMetadata, inGameTokensCombineMetadata, StandardizedMetadata, StandardizedOnChainToken, StandardizedOnChainTokenWithRecognizedTokenData, standardizeExosamaMetadata, standardizeExosamaOnChainTokens, standardizeMarketplaceMetadata, standardizeMarketplaceOnChainTokens, standardizeRaresamaMetadata, standardizeRaresamaOnChainTokens } from '../utils/graphqlReformatter';
 import { useDispatch, useSelector } from 'react-redux';
 import { openSummonModal } from '../state/slices/summonModalSlice';
 import { SummonModal } from '../components/modals/SummonModal';
 import { ExportModal } from '../components/modals/ExportModal';
 import { openExportModal, setExportTokens } from '../state/slices/exportModalSlice';
-import { useGetRaresamaOnChainTokensQuery } from '../state/api/generatedSquidRaresamaApi';
+import { useGetRaresamaMetadataQuery, useGetRaresamaOnChainTokensQuery } from '../state/api/generatedSquidRaresamaApi';
 import { selectBlockNumbers } from '../state/slices/blockNumbersSlice';
 import { openOnChainResourceModal, setOnChainResource } from '../state/slices/onChainResourceModalSlice';
 import { OnChainResourceModal } from '../components/modals/OnChainResourceModal';
@@ -38,6 +38,7 @@ import { openEnraptureModal, setEnraptureModalTokens } from '../state/slices/enr
 import { openImportModal, setImportModalTokens } from '../state/slices/importModalSlice';
 import { openInGameItemModal, setInGameItemModalToken } from '../state/slices/inGameItemModalSlice';
 import { InGameItemModal } from '../components/modals/InGameItemModal';
+import { useGetExosamaMetadataQuery, useGetExosamaOnChainTokensQuery } from '../state/api/generatedSquidExosamaApi';
 
 
 const ProfilePage = () => {
@@ -55,8 +56,9 @@ const ProfilePage = () => {
     const [setSkin, { error: setSkinError, isUninitialized, isLoading, isSuccess, isError, reset: setSkinReset }] = useSetSkinMutation()
 
     //on chain tokens (from indexers)
-    const { data: raresamaOnChainTokensData, currentData: currentRaresamaOnChainTokensData, isLoading: isRaresamaOnChainTokensDataLoading, isFetching: isRaresamaOnChainTokensDataFetching, isError: isRaresamaOnChainTokensDataError, error: raresamaOnChainTokensError, refetch: refetchRaresamaOnChainTokens } = useGetRaresamaOnChainTokensQuery({ where: { owner: { id_eq: address }, contract: { id_eq: "0xf27a6c72398eb7e25543d19fda370b7083474735" } } })
+    const { data: raresamaOnChainTokensData, currentData: currentRaresamaOnChainTokensData, isLoading: isRaresamaOnChainTokensDataLoading, isFetching: isRaresamaOnChainTokensDataFetching, isError: isRaresamaOnChainTokensDataError, error: raresamaOnChainTokensError, refetch: refetchRaresamaOnChainTokens } = useGetRaresamaOnChainTokensQuery({ where: { owner: { id_eq: address }, contract: { OR: [{ id_eq: "0xf27a6c72398eb7e25543d19fda370b7083474735" }, { id_eq: "0xe4bf451271d8d1b9d2a7531aa551b7c45ec95048" }] } } })
     const { data: marketplaceOnChainTokensData, currentData: currentMarketplaceOnChainTokensData, isLoading: isMarketplaceOnChainTokensLoading, isFetching: isMarketplaceOnChainTokensFetching, isError: isMarketplaceOnChainTokensError, error: marketplaceOnChainTokensError, refetch: refetchMarketplaceOnChainTokens } = useGetMarketplaceOnChainTokensQuery({ owner: address })
+    const { data: exosamaOnChainTokensData, currentData: exosamaMarketplaceOnChainTokensData, isLoading: isExosamaOnChainTokensLoading, isFetching: isExosamaOnChainTokensFetching, isError: isExosamaOnChainTokensError, error: exosamaOnChainTokensError, refetch: refetchExosamaOnChainTokens } = useGetExosamaOnChainTokensQuery({ owner: address })
 
     //in game tokens (from nestjs server)
     const { data: recognizedAssetsData, isLoading: isRecognizedAssetsLoading, isFetching: isRecognizedAssetsFetching, isError: isRecognizedAssetsError, error: recognizedAssetsError, refetch: refetchRecognizedAssets } = useGetRecognizedAssetsQuery()
@@ -64,11 +66,13 @@ const ProfilePage = () => {
     const { data: inGameResourcesData, isLoading: isInGameResourcesLoading, isFetching: isInGameResourcesFetching, isError: isInGameResourcesError, error: inGameResourcesError, refetch: refetchInGameResources } = useGetInGameResourcesQuery()
 
     //metadata
-    const inGameItemsMetadataQuery = React.useMemo(() => inGameMarketplaceMetadataParams(inGameItemsData), [inGameItemsData])
-    const inGameResourcesMetadataQuery = React.useMemo(() => inGameMarketplaceMetadataParams(inGameResourcesData), [inGameResourcesData])
-    const { data: inGameItemsMetadata, isLoading: isInGameItemsMetadataLoading, isFetching: isInGameItemsMetadataFetching, isError: isInGameItemsMetadataError, error: inGameItemsMetadataError } = useGetMarketplaceMetadataQuery(inGameItemsMetadataQuery)
-    const { data: inGameResourcesMetadata, isLoading: isInGameResourcesMetadataLoading, isFetching: isInGameResourcesMetadataFetching, isError: isInGameResourcesMetadataError, error: inGameResourcesMetadataError } = useGetMarketplaceMetadataQuery(inGameResourcesMetadataQuery)
+    const inGameItemsMetadataQuery = React.useMemo(() => inGameMetadataParams(inGameItemsData), [inGameItemsData])
+    const inGameResourcesMetadataQuery = React.useMemo(() => inGameMetadataParams(inGameResourcesData), [inGameResourcesData])
+    const { data: marketplaceInGameItemsMetadata, isLoading: isMarketplaceInGameItemsMetadataLoading, isFetching: isMarketplaceInGameItemsMetadataFetching, isError: isMarketplaceInGameItemsMetadataError, error: marketplaceInGameItemsMetadataError } = useGetMarketplaceMetadataQuery(inGameItemsMetadataQuery.marketplace)
+    const { data: marketplaceInGameResourcesMetadata, isLoading: isMarketplaceInGameResourcesMetadataLoading, isFetching: isMarketplaceInGameResourcesMetadataFetching, isError: isMarketplaceInGameResourcesMetadataError, error: marketplaceInGameResourcesMetadataError } = useGetMarketplaceMetadataQuery(inGameResourcesMetadataQuery.marketplace)
 
+    const { data: raresamaInGameItemsMetadata, isLoading: isRaresamaInGameItemsMetadataLoading, isFetching: isRaresamaInGameItemsMetadataFetching, isError: isRaresamaInGameItemsMetadataError, error: raresamaInGameItemsMetadataError } = useGetRaresamaMetadataQuery(inGameItemsMetadataQuery.raresama)
+    const { data: exosamaInGameItemsMetadata, isLoading: isExosamaInGameItemsMetadataLoading, isFetching: isExosamaInGameItemsMetadataFetching, isError: isExosamaInGameItemsMetadataError, error: exosamaInGameItemsMetadataError } = useGetExosamaMetadataQuery(inGameItemsMetadataQuery.exosama)
 
 
 
@@ -100,16 +104,21 @@ const ProfilePage = () => {
     const standardizedRaresamaOnChainTokens: StandardizedOnChainToken[] | undefined = React.useMemo(() => standardizeRaresamaOnChainTokens(raresamaOnChainTokensData), [raresamaOnChainTokensData])
     const standardizedRaresamaOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(standardizedRaresamaOnChainTokens, recognizedAssetsData), [standardizedRaresamaOnChainTokens, recognizedAssetsData])
 
+    const standardizedExosamaOnChainTokens: StandardizedOnChainToken[] | undefined = React.useMemo(() => standardizeExosamaOnChainTokens(exosamaOnChainTokensData), [exosamaOnChainTokensData])
+    const standardizedExosamaOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(standardizedExosamaOnChainTokens, recognizedAssetsData), [standardizedExosamaOnChainTokens, recognizedAssetsData])
+
     const allStandardizedOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
-        if (!!standardizedMarketplaceOnChainTokensWithRecognizedTokenData || !!standardizedRaresamaOnChainTokensWithRecognizedTokenData) {
+        if (!!standardizedMarketplaceOnChainTokensWithRecognizedTokenData || !!standardizedRaresamaOnChainTokensWithRecognizedTokenData || !!standardizedExosamaOnChainTokensWithRecognizedTokenData) {
             return [
                 ...(standardizedMarketplaceOnChainTokensWithRecognizedTokenData ?? []),
-                ...(standardizedRaresamaOnChainTokensWithRecognizedTokenData ?? [])
+                ...(standardizedRaresamaOnChainTokensWithRecognizedTokenData ?? []),
+                ...(standardizedExosamaOnChainTokensWithRecognizedTokenData ?? [])
+
             ]
         } else {
             return undefined
         }
-    }, [standardizedMarketplaceOnChainTokensWithRecognizedTokenData, standardizedRaresamaOnChainTokensWithRecognizedTokenData])
+    }, [standardizedMarketplaceOnChainTokensWithRecognizedTokenData, standardizedRaresamaOnChainTokensWithRecognizedTokenData, standardizedExosamaOnChainTokensWithRecognizedTokenData])
 
 
     const onChainItems: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
@@ -118,41 +127,88 @@ const ProfilePage = () => {
                 if (tok?.importable === false && tok?.enrapturable === false) {
                     return false
                 }
+
+                //if there's a connected chain, only show items on that chain
+                if (!!chainId && tok.chainId !== chainId) {
+                    return false
+                }
                 return true
             })
         } else {
             return undefined
         }
-    }, [allStandardizedOnChainTokensWithRecognizedTokenData])
+    }, [allStandardizedOnChainTokensWithRecognizedTokenData, chainId])
 
 
     const onChainResources: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
         if (!!allStandardizedOnChainTokensWithRecognizedTokenData) {
-            return allStandardizedOnChainTokensWithRecognizedTokenData.filter((tok) => tok.summonable)
+            return allStandardizedOnChainTokensWithRecognizedTokenData.filter((tok) => {
+                if (!!chainId && chainId !== ChainId.MOONRIVER) {
+                    return false
+                }
+                return tok.summonable
+            })
         } else {
             return undefined
         }
-    }, [allStandardizedOnChainTokensWithRecognizedTokenData])
+    }, [allStandardizedOnChainTokensWithRecognizedTokenData, chainId])
 
+
+    const inGameItemsMetadata: StandardizedMetadata[] | undefined = React.useMemo(() => {
+        if (!!marketplaceInGameItemsMetadata || !!raresamaInGameItemsMetadata) {
+            return [
+                ...(standardizeMarketplaceMetadata(marketplaceInGameItemsMetadata) ?? []),
+                ...(standardizeRaresamaMetadata(raresamaInGameItemsMetadata) ?? []),
+                ...(standardizeExosamaMetadata(exosamaInGameItemsMetadata) ?? [])
+            ]
+        } else {
+            return undefined
+        }
+    }, [marketplaceInGameItemsMetadata, raresamaInGameItemsMetadata, exosamaInGameItemsMetadata])
 
     const inGameItems: InGameTokenMaybeMetadata[] | undefined = React.useMemo(() => {
         if (!!inGameItemsData) {
-            return [...inGameTokensCombineMetadata(inGameItemsData, inGameItemsMetadata)].sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
+            return [...inGameTokensCombineMetadata(inGameItemsData, inGameItemsMetadata)]
+                .sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
+                .filter((tok) => {
+                    if (!!chainId && tok.chainId !== chainId) {
+                        return false
+                    }
+                    return true
+                })
         } else {
             return undefined
         }
-    }, [inGameItemsData, inGameItemsMetadata])
+    }, [inGameItemsData, inGameItemsMetadata, chainId])
+
+
+    const inGameResourcesMetadata: StandardizedMetadata[] | undefined = React.useMemo(() => {
+        if (!!marketplaceInGameResourcesMetadata) {
+            return [
+                ...(standardizeMarketplaceMetadata(marketplaceInGameResourcesMetadata) ?? [])
+            ]
+        } else {
+            return undefined
+        }
+    }, [marketplaceInGameResourcesMetadata])
 
 
     const inGameResources: InGameTokenMaybeMetadata[] | undefined = React.useMemo(() => {
         if (!!inGameResourcesData) {
-            return [...inGameTokensCombineMetadata(inGameResourcesData, inGameResourcesMetadata)].sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
+            return [...inGameTokensCombineMetadata(inGameResourcesData, inGameResourcesMetadata)]
+                .sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
+                .filter((tok) => {
+                    if (!!chainId && chainId !== ChainId.MOONRIVER) {
+                        return false
+                    }
+                    return true
+                })
         } else {
             return undefined
         }
-    }, [inGameResourcesData, inGameResourcesMetadata])
+    }, [inGameResourcesData, inGameResourcesMetadata, chainId])
 
-    //TODO: raresama loading
+    //TODO: raresama/exosama loading
     const isOnChainItemsLoading: boolean = React.useMemo(() => {
         if (isMarketplaceOnChainTokensFetching && !currentMarketplaceOnChainTokensData) {
             return true
