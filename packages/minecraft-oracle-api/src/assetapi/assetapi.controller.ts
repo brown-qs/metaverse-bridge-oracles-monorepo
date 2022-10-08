@@ -27,6 +27,12 @@ import { UserDataDto } from './dtos/userdata.dto';
 import { ProfileApiService } from '../profileapi/profileapi.service';
 import { GameTypeService } from '../gametype/gametype.service';
 import { GameApiService } from '../gameapi/gameapi.service';
+import { JwtAuthGuard } from '../authapi/jwt-auth.guard';
+import { CollectionFragmentService } from '../collectionfragment/collectionfragment.service';
+import { Not, IsNull } from 'typeorm';
+import { CollectionFragmentEntity } from '../collectionfragment/collectionfragment.entity';
+import { CollectionService } from '../collection/collection.service';
+import { RecognizedAssetsDto } from './dtos/recognized-assets.dto';
 
 @ApiTags('asset')
 @Controller('asset')
@@ -39,7 +45,7 @@ export class AssetApiController {
         private readonly assetApiService: AssetApiService,
         private readonly profileService: ProfileApiService,
         private readonly gameApiService: GameApiService,
-
+        private readonly collectionService: CollectionService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
         this.context = AssetApiController.name;
@@ -237,5 +243,15 @@ export class AssetApiController {
     ): Promise<UsersFungibleBalancesResultDto> {
         const result = await this.assetApiService.getPlayersFungibleBalances(dto)
         return result
+    }
+
+
+    @Get('recognized-assets')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Gets recognized assets' })
+    @UseGuards(JwtAuthGuard)
+    async getRecognizedAssets(): Promise<RecognizedAssetsDto[]> {
+        const data = await this.collectionService.findMany({ where: { chainId: Not(IsNull()) }, relations: ["collectionFragments", "chain"] });
+        return data.map(d => this.assetApiService.collectionEntityToDto(d))
     }
 }

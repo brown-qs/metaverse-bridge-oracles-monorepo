@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { calculateGasMargin, getSigner } from '../../utils';
-import { useMultiverseBridgeV1Contract, useMultiverseBridgeV2Contract } from '../../hooks/useContracts/useContracts';
-import { useActiveWeb3React, useAuth } from '../../hooks';
+import { useMultiverseBridgeV1Contract, useMultiverseBridgeContract } from '../../hooks/useContracts/useContracts';
+import { useActiveWeb3React } from '../../hooks';
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import axios from 'axios'
+import { useSelector } from 'react-redux';
+import { selectAccessToken } from '../../state/slices/authSlice';
+import { MultiverseVersion } from '../../state/api/types';
 
 export enum ExportAssetCallbackState {
     INVALID,
@@ -14,7 +17,8 @@ export enum ExportAssetCallbackState {
 
 export interface ExportRequest {
     hash?: string,
-    chainId?: number
+    chainId?: number,
+    multiverseVersion?: MultiverseVersion
 }
 
 export interface AssetRequest {
@@ -37,10 +41,9 @@ export function useFetchExportAssetArgumentsCallback(exportRequest: ExportReques
     const { library, account } = useActiveWeb3React();
 
     const [params, setParams] = useState<ExportRequestParams | undefined>(undefined)
-    const { authData } =  useAuth();
+    const accessToken = useSelector(selectAccessToken)
 
-    const {hash, chainId} = exportRequest ?? {}
-    const {jwt} = authData ?? {}
+    const { hash, chainId } = exportRequest ?? {}
 
     const cb = useCallback(async () => {
         if (!library || !account || !hash || !chainId) {
@@ -51,21 +54,21 @@ export function useFetchExportAssetArgumentsCallback(exportRequest: ExportReques
                 method: 'put',
                 url: `${process.env.REACT_APP_BACKEND_API_URL}/oracle/export`,
                 data: exportRequest,
-                headers: { Authorization: `Bearer ${jwt}` }
+                headers: { Authorization: `Bearer ${accessToken}` }
             });
             setParams(resp.data)
-        } catch(e) {
+        } catch (e) {
             console.error('Error fetching export params.')
             setParams(undefined)
         }
-    }, [library, account, hash, jwt, chainId])
+    }, [library, account, hash, accessToken, chainId])
 
 
     useEffect(() => {
         if (library && account && exportRequest) {
             cb()
         }
-    }, [library, account, hash, jwt])
+    }, [library, account, hash, accessToken])
 
     return params
 }
@@ -81,7 +84,7 @@ export function useExportAssetCallback(
 
     //console.log('YOLO', { account, chainId, library });
     // const contract = useMultiverseBridgeV1Contract(true);
-    const contract = useMultiverseBridgeV2Contract(true, exportRequest.chainId);
+    const contract = useMultiverseBridgeContract(exportRequest.multiverseVersion, true, exportRequest.chainId);
 
     const { confirmed, data, hash, signature } = useFetchExportAssetArgumentsCallback(exportRequest) ?? {}
 
@@ -91,7 +94,7 @@ export function useExportAssetCallback(
     const inputOptions = {}
 
     return useMemo(() => {
-        if (!library || !account || !chainId || !contract ) {
+        if (!library || !account || !chainId || !contract) {
             return {
                 state: ExportAssetCallbackState.INVALID,
                 callback: null,
@@ -108,12 +111,12 @@ export function useExportAssetCallback(
         }
 
         if (!data || !signature || !hash) {
-          console.error('Error fetching input params from oracle');
-          return {
-            state: ExportAssetCallbackState.INVALID,
-            callback: null,
-            error: 'Error fetching input params from oracle',
-          };
+            console.error('Error fetching input params from oracle');
+            return {
+                state: ExportAssetCallbackState.INVALID,
+                callback: null,
+                error: 'Error fetching input params from oracle',
+            };
         }
 
         const inputParams = [data, signature]
@@ -121,19 +124,22 @@ export function useExportAssetCallback(
         return {
             state: ExportAssetCallbackState.VALID,
             callback: async function onEnraptureAsset(): Promise<string> {
-                const args = inputParams;
-                const methodName = 'exportFromMetaverseSig';
-
+                let methodName = 'exportFromMetaverseSig';
+                let parameters: any = inputParams
+                if (exportRequest.multiverseVersion === MultiverseVersion.V2) {
+                    methodName = 'unstakeSig'
+                    parameters = [[inputParams[0]], [inputParams[1]]]
+                }
                 const call = {
                     contract: contract.address,
-                    parameters: inputParams,
+                    parameters,
                     methodName,
                 };
 
                 console.log(call);
 
                 const gasEstimate = await contract.estimateGas[methodName](
-                    ...args,
+                    ...parameters,
                     inputOptions
                 ).catch((gasError: any) => {
                     console.debug(
@@ -141,7 +147,7 @@ export function useExportAssetCallback(
                         call
                     );
 
-                    return contract.callStatic[methodName](...args, inputOptions)
+                    return contract.callStatic[methodName](...parameters, inputOptions)
                         .then((result: any) => {
                             console.debug(
                                 'Unexpected successful call after failed estimate gas',
@@ -166,7 +172,7 @@ export function useExportAssetCallback(
                     );
                 }
 
-                return contract[methodName](...args, {
+                return contract[methodName](...parameters, {
                     gasLimit: calculateGasMargin(gasEstimate),
                     from: account,
                     ...inputOptions,
@@ -187,7 +193,7 @@ export function useExportAssetCallback(
                             throw new Error('Transaction rejected.');
                         } else {
                             // otherwise, the error was unexpected and we need to convey that
-                            console.error(`Export asset failed`, error, methodName, args);
+                            console.error(`Export asset failed`, error, methodName, parameters);
                             throw new Error(`Export asset failed: ${error.message}`);
                         }
                     });
@@ -199,7 +205,7 @@ export function useExportAssetCallback(
         account,
         chainId,
         data,
-        signature,,
+        signature, ,
         confirmed,
         hash,
         addTransaction,

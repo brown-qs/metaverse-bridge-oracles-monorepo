@@ -125,7 +125,7 @@ async function main() {
                 })
                 if (cf) {
                     console.log('    FOUND', cf.recognizedAssetType, cf.collection.assetType, cf.collection.assetAddress, assetId)
-                    const res = await connection.manager.update<AssetEntity>(AssetEntity, asset.hash, {collectionFragment: cf})
+                    const res = await connection.manager.update<AssetEntity>(AssetEntity, asset.hash, { collectionFragment: cf })
                     console.log('    ', 'update:', res.affected > 0)
                 } else {
                     console.log('    DANGLING asset', assetAddress, assetId)

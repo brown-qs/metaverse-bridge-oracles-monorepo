@@ -3,7 +3,7 @@ import { ProfileDto } from './dtos/profile.dto';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { AssetService } from '../asset/asset.service';
 import { UserEntity } from '../user/user/user.entity';
-import { RecognizedAssetType, PlayEligibilityReason } from '../config/constants';
+import { RecognizedAssetType, PlayEligibilityReason, MultiverseVersion } from '../config/constants';
 import { ProviderToken } from '../provider/token';
 import { AssetDto, TextureDto, ThingsDto } from './dtos/things.dto';
 import { InventoryService } from '../playerinventory/inventory.service';
@@ -42,37 +42,31 @@ export class ProfileApiService {
         this.defaultChainId = this.configService.get<number>('network.defaultChainId')
     }
 
-    async getPlayerItems(user: UserEntity): Promise<ThingsDto> {
-        const snapshots = await this.inventoryService.findMany({ relations: ['material', 'owner'], where: { owner: { uuid: user.uuid } } })
-
-        const resources: AssetDto[] = snapshots.map(snapshot => {
+    async getSkins(user: UserEntity): Promise<TextureDto[]> {
+        const userSkins = await this.skinService.findMany({ where: { owner: user.uuid }, relations: ['texture'] })
+        const textures: TextureDto[] = userSkins.map(skin => {
             return {
-                amount: snapshot.amount,
-                assetAddress: snapshot.material.assetAddress,
-                assetType: snapshot.material.assetType,
-                assetId: snapshot.material.assetId,
-                name: snapshot.material.name,
-                exportable: false,
-                summonable: true,
-                recognizedAssetType: '',
-                enraptured: false,
-                exportChainId: 1285, // resources are multi chain
-                exportAddress: undefined,
+                id: skin.id,
+                assetAddress: skin.texture.assetAddress,
+                assetId: skin.texture.assetId,
+                assetType: skin.texture.assetType,
+                equipped: skin.equipped,
+                selectable: true,
+                textureData: skin.texture.textureData,
+                textureSignature: skin.texture.textureSignature,
+                name: skin.texture.name
             }
         })
+        return textures
+    }
 
-        const userAssets = await this.assetService.findMany({ where: { owner: user.uuid, pendingIn: false }, relations: ['collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
-        const userSkins = await this.skinService.findMany({ where: { owner: user.uuid }, relations: ['texture'] })
 
+    async getInGameItems(user: UserEntity): Promise<AssetDto[]> {
         const importableAssets = await this.getRecognizedAssets(BridgeAssetType.IMPORTED)
         const enrapturableAssets = await this.getRecognizedAssets(BridgeAssetType.ENRAPTURED)
-
-
-        const assets: AssetDto[] = []
-
-        for (let i = 0; i < userAssets.length; i++) {
-            const asset = userAssets[i]
-
+        const userAssets = await this.assetService.findMany({ where: { owner: user.uuid, pendingIn: false }, relations: ['collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
+        const assets = []
+        for (const asset of userAssets) {
             const assetAddress = asset.collectionFragment.collection.assetAddress.toLowerCase()
             const recongizedEnraptureAsset = findRecognizedAsset(enrapturableAssets, { assetAddress, assetId: asset.assetId })
 
@@ -88,8 +82,9 @@ export class ProfileApiService {
                     summonable: false,
                     recognizedAssetType: recongizedEnraptureAsset.recognizedAssetType.valueOf(),
                     enraptured: asset.enraptured,
-                    exportChainId: asset.collectionFragment.collection.chainId,
+                    chainId: asset.collectionFragment.collection.chainId,
                     exportAddress: asset.assetOwner?.toLowerCase(),
+                    multiverseVersion: asset.collectionFragment.collection.multiverseVersion
                 })
                 continue
             }
@@ -108,57 +103,37 @@ export class ProfileApiService {
                     summonable: false,
                     recognizedAssetType: recongizedImportAsset.recognizedAssetType.valueOf(),
                     enraptured: asset.enraptured,
-                    exportChainId: asset.collectionFragment.collection.chainId,
+                    chainId: asset.collectionFragment.collection.chainId,
                     exportAddress: asset.assetOwner?.toLowerCase(),
+                    multiverseVersion: asset.collectionFragment.collection.multiverseVersion
                 })
                 continue
             }
         }
+        return assets
+    }
 
-        const textures: TextureDto[] = userSkins.map(skin => {
+    async getInGameResources(user: UserEntity): Promise<AssetDto[]> {
+        const snapshots = await this.inventoryService.findMany({ relations: ['material', 'owner'], where: { owner: { uuid: user.uuid } } })
+
+        const resources: AssetDto[] = snapshots.map(snapshot => {
             return {
-                assetAddress: skin.texture.assetAddress,
-                assetId: skin.texture.assetId,
-                assetType: skin.texture.assetType,
-                equipped: skin.equipped,
-                selectable: true,
-                textureData: skin.texture.textureData,
-                textureSignature: skin.texture.textureSignature,
-                name: skin.texture.name
+                amount: snapshot.amount,
+                assetAddress: snapshot.material.assetAddress,
+                assetType: snapshot.material.assetType,
+                assetId: snapshot.material.assetId,
+                name: snapshot.material.name,
+                exportable: false,
+                summonable: true,
+                recognizedAssetType: '',
+                enraptured: false,
+                chainId: 1285, // resources are multi chain
+                exportAddress: undefined,
+                multiverseVersion: MultiverseVersion.V1
+
             }
         })
-
-
-        // TODO fixme
-        const bait = await this.resourceInventoryService.findOne({ owner: user }, { relations: ['owner', 'offset'] })
-        if (!!bait) {
-            const baitAsset = userAssets.find(x => x.assetId === bait.assetId && x.collectionFragment.recognizedAssetType.valueOf() === RecognizedAssetType.RESOURCE.valueOf())
-
-            if (!!baitAsset) {
-                assets.push(
-                    {
-                        amount: formatEther(BigNumber.from(bait.amount).sub(bait.offset?.amount ?? '0')),
-                        assetAddress: baitAsset.collectionFragment.collection.assetAddress.toLowerCase(),
-                        assetType: baitAsset.collectionFragment.collection.assetType,
-                        assetId: baitAsset.assetId,
-                        name: baitAsset.collectionFragment.name,
-                        exportable: !baitAsset.enraptured,
-                        hash: baitAsset.hash,
-                        summonable: false,
-                        recognizedAssetType: baitAsset.recognizedAssetType.valueOf(),
-                        enraptured: baitAsset.enraptured,
-                        exportChainId: baitAsset.collectionFragment.collection.chainId,
-                        exportAddress: baitAsset.assetOwner?.toLowerCase(),
-                    }
-                )
-            }
-        }
-
-        return {
-            resources,
-            assets,
-            textures
-        }
+        return resources
     }
 
     async userProfile(user: UserEntity): Promise<ProfileDto> {
@@ -166,6 +141,8 @@ export class ProfileApiService {
         if (user.allowedToPlay) {
             const userAssets = await this.assetService.findMany({ where: { owner: user.uuid, pendingIn: false } })
             if (userAssets.find(asset => asset.recognizedAssetType == RecognizedAssetType.MOONSAMA)) allowedToPlayReason = PlayEligibilityReason.MOONSAMA;
+            else if (userAssets.find(asset => asset.recognizedAssetType == RecognizedAssetType.EXOSAMA)) allowedToPlayReason = PlayEligibilityReason.EXOSAMA;
+            else if (userAssets.find(asset => asset.recognizedAssetType == RecognizedAssetType.GROMLIN)) allowedToPlayReason = PlayEligibilityReason.GROMLIN;
             else if (userAssets.find(asset => asset.recognizedAssetType == RecognizedAssetType.TICKET)) allowedToPlayReason = PlayEligibilityReason.TICKET;
             else if (userAssets.find(asset => asset.recognizedAssetType == RecognizedAssetType.TEMPORARY_TICKET)) allowedToPlayReason = PlayEligibilityReason.TEMPORARY_TICKET;
         }

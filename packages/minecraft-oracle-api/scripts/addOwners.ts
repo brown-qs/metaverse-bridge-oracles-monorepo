@@ -54,14 +54,14 @@ async function main() {
     const failed = []
 
     try {
-        const assets = await connection.manager.find<AssetEntity>(AssetEntity, {loadEagerRelations: true})
+        const assets = await connection.manager.find<AssetEntity>(AssetEntity, { loadEagerRelations: true })
 
         for (let i = 0; i < assets.length; i++) {
             const asset = assets[i]
-            
+
             if (!asset.assetOwner) {
                 const chainEntity = await connection.manager.findOne<ChainEntity>(ChainEntity, { chainId: asset.collectionFragment.collection.chainId })
-                const contract = new Contract(chainEntity.multiverseAddress, METAVERSE_ABI, new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl))
+                const contract = new Contract(chainEntity.multiverseV1Address, METAVERSE_ABI, new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl))
                 console.log('hash', asset.hash)
                 try {
                     const mAsset: MetaAsset = asset.enraptured ? await contract.getEnrapturedMetaAsset(asset.hash) : await contract.getImportedMetaAsset(asset.hash)
@@ -70,7 +70,7 @@ async function main() {
                 } catch (error) {
                     failed.push(asset.hash)
                 }
-            } 
+            }
         }
 
     } catch (err) {
