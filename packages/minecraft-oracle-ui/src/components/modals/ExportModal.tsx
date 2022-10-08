@@ -13,6 +13,7 @@ import { useExportConfirmCallback } from "../../hooks/multiverse/useConfirm";
 import { ExportAssetCallbackState, useExportAssetCallback } from "../../hooks/multiverse/useExportAsset";
 import useAddNetworkToMetamaskCb from "../../hooks/useAddNetworkToMetamask/useAddNetworkToMetamask";
 import { rtkQueryErrorFormatter, useActiveGameQuery, useEmailLoginCodeVerifyMutation, useSummonMutation } from "../../state/api/bridgeApi";
+import { MultiverseVersion } from "../../state/api/types";
 import { closeEmailCodeModal, selectEmailCodeModalOpen } from "../../state/slices/emailCodeModalSlice";
 import { closeExportModal, selectExportModalOpen, selectExportTokens } from "../../state/slices/exportModalSlice";
 import { closeInGameItemModal, selectInGameItemModalOpen } from "../../state/slices/inGameItemModalSlice";
@@ -56,13 +57,14 @@ export function ExportModal() {
         setExportParamsLoaded(true);
     }
     const assetAddress = exportTokens?.[0]?.assetAddress;
+    const multiverseVersion = exportTokens?.[0]?.multiverseVersion ?? MultiverseVersion.V1
     /*const assetId = exportDialogData?.asset?.assetId;
     const assetType = exportDialogData?.asset?.assetType;
     const item = exportDialogData?.item;*/
 
     let callbackError: string | undefined;
 
-    const exportCallbackParams = useExportAssetCallback({ hash: exportTokens?.[0]?.hash, chainId })
+    const exportCallbackParams = useExportAssetCallback({ multiverseVersion, hash: exportTokens?.[0]?.hash, chainId })
 
 
     if (!!exportCallbackParams.error) {
@@ -122,9 +124,9 @@ export function ExportModal() {
                 <CircularProgress isIndeterminate color="teal"></CircularProgress>
             </VStack>
         </ReduxModal>)
-    } else if (!chainId || !!networkError || exportTokens?.[0]?.exportChainId !== chainId) {
-        const chainToConnect: ChainId = exportTokens?.[0]?.exportChainId ?? DEFAULT_CHAIN as ChainId
-        const networkName = NETWORK_NAME[exportTokens?.[0]?.exportChainId ?? DEFAULT_CHAIN]
+    } else if (!chainId || !!networkError || exportTokens?.[0]?.chainId !== chainId) {
+        const chainToConnect: ChainId = exportTokens?.[0]?.chainId ?? DEFAULT_CHAIN as ChainId
+        const networkName = NETWORK_NAME[exportTokens?.[0]?.chainId ?? DEFAULT_CHAIN]
         return (<ReduxModal
             {...baseProps}
             title="Export"
@@ -154,9 +156,9 @@ export function ExportModal() {
                 <Box w="100%" h="48px" bg="whiteAlpha.100" borderRadius="8px">
                     <HStack padding="12px">
                         <Box flex="1" color="whiteAlpha.700">Transaction</Box>
-                        <Box>
+                        <Box w="100%" overflow="hidden">
                             {exportTx && (
-                                <ChakraLink isExternal
+                                <ChakraLink whiteSpace="nowrap" isExternal textOverflow={"ellipsis"} w="100%" overflow="hidden"
                                     href={getExplorerLink(
                                         chainId ?? ChainId.MOONRIVER,
                                         exportTx.hash,

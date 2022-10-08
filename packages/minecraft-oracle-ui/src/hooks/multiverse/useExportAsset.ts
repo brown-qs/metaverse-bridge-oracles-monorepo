@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { calculateGasMargin, getSigner } from '../../utils';
-import { useMultiverseBridgeV1Contract, useMultiverseBridgeV2Contract } from '../../hooks/useContracts/useContracts';
+import { useMultiverseBridgeV1Contract, useMultiverseBridgeContract } from '../../hooks/useContracts/useContracts';
 import { useActiveWeb3React } from '../../hooks';
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import axios from 'axios'
 import { useSelector } from 'react-redux';
 import { selectAccessToken } from '../../state/slices/authSlice';
+import { MultiverseVersion } from '../../state/api/types';
 
 export enum ExportAssetCallbackState {
     INVALID,
@@ -16,7 +17,8 @@ export enum ExportAssetCallbackState {
 
 export interface ExportRequest {
     hash?: string,
-    chainId?: number
+    chainId?: number,
+    multiverseVersion?: MultiverseVersion
 }
 
 export interface AssetRequest {
@@ -82,7 +84,7 @@ export function useExportAssetCallback(
 
     //console.log('YOLO', { account, chainId, library });
     // const contract = useMultiverseBridgeV1Contract(true);
-    const contract = useMultiverseBridgeV2Contract(true, exportRequest.chainId);
+    const contract = useMultiverseBridgeContract(exportRequest.multiverseVersion, true, exportRequest.chainId);
 
     const { confirmed, data, hash, signature } = useFetchExportAssetArgumentsCallback(exportRequest) ?? {}
 
@@ -122,19 +124,22 @@ export function useExportAssetCallback(
         return {
             state: ExportAssetCallbackState.VALID,
             callback: async function onEnraptureAsset(): Promise<string> {
-                const args = inputParams;
-                const methodName = 'exportFromMetaverseSig';
-
+                let methodName = 'exportFromMetaverseSig';
+                let parameters: any = inputParams
+                if (exportRequest.multiverseVersion === MultiverseVersion.V2) {
+                    methodName = 'unstakeSig'
+                    parameters = [[inputParams[0]], [inputParams[1]]]
+                }
                 const call = {
                     contract: contract.address,
-                    parameters: inputParams,
+                    parameters,
                     methodName,
                 };
 
                 console.log(call);
 
                 const gasEstimate = await contract.estimateGas[methodName](
-                    ...args,
+                    ...parameters,
                     inputOptions
                 ).catch((gasError: any) => {
                     console.debug(
@@ -142,7 +147,7 @@ export function useExportAssetCallback(
                         call
                     );
 
-                    return contract.callStatic[methodName](...args, inputOptions)
+                    return contract.callStatic[methodName](...parameters, inputOptions)
                         .then((result: any) => {
                             console.debug(
                                 'Unexpected successful call after failed estimate gas',
@@ -167,7 +172,7 @@ export function useExportAssetCallback(
                     );
                 }
 
-                return contract[methodName](...args, {
+                return contract[methodName](...parameters, {
                     gasLimit: calculateGasMargin(gasEstimate),
                     from: account,
                     ...inputOptions,
@@ -188,7 +193,7 @@ export function useExportAssetCallback(
                             throw new Error('Transaction rejected.');
                         } else {
                             // otherwise, the error was unexpected and we need to convey that
-                            console.error(`Export asset failed`, error, methodName, args);
+                            console.error(`Export asset failed`, error, methodName, parameters);
                             throw new Error(`Export asset failed: ${error.message}`);
                         }
                     });

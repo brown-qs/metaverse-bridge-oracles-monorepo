@@ -1,6 +1,7 @@
 import { randomBytes } from "crypto";
 import { ethers } from "ethers";
 import { AssetType } from "../common/enums/AssetType";
+import { MultiverseVersion } from "../config/constants";
 
 function encodeParameters(types: readonly (string | ethers.utils.ParamType)[], values: readonly any[]) {
     const abi = new ethers.utils.AbiCoder();
@@ -12,10 +13,18 @@ function decodeParameters(types: readonly (string | ethers.utils.ParamType)[], v
     return abi.decode(types, values);
 }
 
-export async function encodeExportWithSigData(data: {hash: string}, expiration: string) {
+export async function encodeExportWithSigData(data: { hash: string }, expiration: string, multiverseVersion: MultiverseVersion) {
     const {
         hash
     } = data;
+
+    if (multiverseVersion === MultiverseVersion.V2) {
+        return encodeParameters(
+            ['bytes32', 'uint256'],
+            [hash, expiration]
+        )
+    }
+
     return encodeParameters(
         ['bytes32', 'uint256'],
         [hash, expiration]
@@ -35,7 +44,7 @@ export type ImportData = {
     salt: string
 }
 
-export async function encodeImportWithSigData(data: ImportData, expiration: string) {
+export async function encodeImportWithSigData(data: ImportData, expiration: string, multiverseVersion: MultiverseVersion) {
     const {
         asset: {
             assetAddress,
@@ -48,13 +57,21 @@ export async function encodeImportWithSigData(data: ImportData, expiration: stri
         amount,
         salt
     } = data;
+
+    if (multiverseVersion === MultiverseVersion.V2) {
+        const _data = ethers.utils.formatBytes32String("")
+        const types = ['address', 'uint256', 'bytes32', 'address', 'bytes32', 'uint256[]', 'uint256[]', 'bytes32[]', 'uint256', 'bool']
+        const params = [assetAddress, assetType, metaverse, owner, _data, [assetId], [amount], [salt], expiration, false]
+        return encodeParameters(types, params)
+    }
+
     return encodeParameters(
         ['address', 'uint256', 'uint256', 'bytes32', 'address', 'address', 'uint256', 'bytes32', 'uint256', 'bool'],
         [assetAddress, assetId, assetType, metaverse, owner, beneficiary, amount, salt, expiration, false]
     )
 }
 
-export async function encodeEnraptureWithSigData(data: ImportData, expiration: string) {
+export async function encodeEnraptureWithSigData(data: ImportData, expiration: string, multiverseVersion: MultiverseVersion) {
     const {
         asset: {
             assetAddress,
@@ -67,6 +84,15 @@ export async function encodeEnraptureWithSigData(data: ImportData, expiration: s
         amount,
         salt,
     } = data;
+
+    if (multiverseVersion === MultiverseVersion.V2) {
+        const _data = ethers.utils.formatBytes32String("")
+
+        const types = ['address', 'uint256', 'bytes32', 'address', 'bytes32', 'uint256[]', 'uint256[]', 'bytes32[]', 'uint256', 'bool']
+        const params = [assetAddress, assetType, metaverse, owner, _data, [assetId], [amount], [salt], expiration, true]
+        return encodeParameters(types, params)
+    }
+
     return encodeParameters(
         ['address', 'uint256', 'uint256', 'bytes32', 'address', 'address', 'uint256', 'bytes32', 'uint256', 'bool'],
         [assetAddress, assetId, assetType, metaverse, owner, beneficiary, amount, salt, expiration, true]
@@ -91,7 +117,7 @@ export async function encodeSummonWithSigData(data: SummonData, expiration: stri
     } = data;
     return encodeParameters(
         ['uint256', 'bytes32', 'address', 'uint256[]', 'uint256[]', 'bytes'],
-        [ expiration, metaverse, to, assetIds, amounts, extradata]
+        [expiration, metaverse, to, assetIds, amounts, extradata]
     )
 }
 
@@ -136,13 +162,13 @@ export function bytesHexStringToMessageToSign(bytesHexString: string): Buffer {
 }
 
 export async function getSignature(signer: ethers.Signer, data: string): Promise<string> {
-  const sig = await signer.signMessage(bytesHexStringToMessageToSign(data))
-  return sig
+    const sig = await signer.signMessage(bytesHexStringToMessageToSign(data))
+    return sig
 }
 
 export async function getSalt() {
-  const b = "0x" + randomBytes(32).toString('hex')
-  return b
+    const b = "0x" + randomBytes(32).toString('hex')
+    return b
 }
 
 export async function utf8ToKeccak(data: string) {
@@ -150,7 +176,24 @@ export async function utf8ToKeccak(data: string) {
     return hash
 }
 
-export async function calculateMetaAssetHash(data: ImportData) {
+
+
+async function calculateMultiverseAssetStaticPartHash(data: ImportData) {
+    const {
+        metaverse,
+        asset: {
+            assetAddress,
+            assetType
+        }
+    } = data;
+    const hash = await ethers.utils.solidityKeccak256(
+        ['bytes32', 'address', 'uint8'],
+        [metaverse, assetAddress, assetType]
+    )
+    return hash
+}
+
+export async function calculateMetaAssetHash(data: ImportData, multiverseVersion: MultiverseVersion) {
     const {
         asset: {
             assetAddress,
@@ -163,10 +206,22 @@ export async function calculateMetaAssetHash(data: ImportData) {
         amount,
         salt
     } = data;
-    const encoded = encodeParameters(
+
+    let encoded = encodeParameters(
         ['address', 'uint256', 'bytes32', 'address', 'address', 'uint256', 'bytes32'],
         [assetAddress, assetId, metaverse, owner, beneficiary, amount, salt]
     )
+    if (multiverseVersion === MultiverseVersion.V2) {
+        const staticHash = await calculateMultiverseAssetStaticPartHash(data)
+        const _data = ethers.utils.formatBytes32String("")
+
+        const hash = await ethers.utils.solidityKeccak256(
+            ['bytes32', 'uint256', 'uint256', 'address', 'bytes32', 'bytes'],
+            [staticHash, assetId, amount, owner, salt, _data]
+        )
+        return hash
+    }
+
     const hash = await ethers.utils.keccak256(encoded)
     return hash
 }

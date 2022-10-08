@@ -7,18 +7,21 @@ import {
   RECOGNIZED_COLLECTIONS_ADDRESS,
   WAREHOUSE_ADDRESS,
   RPC_URLS,
+  MULTIVERSE_BRIDGE_V2_ADDRESS,
 } from '../../constants';
 import { useCallback, useMemo } from 'react';
 import { getContract, getContractWithChain } from 'utils';
 import {
   MARKETPLACE_V1_ABI,
   METAVERSE_V1_ABI,
+  METAVERSE_V2_ABI,
   RECOGNIZED_COLLECTIONS_ABI,
   WAREHOUSE_ABI,
 } from '../../abi/marketplace';
 import { MULTICALL2_ABI } from 'abi/multicall';
 import { ERC1155_ABI, ERC20_ABI, ERC721_ABI } from 'abi/token';
 import { useActiveWeb3React } from 'hooks';
+import { MultiverseVersion } from '../../state/api/types';
 
 export const useContract = (
   address: string | undefined,
@@ -46,7 +49,7 @@ export const useContract = (
 export const useContractWithChainCallback = (ABI: any, withSignerIfPossible = true) => {
   return useCallback(
     (address: string, chainId: number) => {
-      if (!address || !ABI ) return null;
+      if (!address || !ABI) return null;
       try {
         return getContractWithChain(
           address,
@@ -75,15 +78,21 @@ export function useMultiverseBridgeV1Contract(
   );
 }
 
-export function useMultiverseBridgeV2Contract(
+export function useMultiverseBridgeContract(
+  multiverseVersion: MultiverseVersion = MultiverseVersion.V1,
   withSignerIfPossible = true,
   chainId?: number
 ): Contract | null {
+  let abi = METAVERSE_V1_ABI
+  let contractAddress = chainId ? MULTIVERSE_BRIDGE_V1_ADDRESS[(chainId as ChainId) ?? ChainId.MOONRIVER] : undefined
+  if (multiverseVersion === MultiverseVersion.V2) {
+    abi = METAVERSE_V2_ABI
+    contractAddress = chainId ? MULTIVERSE_BRIDGE_V2_ADDRESS[(chainId as ChainId) ?? ChainId.MOONRIVER] : undefined
+  }
+
   return useContract(
-    chainId
-      ? MULTIVERSE_BRIDGE_V1_ADDRESS[(chainId as ChainId) ?? ChainId.MOONRIVER]
-      : undefined,
-    METAVERSE_V1_ABI,
+    contractAddress,
+    abi,
     withSignerIfPossible
   );
 }
@@ -109,8 +118,8 @@ export function useRecognizedCollectionsContract(
   return useContract(
     chainId
       ? RECOGNIZED_COLLECTIONS_ADDRESS[
-          (chainId as ChainId) ?? ChainId.MOONRIVER
-        ]
+      (chainId as ChainId) ?? ChainId.MOONRIVER
+      ]
       : undefined,
     RECOGNIZED_COLLECTIONS_ABI,
     withSignerIfPossible

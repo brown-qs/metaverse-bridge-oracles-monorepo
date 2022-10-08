@@ -20,7 +20,7 @@ import { useParams } from 'react-router';
 import { AccordionPanel, AccordionItem, Text, Accordion, Box, Button, CircularProgress, IconButton, Stack, useMediaQuery, Modal, Container, Grid, GridItem, AccordionButton, AccordionIcon, ExpandedIndex, HStack } from '@chakra-ui/react';
 import { MoonsamaLayout } from '../../../components';
 import { ChevronDown, ChevronUp } from 'tabler-icons-react';
-import { inGameMarketplaceMetadataParams, InGameTokenMaybeMetadata, inGameTokensCombineMetadata } from '../../../utils/graphqlReformatter';
+import { inGameMetadataParams, InGameTokenMaybeMetadata, inGameTokensCombineMetadata, StandardizedMetadata, standardizeMarketplaceMetadata } from '../../../utils/graphqlReformatter';
 import React from 'react';
 import { useGetInGameItemsQuery } from '../../../state/api/bridgeApi';
 import { useSelector } from 'react-redux';
@@ -561,7 +561,8 @@ const CharacterDesignerPage = () => {
   const accessToken = useSelector(selectAccessToken)
   const { data: inGameItemsData, isLoading: isInGameItemsDataLoading, isFetching: isInGameItemsDataFetching, isError: isInGameItemsError, error: inGameItemsError } = useGetInGameItemsQuery()
 
-  const { data: inGameItemsMetadata, isLoading: isInGameItemsMetadataLoading, isFetching: isInGameItemsMetadataFetching, isError: isInGameItemsMetadataError, error: inGameItemsMetadataError } = useGetMarketplaceMetadataQuery(inGameMarketplaceMetadataParams(inGameItemsData))
+  const { data: marketplaceInGameItemsMetadata, isLoading: isMarketplaceInGameItemsMetadataLoading, isFetching: isMarketplaceInGameItemsMetadataFetching, isError: isMarketplaceInGameItemsMetadataError, error: marketplaceInGameItemsMetadataError } = useGetMarketplaceMetadataQuery(inGameMetadataParams(inGameItemsData).marketplace)
+
 
   const [isTallerThan883] = useMediaQuery('(min-height: 883px)')
   const [isMobileViewport] = useMediaQuery('(max-width: 992px)')
@@ -586,6 +587,17 @@ const CharacterDesignerPage = () => {
   const [saveProgress, setSaveProgress] = useState<{ inProgress?: boolean, errorMessage?: string }>({});
   const [fetchingCustomizations, setFetchingCustomizations] = useState<Array<AssetIdentifier>>([]);
   const [bullshit, setBullshit] = useState<boolean>(false);
+
+  const inGameItemsMetadata: StandardizedMetadata[] | undefined = React.useMemo(() => {
+    if (!!marketplaceInGameItemsMetadata) {
+      return [
+        ...(standardizeMarketplaceMetadata(marketplaceInGameItemsMetadata) ?? [])
+      ]
+    } else {
+      return undefined
+    }
+  }, [marketplaceInGameItemsMetadata])
+
   const inGameItems: InGameTokenMaybeMetadata[] | undefined = React.useMemo(() => {
     if (!!inGameItemsData) {
       return [...inGameTokensCombineMetadata(inGameItemsData, inGameItemsMetadata)].sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
