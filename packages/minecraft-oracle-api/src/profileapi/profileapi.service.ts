@@ -141,6 +141,8 @@ export class ProfileApiService {
         if (user.allowedToPlay) {
             const userAssets = await this.assetService.findMany({ where: { owner: user.uuid, pendingIn: false } })
             if (userAssets.find(asset => asset.recognizedAssetType == RecognizedAssetType.MOONSAMA)) allowedToPlayReason = PlayEligibilityReason.MOONSAMA;
+            else if (userAssets.find(asset => asset.recognizedAssetType == RecognizedAssetType.EXOSAMA)) allowedToPlayReason = PlayEligibilityReason.EXOSAMA;
+            else if (userAssets.find(asset => asset.recognizedAssetType == RecognizedAssetType.GROMLIN)) allowedToPlayReason = PlayEligibilityReason.GROMLIN;
             else if (userAssets.find(asset => asset.recognizedAssetType == RecognizedAssetType.TICKET)) allowedToPlayReason = PlayEligibilityReason.TICKET;
             else if (userAssets.find(asset => asset.recognizedAssetType == RecognizedAssetType.TEMPORARY_TICKET)) allowedToPlayReason = PlayEligibilityReason.TEMPORARY_TICKET;
         }

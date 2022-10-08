@@ -70,7 +70,7 @@ export const MULTICALL_NETWORKS: { [chainId: number]: string } = {
   [ChainId.GÖRLI]: '0x77dCa2C955b15e9dE4dbBCf1246B4B85b651e50e',
   [ChainId.VOLTA]: '0xf097d0eAb2dC8B6396a6433978567C443a691815', // latest multicall 2 deployments
   [ChainId.MOONRIVER]: '0x8B60499C8e99d1218Df15ba6e8f0937e1878b86c', // latest multicall 2 deployments
-  [ChainId.MOONBEAM]: '0x62614aee098C7a84dC070fF06688F4C35D3868F9'
+  [ChainId.MOONBEAM]: '0x7A88A713F806073e0027179E2DfeD4100b888F25' // latest multicall v2
 };
 
 export enum SUPPORTED_CONTRACTS {
@@ -118,11 +118,13 @@ export const MULTIVERSE_BRIDGE_V1_WAREHOUSE_ADDRESS: { [chainId in ChainId]?: st
 };
 
 export const MULTIVERSE_BRIDGE_V2_ADDRESS: { [chainId in ChainId]?: string } = {
-  [ChainId.MOONRIVER]: '0x1ff3097f4a82913d690d2a59de613378ae2b3c05'
+  [ChainId.MOONRIVER]: '0x1ff3097f4a82913d690d2a59de613378ae2b3c05',
+  [ChainId.MOONBEAM]: '0x694665f738fa1d9349744098d6cecdccc2adbfb4'
 };
 
 export const MULTIVERSE_BRIDGE_V2_WAREHOUSE_ADDRESS: { [chainId in ChainId]?: string } = {
-  [ChainId.MOONRIVER]: '0x59C481548CE7BA13f3288df9f4FCf44a10A589A0'
+  [ChainId.MOONRIVER]: '0x59C481548CE7BA13f3288df9f4FCf44a10A589A0',
+  [ChainId.MOONBEAM]: '0xC816967B73d6e7E12D5FDE30d20c4561fBAa5C3D'
 };
 
 export const PROTOCOL_FEE_BPS = '200';
