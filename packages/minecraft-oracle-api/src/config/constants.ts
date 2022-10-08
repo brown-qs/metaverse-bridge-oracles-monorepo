@@ -57,6 +57,8 @@ export enum MultiverseVersion {
 export enum PlayEligibilityReason {
   NONE = 'NONE',
   MOONSAMA = 'MSAMA',
+  GROMLIN = 'GROMLIN',
+  EXOSAMA = 'EXOSAMA',
   TICKET = 'TICKET',
   TEMPORARY_TICKET = 'TEMPORARY_TICKET',
 }
