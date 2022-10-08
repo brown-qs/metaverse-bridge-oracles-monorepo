@@ -197,7 +197,7 @@ export function ExportModal() {
             {...baseProps}
             title="Transaction success!"
             TablerIcon={Checks}
-            message="Confirming export with the metaverse oracle..."
+            message="Confirming export with the multiverse oracle..."
         >
             <VStack spacing="0">
                 <Box w="100%" h="48px" bg="whiteAlpha.100" borderRadius="8px">
