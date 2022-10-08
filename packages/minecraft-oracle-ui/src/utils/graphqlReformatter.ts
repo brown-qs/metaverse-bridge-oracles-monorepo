@@ -46,7 +46,7 @@ export const addRegonizedTokenDataToStandardizedOnChainTokens = (tokens: Standar
             const recognizedAsset = recognizedAssetData.find(ra => ra?.assetAddress?.toLowerCase() === tok?.assetAddress?.toLowerCase())
             if (!!recognizedAsset) {
                 const collectionFragment = recognizedAsset.collectionFragments.find((cf) => {
-                    if (!!cf.idRange) {
+                    if (!!cf.idRange && !(Array.isArray(cf.idRange) && cf.idRange.length === 0)) {
                         return cf.idRange?.includes(tok?.numericId)
                     } else {
                         //if no id range everything accepted
