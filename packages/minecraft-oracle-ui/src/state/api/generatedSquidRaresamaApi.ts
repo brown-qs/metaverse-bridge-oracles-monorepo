@@ -1233,7 +1233,7 @@ export type GetRaresamaOnChainTokensQuery = { __typename?: 'Query', tokens: Arra
 
 export const GetRaresamaMetadataDocument = `
     query getRaresamaMetadata($where: TokenWhereInput) {
-  tokens(where: $where, limit: 1000) {
+  tokens(where: $where, limit: 500) {
     metadata {
       type
       name
@@ -1256,7 +1256,7 @@ export const GetRaresamaMetadataDocument = `
     `;
 export const GetRaresamaOnChainTokensDocument = `
     query getRaresamaOnChainTokens($where: TokenWhereInput) {
-  tokens(where: $where, limit: 1000) {
+  tokens(where: $where, limit: 500) {
     numericId
     metadata {
       image
