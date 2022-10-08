@@ -80,11 +80,11 @@ export function ExportModal() {
     useEffect(() => {
         const x = async () => {
             const confirmed = await confirmCb(exportTokens?.[0]?.hash, chainId)
-            //console.log('effect hook', confirmed)
+            console.log('EXPORT effect hook', confirmed)
             setExportConfirmed(confirmed)
         }
         x()
-    }, [exportTokens?.[0]?.hash, finalTxSubmitted, exportSubmitted, isPending])
+    }, [exportTokens?.[0]?.hash, finalTxSubmitted, exportSubmitted, isPending, chainId])
 
 
 
