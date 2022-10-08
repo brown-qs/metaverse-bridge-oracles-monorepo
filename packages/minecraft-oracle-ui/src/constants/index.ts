@@ -104,7 +104,7 @@ export const WMOVR_ADDRESS: { [chainId in ChainId]?: string } = {
 export const EXPLORER_URL: { [chainId in ChainId]?: string } = {
   [ChainId.VOLTA]: 'https://volta-explorer.energyweb.org',
   [ChainId.MOONRIVER]: 'https://moonriver.moonscan.io/',
-  [ChainId.MOONBEAM]: 'https://blockscout.moonbeam.network'
+  [ChainId.MOONBEAM]: 'https://moonbeam.moonscan.io/'
 };
 
 export const MULTIVERSE_BRIDGE_V1_ADDRESS: { [chainId in ChainId]?: string } = {
@@ -119,12 +119,12 @@ export const MULTIVERSE_BRIDGE_V1_WAREHOUSE_ADDRESS: { [chainId in ChainId]?: st
 
 export const MULTIVERSE_BRIDGE_V2_ADDRESS: { [chainId in ChainId]?: string } = {
   [ChainId.MOONRIVER]: '0x1ff3097f4a82913d690d2a59de613378ae2b3c05',
-  [ChainId.MOONBEAM]: '0x694665f738fa1d9349744098d6cecdccc2adbfb4'
+  [ChainId.MOONBEAM]: '0xbE122F9F612537Cb76020Ee63C32A07A6F7F4376'
 };
 
 export const MULTIVERSE_BRIDGE_V2_WAREHOUSE_ADDRESS: { [chainId in ChainId]?: string } = {
   [ChainId.MOONRIVER]: '0x59C481548CE7BA13f3288df9f4FCf44a10A589A0',
-  [ChainId.MOONBEAM]: '0xC816967B73d6e7E12D5FDE30d20c4561fBAa5C3D'
+  [ChainId.MOONBEAM]: '0x6D73E2920A92931be76F487a2E29F67b4D7858F9'
 };
 
 export const PROTOCOL_FEE_BPS = '200';
