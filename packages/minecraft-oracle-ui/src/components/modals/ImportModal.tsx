@@ -162,7 +162,7 @@ export function ImportModal() {
         </ReduxModal >)
     } else if (finalTxSubmitted && isPending) {
         return (<ReduxModal
-            title="Importing asset into the metaverse..."
+            title="Importing asset into the multiverse..."
             isOpenSelector={selectImportModalOpen}
             closeActionCreator={closeImportModal}
             closeOnOverlayClick={false}
@@ -179,7 +179,7 @@ export function ImportModal() {
             isOpenSelector={selectImportModalOpen}
             closeActionCreator={closeImportModal}
             closeOnOverlayClick={false}
-            message="Confirming import with the metaverse oracle..."
+            message="Confirming import with the multiverse oracle..."
         >
             <VStack spacing="0">
                 <Box w="100%" h="48px" bg="whiteAlpha.100" borderRadius="8px">

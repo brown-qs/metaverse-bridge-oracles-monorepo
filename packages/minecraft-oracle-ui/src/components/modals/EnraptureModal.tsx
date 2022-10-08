@@ -220,7 +220,7 @@ export function EnraptureModal() {
     } else if (finalTxSubmitted && isPending) {
         return (<ReduxModal
             {...baseProps}
-            title="Enrapturing asset into the metaverse..."
+            title="Enrapturing asset into the multiverse..."
             message="Check your wallet for potential action"
         >
 
@@ -230,7 +230,7 @@ export function EnraptureModal() {
             {...baseProps}
             title="Transaction success!"
             TablerIcon={Checks}
-            message="Confirming enrapture with the metaverse oracle..."
+            message="Confirming enrapture with the multiverse oracle..."
         >
             <VStack spacing="0">
                 <Box w="100%" h="48px" bg="whiteAlpha.100" borderRadius="8px">
