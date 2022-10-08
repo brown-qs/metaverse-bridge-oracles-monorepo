@@ -2263,7 +2263,7 @@ export type GetExosamaOnChainTokensQuery = { __typename?: 'Query', erc721Tokens:
 
 export const GetExosamaMetadataDocument = `
     query getExosamaMetadata($erc721Where: ERC721TokenWhereInput) {
-  erc721Tokens(where: $erc721Where, limit: 1000) {
+  erc721Tokens(where: $erc721Where, limit: 500) {
     metadata {
       type
       name
@@ -2286,7 +2286,7 @@ export const GetExosamaMetadataDocument = `
     `;
 export const GetExosamaOnChainTokensDocument = `
     query getExosamaOnChainTokens($owner: String!) {
-  erc721Tokens(where: {ownerId_eq: $owner}, limit: 1000) {
+  erc721Tokens(where: {ownerId_eq: $owner}, limit: 500) {
     numericId
     metadata {
       image

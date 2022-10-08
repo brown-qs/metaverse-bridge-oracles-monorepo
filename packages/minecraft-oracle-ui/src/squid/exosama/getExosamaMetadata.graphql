@@ -1,5 +1,5 @@
 query getExosamaMetadata($erc721Where: ERC721TokenWhereInput) {
-  erc721Tokens(where: $erc721Where, limit: 1000) {
+  erc721Tokens(where: $erc721Where, limit: 500) {
     metadata {
       type
       name
