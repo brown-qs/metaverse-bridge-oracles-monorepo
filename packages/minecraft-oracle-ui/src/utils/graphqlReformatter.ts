@@ -81,11 +81,26 @@ export const addRegonizedTokenDataToStandardizedOnChainTokens = (tokens: Standar
     }
 }
 
-export const formatTokenName = (token: StandardizedOnChainTokenWithRecognizedTokenData): string => {
+export const formatOnChainTokenName = (token: StandardizedOnChainTokenWithRecognizedTokenData): string => {
     let name = token?.metadata?.name ?? ""
 
     if (!!token?.numericId && token?.treatAsFungible === false) {
-        name = `${name} #${token?.numericId}`
+        //moonsamas have token id burned into name
+        if (token?.assetAddress?.toLowerCase() !== "0xb654611f84a8dc429ba3cb4fda9fad236c505a1a") {
+            name = `${name} #${token?.numericId}`
+        }
+    }
+    return name
+}
+
+export const formatInGameTokenName = (token: InGameTokenMaybeMetadata): string => {
+    let name = token?.metadata?.name ?? ""
+
+    if (!!token?.assetId) {
+        //moonsamas have token id burned into name
+        if (token?.assetAddress?.toLowerCase() !== "0xb654611f84a8dc429ba3cb4fda9fad236c505a1a") {
+            name = `${name} #${token?.assetId}`
+        }
     }
     return name
 }
