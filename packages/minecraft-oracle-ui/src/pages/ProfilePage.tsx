@@ -6,7 +6,7 @@ import { countGamePassAssets } from 'utils';
 import { useAssetDialog } from '../hooks/useAssetDialog/useAssetDialog';
 import React, { ReactNode, useEffect, useState } from 'react';
 import { SKIN_LABELS } from '../constants/skins';
-import { BURNABLE_RESOURCES_IDS, ChainId, DEFAULT_CHAIN, NETWORK_NAME } from "../constants";
+import { BURNABLE_RESOURCES_IDS, ChainId, DEFAULT_CHAIN, NETWORK_NAME, PERMISSIONED_CHAINS } from "../constants";
 import { AssetChainDetails } from '../components/AssetChainDetails/AssetChainDetails';
 import { Image, Text, Box, Container, Grid, List, ListIcon, ListItem, Stack, Tooltip, Button, Flex, SimpleGrid, GridItem, VStack, HStack, background, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useCheckboxGroup, useMediaQuery, CircularProgress } from '@chakra-ui/react';
 import { BridgeTab } from '../components/Bridge/BridgeTab';
@@ -58,7 +58,7 @@ const ProfilePage = () => {
     //on chain tokens (from indexers)
     const { data: raresamaOnChainTokensData, currentData: currentRaresamaOnChainTokensData, isLoading: isRaresamaOnChainTokensDataLoading, isFetching: isRaresamaOnChainTokensDataFetching, isError: isRaresamaOnChainTokensDataError, error: raresamaOnChainTokensError, refetch: refetchRaresamaOnChainTokens } = useGetRaresamaOnChainTokensQuery({ where: { owner: { id_eq: address }, contract: { OR: [{ id_eq: "0xf27a6c72398eb7e25543d19fda370b7083474735" }, { id_eq: "0xe4bf451271d8d1b9d2a7531aa551b7c45ec95048" }] } } })
     const { data: marketplaceOnChainTokensData, currentData: currentMarketplaceOnChainTokensData, isLoading: isMarketplaceOnChainTokensLoading, isFetching: isMarketplaceOnChainTokensFetching, isError: isMarketplaceOnChainTokensError, error: marketplaceOnChainTokensError, refetch: refetchMarketplaceOnChainTokens } = useGetMarketplaceOnChainTokensQuery({ owner: address })
-    const { data: exosamaOnChainTokensData, currentData: exosamaMarketplaceOnChainTokensData, isLoading: isExosamaOnChainTokensLoading, isFetching: isExosamaOnChainTokensFetching, isError: isExosamaOnChainTokensError, error: exosamaOnChainTokensError, refetch: refetchExosamaOnChainTokens } = useGetExosamaOnChainTokensQuery({ owner: address })
+    const { data: exosamaOnChainTokensData, currentData: currentExosamaOnChainTokensData, isLoading: isExosamaOnChainTokensLoading, isFetching: isExosamaOnChainTokensFetching, isError: isExosamaOnChainTokensError, error: exosamaOnChainTokensError, refetch: refetchExosamaOnChainTokens } = useGetExosamaOnChainTokensQuery({ owner: address })
 
     //in game tokens (from nestjs server)
     const { data: recognizedAssetsData, isLoading: isRecognizedAssetsLoading, isFetching: isRecognizedAssetsFetching, isError: isRecognizedAssetsError, error: recognizedAssetsError, refetch: refetchRecognizedAssets } = useGetRecognizedAssetsQuery()
@@ -155,7 +155,7 @@ const ProfilePage = () => {
 
 
     const inGameItemsMetadata: StandardizedMetadata[] | undefined = React.useMemo(() => {
-        if (!!marketplaceInGameItemsMetadata || !!raresamaInGameItemsMetadata) {
+        if (!!marketplaceInGameItemsMetadata || !!raresamaInGameItemsMetadata || !!exosamaInGameItemsMetadata) {
             return [
                 ...(standardizeMarketplaceMetadata(marketplaceInGameItemsMetadata) ?? []),
                 ...(standardizeRaresamaMetadata(raresamaInGameItemsMetadata) ?? []),
@@ -170,16 +170,10 @@ const ProfilePage = () => {
         if (!!inGameItemsData) {
             return [...inGameTokensCombineMetadata(inGameItemsData, inGameItemsMetadata)]
                 .sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
-            /* .filter((tok) => {
-                 if (!!chainId && tok.chainId !== chainId) {
-                     return false
-                 }
-                 return true
-             })*/
         } else {
             return undefined
         }
-    }, [inGameItemsData, inGameItemsMetadata, chainId])
+    }, [inGameItemsData, inGameItemsMetadata])
 
 
     const inGameResourcesMetadata: StandardizedMetadata[] | undefined = React.useMemo(() => {
@@ -197,25 +191,25 @@ const ProfilePage = () => {
         if (!!inGameResourcesData) {
             return [...inGameTokensCombineMetadata(inGameResourcesData, inGameResourcesMetadata)]
                 .sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
-            /* .filter((tok) => {
-                 if (!!chainId && chainId !== ChainId.MOONRIVER) {
-                     return false
-                 }
-                 return true
-             })*/
         } else {
             return undefined
         }
-    }, [inGameResourcesData, inGameResourcesMetadata, chainId])
+    }, [inGameResourcesData, inGameResourcesMetadata])
 
-    //TODO: raresama/exosama loading
     const isOnChainItemsLoading: boolean = React.useMemo(() => {
-        if (isMarketplaceOnChainTokensFetching && !currentMarketplaceOnChainTokensData) {
-            return true
+        if (!!chainId) {
+            if (chainId === ChainId.MOONRIVER && isMarketplaceOnChainTokensFetching && !currentMarketplaceOnChainTokensData) {
+                return true
+            } else if (chainId === ChainId.MOONBEAM && isRaresamaOnChainTokensDataFetching && !currentRaresamaOnChainTokensData) {
+                return true
+            } else if (chainId === ChainId.MAINNET && isExosamaOnChainTokensFetching && !currentExosamaOnChainTokensData) {
+                return true
+            }
+            return false
         } else {
             return false
         }
-    }, [currentMarketplaceOnChainTokensData, isMarketplaceOnChainTokensFetching])
+    }, [currentMarketplaceOnChainTokensData, isMarketplaceOnChainTokensFetching, isRaresamaOnChainTokensDataFetching, currentRaresamaOnChainTokensData, isExosamaOnChainTokensFetching, currentExosamaOnChainTokensData, chainId])
 
     const isOnChainResourcesLoading: boolean = React.useMemo(() => {
         if (!!chainId && chainId === ChainId.MOONRIVER && isMarketplaceOnChainTokensFetching && !currentMarketplaceOnChainTokensData) {
@@ -224,6 +218,42 @@ const ProfilePage = () => {
             return false
         }
     }, [currentMarketplaceOnChainTokensData, isMarketplaceOnChainTokensFetching, chainId])
+
+
+    const emptyOnChainItemsMessage: string | undefined = React.useMemo(() => {
+        if (!!onChainItems?.[0]) {
+            return undefined
+        } else {
+            if (!!account) {
+                if (!!chainId && PERMISSIONED_CHAINS.includes(chainId)) {
+                    const networkName = NETWORK_NAME[chainId]
+                    return `There are no on-chain items on ${networkName}. You may need to change networks.`
+                } else {
+                    return 'Please change to a supported network to see your on-chain items.'
+                }
+            } else {
+                return 'Please connect a wallet on a supported network to see your on-chain items.'
+            }
+        }
+    }, [onChainItems, account, chainId])
+
+
+    const emptyOnChainResourcesMessage: string | undefined = React.useMemo(() => {
+        if (!!onChainResources?.[0]) {
+            return undefined
+        } else {
+            if (!!account) {
+                if (!!chainId && PERMISSIONED_CHAINS.includes(chainId)) {
+                    const networkName = NETWORK_NAME[chainId]
+                    return `There are no on-chain resources on ${networkName}. You may need to change networks.`
+                } else {
+                    return 'Please change to a supported network to see your on-chain resources.'
+                }
+            } else {
+                return 'Please connect a wallet on a supported network to see your on-chain resources.'
+            }
+        }
+    }, [onChainResources, account, chainId])
 
 
 
@@ -487,7 +517,7 @@ const ProfilePage = () => {
                             >
                                 <BridgeTab
                                     title="On-Chain Items"
-                                    emptyMessage={onChainItems?.length ? undefined : "No items found in wallet."}
+                                    emptyMessage={emptyOnChainItemsMessage}
                                     isLoading={isOnChainItemsLoading}
                                     icon={<Wallet size="18px" />}
                                     footer={
@@ -625,7 +655,7 @@ const ProfilePage = () => {
                             >
                                 <BridgeTab
                                     title="On-Chain Resources"
-                                    emptyMessage={onChainResources?.length ? undefined : "No resources found in wallet."}
+                                    emptyMessage={emptyOnChainResourcesMessage}
                                     isLoading={isOnChainResourcesLoading}
                                     icon={<Wallet size="18px" />}>
 
