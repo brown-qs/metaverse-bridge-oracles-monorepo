@@ -15,7 +15,10 @@ export interface MediaProps extends BoxProps {
 };
 
 export const Media = ({ uri, imageProps, videoProps, ...props }: MediaProps) => {
-    const { getMediaType, mediaUrl, isLoading } = useFileType(uri);
+    //hack to replace statis pod video
+    const mediaUri = uri?.replace("ipfs://QmQCeS76BRezJ5S7ezkVjeHcHJXjvGzDrZSEdjdwFYuGTB", "https://moonsama.mypinata.cloud/ipfs/QmUEuEv55cY6ZM5VWWSPVUpHjmsrJKrn526VQZs24qqNES/1.jpg")
+    console.log(`Media url: ${mediaUri}`)
+    const { getMediaType, mediaUrl, isLoading } = useFileType(mediaUri);
     const [mediaLoading, setMediaLoading] = useState<boolean>(true)
     const [mediaError, setMediaError] = useState<boolean>(false)
 
@@ -77,7 +80,7 @@ export const Media = ({ uri, imageProps, videoProps, ...props }: MediaProps) => 
             //  borderRadius={borderRadius}
             overflow="hidden"
             backgroundColor={loadingOrError ? "blackAlpha.300" : "transparent"}
-            animation={(loading && typeof uri === "string") ? `${skeletonAnimation} 1.6s linear infinite` : "inherit"}
+            animation={(loading && typeof mediaUri === "string") ? `${skeletonAnimation} 1.6s linear infinite` : "inherit"}
             {...props}
         >
 
@@ -93,7 +96,7 @@ export const Media = ({ uri, imageProps, videoProps, ...props }: MediaProps) => 
                     {getMedia()}
                 </Box>
             }
-            {(mediaError || typeof uri !== "string") &&
+            {(mediaError || typeof mediaUri !== "string") &&
                 <VStack alignItems="center" h="100%" w="100%">
                     <Box flex="1"></Box>
                     <Box alignSelf="center"><PhotoOff color="#fefefe"></PhotoOff></Box>
