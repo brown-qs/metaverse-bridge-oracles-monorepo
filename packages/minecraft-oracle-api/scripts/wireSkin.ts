@@ -46,6 +46,8 @@ import { Oauth2AuthorizationEntity } from '../src/oauth2api/oauth2-authorization
 import { Oauth2ClientEntity } from '../src/oauth2api/oauth2-client/oauth2-client.entity'
 import { ZUserAssetView, ZUserBaitView } from '../src/views'
 import { RecognizedAssetType } from '../src/config/constants'
+import { UserRole } from '../src/common/enums/UserRole'
+import { findRecognizedAsset } from '../src/utils/misc'
 
 config()
 
@@ -118,54 +120,58 @@ async function main() {
     }
     const users = await connection.manager.getRepository(UserEntity).find({ relations: ['assets', 'assets.collectionFragment', 'assets.collectionFragment.collection'], loadEagerRelations: true })
 
+    const fragments = await connection.manager.getRepository(CollectionFragmentEntity).find({ relations: ['collection', 'collection.chain'], loadEagerRelations: true })
+
     for (let i = 0; i < users.length; i++) {
 
         const user = users[i]
 
-        if (!user.assets || user.assets.length === 0) {
-            continue
-        }
+        // if (!user.assets || user.assets.length === 0) {
+        //     continue
+        // }
 
-        const MAP: {[key: string]: any} = {
-            '0xf27a6c72398eb7e25543d19fda370b7083474735': {
-                name: 'Gromlin',
-                type: RecognizedAssetType.GROMLIN
-            },
-            '0xac5c7493036de60e63eb81c5e9a440b42f47ebf5': {
-                name: 'Exosama',
-                type: RecognizedAssetType.EXOSAMA
-            }
-        }
-
-        console.log(user?.minecraftUserName ?? user?.gamerTag ?? user?.uuid)
-        for (let j = 0; j < user.assets.length; j++) {
-            const asset = user.assets[j]
-            if (asset.pendingIn) {
-                continue
-            }
+        const displayname = user?.minecraftUserName ?? user?.gamerTag ?? user?.uuid
+        console.log(displayname)
+        // for (let j = 0; j < user.assets.length; j++) {
+        //     const asset = user.assets[j]
+        //     if (asset.pendingIn) {
+        //         continue
+        //     }
             
-            const assetAddress = asset.collectionFragment.collection.assetAddress
-            const assetId = asset.assetId
+        //     const assetAddress = asset.collectionFragment.collection.assetAddress
+        //     const assetId = asset.assetId
 
-            if (!MAP[assetAddress]) {
-                continue
-            }
+        //     const recognizedAsset = findRecognizedAsset(fragments, {assetAddress, assetId})
 
-            console.log('    ', assetAddress, assetId, asset.recognizedAssetType)
+        //     console.log('    ', assetAddress, assetId, asset.recognizedAssetType)
 
-            const texture = await connection.manager.getRepository(TextureEntity).findOne({ where: { assetAddress, assetId } })
-            if (!!texture) {
-                await connection.manager.getRepository(SkinEntity).save(
-                    { id: SkinEntity.toId(user.uuid, assetAddress, assetId), owner: user, texture }
-                )
-                console.log('    skin set')
-            }
-            const rat = MAP[assetAddress.toLowerCase()]?.type.valueOf()
-            if (!asset.recognizedAssetType || (asset.recognizedAssetType.valueOf() !== rat && !!rat)) {
-                await connection.manager.getRepository(AssetEntity).update({}, {recognizedAssetType: MAP[assetAddress.toLowerCase()].type})
-                console.log('    assset type set')
-            }
-        }
+        //     const texture = await connection.manager.getRepository(TextureEntity).findOne({ where: { assetAddress, assetId } })
+        //     if (!!texture) {
+        //         await connection.manager.getRepository(SkinEntity).save(
+        //             { id: SkinEntity.toId(user.uuid, assetAddress, assetId), owner: user, texture }
+        //         )
+        //         console.log('    skin set')
+        //     }
+        //     const rat = recognizedAsset.recognizedAssetType
+        //     const pass = recognizedAsset.gamepass
+        //     if (!asset.recognizedAssetType || (asset.recognizedAssetType.valueOf() !== rat && !!rat)) {
+        //         await connection.manager.getRepository(AssetEntity).update(asset.hash, {recognizedAssetType: rat})
+        //         console.log('    assset type set', rat)
+        //     }
+        // }
+
+        const recmap = user.assets.map(asset => findRecognizedAsset(fragments, {assetAddress: asset.collectionFragment.collection.assetAddress, assetId: asset.assetId}))
+        const rec = (recmap.find(cf => cf.gamepass === true))
+        const numPassAssets = recmap.reduce((prev, curr) => {return (prev + (curr.gamepass ? 1: 0))}, 0)
+        const hasGamePass = rec !== null && rec !== undefined
+
+        console.log('set', displayname, hasGamePass, numPassAssets, hasGamePass ? UserRole.PLAYER: UserRole.NONE)
+        await connection.manager.getRepository(UserEntity).update(user.uuid, {allowedToPlay: hasGamePass, numGamePassAsset: numPassAssets, role: hasGamePass ? UserRole.PLAYER: UserRole.NONE})
+
+        // if (user.allowedToPlay !== hasGamePass || !user.role || user.role.valueOf() === UserRole.NONE.valueOf()) {
+        //     console.log('set', displayname, hasGamePass, numPassAssets, hasGamePass ? UserRole.PLAYER: UserRole.NONE)
+        //     await connection.manager.getRepository(UserEntity).update(user.uuid, {allowedToPlay: hasGamePass, role: hasGamePass ? UserRole.PLAYER: UserRole.NONE})
+        // }
     }
     await connection.close()
 }
