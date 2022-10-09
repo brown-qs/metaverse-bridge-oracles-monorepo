@@ -126,7 +126,9 @@ async function main() {
         [RecognizedAssetType.PLOT.valueOf()]: '0xa17a550871e5f5f692a69a3abe26e8dbd5991b75',
         [RecognizedAssetType.TEMPORARY_TICKET.valueOf()]: '0x0a54845ac3743c96e582e03f26c3636ea9c00c8a',
         [RecognizedAssetType.TICKET.valueOf()]: '0x1974eeaf317ecf792ff307f25a3521c35eecde86',
-        [RecognizedAssetType.WEAPON_SKIN.valueOf()]: '0x1974eeaf317ecf792ff307f25a3521c35eecde86'
+        [RecognizedAssetType.WEAPON_SKIN.valueOf()]: '0x1974eeaf317ecf792ff307f25a3521c35eecde86',
+        [RecognizedAssetType.GROMLIN.valueOf()]: '0x1974eeaf317ecf792ff307f25a3521c35eecde86',
+        [RecognizedAssetType.EXOSAMA.valueOf()]: '0x1974eeaf317ecf792ff307f25a3521c35eecde86'
     }
 
     try {
