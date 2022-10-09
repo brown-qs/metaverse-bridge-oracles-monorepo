@@ -1,3 +1,5 @@
+
+
 import { MaterialEntity } from '../src/material/material.entity'
 import { Connection, createConnection, getConnection } from 'typeorm'
 
@@ -18,34 +20,36 @@ import { PlayerAchievementEntity } from '../src/playerachievement/playerachievem
 import { PlayerScoreEntity } from '../src/playerscore/playerscore.entity'
 import { GganbuEntity } from '../src/gganbu/gganbu.entity'
 import { SnaplogEntity } from '../src/snaplog/snaplog.entity'
-import { GameItemTypeEntity } from '../src/gameitemtype/gameitemtype.entity'
-import { PlayerGameItemEntity } from '../src/playergameitem/playergameitem.entity'
-import { GameScoreTypeEntity } from '../src/gamescoretype/gamescoretype.entity'
 import { ChainEntity } from '../src/chain/chain.entity'
 import { CollectionEntity } from '../src/collection/collection.entity'
 import { CollectionFragmentEntity } from '../src/collectionfragment/collectionfragment.entity'
 import { CompositeAssetEntity } from '../src/compositeasset/compositeasset.entity'
 import { CompositeCollectionFragmentEntity } from '../src/compositecollectionfragment/compositecollectionfragment.entity'
 import { CompositePartEntity } from '../src/compositepart/compositepart.entity'
+import { GameItemTypeEntity } from '../src/gameitemtype/gameitemtype.entity'
+import { GameScoreTypeEntity } from '../src/gamescoretype/gamescoretype.entity'
+import { PlayerGameItemEntity } from '../src/playergameitem/playergameitem.entity'
 import { ResourceInventoryEntity } from '../src/resourceinventory/resourceinventory.entity'
+import { ResourceInventoryOffsetEntity } from '../src/resourceinventoryoffset/resourceinventoryoffset.entity'
 import { SecretEntity } from '../src/secret/secret.entity'
 import { SyntheticItemEntity } from '../src/syntheticitem/syntheticitem.entity'
 import { SyntheticPartEntity } from '../src/syntheticpart/syntheticpart.entity'
-import { ResourceInventoryOffsetEntity } from '../src/resourceinventoryoffset/resourceinventoryoffset.entity'
-import { BigNumber } from 'ethers'
-import { EmailEntity } from '../src/user/email/email.entity'
-import { KiltSessionEntity } from '../src/user/kilt-session/kilt-session.entity'
-import { KiltDappEntity } from '../src/user/kilt-dapp/kilt-dapp.entity'
 import { DidEntity } from '../src/user/did/did.entity'
 import { EmailChangeEntity } from '../src/user/email-change/email-change.entity'
 import { EmailLoginKeyEntity } from '../src/user/email-login-key/email-login-key.entity'
+import { EmailEntity } from '../src/user/email/email.entity'
+import { KiltDappEntity } from '../src/user/kilt-dapp/kilt-dapp.entity'
+import { KiltSessionEntity } from '../src/user/kilt-session/kilt-session.entity'
 import { MinecraftLinkEntity } from '../src/user/minecraft-link/minecraft-link.entity'
 import { MinecraftUserNameEntity } from '../src/user/minecraft-user-name/minecraft-user-name.entity'
 import { MinecraftUuidEntity } from '../src/user/minecraft-uuid/minecraft-uuid.entity'
 import { Oauth2AuthorizationEntity } from '../src/oauth2api/oauth2-authorization/oauth2-authorization.entity'
 import { Oauth2ClientEntity } from '../src/oauth2api/oauth2-client/oauth2-client.entity'
 import { ZUserAssetView, ZUserBaitView } from '../src/views'
-import { RecognizedAssetType } from '../src/config/constants'
+
+import * as fs from 'fs'
+import { TextureType } from '../src/texture/texturetype.enum'
+import { StringAssetType } from '../src/common/enums/AssetType'
 
 config()
 
@@ -116,59 +120,37 @@ async function main() {
     if (!connection.isConnected) {
         connection = await connection.connect()
     }
-    const users = await connection.manager.getRepository(UserEntity).find({ relations: ['assets', 'assets.collectionFragment', 'assets.collectionFragment.collection'], loadEagerRelations: true })
 
-    for (let i = 0; i < users.length; i++) {
+    const textureData = 'ewogICJ0aW1lc3RhbXAiIDogMTY2NTI2NzczODMxMSwKICAicHJvZmlsZUlkIiA6ICIwNTkyNTIxZGNjZWE0NzRkYjE0M2NmMDg2MDA1Y2FkNyIsCiAgInByb2ZpbGVOYW1lIiA6ICJwdXIyNCIsCiAgInNpZ25hdHVyZVJlcXVpcmVkIiA6IHRydWUsCiAgInRleHR1cmVzIiA6IHsKICAgICJTS0lOIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS9kODlhMzMxNTYxNDlmMTgwNmQ1ZTljMDdmMTk1NTI5N2YyN2VhMmRiYzA5YzFhZTllOGFmNDM3ODk4NTFhZGNhIgogICAgfQogIH0KfQ=='
+    const textureSignature = 'snHainjsdPPaH3UCK/s5WBTCsHlEZMer2DUY22IbEVzWmj5aOzy7aF1ysez4urLCu3nc3T1hgxcRZ5lv5m8WcVPn474v225bgHRlmWlRWdwZ3jNZKuRtWBD+MQtLxvYkgGklHyV8eIJQitxXxt8vVAfanc8gIwGtam67ny4daD0w4hQnQrYE291SGD2pZdLHMUg6jTD52qMTX8OcCO6R0Enf+ZTB2RHV3mrLBErcYKu8HknDgSNPvC0MCfNXK2C/nfCIyGD98KiVWNOn9mW7AOhvhAWr7SZJE+HVJ4C6iCkkv7iA5q0Fom4RBDSzFqVHbRWGga8ibhbf8Mvvo9oJ7ezQx3xesDLC9gv8nEuICJ/7uyKJLH4jfkm5r5YIVRswLbRzg0f+p0BjttPy/agcbAjQRmBe+cx0t5LQ2cs5FT/ZWuG0PEfXAkmMDRg9LcY+4hwkGYOVzMXdVSNCg7i7sokDFEhQaXmnmvwTxaNvjNrslgpMWQU9OJFoIFOdzGUztBBOxgmAlXmNWKW0lO3IJvtOnA4zUF/P1mMWun85SJh4+n1ZZmEbzuKoRk7qgc4gTRBUlVQvztHb5JGx/T2tLkO4PrBONGgpLdKa3aE2zUYZSNlJhYbzIOKs/mYlh7eq5Y+WHQ/47FddKlbB8l9dvDLX84wnfTNpGwrDpGfllF8='
+    const name = 'Gromlin'
+    const assetType = StringAssetType.ERC721
 
-        const user = users[i]
+    const assetAddress = '0xf27a6c72398eb7e25543d19fda370b7083474735'
+    for (let i = 1; i <= 3333; i++) {
+        console.log(i)
+        const assetId = i.toString()
 
-        if (!user.assets || user.assets.length === 0) {
-            continue
-        }
-
-        const MAP: {[key: string]: any} = {
-            '0xf27a6c72398eb7e25543d19fda370b7083474735': {
-                name: 'Gromlin',
-                type: RecognizedAssetType.GROMLIN
-            },
-            '0xac5c7493036de60e63eb81c5e9a440b42f47ebf5': {
-                name: 'Exosama',
-                type: RecognizedAssetType.EXOSAMA
-            }
-        }
-
-        console.log(user?.minecraftUserName ?? user?.gamerTag ?? user?.uuid)
-        for (let j = 0; j < user.assets.length; j++) {
-            const asset = user.assets[j]
-            if (asset.pendingIn) {
-                continue
-            }
-            
-            const assetAddress = asset.collectionFragment.collection.assetAddress
-            const assetId = asset.assetId
-
-            if (!MAP[assetAddress]) {
-                continue
-            }
-
-            console.log('    ', assetAddress, assetId, asset.recognizedAssetType)
-
-            const texture = await connection.manager.getRepository(TextureEntity).findOne({ where: { assetAddress, assetId } })
-            if (!!texture) {
-                await connection.manager.getRepository(SkinEntity).save(
-                    { id: SkinEntity.toId(user.uuid, assetAddress, assetId), owner: user, texture }
-                )
-                console.log('    skin set')
-            }
-            const rat = MAP[assetAddress.toLowerCase()]?.type.valueOf()
-            if (!asset.recognizedAssetType || (asset.recognizedAssetType.valueOf() !== rat && !!rat)) {
-                await connection.manager.getRepository(AssetEntity).update({}, {recognizedAssetType: MAP[assetAddress.toLowerCase()].type})
-                console.log('    assset type set')
-            }
-        }
+        await connection.manager.getRepository(TextureEntity).save({
+            assetType,
+            textureData,
+            textureSignature,
+            assetAddress,
+            assetId,
+            gamepass: false,
+            name,
+            type: TextureType.SKIN,
+            auction: false
+        })
     }
     await connection.close()
 }
 
 
 main()
+
+
+
+
+
+

@@ -36,6 +36,19 @@ import { SyntheticPartEntity } from '../src/syntheticpart/syntheticpart.entity'
 import { METAVERSE_ADDRESSES, RecognizedAssetType } from '../src/config/constants'
 import { checkIfIdIsRecognized } from '../src/utils'
 import { ResourceInventoryEntity } from '../src/resourceinventory/resourceinventory.entity'
+import { Oauth2AuthorizationEntity } from '../src/oauth2api/oauth2-authorization/oauth2-authorization.entity'
+import { Oauth2ClientEntity } from '../src/oauth2api/oauth2-client/oauth2-client.entity'
+import { ResourceInventoryOffsetEntity } from '../src/resourceinventoryoffset/resourceinventoryoffset.entity'
+import { DidEntity } from '../src/user/did/did.entity'
+import { EmailChangeEntity } from '../src/user/email-change/email-change.entity'
+import { EmailLoginKeyEntity } from '../src/user/email-login-key/email-login-key.entity'
+import { EmailEntity } from '../src/user/email/email.entity'
+import { KiltDappEntity } from '../src/user/kilt-dapp/kilt-dapp.entity'
+import { KiltSessionEntity } from '../src/user/kilt-session/kilt-session.entity'
+import { MinecraftLinkEntity } from '../src/user/minecraft-link/minecraft-link.entity'
+import { MinecraftUserNameEntity } from '../src/user/minecraft-user-name/minecraft-user-name.entity'
+import { MinecraftUuidEntity } from '../src/user/minecraft-uuid/minecraft-uuid.entity'
+import { ZUserAssetView, ZUserBaitView } from '../src/views'
 config()
 
 async function main() {
@@ -52,6 +65,10 @@ async function main() {
             port: Number.parseInt(process.env.TYPEORM_PORT),
             database: process.env.TYPEORM_DATABASE,
             entities: [
+                EmailChangeEntity,
+                MinecraftLinkEntity,
+                KiltSessionEntity,
+                EmailLoginKeyEntity,
                 UserEntity,
                 SnapshotItemEntity,
                 InventoryEntity,
@@ -81,9 +98,19 @@ async function main() {
                 CompositePartEntity,
                 SyntheticPartEntity,
                 SyntheticItemEntity,
-                ResourceInventoryEntity
+                ResourceInventoryEntity,
+                ResourceInventoryOffsetEntity,
+                ZUserAssetView,
+                MinecraftUserNameEntity,
+                MinecraftUuidEntity,
+                EmailEntity,
+                DidEntity,
+                KiltDappEntity,
+                Oauth2ClientEntity,
+                Oauth2AuthorizationEntity,
+                ZUserBaitView
             ],
-            synchronize: true
+            synchronize: false
         })
     } catch (err) {
         connection = getConnection('skinmigration')
