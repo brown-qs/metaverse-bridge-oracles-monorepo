@@ -25,32 +25,126 @@ import { SnaplogEntity } from '../src/snaplog/snaplog.entity'
 import { GameItemTypeEntity } from '../src/gameitemtype/gameitemtype.entity'
 import { PlayerGameItemEntity } from '../src/playergameitem/playergameitem.entity'
 import { GameScoreTypeEntity } from '../src/gamescoretype/gamescoretype.entity'
+import { ApolloClient, InMemoryCache, NormalizedCacheObject, HttpLink, gql, ApolloError } from '@apollo/client';
+import fetch from 'cross-fetch';
+import { CollectionEntity } from '../src/collection/collection.entity'
+import { CollectionFragmentEntity } from '../src/collectionfragment/collectionfragment.entity'
+import { CompositePartEntity } from '../src/compositepart/compositepart.entity'
+import { CompositeCollectionFragmentEntity } from '../src/compositecollectionfragment/compositecollectionfragment.entity'
+import { ResourceInventoryEntity } from '../src/resourceinventory/resourceinventory.entity'
+import { ResourceInventoryOffsetEntity } from '../src/resourceinventoryoffset/resourceinventoryoffset.entity'
+import { CompositeAssetEntity } from '../src/compositeasset/compositeasset.entity'
+import { SyntheticPartEntity } from '../src/syntheticpart/syntheticpart.entity'
+import { SyntheticItemEntity } from '../src/syntheticitem/syntheticitem.entity'
+import { Oauth2ClientEntity } from '../src/oauth2api/oauth2-client/oauth2-client.entity'
+import { EmailChangeEntity } from '../src/user/email-change/email-change.entity'
+import { EmailLoginKeyEntity } from '../src/user/email-login-key/email-login-key.entity'
+import { EmailEntity } from '../src/user/email/email.entity'
+import { KiltSessionEntity } from '../src/user/kilt-session/kilt-session.entity'
+import { MinecraftLinkEntity } from '../src/user/minecraft-link/minecraft-link.entity'
+import { KiltDappEntity } from '../src/user/kilt-dapp/kilt-dapp.entity'
+import { DidEntity } from '../src/user/did/did.entity'
+import { MinecraftUuidEntity } from '../src/user/minecraft-uuid/minecraft-uuid.entity'
+import { MinecraftUserNameEntity } from '../src/user/minecraft-user-name/minecraft-user-name.entity'
+import { getDatabaseConnection } from './common'
+import { RecognizedAssetType } from '../src/config/constants'
+
 config()
-
+const PAGE_SIZE = 100
 async function main() {
+    //  console.log(JSON.stringify(process.env))
+    //  process.exit()
 
-    let connection: Connection
-    try {
-        connection = await createConnection({
-            keepAlive: 10000,
-            name: 'indexercompare',
-            type: process.env.TYPEORM_CONNECTION as any,
-            username: process.env.TYPEORM_USERNAME,
-            password: process.env.TYPEORM_PASSWORD,
-            host: process.env.TYPEORM_HOST,
-            port: Number.parseInt(process.env.TYPEORM_PORT),
-            database: process.env.TYPEORM_DATABASE,
-            entities: [GameScoreTypeEntity, PlayerGameItemEntity, GameItemTypeEntity, SnaplogEntity, GganbuEntity, GameTypeEntity, PlayerScoreEntity, PlayerAchievementEntity, AchievementEntity, GameEntity, ChainEntity, MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity, SkinEntity, AssetEntity, SummonEntity, InventoryEntity, PlaySessionEntity, PlaySessionStatEntity],
-            synchronize: true
-        })
-    } catch (err) {
-        connection = getConnection('indexercompare')
+    const connection = await getDatabaseConnection("indexerComparer")
+
+    /*
+https://squid.subsquid.io/moonsama-multiverse/graphql
+https://squid.subsquid.io/exosama-squid/graphql
+https://squid.subsquid.io/raresama-moonbeam/graphql
+    */
+    const client = new ApolloClient({
+        link: new HttpLink({ uri: "https://mainnet-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2", fetch }),
+        cache: new InMemoryCache(),
+    });
+
+    let metaAssets: any = []
+    let page = 0
+    while (true) {
+        const query = gql`{
+            metaAssets(first: ${PAGE_SIZE}, skip: ${page * PAGE_SIZE}, where: {active: true}) {
+              salt
+              owner {
+                id
+              }
+              id
+              burned
+              asset {
+                assetId
+                assetAddress
+              }
+              amount
+              active
+            }
+          }`
+        let result
+        try {
+            result = await client.query(
+                {
+                    query
+                }
+            )
+            //   console.log(JSON.stringify(result, null, 4))
+        } catch (e) {
+            const error = e as ApolloError
+            console.log(JSON.stringify(error))
+            console.log("======= EXITING =======")
+            process.exit(-1)
+        }
+        page++
+        const newMetaAssets = result.data.metaAssets
+        metaAssets = [...metaAssets, ...newMetaAssets]
+        if (newMetaAssets.length < PAGE_SIZE) {
+            break
+        }
     }
-
-    if (!connection.isConnected) {
-        connection = await connection.connect()
+    console.log(`There are ${metaAssets.length} bridged assets according to the indexer, now checking to make sure they are in the database:`)
+    const notFoundAssetIds = []
+    const notFoundHashes = []
+    let count = 0
+    for (let i = 0; i < metaAssets.length; i++) {
+        const mAsset = metaAssets[i]
+        /*
+{
+    "__typename": "MetaAsset",
+    "salt": "0x40af29666bf1359f9b9e7fbafd67f92231edc5a93a46874dbf1a03a583cd4d1a",
+    "owner": {
+        "__typename": "User",
+        "id": "0xb3d35f151c87281658671bb7cc34feb107a52ff7"
+    },
+    "id": "0x007f3bb9f7a87c1bbb3073f1dc7abc9ea00a1248f32ce3f8f92d1567a302b20e",
+    "burned": false,
+    "asset": {
+        "__typename": "Asset",
+        "assetId": "2254",
+        "assetAddress": "0xf27a6c72398eb7e25543d19fda370b7083474735"
+    },
+    "amount": "1",
+    "active": true
+}
+        */
+        // console.log(JSON.stringify(mAsset, null, 4))
+        //console.log(`Checking that meta asset #${i} is in database...`)
+        const assetId = mAsset.asset.assetId
+        const assetEntity = await connection.manager.findOne<AssetEntity>(AssetEntity, { assetId, recognizedAssetType: RecognizedAssetType.EXOSAMA })
+        if (!!assetEntity) {
+            console.log(`✅ Gromlin #${assetId} in the datbase`)
+        } else {
+            notFoundAssetIds.push(assetId)
+            notFoundHashes.push(mAsset.id)
+            console.log(`❌ Gromlin #${assetId} is in the warehouse but NOT in the database`)
+        }
     }
-
+    console.log(`Not found asset ids: ${notFoundAssetIds.join(", ")} Hashes: ${notFoundHashes.join(", ")}`)
     /*
     const failed = []
 
