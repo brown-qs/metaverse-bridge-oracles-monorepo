@@ -177,7 +177,8 @@ export class OracleApiService {
             expiration: expiration.toString(),
             owner: user,
             salt,
-            collectionFragment
+            collectionFragment,
+            createdAt: new Date()
         })
         this.logger.debug(`InData: request: ${[hash, payload, signature]}`, this.context)
         return [hash, payload, signature, false]

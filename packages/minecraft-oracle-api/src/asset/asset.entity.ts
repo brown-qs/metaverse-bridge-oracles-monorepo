@@ -1,5 +1,6 @@
 import {
     IsBoolean,
+    IsDate,
     IsEnum,
     IsJSON,
     IsNumber,
@@ -27,6 +28,10 @@ export class AssetEntity {
     @Column()
     @IsString()
     amount: string;
+
+    @Column({ type: "timestamptz", default: new Date(), nullable: false })
+    @IsDate()
+    createdAt: Date;
 
     @Column()
     @IsString()
