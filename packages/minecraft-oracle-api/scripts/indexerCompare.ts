@@ -49,9 +49,13 @@ import { MinecraftUserNameEntity } from '../src/user/minecraft-user-name/minecra
 import { getDatabaseConnection } from './common'
 import { RecognizedAssetType } from '../src/config/constants'
 import dayjs from "dayjs"
+import { standardizeValidateAssetInParams } from '../src/oracleapi/oracleapi.utils'
 config()
 const PAGE_SIZE = 100
 async function main() {
+
+    standardizeValidateAssetInParams(1, 0, "0xC4550f2a6823Dbd9822BD19132ED9E25E2f9B59b", 0, "1000000000000000000", false, "0xC4550f2a6823Dbd9822BD19132ED9E25E2f9B59b")
+    return
     //  console.log(JSON.stringify(process.env))
     //  process.exit()
 
