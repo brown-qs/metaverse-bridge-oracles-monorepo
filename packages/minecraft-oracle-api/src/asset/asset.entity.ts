@@ -33,6 +33,10 @@ export class AssetEntity {
     @IsDate()
     createdAt: Date;
 
+    @Column({ type: "timestamptz", default: new Date(), nullable: false })
+    @IsDate()
+    modifiedAt: Date;
+
     @Column()
     @IsString()
     assetId: string;
