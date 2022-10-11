@@ -18,8 +18,6 @@ export function scopeToPrettyScope(sc: Oauth2Scope): Oauth2PrettyScope {
         }
     }
 }
-
-console.log(`scopeToPrettyScope: ${scopeToPrettyScope(Oauth2Scope.UserUuidRead)}`)
 //force compiler to verify that each Oauth2Scope has an entry in Oauth2PrettyScope
 interface Oauth2ScopeInterface extends Record<keyof typeof Oauth2Scope, string> { }
 type VerifyExtends<T, U extends T> = true
