@@ -125,7 +125,7 @@ https://squid.subsquid.io/raresama-moonbeam/graphql
         let count = 0
         for (let i = 0; i < metaAssets.length; i++) {
             const mAsset = metaAssets[i]
-            console.log(JSON.stringify(mAsset, null, 4))
+            // console.log(JSON.stringify(mAsset, null, 4))
             /*
     {
         "__typename": "MetaAsset",
