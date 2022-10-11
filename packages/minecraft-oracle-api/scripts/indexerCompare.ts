@@ -50,12 +50,12 @@ import { getDatabaseConnection } from './common'
 import { RecognizedAssetType } from '../src/config/constants'
 import dayjs from "dayjs"
 import { standardizeValidateAssetInParams } from '../src/oracleapi/oracleapi.utils'
+import { METAVERSE_V2_ABI } from '../src/common/contracts/MetaverseV2'
 config()
 const PAGE_SIZE = 100
 async function main() {
 
-    standardizeValidateAssetInParams(1, 0, "0xC4550f2a6823Dbd9822BD19132ED9E25E2f9B59b", 0, "1000000000000000000", false, "0xC4550f2a6823Dbd9822BD19132ED9E25E2f9B59b")
-    return
+
     //  console.log(JSON.stringify(process.env))
     //  process.exit()
 
@@ -67,8 +67,9 @@ https://squid.subsquid.io/exosama-squid/graphql
 https://squid.subsquid.io/raresama-moonbeam/graphql
     */
     const indexers = [
-        "https://moonbeam-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2",
-        "https://mainnet-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2",
+        "https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2"
+        // "https://moonbeam-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2",
+        //"https://mainnet-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2",
     ]
     for (const indexer of indexers) {
         const client = new ApolloClient({
@@ -90,6 +91,7 @@ https://squid.subsquid.io/raresama-moonbeam/graphql
                   asset {
                     assetId
                     assetAddress
+                    assetType
                   }
                   amount
                   active
@@ -123,6 +125,7 @@ https://squid.subsquid.io/raresama-moonbeam/graphql
         let count = 0
         for (let i = 0; i < metaAssets.length; i++) {
             const mAsset = metaAssets[i]
+            console.log(JSON.stringify(mAsset, null, 4))
             /*
     {
         "__typename": "MetaAsset",
@@ -137,6 +140,7 @@ https://squid.subsquid.io/raresama-moonbeam/graphql
             "__typename": "Asset",
             "assetId": "2254",
             "assetAddress": "0xf27a6c72398eb7e25543d19fda370b7083474735"
+            "assetType": "ERC721"
         },
         "amount": "1",
         "active": true
@@ -144,13 +148,17 @@ https://squid.subsquid.io/raresama-moonbeam/graphql
             */
             // console.log(JSON.stringify(mAsset, null, 4))
             //console.log(`Checking that meta asset #${i} is in database...`)
+            const assetTypes = ["UNKNOWN", "NATIVE", "ERC20", "ERC721", "ERC1155"]
             const assetId = mAsset.asset.assetId
             const modifiedAtDate = new Date(mAsset.modifiedAt * 1000)
+            const timeDiff = new Date().getTime() - mAsset.modifiedAt * 1000
+            const olderThanOneDay = timeDiff > 1000 * 60 * 60 * 24
             const modifiedAtPretty = dayjs(modifiedAtDate).format()
             const assetEntity = await connection.manager.findOne<AssetEntity>(AssetEntity, { hash: mAsset.id })
-            const collection = await connection.manager.findOne<CollectionEntity>(CollectionEntity, { assetAddress: mAsset.asset.assetAddress.toLowerCase() })
+            const collection = await connection.manager.findOne<CollectionEntity>(CollectionEntity, { assetAddress: mAsset.asset.assetAddress.toLowerCase() }, { relations: ["chain"] })
+            // const standardizedAsset = standardizeValidateAssetInParams(collection.chain.chainId, assetTypes.indexOf(mAsset.asset.assetType), mAsset.asset.assetAddress.toLowerCase(), parseInt(assetId), mAsset.amount, mAsset.burned, mAsset.owner.id.toLowerCase())
             if (!collection) {
-                throw new Error("Couldn't find recognized collection for asset")
+                throw new Error(`Couldn't find recognized collection for asset ${mAsset.asset.assetAddress.toLowerCase()}`)
             }
             if (!!assetEntity) {
                 console.log(`✅\t${collection.name}\t#${assetId}\t${modifiedAtPretty}\tin the datbase`)
@@ -158,6 +166,16 @@ https://squid.subsquid.io/raresama-moonbeam/graphql
                 notFoundAssetIds.push(assetId)
                 notFoundHashes.push(mAsset.id)
                 console.log(`❌\t${collection.name}\t#${assetId}\t${modifiedAtPretty}\tNOT in the datbase`)
+                if (olderThanOneDay) {
+                    console.log("Older than a day and not in the database, unstaking...")
+                    console.log(JSON.stringify(collection, null, 4))
+                    const client = new ethers.providers.JsonRpcProvider(collection.chain.rpcUrl);
+
+                    const oracle = new ethers.Wallet(process.env.ORACLE_PRIVATE_KEY, client);
+                    const contract = new Contract(collection.chain.multiverseV2Address, METAVERSE_V2_ABI, oracle)
+                    await contract.unstake([mAsset.id])
+                }
+
             }
         }
         console.log(`Not found asset ids: ${notFoundAssetIds.join(", ")} Hashes: ${notFoundHashes.join(", ")} `)
