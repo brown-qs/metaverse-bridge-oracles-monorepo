@@ -48,7 +48,7 @@ import { MinecraftUuidEntity } from '../src/user/minecraft-uuid/minecraft-uuid.e
 import { MinecraftUserNameEntity } from '../src/user/minecraft-user-name/minecraft-user-name.entity'
 import { getDatabaseConnection } from './common'
 import { RecognizedAssetType } from '../src/config/constants'
-
+import dayjs from "dayjs"
 config()
 const PAGE_SIZE = 100
 async function main() {
@@ -62,117 +62,104 @@ https://squid.subsquid.io/moonsama-multiverse/graphql
 https://squid.subsquid.io/exosama-squid/graphql
 https://squid.subsquid.io/raresama-moonbeam/graphql
     */
-    const client = new ApolloClient({
-        link: new HttpLink({ uri: "https://mainnet-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2", fetch }),
-        cache: new InMemoryCache(),
-    });
+    const indexers = [
+        "https://moonbeam-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2",
+        "https://mainnet-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2",
+    ]
+    for (const indexer of indexers) {
+        const client = new ApolloClient({
+            link: new HttpLink({ uri: indexer, fetch }),
+            cache: new InMemoryCache(),
+        });
 
-    let metaAssets: any = []
-    let page = 0
-    while (true) {
-        const query = gql`{
-            metaAssets(first: ${PAGE_SIZE}, skip: ${page * PAGE_SIZE}, where: {active: true}) {
-              salt
-              owner {
-                id
-              }
-              id
-              burned
-              asset {
-                assetId
-                assetAddress
-              }
-              amount
-              active
+        let metaAssets: any = []
+        let page = 0
+        while (true) {
+            const query = gql`{
+                metaAssets(first: ${PAGE_SIZE}, skip: ${page * PAGE_SIZE}, where: {active: true}, orderBy: modifiedAt) {
+                  salt
+                  owner {
+                    id
+                  }
+                  id
+                  burned
+                  asset {
+                    assetId
+                    assetAddress
+                  }
+                  amount
+                  active
+                  modifiedAt
+                }
+              }`
+            let result
+            try {
+                result = await client.query(
+                    {
+                        query
+                    }
+                )
+                //   console.log(JSON.stringify(result, null, 4))
+            } catch (e) {
+                const error = e as ApolloError
+                console.log(JSON.stringify(error))
+                console.log("======= EXITING =======")
+                process.exit(-1)
             }
-          }`
-        let result
-        try {
-            result = await client.query(
-                {
-                    query
-                }
-            )
-            //   console.log(JSON.stringify(result, null, 4))
-        } catch (e) {
-            const error = e as ApolloError
-            console.log(JSON.stringify(error))
-            console.log("======= EXITING =======")
-            process.exit(-1)
-        }
-        page++
-        const newMetaAssets = result.data.metaAssets
-        metaAssets = [...metaAssets, ...newMetaAssets]
-        if (newMetaAssets.length < PAGE_SIZE) {
-            break
-        }
-    }
-    console.log(`There are ${metaAssets.length} bridged assets according to the indexer, now checking to make sure they are in the database:`)
-    const notFoundAssetIds = []
-    const notFoundHashes = []
-    let count = 0
-    for (let i = 0; i < metaAssets.length; i++) {
-        const mAsset = metaAssets[i]
-        /*
-{
-    "__typename": "MetaAsset",
-    "salt": "0x40af29666bf1359f9b9e7fbafd67f92231edc5a93a46874dbf1a03a583cd4d1a",
-    "owner": {
-        "__typename": "User",
-        "id": "0xb3d35f151c87281658671bb7cc34feb107a52ff7"
-    },
-    "id": "0x007f3bb9f7a87c1bbb3073f1dc7abc9ea00a1248f32ce3f8f92d1567a302b20e",
-    "burned": false,
-    "asset": {
-        "__typename": "Asset",
-        "assetId": "2254",
-        "assetAddress": "0xf27a6c72398eb7e25543d19fda370b7083474735"
-    },
-    "amount": "1",
-    "active": true
-}
-        */
-        // console.log(JSON.stringify(mAsset, null, 4))
-        //console.log(`Checking that meta asset #${i} is in database...`)
-        const assetId = mAsset.asset.assetId
-        const assetEntity = await connection.manager.findOne<AssetEntity>(AssetEntity, { assetId, recognizedAssetType: RecognizedAssetType.EXOSAMA })
-        if (!!assetEntity) {
-            console.log(`✅ Gromlin #${assetId} in the datbase`)
-        } else {
-            notFoundAssetIds.push(assetId)
-            notFoundHashes.push(mAsset.id)
-            console.log(`❌ Gromlin #${assetId} is in the warehouse but NOT in the database`)
-        }
-    }
-    console.log(`Not found asset ids: ${notFoundAssetIds.join(", ")} Hashes: ${notFoundHashes.join(", ")}`)
-    /*
-    const failed = []
-
-    try {
-        const assets = await connection.manager.find<AssetEntity>(AssetEntity, { loadEagerRelations: true })
-
-        for (let i = 0; i < assets.length; i++) {
-            const asset = assets[i]
-
-            if (!asset.assetOwner) {
-                const chainEntity = await connection.manager.findOne<ChainEntity>(ChainEntity, { chainId: asset.collectionFragment.collection.chainId })
-                const contract = new Contract(chainEntity.multiverseV1Address, METAVERSE_ABI, new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl))
-                console.log('hash', asset.hash)
-                try {
-                    const mAsset: MetaAsset = asset.enraptured ? await contract.getEnrapturedMetaAsset(asset.hash) : await contract.getImportedMetaAsset(asset.hash)
-                    console.log('   address', mAsset.owner)
-                    await connection.manager.update<AssetEntity>(AssetEntity, { hash: asset.hash }, { assetOwner: mAsset.owner.toLowerCase() })
-                } catch (error) {
-                    failed.push(asset.hash)
-                }
+            page++
+            const newMetaAssets = result.data.metaAssets
+            metaAssets = [...metaAssets, ...newMetaAssets]
+            if (newMetaAssets.length < PAGE_SIZE) {
+                break
             }
         }
-
-    } catch (err) {
-        console.log(err)
+        console.log(`There are ${metaAssets.length} bridged assets according to the indexer, now checking to make sure they are in the database:`)
+        const notFoundAssetIds = []
+        const notFoundHashes = []
+        let count = 0
+        for (let i = 0; i < metaAssets.length; i++) {
+            const mAsset = metaAssets[i]
+            /*
+    {
+        "__typename": "MetaAsset",
+        "salt": "0x40af29666bf1359f9b9e7fbafd67f92231edc5a93a46874dbf1a03a583cd4d1a",
+        "owner": {
+            "__typename": "User",
+            "id": "0xb3d35f151c87281658671bb7cc34feb107a52ff7"
+        },
+        "id": "0x007f3bb9f7a87c1bbb3073f1dc7abc9ea00a1248f32ce3f8f92d1567a302b20e",
+        "burned": false,
+        "asset": {
+            "__typename": "Asset",
+            "assetId": "2254",
+            "assetAddress": "0xf27a6c72398eb7e25543d19fda370b7083474735"
+        },
+        "amount": "1",
+        "active": true
     }
-    console.log('failed: ', failed)
-    await connection.close()*/
+            */
+            // console.log(JSON.stringify(mAsset, null, 4))
+            //console.log(`Checking that meta asset #${i} is in database...`)
+            const assetId = mAsset.asset.assetId
+            const modifiedAtDate = new Date(mAsset.modifiedAt * 1000)
+            const modifiedAtPretty = dayjs(modifiedAtDate).format()
+            const assetEntity = await connection.manager.findOne<AssetEntity>(AssetEntity, { hash: mAsset.id })
+            const collection = await connection.manager.findOne<CollectionEntity>(CollectionEntity, { assetAddress: mAsset.asset.assetAddress.toLowerCase() })
+            if (!collection) {
+                throw new Error("Couldn't find recognized collection for asset")
+            }
+            if (!!assetEntity) {
+                console.log(`✅\t${collection.name}\t#${assetId}\t${modifiedAtPretty}\tin the datbase`)
+            } else {
+                notFoundAssetIds.push(assetId)
+                notFoundHashes.push(mAsset.id)
+                console.log(`❌\t${collection.name}\t#${assetId}\t${modifiedAtPretty}\tNOT in the datbase`)
+            }
+        }
+        console.log(`Not found asset ids: ${notFoundAssetIds.join(", ")} Hashes: ${notFoundHashes.join(", ")} `)
+    }
+
+
     process.exit(0);
 }
 
