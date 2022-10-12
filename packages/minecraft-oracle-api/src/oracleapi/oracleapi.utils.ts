@@ -1,5 +1,6 @@
 import { randomBytes } from "crypto";
 import { ethers } from "ethers";
+import Joi from "joi";
 import { AssetType } from "../common/enums/AssetType";
 import { MultiverseVersion } from "../config/constants";
 
@@ -31,71 +32,19 @@ export async function encodeExportWithSigData(data: { hash: string }, expiration
     )
 }
 
-export type ImportData = {
-    asset: {
-        assetAddress: string,
-        assetId: string,
-        assetType: AssetType
-    },
-    metaverse: string,
-    owner: string,
-    beneficiary: string,
-    amount: string,
-    salt: string
-}
-
-export async function encodeImportWithSigData(data: ImportData, expiration: string, multiverseVersion: MultiverseVersion) {
-    const {
-        asset: {
-            assetAddress,
-            assetId,
-            assetType
-        },
-        metaverse,
-        owner,
-        beneficiary,
-        amount,
-        salt
-    } = data;
+export async function encodeImportOrEnraptureWithSigData(a: StandardizedValidatedAssetInParams[], metaverse: string, salts: string[], expiration: string, multiverseVersion: MultiverseVersion) {
 
     if (multiverseVersion === MultiverseVersion.V2) {
-        const _data = ethers.utils.formatBytes32String("")
+        const d = ethers.utils.formatBytes32String("")
+
         const types = ['address', 'uint256', 'bytes32', 'address', 'bytes32', 'uint256[]', 'uint256[]', 'bytes32[]', 'uint256', 'bool']
-        const params = [assetAddress, assetType, metaverse, owner, _data, [assetId], [amount], [salt], expiration, false]
+        const params = [a[0].assetAddress, a[0].assetType, metaverse, a[0].owner, d, [a[0].assetId], [a[0].amount], [salts[0]], expiration, a[0].enrapture]
         return encodeParameters(types, params)
     }
 
     return encodeParameters(
         ['address', 'uint256', 'uint256', 'bytes32', 'address', 'address', 'uint256', 'bytes32', 'uint256', 'bool'],
-        [assetAddress, assetId, assetType, metaverse, owner, beneficiary, amount, salt, expiration, false]
-    )
-}
-
-export async function encodeEnraptureWithSigData(data: ImportData, expiration: string, multiverseVersion: MultiverseVersion) {
-    const {
-        asset: {
-            assetAddress,
-            assetId,
-            assetType
-        },
-        metaverse,
-        owner,
-        beneficiary,
-        amount,
-        salt,
-    } = data;
-
-    if (multiverseVersion === MultiverseVersion.V2) {
-        const _data = ethers.utils.formatBytes32String("")
-
-        const types = ['address', 'uint256', 'bytes32', 'address', 'bytes32', 'uint256[]', 'uint256[]', 'bytes32[]', 'uint256', 'bool']
-        const params = [assetAddress, assetType, metaverse, owner, _data, [assetId], [amount], [salt], expiration, true]
-        return encodeParameters(types, params)
-    }
-
-    return encodeParameters(
-        ['address', 'uint256', 'uint256', 'bytes32', 'address', 'address', 'uint256', 'bytes32', 'uint256', 'bool'],
-        [assetAddress, assetId, assetType, metaverse, owner, beneficiary, amount, salt, expiration, true]
+        [a[0].assetAddress, a[0].assetId, a[0].assetType, metaverse, a[0].owner, a[0].owner, a[0].amount, salts[0], expiration, a[0].enrapture]
     )
 }
 
@@ -178,50 +127,89 @@ export async function utf8ToKeccak(data: string) {
 
 
 
-async function calculateMultiverseAssetStaticPartHash(data: ImportData) {
-    const {
-        metaverse,
-        asset: {
-            assetAddress,
-            assetType
-        }
-    } = data;
+async function calculateMultiverseAssetStaticPartHash(a: StandardizedValidatedAssetInParams, metaverse: string) {
+
     const hash = await ethers.utils.solidityKeccak256(
         ['bytes32', 'address', 'uint8'],
-        [metaverse, assetAddress, assetType]
+        [metaverse, a.assetAddress, a.assetType]
     )
     return hash
 }
 
-export async function calculateMetaAssetHash(data: ImportData, multiverseVersion: MultiverseVersion) {
-    const {
-        asset: {
-            assetAddress,
-            assetId,
-            assetType
-        },
-        metaverse,
-        owner,
-        beneficiary,
-        amount,
-        salt
-    } = data;
+export async function calculateMetaAssetHash(a: StandardizedValidatedAssetInParams, metaverse: string, salt: string, multiverseVersion: MultiverseVersion) {
 
     let encoded = encodeParameters(
         ['address', 'uint256', 'bytes32', 'address', 'address', 'uint256', 'bytes32'],
-        [assetAddress, assetId, metaverse, owner, beneficiary, amount, salt]
+        [a.assetAddress, a.assetId, metaverse, a.owner, a.owner, a.amount, salt]
     )
     if (multiverseVersion === MultiverseVersion.V2) {
-        const staticHash = await calculateMultiverseAssetStaticPartHash(data)
+        const staticHash = await calculateMultiverseAssetStaticPartHash(a, metaverse)
         const _data = ethers.utils.formatBytes32String("")
 
         const hash = await ethers.utils.solidityKeccak256(
             ['bytes32', 'uint256', 'uint256', 'address', 'bytes32', 'bytes'],
-            [staticHash, assetId, amount, owner, salt, _data]
+            [staticHash, a.assetId, a.amount, a.owner, salt, _data]
         )
         return hash
     }
 
     const hash = await ethers.utils.keccak256(encoded)
     return hash
+}
+
+export type StandardizedValidatedAsset = {
+    chainId: number,
+    assetType: number,
+    assetAddress: string,
+    assetId: number,
+}
+
+export type StandardizedValidatedAssetInParams = StandardizedValidatedAsset & {
+    amount: string,
+    enrapture: boolean,
+    owner: string
+}
+
+export function standardizeValidateAsset(chainId: number, assetType: number, assetAddress: string, assetId: number): StandardizedValidatedAsset {
+    const result = {
+        chainId,
+        assetType,
+        assetAddress: assetAddress?.toLowerCase(),
+        assetId,
+    }
+
+    const schema = Joi.object({
+        chainId: Joi.number().integer().positive().prefs({ convert: false }).required(),
+        assetType: Joi.number().integer().min(0).prefs({ convert: false }).required(),
+        assetAddress: Joi.string().alphanum().lowercase().regex(/^0x[a-f0-9]{40}$/).required(),
+        assetId: Joi.number().integer().min(0).prefs({ convert: false }).required(),
+    })
+    Joi.assert(result, schema)
+
+    return result
+}
+
+export function standardizeValidateAssetInParams(chainId: number, assetType: number, assetAddress: string, assetId: number, amount: string, enrapture: boolean, owner: string): StandardizedValidatedAssetInParams {
+    const asset = standardizeValidateAsset(chainId, assetType, assetAddress, assetId)
+    const partialResult = {
+        amount,
+        enrapture,
+        owner: owner?.toLowerCase()
+    }
+
+    const schema = Joi.object({
+        amount: Joi.string().regex(/^\d+$/).required(),
+        enrapture: Joi.boolean().prefs({ convert: false }).required(),
+        owner: Joi.string().alphanum().lowercase().regex(/^0x[a-f0-9]{40}$/).required()
+    })
+    Joi.assert(partialResult, schema)
+
+    if (String(parseInt(partialResult.amount)) !== partialResult.amount) {
+        throw new Error("invalid amount int string")
+    }
+
+    if (!(parseInt(partialResult.amount) >= 1)) {
+        throw new Error("amount must be greater than or equal to 1")
+    }
+    return { ...asset, ...partialResult }
 }

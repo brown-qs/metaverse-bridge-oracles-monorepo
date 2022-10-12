@@ -7,7 +7,7 @@ import { UserEntity } from '../user/user/user.entity';
 import { GameService } from '../game/game.service';
 import { ImportDto } from './dtos/import.dto';
 import { CALLDATA_EXPIRATION_MS, CALLDATA_EXPIRATION_THRESHOLD, METAVERSE, MultiverseVersion, RecognizedAssetType } from '../config/constants';
-import { calculateMetaAssetHash, encodeEnraptureWithSigData, encodeExportWithSigData, encodeImportWithSigData, getSalt, getSignature, utf8ToKeccak } from './oracleapi.utils';
+import { calculateMetaAssetHash, encodeExportWithSigData, encodeImportOrEnraptureWithSigData, getSalt, getSignature, StandardizedValidatedAssetInParams, standardizeValidateAssetInParams, utf8ToKeccak } from './oracleapi.utils';
 import { BigNumber, Contract, ethers } from 'ethers';
 import { ProviderToken } from '../provider/token';
 import { AssetService } from '../asset/asset.service';
@@ -22,7 +22,7 @@ import { InventoryService } from '../playerinventory/inventory.service';
 import { InventoryEntity } from '../playerinventory/inventory.entity';
 import { SkinService } from '../skin/skin.service';
 import { SkinEntity } from '../skin/skin.entity';
-import { BridgeAssetType, StringAssetType } from '../common/enums/AssetType';
+import { AssetType, BridgeAssetType, StringAssetType } from '../common/enums/AssetType';
 import { NftApiService } from '../nftapi/nftapi.service';
 import { GameKind } from '../game/game.enum';
 import { ChainService } from '../chain/chain.service';
@@ -43,6 +43,7 @@ import { SkinSelectedEvent } from '../cqrs/events/skin-selected.event';
 import { AssetRemovedEvent } from '../cqrs/events/asset-removed.event';
 import { METAVERSE_V2_ABI } from '../common/contracts/MetaverseV2';
 import { ChainEntity } from '../chain/chain.entity';
+import Joi from 'joi';
 
 @Injectable()
 export class OracleApiService {
@@ -79,62 +80,66 @@ export class OracleApiService {
     }
 
     public async userInRequest(user: UserEntity, data: ImportDto, enraptured: boolean): Promise<[string, string, string, boolean]> {
-        this.logger.debug(`userInRequest: ${JSON.stringify(data)}, enraptured: ${enraptured}`, this.context)
+        const funcCallPrefix = `[${makeid(5)}] userInRequest:: uuid: ${user.uuid}`
+        this.logger.debug(`${funcCallPrefix} START ImportDto: ${JSON.stringify(data)}, enraptured: ${enraptured}`, this.context)
         const sanitizedChainId = !!data.chainId ? data.chainId : this.defaultChainId;
         const collectionFragment = enraptured ?
             findRecognizedAsset(await this.getRecognizedAsset(sanitizedChainId, BridgeAssetType.ENRAPTURED), data.asset)
             : findRecognizedAsset(await this.getRecognizedAsset(sanitizedChainId, BridgeAssetType.IMPORTED), data.asset)
 
         if (!collectionFragment) {
-            this.logger.error(`userInRequest: not an permissioned asset`, null, this.context)
+            this.logger.error(`${funcCallPrefix} not an permissioned asset`, null, this.context)
             throw new UnprocessableEntityException(`Not permissioned asset`)
         }
 
+        //standardizes and validates asset in request so hash is deterministic
+        let standardizedParams: StandardizedValidatedAssetInParams
+        try {
+            standardizedParams = standardizeValidateAssetInParams(sanitizedChainId, data.asset.assetType, data.asset.assetAddress, parseInt(data.asset.assetId), data.amount, enraptured, data.owner)
+            this.logger.debug(`${funcCallPrefix} standardized params: ${JSON.stringify(standardizedParams)}`, this.context)
+        } catch (e) {
+            this.logger.error(`${funcCallPrefix} failed to standardize`, null, this.context)
+            throw new UnprocessableEntityException(`Failed to standard asset in request`)
+        }
         const multiverseVersion = collectionFragment.collection.multiverseVersion
 
         const oracle = await this.getOracle(sanitizedChainId)
 
         if (!oracle) {
-            this.logger.error(`userInRequest: oracle error`, null, this.context)
+            this.logger.error(`${funcCallPrefix} oracle error`, null, this.context)
             throw new UnprocessableEntityException(`Oracle could not serve your request`)
         }
 
-        const requestHash = await utf8ToKeccak(JSON.stringify(data))
+        const requestHash = await utf8ToKeccak(JSON.stringify(standardizedParams))
+        this.logger.debug(`${funcCallPrefix} requestHash: ${requestHash}`, this.context)
+
         const existingEntry = await this.assetService.findOne({ requestHash, collectionFragment, enraptured, pendingIn: true, owner: { uuid: user.uuid } }, { order: { expiration: 'DESC' }, relations: ['owner', 'collectionFragment'] })
 
-        existingEntry ? console.log(Date.now() - Number.parseInt(existingEntry.expiration) - CALLDATA_EXPIRATION_THRESHOLD) : undefined
+        //existingEntry ? console.log(Date.now() - Number.parseInt(existingEntry.expiration) - CALLDATA_EXPIRATION_THRESHOLD) : undefined
 
         // we try to confirm
         if (!!existingEntry) {
-            console.log('exists?')
             const salt = existingEntry.salt
-            const ma = {
-                asset: data.asset,
-                beneficiary: data.beneficiary,
-                owner: data.owner,
-                amount: data.amount,
-                chainId: sanitizedChainId,
-                metaverse: METAVERSE,
-                salt
-            }
-            const expirationContract = (Math.floor(Number.parseInt(existingEntry.expiration) / 1000)).toString()
-            const payload = enraptured ? await encodeEnraptureWithSigData(ma, expirationContract, multiverseVersion) : await encodeImportWithSigData(ma, expirationContract, multiverseVersion)
-            const signature = await getSignature(oracle, payload)
-            const hash = await calculateMetaAssetHash(ma, multiverseVersion)
+            this.logger.debug(`${funcCallPrefix} requestHash: ${requestHash} salt ${salt}`, this.context)
 
-            this.logger.debug(`InData: request prepared: ${[hash, payload, signature]}`, this.context)
+            const expirationContract = (Math.floor(Number.parseInt(existingEntry.expiration) / 1000)).toString()
+            const payload = await encodeImportOrEnraptureWithSigData([standardizedParams], METAVERSE, [salt], expirationContract, multiverseVersion)
+            const signature = await getSignature(oracle, payload)
+            const hash = await calculateMetaAssetHash(standardizedParams, METAVERSE, salt, multiverseVersion)
+            this.logger.debug(`${funcCallPrefix} requestHash: ${requestHash} salt: ${salt} hash: ${hash} request prepared from existing salt: ${[hash, payload, signature]}`, this.context)
 
             let failedtoconfirm = false
             try {
                 const success = enraptured ? await this.userEnraptureConfirm(user, { hash, chainId: sanitizedChainId }) : await this.userImportConfirm(user, { hash, chainId: sanitizedChainId })
-                this.logger.debug(`InData: previous inflow was confirmed: ${hash}`, this.context)
+                this.logger.debug(`${funcCallPrefix} requestHash: ${requestHash} salt: ${salt} hash: ${hash} existing inflow confirmed!`, this.context)
             } catch (e) {
                 failedtoconfirm = true
-                this.logger.debug(`InData: previous inflow confirmation fail: ${hash}`, this.context)
+                this.logger.error(`${funcCallPrefix} requestHash: ${requestHash} salt: ${salt} hash: ${hash} error confirming existing inflow`, e, this.context)
             }
 
             if (Number.parseInt(existingEntry.expiration) <= Date.now()) {
                 if (!failedtoconfirm) {
+                    this.logger.debug(`${funcCallPrefix} requestHash: ${requestHash} salt: ${salt} hash: ${hash} removing request because it has not been confirmed and is expired.`, this.context)
                     await this.assetService.remove(existingEntry)
                 }
             } else {
@@ -143,43 +148,38 @@ export class OracleApiService {
                     return [hash, payload, signature, false]
                 }
                 */
-                this.logger.debug(`InData: returning previously stored calldata: ${hash}`, this.context)
+                this.logger.debug(`${funcCallPrefix} requestHash: ${requestHash} salt: ${salt} hash: ${hash} returning previously used call data.`, this.context)
+                //why doesn't this return the last parameter of success if the inflow was confirmed???
                 return [hash, payload, signature, false]
             }
         }
         //console.log('polo')
         const salt = await getSalt()
-        const ma = {
-            asset: data.asset,
-            beneficiary: data.beneficiary,
-            owner: data.owner.toLowerCase(),
-            amount: data.amount,
-            chainId: sanitizedChainId,
-            metaverse: METAVERSE,
-            salt
-        }
+
         const expiration = (Date.now() + CALLDATA_EXPIRATION_MS)
         const expirationContract = (Math.floor(expiration / 1000)).toString()
-        const payload = enraptured ? await encodeEnraptureWithSigData(ma, expirationContract, multiverseVersion) : await encodeImportWithSigData(ma, expirationContract, multiverseVersion)
-
+        const payload = await encodeImportOrEnraptureWithSigData([standardizedParams], METAVERSE, [salt], expirationContract, multiverseVersion)
         const signature = await getSignature(oracle, payload)
-        const hash = await calculateMetaAssetHash(ma, multiverseVersion)
+        const hash = await calculateMetaAssetHash(standardizedParams, METAVERSE, salt, multiverseVersion)
 
+        //TO DO: add a database transaction here, if RPC fails, if this request is called multiple times very fast can get multiple entries for same request hash
         await this.assetService.create({
-            assetId: ma.asset.assetId,
-            assetOwner: ma.owner,
+            assetId: String(standardizedParams.assetId),
+            assetOwner: standardizedParams.owner,
             enraptured,
             hash,
             requestHash,
             pendingIn: true,
             pendingOut: false,
-            amount: ma.amount,
+            amount: standardizedParams.amount,
             expiration: expiration.toString(),
             owner: user,
             salt,
-            collectionFragment
+            collectionFragment,
+            createdAt: new Date(),
+            modifiedAt: new Date()
         })
-        this.logger.debug(`InData: request: ${[hash, payload, signature]}`, this.context)
+        this.logger.debug(`${funcCallPrefix} requestHash: ${requestHash} salt: ${salt} hash: ${hash} request prepared from NEW salt: ${[hash, payload, signature]}`, this.context)
         return [hash, payload, signature, false]
     }
 
@@ -226,6 +226,7 @@ export class OracleApiService {
         let confirmsuccess = false
         existingEntry.pendingOut = true
         existingEntry.expiration = expiration.toString()
+        existingEntry.modifiedAt = new Date()
         await this.assetService.create(existingEntry)
 
         try {
@@ -360,13 +361,15 @@ export class OracleApiService {
         let skinAdded = false
 
         const hash = data.hash;
-        this.logger.log(`ImportConfirm: started ${user.uuid}: ${hash}`, this.context)
+
+        const funcCallPrefix = `[${makeid(5)}] userImportConfirm:: uuid: ${user.uuid} hash: ${hash}`
+        this.logger.debug(`${funcCallPrefix} START`, this.context)
 
         const chainId = !!data.chainId ? data.chainId : this.defaultChainId;
         const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, collectionFragment: { collection: { chainId } } }, { relations: ['collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
 
         if (!assetEntry || assetEntry.hash !== hash || assetEntry.enraptured !== false) {
-            this.logger.error(`ImportConfirm: invalid conditions. exists: ${!!assetEntry}, hash: ${hash}, enraptured: ${assetEntry?.enraptured}, pendingOut: ${assetEntry?.pendingOut}, pendingIn: ${assetEntry?.pendingIn}`)
+            this.logger.error(`${funcCallPrefix} invalid conditions. exists: ${!!assetEntry}, enraptured: ${assetEntry?.enraptured}, pendingOut: ${assetEntry?.pendingOut}, pendingIn: ${assetEntry?.pendingIn}`, null, this.context)
             throw new UnprocessableEntityException('Invalid import confirm conditions')
         }
 
@@ -385,8 +388,6 @@ export class OracleApiService {
 
         let mAsset: any
 
-        console.log(`hash: ${hash}`)
-
         if (multiverseVersion === MultiverseVersion.V1) {
             mAsset = await contract.getImportedMetaAsset(hash)
         } else if (multiverseVersion === MultiverseVersion.V2) {
@@ -396,12 +397,12 @@ export class OracleApiService {
 
         if (multiverseVersion === MultiverseVersion.V1) {
             if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress.toLowerCase() !== assetAddress) {
-                this.logger.error(`ImportConfirm: on-chaind data didn't match for hash: ${hash} mAsset: ${JSON.stringify(mAsset)}`, null, this.context)
+                this.logger.error(`${funcCallPrefix} on-chain data didn't match for mAsset: ${JSON.stringify(mAsset)}`, null, this.context)
                 throw new UnprocessableEntityException(`On-chain data didn't match`)
             }
         } else if (multiverseVersion === MultiverseVersion.V2) {
             if (!mAsset || mAsset.assetAmount.toString() !== assetEntry.amount || mAsset.assetAddress.toLowerCase() !== assetAddress.toLowerCase()) {
-                this.logger.error(`ImportConfirm: on-chaind data didn't match for hash: ${hash} mAsset: ${JSON.stringify(mAsset)}`, null, this.context)
+                this.logger.error(`${funcCallPrefix} on-chain data didn't match for mAsset: ${JSON.stringify(mAsset)}`, null, this.context)
                 throw new UnprocessableEntityException(`On-chain data didn't match`)
             }
         }
@@ -414,7 +415,7 @@ export class OracleApiService {
         // assign skin if asset unlocks one
         const texture = await this.textureService.findOne({ assetAddress, assetId: assetId })
         if (!!texture) {
-            this.logger.log('ImportConfirm: Moonsama, texture found', this.context)
+            this.logger.debug(`${funcCallPrefix} texture found`, this.context)
             await this.skinService.create({
                 id: SkinEntity.toId(user.uuid, texture.assetAddress, texture.assetId),
                 owner: user,
@@ -423,7 +424,7 @@ export class OracleApiService {
             })
             skinAdded = true
         } else {
-            this.logger.warn('ImportConfirm: no texture found for asset!!!', this.context)
+            this.logger.debug(`${funcCallPrefix} NO texture found`, this.context)
         }
 
         if (!!recognizedAsset) {
@@ -451,7 +452,7 @@ export class OracleApiService {
                         ])
 
                     } catch (error) {
-                        this.logger.warn(`ImportConfirm: error trying to set default skins for user ${user.uuid}`, this.context)
+                        this.logger.error(`${funcCallPrefix} error trying to set default skins`, error, this.context)
                     }
                     skinAdded = true
                 }
@@ -461,7 +462,7 @@ export class OracleApiService {
         }
 
         assetEntry.recognizedAssetType = recognizedAsset?.recognizedAssetType ?? RecognizedAssetType.NONE;
-        const finalentry = await this.assetService.create({ ...assetEntry, pendingIn: false });
+        const finalentry = await this.assetService.create({ ...assetEntry, pendingIn: false, modifiedAt: new Date() });
 
         (async () => {
             let metadata = null
@@ -470,15 +471,15 @@ export class OracleApiService {
                 metadata = (await this.nftApiService.getNFT(chainId.toString(), assetType, assetAddress, [assetId]))?.[0] as any ?? null
                 world = metadata?.tokenURI?.plot?.world ?? null
             } catch {
-                this.logger.error(`ImportConfirm: couldn't fetch asset metadata: ${hash}`, undefined, this.context)
+                this.logger.error(`${funcCallPrefix} couldn't fetch asset metadata`, undefined, this.context)
             }
             if (!!metadata) {
-                await this.assetService.update({ hash: assetEntry.hash }, { metadata, world })
+                await this.assetService.update({ hash: assetEntry.hash }, { metadata, world, modifiedAt: new Date() })
             }
         })()
 
         if (!finalentry) {
-            this.logger.error(`ImportConfirm: couldn't change pending flag: ${hash}`, undefined, this.context)
+            this.logger.error(`${funcCallPrefix} couldn't change pending flag`, undefined, this.context)
             throw new UnprocessableEntityException(`Database error`)
         }
 
@@ -500,14 +501,16 @@ export class OracleApiService {
         let skinAdded = false
         let resourceInventoryUpdate = false
         const hash = data.hash
-        this.logger.log(`EnraptureConfirm: started ${user.uuid}: ${hash}`, this.context)
+        const funcCallPrefix = `[${makeid(5)}] userEnraptureConfirm:: uuid: ${user.uuid} hash: ${hash}`
+        this.logger.debug(`${funcCallPrefix} START`, this.context)
+
 
         const chainId = !!data.chainId ? data.chainId : this.defaultChainId;
 
         const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, collectionFragment: { collection: { chainId } } }, { relations: ['collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
 
         if (!assetEntry || assetEntry.hash !== hash || assetEntry.enraptured !== true) {
-            this.logger.error(`EnraptureConfirm: invalid conditions. exists: ${!!assetEntry}, hash: ${hash}, enraptured: ${assetEntry?.enraptured}, pendingOut: ${assetEntry?.pendingOut}, pendingIn: ${assetEntry?.pendingIn}`)
+            this.logger.error(`${funcCallPrefix} invalid conditions. exists: ${!!assetEntry}, enraptured: ${assetEntry?.enraptured}, pendingOut: ${assetEntry?.pendingOut}, pendingIn: ${assetEntry?.pendingIn}`, null, this.context)
             throw new UnprocessableEntityException('Invalid enrapture confirm conditions')
         }
 
@@ -536,12 +539,12 @@ export class OracleApiService {
 
         if (multiverseVersion === MultiverseVersion.V1) {
             if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress.toLowerCase() !== assetAddress) {
-                this.logger.error(`EnraptureConfirm: on-chaind data didn't match for hash: ${hash}`, null, this.context)
+                this.logger.error(`${funcCallPrefix} on-chain data didn't match for mAsset: ${JSON.stringify(mAsset)}`, null, this.context)
                 throw new UnprocessableEntityException(`On-chain data didn't match`)
             }
         } else if (multiverseVersion === MultiverseVersion.V2) {
             if (!mAsset || mAsset.assetAmount.toString() !== assetEntry.amount || mAsset.assetAddress.toLowerCase() !== assetAddress.toLowerCase()) {
-                this.logger.error(`EnraptureConfirm: on-chaind data didn't match for hash: ${hash} mAsset: ${JSON.stringify(mAsset)}`, null, this.context)
+                this.logger.error(`${funcCallPrefix} on-chain data didn't match for mAsset: ${JSON.stringify(mAsset)}`, null, this.context)
                 throw new UnprocessableEntityException(`On-chain data didn't match`)
             }
         }
@@ -599,7 +602,7 @@ export class OracleApiService {
         }
 
         assetEntry.recognizedAssetType = recognizedAsset?.recognizedAssetType ?? RecognizedAssetType.NONE;
-        const finalentry = await this.assetService.create({ ...assetEntry, pendingIn: false });
+        const finalentry = await this.assetService.create({ ...assetEntry, pendingIn: false, modifiedAt: new Date() });
 
         // TODO proper sideffects
 
@@ -821,4 +824,15 @@ export class OracleApiService {
     }
 
 
+}
+
+function makeid(length: number): string {
+    var result = '';
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for (var i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() *
+            charactersLength));
+    }
+    return result;
 }
