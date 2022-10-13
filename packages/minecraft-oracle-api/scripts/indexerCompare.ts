@@ -173,7 +173,7 @@ https://squid.subsquid.io/raresama-moonbeam/graphql
 
                     const oracle = new ethers.Wallet(process.env.ORACLE_PRIVATE_KEY, client);
                     const contract = new Contract(collection.chain.multiverseV2Address, METAVERSE_V2_ABI, oracle)
-                    await contract.unstake([mAsset.id])
+                    //   await contract.unstake([mAsset.id])
                 }
 
             }
