@@ -4,11 +4,11 @@ import { stringToStringAssetType } from 'utils/subgraph';
 import { Fraction } from 'utils/Fraction';
 import { countGamePassAssets } from 'utils';
 import { useAssetDialog } from '../hooks/useAssetDialog/useAssetDialog';
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { FC, ReactNode, useEffect, useState } from 'react';
 import { SKIN_LABELS } from '../constants/skins';
 import { BURNABLE_RESOURCES_IDS, ChainId, DEFAULT_CHAIN, NETWORK_NAME, PERMISSIONED_CHAINS } from "../constants";
 import { AssetChainDetails } from '../components/AssetChainDetails/AssetChainDetails';
-import { Image, Text, Box, Container, Grid, List, ListIcon, ListItem, Stack, Tooltip, Button, Flex, SimpleGrid, GridItem, VStack, HStack, background, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useCheckboxGroup, useMediaQuery, CircularProgress } from '@chakra-ui/react';
+import { Image, Text, Box, Container, Grid, List as ChakraList, ListIcon, ListItem, Stack, Tooltip, Button, Flex, SimpleGrid, GridItem, VStack, HStack, background, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useCheckboxGroup, useMediaQuery, CircularProgress } from '@chakra-ui/react';
 import { BridgeTab } from '../components/Bridge/BridgeTab';
 import { InGameItem } from '../components/Bridge/InGameItem';
 import { CaretLeft, CaretRight, DeviceGamepad, UserCircle, Wallet } from 'tabler-icons-react';
@@ -17,7 +17,7 @@ import { OnChainResource } from '../components/Bridge/OnChainResource';
 import { OnChainItem } from '../components/Bridge/OnChainItem';
 import BackgroundImage from '../assets/images/bridge-background-blur.svg'
 import { useSetSkinMutation, useGetSkinsQuery, useUserProfileQuery, useGetRecognizedAssetsQuery, useGetInGameItemsQuery, useGetInGameResourcesQuery } from '../state/api/bridgeApi';
-
+import { Virtuoso } from 'react-virtuoso'
 import { AssetDto, CollectionFragmentDto, SkinResponse } from '../state/api/types';
 import { useGetMarketplaceMetadataQuery, useGetMarketplaceOnChainTokensQuery } from '../state/api/generatedSquidMarketplaceApi';
 import { Media } from '../components';
@@ -367,51 +367,53 @@ const ProfilePage = () => {
                                     isLoading={skinsLoading}
                                 >
                                     {!!skins &&
-                                        <Grid templateColumns='repeat(2, 1fr)' width="100%">
-                                            {[...skins].sort((t1, t2) => t1.assetAddress.localeCompare(t2.assetAddress)).map((value, ind) => {
-                                                const skinLabel = SKIN_LABELS[value.assetAddress.toLowerCase()]
-                                                const firstColumn = ind % 2 === 0
-                                                const firstRow = ind < 2
-                                                return (
-                                                    < GridItem
-                                                        paddingTop="100%"
-                                                        position="relative"
-                                                        key={`${value?.assetAddress}-${value?.assetId}-${ind}`}
+                                        <VStack spacing="0" overflowY="scroll" h="100%">
+                                            <Grid templateColumns='repeat(2, 1fr)' width="100%" height="100%">
+                                                {[...skins].sort((t1, t2) => t1.assetAddress.localeCompare(t2.assetAddress)).map((value, ind) => {
+                                                    const skinLabel = SKIN_LABELS[value.assetAddress.toLowerCase()]
+                                                    const firstColumn = ind % 2 === 0
+                                                    const firstRow = ind < 2
+                                                    return (
+                                                        < GridItem
+                                                            paddingTop="100%"
+                                                            position="relative"
+                                                            key={`${value?.assetAddress}-${value?.assetId}-${ind}`}
 
-                                                        onClick={() => {
-                                                            //dont set a skin thats already set
-                                                            if (!value.equipped) {
-                                                                setSkin({
-                                                                    id: value.id,
-                                                                    assetAddress: value.assetAddress,
-                                                                    assetId: value.assetId,
-                                                                    assetType: value.assetType
-                                                                })
-                                                            }
-                                                        }}
-                                                    >
-                                                        <Box
-                                                            overflow="visible"
-                                                            position="absolute"
-                                                            top={firstRow ? "12px" : "4px"}
-                                                            right="12px"
-                                                            bottom="12px"
-                                                            left={firstColumn ? "12px" : "4px"}
-                                                            bg={value.equipped ? "rgba(14, 235, 168, 0.1)" : "inherit"}
-                                                            _hover={value.equipped ? {} : { bg: "rgba(255, 255, 255, 0.06)" }}
-                                                            _after={(value.equipped && !isSmallerThan285) ? { fontFamily: "heading", content: `"EQUIPPED"`, fontSize: "12px", bg: "teal.400", color: "#16132B", padding: "4px 8px", borderRadius: "8px 0px 4px 0px", marginTop: "100px", position: "absolute", bottom: "-1px", right: "-1px" } : {}}
-                                                            cursor={value.equipped ? "default" : "pointer"}
-                                                            borderRadius="4px"
-                                                            border={value.equipped ? "1px solid" : "1px solid"}
-                                                            borderColor={value.equipped ? "teal.400" : "transparent"}
+                                                            onClick={() => {
+                                                                //dont set a skin thats already set
+                                                                if (!value.equipped) {
+                                                                    setSkin({
+                                                                        id: value.id,
+                                                                        assetAddress: value.assetAddress,
+                                                                        assetId: value.assetId,
+                                                                        assetType: value.assetType
+                                                                    })
+                                                                }
+                                                            }}
                                                         >
-                                                            <Media imageProps={{ objectFit: "contain" }} padding="12%" uri={skinToImageUrl(value)} />
-                                                        </Box>
-                                                    </GridItem >
-                                                );
-                                            })}
+                                                            <Box
+                                                                overflow="visible"
+                                                                position="absolute"
+                                                                top={firstRow ? "12px" : "4px"}
+                                                                right="12px"
+                                                                bottom="12px"
+                                                                left={firstColumn ? "12px" : "4px"}
+                                                                bg={value.equipped ? "rgba(14, 235, 168, 0.1)" : "inherit"}
+                                                                _hover={value.equipped ? {} : { bg: "rgba(255, 255, 255, 0.06)" }}
+                                                                _after={(value.equipped && !isSmallerThan285) ? { fontFamily: "heading", content: `"EQUIPPED"`, fontSize: "12px", bg: "teal.400", color: "#16132B", padding: "4px 8px", borderRadius: "8px 0px 4px 0px", marginTop: "100px", position: "absolute", bottom: "-1px", right: "-1px" } : {}}
+                                                                cursor={value.equipped ? "default" : "pointer"}
+                                                                borderRadius="4px"
+                                                                border={value.equipped ? "1px solid" : "1px solid"}
+                                                                borderColor={value.equipped ? "teal.400" : "transparent"}
+                                                            >
+                                                                <Media imageProps={{ objectFit: "contain" }} padding="12%" uri={skinToImageUrl(value)} />
+                                                            </Box>
+                                                        </GridItem >
+                                                    );
+                                                })}
 
-                                        </Grid>
+                                            </Grid>
+                                        </VStack>
                                     }
                                 </BridgeTab>
                             </GridItem>
@@ -458,44 +460,47 @@ const ProfilePage = () => {
                                         }}
                                         isDisabled={inGameCheckboxGroupValue.length === 0} w="100%">EXPORT TO WALLET</Button>}
                                 >
+                                    {!!inGameItems &&
+                                        <Virtuoso
+                                            style={{ height: "100%", }}
+                                            totalCount={inGameItems.length}
+                                            itemContent={(index) => {
+                                                const token = inGameItems[index]
+                                                return (
+                                                    <InGameItem
+                                                        lineOne={formatInGameTokenName(token)}
+                                                        lineTwo={token.enraptured ? "Enraptured. Not exportable." : undefined}
+                                                        mediaRedOutline={token.enraptured === true}
+                                                        mediaUrl={token?.metadata?.image}
+                                                        isLoading={!!token?.metadata !== true}
+                                                        key={token.hash}
+                                                        isCheckboxDisabled={token.enraptured === true}
+                                                        checkboxValue={String(token.hash)}
+                                                        isChecked={inGameCheckboxGroupValue.includes(String(token.hash))}
+                                                        onCheckboxChange={(e) => {
+                                                            //hack for now allow only one check
+                                                            if (e.target.checked) {
+                                                                setInGameCheckboxGroupValue([String(token.hash)])
+                                                            } else {
+                                                                setInGameCheckboxGroupValue([])
+                                                            }
 
-                                    <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">
+                                                            //do this when ready for multiple values
+                                                            //checkBoxProps.onChange(e)
+                                                        }}
+                                                        highlightable={true}
+                                                        onClick={() => {
+                                                            dispatch(setInGameItemModalToken(token))
+                                                            dispatch(openInGameItemModal())
+                                                        }}
+                                                    >
+                                                    </InGameItem>
 
-                                        {!!inGameItems && inGameItems.map((item, ind) => {
-                                            const checkBoxProps = getInGameCheckboxGroupProps({ value: item.hash })
-                                            return (
-                                                <InGameItem
-                                                    lineOne={formatInGameTokenName(item)}
-                                                    lineTwo={item.enraptured ? "Enraptured. Not exportable." : undefined}
-                                                    mediaRedOutline={item.enraptured === true}
-                                                    mediaUrl={item?.metadata?.image}
-                                                    isLoading={!!item?.metadata !== true}
-                                                    key={item.hash}
-                                                    isCheckboxDisabled={item.enraptured === true}
-                                                    checkboxValue={String(item.hash)}
-                                                    isChecked={inGameCheckboxGroupValue.includes(String(item.hash))}
-                                                    onCheckboxChange={(e) => {
-                                                        //hack for now allow only one check
-                                                        if (e.target.checked) {
-                                                            setInGameCheckboxGroupValue([String(item.hash)])
-                                                        } else {
-                                                            setInGameCheckboxGroupValue([])
-                                                        }
-
-                                                        //do this when ready for multiple values
-                                                        //checkBoxProps.onChange(e)
-                                                    }}
-                                                    highlightable={true}
-                                                    onClick={() => {
-                                                        dispatch(setInGameItemModalToken(item))
-                                                        dispatch(openInGameItemModal())
-                                                    }}
-                                                >
-                                                </InGameItem>
-                                            );
-                                        })}
-                                    </VStack>
-
+                                                )
+                                            }}
+                                        >
+                                        </Virtuoso>
+                                    }
 
                                 </BridgeTab>
                             </GridItem>
@@ -550,39 +555,41 @@ const ProfilePage = () => {
                                         </Button>}
                                 >
 
-                                    <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">
-                                        {!!onChainItems && onChainItems.map((item, ind) => {
-                                            const checkBoxProps = getOnChainCheckboxGroupProps({ value: item.id })
+                                    {!!onChainItems &&
+                                        <Virtuoso
+                                            style={{ height: "100%" }}
+                                            totalCount={onChainItems.length}
+                                            itemContent={(index) => {
+                                                const token = onChainItems[index]
+                                                return (
+                                                    <OnChainItem
+                                                        lineOne={formatOnChainTokenName(token)}
+                                                        lineTwo={token.enrapturable ? "This item will be burned into your account." : undefined}
+                                                        mediaRedOutline={token.enrapturable === true}
+                                                        mediaUrl={token?.metadata?.image ?? ""}
+                                                        isLoading={false}
+                                                        key={token.id} //update key
+                                                        isCheckboxDisabled={false}
+                                                        checkboxValue={token.id}
+                                                        isChecked={onChainCheckboxGroupValue.includes(token.id)}
+                                                        onCheckboxChange={(e) => {
+                                                            //hack for now allow only one check
+                                                            if (e.target.checked) {
+                                                                setOnChainCheckboxGroupValue([token.id])
+                                                            } else {
+                                                                setOnChainCheckboxGroupValue([])
+                                                            }
 
-                                            return (
-                                                <OnChainItem
-                                                    lineOne={formatOnChainTokenName(item)}
-                                                    lineTwo={item.enrapturable ? "This item will be burned into your account." : undefined}
-                                                    mediaRedOutline={item.enrapturable === true}
-                                                    mediaUrl={item?.metadata?.image ?? ""}
-                                                    isLoading={false}
-                                                    key={item.id} //update key
-                                                    isCheckboxDisabled={false}
-                                                    checkboxValue={item.id}
-                                                    isChecked={onChainCheckboxGroupValue.includes(item.id)}
-                                                    onCheckboxChange={(e) => {
-                                                        //hack for now allow only one check
-                                                        if (e.target.checked) {
-                                                            setOnChainCheckboxGroupValue([item.id])
-                                                        } else {
-                                                            setOnChainCheckboxGroupValue([])
-                                                        }
-
-                                                        //do this when ready for multiple values
-                                                        //checkBoxProps.onChange(e)
-                                                    }}
-                                                >
-                                                </OnChainItem>
-                                            );
-                                        })}
-                                    </VStack>
-
-
+                                                            //do this when ready for multiple values
+                                                            //checkBoxProps.onChange(e)
+                                                        }}
+                                                    >
+                                                    </OnChainItem>
+                                                )
+                                            }}
+                                        >
+                                        </Virtuoso>
+                                    }
                                 </BridgeTab>
                             </GridItem>
                             {/* END ON-CHAIN ITEMS */}
@@ -621,21 +628,26 @@ const ProfilePage = () => {
                                     }
                                     icon={<DeviceGamepad size="18px" />}
                                 >
-                                    <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">
-                                        {!!inGameResources && inGameResources.map((item, ind) => {
-
-                                            return (
-                                                <InGameResource
-                                                    isLoading={!!item?.metadata !== true}
-                                                    lineOne={item?.metadata?.name}
-                                                    mediaUrl={item?.metadata?.image ?? ""}
-                                                    key={`${item.assetAddress}~${item.assetId}`} //update key
-                                                    balanceWei={utils.parseEther(item?.amount)}
-                                                >
-                                                </InGameResource>
-                                            );
-                                        })}
-                                    </VStack>
+                                    {!!inGameResources &&
+                                        <Virtuoso
+                                            style={{ height: "100%", }}
+                                            totalCount={inGameResources.length}
+                                            itemContent={(index) => {
+                                                const token = inGameResources[index]
+                                                return (
+                                                    <InGameResource
+                                                        isLoading={!!token?.metadata !== true}
+                                                        lineOne={token?.metadata?.name}
+                                                        mediaUrl={token?.metadata?.image ?? ""}
+                                                        key={`${token.assetAddress}~${token.assetId}`} //update key
+                                                        balanceWei={utils.parseEther(token?.amount)}
+                                                    >
+                                                    </InGameResource>
+                                                )
+                                            }}
+                                        >
+                                        </Virtuoso>
+                                    }
                                 </BridgeTab>
                             </GridItem>
                             {/* END IN-GAME RESOURCES */}
@@ -658,28 +670,32 @@ const ProfilePage = () => {
                                     emptyMessage={emptyOnChainResourcesMessage}
                                     isLoading={isOnChainResourcesLoading}
                                     icon={<Wallet size="18px" />}>
+                                    {!!onChainResources &&
+                                        <Virtuoso
+                                            style={{ height: "100%", }}
+                                            totalCount={onChainResources.length}
+                                            itemContent={(index) => {
+                                                const token = onChainResources[index]
+                                                return (
+                                                    <OnChainResource
+                                                        lineOne={formatOnChainTokenName(token)}
+                                                        mediaUrl={token?.metadata?.image}
+                                                        balanceWei={BigNumber.from(token.balance)}
+                                                        isLoading={false}
+                                                        key={token.id}
+                                                        onClick={() => {
+                                                            //user will be able to see resources in their metamask wallet as under assets, nothing is moving
+                                                            dispatch(setOnChainResource(token))
+                                                            dispatch(openOnChainResourceModal())
+                                                        }}
+                                                    >
+                                                    </OnChainResource>
 
-                                    <VStack spacing="8px" width="100%" padding="8px 12px 8px 12px">
-
-                                        {!!onChainResources && onChainResources.map((item) => {
-                                            return (
-                                                <OnChainResource
-                                                    lineOne={formatOnChainTokenName(item)}
-                                                    mediaUrl={item?.metadata?.image}
-                                                    balanceWei={BigNumber.from(item.balance)}
-                                                    isLoading={false}
-                                                    key={item.id}
-                                                    onClick={() => {
-                                                        //user will be able to see resources in their metamask wallet as under assets, nothing is moving
-                                                        dispatch(setOnChainResource(item))
-                                                        dispatch(openOnChainResourceModal())
-                                                    }}
-                                                >
-                                                </OnChainResource>
-                                            )
-                                        })}
-                                    </VStack>
-
+                                                )
+                                            }}
+                                        >
+                                        </Virtuoso>
+                                    }
                                 </BridgeTab>
                             </GridItem>
                             {/* END ON-CHAIN RESOURCES */}

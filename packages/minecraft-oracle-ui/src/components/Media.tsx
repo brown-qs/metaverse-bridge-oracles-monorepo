@@ -17,7 +17,6 @@ export interface MediaProps extends BoxProps {
 export const Media = ({ uri, imageProps, videoProps, ...props }: MediaProps) => {
     //hack to replace statis pod video
     const mediaUri = uri?.replace("ipfs://QmQCeS76BRezJ5S7ezkVjeHcHJXjvGzDrZSEdjdwFYuGTB", "https://moonsama.mypinata.cloud/ipfs/QmUEuEv55cY6ZM5VWWSPVUpHjmsrJKrn526VQZs24qqNES/1.jpg")
-    console.log(`Media url: ${mediaUri}`)
     const { getMediaType, mediaUrl, isLoading } = useFileType(mediaUri);
     const [mediaLoading, setMediaLoading] = useState<boolean>(true)
     const [mediaError, setMediaError] = useState<boolean>(false)

@@ -4,9 +4,9 @@ import {
   IsNumber,
   IsString
 } from 'class-validator';
-import { Oauth2ClientType } from 'src/common/enums/Oauth2ClientType';
-import { Oauth2Scope } from 'src/common/enums/Oauth2Scope';
-import { UserEntity } from 'src/user/user/user.entity';
+import { Oauth2ClientType } from '../../common/enums/Oauth2ClientType';
+import { Oauth2Scope } from '../../common/enums/Oauth2Scope';
+import { UserEntity } from '../../user/user/user.entity';
 import { BeforeInsert, Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn, Unique } from 'typeorm';
 import { UserRole } from '../../common/enums/UserRole';
 import { Oauth2ClientEntity } from '../oauth2-client/oauth2-client.entity';
