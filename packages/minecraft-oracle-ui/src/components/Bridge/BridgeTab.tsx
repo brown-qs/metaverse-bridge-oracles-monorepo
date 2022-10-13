@@ -60,7 +60,7 @@ export const BridgeTab: React.FC<{ title: string, children: ReactNode, isLoading
                             {emptyMessage}
                         </Box>
                         :
-                        <>{children}</>
+                        <Box w="100%" h="100%" overflow="hidden">{children}</Box>
                     }</>
 
                 }
