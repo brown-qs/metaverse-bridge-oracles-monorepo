@@ -1,6 +1,6 @@
 import { useDispatch } from 'react-redux';
 
-import { injected, walletconnect } from 'connectors';
+import { injected, talisman, walletconnect, WalletInfo } from 'connectors';
 import { SUPPORTED_WALLETS } from '../../connectors';
 import { useAccountDialog } from 'hooks';
 import { useCallback, useEffect, useState } from 'react';
@@ -27,6 +27,8 @@ import { Image, Box, Button, CircularProgress, Modal, ModalBody, ModalCloseButto
 import { ArrowsRightLeft, MessageReport } from 'tabler-icons-react';
 import { ModalIcon } from '../MoonsamaModal/ModalIcon';
 import { MoonsamaModal } from '../MoonsamaModal';
+import React from 'react';
+import { isMatch } from 'date-fns';
 
 const WALLET_VIEWS = {
   OPTIONS: 'options',
@@ -101,16 +103,17 @@ export const AccountDialog = () => {
     connectorPrevious,
   ]);
 
+
+
   function formatConnectorName() {
     const { ethereum } = window;
     const isMetaMask = !!(ethereum && ethereum.isMetaMask);
-    const name = Object.keys(SUPPORTED_WALLETS)
-      .filter(
-        (k) =>
-          SUPPORTED_WALLETS[k].connector === connector &&
-          (connector !== injected || isMetaMask === (k === 'METAMASK'))
-      )
-      .map((k) => SUPPORTED_WALLETS[k].name)[0];
+    const name = SUPPORTED_WALLETS.filter(
+      (w) =>
+        w.connector === connector &&
+        (connector !== injected || isMetaMask === (w.name === 'MetaMask'))
+    )
+      .map((w) => w.name)[0];
     return <Box w="100%">Connected with {name}</Box>;
   }
 
@@ -161,9 +164,9 @@ export const AccountDialog = () => {
 
   const tryActivation = async (connector: AbstractConnector | undefined) => {
     let name = '';
-    Object.keys(SUPPORTED_WALLETS).map((key) => {
-      if (connector === SUPPORTED_WALLETS[key].connector) {
-        return (name = SUPPORTED_WALLETS[key].name);
+    SUPPORTED_WALLETS.map((w) => {
+      if (connector === w.connector) {
+        return (name = w.name);
       }
       return true;
     });
@@ -187,96 +190,49 @@ export const AccountDialog = () => {
         }
       });
   };
+  const installedWallets: WalletInfo[] = React.useMemo(() => SUPPORTED_WALLETS.filter(w => w.checkInstallationFunc()), [])
+  const supportedButNotInstalledWallets: WalletInfo[] = React.useMemo(() => {
+    return SUPPORTED_WALLETS.filter(w => {
+      const alreadyInstalled = !!installedWallets.find(wal => wal.name === w.name)
+      if (alreadyInstalled) {
+        return false
+      }
+      return w.checkSupportFunc()
+    })
+  }, [installedWallets])
+
+
 
   function getOptions() {
-    const isMetamask = window.ethereum && window.ethereum.isMetaMask;
-    return Object.keys(SUPPORTED_WALLETS).map((key) => {
-      const option = SUPPORTED_WALLETS[key];
-      // check for mobile options
-      if (isMobile) {
-        //disable portis on mobile for now
-        //if (option.connector === portis) {
-        //  return null
-        //}
 
-        if (!window.web3 && !window.ethereum && option.mobile) {
-          return (
-            <OptionCard
-              onClick={() => {
-                option.connector !== connector &&
-                  !option.href &&
-                  tryActivation(option.connector);
-              }}
-              id={`connect-${key}`}
-              key={key}
-              active={option.connector && option.connector === connector}
-              color={option.color}
-              link={option.href}
-              header={option.name}
-              subheader={null}
-              iconUrl={`../../assets/images/${option.iconName}`}
-            //icon={<img src={require('../../assets/images/' + option.iconName)}></img>}
-            />
-          );
-        }
-        return null;
+    return <VStack width='100%' spacing="16px">
+
+      {installedWallets.map(w =>
+      (
+        <OptionCard
+          onClick={() => {
+            w.connector === connector
+              ? setWalletView(WALLET_VIEWS.ACCOUNT) : tryActivation(w.connector);
+          }}
+          key={w.name}
+          header={w.name.toUpperCase()}
+          iconSvgData={w.iconSvgData}
+        />))
       }
 
-      // overwrite injected when needed
-      if (option.connector === injected) {
-        // don't show injected if there's no injected provider
-        if (!(window.web3 || window.ethereum)) {
-          if (option.name === 'MetaMask') {
-            return (
-              < OptionCard
-                id={`connect-${key}`
-                }
-                key={key}
-                color={'#E8831D'}
-                header={'Install Metamask'}
-                subheader={null}
-                link={'https://metamask.io/'}
-                iconUrl={MetamaskIcon}
-
-              />
-            );
-          } else {
-            return null; //dont want to return install twice
-          }
-        }
-        // don't return metamask if injected provider isn't metamask
-        else if (option.name === 'MetaMask' && !isMetamask) {
-          return null;
-        }
-        // likewise for generic
-        else if (option.name === 'Injected' && isMetamask) {
-          return null;
-        }
+      {/**nova is an app based wallet only so don't show */}
+      {!(!!(window as any)?.ethereum?.isNovaWallet) && supportedButNotInstalledWallets.map(w =>
+      (
+        <OptionCard
+          onClick={() => {
+            window.open(w.href, '_blank')
+          }}
+          key={w.name}
+          header={`INSTALL ${w.name.toUpperCase()}`}
+          iconSvgData={w.iconSvgData}
+        />))
       }
-
-      // return rest of options
-
-      return (
-        !isMobile &&
-        !option.mobileOnly && (
-          <OptionCard
-            id={`connect-${key}`}
-            onClick={() => {
-              option.connector === connector
-                ? setWalletView(WALLET_VIEWS.ACCOUNT)
-                : !option.href && tryActivation(option.connector);
-            }}
-            key={key}
-            active={option.connector === connector}
-            color={option.color}
-            link={option.href}
-            header={option.name.toUpperCase()}
-            subheader={null} //use option.descriptio to bring back multi-line
-            iconUrl={MetamaskIcon}
-          />
-        )
-      );
-    });
+    </VStack >
   }
 
 
@@ -343,9 +299,7 @@ export const AccountDialog = () => {
       message="Connect to a wallet"
     >
       <VStack alignItems="center" spacing="0" w="100%">
-        <Box w="100%">
-          {getOptions()}
-        </Box>
+        {getOptions()}
         <Box paddingTop="16px">
           {newToEthereumElem}
         </Box>
@@ -412,5 +366,4 @@ export const AccountDialog = () => {
     >
     </MoonsamaModal>)
   }
-
 };
