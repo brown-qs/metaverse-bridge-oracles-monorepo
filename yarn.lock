@@ -5866,6 +5866,7 @@ __metadata:
     "@reduxjs/toolkit": ^1.8.4
     "@rtk-incubator/rtk-query": ^0.3.0
     "@rtk-query/graphql-request-base-query": ^2.2.0
+    "@talismn/web3react-v6-connector": ^6.0.1
     "@testing-library/dom": ^7.31.2
     "@testing-library/jest-dom": ^5.13.0
     "@testing-library/react": ^11.2.7
@@ -7411,6 +7412,16 @@ __metadata:
     "@svgr/plugin-svgo": ^5.5.0
     loader-utils: ^2.0.0
   checksum: 540391bd63791625d26d6b5e0dd3c716ef51176bfba53bf0979a1ac4781afd2672f4bef2d76cf3d9cdc8e9ee61bda6863ed405a237b10406633ede4cd524f1cc
+  languageName: node
+  linkType: hard
+
+"@talismn/web3react-v6-connector@npm:^6.0.1":
+  version: 6.0.1
+  resolution: "@talismn/web3react-v6-connector@npm:6.0.1"
+  dependencies:
+    "@web3-react/abstract-connector": ^6.0.7
+    "@web3-react/types": ^6.0.7
+  checksum: f025dfcc80e9f4d2f0af96f63e080a972715477db8af12e566f98d4f2fba6f28725d27e26ac767df0481e55ba6deba679c70682bfacc6ebf00e81ad2d618ebae
   languageName: node
   linkType: hard
 
