@@ -42,6 +42,12 @@ import { EmailLoginKeyEntity } from '../src/user/email-login-key/email-login-key
 import { MinecraftLinkEntity } from '../src/user/minecraft-link/minecraft-link.entity'
 import { MinecraftUserNameEntity } from '../src/user/minecraft-user-name/minecraft-user-name.entity'
 import { MinecraftUuidEntity } from '../src/user/minecraft-uuid/minecraft-uuid.entity'
+import { Oauth2AuthorizationEntity } from '../src/oauth2api/oauth2-authorization/oauth2-authorization.entity'
+import { Oauth2ClientEntity } from '../src/oauth2api/oauth2-client/oauth2-client.entity'
+import { ZUserAssetView, ZUserBaitView } from '../src/views'
+import { RecognizedAssetType } from '../src/config/constants'
+import { UserRole } from '../src/common/enums/UserRole'
+import { findRecognizedAsset } from '../src/utils/misc'
 
 config()
 
@@ -58,6 +64,10 @@ async function main() {
             port: Number.parseInt(process.env.TYPEORM_PORT),
             database: process.env.TYPEORM_DATABASE,
             entities: [
+                EmailChangeEntity,
+                MinecraftLinkEntity,
+                KiltSessionEntity,
+                EmailLoginKeyEntity,
                 UserEntity,
                 SnapshotItemEntity,
                 InventoryEntity,
@@ -89,15 +99,15 @@ async function main() {
                 SyntheticItemEntity,
                 ResourceInventoryEntity,
                 ResourceInventoryOffsetEntity,
-                EmailEntity,
-                KiltSessionEntity,
-                KiltDappEntity,
-                DidEntity,
-                EmailChangeEntity,
-                EmailLoginKeyEntity,
-                MinecraftLinkEntity,
+                ZUserAssetView,
                 MinecraftUserNameEntity,
-                MinecraftUuidEntity
+                MinecraftUuidEntity,
+                EmailEntity,
+                DidEntity,
+                KiltDappEntity,
+                Oauth2ClientEntity,
+                Oauth2AuthorizationEntity,
+                ZUserBaitView
             ],
             synchronize: false
         })
@@ -110,33 +120,58 @@ async function main() {
     }
     const users = await connection.manager.getRepository(UserEntity).find({ relations: ['assets', 'assets.collectionFragment', 'assets.collectionFragment.collection'], loadEagerRelations: true })
 
-    const addressToCheck = '0x0a54845ac3743c96e582e03f26c3636ea9c00c8a'
-    const assetIdsToCheck = ['11', '12', '13', '14', '15']
+    const fragments = await connection.manager.getRepository(CollectionFragmentEntity).find({ relations: ['collection', 'collection.chain'], loadEagerRelations: true })
+
     for (let i = 0; i < users.length; i++) {
 
         const user = users[i]
 
-        if (!user.assets || user.assets.length === 0) {
-            continue
-        }
+        // if (!user.assets || user.assets.length === 0) {
+        //     continue
+        // }
 
-        let sum = BigNumber.from('0')
-        for (let j = 0; j < user.assets.length; j++) {
-            const asset = user.assets[j]
+        const displayname = user?.minecraftUserName ?? user?.gamerTag ?? user?.uuid
+        console.log(displayname)
+        // for (let j = 0; j < user.assets.length; j++) {
+        //     const asset = user.assets[j]
+        //     if (asset.pendingIn) {
+        //         continue
+        //     }
+            
+        //     const assetAddress = asset.collectionFragment.collection.assetAddress
+        //     const assetId = asset.assetId
 
-            for (let k = 0; k < assetIdsToCheck.length; k++) {
-                const assetIdToCheck = assetIdsToCheck[k]
-                if (asset.collectionFragment.collection.assetAddress === addressToCheck && asset.assetId === assetIdToCheck) {
-                    console.log('found', user.minecraftUserName, addressToCheck, assetIdToCheck)
+        //     const recognizedAsset = findRecognizedAsset(fragments, {assetAddress, assetId})
 
-                    const texture = await connection.manager.getRepository(TextureEntity).findOne({ where: { assetAddress: addressToCheck, assetId: assetIdToCheck } })
-                    await connection.manager.getRepository(SkinEntity).save(
-                        { id: SkinEntity.toId(user.uuid, addressToCheck, assetIdToCheck), owner: user, texture }
-                    )
-                    break
-                }
-            }
-        }
+        //     console.log('    ', assetAddress, assetId, asset.recognizedAssetType)
+
+        //     const texture = await connection.manager.getRepository(TextureEntity).findOne({ where: { assetAddress, assetId } })
+        //     if (!!texture) {
+        //         await connection.manager.getRepository(SkinEntity).save(
+        //             { id: SkinEntity.toId(user.uuid, assetAddress, assetId), owner: user, texture }
+        //         )
+        //         console.log('    skin set')
+        //     }
+        //     const rat = recognizedAsset.recognizedAssetType
+        //     const pass = recognizedAsset.gamepass
+        //     if (!asset.recognizedAssetType || (asset.recognizedAssetType.valueOf() !== rat && !!rat)) {
+        //         await connection.manager.getRepository(AssetEntity).update(asset.hash, {recognizedAssetType: rat})
+        //         console.log('    assset type set', rat)
+        //     }
+        // }
+
+        const recmap = user.assets.map(asset => findRecognizedAsset(fragments, {assetAddress: asset.collectionFragment.collection.assetAddress, assetId: asset.assetId}))
+        const rec = (recmap.find(cf => cf.gamepass === true))
+        const numPassAssets = recmap.reduce((prev, curr) => {return (prev + (curr.gamepass ? 1: 0))}, 0)
+        const hasGamePass = rec !== null && rec !== undefined
+
+        console.log('set', displayname, hasGamePass, numPassAssets, hasGamePass ? UserRole.PLAYER: UserRole.NONE)
+        await connection.manager.getRepository(UserEntity).update(user.uuid, {allowedToPlay: hasGamePass, numGamePassAsset: numPassAssets, role: hasGamePass ? UserRole.PLAYER: UserRole.NONE})
+
+        // if (user.allowedToPlay !== hasGamePass || !user.role || user.role.valueOf() === UserRole.NONE.valueOf()) {
+        //     console.log('set', displayname, hasGamePass, numPassAssets, hasGamePass ? UserRole.PLAYER: UserRole.NONE)
+        //     await connection.manager.getRepository(UserEntity).update(user.uuid, {allowedToPlay: hasGamePass, role: hasGamePass ? UserRole.PLAYER: UserRole.NONE})
+        // }
     }
     await connection.close()
 }

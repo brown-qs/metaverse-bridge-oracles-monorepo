@@ -1,3 +1,5 @@
+
+
 import { MaterialEntity } from '../src/material/material.entity'
 import { Connection, createConnection, getConnection } from 'typeorm'
 
@@ -11,34 +13,27 @@ import { InventoryEntity } from '../src/playerinventory/inventory.entity'
 import { PlaySessionEntity } from '../src/playsession/playsession.entity'
 import { PlaySessionStatEntity } from '../src/playsession/playsessionstat.entity'
 import { SkinEntity } from '../src/skin/skin.entity'
-import { MetaAsset } from '../src/oracleapi/oracleapi.types'
-import { Contract, ethers } from 'ethers'
-import { ChainEntity } from '../src/chain/chain.entity'
-import { METAVERSE_ABI } from '../src/common/contracts/Metaverse'
 import { GameEntity } from '../src/game/game.entity'
+import { GameTypeEntity } from '../src/gametype/gametype.entity'
 import { AchievementEntity } from '../src/achievement/achievement.entity'
 import { PlayerAchievementEntity } from '../src/playerachievement/playerachievement.entity'
 import { PlayerScoreEntity } from '../src/playerscore/playerscore.entity'
-import { GameTypeEntity } from '../src/gametype/gametype.entity'
 import { GganbuEntity } from '../src/gganbu/gganbu.entity'
 import { SnaplogEntity } from '../src/snaplog/snaplog.entity'
-import { GameItemTypeEntity } from '../src/gameitemtype/gameitemtype.entity'
-import { PlayerGameItemEntity } from '../src/playergameitem/playergameitem.entity'
-import { GameScoreTypeEntity } from '../src/gamescoretype/gamescoretype.entity'
+import { ChainEntity } from '../src/chain/chain.entity'
 import { CollectionEntity } from '../src/collection/collection.entity'
 import { CollectionFragmentEntity } from '../src/collectionfragment/collectionfragment.entity'
 import { CompositeAssetEntity } from '../src/compositeasset/compositeasset.entity'
 import { CompositeCollectionFragmentEntity } from '../src/compositecollectionfragment/compositecollectionfragment.entity'
 import { CompositePartEntity } from '../src/compositepart/compositepart.entity'
+import { GameItemTypeEntity } from '../src/gameitemtype/gameitemtype.entity'
+import { GameScoreTypeEntity } from '../src/gamescoretype/gamescoretype.entity'
+import { PlayerGameItemEntity } from '../src/playergameitem/playergameitem.entity'
+import { ResourceInventoryEntity } from '../src/resourceinventory/resourceinventory.entity'
+import { ResourceInventoryOffsetEntity } from '../src/resourceinventoryoffset/resourceinventoryoffset.entity'
 import { SecretEntity } from '../src/secret/secret.entity'
 import { SyntheticItemEntity } from '../src/syntheticitem/syntheticitem.entity'
 import { SyntheticPartEntity } from '../src/syntheticpart/syntheticpart.entity'
-import { METAVERSE_ADDRESSES, RecognizedAssetType } from '../src/config/constants'
-import { checkIfIdIsRecognized } from '../src/utils'
-import { ResourceInventoryEntity } from '../src/resourceinventory/resourceinventory.entity'
-import { Oauth2AuthorizationEntity } from '../src/oauth2api/oauth2-authorization/oauth2-authorization.entity'
-import { Oauth2ClientEntity } from '../src/oauth2api/oauth2-client/oauth2-client.entity'
-import { ResourceInventoryOffsetEntity } from '../src/resourceinventoryoffset/resourceinventoryoffset.entity'
 import { DidEntity } from '../src/user/did/did.entity'
 import { EmailChangeEntity } from '../src/user/email-change/email-change.entity'
 import { EmailLoginKeyEntity } from '../src/user/email-login-key/email-login-key.entity'
@@ -48,16 +43,22 @@ import { KiltSessionEntity } from '../src/user/kilt-session/kilt-session.entity'
 import { MinecraftLinkEntity } from '../src/user/minecraft-link/minecraft-link.entity'
 import { MinecraftUserNameEntity } from '../src/user/minecraft-user-name/minecraft-user-name.entity'
 import { MinecraftUuidEntity } from '../src/user/minecraft-uuid/minecraft-uuid.entity'
+import { Oauth2AuthorizationEntity } from '../src/oauth2api/oauth2-authorization/oauth2-authorization.entity'
+import { Oauth2ClientEntity } from '../src/oauth2api/oauth2-client/oauth2-client.entity'
 import { ZUserAssetView, ZUserBaitView } from '../src/views'
+
+import * as fs from 'fs'
+import { TextureType } from '../src/texture/texturetype.enum'
+import { StringAssetType } from '../src/common/enums/AssetType'
+
 config()
 
 async function main() {
-
     let connection: Connection
     try {
         connection = await createConnection({
             keepAlive: 10000,
-            name: 'skinmigration',
+            name: 'materialseeder',
             type: process.env.TYPEORM_CONNECTION as any,
             username: process.env.TYPEORM_USERNAME,
             password: process.env.TYPEORM_PASSWORD,
@@ -113,65 +114,43 @@ async function main() {
             synchronize: false
         })
     } catch (err) {
-        connection = getConnection('skinmigration')
+        connection = getConnection('materialseeder')
     }
 
     if (!connection.isConnected) {
         connection = await connection.connect()
     }
 
-    const MAP = {
-        //[RecognizedAssetType.MOONSAMA.valueOf()]: '0xb654611f84a8dc429ba3cb4fda9fad236c505a1a',
-        [RecognizedAssetType.OFFHAND.valueOf()]: '0x1974eeaf317ecf792ff307f25a3521c35eecde86',
-        [RecognizedAssetType.PLOT.valueOf()]: '0xa17a550871e5f5f692a69a3abe26e8dbd5991b75',
-        [RecognizedAssetType.TEMPORARY_TICKET.valueOf()]: '0x0a54845ac3743c96e582e03f26c3636ea9c00c8a',
-        [RecognizedAssetType.TICKET.valueOf()]: '0x1974eeaf317ecf792ff307f25a3521c35eecde86',
-        [RecognizedAssetType.WEAPON_SKIN.valueOf()]: '0x1974eeaf317ecf792ff307f25a3521c35eecde86',
-        [RecognizedAssetType.GROMLIN.valueOf()]: '0x1974eeaf317ecf792ff307f25a3521c35eecde86',
-        [RecognizedAssetType.EXOSAMA.valueOf()]: '0x1974eeaf317ecf792ff307f25a3521c35eecde86'
-    }
+    const textureData = 'ewogICJ0aW1lc3RhbXAiIDogMTY2NTI2NzczODMxMSwKICAicHJvZmlsZUlkIiA6ICIwNTkyNTIxZGNjZWE0NzRkYjE0M2NmMDg2MDA1Y2FkNyIsCiAgInByb2ZpbGVOYW1lIiA6ICJwdXIyNCIsCiAgInNpZ25hdHVyZVJlcXVpcmVkIiA6IHRydWUsCiAgInRleHR1cmVzIiA6IHsKICAgICJTS0lOIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS9kODlhMzMxNTYxNDlmMTgwNmQ1ZTljMDdmMTk1NTI5N2YyN2VhMmRiYzA5YzFhZTllOGFmNDM3ODk4NTFhZGNhIgogICAgfQogIH0KfQ=='
+    const textureSignature = 'snHainjsdPPaH3UCK/s5WBTCsHlEZMer2DUY22IbEVzWmj5aOzy7aF1ysez4urLCu3nc3T1hgxcRZ5lv5m8WcVPn474v225bgHRlmWlRWdwZ3jNZKuRtWBD+MQtLxvYkgGklHyV8eIJQitxXxt8vVAfanc8gIwGtam67ny4daD0w4hQnQrYE291SGD2pZdLHMUg6jTD52qMTX8OcCO6R0Enf+ZTB2RHV3mrLBErcYKu8HknDgSNPvC0MCfNXK2C/nfCIyGD98KiVWNOn9mW7AOhvhAWr7SZJE+HVJ4C6iCkkv7iA5q0Fom4RBDSzFqVHbRWGga8ibhbf8Mvvo9oJ7ezQx3xesDLC9gv8nEuICJ/7uyKJLH4jfkm5r5YIVRswLbRzg0f+p0BjttPy/agcbAjQRmBe+cx0t5LQ2cs5FT/ZWuG0PEfXAkmMDRg9LcY+4hwkGYOVzMXdVSNCg7i7sokDFEhQaXmnmvwTxaNvjNrslgpMWQU9OJFoIFOdzGUztBBOxgmAlXmNWKW0lO3IJvtOnA4zUF/P1mMWun85SJh4+n1ZZmEbzuKoRk7qgc4gTRBUlVQvztHb5JGx/T2tLkO4PrBONGgpLdKa3aE2zUYZSNlJhYbzIOKs/mYlh7eq5Y+WHQ/47FddKlbB8l9dvDLX84wnfTNpGwrDpGfllF8='
+    const name = 'Gromlin'
+    const assetType = StringAssetType.ERC721
 
-    try {
-        const assets = await connection.manager.find<AssetEntity>(AssetEntity, { relations: ['collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
+    const assetAddress = '0xf27a6c72398eb7e25543d19fda370b7083474735'
+    for (let i = 1; i <= 3333; i++) {
+        console.log(i)
+        const assetId = i.toString()
 
-        const client = new ethers.providers.JsonRpcProvider('https://moonriver-rpc.moonsama.com');
-        const oracle = new ethers.Wallet(process.env.ORACLE_PRIVATE_KEY, client);
-        const m = new Contract(METAVERSE_ADDRESSES[1285], METAVERSE_ABI, oracle)
-
-        const dangling = []
-
-        for (let i = 0; i < assets.length; i++) {
-            console.log(i)
-            const asset = assets[i]
-            try {
-                const entry = asset.enraptured ? await m.getEnrapturedMetaAsset(asset.hash) : await m.getImportedMetaAsset(asset.hash)
-                const assetAddress = entry.asset.assetAddress.toLowerCase() as string
-                const assetId = entry.asset.assetId.toString() as string
-                const cfs = await connection.manager.find<CollectionFragmentEntity>(CollectionFragmentEntity, { where: { collection: { chainId: 1285, assetAddress } }, relations: ['collection', 'bridgeAssets'], loadEagerRelations: true })
-
-                const cf = cfs.find(x => {
-                    return checkIfIdIsRecognized(x.idRange, { assetAddress, assetId })
-                })
-                if (cf) {
-                    console.log('    FOUND', cf.recognizedAssetType, cf.collection.assetType, cf.collection.assetAddress, assetId)
-                    const res = await connection.manager.update<AssetEntity>(AssetEntity, asset.hash, { collectionFragment: cf })
-                    console.log('    ', 'update:', res.affected > 0)
-                } else {
-                    console.log('    DANGLING asset', assetAddress, assetId)
-                    dangling.push(`${asset.hash}-${assetAddress}-${assetId}`)
-                }
-
-            } catch (error) {
-                console.log(error)
-            }
-        }
-        console.log(dangling)
-
-    } catch (err) {
-        console.log(err)
+        await connection.manager.getRepository(TextureEntity).save({
+            assetType,
+            textureData,
+            textureSignature,
+            assetAddress,
+            assetId,
+            gamepass: false,
+            name,
+            type: TextureType.SKIN,
+            auction: false
+        })
     }
     await connection.close()
-    process.exit(0);
 }
 
+
 main()
+
+
+
+
+
+
