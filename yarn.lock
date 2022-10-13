@@ -5877,6 +5877,7 @@ __metadata:
     "@types/react-dom": ^18.0.6
     "@types/react-router-dom": ^5.3.3
     "@types/react-swipeable-views": ^0.13.1
+    "@types/react-virtualized": ^9.21.21
     "@types/react-window": ^1.8.5
     "@types/yup": ^0.29.13
     "@typescript-eslint/eslint-plugin": ^4.26.1
@@ -5927,6 +5928,8 @@ __metadata:
     react-router-dom: ^6.3.0
     react-scripts: ^5.0.1
     react-swipeable-views: ^0.14.0
+    react-virtualized: ^9.22.3
+    react-virtuoso: ^2.19.1
     react-window: ^1.8.7
     redux-persist: ^6.0.0
     sass: ^1.38.2
@@ -8100,6 +8103,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-virtualized@npm:^9.21.21":
+  version: 9.21.21
+  resolution: "@types/react-virtualized@npm:9.21.21"
+  dependencies:
+    "@types/prop-types": "*"
+    "@types/react": ^17
+  checksum: 7f360746ae926c93ba07d830a33940ab1598f6966263594896d0dc746d704f9c0e0d1692cf543e925bcca7b007d70d3cc53379a9b1810f60c2d43ee5cfdb591e
+  languageName: node
+  linkType: hard
+
 "@types/react-window@npm:^1.8.5":
   version: 1.8.5
   resolution: "@types/react-window@npm:1.8.5"
@@ -8117,6 +8130,17 @@ __metadata:
     "@types/scheduler": "*"
     csstype: ^3.0.2
   checksum: e22cc388d1c145aa184787e44dc28db4789976c704cd5db475c170bb76a560eb81def5f346cfe750949bb3d43ad88822b8cbb9f19b1286e3795892a8263e7715
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:^17":
+  version: 17.0.50
+  resolution: "@types/react@npm:17.0.50"
+  dependencies:
+    "@types/prop-types": "*"
+    "@types/scheduler": "*"
+    csstype: ^3.0.2
+  checksum: b5629dff7c2f3e9fcba95a19b2b3bfd78d7cacc33ba5fc26413dba653d34afcac3b93ddabe563e8062382688a1eac7db68e93739bb8e712d27637a03aaafbbb8
   languageName: node
   linkType: hard
 
@@ -8529,6 +8553,24 @@ __metadata:
     "@typescript-eslint/types": 5.33.0
     eslint-visitor-keys: ^3.3.0
   checksum: d7e3653de6bac6841e6fcc54226b93ad6bdca4aa76ebe7d83459c016c3eebcc50d4f65ee713174bc267d765295b642d1927a778c5de707b8389e3fcc052aa4a1
+  languageName: node
+  linkType: hard
+
+"@virtuoso.dev/react-urx@npm:^0.2.12":
+  version: 0.2.13
+  resolution: "@virtuoso.dev/react-urx@npm:0.2.13"
+  dependencies:
+    "@virtuoso.dev/urx": ^0.2.13
+  peerDependencies:
+    react: ">=16"
+  checksum: 173e91c21f6a8cd506ad3b72af10656897fe1951124ed9eeb1fd85575534993bea2f97cba3f81c08ae1e88a2613df348e2c80d0ceecb3021f8c8c8fe0e053ee2
+  languageName: node
+  linkType: hard
+
+"@virtuoso.dev/urx@npm:^0.2.12, @virtuoso.dev/urx@npm:^0.2.13":
+  version: 0.2.13
+  resolution: "@virtuoso.dev/urx@npm:0.2.13"
+  checksum: 682a99cf40ccc429241268dd37495cd1ed4695ae58b5a1169c75df1630d5dc3fd8eb3aaa655f71c37f39ba9c23c0aaf4401b76d8a986986d1a38a422d596a6ba
   languageName: node
   linkType: hard
 
@@ -11427,6 +11469,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"clsx@npm:^1.0.4":
+  version: 1.2.1
+  resolution: "clsx@npm:1.2.1"
+  checksum: 30befca8019b2eb7dbad38cff6266cf543091dae2825c856a62a8ccf2c3ab9c2907c4d12b288b73101196767f66812365400a227581484a05f968b0307cfaf12
+  languageName: node
+  linkType: hard
+
 "cluster-key-slot@npm:^1.1.0":
   version: 1.1.0
   resolution: "cluster-key-slot@npm:1.1.0"
@@ -13080,7 +13129,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dom-helpers@npm:^5.0.1":
+"dom-helpers@npm:^5.0.1, dom-helpers@npm:^5.1.3":
   version: 5.2.1
   resolution: "dom-helpers@npm:5.2.1"
   dependencies:
@@ -23696,6 +23745,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-lifecycles-compat@npm:^3.0.4":
+  version: 3.0.4
+  resolution: "react-lifecycles-compat@npm:3.0.4"
+  checksum: a904b0fc0a8eeb15a148c9feb7bc17cec7ef96e71188280061fc340043fd6d8ee3ff233381f0e8f95c1cf926210b2c4a31f38182c8f35ac55057e453d6df204f
+  languageName: node
+  linkType: hard
+
 "react-loading-overlay-ts@npm:^0.2.0":
   version: 0.2.0
   resolution: "react-loading-overlay-ts@npm:0.2.0"
@@ -23954,6 +24010,36 @@ __metadata:
     react: ">=16.6.0"
     react-dom: ">=16.6.0"
   checksum: 0bcd8af483709832e318dcef84c26ebddeb866bf4f58010286367ef0c1e7c5106e00cfc65688b9102414cb3d572c63909c2eb7ea972b4420fc70a78c10b6e8ad
+  languageName: node
+  linkType: hard
+
+"react-virtualized@npm:^9.22.3":
+  version: 9.22.3
+  resolution: "react-virtualized@npm:9.22.3"
+  dependencies:
+    "@babel/runtime": ^7.7.2
+    clsx: ^1.0.4
+    dom-helpers: ^5.1.3
+    loose-envify: ^1.4.0
+    prop-types: ^15.7.2
+    react-lifecycles-compat: ^3.0.4
+  peerDependencies:
+    react: ^15.3.0 || ^16.0.0-alpha
+    react-dom: ^15.3.0 || ^16.0.0-alpha
+  checksum: 5e3b566592293bc0057bc6be4f6ee29c58c8931421d2882a3ef45ca9b24c6f3ea78bbc5a182c2916af6520845e5a90f569b3a63c9b5e89428720913e6d6239cc
+  languageName: node
+  linkType: hard
+
+"react-virtuoso@npm:^2.19.1":
+  version: 2.19.1
+  resolution: "react-virtuoso@npm:2.19.1"
+  dependencies:
+    "@virtuoso.dev/react-urx": ^0.2.12
+    "@virtuoso.dev/urx": ^0.2.12
+  peerDependencies:
+    react: ">=16 || >=17 || >= 18"
+    react-dom: ">=16 || >=17 || >= 18"
+  checksum: a87c6550cc20e9f3de8763ecf1fa3b6bf7ca201eafc17bcf40626f43cb78a7dcb5643124707f021621df0d3048b696c63b78e2dc00025cceb68cc7a8f38703d3
   languageName: node
   linkType: hard
 
