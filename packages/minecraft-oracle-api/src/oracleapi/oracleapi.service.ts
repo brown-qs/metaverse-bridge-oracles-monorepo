@@ -11,7 +11,7 @@ import { calculateMetaAssetHash, encodeExportWithSigData, encodeImportOrEnraptur
 import { BigNumber, Contract, ethers } from 'ethers';
 import { ProviderToken } from '../provider/token';
 import { AssetService } from '../asset/asset.service';
-import { findRecognizedAsset } from '../utils';
+import { findRecognizedAsset, stringAssetTypeToAssetType } from '../utils';
 import { MetaAsset } from './oracleapi.types';
 import { ExportDto } from './dtos/export.dto';
 import { SummonDto } from './dtos/summon.dto';
@@ -45,6 +45,7 @@ import { METAVERSE_V2_ABI } from '../common/contracts/MetaverseV2';
 import { ChainEntity } from '../chain/chain.entity';
 import Joi from 'joi';
 import { CollectionFragmentService } from '../collectionfragment/collectionfragment.service';
+import { CallparamDto } from './dtos/callparams.dto';
 
 @Injectable()
 export class OracleApiService {
@@ -81,13 +82,13 @@ export class OracleApiService {
         this.defaultChainId = this.configService.get<number>('network.defaultChainId')
     }
 
-    public async userInRequest(user: UserEntity, data: InDto): Promise<[string, string, string, boolean]> {
+    public async userInRequest(user: UserEntity, data: InDto): Promise<CallparamDto> {
         const funcCallPrefix = `[${makeid(5)}] userInRequest:: uuid: ${user.uuid}`
         this.logger.debug(`${funcCallPrefix} START ImportDto: ${JSON.stringify(data)}`, this.context)
         const sanitizedChainId = !!data.chainId ? data.chainId : this.defaultChainId;
 
         const recognizedInAssets = [...await this.getRecognizedAsset(sanitizedChainId, BridgeAssetType.IMPORTED), ...await this.getRecognizedAsset(sanitizedChainId, BridgeAssetType.ENRAPTURED)]
-        const collectionFragment = findRecognizedAsset(recognizedInAssets, data.asset)
+        const collectionFragment = findRecognizedAsset(recognizedInAssets, { assetAddress: data.assetAddress, assetId: String(data.assetId) })
 
         if (!collectionFragment) {
             this.logger.error(`${funcCallPrefix} not an permissioned asset`, null, this.context)
@@ -101,7 +102,7 @@ export class OracleApiService {
         //standardizes and validates asset in request so hash is deterministic
         let standardizedParams: StandardizedValidatedAssetInParams
         try {
-            standardizedParams = standardizeValidateAssetInParams(sanitizedChainId, data.asset.assetType, data.asset.assetAddress, parseInt(data.asset.assetId), data.amount, enraptured, data.owner)
+            standardizedParams = standardizeValidateAssetInParams(sanitizedChainId, stringAssetTypeToAssetType(data.assetType), data.assetAddress, data.assetId, data.amount, enraptured, data.owner)
             this.logger.debug(`${funcCallPrefix} standardized params: ${JSON.stringify(standardizedParams)}`, this.context)
         } catch (e) {
             console.log(e)
@@ -157,7 +158,7 @@ export class OracleApiService {
                 */
                 this.logger.debug(`${funcCallPrefix} requestHash: ${requestHash} salt: ${salt} hash: ${hash} returning previously used call data.`, this.context)
                 //why doesn't this return the last parameter of success if the inflow was confirmed???
-                return [hash, payload, signature, false]
+                return { hash, data: payload, signature, confirmed: false }
             }
         }
         //console.log('polo')
@@ -188,7 +189,7 @@ export class OracleApiService {
             modifiedAt: new Date()
         })
         this.logger.debug(`${funcCallPrefix} requestHash: ${requestHash} salt: ${salt} hash: ${hash} request prepared from NEW salt: ${[hash, payload, signature]}`, this.context)
-        return [hash, payload, signature, false]
+        return { hash, data: payload, signature, confirmed: false }
     }
 
 

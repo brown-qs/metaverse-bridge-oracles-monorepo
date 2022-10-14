@@ -42,6 +42,8 @@ import { useGetExosamaMetadataQuery, useGetExosamaOnChainTokensQuery } from '../
 import { useQuery } from 'react-query';
 import { RARESAMA_POOP, SHIT_FART } from '../utils/constants';
 import { getAssetBalance } from '../hooks/useBalances/useBalances';
+import { InModal } from '../components/modals/InModal';
+import { openInModal, setInModalTokens } from '../state/slices/inModalSlice';
 
 
 const ProfilePage = () => {
@@ -604,13 +606,8 @@ const ProfilePage = () => {
                                                     }
                                                 }
                                                 if (importAssets.length > 0) {
-                                                    if (importAssets[0].enrapturable) {
-                                                        dispatch(setEnraptureModalTokens(importAssets))
-                                                        dispatch(openEnraptureModal())
-                                                    } else {
-                                                        dispatch(setImportModalTokens(importAssets))
-                                                        dispatch(openImportModal())
-                                                    }
+                                                    dispatch(setInModalTokens(importAssets))
+                                                    dispatch(openInModal())
                                                 }
 
 
@@ -777,6 +774,7 @@ const ProfilePage = () => {
             <SummonModal />
             <ImportModal />
             <EnraptureModal />
+            <InModal />
 
         </>
     )

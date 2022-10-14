@@ -30,9 +30,7 @@ import { PreferredServersDto } from './dtos/preferredServer.dto';
 import { ProfileApiService } from '../profileapi/profileapi.service';
 import { AdminConfirmDto, OracleActionTypeDto } from './dtos/confirm.dto';
 import { OracleApiService } from '../oracleapi/oracleapi.service';
-import { OracleRequestDto } from './dtos/oraclerequest.dto';
 import { ExportDto } from '../oracleapi/dtos/export.dto';
-import { ImportDto } from '../oracleapi/dtos/in.dto';
 import { SummonDto } from '../oracleapi/dtos/summon.dto';
 import { CallparamDto } from '../oracleapi/dtos/callparams.dto';
 import { CommunismDto } from './dtos/communism.dto';
@@ -40,6 +38,7 @@ import { BlacklistDto } from './dtos/blacklist.dto';
 import { GameTypeService } from '../gametype/gametype.service';
 import { GameService } from '../game/game.service';
 import { BankDto } from '../gameapi/dtos/bank.dto';
+import { InDto } from '../oracleapi/dtos/in.dto';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -285,15 +284,16 @@ export class AdminApiController {
         }
         let success = false
         if (dto.type.valueOf() === OracleActionTypeDto.ENRAPTURE) {
-            success = await this.oracleService.userEnraptureConfirm(user, dto)
+            success = await this.oracleService.userInConfirm(user, dto)
         } else if (dto.type.valueOf() === OracleActionTypeDto.IMPORT) {
-            success = await this.oracleService.userImportConfirm(user, dto)
+            success = await this.oracleService.userInConfirm(user, dto)
         } else if (dto.type.valueOf() === OracleActionTypeDto.EXPORT) {
             success = await this.oracleService.userExportConfirm(user, dto)
         }
         return success
     }
 
+    /*
     @Put('oracle/request')
     @HttpCode(200)
     @ApiOperation({ summary: 'Manual request for a user' })
@@ -312,9 +312,9 @@ export class AdminApiController {
         }
         let res
         if (dto.type.valueOf() === OracleActionTypeDto.ENRAPTURE.valueOf()) {
-            res = await this.oracleService.userInRequest(user, dto.data as ImportDto, true)
+            res = await this.oracleService.userInRequest(user, dto.data as InDto)
         } else if (dto.type.valueOf() === OracleActionTypeDto.IMPORT.valueOf()) {
-            res = await this.oracleService.userInRequest(user, dto.data as ImportDto, false)
+            res = await this.oracleService.userInRequest(user, dto.data as InDto)
         } else if (dto.type.valueOf() === OracleActionTypeDto.EXPORT.valueOf()) {
             res = await this.oracleService.userOutRequest(user, dto.data as ExportDto)
         } else if (dto.type.valueOf() === OracleActionTypeDto.SUMMON.valueOf()) {
@@ -329,7 +329,7 @@ export class AdminApiController {
             signature: res[2],
             confirmed: res[3]
         }
-    }
+    }*/
 
     @Put('communism')
     @HttpCode(200)
