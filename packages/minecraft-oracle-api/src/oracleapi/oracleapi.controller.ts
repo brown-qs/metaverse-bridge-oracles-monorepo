@@ -38,16 +38,9 @@ export class OracleApiController {
     @UseGuards(JwtAuthGuard)
     async import(
         @User() user: UserEntity,
-        @Body() data: InDto
-    ): Promise<CallparamDto> {
-        const params = await this.oracleApiService.userInRequest(user, data)
-
-        return {
-            hash: params[0],
-            data: params[1],
-            signature: params[2],
-            confirmed: params[3]
-        }
+        @Body() data: InDto[]
+    ): Promise<CallparamDto[]> {
+        return await Promise.all(data.map(d => this.oracleApiService.userInRequest(user, d)))
     }
 
     @Put('in/confirm')

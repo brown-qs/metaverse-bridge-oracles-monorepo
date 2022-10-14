@@ -67,9 +67,9 @@ https://squid.subsquid.io/exosama-squid/graphql
 https://squid.subsquid.io/raresama-moonbeam/graphql
     */
     const indexers = [
-        //   "https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2"
-        "https://moonbeam-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2",
-        "https://mainnet-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2",
+        "https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2"
+        // "https://moonbeam-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2",
+        //"https://mainnet-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2",
     ]
     for (const indexer of indexers) {
         const client = new ApolloClient({

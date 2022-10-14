@@ -21,6 +21,7 @@ import { persistStore, persistReducer } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
 import importModalSlice from './slices/importModalSlice';
 import enraptureModalSlice from './slices/enraptureModalSlice';
+import inModalSlice from './slices/inModalSlice';
 
 
 
@@ -49,6 +50,7 @@ const rootReducer = combineReducers({
   kiltLoginModal: kiltLoginModalSlice,
   exportModal: exportModalSlice,
   summonModal: summonModalSlice,
+  inModal: inModalSlice,
   blockNumbers: blockNumbersSlice,
   oauth: oauthSlice,
   [bridgeApi.reducerPath]: bridgeApi.reducer,

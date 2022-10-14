@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { calculateGasMargin } from '../../utils';
+import { calculateGasMargin, getSigner } from '../../utils';
 import { useMultiverseBridgeV1Contract, useMultiverseBridgeContract } from '../../hooks/useContracts/useContracts';
 import { useActiveWeb3React } from '../../hooks';
 import { useTransactionAdder } from '../../state/transactions/hooks';
@@ -8,7 +8,75 @@ import { AssetType } from 'utils/marketplace';
 import { useSelector } from 'react-redux';
 import { selectAccessToken } from '../../state/slices/authSlice';
 import { MultiverseVersion } from '../../state/api/types';
+import { ChainId, getContractAddress } from '../../constants';
+import { TransactionResponse, Web3Provider } from '@ethersproject/providers';
+import { Contract } from '@ethersproject/contracts';
+import { METAVERSE_V1_ABI, METAVERSE_V2_ABI } from '../../abi/marketplace';
+import { ERC20_ABI } from '../../abi/token';
 
+
+export async function assetInTransaction(mv: MultiverseVersion, chainId: ChainId, library: Web3Provider, account: string, calls: string[], signatures: string[], enrapture: boolean) {
+    const contractAddress = getContractAddress(mv, chainId)
+    const abi = (mv === MultiverseVersion.V1) ? METAVERSE_V1_ABI : METAVERSE_V2_ABI
+    const contract = new Contract(contractAddress, abi, getSigner(library, account))
+
+    let methodName: string
+    let args: string[] | string[][]
+    if (mv === MultiverseVersion.V1) {
+        if (enrapture) {
+            methodName = "enraptureToMetaverseSig"
+        } else {
+            methodName = "importToMetaverseSig"
+
+        }
+        args = [calls[0], signatures[0]]
+    } else {
+        methodName = "stakeSigArray"
+        args = [calls, signatures]
+    }
+
+    const inputOptions = {
+        value: "0"
+    }
+
+    let gasEstimate
+    try {
+        gasEstimate = await contract.estimateGas[methodName](...args, inputOptions)
+    } catch (e) {
+        console.log("Import error: ", e)
+        let callStaticSuccess = false;
+        try {
+            await contract.callStatic[methodName](...args, inputOptions)
+            callStaticSuccess = true
+
+            //Unexpected successful call after failed estimate gas
+        } catch (callError: any) {
+            console.debug('Call threw error', methodName, args, callError);
+            let errorMessage = `The transaction cannot succeed due to error: ${callError.reason}`;
+            throw new Error(errorMessage);
+
+        }
+        if (callStaticSuccess) {
+            throw new Error('Unexpected issue with estimating the gas. Please try again.');
+        }
+    }
+    if (!gasEstimate) {
+        throw new Error('Unexpected error. Please contact support: none of the calls threw an error');
+    }
+    let result: TransactionResponse
+    try {
+        result = await contract[methodName](...args, { gasLimit: calculateGasMargin(gasEstimate), from: account, ...inputOptions })
+    } catch (e: any) {
+        if (e?.code === 4001) {
+            throw new Error('Transaction rejected.');
+        } else {
+            // otherwise, the error was unexpected and we need to convey that
+            // console.error(`Enrapture asset failed`, error, methodName, args);
+            throw new Error(`Asset inflow failed: ${e.message}`);
+        }
+    }
+    return result
+}
 export enum CreateImportAssetCallbackState {
     INVALID,
     LOADING,

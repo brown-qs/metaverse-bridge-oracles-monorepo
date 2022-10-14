@@ -1,9 +1,9 @@
 import { MaxUint256 } from '@ethersproject/constants';
 import { BigNumber } from '@ethersproject/bignumber';
-import { TransactionResponse } from '@ethersproject/providers';
+import { TransactionResponse, Web3Provider } from '@ethersproject/providers';
 import { useActiveWeb3React } from 'hooks';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { BalanceQuery } from 'hooks/marketplace/types';
+import { BalanceQuery, NewAsset } from 'hooks/marketplace/types';
 import {
   useERC20Contract,
   useERC1155Contract,
@@ -18,6 +18,66 @@ import { StringAssetType } from 'utils/subgraph';
 import { MULTIVERSE_BRIDGE_V1_ADDRESS, ChainId } from '../../constants';
 import { AllowanceQuery } from './useApproveCallback.types';
 import { useBlockNumber } from 'state/application/hooks';
+import { Contract } from '@ethersproject/contracts';
+import { ERC20_ABI, ERC721_ABI, ERC1155_ABI } from '../../abi/token';
+
+export const checkApproval = async (assetAddress: string, assetType: StringAssetType, library: Web3Provider, account: string, spender: string): Promise<BigNumber> => {
+  const lowerAccount = account.toLowerCase()
+  const lowerSpender = spender.toLowerCase()
+  const lowerAssetAddress = assetAddress.toLowerCase()
+  if (assetType === StringAssetType.NATIVE) {
+    return MaxUint256
+  } else if (assetType === StringAssetType.ERC20) {
+    const contract = new Contract(lowerAssetAddress, ERC20_ABI, library)
+    return await contract.allowance(lowerAccount, lowerSpender)
+
+  } else if (assetType === StringAssetType.ERC721) {
+    const contract = new Contract(lowerAssetAddress, ERC721_ABI, library)
+    const approved: boolean = await contract.isApprovedForAll(lowerAccount, lowerSpender);
+    return approved ? MaxUint256 : BigNumber.from('0')
+
+  } else if (assetType === StringAssetType.ERC1155) {
+    const contract = new Contract(lowerAssetAddress, ERC1155_ABI, library)
+    const approved: boolean = await contract.isApprovedForAll(lowerAccount, lowerSpender);
+    return approved ? MaxUint256 : BigNumber.from('0')
+
+  } else {
+    throw new Error(`Unsupported asset type ${assetType.valueOf()}`)
+  }
+}
+
+
+export const approveAsset = async (assetAddress: string, assetType: StringAssetType, library: Web3Provider, operator: string): Promise<TransactionResponse> => {
+  const lowerOperator = operator.toLowerCase()
+  const lowerAssetAddress = assetAddress.toLowerCase()
+  if (assetType === StringAssetType.ERC20) {
+    const contract = new Contract(lowerAssetAddress, ERC20_ABI, library)
+
+    let estimatedGas
+    try {
+      estimatedGas = await contract.estimateGas.approve(lowerOperator, MaxUint256)
+    } catch (e) {
+      //TO DO: tokens who restrict approval amounts
+      throw e
+    }
+    return await contract.approve(lowerOperator, MaxUint256, { gasLimit: calculateGasMargin(estimatedGas) })
+
+  } else if (assetType === StringAssetType.ERC721) {
+    const contract = new Contract(lowerAssetAddress, ERC721_ABI, library)
+    const estimatedGas = await contract.estimateGas.setApprovalForAll(lowerOperator, true)
+    return await contract.setApprovalForAll(lowerOperator, true, { gasLimit: calculateGasMargin(estimatedGas) })
+
+  } else if (assetType === StringAssetType.ERC1155) {
+    const contract = new Contract(lowerAssetAddress, ERC1155_ABI, library)
+    const estimatedGas = await contract.estimateGas.setApprovalForAll(lowerOperator, true)
+    return await contract.setApprovalForAll(lowerOperator, true, { gasLimit: calculateGasMargin(estimatedGas) })
+
+
+  } else {
+    throw new Error(`Unsupported asset type ${assetType.valueOf()}`)
+  }
+}
+
 
 export enum ApprovalState {
   UNKNOWN,
