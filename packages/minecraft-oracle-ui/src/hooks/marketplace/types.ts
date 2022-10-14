@@ -1,6 +1,12 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { StringAssetType, StringOrderType } from 'utils/subgraph';
 
+export interface NewAsset {
+  assetType: StringAssetType;
+  assetAddress: string;
+  assetId: number;
+}
+
 export interface Asset {
   // {asset address}-{asset id}
   id: string;

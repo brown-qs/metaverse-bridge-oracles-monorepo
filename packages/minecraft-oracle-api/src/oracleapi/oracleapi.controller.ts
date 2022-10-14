@@ -13,7 +13,7 @@ import { UserEntity } from '../user/user/user.entity';
 import { User } from '../utils/decorators';
 import { CallparamDto } from './dtos/callparams.dto';
 import { OracleApiService } from './oracleapi.service';
-import { ImportDto } from './dtos/import.dto';
+import { InDto } from './dtos/in.dto';
 import { ConfirmDto } from './dtos/confirm.dto';
 import { ExportDto } from './dtos/export.dto';
 import { SummonDto } from './dtos/summon.dto';
@@ -31,16 +31,16 @@ export class OracleApiController {
         this.context = OracleApiController.name;
     }
 
-    @Put('import')
+    @Put('in')
     @HttpCode(200)
     @ApiOperation({ summary: 'Fetches oracle data for an import' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async import(
         @User() user: UserEntity,
-        @Body() data: ImportDto
+        @Body() data: InDto
     ): Promise<CallparamDto> {
-        const params = await this.oracleApiService.userInRequest(user, data, false)
+        const params = await this.oracleApiService.userInRequest(user, data)
 
         return {
             hash: params[0],
@@ -50,7 +50,7 @@ export class OracleApiController {
         }
     }
 
-    @Put('import/confirm')
+    @Put('in/confirm')
     @HttpCode(200)
     @ApiOperation({ summary: 'Confirms an import request, sealing the deal' })
     @ApiBearerAuth()
@@ -59,38 +59,7 @@ export class OracleApiController {
         @User() user: UserEntity,
         @Body() data: ConfirmDto
     ): Promise<boolean> {
-        const success = await this.oracleApiService.userImportConfirm(user, data)
-        return success
-    }
-
-    @Put('enrapture')
-    @HttpCode(200)
-    @ApiOperation({ summary: 'Fetches oracle data for an enrapture' })
-    @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard)
-    async enrapture(
-        @User() user: UserEntity,
-        @Body() data: ImportDto
-    ): Promise<CallparamDto> {
-        const params = await this.oracleApiService.userInRequest(user, data, true)
-        return {
-            hash: params[0],
-            data: params[1],
-            signature: params[2],
-            confirmed: params[3]
-        }
-    }
-
-    @Put('enrapture/confirm')
-    @HttpCode(200)
-    @ApiOperation({ summary: 'Confirms an enrapture request, sealing the deal' })
-    @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard)
-    async enraptureConfirm(
-        @User() user: UserEntity,
-        @Body() data: ConfirmDto
-    ): Promise<boolean> {
-        const success = await this.oracleApiService.userEnraptureConfirm(user, data)
+        const success = await this.oracleApiService.userInConfirm(user, data)
         return success
     }
 

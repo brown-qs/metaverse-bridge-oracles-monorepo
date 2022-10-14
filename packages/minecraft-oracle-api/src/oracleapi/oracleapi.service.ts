@@ -5,7 +5,7 @@ import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { TextureService } from '../texture/texture.service';
 import { UserEntity } from '../user/user/user.entity';
 import { GameService } from '../game/game.service';
-import { ImportDto } from './dtos/import.dto';
+import { InDto } from './dtos/in.dto';
 import { CALLDATA_EXPIRATION_MS, CALLDATA_EXPIRATION_THRESHOLD, METAVERSE, MultiverseVersion, RecognizedAssetType } from '../config/constants';
 import { calculateMetaAssetHash, encodeExportWithSigData, encodeImportOrEnraptureWithSigData, getSalt, getSignature, StandardizedValidatedAssetInParams, standardizeValidateAssetInParams, utf8ToKeccak } from './oracleapi.utils';
 import { BigNumber, Contract, ethers } from 'ethers';
@@ -44,6 +44,7 @@ import { AssetRemovedEvent } from '../cqrs/events/asset-removed.event';
 import { METAVERSE_V2_ABI } from '../common/contracts/MetaverseV2';
 import { ChainEntity } from '../chain/chain.entity';
 import Joi from 'joi';
+import { CollectionFragmentService } from '../collectionfragment/collectionfragment.service';
 
 @Injectable()
 export class OracleApiService {
@@ -68,6 +69,7 @@ export class OracleApiService {
         private readonly compositeAssetService: CompositeAssetService,
         private readonly materialService: MaterialService,
         private readonly resourceInventoryService: ResourceInventoryService,
+        private readonly collectionFragmentService: CollectionFragmentService,
         private configService: ConfigService,
         @Inject(ProviderToken.ORACLE_WALLET_CALLBACK) private getOracle: TypeOracleWalletProvider,
         @Inject(ProviderToken.RECOGNIZED_CHAIN_ASSETS_CALLBACK) private getRecognizedAsset: TypeRecognizedChainAssetsProvider,
@@ -79,18 +81,22 @@ export class OracleApiService {
         this.defaultChainId = this.configService.get<number>('network.defaultChainId')
     }
 
-    public async userInRequest(user: UserEntity, data: ImportDto, enraptured: boolean): Promise<[string, string, string, boolean]> {
+    public async userInRequest(user: UserEntity, data: InDto): Promise<[string, string, string, boolean]> {
         const funcCallPrefix = `[${makeid(5)}] userInRequest:: uuid: ${user.uuid}`
-        this.logger.debug(`${funcCallPrefix} START ImportDto: ${JSON.stringify(data)}, enraptured: ${enraptured}`, this.context)
+        this.logger.debug(`${funcCallPrefix} START ImportDto: ${JSON.stringify(data)}`, this.context)
         const sanitizedChainId = !!data.chainId ? data.chainId : this.defaultChainId;
-        const collectionFragment = enraptured ?
-            findRecognizedAsset(await this.getRecognizedAsset(sanitizedChainId, BridgeAssetType.ENRAPTURED), data.asset)
-            : findRecognizedAsset(await this.getRecognizedAsset(sanitizedChainId, BridgeAssetType.IMPORTED), data.asset)
+
+        const recognizedInAssets = [...await this.getRecognizedAsset(sanitizedChainId, BridgeAssetType.IMPORTED), ...await this.getRecognizedAsset(sanitizedChainId, BridgeAssetType.ENRAPTURED)]
+        const collectionFragment = findRecognizedAsset(recognizedInAssets, data.asset)
 
         if (!collectionFragment) {
             this.logger.error(`${funcCallPrefix} not an permissioned asset`, null, this.context)
             throw new UnprocessableEntityException(`Not permissioned asset`)
         }
+
+        const enraptured = collectionFragment.enrapturable === true
+        this.logger.debug(`${funcCallPrefix} enrapturing: ${String(enraptured)}`, this.context)
+
 
         //standardizes and validates asset in request so hash is deterministic
         let standardizedParams: StandardizedValidatedAssetInParams
@@ -98,7 +104,8 @@ export class OracleApiService {
             standardizedParams = standardizeValidateAssetInParams(sanitizedChainId, data.asset.assetType, data.asset.assetAddress, parseInt(data.asset.assetId), data.amount, enraptured, data.owner)
             this.logger.debug(`${funcCallPrefix} standardized params: ${JSON.stringify(standardizedParams)}`, this.context)
         } catch (e) {
-            this.logger.error(`${funcCallPrefix} failed to standardize`, null, this.context)
+            console.log(e)
+            this.logger.error(`${funcCallPrefix} failed to standardize`, e, this.context)
             throw new UnprocessableEntityException(`Failed to standard asset in request`)
         }
         const multiverseVersion = collectionFragment.collection.multiverseVersion
@@ -130,7 +137,7 @@ export class OracleApiService {
 
             let failedtoconfirm = false
             try {
-                const success = enraptured ? await this.userEnraptureConfirm(user, { hash, chainId: sanitizedChainId }) : await this.userImportConfirm(user, { hash, chainId: sanitizedChainId })
+                const success = await this.userInConfirm(user, { hash, chainId: sanitizedChainId })
                 this.logger.debug(`${funcCallPrefix} requestHash: ${requestHash} salt: ${salt} hash: ${hash} existing inflow confirmed!`, this.context)
             } catch (e) {
                 failedtoconfirm = true
@@ -175,6 +182,7 @@ export class OracleApiService {
             expiration: expiration.toString(),
             owner: user,
             salt,
+            recognizedAssetType: collectionFragment.recognizedAssetType,
             collectionFragment,
             createdAt: new Date(),
             modifiedAt: new Date()
@@ -182,6 +190,176 @@ export class OracleApiService {
         this.logger.debug(`${funcCallPrefix} requestHash: ${requestHash} salt: ${salt} hash: ${hash} request prepared from NEW salt: ${[hash, payload, signature]}`, this.context)
         return [hash, payload, signature, false]
     }
+
+
+    public async userInConfirm(user: UserEntity, data: { hash: string, chainId: number }): Promise<boolean> {
+        let skinAdded = false
+        let resourceInventoryUpdate = false
+        const hash = data.hash
+        const funcCallPrefix = `[${makeid(5)}] userInConfirm:: uuid: ${user.uuid} hash: ${hash}`
+        this.logger.debug(`${funcCallPrefix} START`, this.context)
+
+
+        const chainId = !!data.chainId ? data.chainId : this.defaultChainId;
+
+        const assetEntry = await this.assetService.findOne({ hash, collectionFragment: { collection: { chainId } } }, { relations: ['collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
+        const enraptured = assetEntry.enraptured
+        if (!assetEntry || assetEntry.hash !== hash) {
+            this.logger.error(`${funcCallPrefix} invalid conditions. exists: ${!!assetEntry}, enraptured: ${assetEntry?.enraptured}, pendingOut: ${assetEntry?.pendingOut}, pendingIn: ${assetEntry?.pendingIn}`, null, this.context)
+            throw new UnprocessableEntityException('Invalid enrapture confirm conditions')
+        }
+
+        if (assetEntry.pendingIn === false) {
+            return true
+        }
+        const multiverseVersion = assetEntry.collectionFragment.collection.multiverseVersion
+        const chainEntity = await this.chainService.findOne({ chainId })
+        const assetAddress = assetEntry.collectionFragment.collection.assetAddress.toLowerCase()
+        const assetType = assetEntry.collectionFragment.collection.assetType
+        const assetId = assetEntry.assetId
+        const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
+        const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
+
+        let contract: Contract = this.getContract(multiverseVersion, chainEntity, oracle)
+
+
+        let mAsset: any
+
+        if (multiverseVersion === MultiverseVersion.V1) {
+            if (enraptured) {
+                mAsset = await contract.getEnrapturedMetaAsset(hash)
+            } else {
+                mAsset = await contract.getImportedMetaAsset(hash)
+            }
+        } else if (multiverseVersion === MultiverseVersion.V2) {
+            mAsset = await contract.getMetaAsset(hash, true)
+        }
+
+
+        if (multiverseVersion === MultiverseVersion.V1) {
+            if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress.toLowerCase() !== assetAddress) {
+                this.logger.error(`${funcCallPrefix} on-chain data didn't match for mAsset: ${JSON.stringify(mAsset)}`, null, this.context)
+                throw new UnprocessableEntityException(`On-chain data didn't match`)
+            }
+        } else if (multiverseVersion === MultiverseVersion.V2) {
+            if (!mAsset || mAsset.assetAmount.toString() !== assetEntry.amount || mAsset.assetAddress.toLowerCase() !== assetAddress.toLowerCase()) {
+                this.logger.error(`${funcCallPrefix} on-chain data didn't match for mAsset: ${JSON.stringify(mAsset)}`, null, this.context)
+                throw new UnprocessableEntityException(`On-chain data didn't match`)
+            }
+        }
+
+        // assign skin if asset unlocks one
+        const texture = await this.textureService.findOne({ assetAddress, assetId })
+        if (!!texture) {
+            this.logger.log('EnraptureConfirm: texture found', this.context)
+            await this.skinService.create({
+                id: SkinEntity.toId(user.uuid, texture.assetAddress, texture.assetId),
+                owner: user,
+                equipped: false,
+                texture
+            })
+            skinAdded = true
+        } else {
+            this.logger.warn('EnraptureConfirm: no texture found for asset!!!', this.context)
+        }
+
+        if (!!assetEntry.collectionFragment) {
+            if (assetEntry.collectionFragment.gamepass) {
+                user.allowedToPlay = true
+                user.role = user.role?.valueOf() === UserRole.NONE.valueOf() ? UserRole.PLAYER : user.role
+                user.numGamePassAsset = (user.numGamePassAsset ?? 0) + 1
+
+                // this means user had no skins/in game eligible assets imported before
+                if (user.numGamePassAsset === 1) {
+                    try {
+                        await this.skinService.createMultiple([
+                            {
+                                id: SkinEntity.toId(user.uuid, '0x0', '0'),
+                                owner: user,
+                                equipped: true,
+                                texture: await this.textureService.findOne({ assetAddress: '0x0', assetId: '0', assetType: StringAssetType.NONE })
+                            },
+                            {
+                                id: SkinEntity.toId(user.uuid, '0x0', '1'),
+                                owner: user,
+                                equipped: false,
+                                texture: await this.textureService.findOne({ assetAddress: '0x0', assetId: '1', assetType: StringAssetType.NONE })
+                            }
+                        ])
+                    } catch (error) {
+                        this.logger.warn(`ImportConfirm: error trying to set default skins for user ${user.uuid}`, this.context)
+                    }
+                    skinAdded = true
+                }
+
+                await this.userService.update(user.uuid, { allowedToPlay: user.allowedToPlay, role: user.role, numGamePassAsset: user.numGamePassAsset })
+            }
+        }
+
+        const finalentry = await this.assetService.create({ ...assetEntry, pendingIn: false, modifiedAt: new Date() });
+
+        // TODO proper sideffects
+
+        (async () => {
+            let metadata = null
+            let world = null
+            try {
+                metadata = (await this.nftApiService.getNFT(chainId.toString(), assetType, assetAddress, [assetId]))?.[0] as any ?? null
+                world = metadata?.tokenURI?.plot?.world ?? null
+            } catch {
+                this.logger.error(`ImportConfirm: couldn't fetch asset metadata: ${hash}`, undefined, this.context)
+            }
+            if (!!metadata) {
+                await this.assetService.update({ hash: assetEntry.hash }, { metadata, world })
+            }
+        })()
+
+        // TODO disgustang
+
+        if (assetEntry.collectionFragment.treatAsFungible === true) {
+            const cid = ResourceInventoryService.calculateId({ chainId, assetAddress, assetId, uuid: user.uuid })
+            const inv = await this.resourceInventoryService.findOne({ id: cid }, { relations: ['assets'] })
+            if (!inv) {
+                await this.resourceInventoryService.create({
+                    amount: assetEntry.amount,
+                    owner: user,
+                    id: cid,
+                    assetId,
+                    collectionFragment: assetEntry.collectionFragment,
+                    assets: [finalentry]
+                })
+            } else {
+                const newAmount = (BigNumber.from(inv.amount).add(assetEntry.amount)).toString()
+                const entry: ResourceInventoryEntity = { ...inv, amount: newAmount, assets: (inv.assets ?? []).concat([finalentry]) }
+                console.log(entry)
+                await this.resourceInventoryService.create(entry)
+            }
+            resourceInventoryUpdate = true
+        }
+
+        if (!finalentry) {
+            this.logger.error(`EnraptureConfirm: couldn't change pending flag: ${hash}`, undefined, this.context)
+            throw new UnprocessableEntityException(`Database error`)
+        }
+
+        user.lastUsedAddress = mAsset.owner.toLowerCase()
+        if (!user.usedAddresses.includes(user.lastUsedAddress)) {
+            user.usedAddresses.push(user.lastUsedAddress)
+        }
+        await this.userService.update(user.uuid, { usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress, numGamePassAsset: user.numGamePassAsset })
+        if (skinAdded) {
+            this.eventBus.publish(new SkinAddedEvent(user.uuid))
+        }
+        if (resourceInventoryUpdate) {
+            this.eventBus.publish(new ResourceInventoryUpdatedEvent(user.uuid))
+        }
+        this.eventBus.publish(new UserProfileUpdatedEvent(user.uuid))
+        this.eventBus.publish(new AssetAddedEvent(user.uuid))
+
+        return true
+    }
+
+
 
     public async userOutRequest(user: UserEntity, { hash, chainId }: ExportDto): Promise<[string, string, string, boolean]> {
         this.logger.debug(`userOutRequest: ${hash}`, this.context)
@@ -357,313 +535,6 @@ export class OracleApiService {
         return res
     }
 
-    public async userImportConfirm(user: UserEntity, data: { hash: string, chainId: number }, asset?: AssetEntity): Promise<boolean> {
-        let skinAdded = false
-
-        const hash = data.hash;
-
-        const funcCallPrefix = `[${makeid(5)}] userImportConfirm:: uuid: ${user.uuid} hash: ${hash}`
-        this.logger.debug(`${funcCallPrefix} START`, this.context)
-
-        const chainId = !!data.chainId ? data.chainId : this.defaultChainId;
-        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, collectionFragment: { collection: { chainId } } }, { relations: ['collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
-
-        if (!assetEntry || assetEntry.hash !== hash || assetEntry.enraptured !== false) {
-            this.logger.error(`${funcCallPrefix} invalid conditions. exists: ${!!assetEntry}, enraptured: ${assetEntry?.enraptured}, pendingOut: ${assetEntry?.pendingOut}, pendingIn: ${assetEntry?.pendingIn}`, null, this.context)
-            throw new UnprocessableEntityException('Invalid import confirm conditions')
-        }
-
-        if (assetEntry.pendingIn === false) {
-            return true
-        }
-        const multiverseVersion = assetEntry.collectionFragment.collection.multiverseVersion
-        const assetAddress = assetEntry.collectionFragment.collection.assetAddress.toLowerCase()
-        const assetType = assetEntry.collectionFragment.collection.assetType
-        const assetId = assetEntry.assetId
-        const chainEntity = await this.chainService.findOne({ chainId })
-        const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
-        const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
-
-        let contract: Contract = this.getContract(multiverseVersion, chainEntity, oracle)
-
-        let mAsset: any
-
-        if (multiverseVersion === MultiverseVersion.V1) {
-            mAsset = await contract.getImportedMetaAsset(hash)
-        } else if (multiverseVersion === MultiverseVersion.V2) {
-            mAsset = await contract.getMetaAsset(hash, false)
-        }
-
-
-        if (multiverseVersion === MultiverseVersion.V1) {
-            if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress.toLowerCase() !== assetAddress) {
-                this.logger.error(`${funcCallPrefix} on-chain data didn't match for mAsset: ${JSON.stringify(mAsset)}`, null, this.context)
-                throw new UnprocessableEntityException(`On-chain data didn't match`)
-            }
-        } else if (multiverseVersion === MultiverseVersion.V2) {
-            if (!mAsset || mAsset.assetAmount.toString() !== assetEntry.amount || mAsset.assetAddress.toLowerCase() !== assetAddress.toLowerCase()) {
-                this.logger.error(`${funcCallPrefix} on-chain data didn't match for mAsset: ${JSON.stringify(mAsset)}`, null, this.context)
-                throw new UnprocessableEntityException(`On-chain data didn't match`)
-            }
-        }
-
-
-
-        const importableAssets = await this.getRecognizedAsset(chainId, BridgeAssetType.IMPORTED)
-        const recognizedAsset = findRecognizedAsset(importableAssets, { assetAddress, assetId })
-
-        // assign skin if asset unlocks one
-        const texture = await this.textureService.findOne({ assetAddress, assetId: assetId })
-        if (!!texture) {
-            this.logger.debug(`${funcCallPrefix} texture found`, this.context)
-            await this.skinService.create({
-                id: SkinEntity.toId(user.uuid, texture.assetAddress, texture.assetId),
-                owner: user,
-                equipped: false,
-                texture
-            })
-            skinAdded = true
-        } else {
-            this.logger.debug(`${funcCallPrefix} NO texture found`, this.context)
-        }
-
-        if (!!recognizedAsset) {
-            if (recognizedAsset.gamepass) {
-                user.allowedToPlay = true
-                user.role = user.role?.valueOf() === UserRole.NONE.valueOf() ? UserRole.PLAYER : user.role
-                user.numGamePassAsset = (user.numGamePassAsset ?? 0) + 1
-
-                // this means user had no skins/in game eligible assets imported before
-                if (user.numGamePassAsset === 1) {
-                    try {
-                        await this.skinService.createMultiple([
-                            {
-                                id: SkinEntity.toId(user.uuid, '0x0', '0'),
-                                owner: user,
-                                equipped: true,
-                                texture: await this.textureService.findOne({ assetAddress: '0x0', assetId: '0', assetType: StringAssetType.NONE })
-                            },
-                            {
-                                id: SkinEntity.toId(user.uuid, '0x0', '1'),
-                                owner: user,
-                                equipped: false,
-                                texture: await this.textureService.findOne({ assetAddress: '0x0', assetId: '1', assetType: StringAssetType.NONE })
-                            }
-                        ])
-
-                    } catch (error) {
-                        this.logger.error(`${funcCallPrefix} error trying to set default skins`, error, this.context)
-                    }
-                    skinAdded = true
-                }
-
-                await this.userService.update(user.uuid, { allowedToPlay: user.allowedToPlay, role: user.role, numGamePassAsset: user.numGamePassAsset })
-            }
-        }
-
-        assetEntry.recognizedAssetType = recognizedAsset?.recognizedAssetType ?? RecognizedAssetType.NONE;
-        const finalentry = await this.assetService.create({ ...assetEntry, pendingIn: false, modifiedAt: new Date() });
-
-        (async () => {
-            let metadata = null
-            let world = null
-            try {
-                metadata = (await this.nftApiService.getNFT(chainId.toString(), assetType, assetAddress, [assetId]))?.[0] as any ?? null
-                world = metadata?.tokenURI?.plot?.world ?? null
-            } catch {
-                this.logger.error(`${funcCallPrefix} couldn't fetch asset metadata`, undefined, this.context)
-            }
-            if (!!metadata) {
-                await this.assetService.update({ hash: assetEntry.hash }, { metadata, world, modifiedAt: new Date() })
-            }
-        })()
-
-        if (!finalentry) {
-            this.logger.error(`${funcCallPrefix} couldn't change pending flag`, undefined, this.context)
-            throw new UnprocessableEntityException(`Database error`)
-        }
-
-        user.lastUsedAddress = mAsset.owner.toLowerCase()
-        if (!user.usedAddresses.includes(user.lastUsedAddress)) {
-            user.usedAddresses.push(user.lastUsedAddress)
-        }
-        await this.userService.update(user.uuid, { usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress, numGamePassAsset: user.numGamePassAsset })
-        if (skinAdded) {
-            this.eventBus.publish(new SkinAddedEvent(user.uuid))
-        }
-        this.eventBus.publish(new UserProfileUpdatedEvent(user.uuid))
-        this.eventBus.publish(new AssetAddedEvent(user.uuid))
-
-        return true
-    }
-
-    public async userEnraptureConfirm(user: UserEntity, data: { hash: string, chainId: number }, asset?: AssetEntity): Promise<boolean> {
-        let skinAdded = false
-        let resourceInventoryUpdate = false
-        const hash = data.hash
-        const funcCallPrefix = `[${makeid(5)}] userEnraptureConfirm:: uuid: ${user.uuid} hash: ${hash}`
-        this.logger.debug(`${funcCallPrefix} START`, this.context)
-
-
-        const chainId = !!data.chainId ? data.chainId : this.defaultChainId;
-
-        const assetEntry = !!asset ? asset : await this.assetService.findOne({ hash, collectionFragment: { collection: { chainId } } }, { relations: ['collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
-
-        if (!assetEntry || assetEntry.hash !== hash || assetEntry.enraptured !== true) {
-            this.logger.error(`${funcCallPrefix} invalid conditions. exists: ${!!assetEntry}, enraptured: ${assetEntry?.enraptured}, pendingOut: ${assetEntry?.pendingOut}, pendingIn: ${assetEntry?.pendingIn}`, null, this.context)
-            throw new UnprocessableEntityException('Invalid enrapture confirm conditions')
-        }
-
-        if (assetEntry.pendingIn === false) {
-            return true
-        }
-        const multiverseVersion = assetEntry.collectionFragment.collection.multiverseVersion
-        const chainEntity = await this.chainService.findOne({ chainId })
-        const assetAddress = assetEntry.collectionFragment.collection.assetAddress.toLowerCase()
-        const assetType = assetEntry.collectionFragment.collection.assetType
-        const assetId = assetEntry.assetId
-        const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
-        const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
-
-        let contract: Contract = this.getContract(multiverseVersion, chainEntity, oracle)
-
-
-        let mAsset: any = await contract.getEnrapturedMetaAsset(hash)
-
-        if (multiverseVersion === MultiverseVersion.V1) {
-            mAsset = await contract.getEnrapturedMetaAsset(hash)
-        } else if (multiverseVersion === MultiverseVersion.V2) {
-            mAsset = await contract.getMetaAsset(hash, true)
-        }
-
-
-        if (multiverseVersion === MultiverseVersion.V1) {
-            if (!mAsset || mAsset.amount.toString() !== assetEntry.amount || mAsset.asset.assetAddress.toLowerCase() !== assetAddress) {
-                this.logger.error(`${funcCallPrefix} on-chain data didn't match for mAsset: ${JSON.stringify(mAsset)}`, null, this.context)
-                throw new UnprocessableEntityException(`On-chain data didn't match`)
-            }
-        } else if (multiverseVersion === MultiverseVersion.V2) {
-            if (!mAsset || mAsset.assetAmount.toString() !== assetEntry.amount || mAsset.assetAddress.toLowerCase() !== assetAddress.toLowerCase()) {
-                this.logger.error(`${funcCallPrefix} on-chain data didn't match for mAsset: ${JSON.stringify(mAsset)}`, null, this.context)
-                throw new UnprocessableEntityException(`On-chain data didn't match`)
-            }
-        }
-
-
-        const enrapturableAssets = await this.getRecognizedAsset(chainId, BridgeAssetType.ENRAPTURED)
-        const recognizedAsset = findRecognizedAsset(enrapturableAssets, { assetAddress, assetId })
-
-        // assign skin if asset unlocks one
-        const texture = await this.textureService.findOne({ assetAddress, assetId })
-        if (!!texture) {
-            this.logger.log('EnraptureConfirm: texture found', this.context)
-            await this.skinService.create({
-                id: SkinEntity.toId(user.uuid, texture.assetAddress, texture.assetId),
-                owner: user,
-                equipped: false,
-                texture
-            })
-            skinAdded = true
-        } else {
-            this.logger.warn('EnraptureConfirm: no texture found for asset!!!', this.context)
-        }
-
-        if (!!recognizedAsset) {
-            if (recognizedAsset.gamepass) {
-                user.allowedToPlay = true
-                user.role = user.role?.valueOf() === UserRole.NONE.valueOf() ? UserRole.PLAYER : user.role
-                user.numGamePassAsset = (user.numGamePassAsset ?? 0) + 1
-
-                // this means user had no skins/in game eligible assets imported before
-                if (user.numGamePassAsset === 1) {
-                    try {
-                        await this.skinService.createMultiple([
-                            {
-                                id: SkinEntity.toId(user.uuid, '0x0', '0'),
-                                owner: user,
-                                equipped: true,
-                                texture: await this.textureService.findOne({ assetAddress: '0x0', assetId: '0', assetType: StringAssetType.NONE })
-                            },
-                            {
-                                id: SkinEntity.toId(user.uuid, '0x0', '1'),
-                                owner: user,
-                                equipped: false,
-                                texture: await this.textureService.findOne({ assetAddress: '0x0', assetId: '1', assetType: StringAssetType.NONE })
-                            }
-                        ])
-                    } catch (error) {
-                        this.logger.warn(`ImportConfirm: error trying to set default skins for user ${user.uuid}`, this.context)
-                    }
-                    skinAdded = true
-                }
-
-                await this.userService.update(user.uuid, { allowedToPlay: user.allowedToPlay, role: user.role, numGamePassAsset: user.numGamePassAsset })
-            }
-        }
-
-        assetEntry.recognizedAssetType = recognizedAsset?.recognizedAssetType ?? RecognizedAssetType.NONE;
-        const finalentry = await this.assetService.create({ ...assetEntry, pendingIn: false, modifiedAt: new Date() });
-
-        // TODO proper sideffects
-
-        (async () => {
-            let metadata = null
-            let world = null
-            try {
-                metadata = (await this.nftApiService.getNFT(chainId.toString(), assetType, assetAddress, [assetId]))?.[0] as any ?? null
-                world = metadata?.tokenURI?.plot?.world ?? null
-            } catch {
-                this.logger.error(`ImportConfirm: couldn't fetch asset metadata: ${hash}`, undefined, this.context)
-            }
-            if (!!metadata) {
-                await this.assetService.update({ hash: assetEntry.hash }, { metadata, world })
-            }
-        })()
-
-        // TODO disgustang
-
-        if (assetEntry.recognizedAssetType.valueOf() === RecognizedAssetType.RESOURCE.valueOf()) {
-            const cid = ResourceInventoryService.calculateId({ chainId, assetAddress, assetId, uuid: user.uuid })
-            const inv = await this.resourceInventoryService.findOne({ id: cid }, { relations: ['assets'] })
-            if (!inv) {
-                await this.resourceInventoryService.create({
-                    amount: assetEntry.amount,
-                    owner: user,
-                    id: cid,
-                    assetId,
-                    collectionFragment: assetEntry.collectionFragment,
-                    assets: [finalentry]
-                })
-            } else {
-                const newAmount = (BigNumber.from(inv.amount).add(assetEntry.amount)).toString()
-                const entry: ResourceInventoryEntity = { ...inv, amount: newAmount, assets: (inv.assets ?? []).concat([finalentry]) }
-                console.log(entry)
-                await this.resourceInventoryService.create(entry)
-            }
-            resourceInventoryUpdate = true
-        }
-
-        if (!finalentry) {
-            this.logger.error(`EnraptureConfirm: couldn't change pending flag: ${hash}`, undefined, this.context)
-            throw new UnprocessableEntityException(`Database error`)
-        }
-
-        user.lastUsedAddress = mAsset.owner.toLowerCase()
-        if (!user.usedAddresses.includes(user.lastUsedAddress)) {
-            user.usedAddresses.push(user.lastUsedAddress)
-        }
-        await this.userService.update(user.uuid, { usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress, numGamePassAsset: user.numGamePassAsset })
-        if (skinAdded) {
-            this.eventBus.publish(new SkinAddedEvent(user.uuid))
-        }
-        if (resourceInventoryUpdate) {
-            this.eventBus.publish(new ResourceInventoryUpdatedEvent(user.uuid))
-        }
-        this.eventBus.publish(new UserProfileUpdatedEvent(user.uuid))
-        this.eventBus.publish(new AssetAddedEvent(user.uuid))
-
-        return true
-    }
 
     public async userExportConfirm(user: UserEntity, data: { hash: string, chainId: number }, asset?: AssetEntity): Promise<boolean> {
         let skinSelectedChanged = false
