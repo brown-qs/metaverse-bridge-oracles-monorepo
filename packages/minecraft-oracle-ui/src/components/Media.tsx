@@ -20,8 +20,8 @@ export const Media = ({ uri, imageProps, videoProps, ...props }: MediaProps) => 
     const { getMediaType, mediaUrl, isLoading } = useFileType(mediaUri);
     const [mediaLoading, setMediaLoading] = useState<boolean>(true)
     const [mediaError, setMediaError] = useState<boolean>(false)
-
     const mediaType = getMediaType();
+
 
     const getMedia = () => {
         if (["xml", "image"].includes(String(mediaType)) && mediaUrl) {
