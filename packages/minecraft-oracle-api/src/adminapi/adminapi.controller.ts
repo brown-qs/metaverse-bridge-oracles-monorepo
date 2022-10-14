@@ -32,7 +32,7 @@ import { AdminConfirmDto, OracleActionTypeDto } from './dtos/confirm.dto';
 import { OracleApiService } from '../oracleapi/oracleapi.service';
 import { OracleRequestDto } from './dtos/oraclerequest.dto';
 import { ExportDto } from '../oracleapi/dtos/export.dto';
-import { ImportDto } from '../oracleapi/dtos/import.dto';
+import { ImportDto } from '../oracleapi/dtos/in.dto';
 import { SummonDto } from '../oracleapi/dtos/summon.dto';
 import { CallparamDto } from '../oracleapi/dtos/callparams.dto';
 import { CommunismDto } from './dtos/communism.dto';

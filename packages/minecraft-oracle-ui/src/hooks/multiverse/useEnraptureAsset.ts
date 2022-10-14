@@ -93,7 +93,6 @@ export function useEnraptureAssetCallback(
     hash?: string;
 } {
     const { account, chainId, library } = useActiveWeb3React();
-
     //console.log('YOLO', { account, chainId, library });
     // const contract = useMultiverseBridgeV1Contract(true);
     const contract = useMultiverseBridgeContract(assetRequest.multiverseVersion, true, assetRequest.chainId);

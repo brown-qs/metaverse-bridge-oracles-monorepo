@@ -39,17 +39,68 @@ import { openImportModal, setImportModalTokens } from '../state/slices/importMod
 import { openInGameItemModal, setInGameItemModalToken } from '../state/slices/inGameItemModalSlice';
 import { InGameItemModal } from '../components/modals/InGameItemModal';
 import { useGetExosamaMetadataQuery, useGetExosamaOnChainTokensQuery } from '../state/api/generatedSquidExosamaApi';
+import { useQuery } from 'react-query';
+import { RARESAMA_POOP, SHIT_FART } from '../utils/constants';
+import { getAssetBalance } from '../hooks/useBalances/useBalances';
 
 
 const ProfilePage = () => {
     const dispatch = useDispatch()
     const blockNumbers = useSelector(selectBlockNumbers)
-    const { account, chainId } = useActiveWeb3React()
+    const { account, chainId, library } = useActiveWeb3React()
 
     const address: string = React.useMemo(() => account?.toLowerCase() ?? "0x999999999999999999999999999", [account])
 
     //profile
     const { data: profile, error, isLoading: profileLoading } = useUserProfileQuery()
+
+    //erc20 token balances
+    const { isLoading: isPoopBalanceLoading, data: poopBalanceData, refetch: refetchPoopBalance } = useQuery(
+        ['getAssetBalance', RARESAMA_POOP, account],
+        () => getAssetBalance(RARESAMA_POOP, library!, account!),
+        {
+            enabled: !!library && !!account && chainId === ChainId.MOONBEAM
+        }
+    )
+
+    const { isLoading: isShitFartBalanceLoading, data: shitFartBalanceData, refetch: refetchShitFartBalance } = useQuery( //test token, wont show up if you dont have it
+        ['getAssetBalance', SHIT_FART, account],
+        () => getAssetBalance(SHIT_FART, library!, account!),
+        {
+            enabled: !!library && !!account && chainId === ChainId.MOONRIVER
+        }
+    )
+
+    const standardizedErc20Tokens: StandardizedOnChainToken[] = React.useMemo(() => {
+        const resultTokens: StandardizedOnChainToken[] = []
+        if (!!shitFartBalanceData && shitFartBalanceData.gt("0")) {
+            const token: StandardizedOnChainToken = {
+                id: "SHIT_FART_TOKEN",
+                assetAddress: SHIT_FART.assetAddress,
+                numericId: 0,
+                balance: shitFartBalanceData.toString(),
+                metadata: {
+                    name: "$SFT",
+                    image: "https://static.moonsama.com/static/poop.svg"
+                }
+            }
+            resultTokens.push(token)
+        }
+        if (!!poopBalanceData && poopBalanceData.gt("0")) {
+            const token: StandardizedOnChainToken = {
+                id: "POOP_TOKEN",
+                assetAddress: RARESAMA_POOP.assetAddress,
+                numericId: 0,
+                balance: poopBalanceData.toString(),
+                metadata: {
+                    name: "$SFT",
+                    image: "https://static.moonsama.com/static/poop.svg"
+                }
+            }
+            resultTokens.push(token)
+        }
+        return resultTokens
+    }, [shitFartBalanceData, poopBalanceData])
 
     //skins
     const { data: skins, error: skinsError, isLoading: skinsLoading, refetch: refetchSkins } = useGetSkinsQuery()
@@ -107,18 +158,20 @@ const ProfilePage = () => {
     const standardizedExosamaOnChainTokens: StandardizedOnChainToken[] | undefined = React.useMemo(() => standardizeExosamaOnChainTokens(exosamaOnChainTokensData), [exosamaOnChainTokensData])
     const standardizedExosamaOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(standardizedExosamaOnChainTokens, recognizedAssetsData), [standardizedExosamaOnChainTokens, recognizedAssetsData])
 
+    const standardizedErc20OnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(standardizedErc20Tokens, recognizedAssetsData), [standardizedErc20Tokens, recognizedAssetsData])
+
     const allStandardizedOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
         if (!!standardizedMarketplaceOnChainTokensWithRecognizedTokenData || !!standardizedRaresamaOnChainTokensWithRecognizedTokenData || !!standardizedExosamaOnChainTokensWithRecognizedTokenData) {
             return [
+                ...(standardizedErc20OnChainTokensWithRecognizedTokenData ?? []),
                 ...(standardizedMarketplaceOnChainTokensWithRecognizedTokenData ?? []),
                 ...(standardizedRaresamaOnChainTokensWithRecognizedTokenData ?? []),
-                ...(standardizedExosamaOnChainTokensWithRecognizedTokenData ?? [])
-
+                ...(standardizedExosamaOnChainTokensWithRecognizedTokenData ?? []),
             ]
         } else {
             return undefined
         }
-    }, [standardizedMarketplaceOnChainTokensWithRecognizedTokenData, standardizedRaresamaOnChainTokensWithRecognizedTokenData, standardizedExosamaOnChainTokensWithRecognizedTokenData])
+    }, [standardizedMarketplaceOnChainTokensWithRecognizedTokenData, standardizedRaresamaOnChainTokensWithRecognizedTokenData, standardizedExosamaOnChainTokensWithRecognizedTokenData, standardizedErc20OnChainTokensWithRecognizedTokenData])
 
 
     const onChainItems: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
@@ -200,7 +253,7 @@ const ProfilePage = () => {
         if (!!chainId) {
             if (chainId === ChainId.MOONRIVER && isMarketplaceOnChainTokensFetching && !currentMarketplaceOnChainTokensData) {
                 return true
-            } else if (chainId === ChainId.MOONBEAM && isRaresamaOnChainTokensDataFetching && !currentRaresamaOnChainTokensData) {
+            } else if (chainId === ChainId.MOONBEAM && ((isRaresamaOnChainTokensDataFetching && !currentRaresamaOnChainTokensData) || isPoopBalanceLoading)) {
                 return true
             } else if (chainId === ChainId.MAINNET && isExosamaOnChainTokensFetching && !currentExosamaOnChainTokensData) {
                 return true
@@ -209,7 +262,7 @@ const ProfilePage = () => {
         } else {
             return false
         }
-    }, [currentMarketplaceOnChainTokensData, isMarketplaceOnChainTokensFetching, isRaresamaOnChainTokensDataFetching, currentRaresamaOnChainTokensData, isExosamaOnChainTokensFetching, currentExosamaOnChainTokensData, chainId])
+    }, [currentMarketplaceOnChainTokensData, isMarketplaceOnChainTokensFetching, isRaresamaOnChainTokensDataFetching, currentRaresamaOnChainTokensData, isExosamaOnChainTokensFetching, currentExosamaOnChainTokensData, isPoopBalanceLoading, chainId])
 
     const isOnChainResourcesLoading: boolean = React.useMemo(() => {
         if (!!chainId && chainId === ChainId.MOONRIVER && isMarketplaceOnChainTokensFetching && !currentMarketplaceOnChainTokensData) {
@@ -256,6 +309,17 @@ const ProfilePage = () => {
     }, [onChainResources, account, chainId])
 
 
+    React.useEffect(() => {
+        if (!!account && chainId === ChainId.MOONRIVER) {
+            refetchShitFartBalance()
+        }
+    }, [account, blockNumbers[ChainId.MOONRIVER], chainId])
+
+    React.useEffect(() => {
+        if (!!account && chainId === ChainId.MOONBEAM) {
+            refetchPoopBalance()
+        }
+    }, [account, blockNumbers[ChainId.MOONBEAM], chainId])
 
     React.useEffect(() => {
         refetchExosamaOnChainTokens()
