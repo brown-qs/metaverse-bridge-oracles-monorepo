@@ -134,7 +134,7 @@ export class OracleApiService {
             const payload = await encodeImportOrEnraptureWithSigData([standardizedParams], METAVERSE, [salt], expirationContract, multiverseVersion)
             const signature = await getSignature(oracle, payload)
             const hash = await calculateMetaAssetHash(standardizedParams, METAVERSE, salt, multiverseVersion)
-            this.logger.debug(`${funcCallPrefix} requestHash: ${requestHash} salt: ${salt} hash: ${hash} request prepared from existing salt: ${[hash, payload, signature]}`, this.context)
+            this.logger.debug(`${funcCallPrefix} requestHash: ${requestHash} salt: ${salt} hash: ${hash} request prepared from existing salt: ${[payload, signature]}`, this.context)
 
             let failedtoconfirm = false
             try {
@@ -233,7 +233,7 @@ export class OracleApiService {
                 mAsset = await contract.getImportedMetaAsset(hash)
             }
         } else if (multiverseVersion === MultiverseVersion.V2) {
-            mAsset = await contract.getMetaAsset(hash, true)
+            mAsset = await contract.getMetaAsset(hash, enraptured)
         }
 
 
