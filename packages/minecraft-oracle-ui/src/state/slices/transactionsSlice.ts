@@ -1,4 +1,5 @@
 import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit"
+import { tr } from "date-fns/locale";
 import { AppState } from ".."
 import { ChainId } from "../../constants";
 import { StringAssetType } from "../../utils/subgraph";
@@ -24,7 +25,7 @@ export enum ApprovalType {
 }
 
 export interface BaseTransaction {
-    transactionHash: string
+    hash: string
     type: TransactionType
     addedAt: number
     receipt: TransactionReceipt | undefined
@@ -62,11 +63,10 @@ const transactionsSlice = createSlice({
     name: "transactionsSlice",
     initialState: { approvalTransactions: [], inTransactions: [], outTransaction: [] } as TransactionsSlice,
     reducers: {
-        addApprovalTransaction: (state, action: PayloadAction<Pick<ApprovalTransaction, "transactionHash" | "chainId" | "assetType" | "assetAddress" | "operator">>) => {
+        addApprovalTransaction: (state, action: PayloadAction<Pick<ApprovalTransaction, "hash" | "chainId" | "assetType" | "assetAddress" | "operator">>) => {
             const payload = action.payload
-            console.log("Add approval transaction: " + JSON.stringify(payload))
             const trans: ApprovalTransaction = {
-                transactionHash: payload.transactionHash,
+                hash: payload.hash,
                 type: TransactionType.Approval,
                 addedAt: new Date().getTime(),
                 receipt: undefined,
@@ -78,15 +78,14 @@ const transactionsSlice = createSlice({
                 assetAddress: payload.assetAddress.toLowerCase(),
                 operator: payload.operator.toLowerCase()
             }
-            if (!state.approvalTransactions.find(t => t.transactionHash === trans.transactionHash)) {
-                console.log("PUSHING TRANSACTION")
+            if (!state.approvalTransactions.find(t => t.hash === trans.hash)) {
                 state.approvalTransactions.push(trans)
             }
         },
-        addInTransaction: (state, action: PayloadAction<Pick<InTransaction, "transactionHash" | "assets">>) => {
+        addInTransaction: (state, action: PayloadAction<Pick<InTransaction, "hash" | "assets">>) => {
             const payload = action.payload
             const trans: InTransaction = {
-                transactionHash: payload.transactionHash,
+                hash: payload.hash,
                 type: TransactionType.In,
                 addedAt: new Date().getTime(),
                 receipt: undefined,
@@ -94,28 +93,54 @@ const transactionsSlice = createSlice({
 
                 assets: payload.assets
             }
-            if (!state.inTransactions.find(t => t.transactionHash === trans.transactionHash)) {
+            if (!state.inTransactions.find(t => t.hash === trans.hash)) {
                 state.inTransactions.push(trans)
             }
         },
-        addOutTransaction: (state, action: PayloadAction<Pick<OutTransaction, "transactionHash">>) => {
+        addOutTransaction: (state, action: PayloadAction<Pick<OutTransaction, "hash">>) => {
             const payload = action.payload
             const trans: OutTransaction = {
-                transactionHash: payload.transactionHash,
+                hash: payload.hash,
                 type: TransactionType.Out,
                 addedAt: new Date().getTime(),
                 receipt: undefined,
                 lastCheckedBlock: 0,
 
             }
-            if (!state.outTransaction.find(t => t.transactionHash === trans.transactionHash)) {
+            if (!state.outTransaction.find(t => t.hash === trans.hash)) {
                 state.outTransaction.push(trans)
+            }
+        },
+        updateLastCheckedBlock: (state, action: PayloadAction<{ hash: string, block: number }>) => {
+            console.log(`updateLastCheckedBlock`)
+
+            const payload = action.payload;
+            for (const [transactionTypeString, transactions] of Object.entries(state)) {
+                const matchingTransaction = (transactions as any)?.find((t: AllTransactionsType) => t.hash === payload.hash)
+                if (!!matchingTransaction) {
+                    matchingTransaction.lastCheckedBlock = Math.max(matchingTransaction.lastCheckedBlock ?? 0, payload.block)
+                    break
+                }
+            }
+        },
+        setReceipt: (state, action: PayloadAction<{ hash: string, receipt: TransactionReceipt }>) => {
+            const payload = action.payload;
+            for (const [transactionTypeString, transactions] of Object.entries(state)) {
+                const matchingTransaction = (transactions as any)?.find((t: AllTransactionsType) => t.hash === payload.hash)
+                if (!!matchingTransaction) {
+                    if (!matchingTransaction.receipt) {
+                        matchingTransaction.receipt = payload.receipt
+                    } else {
+                        console.log("setReceipt:: tried to set receipt after it had already been set.")
+                    }
+                    break;
+                }
             }
         }
     }
 })
 
-export const { addApprovalTransaction, addInTransaction, addOutTransaction } = transactionsSlice.actions
+export const { addApprovalTransaction, addInTransaction, addOutTransaction, updateLastCheckedBlock, setReceipt } = transactionsSlice.actions
 export default transactionsSlice.reducer
 
 export const selectApprovalTransactions = (state: AppState) => state?.newTransactions?.approvalTransactions
@@ -124,7 +149,7 @@ export const selectOutTransactions = (state: AppState) => state?.newTransactions
 export const selectAllBaseTransactions: (state: AppState) => BaseTransaction[] = createSelector([selectApprovalTransactions, selectInTransactions, selectOutTransactions], (approval, inTrans, out) => {
     const allTransactions: BaseTransaction[] =
         [...approval, ...inTrans, ...out]
-            .map(t => ({ transactionHash: t.transactionHash, type: t.type, addedAt: t.addedAt, receipt: t.receipt, lastCheckedBlock: t.lastCheckedBlock }))
+            .map(t => ({ hash: t.hash, type: t.type, addedAt: t.addedAt, receipt: t.receipt, lastCheckedBlock: t.lastCheckedBlock }))
             .sort(t => t.addedAt)
     return allTransactions
 })
@@ -134,3 +159,38 @@ export const selectAllTransactions: (state: AppState) => AllTransactionsType[] =
             .sort(t => t.addedAt)
     return allTransactions
 })
+
+export const selectAllTransactionsFromLastDay: (state: AppState) => AllTransactionsType[] = createSelector([selectAllTransactions], (transactions) => {
+    const time = new Date().getTime()
+    return transactions.filter(t => ((time - t.addedAt) < 1000 * 60 * 60 * 24))
+})
+
+export const shouldCheckTransactionOnBlock = (transaction: AllTransactionsType, latestBlock: number): boolean => {
+    if (!!transaction.receipt) return false;
+    if (!transaction.lastCheckedBlock) return true;
+    const blocksSinceCheck = latestBlock - transaction.lastCheckedBlock
+    if (blocksSinceCheck < 1) return false;
+    const minutesPending = (new Date().getTime() - transaction.addedAt) / 1000 / 60;
+    if (minutesPending > 60) {
+        // every 10 blocks if pending for longer than an hour
+        return false;
+    } else if (minutesPending > 5) {
+        // every 3 blocks if pending more than 5 minutes
+        return blocksSinceCheck > 2;
+    } else {
+        // otherwise every block
+        return true;
+    }
+}
+
+export const transactionToChainId = (transaction: AllTransactionsType): number => {
+    if (transaction.type === TransactionType.Approval) {
+        return transaction.chainId
+    } else if (transaction.type === TransactionType.In) {
+        return transaction.assets[0].chainId
+    } else if (transaction.type === TransactionType.Out) {
+        return 0
+    } else {
+        return 0
+    }
+}

@@ -67,6 +67,7 @@ export const approveAsset = async (assetAddress: string, assetType: StringAssetT
     result = await contract.approve(lowerOperator, MaxUint256, { gasLimit: calculateGasMargin(estimatedGas) })
 
   } else if (assetType === StringAssetType.ERC721) {
+    console.log(`lowerAssetAddress: ${lowerAssetAddress} lowerOperator: ${lowerOperator}`)
     const contract = new Contract(lowerAssetAddress, ERC721_ABI, getSigner(library, account))
     const estimatedGas = await contract.estimateGas.setApprovalForAll(lowerOperator, true)
     result = await contract.setApprovalForAll(lowerOperator, true, { gasLimit: calculateGasMargin(estimatedGas) })
@@ -90,7 +91,7 @@ export const approveAsset = async (assetAddress: string, assetType: StringAssetT
       throw new Error("Couldn't get transaction chainId.")
     }
 
-    store.dispatch(addApprovalTransaction({ transactionHash: result.hash, chainId: network.chainId, assetAddress, assetType, operator: lowerOperator }))
+    store.dispatch(addApprovalTransaction({ hash: result.hash, chainId: network.chainId, assetAddress, assetType, operator: lowerOperator }))
     return result
   } else {
     throw new Error(`Unsupported asset type ${assetType.valueOf()}`)

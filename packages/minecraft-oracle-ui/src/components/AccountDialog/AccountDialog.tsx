@@ -29,7 +29,7 @@ import { ModalIcon } from '../MoonsamaModal/ModalIcon';
 import { MoonsamaModal } from '../MoonsamaModal';
 import React from 'react';
 import { isMatch } from 'date-fns';
-import { AllTransactionsType, selectAllTransactions } from '../../state/slices/transactionsSlice';
+import { AllTransactionsType, selectAllTransactions, selectAllTransactionsFromLastDay } from '../../state/slices/transactionsSlice';
 
 const WALLET_VIEWS = {
   OPTIONS: 'options',
@@ -47,7 +47,7 @@ export const AccountDialog = () => {
   const [, setPendingError] = useState<boolean>();
   const [walletView, setWalletView] = useState(WALLET_VIEWS.ACCOUNT);
 
-  const allTransactions = useSelector(selectAllTransactions);
+  const allTransactions = useSelector(selectAllTransactionsFromLastDay);
   //console.log("sortedRecentTransactions: ", sortedRecentTransactions)
   const { addNetwork } = useAddNetworkToMetamaskCb()
 
@@ -140,7 +140,7 @@ export const AccountDialog = () => {
     return (
       <>
         {transactions.map((t: AllTransactionsType, i) => {
-          return <Transaction key={t.transactionHash} transaction={t} />;
+          return <Transaction key={t.hash} transaction={t} />;
         })}
       </>
     );
