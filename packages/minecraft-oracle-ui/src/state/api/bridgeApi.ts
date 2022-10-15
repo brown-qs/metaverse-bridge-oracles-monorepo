@@ -120,6 +120,13 @@ export const bridgeApi = createApi({
                 body
             }),
         }),
+        inConfirm: builder.mutation<boolean, ConfirmDto>({
+            query: (body) => ({
+                url: `/oracle/in/confirm`,
+                method: "PUT",
+                body
+            }),
+        }),
         export: builder.mutation<CallparamDto, ExportDto>({
             query: (body) => ({
                 url: `/oracle/export`,
@@ -127,13 +134,7 @@ export const bridgeApi = createApi({
                 body
             }),
         }),
-        importConfirm: builder.query<boolean, ConfirmDto>({
-            query: (body) => ({
-                url: `/oracle/in/confirm`,
-                method: "PUT",
-                body
-            }),
-        }),
+
         enraptureConfirm: builder.query<boolean, ConfirmDto>({
             query: (body) => ({
                 url: `/oracle/enrapture/confirm`,
@@ -229,4 +230,4 @@ export const rtkQueryErrorFormatter = (error: any): string => {
     return strErr
 }
 
-export const { useInMutation, useExportMutation, useImportConfirmQuery, useEnraptureConfirmQuery, useExportConfirmQuery, useActiveGameQuery, useOauthInfoQuery, useOauthAuthorizeMutation, useSummonMutation, useGetInGameResourcesQuery, useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
+export const { useInMutation, useExportMutation, useInConfirmMutation, useEnraptureConfirmQuery, useExportConfirmQuery, useActiveGameQuery, useOauthInfoQuery, useOauthAuthorizeMutation, useSummonMutation, useGetInGameResourcesQuery, useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
