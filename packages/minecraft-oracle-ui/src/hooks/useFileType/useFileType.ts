@@ -21,6 +21,7 @@ export const useFileType = (uri?: string) => {
 
   const getMediaType = useCallback(() => {
     if (fileType) {
+
       const [media, secondOne] = fileType.mime.split('/');
       if (mediaArray.includes(media as MediaType)) {
         return media;
@@ -30,6 +31,8 @@ export const useFileType = (uri?: string) => {
         return secondOne;
       }
       return 'other';
+    } else if (url?.toLowerCase().includes(".svg")) {
+      return 'image'
     }
   }, [fileType]);
 
@@ -39,11 +42,14 @@ export const useFileType = (uri?: string) => {
       setIsLoading(true);
       const res = url ? await fetch(url) : undefined;
       if (res?.body) {
-        const type = await fromStream(res?.body);
+        let type = await fromStream(res?.body);
+
+
         try {
           await res.body.cancel();
         } catch (e) {
           // TODO: See why firefox crashes here.
+          console.log(`getFileType:: error: ${e}`)
           if (
             isFirefox &&
             e instanceof TypeError &&

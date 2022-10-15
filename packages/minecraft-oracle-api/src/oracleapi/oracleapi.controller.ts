@@ -13,10 +13,9 @@ import { UserEntity } from '../user/user/user.entity';
 import { User } from '../utils/decorators';
 import { CallparamDto } from './dtos/callparams.dto';
 import { OracleApiService } from './oracleapi.service';
-import { ImportDto } from './dtos/import.dto';
-import { ConfirmDto } from './dtos/confirm.dto';
-import { ExportDto } from './dtos/export.dto';
+import { InDto } from './dtos/in.dto';
 import { SummonDto } from './dtos/summon.dto';
+import { HashAndChainIdDto } from './dtos/hashandchainid.dto';
 
 @ApiTags('oracle')
 @Controller('oracle')
@@ -31,97 +30,53 @@ export class OracleApiController {
         this.context = OracleApiController.name;
     }
 
-    @Put('import')
+    @Put('in')
     @HttpCode(200)
     @ApiOperation({ summary: 'Fetches oracle data for an import' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async import(
         @User() user: UserEntity,
-        @Body() data: ImportDto
-    ): Promise<CallparamDto> {
-        const params = await this.oracleApiService.userInRequest(user, data, false)
-
-        return {
-            hash: params[0],
-            data: params[1],
-            signature: params[2],
-            confirmed: params[3]
-        }
+        @Body() data: InDto[]
+    ): Promise<CallparamDto[]> {
+        return await Promise.all(data.map(d => this.oracleApiService.userInRequest(user, d)))
     }
 
-    @Put('import/confirm')
+    @Put('in/confirm')
     @HttpCode(200)
     @ApiOperation({ summary: 'Confirms an import request, sealing the deal' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async importConfirm(
         @User() user: UserEntity,
-        @Body() data: ConfirmDto
+        @Body() data: HashAndChainIdDto
     ): Promise<boolean> {
-        const success = await this.oracleApiService.userImportConfirm(user, data)
+        const success = await this.oracleApiService.userInConfirm(user, data)
         return success
     }
 
-    @Put('enrapture')
-    @HttpCode(200)
-    @ApiOperation({ summary: 'Fetches oracle data for an enrapture' })
-    @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard)
-    async enrapture(
-        @User() user: UserEntity,
-        @Body() data: ImportDto
-    ): Promise<CallparamDto> {
-        const params = await this.oracleApiService.userInRequest(user, data, true)
-        return {
-            hash: params[0],
-            data: params[1],
-            signature: params[2],
-            confirmed: params[3]
-        }
-    }
-
-    @Put('enrapture/confirm')
-    @HttpCode(200)
-    @ApiOperation({ summary: 'Confirms an enrapture request, sealing the deal' })
-    @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard)
-    async enraptureConfirm(
-        @User() user: UserEntity,
-        @Body() data: ConfirmDto
-    ): Promise<boolean> {
-        const success = await this.oracleApiService.userEnraptureConfirm(user, data)
-        return success
-    }
-
-    @Put('export')
+    @Put('out')
     @HttpCode(200)
     @ApiOperation({ summary: 'Fetches oracle data for an export' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async export(
         @User() user: UserEntity,
-        @Body() data: ExportDto
-    ): Promise<CallparamDto> {
-        const params = await this.oracleApiService.userOutRequest(user, data)
-        return {
-            hash: params[0],
-            data: params[1],
-            signature: params[2],
-            confirmed: params[3]
-        }
+        @Body() data: HashAndChainIdDto[]
+    ): Promise<CallparamDto[]> {
+        return await Promise.all(data.map(d => this.oracleApiService.userOutRequest(user, d)))
     }
 
-    @Put('export/confirm')
+    @Put('out/confirm')
     @HttpCode(200)
     @ApiOperation({ summary: 'Confirms an export request, sealing the deal' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async exportConfirm(
         @User() user: UserEntity,
-        @Body() data: ConfirmDto
+        @Body() data: HashAndChainIdDto
     ): Promise<boolean> {
-        const success = await this.oracleApiService.userExportConfirm(user, data)
+        const success = await this.oracleApiService.userOutConfirm(user, data)
         return success
     }
 

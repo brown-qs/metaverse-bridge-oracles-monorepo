@@ -1,3 +1,7 @@
+import { NewAsset } from "../hooks/marketplace/types";
+import { MultiverseVersion } from "../state/api/types";
+import { StringAssetType } from "../utils/subgraph";
+
 export const CHAIN_ID = parseInt(process.env.REACT_APP_CHAIN_ID ?? '1285', 10);
 
 export const SUBGRAPH_URL =
@@ -128,6 +132,20 @@ export const MULTIVERSE_BRIDGE_V2_WAREHOUSE_ADDRESS: { [chainId in ChainId]?: st
   [ChainId.MOONBEAM]: '0x6D73E2920A92931be76F487a2E29F67b4D7858F9',
   [ChainId.MAINNET]: '0xbC0d0c5E67fC0d7834a0e3B8Acf741d1F5b78ca5'
 };
+
+export const getContractAddress = (mv: MultiverseVersion, chainId: ChainId): string => {
+  let address: string | undefined
+  if (mv === MultiverseVersion.V1) {
+    address = MULTIVERSE_BRIDGE_V1_ADDRESS[chainId]
+
+  } else {
+    address = MULTIVERSE_BRIDGE_V2_ADDRESS[chainId]
+  }
+  if (!address) {
+    throw new Error("Unable to find bridge contract address.")
+  }
+  return address
+}
 
 export const PROTOCOL_FEE_BPS = '200';
 export const FRACTION_TO_BPS = '10000';
@@ -260,3 +278,17 @@ export const SUB_ASSETS: SubAsset[] = [
     subAssetAddress: '0xbe0b5b87ceb3eb1b05d11dc83332409291b35746'
   }
 ]
+
+
+//STATIC TOKENS: 
+export const RARESAMA_POOP: NewAsset = {
+  assetType: StringAssetType.ERC20,
+  assetAddress: "0xfffffffecb45afd30a637967995394cc88c0c194",
+  assetId: 0
+}
+
+export const SHIT_FART: NewAsset = {
+  assetType: StringAssetType.ERC20,
+  assetAddress: "0x2f82471dccf85d3f6cb498d4e792cfa9e875ab0a",
+  assetId: 0
+}
