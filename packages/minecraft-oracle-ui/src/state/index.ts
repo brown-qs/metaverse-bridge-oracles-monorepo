@@ -23,6 +23,7 @@ import importModalSlice from './slices/importModalSlice';
 import enraptureModalSlice from './slices/enraptureModalSlice';
 import inModalSlice from './slices/inModalSlice';
 import transactionsSlice from './slices/transactionsSlice';
+import outModalSlice from './slices/outModalSlice';
 
 
 
@@ -58,6 +59,7 @@ const rootReducer = combineReducers({
   exportModal: exportModalSlice,
   summonModal: summonModalSlice,
   inModal: inModalSlice,
+  outModal: outModalSlice,
   blockNumbers: blockNumbersSlice,
   oauth: oauthSlice,
   [bridgeApi.reducerPath]: bridgeApi.reducer,

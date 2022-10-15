@@ -1,4 +1,4 @@
-import { Link as ChakraLink, Box, Button, CircularProgress, FormControl, FormErrorMessage, HStack, Input, ToastId, useToast, VStack, FormHelperText, FormLabel } from "@chakra-ui/react";
+import { Link as ChakraLink, Box, Button, CircularProgress, FormControl, FormErrorMessage, HStack, Input, ToastId, useToast, VStack, FormHelperText, FormLabel, NumberInput, NumberDecrementStepper, NumberIncrementStepper, NumberInputField, NumberInputStepper } from "@chakra-ui/react";
 import { isPending } from "@reduxjs/toolkit";
 import { useWeb3React } from "@web3-react/core";
 import React from "react";
@@ -39,6 +39,8 @@ export function InModal() {
     const inTokens = useSelector(selectInModalTokens)
     const isOpen = useSelector(selectInModalOpen)
     const [setIn, { data: setInData, error: setInError, isUninitialized: isSetInUninitialized, isLoading: isSetInLoading, isSuccess: isSetInSuccess, isError: isSetInError, reset: setInReset }] = useInMutation()
+    const [value, setValue] = React.useState('1')
+    const [amount, setAmount] = React.useState<string | undefined>(undefined)
     const assetInTransactionStable = React.useCallback(() => assetInTransaction(
         inTokens?.[0]?.multiverseVersion!,
         library!,
@@ -47,7 +49,7 @@ export function InModal() {
         setInData?.map((inp: CallparamDto) => inp.signature)!,
         inTokens.map((tok, i) => ({
             bridgeHash: setInData?.[i]?.hash!,
-            ...onChainTokenTokenToInDto(tok, account!)
+            ...onChainTokenTokenToInDto(tok, account!, amount ?? "1")
         }))
     ), [inTokens, library, account, setInData])
 
@@ -56,9 +58,11 @@ export function InModal() {
             throw new Error("Unable to call wallet for signature. Invalid configuration.")
         }
         const result = await assetInTransactionStable()
+        return result
     })
 
     const isEnrapture: boolean = React.useMemo(() => inTokens?.[0]?.enrapturable === true, [inTokens])
+    const isFungible: boolean = React.useMemo(() => inTokens?.[0]?.treatAsFungible === true, [inTokens])
 
     const warehouseAddress: string | undefined = React.useMemo(() => {
         if (!!inTokens?.[0]) {
@@ -93,13 +97,13 @@ export function InModal() {
         }
     )
 
-    const onChainTokenTokenToInDto = (tok: StandardizedOnChainTokenWithRecognizedTokenData, account: string): InDto => {
+    const onChainTokenTokenToInDto = (tok: StandardizedOnChainTokenWithRecognizedTokenData, account: string, amount: string): InDto => {
         const result: InDto = {
             chainId: tok.chainId,
             assetType: tok.assetType,
             assetAddress: tok.assetAddress,
             assetId: tok.numericId,
-            amount: "1",
+            amount,
             owner: account,
             enrapture: tok.enrapturable
         }
@@ -108,17 +112,29 @@ export function InModal() {
 
     React.useEffect(() => {
         if (isOpen && !!inTokens?.[0] && !!account) {
-            const inParams: InDto[] = inTokens.map(tok => onChainTokenTokenToInDto(tok, account))
             refetchCheckApproval()
-            setIn(inParams)
+            if (isFungible) {
+                if (typeof amount === "string") {
+                    const inParams: InDto[] = inTokens.map(tok => onChainTokenTokenToInDto(tok, account, amount))
+                    setIn(inParams)
+
+                }
+            } else {
+                const inParams: InDto[] = inTokens.map(tok => onChainTokenTokenToInDto(tok, account, "1"))
+                console.log("set in NOT fungible")
+
+                setIn(inParams)
+            }
+
         } else {
             if (!isOpen) {
                 setInReset()
                 signTransactionMutation.reset()
                 approveMutation.reset()
+                setAmount(undefined)
             }
         }
-    }, [isOpen, inTokens, account])
+    }, [isOpen, inTokens, account, isFungible, amount])
 
     React.useEffect(() => {
         if (isOpen && (approveMutation?.isSuccess === true) && checkApprovalData?.toString() === "0" && !isCheckApprovalFetching) {
@@ -184,6 +200,41 @@ export function InModal() {
 
             >
             </ReduxModal >)
+    } else if (isFungible && typeof amount !== 'string') {
+        return <ReduxModal
+            {...baseProps}
+            message={`Please set the amount you want to ${isEnrapture ? "enrapture" : "import"}.`}
+            bottomButtonText="Cancel"
+        >
+            <VStack spacing="0" w="100%">
+                <NumberInput
+                    inputMode="numeric"
+                    w="100%"
+                    defaultValue={1}
+                    precision={0}
+                    min={1}
+                    value={value}
+                    onChange={(val) => setValue(val)}
+                >
+                    <NumberInputField />
+                    <NumberInputStepper>
+                        <NumberIncrementStepper />
+                        <NumberDecrementStepper />
+                    </NumberInputStepper>
+                </NumberInput>
+                <Box h='24px'></Box>
+                <Button
+                    w="100%"
+                    isDisabled={value?.length === 0}
+                    //will keep refreshing until approval is recognized
+                    onClick={() => {
+                        setAmount(parseEther(value).toString())
+                    }}
+                >
+                    SET
+                </Button>
+            </VStack>
+        </ReduxModal>
     } else if (isCheckApprovalLoading || isSetInLoading) {
         return <ReduxModal
             {...baseProps}
@@ -247,14 +298,24 @@ export function InModal() {
         return (<ReduxModal
             {...baseProps}
             TablerIcon={Checks}
-            message="Confirming enrapture with the multiverse oracle..."
+            message={`Confirming ${isEnrapture ? "enrapture" : "import"} with the multiverse oracle...`}
         >
             <VStack spacing="0">
                 <Box w="100%" h="48px" bg="whiteAlpha.100" borderRadius="8px">
-                    <HStack padding="12px">
+                    <HStack padding="12px" overflow="ellipsis" w="100%" whiteSpace="nowrap">
                         <Box flex="1" color="whiteAlpha.700">Transaction</Box>
-                        <Box>
-
+                        <Box overflow="hidden" textOverflow="ellipsis">
+                            {!!signTransactionMutation.data && (
+                                <ChakraLink isExternal
+                                    href={getExplorerLink(
+                                        chainId ?? ChainId.MOONRIVER,
+                                        String(signTransactionMutation?.data?.hash),
+                                        'transaction'
+                                    )}
+                                >
+                                    {signTransactionMutation?.data?.hash}
+                                </ChakraLink>
+                            )}
                         </Box>
 
                     </HStack>
@@ -262,7 +323,7 @@ export function InModal() {
                 <Box w="100%" paddingTop="16px">
                     <Button
                         onClick={() => {
-                            // handleClose()
+                            dispatch(closeInModal())
                         }}
                         leftIcon={<Checks />}
                         w="100%">GOT IT!</Button>
@@ -270,9 +331,14 @@ export function InModal() {
             </VStack >
         </ReduxModal >)
     } else if (signTransactionMutation.isError) {
+        let errorMsg = `Unable to sign the transaction.`
+        if (String(signTransactionMutation.error).includes("insufficient allowance")) {
+            errorMsg = `Insufficient allowance.`
+        }
+
         return (<ReduxModal
             {...baseProps}
-            message="Error: Unable to sign the transaction."
+            message={`Error: ${errorMsg}`}
         >
         </ReduxModal >)
     } else {
@@ -286,6 +352,11 @@ export function InModal() {
         // onBottomButtonClick={handleClose}
         >
             <VStack spacing="0">
+
+                {amount &&
+                    <Box paddingBottom="16px">
+                        Amount: {amount}
+                    </Box>}
                 <Button
                     w="100%"
                     isLoading={signTransactionMutation.isLoading}

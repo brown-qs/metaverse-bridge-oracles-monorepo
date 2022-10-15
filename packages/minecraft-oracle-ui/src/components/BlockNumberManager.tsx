@@ -76,7 +76,19 @@ export const BlockNumberManager = () => {
 
                                                             }
                                                         })
+                                                    } else if (transaction.type === TransactionType.Out) {
+                                                        if (DEBUG) console.log(`BlockNumberManager:: transaction hash: ${transaction.hash} trying to confirm exports`)
+                                                        transaction.bridgeHashes.map((h) => {
+                                                            try {
+                                                                //{ hash: a.bridgeHash, chainId: a.chainId }
+                                                                if (DEBUG) console.log(`BlockNumberManager:: transaction hash: ${transaction.hash} trying to confirm export bridgeHash: ${h}`)
 
+                                                                store.dispatch(bridgeApi.endpoints.outConfirm.initiate({ hash: h, chainId: transaction.chainId }) as any)
+
+                                                            } catch (e) {
+
+                                                            }
+                                                        })
                                                     }
                                                 }
                                             }

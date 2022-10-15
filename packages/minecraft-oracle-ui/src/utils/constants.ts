@@ -1,17 +1,6 @@
 import { NewAsset } from "../hooks/marketplace/types";
 import { StringAssetType } from "./subgraph";
 
-export const RARESAMA_POOP: NewAsset = {
-  assetType: StringAssetType.ERC20,
-  assetAddress: "0xfffffffecb45afd30a637967995394cc88c0c194",
-  assetId: 0
-}
-
-export const SHIT_FART: NewAsset = {
-  assetType: StringAssetType.ERC20,
-  assetAddress: "0x2f82471dccf85d3f6cb498d4e792cfa9e875ab0a",
-  assetId: 0
-}
 
 export const SORT_TYPES = [
   { label: 'Price: Low to High', value: 'price_low_to_high' },

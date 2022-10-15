@@ -30,7 +30,7 @@ export const Transaction = ({ transaction }: { transaction: AllTransactionsType 
     if (transaction.assets.length === 1) {
       ass = 'ASSET'
     }
-    const summary = ` ${String(transaction.receipt).slice(0, 5)} ${transaction.assets.length} ${ass} IN ${transaction.assets[0].assetType} ${transaction.assets[0].assetAddress}`
+    const summary = `${transaction.assets.length} ${ass} IN ${transaction.assets[0].assetType} ${transaction.assets[0].assetAddress}`
     return (
       <TransactionLink
         href={getExplorerLink(
@@ -42,14 +42,20 @@ export const Transaction = ({ transaction }: { transaction: AllTransactionsType 
       />
     );
   } else if (transaction.type === TransactionType.Out) {
+    let ass = `ASSETS`
+    if (transaction.bridgeHashes.length === 1) {
+      ass = 'ASSET'
+    }
+    const summary = `${transaction.bridgeHashes.length} OUT`
+
     return (
       <TransactionLink
         href={getExplorerLink(
-          ChainId.MOONRIVER,
-          "",
+          transaction.chainId,
+          transaction.hash,
           'transaction'
         )}
-        linkText={""}
+        linkText={`${summary}`}
       />
     );
   } else {

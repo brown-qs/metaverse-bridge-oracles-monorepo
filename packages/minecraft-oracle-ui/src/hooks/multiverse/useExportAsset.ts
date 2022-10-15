@@ -7,6 +7,84 @@ import axios from 'axios'
 import { useSelector } from 'react-redux';
 import { selectAccessToken } from '../../state/slices/authSlice';
 import { MultiverseVersion } from '../../state/api/types';
+import store from '../../state';
+import { Contract } from '@ethersproject/contracts';
+import { Web3Provider, TransactionResponse } from '@ethersproject/providers';
+import { METAVERSE_V1_ABI, METAVERSE_V2_ABI } from '../../abi/marketplace';
+import { InAsset, addInTransaction, addOutTransaction } from '../../state/slices/transactionsSlice';
+import { ChainId, getContractAddress } from '../../constants';
+
+
+export async function assetOutTransaction(mv: MultiverseVersion, library: Web3Provider, account: string, chainId: ChainId, calls: string[], signatures: string[], bridgeHashes: string[]) {
+    const contractAddress = getContractAddress(mv, chainId)
+    const abi = (mv === MultiverseVersion.V1) ? METAVERSE_V1_ABI : METAVERSE_V2_ABI
+    console.log(`assetOutTransaction:: mv: ${mv} chainId: ${chainId} account: ${account} contractAddress: ${contractAddress}`)
+    const contract = new Contract(contractAddress, abi, getSigner(library, account))
+
+    let methodName: string
+    let args: string[] | string[][]
+    if (mv === MultiverseVersion.V1) {
+        methodName = "exportFromMetaverseSig"
+        args = [calls[0], signatures[0]]
+    } else {
+        methodName = "unstakeSig"
+        args = [calls, signatures]
+    }
+
+    console.log("args" + JSON.stringify(args))
+    const inputOptions = {}
+
+    let gasEstimate
+    try {
+        gasEstimate = await contract.estimateGas[methodName](...args, inputOptions)
+    } catch (e) {
+        console.log("Export error: ", e)
+        let callStaticSuccess = false;
+        try {
+            await contract.callStatic[methodName](...args, inputOptions)
+            callStaticSuccess = true
+
+            //Unexpected successful call after failed estimate gas
+        } catch (callError: any) {
+            console.debug('Call threw error', methodName, args, callError);
+
+            let cErr = callError
+            if (!!callError?.data) {
+                cErr = JSON.stringify(callError?.data)
+            }
+            let errorMessage = `The transaction cannot succeed due to error: ${cErr}`;
+            throw new Error(errorMessage);
+
+        }
+        if (callStaticSuccess) {
+            throw new Error('Unexpected issue with estimating the gas. Please try again.');
+        }
+    }
+    if (!gasEstimate) {
+        throw new Error('Unexpected error. Please contact support: none of the calls threw an error');
+    }
+    let result: TransactionResponse
+    try {
+        result = await contract[methodName](...args, { gasLimit: calculateGasMargin(gasEstimate), from: account, ...inputOptions })
+    } catch (e: any) {
+        if (e?.code === 4001) {
+            throw new Error('Transaction rejected.');
+        } else {
+            // otherwise, the error was unexpected and we need to convey that
+            // console.error(`Enrapture asset failed`, error, methodName, args);
+            throw new Error(`Asset outflow failed: ${e.message}`);
+        }
+    }
+    if (!result.hash) {
+        throw new Error("Couldn't get transaction hash.")
+    }
+    if (!chainId) {
+        throw new Error("Couldn't get chainId.")
+    }
+
+    store.dispatch(addOutTransaction({ hash: result.hash, bridgeHashes, chainId }))
+    return result
+}
 
 export enum ExportAssetCallbackState {
     INVALID,

@@ -13,7 +13,6 @@ import { ProviderToken } from '../provider/token';
 import { AssetService } from '../asset/asset.service';
 import { findRecognizedAsset, stringAssetTypeToAssetType } from '../utils';
 import { MetaAsset } from './oracleapi.types';
-import { ExportDto } from './dtos/export.dto';
 import { SummonDto } from './dtos/summon.dto';
 import { AssetEntity } from '../asset/asset.entity';
 import { Mutex, MutexInterface } from 'async-mutex';
@@ -46,6 +45,7 @@ import { ChainEntity } from '../chain/chain.entity';
 import Joi from 'joi';
 import { CollectionFragmentService } from '../collectionfragment/collectionfragment.service';
 import { CallparamDto } from './dtos/callparams.dto';
+import { HashAndChainIdDto } from './dtos/hashandchainid.dto';
 
 @Injectable()
 export class OracleApiService {
@@ -379,7 +379,7 @@ export class OracleApiService {
 
 
 
-    public async userOutRequest(user: UserEntity, { hash, chainId }: ExportDto): Promise<[string, string, string, boolean]> {
+    public async userOutRequest(user: UserEntity, { hash, chainId }: HashAndChainIdDto): Promise<CallparamDto> {
         this.logger.debug(`userOutRequest: ${hash}`, this.context)
 
         if (user.blacklisted) {
@@ -426,135 +426,17 @@ export class OracleApiService {
         await this.assetService.create(existingEntry)
 
         try {
-            confirmsuccess = await this.userExportConfirm(user, { hash, chainId })
+            confirmsuccess = await this.userOutConfirm(user, { hash, chainId })
         } catch (e) {
         }
 
         if (confirmsuccess) {
-            return [hash, payload, signature, true]
+            return { hash, data: payload, signature, confirmed: true }
         }
-        return [hash, payload, signature, false]
+        return { hash, data: payload, signature, confirmed: false }
     }
 
-    public async userSummonRequest(user: UserEntity, { recipient, chainId }: SummonDto): Promise<boolean> {
-        this.logger.debug(`userSummonRequest user ${user.uuid} to ${recipient} ID is ${chainId}`, this.context)
-
-        if (!recipient || recipient.length !== 42 || !recipient.startsWith('0x')) {
-            this.logger.error(`Summon: recipient invalid: ${recipient}}`, null, this.context)
-            throw new UnprocessableEntityException('Recipient invalid')
-        }
-
-        if (user.blacklisted) {
-            this.logger.error(`userSummonRequest: user blacklisted`, null, this.context)
-            throw new UnprocessableEntityException(`Blacklisted`)
-        }
-
-        this.ensureLock('oracle_summon')
-        const oracleLock = this.locks.get('oracle_summon')
-
-        const snapshots = await this.inventoryService.findMany({ relations: ['owner', 'material'], where: { owner: { uuid: user.uuid }, summonInProgress: false } })
-
-        if (!snapshots || snapshots.length === 0) {
-            const snapshots2 = await this.inventoryService.findMany({ relations: ['owner'], where: { owner: { uuid: user.uuid }, summonInProgress: true } })
-
-            if (!snapshots2 || snapshots2.length === 0) {
-                return false
-            } else {
-                return true
-            }
-        }
-
-        await Promise.all(
-            snapshots.map(async (snap) => {
-                snap.summonInProgress = true
-                await this.inventoryService.update(snap.id, { summonInProgress: snap.summonInProgress })
-            })
-        )
-
-        const res = await oracleLock.runExclusive(async () => {
-
-            // safety vibe check
-            if (!snapshots[0].summonInProgress) {
-                this.logger.warn(`Summon: summonInProgress vibe check fail for ${user.uuid}`, this.context)
-                return false
-            }
-
-            const groups: { [key: string]: { ids: string[], amounts: string[], entities: InventoryEntity[] } } = {}
-            snapshots.map(snapshot => {
-                const amount = (snapshot.material.multiplier ?? 1) * Number.parseFloat(snapshot.amount)
-                const assetAddress = snapshot.material.assetAddress.toLowerCase()
-                if (!(assetAddress in groups)) {
-                    groups[assetAddress] = {
-                        ids: [],
-                        amounts: [],
-                        entities: []
-                    }
-                }
-                groups[assetAddress]['amounts'].push(ethers.utils.parseEther(amount.toString()).toString())
-                groups[assetAddress]['ids'].push(snapshot.material.assetId)
-                groups[assetAddress]['entities'].push(snapshot)
-            })
-
-            const addresses = Object.keys(groups)
-
-            const chainEntity = await this.chainService.findOne({ chainId })
-            const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
-            const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
-
-            let contract: Contract;
-            if (chainEntity.multiverseV1Address)
-                contract = new Contract(chainEntity.multiverseV1Address, METAVERSE_ABI, oracle)
-            else {
-                this.logger.error(`Summon: failiure not find MultiverseAddress`)
-                throw new UnprocessableEntityException('Summon MultiverseAddress error.')
-            }
-
-            for (let i = 0; i < addresses.length; i++) {
-                try {
-
-                    const ids = groups[addresses[i]].ids
-                    const amounts = groups[addresses[i]].amounts
-                    //console.log({METAVERSE, recipient, ids, amounts, i})
-                    // console.log("SummonResult",this.metaverseChain[chainId])
-
-                    const receipt = await ((await contract.summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], { value: 0, gasPrice: '3000000000', gasLimit: '1000000' })).wait())
-
-                    try {
-                        await this.inventoryService.removeAll(groups[addresses[i]].entities)
-                    } catch (e) {
-                        this.logger.error(`Summon: failiure to remove entities, ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
-                    }
-
-                    this.logger.log(`Summon: successful summon for user ${user.uuid}`, this.context)
-                } catch (e) {
-                    //console.log(e)
-                    this.logger.error(`Summon: failiure to summon ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
-
-                    await Promise.all(
-                        groups[addresses[i]].entities.map(async (snap) => {
-                            snap.summonInProgress = false
-                            await this.inventoryService.update(snap.id, { summonInProgress: snap.summonInProgress })
-                        })
-                    )
-
-                    throw new UnprocessableEntityException('Summon error.')
-                }
-            }
-
-            user.lastUsedAddress = recipient.toLowerCase()
-            if (!user.usedAddresses.includes(user.lastUsedAddress)) {
-                user.usedAddresses.push(user.lastUsedAddress)
-            }
-            await this.userService.update(user.uuid, { usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress })
-
-            return true
-        })
-
-        return res
-    }
-
-
-    public async userExportConfirm(user: UserEntity, data: { hash: string, chainId: number }, asset?: AssetEntity): Promise<boolean> {
+    public async userOutConfirm(user: UserEntity, data: { hash: string, chainId: number }, asset?: AssetEntity): Promise<boolean> {
         let skinSelectedChanged = false
         let skinRemoved = false
         let userProfileUpdated = false
@@ -683,6 +565,127 @@ export class OracleApiService {
         this.eventBus.publish(new AssetRemovedEvent(user.uuid))
         return true
     }
+
+
+    public async userSummonRequest(user: UserEntity, { recipient, chainId }: SummonDto): Promise<boolean> {
+        this.logger.debug(`userSummonRequest user ${user.uuid} to ${recipient} ID is ${chainId}`, this.context)
+
+        if (!recipient || recipient.length !== 42 || !recipient.startsWith('0x')) {
+            this.logger.error(`Summon: recipient invalid: ${recipient}}`, null, this.context)
+            throw new UnprocessableEntityException('Recipient invalid')
+        }
+
+        if (user.blacklisted) {
+            this.logger.error(`userSummonRequest: user blacklisted`, null, this.context)
+            throw new UnprocessableEntityException(`Blacklisted`)
+        }
+
+        this.ensureLock('oracle_summon')
+        const oracleLock = this.locks.get('oracle_summon')
+
+        const snapshots = await this.inventoryService.findMany({ relations: ['owner', 'material'], where: { owner: { uuid: user.uuid }, summonInProgress: false } })
+
+        if (!snapshots || snapshots.length === 0) {
+            const snapshots2 = await this.inventoryService.findMany({ relations: ['owner'], where: { owner: { uuid: user.uuid }, summonInProgress: true } })
+
+            if (!snapshots2 || snapshots2.length === 0) {
+                return false
+            } else {
+                return true
+            }
+        }
+
+        await Promise.all(
+            snapshots.map(async (snap) => {
+                snap.summonInProgress = true
+                await this.inventoryService.update(snap.id, { summonInProgress: snap.summonInProgress })
+            })
+        )
+
+        const res = await oracleLock.runExclusive(async () => {
+
+            // safety vibe check
+            if (!snapshots[0].summonInProgress) {
+                this.logger.warn(`Summon: summonInProgress vibe check fail for ${user.uuid}`, this.context)
+                return false
+            }
+
+            const groups: { [key: string]: { ids: string[], amounts: string[], entities: InventoryEntity[] } } = {}
+            snapshots.map(snapshot => {
+                const amount = (snapshot.material.multiplier ?? 1) * Number.parseFloat(snapshot.amount)
+                const assetAddress = snapshot.material.assetAddress.toLowerCase()
+                if (!(assetAddress in groups)) {
+                    groups[assetAddress] = {
+                        ids: [],
+                        amounts: [],
+                        entities: []
+                    }
+                }
+                groups[assetAddress]['amounts'].push(ethers.utils.parseEther(amount.toString()).toString())
+                groups[assetAddress]['ids'].push(snapshot.material.assetId)
+                groups[assetAddress]['entities'].push(snapshot)
+            })
+
+            const addresses = Object.keys(groups)
+
+            const chainEntity = await this.chainService.findOne({ chainId })
+            const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
+            const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
+
+            let contract: Contract;
+            if (chainEntity.multiverseV1Address)
+                contract = new Contract(chainEntity.multiverseV1Address, METAVERSE_ABI, oracle)
+            else {
+                this.logger.error(`Summon: failiure not find MultiverseAddress`)
+                throw new UnprocessableEntityException('Summon MultiverseAddress error.')
+            }
+
+            for (let i = 0; i < addresses.length; i++) {
+                try {
+
+                    const ids = groups[addresses[i]].ids
+                    const amounts = groups[addresses[i]].amounts
+                    //console.log({METAVERSE, recipient, ids, amounts, i})
+                    // console.log("SummonResult",this.metaverseChain[chainId])
+
+                    const receipt = await ((await contract.summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], { value: 0, gasPrice: '3000000000', gasLimit: '1000000' })).wait())
+
+                    try {
+                        await this.inventoryService.removeAll(groups[addresses[i]].entities)
+                    } catch (e) {
+                        this.logger.error(`Summon: failiure to remove entities, ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
+                    }
+
+                    this.logger.log(`Summon: successful summon for user ${user.uuid}`, this.context)
+                } catch (e) {
+                    //console.log(e)
+                    this.logger.error(`Summon: failiure to summon ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
+
+                    await Promise.all(
+                        groups[addresses[i]].entities.map(async (snap) => {
+                            snap.summonInProgress = false
+                            await this.inventoryService.update(snap.id, { summonInProgress: snap.summonInProgress })
+                        })
+                    )
+
+                    throw new UnprocessableEntityException('Summon error.')
+                }
+            }
+
+            user.lastUsedAddress = recipient.toLowerCase()
+            if (!user.usedAddresses.includes(user.lastUsedAddress)) {
+                user.usedAddresses.push(user.lastUsedAddress)
+            }
+            await this.userService.update(user.uuid, { usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress })
+
+            return true
+        })
+
+        return res
+    }
+
+
+
 
     private getContract(multiverseVersion: MultiverseVersion, chainEntity: ChainEntity, oracle: ethers.Wallet): Contract {
         if (multiverseVersion === MultiverseVersion.V1) {

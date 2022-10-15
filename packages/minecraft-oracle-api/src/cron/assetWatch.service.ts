@@ -57,7 +57,7 @@ export class AssetWatchService {
           }
           if (asset.pendingOut) {
             this.logger.debug(`handleConfirmPatrol: export confirm of ${asset.hash}`, this.context);
-            await this.oracleApiService.userExportConfirm(asset.owner, { hash: asset.hash, chainId }, asset)
+            await this.oracleApiService.userOutConfirm(asset.owner, { hash: asset.hash, chainId }, asset)
           }
         } catch (e) {
           this.logger.warn(`handleConfirmPatrol: error confirming ${asset.hash}`, this.context);
@@ -103,7 +103,7 @@ export class AssetWatchService {
 
           if (asset.pendingOut) {
             this.logger.debug(`handleCleanPatrol: export confirm of ${asset.hash}`, this.context);
-            success = await this.oracleApiService.userExportConfirm(asset.owner, { hash: asset.hash, chainId }, asset)
+            success = await this.oracleApiService.userOutConfirm(asset.owner, { hash: asset.hash, chainId })
             continue
           }
         } catch (e) {

@@ -1,4 +1,6 @@
+import { NewAsset } from "../hooks/marketplace/types";
 import { MultiverseVersion } from "../state/api/types";
+import { StringAssetType } from "../utils/subgraph";
 
 export const CHAIN_ID = parseInt(process.env.REACT_APP_CHAIN_ID ?? '1285', 10);
 
@@ -276,3 +278,17 @@ export const SUB_ASSETS: SubAsset[] = [
     subAssetAddress: '0xbe0b5b87ceb3eb1b05d11dc83332409291b35746'
   }
 ]
+
+
+//STATIC TOKENS: 
+export const RARESAMA_POOP: NewAsset = {
+  assetType: StringAssetType.ERC20,
+  assetAddress: "0xfffffffecb45afd30a637967995394cc88c0c194",
+  assetId: 0
+}
+
+export const SHIT_FART: NewAsset = {
+  assetType: StringAssetType.ERC20,
+  assetAddress: "0x2f82471dccf85d3f6cb498d4e792cfa9e875ab0a",
+  assetId: 0
+}
