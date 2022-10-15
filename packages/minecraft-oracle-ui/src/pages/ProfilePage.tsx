@@ -772,8 +772,6 @@ const ProfilePage = () => {
             <OnChainResourceModal />
             <ExportModal />
             <SummonModal />
-            <ImportModal />
-            <EnraptureModal />
             <InModal />
 
         </>

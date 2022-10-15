@@ -1,4 +1,4 @@
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { injected, talisman, walletconnect, WalletInfo } from 'connectors';
 import { SUPPORTED_WALLETS } from '../../connectors';
@@ -29,6 +29,7 @@ import { ModalIcon } from '../MoonsamaModal/ModalIcon';
 import { MoonsamaModal } from '../MoonsamaModal';
 import React from 'react';
 import { isMatch } from 'date-fns';
+import { AllTransactionsType, selectAllTransactions } from '../../state/slices/transactionsSlice';
 
 const WALLET_VIEWS = {
   OPTIONS: 'options',
@@ -46,16 +47,17 @@ export const AccountDialog = () => {
   const [, setPendingError] = useState<boolean>();
   const [walletView, setWalletView] = useState(WALLET_VIEWS.ACCOUNT);
 
-  const sortedRecentTransactions = useSortedRecentTransactions();
+  const allTransactions = useSelector(selectAllTransactions);
   //console.log("sortedRecentTransactions: ", sortedRecentTransactions)
   const { addNetwork } = useAddNetworkToMetamaskCb()
 
+  /*
   const pendingTransactions = sortedRecentTransactions
     .filter((tx) => !tx.receipt)
     .map((tx) => tx.hash);
   const confirmedTransactions = sortedRecentTransactions
     .filter((tx) => tx.receipt)
-    .map((tx) => tx.hash);
+    .map((tx) => tx.hash);*/
 
   const { isAccountDialogOpen, onAccountDialogOpen, onAccountDialogClose } = useAccountDialog();
   // error reporting not working (e.g. on unsupported chain id)
@@ -134,11 +136,11 @@ export const AccountDialog = () => {
     return null;
   }
 
-  function renderTransactions(transactions: string[]) {
+  function renderTransactions(transactions: AllTransactionsType[]) {
     return (
       <>
-        {transactions.map((hash, i) => {
-          return <Transaction key={i} hash={hash} />;
+        {transactions.map((t: AllTransactionsType, i) => {
+          return <Transaction key={t.transactionHash} transaction={t} />;
         })}
       </>
     );
@@ -316,23 +318,22 @@ export const AccountDialog = () => {
       <VStack lineHeight="24px" fontSize="16px" color="whiteAlpha.700" fontFamily="Rubik" w="100%">
         {showConnectedAccountDetails()}
         {account &&
-          (!!pendingTransactions.length || !!confirmedTransactions.length) ? (
+          (!!allTransactions.length) ? (
           <Stack fontSize="12px" w="100%">
             <VStack w="100%">
               <Box>
                 <Text>Recent transactions</Text>
               </Box>
 
-              {renderTransactions(pendingTransactions)}
-              {renderTransactions(confirmedTransactions)}
-              <Box w="100%">
+              {renderTransactions(allTransactions)}
+              {/**<Box w="100%">
                 <Button
                   w="100%"
                   onClick={clearAllTransactionsCallback}
                 >
                   CLEAR ALL
                 </Button>
-              </Box>
+          </Box>*/}
             </VStack>
 
           </Stack>
