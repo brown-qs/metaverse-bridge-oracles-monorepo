@@ -114,11 +114,12 @@ export function getExplorerLink(
   data: string,
   type: 'transaction' | 'token' | 'address' | 'block'
 ): string {
+  console.log(`GET EXPLORER LINK: ${chainId} `)
   if (!chainId) {
     return '';
   }
-
   const prefix = `https://${EXPLORER_PREFIXES[chainId]}`;
+  console.log(`GET EXPLORER LINK: ${chainId} prefix: ${prefix}`)
 
   switch (type) {
     case 'transaction': {

@@ -15,7 +15,7 @@ import { METAVERSE_V1_ABI, METAVERSE_V2_ABI } from '../../abi/marketplace';
 import { ERC20_ABI } from '../../abi/token';
 
 
-export async function assetInTransaction(mv: MultiverseVersion, chainId: ChainId, library: Web3Provider, account: string, calls: string[], signatures: string[], enrapture: boolean) {
+export async function assetInTransaction(mv: MultiverseVersion, chainId: ChainId, library: Web3Provider, account: string, calls: string[], signatures: string[], bridgeHashes: string[], enrapture: boolean) {
     const contractAddress = getContractAddress(mv, chainId)
     const abi = (mv === MultiverseVersion.V1) ? METAVERSE_V1_ABI : METAVERSE_V2_ABI
     const contract = new Contract(contractAddress, abi, getSigner(library, account))
