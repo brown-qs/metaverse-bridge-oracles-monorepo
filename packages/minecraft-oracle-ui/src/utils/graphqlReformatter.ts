@@ -1,7 +1,7 @@
 import { GetExosamaMetadataQuery, GetExosamaMetadataQueryVariables, GetExosamaOnChainTokensQuery } from "../state/api/generatedSquidExosamaApi"
 import { Erc1155TokenWhereInput, Erc721TokenWhereInput, GetMarketplaceMetadataQuery, GetMarketplaceMetadataQueryVariables, GetMarketplaceOnChainTokensQuery, useGetMarketplaceOnChainTokensQuery } from "../state/api/generatedSquidMarketplaceApi"
 import { GetRaresamaMetadataQuery, GetRaresamaMetadataQueryVariables, GetRaresamaOnChainTokensQuery, TokenWhereInput } from "../state/api/generatedSquidRaresamaApi"
-import { AssetDto, CollectionFragmentDto, MultiverseVersion, RecognizedAssetsDto, RecognizedAssetType, } from "../state/api/types"
+import { BridgedAssetDto, CollectionFragmentDto, MultiverseVersion, RecognizedAssetsDto, RecognizedAssetType, } from "../state/api/types"
 import { StringAssetType } from "./subgraph"
 
 
@@ -199,7 +199,7 @@ export type InGameMetadataParams = {
     exosama: GetExosamaMetadataQueryVariables
 }
 
-export const inGameMetadataParams = (inGameItems: AssetDto[] | undefined): InGameMetadataParams => {
+export const inGameMetadataParams = (inGameItems: BridgedAssetDto[] | undefined): InGameMetadataParams => {
     const erc1155Or: Erc1155TokenWhereInput[] = []
     const erc721Or: Erc721TokenWhereInput[] = []
     const raresamaOr: TokenWhereInput[] = []
@@ -222,8 +222,8 @@ export const inGameMetadataParams = (inGameItems: AssetDto[] | undefined): InGam
 }
 
 export type SquidMetadata = GetMarketplaceMetadataQuery["erc721Tokens"][0]["metadata"]
-export type InGameTokenMaybeMetadata = AssetDto & { metadata?: SquidMetadata }
-export const inGameTokensCombineMetadata = (inGameTokens: AssetDto[], metadata: StandardizedMetadata[] | undefined): InGameTokenMaybeMetadata[] => {
+export type InGameTokenMaybeMetadata = BridgedAssetDto & { metadata?: SquidMetadata }
+export const inGameTokensCombineMetadata = (inGameTokens: BridgedAssetDto[], metadata: StandardizedMetadata[] | undefined): InGameTokenMaybeMetadata[] => {
     if (!!metadata) {
         const newInGameTokens: InGameTokenMaybeMetadata[] = []
         for (const item of inGameTokens) {

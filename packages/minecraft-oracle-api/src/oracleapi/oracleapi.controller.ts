@@ -14,9 +14,8 @@ import { User } from '../utils/decorators';
 import { CallparamDto } from './dtos/callparams.dto';
 import { OracleApiService } from './oracleapi.service';
 import { InDto } from './dtos/in.dto';
-import { ConfirmDto } from './dtos/confirm.dto';
-import { ExportDto } from './dtos/export.dto';
 import { SummonDto } from './dtos/summon.dto';
+import { HashAndChainIdDto } from './dtos/hashandchainid.dto';
 
 @ApiTags('oracle')
 @Controller('oracle')
@@ -50,40 +49,34 @@ export class OracleApiController {
     @UseGuards(JwtAuthGuard)
     async importConfirm(
         @User() user: UserEntity,
-        @Body() data: ConfirmDto
+        @Body() data: HashAndChainIdDto
     ): Promise<boolean> {
         const success = await this.oracleApiService.userInConfirm(user, data)
         return success
     }
 
-    @Put('export')
+    @Put('out')
     @HttpCode(200)
     @ApiOperation({ summary: 'Fetches oracle data for an export' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async export(
         @User() user: UserEntity,
-        @Body() data: ExportDto
-    ): Promise<CallparamDto> {
-        const params = await this.oracleApiService.userOutRequest(user, data)
-        return {
-            hash: params[0],
-            data: params[1],
-            signature: params[2],
-            confirmed: params[3]
-        }
+        @Body() data: HashAndChainIdDto[]
+    ): Promise<CallparamDto[]> {
+        return await Promise.all(data.map(d => this.oracleApiService.userOutRequest(user, d)))
     }
 
-    @Put('export/confirm')
+    @Put('out/confirm')
     @HttpCode(200)
     @ApiOperation({ summary: 'Confirms an export request, sealing the deal' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async exportConfirm(
         @User() user: UserEntity,
-        @Body() data: ConfirmDto
+        @Body() data: HashAndChainIdDto
     ): Promise<boolean> {
-        const success = await this.oracleApiService.userExportConfirm(user, data)
+        const success = await this.oracleApiService.userOutConfirm(user, data)
         return success
     }
 

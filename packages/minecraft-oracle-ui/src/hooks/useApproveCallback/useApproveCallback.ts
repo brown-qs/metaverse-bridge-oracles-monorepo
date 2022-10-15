@@ -23,6 +23,7 @@ import { ERC20_ABI, ERC721_ABI, ERC1155_ABI } from '../../abi/token';
 import { addApprovalTransaction } from '../../state/slices/transactionsSlice';
 import store from '../../state';
 
+
 export const checkApproval = async (assetAddress: string, assetType: StringAssetType, library: Web3Provider, account: string, spender: string): Promise<BigNumber> => {
   const lowerAccount = account.toLowerCase()
   const lowerSpender = spender.toLowerCase()
