@@ -85,7 +85,7 @@ export async function assetInTransaction(mv: MultiverseVersion, library: Web3Pro
         throw new Error("Couldn't get chainId.")
     }
 
-    store.dispatch(addInTransaction({ transactionHash: result.hash, assets: inAssets }))
+    store.dispatch(addInTransaction({ hash: result.hash, assets: inAssets }))
 
 
     return result

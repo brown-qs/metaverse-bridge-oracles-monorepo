@@ -192,7 +192,7 @@ export function InModal() {
         >
             <MoonsamaSpinner></MoonsamaSpinner>
         </ReduxModal >
-    } else if (true || checkApprovalData?.toString() === "0") {
+    } else if (checkApprovalData?.toString() === "0") {
         return <ReduxModal
             {...baseProps}
             message="Token approval required. You must approve this token/collection to be moved into the Moonsama warehouse. Wallet action required."

@@ -14,15 +14,15 @@ import { AllTransactionsType, TransactionType } from '../../state/slices/transac
 export const Transaction = ({ transaction }: { transaction: AllTransactionsType }) => {
 
   if (transaction.type === TransactionType.Approval) {
-    const summary = `APPROVE ${transaction.assetType} ${transaction.assetAddress}`
+    const summary = ` ${String(transaction.receipt).slice(0, 5)} APPROVE ${transaction.assetType} ${transaction.assetAddress}`
     return (
       <TransactionLink
         href={getExplorerLink(
           transaction.chainId,
-          transaction.transactionHash,
+          transaction.hash,
           'transaction'
         )}
-        linkText={summary}
+        linkText={`${summary}`}
       />
     );
   } else if (transaction.type === TransactionType.In) {
@@ -30,15 +30,15 @@ export const Transaction = ({ transaction }: { transaction: AllTransactionsType 
     if (transaction.assets.length === 1) {
       ass = 'ASSET'
     }
-    const summary = `${transaction.assets.length} ${ass} IN ${transaction.assets[0].assetType} ${transaction.assets[0].assetAddress}`
+    const summary = ` ${String(transaction.receipt).slice(0, 5)} ${transaction.assets.length} ${ass} IN ${transaction.assets[0].assetType} ${transaction.assets[0].assetAddress}`
     return (
       <TransactionLink
         href={getExplorerLink(
           transaction.assets[0].chainId,
-          transaction.transactionHash,
+          transaction.hash,
           'transaction'
         )}
-        linkText={summary}
+        linkText={`${summary}`}
       />
     );
   } else if (transaction.type === TransactionType.Out) {
