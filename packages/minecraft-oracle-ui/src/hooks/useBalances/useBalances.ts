@@ -11,8 +11,11 @@ import { StringAssetType } from 'utils/subgraph';
 import { FunctionFragment } from 'ethers/lib/utils';
 import { useActiveWeb3React } from 'hooks/useActiveWeb3React/useActiveWeb3React';
 import { useCallback, useEffect, useState } from 'react';
-import { Asset } from 'hooks/marketplace/types';
+import { Asset, NewAsset } from 'hooks/marketplace/types';
 import { useBlockNumber } from 'state/application/hooks';
+import { Web3Provider } from '@ethersproject/providers';
+import { Contract } from '@ethersproject/contracts';
+import { ERC1155_ABI, ERC20_ABI, ERC721_ABI } from '../../abi/token';
 
 export const useBalances = (assets: (Partial<Asset> | undefined)[]) => {
   const { chainId, account } = useActiveWeb3React();
@@ -99,8 +102,8 @@ export const useBalances = (assets: (Partial<Asset> | undefined)[]) => {
         return result?.[0] === account
           ? BigNumber.from('1')
           : result?.[0]
-          ? BigNumber.from('0')
-          : undefined;
+            ? BigNumber.from('0')
+            : undefined;
       }
       return result?.[0] as BigNumber;
     });
@@ -116,6 +119,34 @@ export const useBalances = (assets: (Partial<Asset> | undefined)[]) => {
 
   return balances;
 };
+
+
+export const getAssetBalance = async (asset: NewAsset, library: Web3Provider, account: string): Promise<BigNumber> => {
+  const lowerAccount = account.toLowerCase()
+  if (asset.assetType === StringAssetType.NATIVE) {
+    return await library.getBalance(lowerAccount)
+
+  } else if (asset.assetType === StringAssetType.ERC20) {
+    const contract = new Contract(asset.assetAddress, ERC20_ABI, library)
+    return await contract.balanceOf(lowerAccount) as BigNumber
+
+
+  } else if (asset.assetType === StringAssetType.ERC721) {
+    const contract = new Contract(asset.assetAddress, ERC721_ABI, library)
+    const owningAccount = await contract.ownerOf(asset.assetId)
+    return (!!lowerAccount && (owningAccount?.toLowerCase() === lowerAccount)) ? BigNumber.from('1') : BigNumber.from('0')
+
+
+  } else if (asset.assetType === StringAssetType.ERC1155) {
+    const contract = new Contract(asset.assetAddress, ERC1155_ABI, library)
+    return await contract.balanceOf(lowerAccount, asset.assetId) as BigNumber
+
+
+  } else {
+    throw new Error(`Unrecognized asset type ${asset.assetType.valueOf()}`)
+  }
+}
+
 
 export const useNativeBalance = () => {
   const { chainId, account, library } = useActiveWeb3React();

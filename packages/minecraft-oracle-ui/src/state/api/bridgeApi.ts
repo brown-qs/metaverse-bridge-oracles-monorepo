@@ -2,7 +2,7 @@ import { SerializedError } from "@reduxjs/toolkit"
 import { BaseQueryFn, createApi, FetchArgs, fetchBaseQuery, FetchBaseQueryError } from "@reduxjs/toolkit/query/react"
 import { AppState } from ".."
 import { setTokens } from "../slices/authSlice"
-import { AssetDto, CallparamDto, ConfirmDto, EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse, ExportDto, ImportDto, Oauth2PublicClientDto, RecognizedAssetsDto, SkinResponse, SkinSelectRequest, UserProfileResponse } from "./types"
+import { BridgedAssetDto, CallparamDto, EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse, ExportDto, HashAndChainIdDto, InDto, Oauth2PublicClientDto, RecognizedAssetsDto, SkinResponse, SkinSelectRequest, UserProfileResponse } from "./types"
 
 
 // ---------------------------------------------------------- //
@@ -98,10 +98,10 @@ export const bridgeApi = createApi({
             }),
             invalidatesTags: ["Profile"]
         }),
-        getInGameItems: builder.query<AssetDto[], void>({
+        getInGameItems: builder.query<BridgedAssetDto[], void>({
             query: () => `/user/in-game-items`,
         }),
-        getInGameResources: builder.query<AssetDto[], void>({
+        getInGameResources: builder.query<BridgedAssetDto[], void>({
             query: () => `/user/in-game-resources`,
             providesTags: ["InGameResources"]
         }),
@@ -113,44 +113,30 @@ export const bridgeApi = createApi({
             }),
             invalidatesTags: ["Profile"]
         }),
-        import: builder.mutation<CallparamDto, ImportDto>({
+        in: builder.mutation<CallparamDto[], InDto[]>({
             query: (body) => ({
-                url: `/oracle/import`,
+                url: `/oracle/in`,
                 method: "PUT",
                 body
             }),
         }),
-        enrapture: builder.mutation<CallparamDto, ImportDto>({
+        inConfirm: builder.mutation<boolean, HashAndChainIdDto>({
             query: (body) => ({
-                url: `/oracle/enrapture`,
+                url: `/oracle/in/confirm`,
                 method: "PUT",
                 body
             }),
         }),
-        export: builder.mutation<CallparamDto, ExportDto>({
+        out: builder.mutation<CallparamDto[], HashAndChainIdDto[]>({
             query: (body) => ({
-                url: `/oracle/export`,
+                url: `/oracle/out`,
                 method: "PUT",
                 body
             }),
         }),
-        importConfirm: builder.query<boolean, ConfirmDto>({
+        outConfirm: builder.mutation<boolean, HashAndChainIdDto>({
             query: (body) => ({
-                url: `/oracle/import/confirm`,
-                method: "PUT",
-                body
-            }),
-        }),
-        enraptureConfirm: builder.query<boolean, ConfirmDto>({
-            query: (body) => ({
-                url: `/oracle/enrapture/confirm`,
-                method: "PUT",
-                body
-            }),
-        }),
-        exportConfirm: builder.query<boolean, ConfirmDto>({
-            query: (body) => ({
-                url: `/oracle/export/confirm`,
+                url: `/oracle/out/confirm`,
                 method: "PUT",
                 body
             }),
@@ -236,4 +222,4 @@ export const rtkQueryErrorFormatter = (error: any): string => {
     return strErr
 }
 
-export const { useImportMutation, useEnraptureMutation, useExportMutation, useImportConfirmQuery, useEnraptureConfirmQuery, useExportConfirmQuery, useActiveGameQuery, useOauthInfoQuery, useOauthAuthorizeMutation, useSummonMutation, useGetInGameResourcesQuery, useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
+export const { useInMutation, useOutMutation, useOutConfirmMutation, useInConfirmMutation, useActiveGameQuery, useOauthInfoQuery, useOauthAuthorizeMutation, useSummonMutation, useGetInGameResourcesQuery, useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi

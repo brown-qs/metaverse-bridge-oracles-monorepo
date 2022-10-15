@@ -1,4 +1,4 @@
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { injected, talisman, walletconnect, WalletInfo } from 'connectors';
 import { SUPPORTED_WALLETS } from '../../connectors';
@@ -11,7 +11,6 @@ import MetamaskIcon from '../../assets/images/metamask.svg';
 
 import Identicon from '../Identicon/Identicon';
 import { Transaction } from './Transaction';
-import { clearAllTransactions } from 'state/transactions/actions';
 import { AppDispatch } from 'state';
 import { useSortedRecentTransactions } from 'state/transactions/hooks';
 import { shortenAddress } from 'utils';
@@ -29,6 +28,7 @@ import { ModalIcon } from '../MoonsamaModal/ModalIcon';
 import { MoonsamaModal } from '../MoonsamaModal';
 import React from 'react';
 import { isMatch } from 'date-fns';
+import { AllTransactionsType, clearAllTransactions, selectAllTransactions, selectAllTransactionsFromLastDay } from '../../state/slices/transactionsSlice';
 
 const WALLET_VIEWS = {
   OPTIONS: 'options',
@@ -46,16 +46,17 @@ export const AccountDialog = () => {
   const [, setPendingError] = useState<boolean>();
   const [walletView, setWalletView] = useState(WALLET_VIEWS.ACCOUNT);
 
-  const sortedRecentTransactions = useSortedRecentTransactions();
+  const allTransactions = useSelector(selectAllTransactionsFromLastDay);
   //console.log("sortedRecentTransactions: ", sortedRecentTransactions)
   const { addNetwork } = useAddNetworkToMetamaskCb()
 
+  /*
   const pendingTransactions = sortedRecentTransactions
     .filter((tx) => !tx.receipt)
     .map((tx) => tx.hash);
   const confirmedTransactions = sortedRecentTransactions
     .filter((tx) => tx.receipt)
-    .map((tx) => tx.hash);
+    .map((tx) => tx.hash);*/
 
   const { isAccountDialogOpen, onAccountDialogOpen, onAccountDialogClose } = useAccountDialog();
   // error reporting not working (e.g. on unsupported chain id)
@@ -134,11 +135,11 @@ export const AccountDialog = () => {
     return null;
   }
 
-  function renderTransactions(transactions: string[]) {
+  function renderTransactions(transactions: AllTransactionsType[]) {
     return (
       <>
-        {transactions.map((hash, i) => {
-          return <Transaction key={i} hash={hash} />;
+        {transactions.map((t: AllTransactionsType, i) => {
+          return <Transaction key={t.hash} transaction={t} />;
         })}
       </>
     );
@@ -158,9 +159,7 @@ export const AccountDialog = () => {
     [account, activate, deactivate]
   );
 
-  const clearAllTransactionsCallback = useCallback(() => {
-    if (chainId) dispatch(clearAllTransactions({ chainId }));
-  }, [dispatch, chainId]);
+
 
   const tryActivation = async (connector: AbstractConnector | undefined) => {
     let name = '';
@@ -316,19 +315,18 @@ export const AccountDialog = () => {
       <VStack lineHeight="24px" fontSize="16px" color="whiteAlpha.700" fontFamily="Rubik" w="100%">
         {showConnectedAccountDetails()}
         {account &&
-          (!!pendingTransactions.length || !!confirmedTransactions.length) ? (
+          (!!allTransactions.length) ? (
           <Stack fontSize="12px" w="100%">
             <VStack w="100%">
               <Box>
                 <Text>Recent transactions</Text>
               </Box>
 
-              {renderTransactions(pendingTransactions)}
-              {renderTransactions(confirmedTransactions)}
+              {renderTransactions(allTransactions)}
               <Box w="100%">
                 <Button
                   w="100%"
-                  onClick={clearAllTransactionsCallback}
+                  onClick={() => dispatch(clearAllTransactions())}
                 >
                   CLEAR ALL
                 </Button>
