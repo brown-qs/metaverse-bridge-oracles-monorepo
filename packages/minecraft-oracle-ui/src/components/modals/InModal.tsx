@@ -39,8 +39,17 @@ export function InModal() {
     const inTokens = useSelector(selectInModalTokens)
     const isOpen = useSelector(selectInModalOpen)
     const [setIn, { data: setInData, error: setInError, isUninitialized: isSetInUninitialized, isLoading: isSetInLoading, isSuccess: isSetInSuccess, isError: isSetInError, reset: setInReset }] = useInMutation()
-
-    const assetInTransactionStable = React.useCallback(() => assetInTransaction(inTokens?.[0]?.multiverseVersion!, inTokens?.[0]?.chainId!, library!, account!, setInData?.map((inp: CallparamDto) => inp.data)!, setInData?.map((inp: CallparamDto) => inp.signature)!, setInData?.map((inp: CallparamDto) => inp.hash)!, inTokens?.[0]?.enrapturable!), [inTokens, library, account, setInData])
+    const assetInTransactionStable = React.useCallback(() => assetInTransaction(
+        inTokens?.[0]?.multiverseVersion!,
+        library!,
+        account!,
+        setInData?.map((inp: CallparamDto) => inp.data)!,
+        setInData?.map((inp: CallparamDto) => inp.signature)!,
+        inTokens.map((tok, i) => ({
+            bridgeHash: setInData?.[i]?.hash!,
+            ...onChainTokenTokenToInDto(tok, account!)
+        }))
+    ), [inTokens, library, account, setInData])
 
     const signTransactionMutation = useMutation(async () => {
         if (!inTokens?.[0] || !library || !account || !setInData) {
@@ -91,7 +100,8 @@ export function InModal() {
             assetAddress: tok.assetAddress,
             assetId: tok.numericId,
             amount: "1",
-            owner: account
+            owner: account,
+            enrapture: tok.enrapturable
         }
         return result
     }
