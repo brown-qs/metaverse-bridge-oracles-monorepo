@@ -16,7 +16,8 @@ import { CaptchaContext } from '../context/captcha/captchaContext/captchaContext
 import { CaptchaContextController } from '../context/captcha/captchaContextController/captchaContextController';
 import ScrollToTop from '../components/ScrollToTop';
 import { BlockNumberManager } from '../components/BlockNumberManager';
-
+import { QueryClient, QueryClientProvider, useQuery } from 'react-query'
+const queryClient = new QueryClient()
 function Updaters() {
   return (
     <>
@@ -35,17 +36,19 @@ export const AppProviders = ({ children }: AppProvidersProps) => (
           <Web3ReactManager>
             <>
               <BlockNumberManager />
-              <AccountDialogContextController>
-                <TransferDialogContextController>
-                  <AssetDialogContextController>
-                    <Router>
-                      <ScrollToTop></ScrollToTop>
-                      {children}
-                    </Router>
-                  </AssetDialogContextController>
-                </TransferDialogContextController>
+              <QueryClientProvider client={queryClient}>
+                <AccountDialogContextController>
+                  <TransferDialogContextController>
+                    <AssetDialogContextController>
+                      <Router>
+                        <ScrollToTop></ScrollToTop>
+                        {children}
+                      </Router>
+                    </AssetDialogContextController>
+                  </TransferDialogContextController>
 
-              </AccountDialogContextController>
+                </AccountDialogContextController>
+              </QueryClientProvider>
             </>
           </Web3ReactManager>
         </Provider>

@@ -1,23 +1,22 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { ExportDto } from "../../oracleapi/dtos/export.dto";
-import { ImportDto } from "../../oracleapi/dtos/import.dto";
 import { SummonDto } from "../../oracleapi/dtos/summon.dto";
 import { OracleActionTypeDto } from "./confirm.dto";
 
+/*
 export class OracleRequestDto {
 
-    @ApiProperty({ description: 'User uuid'})
+    @ApiProperty({ description: 'User uuid' })
     uuid: string;
 
-    @ApiProperty({ description: 'Data'})
+    @ApiProperty({ description: 'Data' })
     data: ImportDto | ExportDto | SummonDto
 
-    @ApiProperty({ description: 'Type', enum: OracleActionTypeDto})
+    @ApiProperty({ description: 'Type', enum: OracleActionTypeDto })
     type: OracleActionTypeDto;
 }
 
 export class OracleRequestsDto {
 
-    @ApiProperty({ description: 'List of requests', type: [OracleRequestDto]})
+    @ApiProperty({ description: 'List of requests', type: [OracleRequestDto] })
     confirms: OracleRequestDto[]
-}
+}*/
