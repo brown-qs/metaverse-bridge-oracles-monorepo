@@ -23,9 +23,9 @@ export class AssetWatchService {
     private readonly oracleApiService: OracleApiService,
     private configService: ConfigService,
     @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
-    ) {
-      this.context = AssetWatchService.name
-      this.disabled = this.configService.get<boolean>('cron.disabled') ?? false
+  ) {
+    this.context = AssetWatchService.name
+    this.disabled = this.configService.get<boolean>('cron.disabled') ?? false
   }
 
   @Interval(IMPORT_CONFIRM_CRON_INTERVAL_MS)
@@ -42,27 +42,22 @@ export class AssetWatchService {
         return;
       }
       this.lastConfirmPatrol = now
-      const assets = await this.assetService.findMany({where: [{pendingIn: true, expiration: MoreThanOrEqual(now)}, {pendingOut: true, expiration: MoreThanOrEqual(now)}], relations: ['owner', 'collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true})
-      
+      const assets = await this.assetService.findMany({ where: [{ pendingIn: true, expiration: MoreThanOrEqual(now) }, { pendingOut: true, expiration: MoreThanOrEqual(now) }], relations: ['owner', 'collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
+
       this.logger.debug(`handleConfirmPatrol: found ${assets.length} assets to check`, this.context);
-      
-      for(let i = 0; i < assets.length; i++) {
+
+      for (let i = 0; i < assets.length; i++) {
         const asset = assets[i]
         const chainId = asset.collectionFragment.collection.chainId
 
         try {
           if (asset.pendingIn) {
-            if (asset.enraptured) {
-              this.logger.debug(`handleConfirmPatrol: enrapture confirm of ${asset.hash}`, this.context);
-              await this.oracleApiService.userEnraptureConfirm(asset.owner, {hash: asset.hash, chainId}, asset)
-            } else {
-              this.logger.debug(`handleConfirmPatrol: import confirm of ${asset.hash}`, this.context);
-              await this.oracleApiService.userImportConfirm(asset.owner, {hash: asset.hash, chainId}, asset)
-            }
+            this.logger.debug(`handleConfirmPatrol: enrapture confirm of ${asset.hash}`, this.context);
+            await this.oracleApiService.userInConfirm(asset.owner, { hash: asset.hash, chainId })
           }
           if (asset.pendingOut) {
             this.logger.debug(`handleConfirmPatrol: export confirm of ${asset.hash}`, this.context);
-            await this.oracleApiService.userExportConfirm(asset.owner, {hash: asset.hash, chainId}, asset)
+            await this.oracleApiService.userOutConfirm(asset.owner, { hash: asset.hash, chainId }, asset)
           }
         } catch (e) {
           this.logger.warn(`handleConfirmPatrol: error confirming ${asset.hash}`, this.context);
@@ -76,7 +71,7 @@ export class AssetWatchService {
     }
   }
 
-@Interval(CLEAN_CRON_INTERVAL_MS)
+  @Interval(CLEAN_CRON_INTERVAL_MS)
   async handleCleanPatrol() {
     if (this.disabled) {
       this.logger.debug('handleCleanPatrol: disabled', this.context);
@@ -90,29 +85,25 @@ export class AssetWatchService {
         return;
       }
       this.lastCleanPatrol = now
-      const assets = await this.assetService.findMany({where: [{pendingIn: true, expiration: LessThan(now)}, {pendingOut: true, expiration: LessThan(now)}], relations: ['owner', 'collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true})
+      const assets = await this.assetService.findMany({ where: [{ pendingIn: true, expiration: LessThan(now) }, { pendingOut: true, expiration: LessThan(now) }], relations: ['owner', 'collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
 
       this.logger.debug(`handleCleanPatrol: found ${assets.length} assets to clean`, this.context);
 
-      for(let i = 0; i < assets.length; i++) {
+      for (let i = 0; i < assets.length; i++) {
         let success = false
         const asset = assets[i]
         const chainId = asset.collectionFragment.collection.chainId
 
         try {
           if (asset.pendingIn) {
-            if (asset.enraptured) {
-                this.logger.debug(`handleCleanPatrol: enrapture confirm of ${asset.hash}`, this.context);
-                success = await this.oracleApiService.userEnraptureConfirm(asset.owner, {hash: asset.hash, chainId}, asset)
-              } else {
-                this.logger.debug(`handleCleanPatrol: import confirm of ${asset.hash}`, this.context);
-                success = await this.oracleApiService.userImportConfirm(asset.owner, {hash: asset.hash, chainId}, asset)
-              }
+            this.logger.debug(`handleCleanPatrol: inflow confirm of ${asset.hash}`, this.context);
+            success = await this.oracleApiService.userInConfirm(asset.owner, { hash: asset.hash, chainId })
+
           }
 
           if (asset.pendingOut) {
             this.logger.debug(`handleCleanPatrol: export confirm of ${asset.hash}`, this.context);
-            success = await this.oracleApiService.userExportConfirm(asset.owner, {hash: asset.hash, chainId}, asset)
+            success = await this.oracleApiService.userOutConfirm(asset.owner, { hash: asset.hash, chainId })
             continue
           }
         } catch (e) {
