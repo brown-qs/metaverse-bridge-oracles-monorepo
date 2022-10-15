@@ -124,6 +124,7 @@ export interface InDto {
     assetId: number
     owner: string
     amount: string
+    enrapture: boolean
 }
 
 

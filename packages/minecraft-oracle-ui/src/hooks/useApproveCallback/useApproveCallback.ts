@@ -13,13 +13,15 @@ import {
   useHasPendingApproval,
   useTransactionAdder,
 } from 'state/transactions/hooks';
-import { calculateGasMargin } from 'utils';
+import { calculateGasMargin, getSigner } from 'utils';
 import { StringAssetType } from 'utils/subgraph';
 import { MULTIVERSE_BRIDGE_V1_ADDRESS, ChainId } from '../../constants';
 import { AllowanceQuery } from './useApproveCallback.types';
 import { useBlockNumber } from 'state/application/hooks';
 import { Contract } from '@ethersproject/contracts';
 import { ERC20_ABI, ERC721_ABI, ERC1155_ABI } from '../../abi/token';
+import { addApprovalTransaction } from '../../state/slices/transactionsSlice';
+import store from '../../state';
 
 export const checkApproval = async (assetAddress: string, assetType: StringAssetType, library: Web3Provider, account: string, spender: string): Promise<BigNumber> => {
   const lowerAccount = account.toLowerCase()
@@ -47,11 +49,13 @@ export const checkApproval = async (assetAddress: string, assetType: StringAsset
 }
 
 
-export const approveAsset = async (assetAddress: string, assetType: StringAssetType, library: Web3Provider, operator: string): Promise<TransactionResponse> => {
+export const approveAsset = async (assetAddress: string, assetType: StringAssetType, library: Web3Provider, account: string, operator: string): Promise<TransactionResponse> => {
   const lowerOperator = operator.toLowerCase()
   const lowerAssetAddress = assetAddress.toLowerCase()
+  const network = await library.getNetwork()
+  let result: TransactionResponse
   if (assetType === StringAssetType.ERC20) {
-    const contract = new Contract(lowerAssetAddress, ERC20_ABI, library)
+    const contract = new Contract(lowerAssetAddress, ERC20_ABI, getSigner(library, account))
 
     let estimatedGas
     try {
@@ -60,19 +64,34 @@ export const approveAsset = async (assetAddress: string, assetType: StringAssetT
       //TO DO: tokens who restrict approval amounts
       throw e
     }
-    return await contract.approve(lowerOperator, MaxUint256, { gasLimit: calculateGasMargin(estimatedGas) })
+    result = await contract.approve(lowerOperator, MaxUint256, { gasLimit: calculateGasMargin(estimatedGas) })
 
   } else if (assetType === StringAssetType.ERC721) {
-    const contract = new Contract(lowerAssetAddress, ERC721_ABI, library)
-    const estimatedGas = await contract.estimateGas.setApprovalForAll(lowerOperator, true)
-    return await contract.setApprovalForAll(lowerOperator, true, { gasLimit: calculateGasMargin(estimatedGas) })
+    const contract = new Contract(lowerAssetAddress, ERC721_ABI, getSigner(library, account))
+    const estimatedGas = await contract.estimateGas.setApprovalForAll(lowerOperator, false)
+    result = await contract.setApprovalForAll(lowerOperator, false, { gasLimit: calculateGasMargin(estimatedGas) })
 
   } else if (assetType === StringAssetType.ERC1155) {
-    const contract = new Contract(lowerAssetAddress, ERC1155_ABI, library)
+    const contract = new Contract(lowerAssetAddress, ERC1155_ABI, getSigner(library, account))
     const estimatedGas = await contract.estimateGas.setApprovalForAll(lowerOperator, true)
-    return await contract.setApprovalForAll(lowerOperator, true, { gasLimit: calculateGasMargin(estimatedGas) })
+    result = await contract.setApprovalForAll(lowerOperator, true, { gasLimit: calculateGasMargin(estimatedGas) })
 
 
+  } else {
+    throw new Error(`Unsupported asset type ${assetType.valueOf()}`)
+  }
+
+  if (!!result) {
+    console.log(`network.chainId: ${network.chainId}`)
+    if (!result.hash) {
+      throw new Error("Couldn't get transaction hash.")
+    }
+    if (!network.chainId) {
+      throw new Error("Couldn't get transaction chainId.")
+    }
+
+    store.dispatch(addApprovalTransaction({ transactionHash: result.hash, chainId: network.chainId, assetAddress, assetType, operator: lowerOperator }))
+    return result
   } else {
     throw new Error(`Unsupported asset type ${assetType.valueOf()}`)
   }
