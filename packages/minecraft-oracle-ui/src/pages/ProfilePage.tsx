@@ -256,7 +256,7 @@ const ProfilePage = () => {
         if (!!chainId) {
             if (chainId === ChainId.MOONRIVER && isMarketplaceOnChainTokensFetching && !currentMarketplaceOnChainTokensData) {
                 return true
-            } else if (chainId === ChainId.MOONBEAM && ((isRaresamaOnChainTokensDataFetching && !currentRaresamaOnChainTokensData) || isPoopBalanceLoading)) {
+            } else if (chainId === ChainId.MOONBEAM && isRaresamaOnChainTokensDataFetching && !currentRaresamaOnChainTokensData) {
                 return true
             } else if (chainId === ChainId.MAINNET && isExosamaOnChainTokensFetching && !currentExosamaOnChainTokensData) {
                 return true
@@ -265,7 +265,7 @@ const ProfilePage = () => {
         } else {
             return false
         }
-    }, [currentMarketplaceOnChainTokensData, isMarketplaceOnChainTokensFetching, isRaresamaOnChainTokensDataFetching, currentRaresamaOnChainTokensData, isExosamaOnChainTokensFetching, currentExosamaOnChainTokensData, isPoopBalanceLoading, chainId])
+    }, [currentMarketplaceOnChainTokensData, isMarketplaceOnChainTokensFetching, isRaresamaOnChainTokensDataFetching, currentRaresamaOnChainTokensData, isExosamaOnChainTokensFetching, currentExosamaOnChainTokensData, chainId])
 
     const isOnChainResourcesLoading: boolean = React.useMemo(() => {
         if (!!chainId && chainId === ChainId.MOONRIVER && isMarketplaceOnChainTokensFetching && !currentMarketplaceOnChainTokensData) {
