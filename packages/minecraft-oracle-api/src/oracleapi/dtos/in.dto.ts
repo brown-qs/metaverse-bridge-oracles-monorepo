@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsEnum, IsEthereumAddress, IsNotEmpty, IsNumber, IsString } from "class-validator"
+import { IsBoolean, IsEnum, IsEthereumAddress, IsNotEmpty, IsNumber, IsString } from "class-validator"
 import { AssetType, StringAssetType } from "../../common/enums/AssetType"
 import { AssetDto } from "./asset.dto"
 
@@ -33,4 +33,9 @@ export class InDto {
     @IsNotEmpty()
     @IsString()
     amount: string
+
+    @ApiProperty({ description: 'Included for future flexibility if we give user a choice. But still enforced now.' })
+    @IsNotEmpty()
+    @IsBoolean()
+    enrapture: string
 }

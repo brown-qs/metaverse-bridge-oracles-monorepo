@@ -87,8 +87,25 @@ export class OracleApiService {
         this.logger.debug(`${funcCallPrefix} START ImportDto: ${JSON.stringify(data)}`, this.context)
         const sanitizedChainId = !!data.chainId ? data.chainId : this.defaultChainId;
 
-        const recognizedInAssets = [...await this.getRecognizedAsset(sanitizedChainId, BridgeAssetType.IMPORTED), ...await this.getRecognizedAsset(sanitizedChainId, BridgeAssetType.ENRAPTURED)]
-        const collectionFragment = findRecognizedAsset(recognizedInAssets, { assetAddress: data.assetAddress, assetId: String(data.assetId) })
+        let enraptureCollectionFrag = findRecognizedAsset(await this.getRecognizedAsset(sanitizedChainId, BridgeAssetType.ENRAPTURED), { assetAddress: data.assetAddress, assetId: String(data.assetId) });
+        let importCollectionFrag = findRecognizedAsset(await this.getRecognizedAsset(sanitizedChainId, BridgeAssetType.IMPORTED), { assetAddress: data.assetAddress, assetId: String(data.assetId) })
+
+        let collectionFragment
+        if (data.enrapture) {
+            if (!!enraptureCollectionFrag) {
+                collectionFragment = enraptureCollectionFrag
+            } else if (!!importCollectionFrag) {
+                this.logger.error(`${funcCallPrefix} asset permissioned, but enrapture not supported.`, null, this.context)
+                throw new UnprocessableEntityException(`Asset permissioned, but enrapture not supported.`)
+            }
+        } else {
+            if (!!importCollectionFrag) {
+                collectionFragment = importCollectionFrag
+            } else if (!!enraptureCollectionFrag) {
+                this.logger.error(`${funcCallPrefix} asset permissioned, but import not supported.`, null, this.context)
+                throw new UnprocessableEntityException(`Asset permissioned, but import not supported.`)
+            }
+        }
 
         if (!collectionFragment) {
             this.logger.error(`${funcCallPrefix} not an permissioned asset`, null, this.context)

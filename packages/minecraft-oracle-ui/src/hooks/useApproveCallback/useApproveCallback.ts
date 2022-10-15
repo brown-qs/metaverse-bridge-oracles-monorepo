@@ -68,8 +68,8 @@ export const approveAsset = async (assetAddress: string, assetType: StringAssetT
 
   } else if (assetType === StringAssetType.ERC721) {
     const contract = new Contract(lowerAssetAddress, ERC721_ABI, getSigner(library, account))
-    const estimatedGas = await contract.estimateGas.setApprovalForAll(lowerOperator, false)
-    result = await contract.setApprovalForAll(lowerOperator, false, { gasLimit: calculateGasMargin(estimatedGas) })
+    const estimatedGas = await contract.estimateGas.setApprovalForAll(lowerOperator, true)
+    result = await contract.setApprovalForAll(lowerOperator, true, { gasLimit: calculateGasMargin(estimatedGas) })
 
   } else if (assetType === StringAssetType.ERC1155) {
     const contract = new Contract(lowerAssetAddress, ERC1155_ABI, getSigner(library, account))

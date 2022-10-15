@@ -13,9 +13,12 @@ import { TransactionResponse, Web3Provider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
 import { METAVERSE_V1_ABI, METAVERSE_V2_ABI } from '../../abi/marketplace';
 import { ERC20_ABI } from '../../abi/token';
+import store from '../../state';
+import { addInTransaction, InAsset } from '../../state/slices/transactionsSlice';
 
 
-export async function assetInTransaction(mv: MultiverseVersion, chainId: ChainId, library: Web3Provider, account: string, calls: string[], signatures: string[], bridgeHashes: string[], enrapture: boolean) {
+export async function assetInTransaction(mv: MultiverseVersion, library: Web3Provider, account: string, calls: string[], signatures: string[], inAssets: InAsset[]) {
+    const chainId = inAssets[0].chainId
     const contractAddress = getContractAddress(mv, chainId)
     const abi = (mv === MultiverseVersion.V1) ? METAVERSE_V1_ABI : METAVERSE_V2_ABI
     const contract = new Contract(contractAddress, abi, getSigner(library, account))
@@ -23,7 +26,7 @@ export async function assetInTransaction(mv: MultiverseVersion, chainId: ChainId
     let methodName: string
     let args: string[] | string[][]
     if (mv === MultiverseVersion.V1) {
-        if (enrapture) {
+        if (inAssets?.[0]?.enrapture) {
             methodName = "enraptureToMetaverseSig"
         } else {
             methodName = "importToMetaverseSig"
@@ -75,6 +78,16 @@ export async function assetInTransaction(mv: MultiverseVersion, chainId: ChainId
             throw new Error(`Asset inflow failed: ${e.message}`);
         }
     }
+    if (!result.hash) {
+        throw new Error("Couldn't get transaction hash.")
+    }
+    if (!chainId) {
+        throw new Error("Couldn't get chainId.")
+    }
+
+    store.dispatch(addInTransaction({ transactionHash: result.hash, assets: inAssets }))
+
+
     return result
 }
 export enum CreateImportAssetCallbackState {
