@@ -21,6 +21,9 @@ import { persistStore, persistReducer } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
 import importModalSlice from './slices/importModalSlice';
 import enraptureModalSlice from './slices/enraptureModalSlice';
+import inModalSlice from './slices/inModalSlice';
+import transactionsSlice from './slices/transactionsSlice';
+import outModalSlice from './slices/outModalSlice';
 
 
 
@@ -36,9 +39,15 @@ const transactionsPersistConfig = {
   storage: storage,
 }
 
+const newTransactionsPersistConfig = {
+  key: 'newTransactions',
+  storage: storage,
+}
+
 const rootReducer = combineReducers({
   application,
   transactions: persistReducer(transactionsPersistConfig, transactions),
+  newTransactions: persistReducer(newTransactionsPersistConfig, transactionsSlice),
   auth: persistReducer(authPersistConfig, authSlice),
   importModal: importModalSlice,
   enraptureModal: enraptureModalSlice,
@@ -49,6 +58,8 @@ const rootReducer = combineReducers({
   kiltLoginModal: kiltLoginModalSlice,
   exportModal: exportModalSlice,
   summonModal: summonModalSlice,
+  inModal: inModalSlice,
+  outModal: outModalSlice,
   blockNumbers: blockNumbersSlice,
   oauth: oauthSlice,
   [bridgeApi.reducerPath]: bridgeApi.reducer,

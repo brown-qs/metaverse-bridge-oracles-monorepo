@@ -1,3 +1,7 @@
+import { NewAsset } from "../hooks/marketplace/types";
+import { StringAssetType } from "./subgraph";
+
+
 export const SORT_TYPES = [
   { label: 'Price: Low to High', value: 'price_low_to_high' },
   { label: 'Price: High to Low', value: 'price_high_to_low' },
