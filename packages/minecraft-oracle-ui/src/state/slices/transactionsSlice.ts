@@ -49,6 +49,8 @@ export interface InTransaction extends BaseTransaction {
 
 export interface OutTransaction extends BaseTransaction {
     type: TransactionType.Out,
+    chainId: ChainId,
+    bridgeHashes: string[]
 }
 
 export type AllTransactionsType = ApprovalTransaction | InTransaction | OutTransaction
@@ -59,9 +61,10 @@ export interface TransactionsSlice {
     outTransaction: OutTransaction[],
 }
 
+const initialState = { approvalTransactions: [], inTransactions: [], outTransaction: [] } as TransactionsSlice
 const transactionsSlice = createSlice({
     name: "transactionsSlice",
-    initialState: { approvalTransactions: [], inTransactions: [], outTransaction: [] } as TransactionsSlice,
+    initialState,
     reducers: {
         addApprovalTransaction: (state, action: PayloadAction<Pick<ApprovalTransaction, "hash" | "chainId" | "assetType" | "assetAddress" | "operator">>) => {
             const payload = action.payload
@@ -97,7 +100,7 @@ const transactionsSlice = createSlice({
                 state.inTransactions.push(trans)
             }
         },
-        addOutTransaction: (state, action: PayloadAction<Pick<OutTransaction, "hash">>) => {
+        addOutTransaction: (state, action: PayloadAction<Pick<OutTransaction, "hash" | "bridgeHashes" | "chainId">>) => {
             const payload = action.payload
             const trans: OutTransaction = {
                 hash: payload.hash,
@@ -106,6 +109,8 @@ const transactionsSlice = createSlice({
                 receipt: undefined,
                 lastCheckedBlock: 0,
 
+                chainId: payload.chainId,
+                bridgeHashes: payload.bridgeHashes
             }
             if (!state.outTransaction.find(t => t.hash === trans.hash)) {
                 state.outTransaction.push(trans)
@@ -136,11 +141,18 @@ const transactionsSlice = createSlice({
                     break;
                 }
             }
+        },
+        clearAllTransactions: (state, action: PayloadAction<void>) => {
+            for (const [transactionTypeString, transactions] of Object.entries(state)) {
+                if (Array.isArray(transactions)) {
+                    (state as any)[transactionTypeString] = []
+                }
+            }
         }
     }
 })
 
-export const { addApprovalTransaction, addInTransaction, addOutTransaction, updateLastCheckedBlock, setReceipt } = transactionsSlice.actions
+export const { addApprovalTransaction, clearAllTransactions, addInTransaction, addOutTransaction, updateLastCheckedBlock, setReceipt } = transactionsSlice.actions
 export default transactionsSlice.reducer
 
 export const selectApprovalTransactions = (state: AppState) => state?.newTransactions?.approvalTransactions
@@ -189,7 +201,7 @@ export const transactionToChainId = (transaction: AllTransactionsType): number =
     } else if (transaction.type === TransactionType.In) {
         return transaction.assets[0].chainId
     } else if (transaction.type === TransactionType.Out) {
-        return 0
+        return transaction.chainId
     } else {
         return 0
     }

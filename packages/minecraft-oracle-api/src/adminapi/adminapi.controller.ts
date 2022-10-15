@@ -30,7 +30,6 @@ import { PreferredServersDto } from './dtos/preferredServer.dto';
 import { ProfileApiService } from '../profileapi/profileapi.service';
 import { AdminConfirmDto, OracleActionTypeDto } from './dtos/confirm.dto';
 import { OracleApiService } from '../oracleapi/oracleapi.service';
-import { ExportDto } from '../oracleapi/dtos/export.dto';
 import { SummonDto } from '../oracleapi/dtos/summon.dto';
 import { CallparamDto } from '../oracleapi/dtos/callparams.dto';
 import { CommunismDto } from './dtos/communism.dto';
@@ -265,34 +264,34 @@ export class AdminApiController {
         await Promise.all(promises)
         return true
     }
-
-    @Put('confirm')
-    @HttpCode(200)
-    @ApiOperation({ summary: 'Manual trigger of confirmation of a multiverse bridge event' })
-    @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard)
-    async getConfirmations(
-        @User() caller: UserEntity,
-        @Body() dto: AdminConfirmDto
-    ): Promise<boolean> {
-        if (caller.role !== UserRole.ADMIN) {
-            throw new ForbiddenException('Not admin')
+    /*
+        @Put('confirm')
+        @HttpCode(200)
+        @ApiOperation({ summary: 'Manual trigger of confirmation of a multiverse bridge event' })
+        @ApiBearerAuth()
+        @UseGuards(JwtAuthGuard)
+        async getConfirmations(
+            @User() caller: UserEntity,
+            @Body() dto: AdminConfirmDto
+        ): Promise<boolean> {
+            if (caller.role !== UserRole.ADMIN) {
+                throw new ForbiddenException('Not admin')
+            }
+            const user = await this.userService.findOne({ uuid: dto.uuid })
+            if (!user) {
+                return false
+            }
+            let success = false
+            if (dto.type.valueOf() === OracleActionTypeDto.ENRAPTURE) {
+                success = await this.oracleService.userInConfirm(user, dto)
+            } else if (dto.type.valueOf() === OracleActionTypeDto.IMPORT) {
+                success = await this.oracleService.userInConfirm(user, dto)
+            } else if (dto.type.valueOf() === OracleActionTypeDto.EXPORT) {
+                success = await this.oracleService.userExportConfirm(user, dto)
+            }
+            return success
         }
-        const user = await this.userService.findOne({ uuid: dto.uuid })
-        if (!user) {
-            return false
-        }
-        let success = false
-        if (dto.type.valueOf() === OracleActionTypeDto.ENRAPTURE) {
-            success = await this.oracleService.userInConfirm(user, dto)
-        } else if (dto.type.valueOf() === OracleActionTypeDto.IMPORT) {
-            success = await this.oracleService.userInConfirm(user, dto)
-        } else if (dto.type.valueOf() === OracleActionTypeDto.EXPORT) {
-            success = await this.oracleService.userExportConfirm(user, dto)
-        }
-        return success
-    }
-
+    */
     /*
     @Put('oracle/request')
     @HttpCode(200)

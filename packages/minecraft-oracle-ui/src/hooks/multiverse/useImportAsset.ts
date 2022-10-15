@@ -21,6 +21,7 @@ export async function assetInTransaction(mv: MultiverseVersion, library: Web3Pro
     const chainId = inAssets[0].chainId
     const contractAddress = getContractAddress(mv, chainId)
     const abi = (mv === MultiverseVersion.V1) ? METAVERSE_V1_ABI : METAVERSE_V2_ABI
+    console.log(`assetInTransaction:: mv: ${mv} chainId: ${chainId} account: ${account} contractAddress: ${contractAddress}`)
     const contract = new Contract(contractAddress, abi, getSigner(library, account))
 
     let methodName: string
@@ -55,7 +56,12 @@ export async function assetInTransaction(mv: MultiverseVersion, library: Web3Pro
             //Unexpected successful call after failed estimate gas
         } catch (callError: any) {
             console.debug('Call threw error', methodName, args, callError);
-            let errorMessage = `The transaction cannot succeed due to error: ${callError.reason}`;
+
+            let cErr = callError
+            if (!!callError?.data) {
+                cErr = JSON.stringify(callError?.data)
+            }
+            let errorMessage = `The transaction cannot succeed due to error: ${cErr}`;
             throw new Error(errorMessage);
 
         }

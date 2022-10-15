@@ -6,7 +6,7 @@ import { countGamePassAssets } from 'utils';
 import { useAssetDialog } from '../hooks/useAssetDialog/useAssetDialog';
 import React, { FC, ReactNode, useEffect, useState } from 'react';
 import { SKIN_LABELS } from '../constants/skins';
-import { BURNABLE_RESOURCES_IDS, ChainId, DEFAULT_CHAIN, NETWORK_NAME, PERMISSIONED_CHAINS } from "../constants";
+import { BURNABLE_RESOURCES_IDS, ChainId, DEFAULT_CHAIN, NETWORK_NAME, PERMISSIONED_CHAINS, RARESAMA_POOP, SHIT_FART } from "../constants";
 import { AssetChainDetails } from '../components/AssetChainDetails/AssetChainDetails';
 import { Image, Text, Box, Container, Grid, List as ChakraList, ListIcon, ListItem, Stack, Tooltip, Button, Flex, SimpleGrid, GridItem, VStack, HStack, background, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useCheckboxGroup, useMediaQuery, CircularProgress } from '@chakra-ui/react';
 import { BridgeTab } from '../components/Bridge/BridgeTab';
@@ -18,7 +18,7 @@ import { OnChainItem } from '../components/Bridge/OnChainItem';
 import BackgroundImage from '../assets/images/bridge-background-blur.svg'
 import { useSetSkinMutation, useGetSkinsQuery, useUserProfileQuery, useGetRecognizedAssetsQuery, useGetInGameItemsQuery, useGetInGameResourcesQuery } from '../state/api/bridgeApi';
 import { Virtuoso } from 'react-virtuoso'
-import { AssetDto, CollectionFragmentDto, SkinResponse } from '../state/api/types';
+import { CollectionFragmentDto, MultiverseVersion, SkinResponse } from '../state/api/types';
 import { useGetMarketplaceMetadataQuery, useGetMarketplaceOnChainTokensQuery } from '../state/api/generatedSquidMarketplaceApi';
 import { Media } from '../components';
 import { BigNumber, utils } from 'ethers';
@@ -40,10 +40,11 @@ import { openInGameItemModal, setInGameItemModalToken } from '../state/slices/in
 import { InGameItemModal } from '../components/modals/InGameItemModal';
 import { useGetExosamaMetadataQuery, useGetExosamaOnChainTokensQuery } from '../state/api/generatedSquidExosamaApi';
 import { useQuery } from 'react-query';
-import { RARESAMA_POOP, SHIT_FART } from '../utils/constants';
 import { getAssetBalance } from '../hooks/useBalances/useBalances';
 import { InModal } from '../components/modals/InModal';
 import { openInModal, setInModalTokens } from '../state/slices/inModalSlice';
+import { openOutModal, setOutModalTokens } from '../state/slices/outModalSlice';
+import { OutModal } from '../components/modals/OutModal';
 
 
 const ProfilePage = () => {
@@ -520,8 +521,8 @@ const ProfilePage = () => {
                                             //just export one items now but we are setup for multiple later
                                             if (exportAssets.length > 0) {
                                                 const value = exportAssets[0]
-                                                dispatch(setExportTokens([value]))
-                                                dispatch(openExportModal())
+                                                dispatch(setOutModalTokens(exportAssets))
+                                                dispatch(openOutModal())
                                             }
                                         }}
                                         isDisabled={inGameCheckboxGroupValue.length === 0} w="100%">EXPORT TO WALLET</Button>}
@@ -532,6 +533,36 @@ const ProfilePage = () => {
                                             totalCount={inGameItems.length}
                                             itemContent={(index) => {
                                                 const token = inGameItems[index]
+
+                                                const isCheckBoxDisabled = (token: InGameTokenMaybeMetadata) => {
+                                                    if (token.enraptured) {
+                                                        return true
+                                                    }
+
+                                                    const isChecked = inGameCheckboxGroupValue.includes(token.hash!)
+                                                    if (!isChecked) {
+                                                        if (inGameCheckboxGroupValue.length >= 20) {
+                                                            return true
+                                                        }
+                                                        const firstCheck = inGameItems.find(tok => tok.hash === inGameCheckboxGroupValue[0])
+                                                        if (!!firstCheck) {
+                                                            if (token.multiverseVersion === MultiverseVersion.V1) {
+                                                                return true
+                                                            }
+                                                            const firstCheckAssetAddress = firstCheck?.assetAddress?.toLowerCase()
+                                                            const firstCheckExportAddress = firstCheck?.exportAddress?.toLowerCase()
+                                                            if (!!firstCheckAssetAddress && (firstCheckAssetAddress !== token?.assetAddress?.toLowerCase())) {
+                                                                return true
+                                                            }
+
+                                                            if (!!firstCheckExportAddress && (firstCheckExportAddress !== token?.exportAddress?.toLowerCase())) {
+                                                                return true
+                                                            }
+                                                        }
+                                                    }
+
+                                                    return false
+                                                }
                                                 return (
                                                     <InGameItem
                                                         lineOne={formatInGameTokenName(token)}
@@ -540,19 +571,17 @@ const ProfilePage = () => {
                                                         mediaUrl={token?.metadata?.image}
                                                         isLoading={!!token?.metadata !== true}
                                                         key={token.hash}
-                                                        isCheckboxDisabled={token.enraptured === true}
+                                                        isCheckboxDisabled={isCheckBoxDisabled(token)}
                                                         checkboxValue={String(token.hash)}
                                                         isChecked={inGameCheckboxGroupValue.includes(String(token.hash))}
                                                         onCheckboxChange={(e) => {
-                                                            //hack for now allow only one check
+
                                                             if (e.target.checked) {
-                                                                setInGameCheckboxGroupValue([String(token.hash)])
+                                                                setInGameCheckboxGroupValue([...inGameCheckboxGroupValue, token.hash!])
                                                             } else {
-                                                                setInGameCheckboxGroupValue([])
+                                                                setInGameCheckboxGroupValue([...inGameCheckboxGroupValue.filter(id => id !== token.hash)])
                                                             }
 
-                                                            //do this when ready for multiple values
-                                                            //checkBoxProps.onChange(e)
                                                         }}
                                                         highlightable={true}
                                                         onClick={() => {
@@ -622,6 +651,32 @@ const ProfilePage = () => {
                                             totalCount={onChainItems.length}
                                             itemContent={(index) => {
                                                 const token = onChainItems[index]
+
+                                                const isCheckBoxDisabled = (token: StandardizedOnChainTokenWithRecognizedTokenData) => {
+                                                    const isChecked = onChainCheckboxGroupValue.includes(token.id)
+                                                    if (!isChecked) {
+                                                        if (onChainCheckboxGroupValue.length >= 20) {
+                                                            return true
+                                                        }
+                                                        const firstCheck = onChainItems.find(tok => tok.id === onChainCheckboxGroupValue[0])
+                                                        if (!!firstCheck) {
+                                                            if (token.multiverseVersion === MultiverseVersion.V1) {
+                                                                return true
+                                                            }
+                                                            const firstCheckAssetAddress = firstCheck?.assetAddress?.toLowerCase()
+                                                            //fungible one at a time for now
+                                                            if (firstCheck.treatAsFungible) {
+                                                                return true
+                                                            }
+
+                                                            if (!!firstCheckAssetAddress && firstCheckAssetAddress !== token?.assetAddress?.toLowerCase()) {
+                                                                return true
+                                                            }
+                                                        }
+
+                                                    }
+                                                    return false
+                                                }
                                                 return (
                                                     <OnChainItem
                                                         lineOne={formatOnChainTokenName(token)}
@@ -630,19 +685,15 @@ const ProfilePage = () => {
                                                         mediaUrl={token?.metadata?.image ?? ""}
                                                         isLoading={false}
                                                         key={token.id} //update key
-                                                        isCheckboxDisabled={false}
+                                                        isCheckboxDisabled={isCheckBoxDisabled(token)}
                                                         checkboxValue={token.id}
                                                         isChecked={onChainCheckboxGroupValue.includes(token.id)}
                                                         onCheckboxChange={(e) => {
-                                                            //hack for now allow only one check
                                                             if (e.target.checked) {
-                                                                setOnChainCheckboxGroupValue([token.id])
+                                                                setOnChainCheckboxGroupValue([...onChainCheckboxGroupValue, token.id])
                                                             } else {
-                                                                setOnChainCheckboxGroupValue([])
+                                                                setOnChainCheckboxGroupValue([...onChainCheckboxGroupValue.filter(id => id !== token.id)])
                                                             }
-
-                                                            //do this when ready for multiple values
-                                                            //checkBoxProps.onChange(e)
                                                         }}
                                                     >
                                                     </OnChainItem>
@@ -770,7 +821,7 @@ const ProfilePage = () => {
             </Container >
             <InGameItemModal />
             <OnChainResourceModal />
-            <ExportModal />
+            <OutModal />
             <SummonModal />
             <InModal />
 

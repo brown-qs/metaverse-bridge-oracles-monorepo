@@ -11,7 +11,6 @@ import MetamaskIcon from '../../assets/images/metamask.svg';
 
 import Identicon from '../Identicon/Identicon';
 import { Transaction } from './Transaction';
-import { clearAllTransactions } from 'state/transactions/actions';
 import { AppDispatch } from 'state';
 import { useSortedRecentTransactions } from 'state/transactions/hooks';
 import { shortenAddress } from 'utils';
@@ -29,7 +28,7 @@ import { ModalIcon } from '../MoonsamaModal/ModalIcon';
 import { MoonsamaModal } from '../MoonsamaModal';
 import React from 'react';
 import { isMatch } from 'date-fns';
-import { AllTransactionsType, selectAllTransactions, selectAllTransactionsFromLastDay } from '../../state/slices/transactionsSlice';
+import { AllTransactionsType, clearAllTransactions, selectAllTransactions, selectAllTransactionsFromLastDay } from '../../state/slices/transactionsSlice';
 
 const WALLET_VIEWS = {
   OPTIONS: 'options',
@@ -160,9 +159,7 @@ export const AccountDialog = () => {
     [account, activate, deactivate]
   );
 
-  const clearAllTransactionsCallback = useCallback(() => {
-    if (chainId) dispatch(clearAllTransactions({ chainId }));
-  }, [dispatch, chainId]);
+
 
   const tryActivation = async (connector: AbstractConnector | undefined) => {
     let name = '';
@@ -326,14 +323,14 @@ export const AccountDialog = () => {
               </Box>
 
               {renderTransactions(allTransactions)}
-              {/**<Box w="100%">
+              <Box w="100%">
                 <Button
                   w="100%"
-                  onClick={clearAllTransactionsCallback}
+                  onClick={() => dispatch(clearAllTransactions())}
                 >
                   CLEAR ALL
                 </Button>
-          </Box>*/}
+              </Box>
             </VStack>
 
           </Stack>
