@@ -3,55 +3,19 @@ import React from 'react';
 import { useClasses } from 'hooks'
 import { Link, Image, Box, Button, HStack, VStack, Text } from '@chakra-ui/react';
 
+export type OptionCardProps = {
+  onClick?: null | (() => void)
+  header: React.ReactNode
+  iconSvgData: string
+}
 export default function OptionCard({
-  link = null,
   onClick = null,
   header,
-  subheader = null,
-  iconUrl,
-  active = false,
-  id,
-}: {
-  link?: string | null;
-  clickable?: boolean;
-  size?: number | null;
-  onClick?: null | (() => void);
-  color: string;
-  header: React.ReactNode;
-  subheader: React.ReactNode | null;
-  iconUrl?: string
-  active?: boolean;
-  id: string;
-}) {
-  const content = (
-    <div >
-      <div >
-        <div >
-          {active ? (
-            <div >
-              <div >
-                <div />
-              </div>
-            </div>
-          ) : (
-            ''
-          )}
-          {header}
-        </div>
-        {subheader && <div >{subheader}</div>}
-      </div>
-
-      <div >
-
-      </div>
-    </div>
-  );
-  if (link) {
-    return <Link isExternal color="teal.200" lineHeight="24px" fontSize="16px" fontFamily="Rubik" href={link}>{header}</Link >;
-  }
-
+  iconSvgData,
+}: OptionCardProps) {
   return (
     <Box
+      w="100%"
       position="relative"
     >
       <Image
@@ -64,12 +28,11 @@ export default function OptionCard({
         left="0"
         objectFit="contain"
         pointerEvents="none"  //only hover to pass down to button
-        src={iconUrl}>
+        src={`data:image/svg+xml;base64,${btoa(iconSvgData)}`}>
 
       </Image>
       <Button
         w="100%"
-        id={id}
         onClick={() => onClick?.()}
       >
         {header}

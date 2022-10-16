@@ -5,7 +5,7 @@ export const BridgeTab: React.FC<{ title: string, children: ReactNode, isLoading
     const [isSmallerThan285] = useMediaQuery('(max-width: 285px)')
     const topRightCornerRadius = isSmallerThan285 ? "0px" : "8px"
     return (
-        <VStack maxHeight="100%" height="100%" alignItems={"flex-start"} spacing={0}>
+        <VStack maxHeight="100%" height="100%" alignItems={"flex-start"} spacing={0} overflow="hidden">
             <HStack
                 alignItems={"center"}
                 width={isSmallerThan285 ? "100%" : "inherit"}
@@ -43,10 +43,9 @@ export const BridgeTab: React.FC<{ title: string, children: ReactNode, isLoading
                 top="-1px"
                 flexGrow="1"
                 borderRadius={footer ? `0px ${topRightCornerRadius} 0px 0px` : `0px ${topRightCornerRadius} 8px 8px`}
-                overflowY="scroll"
+                overflow="hidden"
                 width="100%"
                 background="gray.800"
-                overscrollBehavior="none"
             >
                 {!!isLoading
                     ?
@@ -60,7 +59,7 @@ export const BridgeTab: React.FC<{ title: string, children: ReactNode, isLoading
                             {emptyMessage}
                         </Box>
                         :
-                        <>{children}</>
+                        <Box w="100%" h="100%" overflow="hidden">{children}</Box>
                     }</>
 
                 }

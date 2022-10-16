@@ -64,7 +64,7 @@ export function EnraptureModal() {
 
     const assetAddress = enraptureTokens?.[0]?.assetAddress?.toLowerCase()
     const assId = enraptureTokens?.[0]?.numericId
-    const assetId = !!assId ? String(assId) : undefined
+    const assetId = (!!assId || assId === 0) ? String(assId) : undefined
     const assetType = enraptureTokens?.[0]?.assetType
     const multiverseVersion = enraptureTokens?.[0]?.multiverseVersion ?? MultiverseVersion.V1
     const warehouseAddress = (multiverseVersion === MultiverseVersion.V1) ? MULTIVERSE_BRIDGE_V1_WAREHOUSE_ADDRESS[chainId ?? 1285] : MULTIVERSE_BRIDGE_V2_WAREHOUSE_ADDRESS[chainId ?? 1285]
