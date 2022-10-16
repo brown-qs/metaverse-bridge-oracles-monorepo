@@ -39,6 +39,7 @@ export async function encodeImportOrEnraptureWithSigData(a: StandardizedValidate
 
         const types = ['address', 'uint256', 'bytes32', 'address', 'bytes32', 'uint256[]', 'uint256[]', 'bytes32[]', 'uint256', 'bool']
         const params = [a[0].assetAddress, a[0].assetType, metaverse, a[0].owner, d, [a[0].assetId], [a[0].amount], [salts[0]], expiration, a[0].enrapture]
+        console.log(JSON.stringify(params))
         return encodeParameters(types, params)
     }
 

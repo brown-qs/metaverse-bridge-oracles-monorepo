@@ -67,9 +67,9 @@ https://squid.subsquid.io/exosama-squid/graphql
 https://squid.subsquid.io/raresama-moonbeam/graphql
     */
     const indexers = [
-        //   "https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2"
-        "https://moonbeam-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2",
-        "https://mainnet-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2",
+        "https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2"
+        // "https://moonbeam-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2",
+        //"https://mainnet-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2",
     ]
     for (const indexer of indexers) {
         const client = new ApolloClient({
@@ -160,6 +160,11 @@ https://squid.subsquid.io/raresama-moonbeam/graphql
             if (!collection) {
                 throw new Error(`Couldn't find recognized collection for asset ${mAsset.asset.assetAddress.toLowerCase()}`)
             }
+            const client = new ethers.providers.JsonRpcProvider(collection.chain.rpcUrl);
+            const oracle = new ethers.Wallet(process.env.ORACLE_PRIVATE_KEY, client);
+            const contract = new Contract(collection.chain.multiverseV2Address, METAVERSE_V2_ABI, oracle)
+
+
             if (!!assetEntity) {
                 console.log(`✅\t${collection.name}\t#${assetId}\t${modifiedAtPretty}\tin the datbase`)
             } else {
@@ -169,7 +174,6 @@ https://squid.subsquid.io/raresama-moonbeam/graphql
                 if (olderThanOneDay) {
                     console.log("Older than a day and not in the database, unstaking...")
                     console.log(JSON.stringify(collection, null, 4))
-                    const client = new ethers.providers.JsonRpcProvider(collection.chain.rpcUrl);
 
                     const oracle = new ethers.Wallet(process.env.ORACLE_PRIVATE_KEY, client);
                     console.log(oracle.address, collection.chain.rpcUrl)

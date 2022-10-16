@@ -117,7 +117,6 @@ export function getExplorerLink(
   if (!chainId) {
     return '';
   }
-
   const prefix = `https://${EXPLORER_PREFIXES[chainId]}`;
 
   switch (type) {
