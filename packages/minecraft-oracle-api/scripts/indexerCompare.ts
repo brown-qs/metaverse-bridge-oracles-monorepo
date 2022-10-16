@@ -172,8 +172,11 @@ https://squid.subsquid.io/raresama-moonbeam/graphql
                     const client = new ethers.providers.JsonRpcProvider(collection.chain.rpcUrl);
 
                     const oracle = new ethers.Wallet(process.env.ORACLE_PRIVATE_KEY, client);
+                    console.log(oracle.address, collection.chain.rpcUrl)
                     const contract = new Contract(collection.chain.multiverseV2Address, METAVERSE_V2_ABI, oracle)
-                    await contract.unstake([mAsset.id])
+                    console.log('burned', await contract.exists(mAsset.id, true))
+                    console.log('imported', await contract.exists(mAsset.id, false))
+                    await (await contract.unstake([mAsset.id], { maxFeePerGas: '18000000000', maxPriorityFeePerGas: '3000000000', gasLimit: '5000000' })).wait()
                 }
 
             }
