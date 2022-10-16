@@ -99,7 +99,7 @@ export enum RecognizedAssetType {
     PONDSAMA_FISH = 'PONDSAMA_FISH'
 }
 
-export type AssetDto = {
+export type BridgedAssetDto = {
     name: string
     assetAddress: string
     assetId: string
@@ -117,13 +117,16 @@ export type AssetDto = {
 
 
 
-export interface ImportDto {
-    asset: AssetDto
-    owner: string
-    beneficiary: string
-    amount: string
+export interface InDto {
     chainId: number
+    assetType: StringAssetType
+    assetAddress: string
+    assetId: number
+    owner: string
+    amount: string
+    enrapture: boolean
 }
+
 
 export interface ExportDto {
     hash: string
@@ -134,7 +137,7 @@ export interface ExportDto {
 export interface CallparamDto {
     data: string
     signature: string
-    hash?: string
+    hash: string
     confirmed: boolean
 }
 
@@ -148,7 +151,7 @@ export enum Oauth2Scope {
     UserGamerTagRead = 'user:gamer_tag.read'
 }
 
-export interface ConfirmDto {
+export interface HashAndChainIdDto {
     hash: string
     chainId: number
 }

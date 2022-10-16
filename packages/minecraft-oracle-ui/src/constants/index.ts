@@ -1,3 +1,7 @@
+import { NewAsset } from "../hooks/marketplace/types";
+import { MultiverseVersion } from "../state/api/types";
+import { StringAssetType } from "../utils/subgraph";
+
 export const CHAIN_ID = parseInt(process.env.REACT_APP_CHAIN_ID ?? '1285', 10);
 
 export const SUBGRAPH_URL =
@@ -104,7 +108,7 @@ export const WMOVR_ADDRESS: { [chainId in ChainId]?: string } = {
 export const EXPLORER_URL: { [chainId in ChainId]?: string } = {
   [ChainId.VOLTA]: 'https://volta-explorer.energyweb.org',
   [ChainId.MOONRIVER]: 'https://moonriver.moonscan.io/',
-  [ChainId.MOONBEAM]: 'https://blockscout.moonbeam.network'
+  [ChainId.MOONBEAM]: 'https://moonbeam.moonscan.io/'
 };
 
 export const MULTIVERSE_BRIDGE_V1_ADDRESS: { [chainId in ChainId]?: string } = {
@@ -119,13 +123,29 @@ export const MULTIVERSE_BRIDGE_V1_WAREHOUSE_ADDRESS: { [chainId in ChainId]?: st
 
 export const MULTIVERSE_BRIDGE_V2_ADDRESS: { [chainId in ChainId]?: string } = {
   [ChainId.MOONRIVER]: '0x1ff3097f4a82913d690d2a59de613378ae2b3c05',
-  [ChainId.MOONBEAM]: '0x694665f738fa1d9349744098d6cecdccc2adbfb4'
+  [ChainId.MOONBEAM]: '0xbE122F9F612537Cb76020Ee63C32A07A6F7F4376',
+  [ChainId.MAINNET]: '0xaF1F85aD24Bc45fb19f5F8B5166e1Aed41c60844'
 };
 
 export const MULTIVERSE_BRIDGE_V2_WAREHOUSE_ADDRESS: { [chainId in ChainId]?: string } = {
   [ChainId.MOONRIVER]: '0x59C481548CE7BA13f3288df9f4FCf44a10A589A0',
-  [ChainId.MOONBEAM]: '0xC816967B73d6e7E12D5FDE30d20c4561fBAa5C3D'
+  [ChainId.MOONBEAM]: '0x6D73E2920A92931be76F487a2E29F67b4D7858F9',
+  [ChainId.MAINNET]: '0xbC0d0c5E67fC0d7834a0e3B8Acf741d1F5b78ca5'
 };
+
+export const getContractAddress = (mv: MultiverseVersion, chainId: ChainId): string => {
+  let address: string | undefined
+  if (mv === MultiverseVersion.V1) {
+    address = MULTIVERSE_BRIDGE_V1_ADDRESS[chainId]
+
+  } else {
+    address = MULTIVERSE_BRIDGE_V2_ADDRESS[chainId]
+  }
+  if (!address) {
+    throw new Error("Unable to find bridge contract address.")
+  }
+  return address
+}
 
 export const PROTOCOL_FEE_BPS = '200';
 export const FRACTION_TO_BPS = '10000';
@@ -258,3 +278,17 @@ export const SUB_ASSETS: SubAsset[] = [
     subAssetAddress: '0xbe0b5b87ceb3eb1b05d11dc83332409291b35746'
   }
 ]
+
+
+//STATIC TOKENS: 
+export const RARESAMA_POOP: NewAsset = {
+  assetType: StringAssetType.ERC20,
+  assetAddress: "0xfffffffecb45afd30a637967995394cc88c0c194",
+  assetId: 0
+}
+
+export const SHIT_FART: NewAsset = {
+  assetType: StringAssetType.ERC20,
+  assetAddress: "0x2f82471dccf85d3f6cb498d4e792cfa9e875ab0a",
+  assetId: 0
+}
