@@ -30,98 +30,137 @@ export class AssetWatchService {
 
   @Interval(IMPORT_CONFIRM_CRON_INTERVAL_MS)
   async handleConfirmPatrol() {
+    //REMOVE ME 
+    return
+    const funcCallPrefix = `[${makeid(5)}] handleConfirmPatrol::`
+
     if (this.disabled) {
-      this.logger.debug('handleConfirmPatrol: disabled', this.context);
+      this.logger.debug(`${funcCallPrefix} DISABLED`, this.context);
       return
     }
 
     const now = Date.now()
     try {
       if (Date.now() - this.lastConfirmPatrol < IMPORT_CONFIRM_CRON_INTERVAL_MS) {
-        this.logger.debug('handleConfirmPatrol: this coronjob has problems with premature ejaculation', this.context);
+        this.logger.debug(`${funcCallPrefix} this coronjob has problems with premature ejaculation`, this.context);
         return;
       }
       this.lastConfirmPatrol = now
       const assets = await this.assetService.findMany({ where: [{ pendingIn: true, expiration: MoreThanOrEqual(now) }, { pendingOut: true, expiration: MoreThanOrEqual(now) }], relations: ['owner', 'collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
 
-      this.logger.debug(`handleConfirmPatrol: found ${assets.length} assets to check`, this.context);
+      this.logger.debug(`${funcCallPrefix} found ${assets.length} assets to check`, this.context);
 
       for (let i = 0; i < assets.length; i++) {
         const asset = assets[i]
         const chainId = asset.collectionFragment.collection.chainId
+        this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash} pendingIn: ${asset.pendingIn} pendingOut: ${asset.pendingOut}`, this.context);
 
         try {
           if (asset.pendingIn) {
-            this.logger.debug(`handleConfirmPatrol: enrapture confirm of ${asset.hash}`, this.context);
-            await this.oracleApiService.userInConfirm(asset.owner, { hash: asset.hash, chainId })
+            this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash}, confirming in...`, this.context);
+            //database updates are handled in below function, no need to do it here
+            const inSuccess = await this.oracleApiService.userInConfirm(asset.owner, { hash: asset.hash, chainId })
+            this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash}, successful in? ${inSuccess}`, this.context);
           }
           if (asset.pendingOut) {
-            this.logger.debug(`handleConfirmPatrol: export confirm of ${asset.hash}`, this.context);
-            await this.oracleApiService.userOutConfirm(asset.owner, { hash: asset.hash, chainId }, asset)
+            this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash}, confirming in...`, this.context);
+            //database removal is handled in below function, no need to do it here
+            const outSuccess = await this.oracleApiService.userOutConfirm(asset.owner, { hash: asset.hash, chainId }, asset)
+            this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash}, successful out? ${outSuccess}`, this.context);
           }
         } catch (e) {
-          this.logger.warn(`handleConfirmPatrol: error confirming ${asset.hash}`, this.context);
-          this.logger.warn(e, this.context);
+          this.logger.error(`${funcCallPrefix} asset: ${i} hash: ${asset.hash} in or out confirm threw error ${e}`, e, this.context);
         }
       }
 
     } catch (error) {
-      this.logger.error('handleConfirmPatrol: unsuccessful task', null, this.context);
-      this.logger.error(error, null, this.context);
+      this.logger.error(`${funcCallPrefix} unsuccessful task ${error}`, error, this.context);
     }
   }
 
   @Interval(CLEAN_CRON_INTERVAL_MS)
   async handleCleanPatrol() {
+    const funcCallPrefix = `[${makeid(5)}] handleCleanPatrol::`
+
     if (this.disabled) {
-      this.logger.debug('handleCleanPatrol: disabled', this.context);
+      this.logger.debug(`${funcCallPrefix} DISABLED`, this.context);
       return
     }
 
     const now = Date.now()
     try {
       if (now - this.lastCleanPatrol < CLEAN_CRON_INTERVAL_MS) {
-        this.logger.debug('handleCleanPatrol: this coronjob has problems with premature ejaculation', this.context);
+        this.logger.debug(`${funcCallPrefix} this coronjob has problems with premature ejaculation`, this.context);
         return;
       }
       this.lastCleanPatrol = now
-      const assets = await this.assetService.findMany({ where: [{ pendingIn: true, expiration: LessThan(now) }, { pendingOut: true, expiration: LessThan(now) }], relations: ['owner', 'collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
+      const assets = await this.assetService.findMany({ where: [{ pendingIn: true, expiration: LessThan(now) }, { pendingOut: true, enraptured: false, expiration: LessThan(now) }], relations: ['owner', 'collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
 
-      this.logger.debug(`handleCleanPatrol: found ${assets.length} assets to clean`, this.context);
+      this.logger.debug(`${funcCallPrefix} found ${assets.length} assets to clean`, this.context);
 
       for (let i = 0; i < assets.length; i++) {
-        let success = false
         const asset = assets[i]
+        const timeDiff = Date.now() - parseInt(asset.expiration)
         const chainId = asset.collectionFragment.collection.chainId
+        this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash} pendingIn: ${asset.pendingIn} pendingOut: ${asset.pendingOut}`, this.context);
+
+        if (timeDiff < 1000 * 60 * 5) {
+          this.logger.debug(`${funcCallPrefix} hash: ${asset.hash} was attempted to be exported/import in the last 5 mins, skipping.`, this.context);
+          continue
+        }
 
         try {
           if (asset.pendingIn) {
-            this.logger.debug(`handleCleanPatrol: inflow confirm of ${asset.hash}`, this.context);
-            success = await this.oracleApiService.userInConfirm(asset.owner, { hash: asset.hash, chainId })
-
+            this.logger.debug(`${funcCallPrefix} hash: ${asset.hash} in confirm...`, this.context);
+            const inSuccess = await this.oracleApiService.userInConfirm(asset.owner, { hash: asset.hash, chainId })
+            if (!inSuccess) {
+              this.logger.debug(`${funcCallPrefix} hash: ${asset.hash}. Asset couldn't be confirmed in, removing.`, this.context);
+              //use delete to make sure make sure expiration time or pending in didn't change in the time between starting cron job and now
+              const deleteResult = await this.assetService.delete({ hash: asset.hash, pendingIn: true, pendingOut: false, expiration: asset.expiration })
+              this.logger.debug(`${funcCallPrefix} hash: ${asset.hash}. Delete result: ${deleteResult.affected}`, this.context);
+              if (deleteResult?.affected === 1) {
+                this.logger.debug(`${funcCallPrefix} hash: ${asset.hash}. Successfully deleted.`, this.context);
+              } else {
+                this.logger.debug(`${funcCallPrefix} hash: ${asset.hash}. Row must've changed so asset was not deleted.`, this.context);
+              }
+            }
           }
 
           if (asset.pendingOut) {
-            this.logger.debug(`handleCleanPatrol: export confirm of ${asset.hash}`, this.context);
-            success = await this.oracleApiService.userOutConfirm(asset.owner, { hash: asset.hash, chainId })
-            continue
+            this.logger.debug(`${funcCallPrefix} hash: ${asset.hash}. Asset couldn't be confirmed out, setting pendingOut = false.`, this.context);
+
+            this.logger.debug(`${funcCallPrefix} hash: ${asset.hash} out confirm...`, this.context);
+            const outSuccess = await this.oracleApiService.userOutConfirm(asset.owner, { hash: asset.hash, chainId })
+            if (!outSuccess) {
+              //use update to make sure make sure expiration time or pending out didn't change in the time between starting cron job and now
+              const updateResult = await this.assetService.update({ hash: asset.hash, pendingIn: false, pendingOut: true, expiration: asset.expiration }, { pendingOut: false })
+              this.logger.debug(`${funcCallPrefix} hash: ${asset.hash}. Delete result: ${updateResult.affected}`, this.context);
+              if (updateResult?.affected === 1) {
+                this.logger.debug(`${funcCallPrefix} hash: ${asset.hash}. Successfully updated.`, this.context);
+              } else {
+                this.logger.debug(`${funcCallPrefix} hash: ${asset.hash}. Row must've changed so asset was not updated.`, this.context);
+              }
+            }
           }
         } catch (e) {
-          success = false
-          if (asset.pendingOut) {
-            continue
-          }
-        }
-
-        if (!success) {
-          this.logger.log(`handleCleanPatrol: failed to confirm expired asset ${asset.hash}. Cleaning up..`, this.context);
-          await this.assetService.remove(asset)
+          this.logger.error(`${funcCallPrefix} hash: ${asset.hash} in or out confirm threw error ${e}`, e, this.context);
         }
       }
 
     } catch (error) {
-      this.logger.error('handleConfirmPatrol: unsuccessful task', null, this.context);
-      this.logger.error(error, null, this.context);
+      this.logger.error(`${funcCallPrefix} unsuccessful task ${error}`, error, this.context);
     }
   }
+}
+
+
+function makeid(length: number): string {
+  var result = '';
+  var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var charactersLength = characters.length;
+  for (var i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() *
+      charactersLength));
+  }
+  return result;
 }

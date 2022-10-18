@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AssetEntity } from './asset.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindConditions, FindManyOptions, FindOneOptions, ObjectID, UpdateResult } from 'typeorm';
+import { Repository, FindConditions, FindManyOptions, FindOneOptions, ObjectID, UpdateResult, DeleteResult } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 @Injectable()
@@ -9,7 +9,7 @@ export class AssetService {
     constructor(
         @InjectRepository(AssetEntity)
         private readonly repository: Repository<AssetEntity>
-    ) {}
+    ) { }
 
     public async create(material: AssetEntity): Promise<AssetEntity> {
         const u = await this.repository.save(material);
@@ -53,5 +53,10 @@ export class AssetService {
     public async findOne(conditions: FindConditions<AssetEntity>, options?: FindOneOptions<AssetEntity>): Promise<AssetEntity> {
         const result: AssetEntity = await this.repository.findOne(conditions, options);
         return result;
+    }
+
+    public async delete(conditions: FindConditions<AssetEntity>): Promise<DeleteResult> {
+        const result = await this.repository.delete(conditions)
+        return result
     }
 }
