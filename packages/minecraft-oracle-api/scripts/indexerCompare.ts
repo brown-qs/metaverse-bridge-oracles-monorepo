@@ -54,6 +54,7 @@ import { METAVERSE_V2_ABI } from '../src/common/contracts/MetaverseV2'
 import { privateKeyToEthereumKeys } from '../src/crypto'
 config()
 const PAGE_SIZE = 100
+const DRY_RUN = false
 async function main() {
 
 
@@ -68,9 +69,9 @@ https://squid.subsquid.io/exosama-squid/graphql
 https://squid.subsquid.io/raresama-moonbeam/graphql
     */
     const indexers = [
-        // "https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2"
-        // "https://moonbeam-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2",
-        "https://mainnet-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2",
+        "https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2"
+        //   "https://moonbeam-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2",
+        //   "https://mainnet-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2",
     ]
     for (const indexer of indexers) {
         const client = new ApolloClient({
@@ -173,18 +174,23 @@ https://squid.subsquid.io/raresama-moonbeam/graphql
                 notFoundHashes.push(mAsset.id)
                 console.log(`❌\t${collection.name}\t#${assetId}\t${modifiedAtPretty}\tNOT in the datbase`)
                 if (olderThanOneDay) {
-                    console.log("Older than a day and not in the database, unstaking...")
-                    console.log(JSON.stringify(collection, null, 4))
-                    
-                    const keys = privateKeyToEthereumKeys(process.env.ORACLE_PRIVATE_KEY)
-                    const oracle = new ethers.Wallet(keys.privateKey, client);
-                    console.log(oracle.address, collection.chain.rpcUrl, mAsset.id)
-                    const contract = new Contract(collection.chain.multiverseV2Address, METAVERSE_V2_ABI, oracle)
-                    console.log('burned', await contract.exists(mAsset.id, true))
-                    console.log('imported', await contract.exists(mAsset.id, false))
-                    await (await contract.unstake([mAsset.id], { maxFeePerGas: '18000000000', maxPriorityFeePerGas: '3000000000', gasLimit: '5000000' })).wait()
-                    console.log('done')
+                    if (DRY_RUN) {
+                        console.log("Older than a day and not in the database DRY_RUN === true, doing nothing")
+                    } else {
+                        console.log("Older than a day and not in the database, unstaking...")
+                        // console.log(JSON.stringify(collection, null, 4))
+
+                        const keys = privateKeyToEthereumKeys(process.env.ORACLE_PRIVATE_KEY)
+                        const oracle = new ethers.Wallet(keys.privateKey, client);
+                        console.log(oracle.address, collection.chain.rpcUrl, mAsset.id)
+                        const contract = new Contract(collection.chain.multiverseV2Address, METAVERSE_V2_ABI, oracle)
+                        console.log('burned', await contract.exists(mAsset.id, true))
+                        console.log('imported', await contract.exists(mAsset.id, false))
+                        await (await contract.unstake([mAsset.id], { maxFeePerGas: '18000000000', maxPriorityFeePerGas: '3000000000', gasLimit: '5000000' })).wait()
+                        console.log('done')
+                    }
                 }
+
 
             }
         }
