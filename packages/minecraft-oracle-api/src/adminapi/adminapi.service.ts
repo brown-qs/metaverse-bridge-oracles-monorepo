@@ -10,6 +10,7 @@ import { TextureEntity } from '../texture/texture.entity';
 import { SecretService } from '../secret/secret.service';
 import { EventBus } from '@nestjs/cqrs';
 import { UserProfileUpdatedEvent } from '../cqrs/events/user-profile-updated.event';
+import { AssetService } from '../asset/asset.service';
 
 @Injectable()
 export class AdminApiService {
@@ -20,6 +21,7 @@ export class AdminApiService {
         private readonly userService: UserService,
         private readonly textureService: TextureService,
         private readonly materialService: MaterialService,
+        private readonly assetService: AssetService,
         private readonly snapshotService: SnapshotService,
         private readonly secretService: SecretService,
         private configService: ConfigService,
@@ -125,5 +127,23 @@ export class AdminApiService {
         const res = await this.userService.update(user.uuid, { blacklisted })
         this.eventBus.publish(new UserProfileUpdatedEvent(user.uuid))
         return (res.affected ?? 1) > 0
+    }
+
+    public async updateMetadata(hash: string) {
+
+        const asset = await this.assetService.findOne({ hash })
+        console.log(JSON.stringify(asset, null, 4))
+        /*
+        let metadata = null
+        let world = null
+        try {
+            metadata = (await this.nftApiService.getNFT(chainId.toString(), assetType, assetAddress, [assetId]))?.[0] as any ?? null
+            world = metadata?.tokenURI?.plot?.world ?? null
+        } catch {
+            this.logger.error(`ImportConfirm: couldn't fetch asset metadata: ${hash}`, undefined, this.context)
+        }
+        if (!!metadata) {
+            await this.assetService.update({ hash: assetEntry.hash }, { metadata, world })
+        }*/
     }
 }
