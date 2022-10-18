@@ -95,7 +95,7 @@ export function OutModal() {
             title="Carnage is live!"
             TablerIcon={MessageReport}
             iconBackgroundColor="yellow.300"
-            message="Sorry, you cannot export from the bridge during an ongoing Carnage game."
+            message="Sorry, you cannot export from the bridge during an ongoing Carnage game or the resource distribution period after Carnage."
         >
             <VStack spacing="0">
                 <Box w="100%">
@@ -120,14 +120,7 @@ export function OutModal() {
         >
         </ReduxModal >)
 
-    } else if (!outTokens?.[0]?.exportAddress) {
-        return (<ReduxModal
-            {...baseProps}
-            message="Error: Unable to determine token export address."
-            bottomButtonText="Close"
 
-        >
-        </ReduxModal >)
     } else if (isSetOutError) {
         return (
             <ReduxModal
@@ -137,15 +130,7 @@ export function OutModal() {
 
             >
             </ReduxModal >)
-    } else if (!!account && (account?.toLowerCase() !== outTokens?.[0]?.exportAddress)) {
-        return (
-            <ReduxModal
-                {...baseProps}
-                message={`Error: You can only export to address ${outTokens?.[0]?.exportAddress}.`}
-                bottomButtonText="Close"
 
-            >
-            </ReduxModal >)
     } else if (isSetOutLoading) {
         return (<ReduxModal
             {...baseProps}

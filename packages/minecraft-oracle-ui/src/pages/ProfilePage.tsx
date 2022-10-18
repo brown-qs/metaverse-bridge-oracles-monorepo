@@ -527,13 +527,8 @@ const ProfilePage = () => {
                                                             if (token.multiverseVersion === MultiverseVersion.V1) {
                                                                 return true
                                                             }
-                                                            const firstCheckAssetAddress = firstCheck?.assetAddress?.toLowerCase()
-                                                            const firstCheckExportAddress = firstCheck?.exportAddress?.toLowerCase()
-                                                            if (!!firstCheckAssetAddress && (firstCheckAssetAddress !== token?.assetAddress?.toLowerCase())) {
-                                                                return true
-                                                            }
-
-                                                            if (!!firstCheckExportAddress && (firstCheckExportAddress !== token?.exportAddress?.toLowerCase())) {
+                                                            const firstCheckChainId = firstCheck?.chainId
+                                                            if (!!firstCheckChainId && (String(firstCheckChainId) !== String(token?.chainId))) {
                                                                 return true
                                                             }
                                                         }
