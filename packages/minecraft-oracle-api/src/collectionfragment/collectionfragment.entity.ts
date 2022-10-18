@@ -55,6 +55,10 @@ export class CollectionFragmentEntity {
     @IsBoolean()
     gamepass: boolean;
 
+    @Column({ default: false })
+    @IsBoolean()
+    swapable: boolean;
+
     @Column()
     @IsString()
     name: string;
