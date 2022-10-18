@@ -424,6 +424,6 @@ export class AdminApiController {
             throw new ForbiddenException('Not admin')
         }
 
-        this.adminApiService.updateMetadata(dto.hash)
+        await this.adminApiService.updateMetadata(dto.hash)
     }
 }
