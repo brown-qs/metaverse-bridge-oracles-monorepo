@@ -7,6 +7,8 @@ import AccountPage from './AccountPage';
 import { useSelector } from 'react-redux';
 import { selectAccessToken } from '../state/slices/authSlice';
 import TestPage from './TestPage';
+import SwapPage from './SwapPage';
+import CustomizerPage from './CustomizerPage';
 
 export const Routing = () => {
     const accessToken = useSelector(selectAccessToken)
@@ -18,6 +20,8 @@ export const Routing = () => {
             <Route path="/oauth" element={<HomePage />} />
             <Route path="/moonsama/customizer/:chainId/:assetAddress/:assetId" element={<MoonsamaCharacterDesignerPage />} />
             <Route path="/moonsama/customizer" element={<MoonsamaCharacterDesignerPage />} />
+            <Route path="/swap" element={<SwapPage />} />
+            <Route path="/customizer" element={<CustomizerPage />} />
             <Route path="/test" element={<TestPage />} />
             <Route path="*" element={<Navigate to="/bridge" />} />
         </Routes>
