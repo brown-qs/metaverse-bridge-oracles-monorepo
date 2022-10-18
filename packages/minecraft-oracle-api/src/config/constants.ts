@@ -227,7 +227,7 @@ export const CALLDATA_EXPIRATION_MS = 1000 * 60 * 5
 export const CALLDATA_EXPIRATION_THRESHOLD = 1000 * 60 * 1
 
 export const IMPORT_CONFIRM_CRON_INTERVAL_MS = 60 * 1000 // 1 minute
-export const CLEAN_CRON_INTERVAL_MS = 1 * 60 * 1000 // 1 hour
+export const CLEAN_CRON_INTERVAL_MS = 15 * 60 * 1000 // 15 mins
 
 export const IPFS_GATEWAY = 'https://moonsama.mypinata.cloud'
 

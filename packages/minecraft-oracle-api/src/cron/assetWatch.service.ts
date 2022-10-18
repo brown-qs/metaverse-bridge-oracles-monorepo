@@ -30,10 +30,7 @@ export class AssetWatchService {
 
   @Interval(IMPORT_CONFIRM_CRON_INTERVAL_MS)
   async handleConfirmPatrol() {
-    //REMOVE ME 
-    return
     const funcCallPrefix = `[${makeid(5)}] handleConfirmPatrol::`
-
     if (this.disabled) {
       this.logger.debug(`${funcCallPrefix} DISABLED`, this.context);
       return
@@ -63,7 +60,7 @@ export class AssetWatchService {
             this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash}, successful in? ${inSuccess}`, this.context);
           }
           if (asset.pendingOut) {
-            this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash}, confirming in...`, this.context);
+            this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash}, confirming out...`, this.context);
             //database removal is handled in below function, no need to do it here
             const outSuccess = await this.oracleApiService.userOutConfirm(asset.owner, { hash: asset.hash, chainId }, asset)
             this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash}, successful out? ${outSuccess}`, this.context);
@@ -134,7 +131,7 @@ export class AssetWatchService {
             if (!outSuccess) {
               //use update to make sure make sure expiration time or pending out didn't change in the time between starting cron job and now
               const updateResult = await this.assetService.update({ hash: asset.hash, pendingIn: false, pendingOut: true, expiration: asset.expiration }, { pendingOut: false })
-              this.logger.debug(`${funcCallPrefix} hash: ${asset.hash}. Delete result: ${updateResult.affected}`, this.context);
+              this.logger.debug(`${funcCallPrefix} hash: ${asset.hash}. Update result: ${updateResult.affected}`, this.context);
               if (updateResult?.affected === 1) {
                 this.logger.debug(`${funcCallPrefix} hash: ${asset.hash}. Successfully updated.`, this.context);
               } else {
