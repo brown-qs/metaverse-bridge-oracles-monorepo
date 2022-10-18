@@ -7,6 +7,7 @@ import {
     HttpCode,
     Inject,
     Param,
+    Post,
     Put,
     UnprocessableEntityException,
     UseGuards
@@ -38,6 +39,7 @@ import { GameTypeService } from '../gametype/gametype.service';
 import { GameService } from '../game/game.service';
 import { BankDto } from '../gameapi/dtos/bank.dto';
 import { InDto } from '../oracleapi/dtos/in.dto';
+import { UpdateMetadataDto } from './dtos/index.dto';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -407,5 +409,21 @@ export class AdminApiController {
         }
         const entities = await this.gameService.find({})
         return (entities ?? [])
+    }
+
+    @Post('update-metadata')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Forces a metadata update for an asset_entity' })
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    async updateMetadata(
+        @User() caller: UserEntity,
+        @Body() dto: UpdateMetadataDto
+    ) {
+        if (caller.role !== UserRole.ADMIN) {
+            throw new ForbiddenException('Not admin')
+        }
+
+        await this.adminApiService.updateMetadata(dto.hash)
     }
 }

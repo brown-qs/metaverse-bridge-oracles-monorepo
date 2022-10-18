@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '../user/user/user.service';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
@@ -10,6 +10,8 @@ import { TextureEntity } from '../texture/texture.entity';
 import { SecretService } from '../secret/secret.service';
 import { EventBus } from '@nestjs/cqrs';
 import { UserProfileUpdatedEvent } from '../cqrs/events/user-profile-updated.event';
+import { AssetService } from '../asset/asset.service';
+import { NftApiService } from '../nftapi/nftapi.service';
 
 @Injectable()
 export class AdminApiService {
@@ -20,8 +22,10 @@ export class AdminApiService {
         private readonly userService: UserService,
         private readonly textureService: TextureService,
         private readonly materialService: MaterialService,
+        private readonly assetService: AssetService,
         private readonly snapshotService: SnapshotService,
         private readonly secretService: SecretService,
+        private readonly nftApiService: NftApiService,
         private configService: ConfigService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
@@ -125,5 +129,25 @@ export class AdminApiService {
         const res = await this.userService.update(user.uuid, { blacklisted })
         this.eventBus.publish(new UserProfileUpdatedEvent(user.uuid))
         return (res.affected ?? 1) > 0
+    }
+
+    public async updateMetadata(hash: string) {
+
+        const asset = await this.assetService.findOne({ hash }, { relations: ["collectionFragment", "collectionFragment.collection"] })
+
+        const collection = asset.collectionFragment.collection
+
+        let metadata = null
+        let world = null
+        try {
+            metadata = (await this.nftApiService.getNFT(collection.chainId.toString(), collection.assetType, collection.assetAddress, [asset.assetId]))?.[0] as any ?? null
+            world = metadata?.tokenURI?.plot?.world ?? null
+        } catch {
+            this.logger.error(`updateMetadata:: couldn't fetch asset metadata: ${hash}`, undefined, this.context)
+            throw new BadRequestException(`Couldn't update metadata for hash ${hash}`)
+        }
+        if (!!metadata) {
+            await this.assetService.update({ hash: asset.hash }, { metadata, world })
+        }
     }
 }
