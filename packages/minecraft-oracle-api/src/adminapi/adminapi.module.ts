@@ -12,9 +12,13 @@ import { UserModule } from '../user/user/user.module';
 import { AdminApiController } from './adminapi.controller';
 import { AdminApiService } from './adminapi.service';
 import { CqrsModule } from '@nestjs/cqrs';
+import { AssetModule } from '../asset/asset.module';
+import { NftApiModule } from '../nftapi/nftapi.module';
 
 @Module({
     imports: [
+        NftApiModule,
+        AssetModule,
         CqrsModule,
         MaterialModule,
         SecretModule,

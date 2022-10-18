@@ -42,7 +42,6 @@ import { SkinSelectedEvent } from '../cqrs/events/skin-selected.event';
 import { AssetRemovedEvent } from '../cqrs/events/asset-removed.event';
 import { METAVERSE_V2_ABI } from '../common/contracts/MetaverseV2';
 import { ChainEntity } from '../chain/chain.entity';
-import Joi from 'joi';
 import { CollectionFragmentService } from '../collectionfragment/collectionfragment.service';
 import { CallparamDto } from './dtos/callparams.dto';
 import { HashAndChainIdDto } from './dtos/hashandchainid.dto';
@@ -239,6 +238,20 @@ export class OracleApiService {
         const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
 
         let contract: Contract = this.getContract(multiverseVersion, chainEntity, oracle)
+
+
+        let exists: any;
+        if (multiverseVersion === MultiverseVersion.V1) {
+            exists = await contract.existsImported(hash)
+        } else if (multiverseVersion === MultiverseVersion.V2) {
+            exists = await contract.exists(hash, enraptured)
+        }
+        this.logger.debug(`${funcCallPrefix} Hash exists in bridge? ${exists}`, this.context)
+
+        if (!exists) {
+            this.logger.debug(`${funcCallPrefix} hash doesn't exist in bridge.`, this.context)
+            return false
+        }
 
 
         let mAsset: any
@@ -477,8 +490,8 @@ export class OracleApiService {
         }
 
         if (exists) {
-            this.logger.error(`ExportConfirm: not exported yet: ${hash}`, null, this.context)
-            throw new UnprocessableEntityException(`Not exported yet`)
+            this.logger.debug(`ExportConfirm: not exported yet: ${hash}`, this.context)
+            return false
         }
 
         const exportableAssets = await this.getRecognizedAsset(chainId, BridgeAssetType.EXPORTED)
