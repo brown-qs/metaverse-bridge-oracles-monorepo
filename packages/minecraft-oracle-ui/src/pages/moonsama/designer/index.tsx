@@ -588,22 +588,17 @@ const CharacterDesignerPage = () => {
   const [fetchingCustomizations, setFetchingCustomizations] = useState<Array<AssetIdentifier>>([]);
   const [bullshit, setBullshit] = useState<boolean>(false);
 
-  const inGameItemsMetadata: StandardizedMetadata[] | undefined = React.useMemo(() => {
-    if (!!marketplaceInGameItemsMetadata) {
-      return [
-        ...(standardizeMarketplaceMetadata(marketplaceInGameItemsMetadata) ?? [])
-      ]
-    } else {
-      return undefined
-    }
+  const inGameItemsMetadata: StandardizedMetadata[] = React.useMemo(() => {
+    return [
+      ...(standardizeMarketplaceMetadata(marketplaceInGameItemsMetadata) ?? []),
+    ]
   }, [marketplaceInGameItemsMetadata])
 
-  const inGameItems: InGameTokenMaybeMetadata[] | undefined = React.useMemo(() => {
-    if (!!inGameItemsData) {
-      return [...inGameTokensCombineMetadata(inGameItemsData, inGameItemsMetadata)].sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
-    } else {
-      return undefined
-    }
+
+  const inGameItems: InGameTokenMaybeMetadata[] = React.useMemo(() => {
+    return [...inGameTokensCombineMetadata(inGameItemsData ?? [], inGameItemsMetadata)]
+      .sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
+
   }, [inGameItemsData, inGameItemsMetadata])
 
   const onChainItems = useOnChainItemsWithCompositeMetaAndAssets();
