@@ -9,7 +9,7 @@ export class CollectionFragmentService {
     constructor(
         @InjectRepository(CollectionFragmentEntity)
         private readonly repository: Repository<CollectionFragmentEntity>
-    ) {}
+    ) { }
 
     public async create(material: CollectionFragmentEntity): Promise<CollectionFragmentEntity> {
         const u = await this.repository.save(material);
