@@ -39,7 +39,7 @@ export class OracleApiController {
         @User() user: UserEntity,
         @Body() data: InDto[]
     ): Promise<CallparamDto[]> {
-        return await Promise.all(data.map(d => this.oracleApiService.userInRequest(user, d)))
+        return await Promise.all(data.map(d => this.oracleApiService.inRequest(d, user)))
     }
 
     @Put('in/confirm')
@@ -49,9 +49,9 @@ export class OracleApiController {
     @UseGuards(JwtAuthGuard)
     async importConfirm(
         @User() user: UserEntity,
-        @Body() data: HashAndChainIdDto
+        @Body() dto: HashAndChainIdDto
     ): Promise<boolean> {
-        const success = await this.oracleApiService.userInConfirm(user, data)
+        const success = await this.oracleApiService.inConfirm(dto.hash, user)
         return success
     }
 
@@ -64,7 +64,7 @@ export class OracleApiController {
         @User() user: UserEntity,
         @Body() data: HashAndChainIdDto[]
     ): Promise<CallparamDto[]> {
-        return await Promise.all(data.map(d => this.oracleApiService.userOutRequest(user, d)))
+        return await Promise.all(data.map(d => this.oracleApiService.outRequest(d.hash, user)))
     }
 
     @Put('out/confirm')
@@ -76,7 +76,7 @@ export class OracleApiController {
         @User() user: UserEntity,
         @Body() data: HashAndChainIdDto
     ): Promise<boolean> {
-        const success = await this.oracleApiService.userOutConfirm(user, data)
+        const success = await this.oracleApiService.outConfirm(data.hash, user)
         return success
     }
 

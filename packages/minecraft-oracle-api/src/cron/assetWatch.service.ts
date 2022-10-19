@@ -56,13 +56,13 @@ export class AssetWatchService {
           if (asset.pendingIn) {
             this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash}, confirming in...`, this.context);
             //database updates are handled in below function, no need to do it here
-            const inSuccess = await this.oracleApiService.userInConfirm(asset.owner, { hash: asset.hash, chainId })
+            const inSuccess = await this.oracleApiService.inConfirm(asset.hash, asset.owner)
             this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash}, successful in? ${inSuccess}`, this.context);
           }
           if (asset.pendingOut) {
             this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash}, confirming out...`, this.context);
             //database removal is handled in below function, no need to do it here
-            const outSuccess = await this.oracleApiService.userOutConfirm(asset.owner, { hash: asset.hash, chainId }, asset)
+            const outSuccess = await this.oracleApiService.outConfirm(asset.hash, asset.owner)
             this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash}, successful out? ${outSuccess}`, this.context);
           }
         } catch (e) {
@@ -109,7 +109,7 @@ export class AssetWatchService {
         try {
           if (asset.pendingIn) {
             this.logger.debug(`${funcCallPrefix} hash: ${asset.hash} in confirm...`, this.context);
-            const inSuccess = await this.oracleApiService.userInConfirm(asset.owner, { hash: asset.hash, chainId })
+            const inSuccess = await this.oracleApiService.inConfirm(asset.hash, asset.owner)
             if (!inSuccess) {
               this.logger.debug(`${funcCallPrefix} hash: ${asset.hash}. Asset couldn't be confirmed in, removing.`, this.context);
               //use delete to make sure make sure expiration time or pending in didn't change in the time between starting cron job and now
@@ -127,7 +127,7 @@ export class AssetWatchService {
             this.logger.debug(`${funcCallPrefix} hash: ${asset.hash}. Asset couldn't be confirmed out, setting pendingOut = false.`, this.context);
 
             this.logger.debug(`${funcCallPrefix} hash: ${asset.hash} out confirm...`, this.context);
-            const outSuccess = await this.oracleApiService.userOutConfirm(asset.owner, { hash: asset.hash, chainId })
+            const outSuccess = await this.oracleApiService.outConfirm(asset.hash, asset.owner)
             if (!outSuccess) {
               //use update to make sure make sure expiration time or pending out didn't change in the time between starting cron job and now
               const updateResult = await this.assetService.update({ hash: asset.hash, pendingIn: false, pendingOut: true, expiration: asset.expiration }, { pendingOut: false })
