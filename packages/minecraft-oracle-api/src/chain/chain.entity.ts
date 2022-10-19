@@ -34,6 +34,18 @@ export class ChainEntity {
     @IsString()
     multicallAddress?: string;
 
+    @Column({ nullable: true, default: null })
+    @IsString()
+    multiverseV1IndexerUrl: string;
+
+    @Column({ nullable: true, default: null })
+    @IsString()
+    multiverseV2IndexerUrl: string;
+
+    @Column({ nullable: true, default: null })
+    @IsString()
+    tokenIndexerUrl: string;
+
     @Column()
     @IsBoolean()
     allowed: boolean;
