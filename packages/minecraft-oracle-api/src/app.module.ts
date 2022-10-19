@@ -100,6 +100,8 @@ import { Oauth2AuthorizationEntity } from './oauth2api/oauth2-authorization/oaut
 import { ZUserAssetView } from './views/user-asset.view';
 import { ZUserBaitView, ZUserGamepassView } from './views';
 import { MoonsamaCqrsModule } from './cqrs/moonsama-cqrs.module';
+import { CollectionFragmentRoutingModule } from './collectionfragmentrouting/collectionfragmentrouting.module';
+import { CollectionFragmentRoutingEntity } from './collectionfragmentrouting/collectionfragmentrouting.entity';
 
 
 @Module({
@@ -132,6 +134,7 @@ import { MoonsamaCqrsModule } from './cqrs/moonsama-cqrs.module';
                 password: configService.get<string>('typeorm.password'),
                 database: configService.get<string>('typeorm.database'),
                 entities: [
+                    CollectionFragmentRoutingEntity,
                     EmailChangeEntity,
                     MinecraftLinkEntity,
                     KiltSessionEntity,
@@ -195,6 +198,7 @@ import { MoonsamaCqrsModule } from './cqrs/moonsama-cqrs.module';
             ],
             inject: [ConfigService]
         }),*/
+        CollectionFragmentRoutingModule,
         Oauth2Module,
         AssetApiModule,
         EmailChangeModule,

@@ -70,7 +70,7 @@ export const BlockNumberManager = () => {
                                                                 //{ hash: a.bridgeHash, chainId: a.chainId }
                                                                 if (DEBUG) console.log(`BlockNumberManager:: transaction hash: ${transaction.hash} trying to confirm bridgeHash: ${a.bridgeHash}`)
 
-                                                                store.dispatch(bridgeApi.endpoints.inConfirm.initiate({ hash: a.bridgeHash, chainId: a.chainId }) as any)
+                                                                store.dispatch(bridgeApi.endpoints.inConfirm.initiate({ hash: a.bridgeHash }) as any)
 
                                                             } catch (e) {
 
@@ -83,7 +83,7 @@ export const BlockNumberManager = () => {
                                                                 //{ hash: a.bridgeHash, chainId: a.chainId }
                                                                 if (DEBUG) console.log(`BlockNumberManager:: transaction hash: ${transaction.hash} trying to confirm export bridgeHash: ${h}`)
 
-                                                                store.dispatch(bridgeApi.endpoints.outConfirm.initiate({ hash: h, chainId: transaction.chainId }) as any)
+                                                                store.dispatch(bridgeApi.endpoints.outConfirm.initiate({ hash: h }) as any)
 
                                                             } catch (e) {
 
