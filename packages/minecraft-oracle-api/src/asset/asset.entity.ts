@@ -85,8 +85,8 @@ export class AssetEntity {
     @Column({ type: 'json', nullable: true })
     metadata?: unknown;
 
-    @ManyToOne(() => UserEntity, (user) => user.assets)
-    owner?: UserEntity
+    @ManyToOne(() => UserEntity, (user) => user.assets, { nullable: true })
+    owner?: UserEntity | null
 
     @ManyToOne(() => CompositeAssetEntity, (compositeAsset) => compositeAsset.children, { onDelete: 'SET NULL', nullable: true })
     compositeAsset?: CompositeAssetEntity
