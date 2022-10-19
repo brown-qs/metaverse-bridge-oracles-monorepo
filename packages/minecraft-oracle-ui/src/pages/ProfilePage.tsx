@@ -22,20 +22,15 @@ import { CollectionFragmentDto, MultiverseVersion, SkinResponse } from '../state
 import { useGetMarketplaceMetadataQuery, useGetMarketplaceOnChainTokensQuery } from '../state/api/generatedSquidMarketplaceApi';
 import { Media } from '../components';
 import { BigNumber, utils } from 'ethers';
-import { addRegonizedTokenDataToStandardizedOnChainTokens, formatInGameTokenName, formatOnChainTokenName, inGameMetadataParams, InGameTokenMaybeMetadata, inGameTokensCombineMetadata, StandardizedMetadata, StandardizedOnChainToken, StandardizedOnChainTokenWithRecognizedTokenData, standardizeExosamaMetadata, standardizeExosamaOnChainTokens, standardizeMarketplaceMetadata, standardizeMarketplaceOnChainTokens, standardizeRaresamaMetadata, standardizeRaresamaOnChainTokens } from '../utils/graphqlReformatter';
+import { addRegonizedTokenDataToStandardizedOnChainTokens, checkOnChainItemNotImported, formatInGameTokenName, formatOnChainTokenName, inGameMetadataParams, InGameTokenMaybeMetadata, inGameTokensCombineMetadata, StandardizedMetadata, StandardizedOnChainToken, StandardizedOnChainTokenWithRecognizedTokenData, standardizeExosamaMetadata, standardizeExosamaOnChainTokens, standardizeMarketplaceMetadata, standardizeMarketplaceOnChainTokens, standardizeRaresamaMetadata, standardizeRaresamaOnChainTokens } from '../utils/graphqlReformatter';
 import { useDispatch, useSelector } from 'react-redux';
 import { openSummonModal } from '../state/slices/summonModalSlice';
 import { SummonModal } from '../components/modals/SummonModal';
-import { ExportModal } from '../components/modals/ExportModal';
-import { openExportModal, setExportTokens } from '../state/slices/exportModalSlice';
 import { useGetRaresamaMetadataQuery, useGetRaresamaOnChainTokensQuery } from '../state/api/generatedSquidRaresamaApi';
 import { selectBlockNumbers } from '../state/slices/blockNumbersSlice';
 import { openOnChainResourceModal, setOnChainResource } from '../state/slices/onChainResourceModalSlice';
 import { OnChainResourceModal } from '../components/modals/OnChainResourceModal';
-import { EnraptureModal } from '../components/modals/EnraptureModal';
-import { ImportModal } from '../components/modals/ImportModal';
-import { openEnraptureModal, setEnraptureModalTokens } from '../state/slices/enraptureModalSlice';
-import { openImportModal, setImportModalTokens } from '../state/slices/importModalSlice';
+
 import { openInGameItemModal, setInGameItemModalToken } from '../state/slices/inGameItemModalSlice';
 import { InGameItemModal } from '../components/modals/InGameItemModal';
 import { useGetExosamaMetadataQuery, useGetExosamaOnChainTokensQuery } from '../state/api/generatedSquidExosamaApi';
@@ -152,105 +147,83 @@ const ProfilePage = () => {
         return coverURL
     }
 
-    const standardizedMarketplaceOnChainTokens: StandardizedOnChainToken[] | undefined = React.useMemo(() => standardizeMarketplaceOnChainTokens(marketplaceOnChainTokensData), [marketplaceOnChainTokensData])
-    const standardizedMarketplaceOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(standardizedMarketplaceOnChainTokens, recognizedAssetsData), [standardizedMarketplaceOnChainTokens, recognizedAssetsData])
+    const standardizedMarketplaceOnChainTokens: StandardizedOnChainToken[] = React.useMemo(() => standardizeMarketplaceOnChainTokens(marketplaceOnChainTokensData), [marketplaceOnChainTokensData])
+    const standardizedMarketplaceOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(standardizedMarketplaceOnChainTokens, recognizedAssetsData), [standardizedMarketplaceOnChainTokens, recognizedAssetsData])
 
-    const standardizedRaresamaOnChainTokens: StandardizedOnChainToken[] | undefined = React.useMemo(() => standardizeRaresamaOnChainTokens(raresamaOnChainTokensData), [raresamaOnChainTokensData])
-    const standardizedRaresamaOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(standardizedRaresamaOnChainTokens, recognizedAssetsData), [standardizedRaresamaOnChainTokens, recognizedAssetsData])
+    const standardizedRaresamaOnChainTokens: StandardizedOnChainToken[] = React.useMemo(() => standardizeRaresamaOnChainTokens(raresamaOnChainTokensData), [raresamaOnChainTokensData])
+    const standardizedRaresamaOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(standardizedRaresamaOnChainTokens, recognizedAssetsData), [standardizedRaresamaOnChainTokens, recognizedAssetsData])
 
-    const standardizedExosamaOnChainTokens: StandardizedOnChainToken[] | undefined = React.useMemo(() => standardizeExosamaOnChainTokens(exosamaOnChainTokensData), [exosamaOnChainTokensData])
-    const standardizedExosamaOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(standardizedExosamaOnChainTokens, recognizedAssetsData), [standardizedExosamaOnChainTokens, recognizedAssetsData])
+    const standardizedExosamaOnChainTokens: StandardizedOnChainToken[] = React.useMemo(() => standardizeExosamaOnChainTokens(exosamaOnChainTokensData), [exosamaOnChainTokensData])
+    const standardizedExosamaOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(standardizedExosamaOnChainTokens, recognizedAssetsData), [standardizedExosamaOnChainTokens, recognizedAssetsData])
 
-    const standardizedErc20OnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(standardizedErc20Tokens, recognizedAssetsData), [standardizedErc20Tokens, recognizedAssetsData])
-
-    const allStandardizedOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
-        if (!!standardizedMarketplaceOnChainTokensWithRecognizedTokenData || !!standardizedRaresamaOnChainTokensWithRecognizedTokenData || !!standardizedExosamaOnChainTokensWithRecognizedTokenData) {
-            return [
-                ...(standardizedErc20OnChainTokensWithRecognizedTokenData ?? []),
-                ...(standardizedMarketplaceOnChainTokensWithRecognizedTokenData ?? []),
-                ...(standardizedRaresamaOnChainTokensWithRecognizedTokenData ?? []),
-                ...(standardizedExosamaOnChainTokensWithRecognizedTokenData ?? []),
-            ]
-        } else {
-            return undefined
-        }
-    }, [standardizedMarketplaceOnChainTokensWithRecognizedTokenData, standardizedRaresamaOnChainTokensWithRecognizedTokenData, standardizedExosamaOnChainTokensWithRecognizedTokenData, standardizedErc20OnChainTokensWithRecognizedTokenData])
+    const standardizedErc20OnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(standardizedErc20Tokens, recognizedAssetsData), [standardizedErc20Tokens, recognizedAssetsData])
 
 
-    const onChainItems: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
-        if (!!allStandardizedOnChainTokensWithRecognizedTokenData) {
-            return allStandardizedOnChainTokensWithRecognizedTokenData.filter((tok) => {
-                if (tok?.importable === false && tok?.enrapturable === false) {
-                    return false
-                }
-
-                //if there's a connected chain, only show items on that chain
-                if (!!chainId && tok.chainId !== chainId) {
-                    return false
-                }
-                return true
-            })
-        } else {
-            return undefined
-        }
-    }, [allStandardizedOnChainTokensWithRecognizedTokenData, chainId])
-
-
-    const onChainResources: StandardizedOnChainTokenWithRecognizedTokenData[] | undefined = React.useMemo(() => {
-        if (!!allStandardizedOnChainTokensWithRecognizedTokenData) {
-            return allStandardizedOnChainTokensWithRecognizedTokenData.filter((tok) => {
-                if (!!chainId && chainId !== ChainId.MOONRIVER) {
-                    return false
-                }
-                return tok.summonable
-            })
-        } else {
-            return undefined
-        }
-    }, [allStandardizedOnChainTokensWithRecognizedTokenData, chainId])
-
-
-    const inGameItemsMetadata: StandardizedMetadata[] | undefined = React.useMemo(() => {
-        if (!!marketplaceInGameItemsMetadata || !!raresamaInGameItemsMetadata || !!exosamaInGameItemsMetadata) {
-            return [
-                ...(standardizeMarketplaceMetadata(marketplaceInGameItemsMetadata) ?? []),
-                ...(standardizeRaresamaMetadata(raresamaInGameItemsMetadata) ?? []),
-                ...(standardizeExosamaMetadata(exosamaInGameItemsMetadata) ?? [])
-            ]
-        } else {
-            return undefined
-        }
+    const inGameItemsMetadata: StandardizedMetadata[] = React.useMemo(() => {
+        return [
+            ...standardizeMarketplaceMetadata(marketplaceInGameItemsMetadata),
+            ...standardizeRaresamaMetadata(raresamaInGameItemsMetadata),
+            ...standardizeExosamaMetadata(exosamaInGameItemsMetadata)
+        ]
     }, [marketplaceInGameItemsMetadata, raresamaInGameItemsMetadata, exosamaInGameItemsMetadata])
 
-    const inGameItems: InGameTokenMaybeMetadata[] | undefined = React.useMemo(() => {
-        if (!!inGameItemsData) {
-            return [...inGameTokensCombineMetadata(inGameItemsData, inGameItemsMetadata)]
-                .sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
-        } else {
-            return undefined
-        }
+    const inGameItems: InGameTokenMaybeMetadata[] = React.useMemo(() => {
+        return [...inGameTokensCombineMetadata(inGameItemsData ?? [], inGameItemsMetadata)]
+            .sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
+
     }, [inGameItemsData, inGameItemsMetadata])
 
+    const allStandardizedOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] = React.useMemo(() => {
+        return [
+            ...standardizedErc20OnChainTokensWithRecognizedTokenData,
+            ...standardizedMarketplaceOnChainTokensWithRecognizedTokenData,
+            ...standardizedRaresamaOnChainTokensWithRecognizedTokenData,
+            ...standardizedExosamaOnChainTokensWithRecognizedTokenData,
+        ].filter(tok => checkOnChainItemNotImported(tok, inGameItems))
 
-    const inGameResourcesMetadata: StandardizedMetadata[] | undefined = React.useMemo(() => {
-        if (!!marketplaceInGameResourcesMetadata) {
-            return [
-                ...(standardizeMarketplaceMetadata(marketplaceInGameResourcesMetadata) ?? [])
-            ]
-        } else {
-            return undefined
-        }
+    }, [standardizedMarketplaceOnChainTokensWithRecognizedTokenData, standardizedRaresamaOnChainTokensWithRecognizedTokenData, standardizedExosamaOnChainTokensWithRecognizedTokenData, standardizedErc20OnChainTokensWithRecognizedTokenData, inGameItems])
+
+
+    const inGameResourcesMetadata: StandardizedMetadata[] = React.useMemo(() => {
+        return [
+            ...standardizeMarketplaceMetadata(marketplaceInGameResourcesMetadata)
+        ]
     }, [marketplaceInGameResourcesMetadata])
 
 
-    const inGameResources: InGameTokenMaybeMetadata[] | undefined = React.useMemo(() => {
-        if (!!inGameResourcesData) {
-            return [...inGameTokensCombineMetadata(inGameResourcesData, inGameResourcesMetadata)]
-                .sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
-        } else {
-            return undefined
-        }
+    const inGameResources: InGameTokenMaybeMetadata[] = React.useMemo(() => {
+        return [...inGameTokensCombineMetadata(inGameResourcesData ?? [], inGameResourcesMetadata)]
+            .sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`))
+
     }, [inGameResourcesData, inGameResourcesMetadata])
+
+
+    const onChainItems: StandardizedOnChainTokenWithRecognizedTokenData[] = React.useMemo(() => {
+        return (allStandardizedOnChainTokensWithRecognizedTokenData ?? []).filter((tok) => {
+            if (tok?.importable === false && tok?.enrapturable === false) {
+                return false
+            }
+
+            //if there's a connected chain, only show items on that chain
+            if (!!chainId && tok.chainId !== chainId) {
+                return false
+            }
+            return true
+        })
+
+    }, [allStandardizedOnChainTokensWithRecognizedTokenData, chainId])
+
+
+    const onChainResources: StandardizedOnChainTokenWithRecognizedTokenData[] = React.useMemo(() => {
+        return allStandardizedOnChainTokensWithRecognizedTokenData.filter((tok) => {
+            if (!!chainId && chainId !== ChainId.MOONRIVER) {
+                return false
+            }
+            return tok.summonable
+        })
+
+    }, [allStandardizedOnChainTokensWithRecognizedTokenData, chainId])
+
 
     const isOnChainItemsLoading: boolean = React.useMemo(() => {
         if (!!chainId) {
@@ -549,13 +522,8 @@ const ProfilePage = () => {
                                                             if (token.multiverseVersion === MultiverseVersion.V1) {
                                                                 return true
                                                             }
-                                                            const firstCheckAssetAddress = firstCheck?.assetAddress?.toLowerCase()
-                                                            const firstCheckExportAddress = firstCheck?.exportAddress?.toLowerCase()
-                                                            if (!!firstCheckAssetAddress && (firstCheckAssetAddress !== token?.assetAddress?.toLowerCase())) {
-                                                                return true
-                                                            }
-
-                                                            if (!!firstCheckExportAddress && (firstCheckExportAddress !== token?.exportAddress?.toLowerCase())) {
+                                                            const firstCheckChainId = firstCheck?.chainId
+                                                            if (!!firstCheckChainId && (String(firstCheckChainId) !== String(token?.chainId))) {
                                                                 return true
                                                             }
                                                         }
