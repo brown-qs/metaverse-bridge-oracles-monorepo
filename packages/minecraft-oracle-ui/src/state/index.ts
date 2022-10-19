@@ -10,7 +10,6 @@ import authSlice from './slices/authSlice';
 import blockNumbersSlice from './slices/blockNumbersSlice';
 import emailCodeModalSlice from './slices/emailCodeModalSlice';
 import emailLoginModalSlice from './slices/emailLoginModalSlice';
-import exportModalSlice from './slices/exportModalSlice';
 import inGameItemModalSlice from './slices/inGameItemModalSlice';
 import kiltLoginModalSlice from './slices/kiltLoginModalSlice';
 import oauthSlice from './slices/oauthSlice';
@@ -19,8 +18,6 @@ import onChainResourceModalSlice from './slices/onChainResourceModalSlice';
 import transactions from './transactions/reducer';
 import { persistStore, persistReducer } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
-import importModalSlice from './slices/importModalSlice';
-import enraptureModalSlice from './slices/enraptureModalSlice';
 import inModalSlice from './slices/inModalSlice';
 import transactionsSlice from './slices/transactionsSlice';
 import outModalSlice from './slices/outModalSlice';
@@ -49,14 +46,11 @@ const rootReducer = combineReducers({
   transactions: persistReducer(transactionsPersistConfig, transactions),
   newTransactions: persistReducer(newTransactionsPersistConfig, transactionsSlice),
   auth: persistReducer(authPersistConfig, authSlice),
-  importModal: importModalSlice,
-  enraptureModal: enraptureModalSlice,
   inGameItemModal: inGameItemModalSlice,
   onChainResourceModal: onChainResourceModalSlice,
   emailCodeModal: emailCodeModalSlice,
   emailLoginModal: emailLoginModalSlice,
   kiltLoginModal: kiltLoginModalSlice,
-  exportModal: exportModalSlice,
   summonModal: summonModalSlice,
   inModal: inModalSlice,
   outModal: outModalSlice,

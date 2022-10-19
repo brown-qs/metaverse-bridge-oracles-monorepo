@@ -2,7 +2,7 @@ import { SerializedError } from "@reduxjs/toolkit"
 import { BaseQueryFn, createApi, FetchArgs, fetchBaseQuery, FetchBaseQueryError } from "@reduxjs/toolkit/query/react"
 import { AppState } from ".."
 import { setTokens } from "../slices/authSlice"
-import { BridgedAssetDto, CallparamDto, EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse, ExportDto, HashAndChainIdDto, InDto, Oauth2PublicClientDto, RecognizedAssetsDto, SkinResponse, SkinSelectRequest, UserProfileResponse } from "./types"
+import { BridgedAssetDto, CallparamDto, EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse, InBatchRequestDto, InConfirmRequestDto, InConfirmResponseDto, Oauth2PublicClientDto, OutBatchRequestDto, OutConfirmRequestDto, OutConfirmResponseDto, RecognizedAssetsDto, SkinResponse, SkinSelectRequest, UserProfileResponse } from "./types"
 
 
 // ---------------------------------------------------------- //
@@ -113,28 +113,28 @@ export const bridgeApi = createApi({
             }),
             invalidatesTags: ["Profile"]
         }),
-        in: builder.mutation<CallparamDto[], InDto[]>({
+        in: builder.mutation<CallparamDto[], InBatchRequestDto>({
             query: (body) => ({
                 url: `/oracle/in`,
                 method: "PUT",
                 body
             }),
         }),
-        inConfirm: builder.mutation<boolean, HashAndChainIdDto>({
+        inConfirm: builder.mutation<InConfirmResponseDto, InConfirmRequestDto>({
             query: (body) => ({
                 url: `/oracle/in/confirm`,
                 method: "PUT",
                 body
             }),
         }),
-        out: builder.mutation<CallparamDto[], HashAndChainIdDto[]>({
+        out: builder.mutation<CallparamDto[], OutBatchRequestDto>({
             query: (body) => ({
                 url: `/oracle/out`,
                 method: "PUT",
                 body
             }),
         }),
-        outConfirm: builder.mutation<boolean, HashAndChainIdDto>({
+        outConfirm: builder.mutation<OutConfirmResponseDto, OutConfirmRequestDto>({
             query: (body) => ({
                 url: `/oracle/out/confirm`,
                 method: "PUT",

@@ -5,7 +5,6 @@ import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { TextureService } from '../texture/texture.service';
 import { UserEntity } from '../user/user/user.entity';
 import { GameService } from '../game/game.service';
-import { InDto } from './dtos/in.dto';
 import { CALLDATA_EXPIRATION_MS, CALLDATA_EXPIRATION_THRESHOLD, METAVERSE, MultiverseVersion, RecognizedAssetType } from '../config/constants';
 import { calculateMetaAssetHash, encodeExportWithSigData, encodeImportOrEnraptureWithSigData, getSalt, getSignature, StandardizedValidatedAssetInParams, standardizeValidateAssetInParams, utf8ToKeccak } from './oracleapi.utils';
 import { BigNumber, Contract, ethers } from 'ethers';
@@ -46,6 +45,7 @@ import { CollectionFragmentService } from '../collectionfragment/collectionfragm
 import { CallparamDto } from './dtos/callparams.dto';
 import { HashAndChainIdDto } from './dtos/hashandchainid.dto';
 import { exist } from 'joi';
+import { InRequestDto } from './dtos/index.dto';
 
 @Injectable()
 export class OracleApiService {
@@ -82,7 +82,7 @@ export class OracleApiService {
         this.defaultChainId = this.configService.get<number>('network.defaultChainId')
     }
 
-    public async inRequest(data: InDto, user?: UserEntity): Promise<CallparamDto> {
+    public async inRequest(data: InRequestDto, user?: UserEntity): Promise<CallparamDto> {
         const funcCallPrefix = `[${makeid(5)}] inRequest:: uuid: ${user?.uuid}`
         this.logger.debug(`${funcCallPrefix} START ImportDto: ${JSON.stringify(data)}`, this.context)
 
@@ -135,6 +135,8 @@ export class OracleApiService {
         const assetEntry = await this.assetService.findOne({ requestHash, collectionFragment, enraptured, pendingIn: true, owner: (!!user ? user : null) }, { order: { expiration: 'DESC' }, relations: ['owner', 'collectionFragment'] })
 
         if (!!assetEntry) {
+            this.logger.debug(`${funcCallPrefix} has existing entry`, this.context)
+
             const salt = assetEntry.salt
             this.logger.debug(`${funcCallPrefix} requestHash: ${requestHash} salt ${salt}`, this.context)
 
@@ -168,6 +170,8 @@ export class OracleApiService {
                 //why doesn't this return the last parameter of success if the inflow was confirmed???
                 return { hash, data: payload, signature, confirmed: false }
             }
+        } else {
+            this.logger.debug(`${funcCallPrefix} NO existing entry`, this.context)
         }
         //console.log('polo')
         const salt = await getSalt()
@@ -205,13 +209,13 @@ export class OracleApiService {
         const funcCallPrefix = `[${makeid(5)}] inConfirm:: hash: ${hash} uuid: ${user?.uuid}`
         this.logger.debug(`${funcCallPrefix} START`, this.context)
 
-        const assetEntry = await this.assetService.findOne({ hash }, { relations: ['collectionFragment', 'collectionFragment.collection', 'collectionFragment.collection.chain'], loadEagerRelations: true })
+        const assetEntry = await this.assetService.findOne({ hash }, { relations: ['collectionFragment', 'collectionFragment.collection', 'collectionFragment.collection.chain', 'owner'], loadEagerRelations: true })
 
         try {
             this.confirmAssetEntry(assetEntry, hash, user)
         } catch (e) {
             this.logger.error(`${funcCallPrefix} this.confirmAssetEntry failure ${e}`, e, this.context)
-            throw new BadRequestException(String(e))
+            throw new BadRequestException(String(e).replace("Error: ", ""))
         }
 
         if (assetEntry.pendingIn === false) {
@@ -395,13 +399,13 @@ export class OracleApiService {
         const funcCallPrefix = `[${makeid(5)}] outRequest:: hash: ${hash} uuid: ${user?.uuid}`
         this.logger.debug(`${funcCallPrefix} START`, this.context)
 
-        const assetEntry = await this.assetService.findOne({ hash, enraptured: false, pendingIn: false }, { relations: ['collectionFragment', 'collectionFragment.collection', 'collectionFragment.collection.chain'], loadEagerRelations: true })
+        const assetEntry = await this.assetService.findOne({ hash, enraptured: false, pendingIn: false }, { relations: ['collectionFragment', 'collectionFragment.collection', 'collectionFragment.collection.chain', 'owner'], loadEagerRelations: true })
 
         try {
             this.confirmAssetEntry(assetEntry, hash, user)
         } catch (e) {
             this.logger.error(`${funcCallPrefix} this.confirmAssetEntry failure ${e}`, e, this.context)
-            throw new BadRequestException(String(e))
+            throw new BadRequestException(String(e).replace("Error: ", ""))
         }
 
         if (assetEntry?.owner?.blacklisted) {
@@ -460,13 +464,13 @@ export class OracleApiService {
         const funcCallPrefix = `[${makeid(5)}] outConfirm:: hash: ${hash} uuid: ${user?.uuid}`
         this.logger.debug(`${funcCallPrefix} START`, this.context)
 
-        const assetEntry = await this.assetService.findOne({ hash, enraptured: false }, { relations: ['collectionFragment', 'collectionFragment.collection', 'collectionFragment.collection.chain', 'compositeAsset'], loadEagerRelations: true })
+        const assetEntry = await this.assetService.findOne({ hash, enraptured: false }, { relations: ['collectionFragment', 'collectionFragment.collection', 'collectionFragment.collection.chain', 'compositeAsset', 'owner'], loadEagerRelations: true })
 
         try {
             this.confirmAssetEntry(assetEntry, hash, user)
         } catch (e) {
             this.logger.error(`${funcCallPrefix} this.confirmAssetEntry failure ${e}`, e, this.context)
-            throw new BadRequestException(String(e))
+            throw new BadRequestException(String(e).replace("Error: ", ""))
         }
 
         if (!assetEntry.pendingOut) {
@@ -705,7 +709,7 @@ export class OracleApiService {
     }
 
 
-    private confirmAssetEntry(asset: AssetEntity, hash: string, user: UserEntity) {
+    private confirmAssetEntry(asset: AssetEntity, hash: string, user?: UserEntity) {
         if (!asset) {
             throw new Error(`Asset entry is not defined.`)
         }
@@ -719,7 +723,15 @@ export class OracleApiService {
         }
 
         if (!!user) {
-            if (asset?.owner?.uuid !== user.uuid) {
+            if (asset?.owner?.uuid !== user?.uuid) {
+                this.logger.debug(`confirmAssetEntry:: User mismatch 1 - asset?.owner?.uuid: ${asset?.owner?.uuid} user.uuid: ${user?.uuid}`)
+
+                throw new Error(`User mismatch.`)
+            }
+        } else {
+            //owner should be null if there is no user
+            if (!!asset.owner) {
+                this.logger.debug(`confirmAssetEntry:: User mismatch 2 - asset?.owner?.uuid: ${asset?.owner?.uuid} user.uuid: ${user?.uuid}`)
                 throw new Error(`User mismatch.`)
             }
         }

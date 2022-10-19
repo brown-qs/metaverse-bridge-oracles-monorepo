@@ -1,4 +1,5 @@
 import {
+    BadRequestException,
     Body,
     Controller,
     HttpCode,
@@ -13,9 +14,9 @@ import { UserEntity } from '../user/user/user.entity';
 import { User } from '../utils/decorators';
 import { CallparamDto } from './dtos/callparams.dto';
 import { OracleApiService } from './oracleapi.service';
-import { InDto } from './dtos/in.dto';
 import { SummonDto } from './dtos/summon.dto';
 import { HashAndChainIdDto } from './dtos/hashandchainid.dto';
+import { InBatchRequestDto, InConfirmRequestDto, InConfirmResponseDto, OutBatchRequestDto, OutConfirmRequestDto, OutConfirmResponseDto } from './dtos/index.dto';
 
 @ApiTags('oracle')
 @Controller('oracle')
@@ -30,16 +31,38 @@ export class OracleApiController {
         this.context = OracleApiController.name;
     }
 
+    @Put('swap')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Swap assets' })
+    async swap(
+        @Body() data: InBatchRequestDto
+    ): Promise<CallparamDto[]> {
+        if (data?.requests?.length !== 1) {
+            throw new BadRequestException("Only 1 swap accepted at this time.")
+        }
+        return await Promise.all(data.requests.map(d => this.oracleApiService.inRequest(d)))
+    }
+
+    @Put('swap/confirm')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Swap assets' })
+    async swapConfirm(
+        @Body() dto: InConfirmRequestDto
+    ): Promise<InConfirmResponseDto> {
+        const success = await this.oracleApiService.inConfirm(dto.hash)
+        return { confirmed: success }
+    }
+
     @Put('in')
     @HttpCode(200)
     @ApiOperation({ summary: 'Fetches oracle data for an import' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    async import(
+    async inRequest(
         @User() user: UserEntity,
-        @Body() data: InDto[]
+        @Body() data: InBatchRequestDto
     ): Promise<CallparamDto[]> {
-        return await Promise.all(data.map(d => this.oracleApiService.inRequest(d, user)))
+        return await Promise.all(data.requests.map(d => this.oracleApiService.inRequest(d, user)))
     }
 
     @Put('in/confirm')
@@ -47,12 +70,12 @@ export class OracleApiController {
     @ApiOperation({ summary: 'Confirms an import request, sealing the deal' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    async importConfirm(
+    async inConfirm(
         @User() user: UserEntity,
-        @Body() dto: HashAndChainIdDto
-    ): Promise<boolean> {
+        @Body() dto: InConfirmRequestDto
+    ): Promise<InConfirmResponseDto> {
         const success = await this.oracleApiService.inConfirm(dto.hash, user)
-        return success
+        return { confirmed: success }
     }
 
     @Put('out')
@@ -60,11 +83,11 @@ export class OracleApiController {
     @ApiOperation({ summary: 'Fetches oracle data for an export' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    async export(
+    async outRequest(
         @User() user: UserEntity,
-        @Body() data: HashAndChainIdDto[]
+        @Body() data: OutBatchRequestDto
     ): Promise<CallparamDto[]> {
-        return await Promise.all(data.map(d => this.oracleApiService.outRequest(d.hash, user)))
+        return await Promise.all(data.requests.map(d => this.oracleApiService.outRequest(d.hash, user)))
     }
 
     @Put('out/confirm')
@@ -72,12 +95,12 @@ export class OracleApiController {
     @ApiOperation({ summary: 'Confirms an export request, sealing the deal' })
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    async exportConfirm(
+    async outConfirm(
         @User() user: UserEntity,
-        @Body() data: HashAndChainIdDto
-    ): Promise<boolean> {
+        @Body() data: OutConfirmRequestDto
+    ): Promise<OutConfirmResponseDto> {
         const success = await this.oracleApiService.outConfirm(data.hash, user)
-        return success
+        return { confirmed: success }
     }
 
     @Put('summon')
