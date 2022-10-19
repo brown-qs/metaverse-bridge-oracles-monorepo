@@ -31,6 +31,8 @@ export class OracleApiController {
         this.context = OracleApiController.name;
     }
 
+
+    /*
     @Put('swap')
     @HttpCode(200)
     @ApiOperation({ summary: 'Swap assets' })
@@ -51,7 +53,7 @@ export class OracleApiController {
     ): Promise<InConfirmResponseDto> {
         const success = await this.oracleApiService.inConfirm(dto.hash)
         return { confirmed: success }
-    }
+    }*/
 
     @Put('in')
     @HttpCode(200)
