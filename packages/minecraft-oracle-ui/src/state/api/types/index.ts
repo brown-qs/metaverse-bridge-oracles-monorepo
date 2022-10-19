@@ -115,32 +115,6 @@ export type BridgedAssetDto = {
     multiverseVersion: MultiverseVersion
 }
 
-
-
-export interface InDto {
-    chainId: number
-    assetType: StringAssetType
-    assetAddress: string
-    assetId: number
-    owner: string
-    amount: string
-    enrapture: boolean
-}
-
-
-export interface ExportDto {
-    hash: string
-    chainId: number
-}
-
-
-export interface CallparamDto {
-    data: string
-    signature: string
-    hash: string
-    confirmed: boolean
-}
-
 export interface Oauth2PublicClientDto {
     appName: string
     scopes: { scope: Oauth2Scope, prettyScope: string }[]
@@ -151,7 +125,58 @@ export enum Oauth2Scope {
     UserGamerTagRead = 'user:gamer_tag.read'
 }
 
-export interface HashAndChainIdDto {
-    hash: string
+
+
+//ORACLE API
+export interface InRequestDto {
     chainId: number
+
+    assetType: StringAssetType
+
+    assetAddress: string
+
+    assetId: number
+
+    owner: string
+
+    amount: string
+
+    enrapture: boolean
+}
+
+export interface InBatchRequestDto {
+    requests: InRequestDto[];
+}
+
+export interface InConfirmRequestDto {
+    hash: string
+}
+
+export interface InConfirmResponseDto {
+    confirmed: boolean
+}
+
+
+
+export interface OutRequestDto {
+    hash: string
+}
+
+export interface OutBatchRequestDto {
+    requests: OutRequestDto[];
+}
+
+export interface OutConfirmRequestDto {
+    hash: string
+}
+
+export interface OutConfirmResponseDto {
+    confirmed: boolean
+}
+
+export interface CallparamDto {
+    data: string
+    signature: string
+    hash: string
+    confirmed: boolean
 }

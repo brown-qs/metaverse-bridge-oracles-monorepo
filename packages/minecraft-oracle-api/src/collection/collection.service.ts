@@ -9,7 +9,7 @@ export class CollectionService {
     constructor(
         @InjectRepository(CollectionEntity)
         private readonly repository: Repository<CollectionEntity>
-    ) {}
+    ) { }
 
     public async create(material: CollectionEntity): Promise<CollectionEntity> {
         const u = await this.repository.save(material);

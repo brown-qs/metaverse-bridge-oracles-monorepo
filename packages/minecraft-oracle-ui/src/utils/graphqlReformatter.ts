@@ -43,46 +43,44 @@ const sortAndFilterStandardizedOnChainTokens = (tokens: StandardizedOnChainToken
         .sort((a, b) => a.id.localeCompare(b.id))
 }
 
-export const addRegonizedTokenDataToStandardizedOnChainTokens = (tokens: StandardizedOnChainToken[] | undefined, recognizedAssetData: RecognizedAssetsDto[] | undefined): StandardizedOnChainTokenWithRecognizedTokenData[] | undefined => {
-    if (!!tokens && !!recognizedAssetData) {
-        const results: StandardizedOnChainTokenWithRecognizedTokenData[] = []
-        for (const tok of tokens) {
-            const recognizedAsset = recognizedAssetData.find(ra => ra?.assetAddress?.toLowerCase() === tok?.assetAddress?.toLowerCase())
-            if (!!recognizedAsset) {
-                const collectionFragment = recognizedAsset.collectionFragments.find((cf) => {
-                    if (!!cf.idRange && !(Array.isArray(cf.idRange) && cf.idRange.length === 0)) {
-                        return cf.idRange?.includes(tok?.numericId)
-                    } else {
-                        //if no id range everything accepted
-                        return true
-                    }
-                })
-                if (!!collectionFragment) {
-                    const recognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData = {
-                        chainId: recognizedAsset.chainId,
-                        assetType: recognizedAsset.assetType,
-                        recognizedCollectionName: recognizedAsset.name,
-                        recognizedCollectionFragmentName: collectionFragment.name,
-                        recognizedAssetType: collectionFragment.recognizedAssetType,
-                        decimals: collectionFragment.decimals,
-                        treatAsFungible: collectionFragment.treatAsFungible,
-                        enrapturable: collectionFragment.enrapturable,
-                        importable: collectionFragment.importable,
-                        exportable: collectionFragment.exportable,
-                        summonable: collectionFragment.summonable,
-                        gamepass: collectionFragment.gamepass,
-                        multiverseVersion: recognizedAsset.multiverseVersion,
-                        ...tok
-                    }
-                    results.push(recognizedTokenData)
+export const addRegonizedTokenDataToStandardizedOnChainTokens = (tokens: StandardizedOnChainToken[], recognizedAssetData: RecognizedAssetsDto[] | undefined): StandardizedOnChainTokenWithRecognizedTokenData[] => {
+    const results: StandardizedOnChainTokenWithRecognizedTokenData[] = []
+    const ra = recognizedAssetData ?? []
+    for (const tok of tokens) {
+        const recognizedAsset = ra.find(ra => ra?.assetAddress?.toLowerCase() === tok?.assetAddress?.toLowerCase())
+        if (!!recognizedAsset) {
+            const collectionFragment = recognizedAsset.collectionFragments.find((cf) => {
+                if (!!cf.idRange && !(Array.isArray(cf.idRange) && cf.idRange.length === 0)) {
+                    return cf.idRange?.includes(tok?.numericId)
+                } else {
+                    //if no id range everything accepted
+                    return true
                 }
+            })
+            if (!!collectionFragment) {
+                const recognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData = {
+                    chainId: recognizedAsset.chainId,
+                    assetType: recognizedAsset.assetType,
+                    recognizedCollectionName: recognizedAsset.name,
+                    recognizedCollectionFragmentName: collectionFragment.name,
+                    recognizedAssetType: collectionFragment.recognizedAssetType,
+                    decimals: collectionFragment.decimals,
+                    treatAsFungible: collectionFragment.treatAsFungible,
+                    enrapturable: collectionFragment.enrapturable,
+                    importable: collectionFragment.importable,
+                    exportable: collectionFragment.exportable,
+                    summonable: collectionFragment.summonable,
+                    gamepass: collectionFragment.gamepass,
+                    multiverseVersion: recognizedAsset.multiverseVersion,
+                    ...tok
+                }
+                results.push(recognizedTokenData)
             }
         }
-
-        return results
-    } else {
-        return undefined
     }
+
+    return results
+
 }
 
 export const formatOnChainTokenName = (token: StandardizedOnChainTokenWithRecognizedTokenData): string => {
@@ -113,25 +111,25 @@ export const formatInGameTokenName = (token: InGameTokenMaybeMetadata): string =
 type ERC721MarketplaceOnChainTokenType = GetMarketplaceOnChainTokensQuery["erc721Tokens"][0]
 type ERC1155MarketplaceOnChainTokenType = GetMarketplaceOnChainTokensQuery["erc1155TokenOwners"][0]
 
-export const standardizeExosamaOnChainTokens = (tokens: GetExosamaOnChainTokensQuery | undefined): StandardizedOnChainToken[] | undefined => {
+export const standardizeExosamaOnChainTokens = (tokens: GetExosamaOnChainTokensQuery | undefined): StandardizedOnChainToken[] => {
     if (!!tokens) {
         return sortAndFilterStandardizedOnChainTokens([
             ...tokens.erc721Tokens.map(tok => standardizeMarketplaceOnChainErc721Token(tok)).filter(isStandardizedOnChainToken)
         ])
     } else {
-        return undefined
+        return []
     }
 }
 
 
-export const standardizeMarketplaceOnChainTokens = (tokens: GetMarketplaceOnChainTokensQuery | undefined): StandardizedOnChainToken[] | undefined => {
+export const standardizeMarketplaceOnChainTokens = (tokens: GetMarketplaceOnChainTokensQuery | undefined): StandardizedOnChainToken[] => {
     if (!!tokens) {
         return sortAndFilterStandardizedOnChainTokens([
             ...tokens.erc1155TokenOwners.map(tok => standardizeMarketplaceOnChainErc1155Token(tok)).filter(isStandardizedOnChainToken),
             ...tokens.erc721Tokens.map(tok => standardizeMarketplaceOnChainErc721Token(tok)).filter(isStandardizedOnChainToken)
         ])
     } else {
-        return undefined
+        return []
     }
 }
 
@@ -168,12 +166,11 @@ const standardizeMarketplaceOnChainErc1155Token = (token: ERC1155MarketplaceOnCh
 //raresama squid
 type RaresamaOnChainTokenType = GetRaresamaOnChainTokensQuery["tokens"][0]
 
-export const standardizeRaresamaOnChainTokens = (tokens: GetRaresamaOnChainTokensQuery | undefined): StandardizedOnChainToken[] | undefined => {
-    const tok = tokens?.tokens[0]
-    if (!!tokens?.tokens) {
+export const standardizeRaresamaOnChainTokens = (tokens: GetRaresamaOnChainTokensQuery | undefined): StandardizedOnChainToken[] => {
+    if (!!tokens) {
         return [...sortAndFilterStandardizedOnChainTokens(tokens.tokens.map(standardizeRaresamaOnChainToken).filter(isStandardizedOnChainToken))]
     } else {
-        return undefined
+        return []
     }
 }
 
@@ -223,22 +220,19 @@ export const inGameMetadataParams = (inGameItems: BridgedAssetDto[] | undefined)
 
 export type SquidMetadata = GetMarketplaceMetadataQuery["erc721Tokens"][0]["metadata"]
 export type InGameTokenMaybeMetadata = BridgedAssetDto & { metadata?: SquidMetadata }
-export const inGameTokensCombineMetadata = (inGameTokens: BridgedAssetDto[], metadata: StandardizedMetadata[] | undefined): InGameTokenMaybeMetadata[] => {
-    if (!!metadata) {
-        const newInGameTokens: InGameTokenMaybeMetadata[] = []
-        for (const item of inGameTokens) {
-            const newToken: InGameTokenMaybeMetadata = { ...item }
-            const md = metadata?.find(tok => (tok?.assetAddress?.toLowerCase() === item?.assetAddress?.toLowerCase() && String(tok?.assetId) === String(item?.assetId)))
+export const inGameTokensCombineMetadata = (inGameTokens: BridgedAssetDto[], metadata: StandardizedMetadata[]): InGameTokenMaybeMetadata[] => {
+    const newInGameTokens: InGameTokenMaybeMetadata[] = []
+    for (const item of inGameTokens) {
+        const newToken: InGameTokenMaybeMetadata = { ...item }
+        const md = metadata?.find(tok => (tok?.assetAddress?.toLowerCase() === item?.assetAddress?.toLowerCase() && String(tok?.assetId) === String(item?.assetId)))
 
-            if (!!md?.metadata) {
-                newToken["metadata"] = md?.metadata
-            }
-            newInGameTokens.push(newToken)
+        if (!!md?.metadata) {
+            newToken["metadata"] = md?.metadata
         }
-        return newInGameTokens
-    } else {
-        return inGameTokens
+        newInGameTokens.push(newToken)
     }
+    return newInGameTokens
+
 }
 
 export type StandardizedMetadata = {
@@ -246,80 +240,86 @@ export type StandardizedMetadata = {
     assetId: number,
     metadata: SquidMetadata
 }
-export const standardizeMarketplaceMetadata = (metadata: GetMarketplaceMetadataQuery | undefined): StandardizedMetadata[] | undefined => {
-    if (!!metadata) {
-        const combinedMetadata: StandardizedMetadata[] = []
-        if (!!metadata?.erc721Tokens) {
-            for (const tok of metadata.erc721Tokens) {
-                if (!!tok?.metadata && !!tok?.contract?.address && !isNaN(parseInt(tok?.numericId))) {
-                    const standardizedMetadata = {
-                        assetAddress: tok.contract.address.toLowerCase(),
-                        assetId: parseInt(tok.numericId),
-                        metadata: tok.metadata
-                    }
-                    combinedMetadata.push(standardizedMetadata)
+export const standardizeMarketplaceMetadata = (metadata: GetMarketplaceMetadataQuery | undefined): StandardizedMetadata[] => {
+    const combinedMetadata: StandardizedMetadata[] = []
+    if (!!metadata?.erc721Tokens) {
+        for (const tok of metadata.erc721Tokens) {
+            if (!!tok?.metadata && !!tok?.contract?.address && !isNaN(parseInt(tok?.numericId))) {
+                const standardizedMetadata = {
+                    assetAddress: tok.contract.address.toLowerCase(),
+                    assetId: parseInt(tok.numericId),
+                    metadata: tok.metadata
                 }
+                combinedMetadata.push(standardizedMetadata)
             }
         }
-
-        if (!!metadata?.erc1155Tokens) {
-            for (const tok of metadata.erc1155Tokens) {
-                if (!!tok?.metadata && !!tok?.contract?.address && !isNaN(parseInt(tok?.numericId))) {
-                    const standardizedMetadata = {
-                        assetAddress: tok.contract.address.toLowerCase(),
-                        assetId: parseInt(tok.numericId),
-                        metadata: tok.metadata
-                    }
-                    combinedMetadata.push(standardizedMetadata)
-                }
-            }
-        }
-        return combinedMetadata;
-    } else {
-        return undefined
     }
+
+    if (!!metadata?.erc1155Tokens) {
+        for (const tok of metadata.erc1155Tokens) {
+            if (!!tok?.metadata && !!tok?.contract?.address && !isNaN(parseInt(tok?.numericId))) {
+                const standardizedMetadata = {
+                    assetAddress: tok.contract.address.toLowerCase(),
+                    assetId: parseInt(tok.numericId),
+                    metadata: tok.metadata
+                }
+                combinedMetadata.push(standardizedMetadata)
+            }
+        }
+    }
+    return combinedMetadata;
 }
 
-export const standardizeExosamaMetadata = (metadata: GetExosamaMetadataQuery | undefined): StandardizedMetadata[] | undefined => {
-    if (!!metadata) {
-        const combinedMetadata: StandardizedMetadata[] = []
-        if (!!metadata?.erc721Tokens) {
-            for (const tok of metadata.erc721Tokens) {
-                if (!!tok?.metadata && !!tok?.contract?.address && !isNaN(parseInt(tok?.numericId))) {
-                    const standardizedMetadata = {
-                        assetAddress: tok.contract.address.toLowerCase(),
-                        assetId: parseInt(tok.numericId),
-                        metadata: tok.metadata
-                    }
-                    combinedMetadata.push(standardizedMetadata)
+export const standardizeExosamaMetadata = (metadata: GetExosamaMetadataQuery | undefined): StandardizedMetadata[] => {
+    const combinedMetadata: StandardizedMetadata[] = []
+    if (!!metadata?.erc721Tokens) {
+        for (const tok of metadata.erc721Tokens) {
+            if (!!tok?.metadata && !!tok?.contract?.address && !isNaN(parseInt(tok?.numericId))) {
+                const standardizedMetadata = {
+                    assetAddress: tok.contract.address.toLowerCase(),
+                    assetId: parseInt(tok.numericId),
+                    metadata: tok.metadata
                 }
+                combinedMetadata.push(standardizedMetadata)
             }
         }
-        return combinedMetadata;
-    } else {
-        return undefined
     }
+    return combinedMetadata;
+
 }
 
-export const standardizeRaresamaMetadata = (metadata: GetRaresamaMetadataQuery | undefined): StandardizedMetadata[] | undefined => {
-    if (!!metadata) {
-        const combinedMetadata: StandardizedMetadata[] = []
-        if (!!metadata?.tokens) {
-            for (const tok of metadata.tokens) {
-                if (!!tok?.metadata && !!tok?.contract?.address && !isNaN(parseInt(tok?.numericId))) {
-                    const standardizedMetadata = {
-                        assetAddress: tok.contract.address.toLowerCase(),
-                        assetId: parseInt(tok.numericId),
-                        metadata: tok.metadata
-                    }
-                    combinedMetadata.push(standardizedMetadata)
+export const standardizeRaresamaMetadata = (metadata: GetRaresamaMetadataQuery | undefined): StandardizedMetadata[] => {
+    const combinedMetadata: StandardizedMetadata[] = []
+    if (!!metadata?.tokens) {
+        for (const tok of metadata.tokens) {
+            if (!!tok?.metadata && !!tok?.contract?.address && !isNaN(parseInt(tok?.numericId))) {
+                const standardizedMetadata = {
+                    assetAddress: tok.contract.address.toLowerCase(),
+                    assetId: parseInt(tok.numericId),
+                    metadata: tok.metadata
                 }
+                combinedMetadata.push(standardizedMetadata)
             }
         }
-        return combinedMetadata;
-    } else {
-        return undefined
     }
+    return combinedMetadata;
 }
 
 
+//indexer is laggy, check our in game items to see if the import has completed
+export const checkOnChainItemNotImported = (onChainToken: StandardizedOnChainTokenWithRecognizedTokenData, multiverseTokens: InGameTokenMaybeMetadata[]): boolean => {
+    if ([StringAssetType.ERC1155, StringAssetType.ERC721].includes(onChainToken.assetType)) {
+        if (onChainToken.treatAsFungible) {
+            return true
+        }
+
+        const matchingToken = multiverseTokens.find(t => t?.assetAddress?.toLowerCase() === onChainToken?.assetAddress?.toLowerCase() && String(t?.assetId) === String(onChainToken?.numericId))
+        if (!!matchingToken) {
+            return false
+        } else {
+            return true
+        }
+    } else {
+        return true
+    }
+}
