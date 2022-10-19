@@ -18,15 +18,13 @@ import { ApprovalState, approveAsset, checkApproval, useApproveCallback } from "
 import { useBalances } from "../../hooks/useBalances/useBalances";
 import { rtkQueryErrorFormatter, useActiveGameQuery, useEmailLoginCodeVerifyMutation, useInMutation, useOutMutation, useSummonMutation } from "../../state/api/bridgeApi";
 import { closeEmailCodeModal, selectEmailCodeModalOpen } from "../../state/slices/emailCodeModalSlice";
-import { closeEnraptureModal, selectEnraptureModalOpen, selectEnraptureModalTokens } from "../../state/slices/enraptureModalSlice";
-import { closeExportModal, selectExportModalOpen, selectExportTokens } from "../../state/slices/exportModalSlice";
 import { closeInGameItemModal, selectInGameItemModalOpen } from "../../state/slices/inGameItemModalSlice";
 import { useSubmittedExportTx, useIsTransactionPending, useSubmittedEnraptureTx, useTransactionAdder } from "../../state/transactions/hooks";
 import { getExplorerLink } from "../../utils";
 import { stringAssetTypeToAssetType } from "../../utils/marketplace";
 import { AddressDisplayComponent } from "../form/AddressDisplayComponent";
 import { TransactionLink } from "../TransactionLink";
-import { CallparamDto, InDto, MultiverseVersion } from "../../state/api/types";
+import { CallparamDto, MultiverseVersion } from "../../state/api/types";
 import { MoonsamaSpinner } from "../MoonsamaSpinner";
 import { closeInModal, selectInModalOpen, selectInModalTokens } from "../../state/slices/inModalSlice";
 import { StandardizedOnChainTokenWithRecognizedTokenData } from "../../utils/graphqlReformatter";
@@ -67,7 +65,7 @@ export function OutModal() {
 
     React.useEffect(() => {
         if (isOpen && !!outTokens?.[0] && !!account) {
-            setOut(outTokens.map(tok => ({ hash: tok.hash!, chainId: tok.chainId })))
+            setOut({ requests: outTokens.map(tok => ({ hash: tok.hash! })) })
         } else {
             if (!isOpen) {
                 setOutReset()

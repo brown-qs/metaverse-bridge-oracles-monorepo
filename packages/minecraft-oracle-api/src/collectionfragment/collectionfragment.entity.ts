@@ -10,6 +10,7 @@ import { CollectionEntity } from '../collection/collection.entity';
 import { AssetEntity } from '../asset/asset.entity';
 import { CompositePartEntity } from '../compositepart/compositepart.entity';
 import { ResourceInventoryEntity } from '../resourceinventory/resourceinventory.entity';
+import { CollectionFragmentRoutingEntity } from '../collectionfragmentrouting/collectionfragmentrouting.entity';
 
 
 @Entity()
@@ -68,6 +69,12 @@ export class CollectionFragmentEntity {
 
     @ManyToOne(() => CollectionEntity, (collection) => collection.collectionFragments)
     collection: CollectionEntity;
+
+    @OneToMany(() => CollectionFragmentRoutingEntity, (en) => en.inCollectionFragment)
+    inRoutes?: CollectionFragmentRoutingEntity[];
+
+    @OneToMany(() => CollectionFragmentRoutingEntity, (en) => en.outCollectionFragment)
+    outRoutes?: CollectionFragmentRoutingEntity[];
 
     @OneToMany(() => AssetEntity, (bridgeAsset) => bridgeAsset.collectionFragment)
     bridgeAssets?: AssetEntity[];

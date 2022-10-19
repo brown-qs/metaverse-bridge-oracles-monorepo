@@ -3,7 +3,7 @@ import { tr } from "date-fns/locale";
 import { AppState } from ".."
 import { ChainId } from "../../constants";
 import { StringAssetType } from "../../utils/subgraph";
-import { InDto, Oauth2PublicClientDto } from "../api/types"
+import { InRequestDto, Oauth2PublicClientDto } from "../api/types"
 export interface TransactionReceipt {
     to: string;
     from: string;
@@ -41,7 +41,7 @@ export interface ApprovalTransaction extends BaseTransaction {
     operator: string
 }
 
-export type InAsset = { bridgeHash: string } & InDto
+export type InAsset = { bridgeHash: string } & InRequestDto
 export interface InTransaction extends BaseTransaction {
     type: TransactionType.In,
     assets: InAsset[]

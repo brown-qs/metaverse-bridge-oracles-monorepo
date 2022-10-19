@@ -3,7 +3,7 @@ import { isPending } from "@reduxjs/toolkit";
 import { useWeb3React } from "@web3-react/core";
 import React from "react";
 import { useState, useEffect, useRef } from "react";
-import { parseEther } from '@ethersproject/units';
+import { parseEther, formatEther } from '@ethersproject/units';
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowsRightLeft, Checks, Flame, Mail, MessageReport, Select, Wallet } from "tabler-icons-react";
@@ -18,15 +18,14 @@ import { ApprovalState, approveAsset, checkApproval, useApproveCallback } from "
 import { useBalances } from "../../hooks/useBalances/useBalances";
 import { rtkQueryErrorFormatter, useActiveGameQuery, useEmailLoginCodeVerifyMutation, useInMutation, useSummonMutation } from "../../state/api/bridgeApi";
 import { closeEmailCodeModal, selectEmailCodeModalOpen } from "../../state/slices/emailCodeModalSlice";
-import { closeEnraptureModal, selectEnraptureModalOpen, selectEnraptureModalTokens } from "../../state/slices/enraptureModalSlice";
-import { closeExportModal, selectExportModalOpen, selectExportTokens } from "../../state/slices/exportModalSlice";
+
 import { closeInGameItemModal, selectInGameItemModalOpen } from "../../state/slices/inGameItemModalSlice";
 import { useSubmittedExportTx, useIsTransactionPending, useSubmittedEnraptureTx, useTransactionAdder } from "../../state/transactions/hooks";
 import { getExplorerLink } from "../../utils";
 import { stringAssetTypeToAssetType } from "../../utils/marketplace";
 import { AddressDisplayComponent } from "../form/AddressDisplayComponent";
 import { TransactionLink } from "../TransactionLink";
-import { CallparamDto, InDto, MultiverseVersion } from "../../state/api/types";
+import { CallparamDto, InRequestDto, MultiverseVersion } from "../../state/api/types";
 import { MoonsamaSpinner } from "../MoonsamaSpinner";
 import { closeInModal, selectInModalOpen, selectInModalTokens } from "../../state/slices/inModalSlice";
 import { StandardizedOnChainTokenWithRecognizedTokenData } from "../../utils/graphqlReformatter";
@@ -97,8 +96,8 @@ export function InModal() {
         }
     )
 
-    const onChainTokenTokenToInDto = (tok: StandardizedOnChainTokenWithRecognizedTokenData, account: string, amount: string): InDto => {
-        const result: InDto = {
+    const onChainTokenTokenToInDto = (tok: StandardizedOnChainTokenWithRecognizedTokenData, account: string, amount: string): InRequestDto => {
+        const result: InRequestDto = {
             chainId: tok.chainId,
             assetType: tok.assetType,
             assetAddress: tok.assetAddress,
@@ -115,15 +114,15 @@ export function InModal() {
             refetchCheckApproval()
             if (isFungible) {
                 if (typeof amount === "string") {
-                    const inParams: InDto[] = inTokens.map(tok => onChainTokenTokenToInDto(tok, account, amount))
-                    setIn(inParams)
+                    const inParams: InRequestDto[] = inTokens.map(tok => onChainTokenTokenToInDto(tok, account, amount))
+                    setIn({ requests: inParams })
 
                 }
             } else {
-                const inParams: InDto[] = inTokens.map(tok => onChainTokenTokenToInDto(tok, account, "1"))
+                const inParams: InRequestDto[] = inTokens.map(tok => onChainTokenTokenToInDto(tok, account, "1"))
                 console.log("set in NOT fungible")
 
-                setIn(inParams)
+                setIn({ requests: inParams })
             }
 
         } else {
@@ -355,7 +354,7 @@ export function InModal() {
 
                 {amount &&
                     <Box paddingBottom="16px">
-                        Amount: {amount}
+                        Amount: {formatEther(amount)}
                     </Box>}
                 <Button
                     w="100%"
