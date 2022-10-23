@@ -38,7 +38,7 @@ import { BlacklistDto } from './dtos/blacklist.dto';
 import { GameTypeService } from '../gametype/gametype.service';
 import { GameService } from '../game/game.service';
 import { BankDto } from '../gameapi/dtos/bank.dto';
-import { UpdateMetadataDto } from './dtos/index.dto';
+import { RecoverAssetDto, UpdateMetadataDto } from './dtos/index.dto';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -424,5 +424,22 @@ export class AdminApiController {
         }
 
         await this.adminApiService.updateMetadata(dto.hash)
+    }
+
+    //recover an asset that is in the warehouse but was removed from the database
+    @Post('recover-asset')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Recover an asset' })
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    async recoverAsset(
+        @User() caller: UserEntity,
+        @Body() dto: RecoverAssetDto
+    ) {
+        if (caller.role !== UserRole.ADMIN) {
+            throw new ForbiddenException('Not admin')
+        }
+
+        await this.adminApiService.recoverAsset(dto.hash, dto.salt, dto.uuid, dto.inData)
     }
 }

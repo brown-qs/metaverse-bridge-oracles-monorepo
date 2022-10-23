@@ -240,13 +240,17 @@ export class OracleApiService {
 
         let exists: any;
         if (multiverseVersion === MultiverseVersion.V1) {
-            exists = await contract.existsImported(hash)
+            if (enraptured) {
+                exists = await contract.existsEnraptured(hash)
+            } else {
+                exists = await contract.existsImported(hash)
+            }
         } else if (multiverseVersion === MultiverseVersion.V2) {
             exists = await contract.exists(hash, enraptured)
         }
         this.logger.debug(`${funcCallPrefix} Hash exists in bridge? ${exists}`, this.context)
 
-        if (!exists) {
+        if (exists === false) {
             this.logger.debug(`${funcCallPrefix} hash doesn't exist in bridge.`, this.context)
             return false
         }
