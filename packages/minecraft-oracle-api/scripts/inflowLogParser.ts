@@ -67,10 +67,10 @@ async function main() {
     const oracle = new ethers.Wallet(process.env.ORACLE_PRIVATE_KEY, provider);
 
     const contract = new Contract("0x59c481548ce7ba13f3288df9f4fcf44a10a589a0", METAVERSE_ABI, oracle)
-    const contents = fs.readFileSync("/Users/me/Downloads/james-2.txt").toString()
+    const contents = fs.readFileSync("/Users/me/Downloads/james-3.txt").toString()
     const lines = contents.split(`[MSAMA-MC-Oracle]`)
     //[OracleApiService] [eMi78] inRequest:: 
-    const filteredLines = lines.filter(l => l.includes("inRequest::"))
+    const filteredLines = lines.filter(l => l.includes("] inRequest:: uuid:"))
 
     const functionCallIds = filteredLines.map(l => l.split(`[OracleApiService] [`)[1].split(`] inRequest:`)[0])
 
@@ -82,7 +82,10 @@ async function main() {
     }
 
     for (const [callId, lines] of Object.entries(groupedFunctionCallLines)) {
-        const startLine = lines.find(l => l.includes(`START ImportDto:`))
+        let startLine = lines.find(l => l.includes(`START ImportDto:`))
+        if (startLine.includes(`\n`)) {
+            startLine = startLine.split(`\n`)[0]
+        }
         const payloadLine = lines.find(l => (l.includes(`request prepared from NEW salt:`) || l.includes(`returning previously used call data`)))
 
         if (!startLine) {
@@ -94,7 +97,15 @@ async function main() {
             console.log("couldn't find payload line")
             continue
         }
-        const importDto = JSON.parse(startLine.split(`START ImportDto:`)[1])
+        let importDto
+        try {
+            importDto = JSON.parse(startLine.split(`START ImportDto:`)[1])
+        } catch (e) {
+            console.log("Couldn't parse json")
+            console.log(`START LINE: |${startLine}|`)
+            continue
+        }
+
         console.log(`=============== ${callId} ===============`)
         console.log(lines.join("\n"))
         console.log('----------------')
@@ -117,22 +128,23 @@ async function main() {
         }
 
         let exists: any
-        if (importDto.enrapturable) {
+        if (importDto.enrapture) {
             exists = await contract.existsEnraptured(payloadLineHash)
         } else {
             exists = await contract.existsImported(payloadLineHash)
         }
         if (exists) {
             console.log("item exists in metaverse, checking if it is the database...")
-
+        } else {
+            continue
         }
 
         const assetEntity = await connection.manager.findOne<AssetEntity>(AssetEntity, { hash: payloadLineHash })
-        if (!assetEntity) {
-            console.log("item is not in the database!")
-        } else {
-            console.log("item is successfully in the database")
+        if (!!assetEntity) {
+            continue
         }
+
+        console.log("Item doesn't exist in DB, adding it")
 
         const postBody: RecoverAssetDto = {
             hash: payloadLineHash,
@@ -140,8 +152,9 @@ async function main() {
             uuid: payloadLineUuid,
             inData: importDto
         }
-        const host = `http://localhost:3030`
+        const host = `https://minecraft-metaverse-api.moonsama.com`
         const jwt = ``
+
         const res = await axios.post(`${host}/api/v1/admin/recover-asset`, postBody, {
             headers: {
                 // Overwrite Axios's automatically set Content-Type
