@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '../user/user/user.service';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
@@ -12,6 +12,13 @@ import { EventBus } from '@nestjs/cqrs';
 import { UserProfileUpdatedEvent } from '../cqrs/events/user-profile-updated.event';
 import { AssetService } from '../asset/asset.service';
 import { NftApiService } from '../nftapi/nftapi.service';
+import { InRequestDto } from '../oracleapi/dtos/index.dto';
+import { calculateMetaAssetHash, standardizeValidateAssetInParams, utf8ToKeccak } from '../oracleapi/oracleapi.utils';
+import { findRecognizedAsset, stringAssetTypeToAssetType } from '../utils';
+import { CALLDATA_EXPIRATION_MS, METAVERSE, MultiverseVersion } from '../config/constants';
+import { BridgeAssetType } from '../common/enums/AssetType';
+import { TypeRecognizedChainAssetsProvider } from '../provider';
+import { ProviderToken } from '../provider/token';
 
 @Injectable()
 export class AdminApiService {
@@ -27,7 +34,9 @@ export class AdminApiService {
         private readonly secretService: SecretService,
         private readonly nftApiService: NftApiService,
         private configService: ConfigService,
-        @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
+        @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger,
+        @Inject(ProviderToken.RECOGNIZED_CHAIN_ASSETS_CALLBACK) private getRecognizedAsset: TypeRecognizedChainAssetsProvider,
+
     ) {
         this.context = AdminApiService.name
     }
@@ -150,4 +159,71 @@ export class AdminApiService {
             await this.assetService.update({ hash: asset.hash }, { metadata, world })
         }
     }
+
+    public async recoverAsset(hash: string, salt: string, uuid: string, inRequest: InRequestDto) {
+        const funcCallPrefix = `[${makeid(5)}] recoverAsset:: uuid: ${uuid}`
+        this.logger.debug(`${funcCallPrefix} START ImportDto: ${JSON.stringify(inRequest)}`, this.context)
+
+        let enraptureCollectionFrag = findRecognizedAsset(await this.getRecognizedAsset(inRequest.chainId, BridgeAssetType.ENRAPTURED), { assetAddress: inRequest.assetAddress, assetId: String(inRequest.assetId) });
+        let importCollectionFrag = findRecognizedAsset(await this.getRecognizedAsset(inRequest.chainId, BridgeAssetType.IMPORTED), { assetAddress: inRequest.assetAddress, assetId: String(inRequest.assetId) })
+
+        let collectionFragment
+        if (inRequest.enrapture) {
+            if (!!enraptureCollectionFrag) {
+                collectionFragment = enraptureCollectionFrag
+            } else if (!!importCollectionFrag) {
+                this.logger.error(`${funcCallPrefix} asset permissioned, but enrapture not supported.`, null, this.context)
+                throw new UnprocessableEntityException(`Asset permissioned, but enrapture not supported.`)
+            }
+        } else {
+            if (!!importCollectionFrag) {
+                collectionFragment = importCollectionFrag
+            } else if (!!enraptureCollectionFrag) {
+                this.logger.error(`${funcCallPrefix} asset permissioned, but import not supported.`, null, this.context)
+                throw new UnprocessableEntityException(`Asset permissioned, but import not supported.`)
+            }
+        }
+
+        if (!collectionFragment) {
+            this.logger.error(`${funcCallPrefix} not an permissioned asset`, null, this.context)
+            throw new UnprocessableEntityException(`Not permissioned asset`)
+        }
+
+        const standardizedParams = standardizeValidateAssetInParams(inRequest.chainId, stringAssetTypeToAssetType(inRequest.assetType), inRequest.assetAddress, inRequest.assetId, inRequest.amount, inRequest.enrapture, inRequest.owner)
+        const requestHash = await utf8ToKeccak(JSON.stringify(standardizedParams))
+        const recalculatedHash = await calculateMetaAssetHash(standardizedParams, METAVERSE, salt, collectionFragment.collection.multiverseVersion)
+        if (recalculatedHash !== hash) {
+            throw new BadRequestException("Recalculated hash doesn't match the one that is already in the metaverse")
+        }
+        const expiration = Date.now() + CALLDATA_EXPIRATION_MS
+
+        const user = await this.userService.findByUuid(uuid)
+        await this.assetService.create({
+            assetId: String(standardizedParams.assetId),
+            assetOwner: standardizedParams.owner,
+            enraptured: inRequest.enrapture,
+            hash,
+            requestHash,
+            pendingIn: true,
+            pendingOut: false,
+            amount: standardizedParams.amount,
+            expiration: expiration.toString(),
+            owner: user,
+            salt,
+            recognizedAssetType: collectionFragment.recognizedAssetType,
+            collectionFragment,
+            createdAt: new Date(),
+            modifiedAt: new Date()
+        })
+    }
+}
+function makeid(length: number): string {
+    var result = '';
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for (var i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() *
+            charactersLength));
+    }
+    return result;
 }
