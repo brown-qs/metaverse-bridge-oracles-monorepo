@@ -14,9 +14,11 @@ import { AdminApiService } from './adminapi.service';
 import { CqrsModule } from '@nestjs/cqrs';
 import { AssetModule } from '../asset/asset.module';
 import { NftApiModule } from '../nftapi/nftapi.module';
+import { ProviderModule } from '../provider/provider.module';
 
 @Module({
     imports: [
+        ProviderModule,
         NftApiModule,
         AssetModule,
         CqrsModule,
