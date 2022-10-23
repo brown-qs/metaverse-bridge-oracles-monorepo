@@ -123,7 +123,7 @@ export function OutModal() {
         return (
             <ReduxModal
                 {...baseProps}
-                message="Error: Unable to fetch export parameters."
+                message={`Unable to fetch export parameters. ${rtkQueryErrorFormatter(setOutError)}`}
                 bottomButtonText="Close"
 
             >

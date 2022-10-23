@@ -215,7 +215,7 @@ export const AccountDialog = () => {
           }}
           key={w.name}
           header={w.name.toUpperCase()}
-          iconSvgData={w.iconSvgData}
+          imageUrl={w.imageUrl}
         />))
       }
 
@@ -228,7 +228,7 @@ export const AccountDialog = () => {
           }}
           key={w.name}
           header={`INSTALL ${w.name.toUpperCase()}`}
-          iconSvgData={w.iconSvgData}
+          imageUrl={w.imageUrl}
         />))
       }
     </VStack >

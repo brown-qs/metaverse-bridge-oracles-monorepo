@@ -6,18 +6,21 @@ import { Link, Image, Box, Button, HStack, VStack, Text } from '@chakra-ui/react
 export type OptionCardProps = {
   onClick?: null | (() => void)
   header: React.ReactNode
-  iconSvgData: string
+  imageUrl: string,
 }
 export default function OptionCard({
   onClick = null,
   header,
-  iconSvgData,
+  imageUrl
 }: OptionCardProps) {
+
+
   return (
     <Box
       w="100%"
       position="relative"
     >
+
       <Image
         zIndex="1"
         position="absolute"
@@ -28,7 +31,7 @@ export default function OptionCard({
         left="0"
         objectFit="contain"
         pointerEvents="none"  //only hover to pass down to button
-        src={`data:image/svg+xml;base64,${btoa(iconSvgData)}`}>
+        src={imageUrl}>
 
       </Image>
       <Button
