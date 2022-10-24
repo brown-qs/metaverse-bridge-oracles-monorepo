@@ -11,10 +11,10 @@ export class SyntheticPartEntity {
     @Column()
     zIndex: number
 
-    @Column({nullable: true})
+    @Column({ nullable: true })
     mediaUriPrefix: string
 
-    @Column({nullable: true})
+    @Column({ nullable: true })
     mediaUriPostfix: string
 
     @Column()

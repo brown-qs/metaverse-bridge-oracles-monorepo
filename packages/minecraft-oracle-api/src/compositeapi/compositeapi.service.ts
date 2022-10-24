@@ -1,4 +1,4 @@
-import { Injectable, Inject, UnprocessableEntityException } from "@nestjs/common";
+import { Injectable, Inject, UnprocessableEntityException, BadRequestException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config/dist/config.service";
 import MutexInterface from "async-mutex/lib/MutexInterface";
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from "nest-winston";
@@ -25,6 +25,10 @@ import { ProviderToken } from "../provider/token";
 import { fetchImageBufferCallback } from "./compositeapi.utils";
 import { EventBus } from "@nestjs/cqrs";
 import { CompositeAssetUpdatedEvent } from "../cqrs/events/composite-asset-updated.event";
+import { StringAssetType } from "../common/enums/AssetType";
+import { SyntheticItemEntity } from "../syntheticitem/syntheticitem.entity";
+import { SyntheticItemLayerEntity } from "../syntheticitemlayer/syntheticitemlayer.entity";
+import { CompositeConfigDto, CompositeConfigPartDto, CompositeConfigItemDto, CompositeConfigLayer } from "./dtos/index.dto";
 
 
 export type CompositeEnrichedAssetEntity = AssetEntity & {
@@ -538,5 +542,66 @@ export class CompositeApiService {
             metaUri: res.metaUri,
             synthetic: false
         }
+    }
+
+    async getConfig(chainId: number, assetAddress: string): Promise<CompositeConfigDto> {
+        const result = await this.compositeCollectionFragmentService.findOne({ collection: { chainId: chainId, assetAddress: assetAddress?.toLowerCase() } }, { relations: ["syntheticParts", "collection", "syntheticParts.items", "syntheticParts.items.layers", "compositeParts"] })
+        if (!result) {
+            throw new BadRequestException("This asset is not permissioned for customization.")
+        }
+
+        const resp: CompositeConfigDto = {
+            chainId: result.collection.chainId,
+            assetAddress: result.collection.assetAddress,
+            assetType: result.collection.assetType,
+            name: result.collection.name,
+            parts: result.syntheticParts.map(p => this.syntheticPartToDto(p, result.collection.chainId)).filter(p => !!p)
+        }
+        return resp
+    }
+
+    private syntheticPartToDto(part: SyntheticPartEntity, chainId: number): CompositeConfigPartDto | undefined {
+        //return undefined if there are no items ... caused items having no layers
+        const items = part.items.map(i => this.syntheticItemToDto(i)).filter(i => !!i)
+        if (!Array.isArray(items) || items.length === 0) {
+            return undefined
+        }
+        const resp: CompositeConfigPartDto = {
+            chainId,
+            assetAddress: part.assetAddress,
+            assetType: StringAssetType.ERC721,
+            name: part.name,
+            synthetic: true,
+            items
+        }
+        return resp
+    }
+
+    private syntheticItemToDto(item: SyntheticItemEntity): CompositeConfigItemDto | undefined {
+        //return undefined if there are no layer
+        if (!Array.isArray(item.layers) || item.layers.length === 0) {
+            return undefined
+        }
+        const parts = item.id.split("-")
+        const previewImageUri = `/customizer/${parts[0]}/${parts[1]}/${item.assetId}.png`
+        const resp: CompositeConfigItemDto = {
+            id: item.id,
+            assetId: parseInt(item.assetId),
+            previewImageUri,
+            attributes: item.attributes,
+            layers: item.layers.map(l => this.syntheticItemLayerToDto(l))
+        }
+        return resp
+    }
+
+    private syntheticItemLayerToDto(layer: SyntheticItemLayerEntity): CompositeConfigLayer {
+        const parts = layer.id.split("-")
+        const imageUri = `/customizer/${parts[0]}/${parts[1]}/${parts[2]}/${parts[3]}.png`
+        const resp: CompositeConfigLayer = {
+            id: layer.id,
+            zIndex: layer.zIndex,
+            imageUri
+        }
+        return resp
     }
 }

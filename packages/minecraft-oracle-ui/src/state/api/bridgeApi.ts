@@ -2,7 +2,7 @@ import { SerializedError } from "@reduxjs/toolkit"
 import { BaseQueryFn, createApi, FetchArgs, fetchBaseQuery, FetchBaseQueryError } from "@reduxjs/toolkit/query/react"
 import { AppState } from ".."
 import { setTokens } from "../slices/authSlice"
-import { BridgedAssetDto, CallparamDto, EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse, InBatchRequestDto, InConfirmRequestDto, InConfirmResponseDto, Oauth2PublicClientDto, OutBatchRequestDto, OutConfirmRequestDto, OutConfirmResponseDto, RecognizedAssetsDto, SkinResponse, SkinSelectRequest, UserProfileResponse } from "./types"
+import { BridgedAssetDto, CallparamDto, CompositeConfigDto, EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse, InBatchRequestDto, InConfirmRequestDto, InConfirmResponseDto, Oauth2PublicClientDto, OutBatchRequestDto, OutConfirmRequestDto, OutConfirmResponseDto, RecognizedAssetsDto, SkinResponse, SkinSelectRequest, UserProfileResponse } from "./types"
 
 
 // ---------------------------------------------------------- //
@@ -202,6 +202,9 @@ export const bridgeApi = createApi({
         activeGame: builder.query<boolean, void>({
             query: () => (`/user/inprogress`),
         }),
+        customizerConfig: builder.query<CompositeConfigDto, { chainId: number | string, assetAddress: string }>({
+            query: ({ chainId, assetAddress }) => (`composite/config/${chainId}/${assetAddress}`),
+        }),
     }),
 
 })
@@ -222,4 +225,4 @@ export const rtkQueryErrorFormatter = (error: any): string => {
     return strErr
 }
 
-export const { useInMutation, useOutMutation, useOutConfirmMutation, useInConfirmMutation, useActiveGameQuery, useOauthInfoQuery, useOauthAuthorizeMutation, useSummonMutation, useGetInGameResourcesQuery, useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
+export const { useCustomizerConfigQuery, useInMutation, useOutMutation, useOutConfirmMutation, useInConfirmMutation, useActiveGameQuery, useOauthInfoQuery, useOauthAuthorizeMutation, useSummonMutation, useGetInGameResourcesQuery, useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
