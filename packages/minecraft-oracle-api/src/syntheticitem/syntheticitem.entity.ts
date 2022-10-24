@@ -1,7 +1,7 @@
 import { CompositeAssetEntity } from '../compositeasset/compositeasset.entity';
 import { Column, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 import { SyntheticPartEntity } from '../syntheticpart/syntheticpart.entity';
-import { CompositeSkeletonBoneMapEntity } from '../composite-skeleton-bone-map/composite-skeleton-bone-map.entity';
+import { SyntheticSubItemEntity } from '../syntheticsubitem/syntheticsubitem.entity';
 
 @Entity()
 export class SyntheticItemEntity {
@@ -21,6 +21,6 @@ export class SyntheticItemEntity {
     @ManyToOne(() => SyntheticPartEntity, (syntheticPart) => syntheticPart.items)
     syntheticPart: SyntheticPartEntity;
 
-    @OneToMany(() => CompositeSkeletonBoneMapEntity, (en) => en.syntheticItem)
-    boneMaps: CompositeSkeletonBoneMapEntity[]
+    @OneToMany(() => SyntheticSubItemEntity, (en) => en.id)
+    subItems: SyntheticSubItemEntity[]
 }

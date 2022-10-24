@@ -102,10 +102,9 @@ import { ZUserBaitView, ZUserGamepassView } from './views';
 import { MoonsamaCqrsModule } from './cqrs/moonsama-cqrs.module';
 import { CollectionFragmentRoutingModule } from './collectionfragmentrouting/collectionfragmentrouting.module';
 import { CollectionFragmentRoutingEntity } from './collectionfragmentrouting/collectionfragmentrouting.entity';
-import { CompositeSkeletonModule } from './composite-skeleton/composite-skeleton.module';
-import { CompositeSkeletonBoneMapModule } from './composite-skeleton-bone-map/composite-skeleton-bone-map.module';
-import { CompositeSkeletonBoneMapEntity } from './composite-skeleton-bone-map/composite-skeleton-bone-map.entity';
-import { CompositeSkeletonEntity } from './composite-skeleton/composite-skeleton.entity';
+import { SyntheticSubItemModule } from './syntheticsubitem/syntheticsubitem.module';
+import { SyntheticSubItemEntity } from './syntheticsubitem/syntheticsubitem.entity';
+
 
 
 @Module({
@@ -138,8 +137,7 @@ import { CompositeSkeletonEntity } from './composite-skeleton/composite-skeleton
                 password: configService.get<string>('typeorm.password'),
                 database: configService.get<string>('typeorm.database'),
                 entities: [
-                    CompositeSkeletonBoneMapEntity,
-                    CompositeSkeletonEntity,
+                    SyntheticSubItemEntity,
                     CollectionFragmentRoutingEntity,
                     EmailChangeEntity,
                     MinecraftLinkEntity,
@@ -255,8 +253,7 @@ import { CompositeSkeletonEntity } from './composite-skeleton/composite-skeleton
         DidModule,
         KiltDappModule,
         MoonsamaCqrsModule,
-        CompositeSkeletonModule,
-        CompositeSkeletonBoneMapModule
+        SyntheticSubItemModule
     ],
     controllers: [],
     providers: []
