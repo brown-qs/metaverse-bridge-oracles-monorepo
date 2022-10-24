@@ -102,8 +102,8 @@ import { ZUserBaitView, ZUserGamepassView } from './views';
 import { MoonsamaCqrsModule } from './cqrs/moonsama-cqrs.module';
 import { CollectionFragmentRoutingModule } from './collectionfragmentrouting/collectionfragmentrouting.module';
 import { CollectionFragmentRoutingEntity } from './collectionfragmentrouting/collectionfragmentrouting.entity';
-import { SyntheticSubItemModule } from './syntheticsubitem/syntheticsubitem.module';
-import { SyntheticSubItemEntity } from './syntheticsubitem/syntheticsubitem.entity';
+import { SyntheticItemLayerModule } from './syntheticitemlayer/syntheticitemlayer.module';
+import { SyntheticItemLayerEntity } from './syntheticitemlayer/syntheticitemlayer.entity';
 
 
 
@@ -137,7 +137,7 @@ import { SyntheticSubItemEntity } from './syntheticsubitem/syntheticsubitem.enti
                 password: configService.get<string>('typeorm.password'),
                 database: configService.get<string>('typeorm.database'),
                 entities: [
-                    SyntheticSubItemEntity,
+                    SyntheticItemLayerEntity,
                     CollectionFragmentRoutingEntity,
                     EmailChangeEntity,
                     MinecraftLinkEntity,
@@ -253,7 +253,7 @@ import { SyntheticSubItemEntity } from './syntheticsubitem/syntheticsubitem.enti
         DidModule,
         KiltDappModule,
         MoonsamaCqrsModule,
-        SyntheticSubItemModule
+        SyntheticItemLayerModule
     ],
     controllers: [],
     providers: []

@@ -4,7 +4,7 @@ import { SyntheticPartEntity } from '../syntheticpart/syntheticpart.entity';
 import { SyntheticItemEntity } from '../syntheticitem/syntheticitem.entity';
 
 @Entity()
-export class SyntheticSubItemEntity {
+export class SyntheticItemLayerEntity {
 
     @PrimaryColumn()
     id: string
@@ -15,6 +15,6 @@ export class SyntheticSubItemEntity {
     @Column({ nullable: false, default: 0 })
     zIndex: number
 
-    @ManyToOne(() => SyntheticItemEntity, (en) => en.subItems, { nullable: false })
+    @ManyToOne(() => SyntheticItemEntity, (en) => en.layers)
     syntheticItem: SyntheticItemEntity;
 }

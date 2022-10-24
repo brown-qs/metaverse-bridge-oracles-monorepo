@@ -28,8 +28,8 @@ import { SnaplogEntity } from "../src/snaplog/snaplog.entity";
 import { SnapshotItemEntity } from "../src/snapshot/snapshotItem.entity";
 import { SummonEntity } from "../src/summon/summon.entity";
 import { SyntheticItemEntity } from "../src/syntheticitem/syntheticitem.entity";
+import { SyntheticItemLayerEntity } from "../src/syntheticitemlayer/syntheticitemlayer.entity";
 import { SyntheticPartEntity } from "../src/syntheticpart/syntheticpart.entity";
-import { SyntheticSubItemEntity } from "../src/syntheticsubitem/syntheticsubitem.entity";
 import { TextureEntity } from "../src/texture/texture.entity";
 import { DidEntity } from "../src/user/did/did.entity";
 import { EmailChangeEntity } from "../src/user/email-change/email-change.entity";
@@ -59,7 +59,7 @@ export const getDatabaseConnection = async (connectionName: string): Promise<Con
             host: process.env.TYPEORM_HOST,
             port: Number.parseInt(process.env.TYPEORM_PORT),
             database: process.env.TYPEORM_DATABASE,
-            entities: [SyntheticSubItemEntity, CollectionFragmentRoutingEntity, MinecraftUuidEntity, MinecraftUserNameEntity, DidEntity, KiltDappEntity, Oauth2ClientEntity, KiltSessionEntity, MinecraftLinkEntity, EmailLoginKeyEntity, EmailChangeEntity, EmailEntity, SyntheticItemEntity, SyntheticPartEntity, CompositeAssetEntity, ResourceInventoryOffsetEntity, ResourceInventoryEntity, CompositeCollectionFragmentEntity, CompositePartEntity, CollectionFragmentEntity, CollectionEntity, GameScoreTypeEntity, PlayerGameItemEntity, GameItemTypeEntity, SnaplogEntity, GganbuEntity, GameTypeEntity, PlayerScoreEntity, PlayerAchievementEntity, AchievementEntity, GameEntity, ChainEntity, MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity, SkinEntity, AssetEntity, SummonEntity, InventoryEntity, PlaySessionEntity, PlaySessionStatEntity],
+            entities: [SyntheticItemLayerEntity, CollectionFragmentRoutingEntity, MinecraftUuidEntity, MinecraftUserNameEntity, DidEntity, KiltDappEntity, Oauth2ClientEntity, KiltSessionEntity, MinecraftLinkEntity, EmailLoginKeyEntity, EmailChangeEntity, EmailEntity, SyntheticItemEntity, SyntheticPartEntity, CompositeAssetEntity, ResourceInventoryOffsetEntity, ResourceInventoryEntity, CompositeCollectionFragmentEntity, CompositePartEntity, CollectionFragmentEntity, CollectionEntity, GameScoreTypeEntity, PlayerGameItemEntity, GameItemTypeEntity, SnaplogEntity, GganbuEntity, GameTypeEntity, PlayerScoreEntity, PlayerAchievementEntity, AchievementEntity, GameEntity, ChainEntity, MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity, SkinEntity, AssetEntity, SummonEntity, InventoryEntity, PlaySessionEntity, PlaySessionStatEntity],
             synchronize: true
         })
     } catch (err) {
