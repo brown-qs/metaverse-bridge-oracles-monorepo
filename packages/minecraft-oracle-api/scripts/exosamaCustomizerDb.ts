@@ -49,7 +49,7 @@ import { MinecraftUserNameEntity } from '../src/user/minecraft-user-name/minecra
 import { getDatabaseConnection } from './common'
 import { promises as fs } from 'fs';
 import path from "path"
-import { SyntheticSubItemEntity } from '../src/syntheticsubitem/syntheticsubitem.entity'
+import { SyntheticItemLayerEntity } from '../src/syntheticitemlayer/syntheticitemlayer.entity'
 config()
 
 async function main() {
@@ -492,10 +492,11 @@ async function main() {
                 const syntheticPart = await connection.manager.findOne<SyntheticPartEntity>(SyntheticPartEntity, { id: traitTypeIdx })
                 const idx = traits.indexOf(t) + 1
     
-                const synethicItemEntity = connection.manager.create<SyntheticItemEntity>(SyntheticItemEntity, { id: `1-${`0x00${traitTypeIdx}`}-${`000000${idx}`.slice(-5)}-${`000000${traitTypeIdx}`.slice(-5)}`, assetId: String(idx), attributes: attrs, syntheticPart })
+                const synethicItemEntity = connection.manager.create<SyntheticItemEntity>(SyntheticItemEntity, { id: `1-${`0x00${traitTypeIdx}`}-${idx}-${traitTypeIdx}`, assetId: String(idx), attributes: attrs, syntheticPart })
                 await connection.manager.save(synethicItemEntity)
             }
-        }*/
+        }
+        return*/
 
     const BASE_PATH = "/Users/me/Downloads"
     const S3_OUTPUT_PATH = `${BASE_PATH}/s3`
@@ -586,9 +587,15 @@ async function main() {
             for (const file of files) {
                 const standardizedPath = attrs.map((a: any) => a.trait_type).join("~")
                 const standardizedFileName = attrs.map((a: any) => a.value).join("~")
-                const idx = files.indexOf(file)
-                const fileId = `${synthItem.id}-${`000000${idx}`.slice(-5)}`
-                const filePath = `${fileId.split("-").join("/")}.png`
+                const layerId = files.indexOf(file)
+
+                const pieces = synthItem.id.split("-")
+                const chainId = pieces[0]
+                const assetAddress = pieces[1].toLowerCase()
+                const assetId = pieces[2]
+
+                const previewFilePath = `${chainId}/${assetAddress}/${assetId}.png`
+                const filePath = `${chainId}/${assetAddress}/${assetId}/${layerId}.png`
                 const fileName = path.basename(filePath)
                 //    console.log(`mkdir -p ${BASE_PATH}/s3/${filePath.replace(fileName, "")}`)
                 execSync(`mkdir -p ${S3_OUTPUT_PATH}/${filePath.replace(fileName, "")}`)
@@ -596,9 +603,16 @@ async function main() {
 
                 const fullFilePath = file.filePath.replace(`${BASE_PATH}/exosama-parts`, "")
                 await fs.copyFile(file.filePath, `${S3_OUTPUT_PATH}/${filePath}`)
+
+                //lets use the first image as the preview for now
+                if (layerId === 0) {
+                    await fs.copyFile(file.filePath, `${S3_OUTPUT_PATH}/${previewFilePath}`)
+
+                }
+
                 // await fs.copyFile(file.filePath, path.normalize(`${STANDARDIZED_OUTPUT_PATH}/${standardizedPath}/${standardizedFileName}.png`))
 
-                const synethicSubItemEntity = connection.manager.create<SyntheticSubItemEntity>(SyntheticSubItemEntity, { id: fileId, description: fullFilePath, syntheticItem: synthItem, zIndex: file.zIndex })
+                const synethicSubItemEntity = connection.manager.create<SyntheticItemLayerEntity>(SyntheticItemLayerEntity, { id: `${chainId}-${assetAddress}-${assetId}-${layerId}`, description: fullFilePath, syntheticItem: synthItem, zIndex: file.zIndex })
                 await connection.manager.save(synethicSubItemEntity)
             }
             if (files.length > 0) {

@@ -1,7 +1,7 @@
 import { CompositeAssetEntity } from '../compositeasset/compositeasset.entity';
 import { Column, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 import { SyntheticPartEntity } from '../syntheticpart/syntheticpart.entity';
-import { SyntheticSubItemEntity } from '../syntheticsubitem/syntheticsubitem.entity';
+import { SyntheticItemLayerEntity } from '../syntheticitemlayer/syntheticitemlayer.entity';
 
 @Entity()
 export class SyntheticItemEntity {
@@ -21,6 +21,6 @@ export class SyntheticItemEntity {
     @ManyToOne(() => SyntheticPartEntity, (syntheticPart) => syntheticPart.items)
     syntheticPart: SyntheticPartEntity;
 
-    @OneToMany(() => SyntheticSubItemEntity, (en) => en.id)
-    subItems: SyntheticSubItemEntity[]
+    @OneToMany(() => SyntheticItemLayerEntity, (en) => en.syntheticItem)
+    layers: SyntheticItemLayerEntity[]
 }
