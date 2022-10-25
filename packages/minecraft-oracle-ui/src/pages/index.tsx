@@ -9,6 +9,8 @@ import { selectAccessToken } from '../state/slices/authSlice';
 import TestPage from './TestPage';
 import SwapPage from './SwapPage';
 import CustomizerPage from './CustomizerPage';
+import ExoAssets from "./exosama/ExoAssets";
+import ExoCustomizer from "./exosama/ExoCustomizer";
 
 export const Routing = () => {
     const accessToken = useSelector(selectAccessToken)
@@ -20,6 +22,8 @@ export const Routing = () => {
             <Route path="/oauth" element={<HomePage />} />
             <Route path="/moonsama/customizer/:chainId/:assetAddress/:assetId" element={<MoonsamaCharacterDesignerPage />} />
             <Route path="/moonsama/customizer" element={<MoonsamaCharacterDesignerPage />} />
+            <Route path="/exosama/assets" element={<ExoAssets />} />
+            <Route path="/exosama/customizer" element={<ExoCustomizer />} />
             <Route path="/swap" element={<SwapPage />} />
             <Route path="/customizer" element={<CustomizerPage />} />
             <Route path="/test" element={<TestPage />} />
