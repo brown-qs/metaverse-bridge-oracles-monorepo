@@ -130,7 +130,7 @@ const ExoCustomizer = () => {
               </h2>
               <AccordionPanel pb={4}>
                 <SimpleGrid
-                  columns={[2, 3, 4, 5]}
+                  columns={[1, 2, 3, 2, 4]}
                   gap={2}
                   maxHeight="300px"
                   overflowY="auto"
