@@ -27,14 +27,14 @@ const TraitCard = ({
   onEquip: (fieldName: string, newValue: string) => void;
 }) => {
   return (
-    <Box maxWidth="220px" role="group">
+    <Box role="group">
       <Box w="100%" borderRadius="10px" overflow="hidden">
         <Box
           bg={`url(${process.env.REACT_APP_COMPOSITE_MEDIA_URI_PREFIX}${trait.previewImageUri})`}
           bgPosition="center"
           bgRepeat="no-repeat"
           bgSize="cover"
-          bgColor="gray.100"
+          bgColor="rgba(255, 255, 255, 0.05)"
           transition="0.2s"
           _after={{ content: '""', display: 'block', paddingBottom: '100%' }}
           _groupHover={{ transform: 'scale(1.05)' }}
@@ -46,14 +46,11 @@ const TraitCard = ({
           zIndex={3}
         >
           <Flex justifyContent="space-between">
-            <Text fontSize="14px">{trait.name}</Text>
+              <Text fontSize="12px">{trait.name}</Text>
           </Flex>
           <Flex>
             {trait.isEquipped ? (
-              <GhostButton
-                w="100%"
-                onClick={() => onEquip(trait.partId, "")}
-              >
+              <GhostButton w="100%" onClick={() => onEquip(trait.partId, '')}>
                 Remove
               </GhostButton>
             ) : (
