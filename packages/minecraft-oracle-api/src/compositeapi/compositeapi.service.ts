@@ -560,7 +560,7 @@ export class CompositeApiService {
             assetAddress: result.collection.assetAddress,
             assetType: result.collection.assetType,
             name: result.collection.name,
-            parts: result.syntheticParts.map(p => syntheticPartToDto(p, result.collection.chainId)).filter(p => !!p)
+            parts: result.syntheticParts.sort((a, b) => a.id - b.id).map(p => syntheticPartToDto(p, result.collection.chainId)).filter(p => !!p)
         }
         return resp
     }

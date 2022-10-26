@@ -30,7 +30,7 @@ export const fetchImageBufferCallback = () => {
 
 export const syntheticPartToDto = (part: SyntheticPartEntity, chainId: number): CompositeConfigPartDto | undefined => {
   //return undefined if there are no items ... caused items having no layers
-  const items = part.items.map(i => syntheticItemToDto(i)).filter(i => !!i)
+  const items = part.items.map(i => syntheticItemToDto(i)).filter(i => !!i).sort((a, b) => a.assetId - b.assetId)
   if (!Array.isArray(items) || items.length === 0) {
     return undefined
   }
