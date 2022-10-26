@@ -60,6 +60,11 @@ const ExoCustomizer = () => {
       (k) => !['Eyewear', 'Face', 'Hair'].includes(k)
     );
   }
+  if (equippedTraits['Body'] !== '') {
+    filteredTraits = filteredTraits.filter(
+      (k) => !['Vibe', 'Expression'].includes(k)
+    );
+  }
 
   // Image Composition... Good luck understanding this xD
   // AKA TODO: Refactor
@@ -86,6 +91,14 @@ const ExoCustomizer = () => {
     )
     // Same as the Earth ;)
     .flat();
+
+  // Filters categories based on other selections
+  let filteredParts = data.parts;
+  if (equippedTraits['Body'] !== '') {
+    filteredParts = filteredParts.filter(
+      (part) => !['Vibe', 'Expression'].includes(part.name)
+    );
+  }
 
   return (
     <Grid
@@ -118,43 +131,46 @@ const ExoCustomizer = () => {
       </Box>
       <Box>
         <Accordion allowToggle>
-          {data.parts.map((part) => (
-            <AccordionItem key={part.name}>
-              <h2>
-                <AccordionButton>
-                  <Box flex="1" textAlign="left" fontFamily="Orbitron">
-                    {part.name}
-                  </Box>
-                  <AccordionIcon />
-                </AccordionButton>
-              </h2>
-              <AccordionPanel pb={4}>
-                <SimpleGrid
-                  columns={[1, 2, 3, 2, 4]}
-                  gap={2}
-                  maxHeight="300px"
-                  overflowY="auto"
-                >
-                  {part.items.map((trait) => {
-                    const { id, assetId, previewImageUri } = trait;
-                    return (
-                      <TraitCard
-                        trait={{
-                          id,
-                          assetId,
-                          previewImageUri,
-                          partId: part.name,
-                          name: trait.attributes[0].value,
-                          isEquipped: trait.id === equippedTraits[part.name],
-                        }}
-                        onEquip={setEquippedTrait}
-                      />
-                    );
-                  })}
-                </SimpleGrid>
-              </AccordionPanel>
-            </AccordionItem>
-          ))}
+          {filteredParts.map((part) => {
+            const { name, items } = part;
+            return (
+              <AccordionItem key={name}>
+                <h2>
+                  <AccordionButton>
+                    <Box flex="1" textAlign="left" fontFamily="Orbitron">
+                      {name}
+                    </Box>
+                    <AccordionIcon />
+                  </AccordionButton>
+                </h2>
+                <AccordionPanel pb={4}>
+                  <SimpleGrid
+                    columns={[1, 2, 3, 2, 4]}
+                    gap={2}
+                    maxHeight="300px"
+                    overflowY="auto"
+                  >
+                    {items.map((trait) => {
+                      const { id, assetId, previewImageUri } = trait;
+                      return (
+                        <TraitCard
+                          trait={{
+                            id,
+                            assetId,
+                            previewImageUri,
+                            partId: part.name,
+                            name: trait.attributes[0].value,
+                            isEquipped: trait.id === equippedTraits[part.name],
+                          }}
+                          onEquip={setEquippedTrait}
+                        />
+                      );
+                    })}
+                  </SimpleGrid>
+                </AccordionPanel>
+              </AccordionItem>
+            );
+          })}
         </Accordion>
       </Box>
     </Grid>
