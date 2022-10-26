@@ -92,6 +92,11 @@ export class CompositeApiService {
         const parentChainId = compositeParent.chainId ?? ChainId.MOONRIVER
         const parentAssetId = compositeParent.assetId
 
+        //temporary dont let peopel save exo configs
+        if (parentChainId !== ChainId.MOONRIVER) {
+            throw new BadRequestException("No you cannot do this.")
+        }
+
         this.logger.log(`saveCompositeConfig:: started for ${parentChainId}-${parentAssetAddress}-${parentAssetId} owned by ${user.minecraftUserName}`, this.context)
         //console.log(compositeChildren)
 

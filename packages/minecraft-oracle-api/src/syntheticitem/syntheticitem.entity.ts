@@ -15,6 +15,9 @@ export class SyntheticItemEntity {
     @Column({ type: 'json', nullable: true })
     attributes?: any;
 
+    @Column({ default: true, nullable: false })
+    showInCustomizer: boolean;
+
     @ManyToMany(() => CompositeAssetEntity, (compositeAsset) => compositeAsset.syntheticChildren)
     compositeAssets?: CompositeAssetEntity[];
 
