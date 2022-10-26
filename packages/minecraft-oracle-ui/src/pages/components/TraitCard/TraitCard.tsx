@@ -9,6 +9,8 @@ import {
 } from '@chakra-ui/react';
 
 import GhostButton from '../GhostButton';
+import { Media } from '../../../components';
+import { MoonsamaImage } from '../../../components/MoonsamaImage';
 
 export interface ITrait {
   id: string;
@@ -30,15 +32,18 @@ const TraitCard = ({
     <Box role="group">
       <Box w="100%" borderRadius="10px" overflow="hidden">
         <Box
-          bg={`url(${process.env.REACT_APP_COMPOSITE_MEDIA_URI_PREFIX}${trait.previewImageUri})`}
-          bgPosition="center"
-          bgRepeat="no-repeat"
-          bgSize="cover"
           bgColor="rgba(255, 255, 255, 0.05)"
           transition="0.2s"
-          _after={{ content: '""', display: 'block', paddingBottom: '100%' }}
+          // _after={{ content: '""', display: 'block', paddingBottom: '100%' }}
           _groupHover={{ transform: 'scale(1.05)' }}
-        ></Box>
+        >
+          <MoonsamaImage
+            src={`${process.env.REACT_APP_COMPOSITE_MEDIA_URI_PREFIX}${trait.previewImageUri}`}
+            onError={() => {}}
+            onLoad={() => {}}
+          />
+        </Box>
+
         <Stack
           bg={trait.isEquipped ? 'orange.500' : 'gray.700'}
           p="10px"
@@ -46,7 +51,7 @@ const TraitCard = ({
           zIndex={3}
         >
           <Flex justifyContent="space-between" minHeight="40px">
-              <Text fontSize="12px">{trait.name}</Text>
+            <Text fontSize="12px">{trait.name}</Text>
           </Flex>
           <Flex>
             {trait.isEquipped ? (
