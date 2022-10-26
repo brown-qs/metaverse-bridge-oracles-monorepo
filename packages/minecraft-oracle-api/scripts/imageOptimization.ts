@@ -1,6 +1,6 @@
 import { MaterialEntity } from '../src/material/material.entity'
 import { Connection, createConnection, getConnection } from 'typeorm'
-import { execSync } from "child_process"
+import { exec, execSync } from "child_process"
 import { config } from 'dotenv'
 import { SnapshotItemEntity } from '../src/snapshot/snapshotItem.entity'
 import { UserEntity } from '../src/user/user/user.entity'
@@ -48,15 +48,21 @@ import { MinecraftUuidEntity } from '../src/user/minecraft-uuid/minecraft-uuid.e
 import { MinecraftUserNameEntity } from '../src/user/minecraft-user-name/minecraft-user-name.entity'
 import { getDatabaseConnection } from './common'
 import { promises as fs } from 'fs';
+import PQueue from "p-queue"
 import path from "path"
 import { SyntheticItemLayerEntity } from '../src/syntheticitemlayer/syntheticitemlayer.entity'
 config()
 
 async function main() {
+    const q = new PQueue({ concurrency: 100 })
+    q.on("idle", () => {
+        console.log("Were finished!")
+    })
+    const images = await getDirRecursive("/Users/me/Downloads/0xac5c7493036de60e63eb81c5e9a440b42f47ebf5")
 
-
-    const images = await getDirRecursive("/Users/me/Downloads/s3final/customizer/1")
-
+    for (const img of images) {
+        q.add(() => processImage(img.path))
+    }
     async function processImage(imagePath: string) {
         if (imagePath.includes("_original.png") || imagePath.includes("_small.png")) {
             throw new Error("nope")
@@ -76,9 +82,10 @@ async function main() {
             console.log("COPYING SMALL")
             await fs.copyFile(originalPath, smallPath)
         }
+        await exec(`sips -Z 128 ${smallPath}`)
 
     }
-    processImage("/Users/me/Desktop/account_page.png")
+
     //  process.exit(0);
 }
 
