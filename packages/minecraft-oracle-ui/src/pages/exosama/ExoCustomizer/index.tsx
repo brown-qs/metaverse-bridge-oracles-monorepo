@@ -4,6 +4,7 @@ import {
   AccordionIcon,
   AccordionItem,
   AccordionPanel,
+  Alert,
   Box,
   Grid,
   SimpleGrid,
@@ -12,6 +13,7 @@ import {
 import { useCustomizerConfigQuery } from '../../../state/api/bridgeApi';
 import TraitCard from 'pages/components/TraitCard/TraitCard';
 import { useEffect, useState } from 'react';
+import { MoonsamaSpinner } from '../../../components/MoonsamaSpinner';
 
 type ILayer = {
   url: string;
@@ -45,12 +47,15 @@ const ExoCustomizer = () => {
   }
 
   if (isFetching) {
-    return <Spinner />;
+    return <MoonsamaSpinner />;
   }
   if (!data || error) {
-    return <Box>Error loading data.</Box>;
+    return (
+      <Box m={20}>
+        <Alert>Configuration failed to load. Please reload the page.</Alert>
+      </Box>
+    );
   }
-
   let filteredTraits = Object.keys(equippedTraits);
 
   // Weird rules
@@ -63,6 +68,14 @@ const ExoCustomizer = () => {
   if (equippedTraits['Body'] !== '') {
     filteredTraits = filteredTraits.filter(
       (k) => !['Vibe', 'Expression'].includes(k)
+    );
+  }
+
+  // Filters categories based on other selections
+  let filteredParts = data.parts;
+  if (equippedTraits['Body'] !== '') {
+    filteredParts = filteredParts.filter(
+      (part) => !['Vibe', 'Expression'].includes(part.name)
     );
   }
 
@@ -92,14 +105,6 @@ const ExoCustomizer = () => {
     // Same as the Earth ;)
     .flat();
 
-  // Filters categories based on other selections
-  let filteredParts = data.parts;
-  if (equippedTraits['Body'] !== '') {
-    filteredParts = filteredParts.filter(
-      (part) => !['Vibe', 'Expression'].includes(part.name)
-    );
-  }
-
   return (
     <Grid
       templateColumns={{ base: 'repeat(1, 1fr)', lg: 'repeat(2, 1fr)' }}
@@ -110,6 +115,8 @@ const ExoCustomizer = () => {
     >
       <Box>
         <Box
+          bgImg="https://dev.static.moonsama.com/customizer-ui/exosama-preview-background.jpg"
+          bgSize="cover"
           bgColor="rgba(255, 255, 255, 0.05)"
           transition="0.2s"
           position="relative"
