@@ -4,6 +4,7 @@ import {
   AccordionIcon,
   AccordionItem,
   AccordionPanel,
+  Alert,
   Box,
   Grid,
   SimpleGrid,
@@ -12,11 +13,13 @@ import {
 import { useCustomizerConfigQuery } from '../../../state/api/bridgeApi';
 import TraitCard from 'pages/components/TraitCard/TraitCard';
 import { useEffect, useState } from 'react';
+import { MoonsamaSpinner } from '../../../components/MoonsamaSpinner';
+import { current } from '@reduxjs/toolkit';
 
-type ILayer = {
-  url: string;
-  zIndex: number;
-};
+// type ILayer = {
+//   url: string;
+//   zIndex: number;
+// };
 
 const ExoCustomizer = () => {
   const { data, isFetching, error } = useCustomizerConfigQuery({
@@ -45,12 +48,16 @@ const ExoCustomizer = () => {
   }
 
   if (isFetching) {
-    return <Spinner />;
+    return <MoonsamaSpinner />;
   }
   if (!data || error) {
-    return <Box>Error loading data.</Box>;
+    return (
+      <Box m={20}>
+        <Alert>Configuration failed to load. Please reload the page.</Alert>
+      </Box>
+    );
   }
-
+  let filteredParts = data.parts;
   let filteredTraits = Object.keys(equippedTraits);
 
   // Weird rules
@@ -58,11 +65,6 @@ const ExoCustomizer = () => {
   if (equippedTraits['Helmet'] !== '') {
     filteredTraits = filteredTraits.filter(
       (k) => !['Eyewear', 'Face', 'Hair'].includes(k)
-    );
-  }
-  if (equippedTraits['Body'] !== '') {
-    filteredTraits = filteredTraits.filter(
-      (k) => !['Vibe', 'Expression'].includes(k)
     );
   }
 
@@ -92,14 +94,20 @@ const ExoCustomizer = () => {
     // Same as the Earth ;)
     .flat();
 
-  // Filters categories based on other selections
-  let filteredParts = data.parts;
-  if (equippedTraits['Body'] !== '') {
-    filteredParts = filteredParts.filter(
-      (part) => !['Vibe', 'Expression'].includes(part.name)
-    );
-  }
+  const bodyTypesMap: any = {
+    '1-0x00101-1-101': 'E1',
+    '1-0x00101-2-101': 'E2',
+  };
+  const bodyType = bodyTypesMap[equippedTraits['Body']];
 
+  const expressionsMap = data.parts
+    .filter((p) => p.name === 'Expression')[0]
+    .items.reduce((current: any, item) => {
+      current[item.id] = item.attributes[0].value;
+      return current;
+    }, {});
+  const expressionType = expressionsMap[equippedTraits['Expression']];
+  
   return (
     <Grid
       templateColumns={{ base: 'repeat(1, 1fr)', lg: 'repeat(2, 1fr)' }}
@@ -110,6 +118,8 @@ const ExoCustomizer = () => {
     >
       <Box>
         <Box
+          bgImg="https://dev.static.moonsama.com/customizer-ui/exosama-preview-background.jpg"
+          bgSize="cover"
           bgColor="rgba(255, 255, 255, 0.05)"
           transition="0.2s"
           position="relative"
@@ -133,6 +143,22 @@ const ExoCustomizer = () => {
         <Accordion allowToggle>
           {filteredParts.map((part) => {
             const { name, items } = part;
+
+            // Filter Expressions and Vibes based on body type
+            let filteredItems = items;
+            if (['Expression', 'Vibe'].includes(name)) {
+              filteredItems = filteredItems.filter((item) => {
+                return item.attributes.map((a) => a.value).includes(bodyType);
+              });
+            }
+            if (['Vibe'].includes(name)) {
+              filteredItems = filteredItems.filter((item) => {
+                return item.attributes
+                  .map((a) => a.value)
+                  .includes(expressionType);
+              });
+            }
+
             return (
               <AccordionItem key={name}>
                 <h2>
@@ -144,29 +170,37 @@ const ExoCustomizer = () => {
                   </AccordionButton>
                 </h2>
                 <AccordionPanel pb={4}>
-                  <SimpleGrid
-                    columns={[1, 2, 3, 2, 4]}
-                    gap={2}
-                    maxHeight="300px"
-                    overflowY="auto"
-                  >
-                    {items.map((trait) => {
-                      const { id, assetId, previewImageUri } = trait;
-                      return (
-                        <TraitCard
-                          trait={{
-                            id,
-                            assetId,
-                            previewImageUri,
-                            partId: part.name,
-                            name: trait.attributes[0].value,
-                            isEquipped: trait.id === equippedTraits[part.name],
-                          }}
-                          onEquip={setEquippedTrait}
-                        />
-                      );
-                    })}
-                  </SimpleGrid>
+                  {filteredItems.length === 0 ? (
+                    <Box>
+                      {name === "Expression" && "Select a Body type first"}
+                      {name === "Vibe" && "Select an Expression first"}
+                    </Box>
+                  ) : (
+                    <SimpleGrid
+                      columns={[1, 2, 3, 2, 4]}
+                      gap={2}
+                      maxHeight="300px"
+                      overflowY="auto"
+                    >
+                      {filteredItems.map((trait) => {
+                        const { id, assetId, previewImageUri } = trait;
+                        return (
+                          <TraitCard
+                            trait={{
+                              id,
+                              assetId,
+                              previewImageUri,
+                              partId: part.name,
+                              name: trait.attributes[0].value,
+                              isEquipped:
+                                trait.id === equippedTraits[part.name],
+                            }}
+                            onEquip={setEquippedTrait}
+                          />
+                        );
+                      })}
+                    </SimpleGrid>
+                  )}
                 </AccordionPanel>
               </AccordionItem>
             );
