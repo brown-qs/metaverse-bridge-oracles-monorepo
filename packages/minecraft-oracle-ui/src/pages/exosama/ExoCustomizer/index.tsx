@@ -60,6 +60,11 @@ const ExoCustomizer = () => {
       (k) => !['Eyewear', 'Face', 'Hair'].includes(k)
     );
   }
+  if (equippedTraits['Body'] !== '') {
+    filteredTraits = filteredTraits.filter(
+      (k) => !['Vibe', 'Expression'].includes(k)
+    );
+  }
 
   // Image Composition... Good luck understanding this xD
   // AKA TODO: Refactor
@@ -87,6 +92,14 @@ const ExoCustomizer = () => {
     // Same as the Earth ;)
     .flat();
 
+  // Filters categories based on other selections
+  let filteredParts = data.parts;
+  if (equippedTraits['Body'] !== '') {
+    filteredParts = filteredParts.filter(
+      (part) => !['Vibe', 'Expression'].includes(part.name)
+    );
+  }
+
   return (
     <Grid
       templateColumns={{ base: 'repeat(1, 1fr)', lg: 'repeat(2, 1fr)' }}
@@ -97,7 +110,7 @@ const ExoCustomizer = () => {
     >
       <Box>
         <Box
-          bgColor="gray.100"
+          bgColor="rgba(255, 255, 255, 0.05)"
           transition="0.2s"
           position="relative"
           _after={{ content: '""', display: 'block', paddingBottom: '100%' }}
@@ -117,44 +130,47 @@ const ExoCustomizer = () => {
         </Box>
       </Box>
       <Box>
-        <Accordion>
-          {data.parts.map((part) => (
-            <AccordionItem key={part.name}>
-              <h2>
-                <AccordionButton>
-                  <Box flex="1" textAlign="left" fontFamily="Orbitron">
-                    {part.name}
-                  </Box>
-                  <AccordionIcon />
-                </AccordionButton>
-              </h2>
-              <AccordionPanel pb={4}>
-                <SimpleGrid
-                  columns={[1, 2, 3, 2, 4]}
-                  gap={2}
-                  maxHeight="300px"
-                  overflowY="auto"
-                >
-                  {part.items.map((trait) => {
-                    const { id, assetId, previewImageUri } = trait;
-                    return (
-                      <TraitCard
-                        trait={{
-                          id,
-                          assetId,
-                          previewImageUri,
-                          partId: part.name,
-                          name: trait.attributes[0].value,
-                          isEquipped: trait.id === equippedTraits[part.name],
-                        }}
-                        onEquip={setEquippedTrait}
-                      />
-                    );
-                  })}
-                </SimpleGrid>
-              </AccordionPanel>
-            </AccordionItem>
-          ))}
+        <Accordion allowToggle>
+          {filteredParts.map((part) => {
+            const { name, items } = part;
+            return (
+              <AccordionItem key={name}>
+                <h2>
+                  <AccordionButton>
+                    <Box flex="1" textAlign="left" fontFamily="Orbitron">
+                      {name}
+                    </Box>
+                    <AccordionIcon />
+                  </AccordionButton>
+                </h2>
+                <AccordionPanel pb={4}>
+                  <SimpleGrid
+                    columns={[1, 2, 3, 2, 4]}
+                    gap={2}
+                    maxHeight="300px"
+                    overflowY="auto"
+                  >
+                    {items.map((trait) => {
+                      const { id, assetId, previewImageUri } = trait;
+                      return (
+                        <TraitCard
+                          trait={{
+                            id,
+                            assetId,
+                            previewImageUri,
+                            partId: part.name,
+                            name: trait.attributes[0].value,
+                            isEquipped: trait.id === equippedTraits[part.name],
+                          }}
+                          onEquip={setEquippedTrait}
+                        />
+                      );
+                    })}
+                  </SimpleGrid>
+                </AccordionPanel>
+              </AccordionItem>
+            );
+          })}
         </Accordion>
       </Box>
     </Grid>

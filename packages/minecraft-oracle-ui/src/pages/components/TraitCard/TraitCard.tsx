@@ -45,7 +45,7 @@ const TraitCard = ({
           position="relative"
           zIndex={3}
         >
-          <Flex justifyContent="space-between">
+          <Flex justifyContent="space-between" minHeight="40px">
               <Text fontSize="12px">{trait.name}</Text>
           </Flex>
           <Flex>
