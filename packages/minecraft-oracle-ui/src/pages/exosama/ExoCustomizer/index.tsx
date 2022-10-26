@@ -14,7 +14,6 @@ import { useCustomizerConfigQuery } from '../../../state/api/bridgeApi';
 import TraitCard from 'pages/components/TraitCard/TraitCard';
 import { useEffect, useState } from 'react';
 import { MoonsamaSpinner } from '../../../components/MoonsamaSpinner';
-import defaultBg from './default.jpg';
 
 type ILayer = {
   url: string;
@@ -116,7 +115,7 @@ const ExoCustomizer = () => {
     >
       <Box>
         <Box
-          bgImg={defaultBg}
+          bgImg="https://dev.static.moonsama.com/customizer-ui/exosama-preview-background.jpg"
           bgSize="cover"
           bgColor="rgba(255, 255, 255, 0.05)"
           transition="0.2s"
