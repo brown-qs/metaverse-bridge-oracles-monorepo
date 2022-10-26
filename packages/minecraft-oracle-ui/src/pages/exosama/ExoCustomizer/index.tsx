@@ -97,7 +97,7 @@ const ExoCustomizer = () => {
     >
       <Box>
         <Box
-          bgColor="gray.100"
+          bgColor="rgba(255, 255, 255, 0.05)"
           transition="0.2s"
           position="relative"
           _after={{ content: '""', display: 'block', paddingBottom: '100%' }}
@@ -117,7 +117,7 @@ const ExoCustomizer = () => {
         </Box>
       </Box>
       <Box>
-        <Accordion>
+        <Accordion allowToggle>
           {data.parts.map((part) => (
             <AccordionItem key={part.name}>
               <h2>
