@@ -58,9 +58,9 @@ const TraitCard = ({
             <Text fontSize="12px">{trait.name}</Text>
           </Flex>
           <Flex>
-              <GhostButton w="100%">
-                {trait.isEquipped ? 'Remove' : 'Equip'}
-              </GhostButton>
+            <GhostButton w="100%">
+              {trait.isEquipped ? 'Remove' : 'Equip'}
+            </GhostButton>
           </Flex>
         </Stack>
       </Box>
