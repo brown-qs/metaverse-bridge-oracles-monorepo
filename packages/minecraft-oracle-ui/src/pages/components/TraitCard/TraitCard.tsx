@@ -29,13 +29,16 @@ const TraitCard = ({
   onEquip: (fieldName: string, newValue: string) => void;
 }) => {
   return (
-    <Box role="group">
+    <Box
+      role="group"
+      cursor="pointer"
+      onClick={() => onEquip(trait.partId, trait.isEquipped ? '' : trait.id)}
+    >
       <Box w="100%" borderRadius="10px" overflow="hidden">
         <Box
           bgColor="rgba(255, 255, 255, 0.05)"
           transition="0.2s"
           // _after={{ content: '""', display: 'block', paddingBottom: '100%' }}
-          _groupHover={{ transform: 'scale(1.05)' }}
         >
           <MoonsamaImage
             src={`${process.env.REACT_APP_COMPOSITE_MEDIA_URI_PREFIX}${trait.previewImageUri}`}
@@ -45,27 +48,19 @@ const TraitCard = ({
         </Box>
 
         <Stack
-          bg={trait.isEquipped ? 'orange.500' : 'gray.700'}
+          bg={trait.isEquipped ? 'gray.600' : 'gray.700'}
           p="10px"
           position="relative"
           zIndex={3}
+          _groupHover={{ background: '#4A5568' }}
         >
           <Flex justifyContent="space-between" minHeight="40px">
             <Text fontSize="12px">{trait.name}</Text>
           </Flex>
           <Flex>
-            {trait.isEquipped ? (
-              <GhostButton w="100%" onClick={() => onEquip(trait.partId, '')}>
-                Remove
+              <GhostButton w="100%">
+                {trait.isEquipped ? 'Remove' : 'Equip'}
               </GhostButton>
-            ) : (
-              <GhostButton
-                w="100%"
-                onClick={() => onEquip(trait.partId, trait.id)}
-              >
-                Equip
-              </GhostButton>
-            )}
           </Flex>
         </Stack>
       </Box>
