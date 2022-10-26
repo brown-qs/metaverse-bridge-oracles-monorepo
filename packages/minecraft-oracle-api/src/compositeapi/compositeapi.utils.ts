@@ -50,6 +50,11 @@ export const syntheticItemToDto = (item: SyntheticItemEntity): CompositeConfigIt
   if (!Array.isArray(item.layers) || item.layers.length === 0) {
     return undefined
   }
+
+  if (item?.showInCustomizer === false) {
+    return undefined
+  }
+
   const parts = item.id.split("-")
   const previewImageUri = `/customizer/${parts[0]}/${parts[1]}/${item.assetId}.png`
   const resp: CompositeConfigItemDto = {
@@ -57,7 +62,7 @@ export const syntheticItemToDto = (item: SyntheticItemEntity): CompositeConfigIt
     assetId: parseInt(item.assetId),
     previewImageUri,
     attributes: item.attributes,
-    layers: item.layers.map(l => syntheticItemLayerToDto(l))
+    layers: item.layers.map(l => syntheticItemLayerToDto(l)),
   }
   return resp
 }

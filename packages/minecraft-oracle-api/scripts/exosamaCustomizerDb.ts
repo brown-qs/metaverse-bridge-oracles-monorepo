@@ -498,6 +498,7 @@ async function main() {
         }
         return*/
 
+    /*
     const BASE_PATH = "/Users/me/Downloads"
     const S3_OUTPUT_PATH = `${BASE_PATH}/s3`
     const STANDARDIZED_OUTPUT_PATH = `${BASE_PATH}/exo-standardized`
@@ -622,7 +623,31 @@ async function main() {
             }
             console.log("---------------------------------------\n\n")
         }
+    }*/
+    const weaponFiles = await getDirRecursive("/Users/me/Downloads/exosama_weapons")
+    const synItems = await connection.manager.find<SyntheticItemEntity>(SyntheticItemEntity, { syntheticPart: { id: 106 } })
+    let results = []
+    for (const synItem of synItems) {
+        const attrs = synItem.attributes[0]
+        if (attrs.trait_type === "Weapon") {
+            const val = attrs.value.replace("Sniper Rifle", "Sniper").replace("SMG-217", "smg-218").replace("Golden Cyber Axe", "Crimson Cyber Axe").replace("Royal Cyber Axe", "Midnight Cyber Axe")
+            const snakeVal = snakeCase(val).replace("a_k-47", "ak47") + ".png"
+            console.log(snakeVal)
+            const matchingFile = weaponFiles.find((f: any) => f.file === snakeVal)
+            if (!!matchingFile) {
+                //   console.log(`${val} MATCH: ${matchingFile.path}`)
+                const pieces = synItem.id.split("-")
+                const s3Path = `customizer/${pieces[0]}/${pieces[1]}/${synItem.assetId}.png`
+                results.push({ path: matchingFile.path, s3Path })
+                console.log(s3Path)
+            } else {
+                // console.log(`${val} NO MATCH`)
+
+            }
+            // console.log("\n\n")
+        }
     }
+    console.log(JSON.stringify(results))
 
     process.exit(0);
 }
