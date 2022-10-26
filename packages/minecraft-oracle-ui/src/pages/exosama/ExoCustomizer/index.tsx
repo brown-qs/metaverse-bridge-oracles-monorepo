@@ -15,10 +15,10 @@ import TraitCard from 'pages/components/TraitCard/TraitCard';
 import { useEffect, useState } from 'react';
 import { MoonsamaSpinner } from '../../../components/MoonsamaSpinner';
 
-type ILayer = {
-  url: string;
-  zIndex: number;
-};
+// type ILayer = {
+//   url: string;
+//   zIndex: number;
+// };
 
 const ExoCustomizer = () => {
   const { data, isFetching, error } = useCustomizerConfigQuery({
@@ -56,6 +56,7 @@ const ExoCustomizer = () => {
       </Box>
     );
   }
+  let filteredParts = data.parts;
   let filteredTraits = Object.keys(equippedTraits);
 
   // Weird rules
@@ -65,19 +66,7 @@ const ExoCustomizer = () => {
       (k) => !['Eyewear', 'Face', 'Hair'].includes(k)
     );
   }
-  if (equippedTraits['Body'] !== '') {
-    filteredTraits = filteredTraits.filter(
-      (k) => !['Vibe', 'Expression'].includes(k)
-    );
-  }
 
-  // Filters categories based on other selections
-  let filteredParts = data.parts;
-  if (equippedTraits['Body'] !== '') {
-    filteredParts = filteredParts.filter(
-      (part) => !['Vibe', 'Expression'].includes(part.name)
-    );
-  }
 
   // Image Composition... Good luck understanding this xD
   // AKA TODO: Refactor
@@ -104,6 +93,12 @@ const ExoCustomizer = () => {
     )
     // Same as the Earth ;)
     .flat();
+
+  const bodyTypesMap: any = {
+    "1-0x00101-1-101": "E1",
+    "1-0x00101-2-101": "E2",
+  }
+  const bodyType = bodyTypesMap[equippedTraits['Body']]
 
   return (
     <Grid
@@ -140,6 +135,16 @@ const ExoCustomizer = () => {
         <Accordion allowToggle>
           {filteredParts.map((part) => {
             const { name, items } = part;
+
+            // Filter Expressions and Vibes based on body type
+            let filteredItems = items
+            if(["Expression", "Vibe"].includes(name)){
+              filteredItems = filteredItems.filter(item => {
+                const attrs = item.attributes.map(a => a.value)
+                return attrs.includes(bodyType)
+              })
+            }
+
             return (
               <AccordionItem key={name}>
                 <h2>
@@ -157,7 +162,7 @@ const ExoCustomizer = () => {
                     maxHeight="300px"
                     overflowY="auto"
                   >
-                    {items.map((trait) => {
+                    {filteredItems.map((trait) => {
                       const { id, assetId, previewImageUri } = trait;
                       return (
                         <TraitCard
