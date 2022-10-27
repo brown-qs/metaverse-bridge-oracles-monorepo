@@ -624,6 +624,8 @@ async function main() {
             console.log("---------------------------------------\n\n")
         }
     }*/
+
+    /*
     const weaponFiles = await getDirRecursive("/Users/me/Downloads/exosama_weapons")
     const synItems = await connection.manager.find<SyntheticItemEntity>(SyntheticItemEntity, { syntheticPart: { id: 106 } })
     let results = []
@@ -647,9 +649,25 @@ async function main() {
             // console.log("\n\n")
         }
     }
-    console.log(JSON.stringify(results))
+    console.log(JSON.stringify(results))*/
 
-    process.exit(0);
+    const synItems = await connection.manager.find<SyntheticItemEntity>(SyntheticItemEntity, { syntheticPart: { id: 105 } })
+    const allIds = []
+    for (const item of synItems) {
+        const attrs = item.attributes
+        if (JSON.stringify(attrs).includes(` Bomber"}]`)) {
+            //   console.log(JSON.stringify(item, null, 4))
+            const pieces = item.id.split("-")
+            const newId = `1-${pieces[1]}-${item.assetId}-1`
+            allIds.push(newId)
+            const synethicSubItemEntity = connection.manager.create<SyntheticItemLayerEntity>(SyntheticItemLayerEntity, { id: newId, description: "/clothes/onyx_hacker_clothes.png", syntheticItem: item, zIndex: 501 })
+            await connection.manager.save(synethicSubItemEntity)
+
+        }
+    }
+    console.log(JSON.stringify(allIds))
+
+    //   process.exit(0);
 }
 
 var getDirRecursive = async (dir: any) => {
