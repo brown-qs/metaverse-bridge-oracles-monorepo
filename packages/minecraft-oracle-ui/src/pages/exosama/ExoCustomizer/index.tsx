@@ -57,6 +57,7 @@ const ExoCustomizer = () => {
       </Box>
     );
   }
+
   let filteredParts = data.parts;
   let filteredTraits = Object.keys(equippedTraits);
 
@@ -107,14 +108,14 @@ const ExoCustomizer = () => {
       return current;
     }, {});
   const expressionType = expressionsMap[equippedTraits['Expression']];
-  
+
   return (
     <Grid
       templateColumns={{ base: 'repeat(1, 1fr)', lg: 'repeat(2, 1fr)' }}
       maxWidth="1536px"
       margin="0 auto"
       gap="20px"
-      p="20px"
+      // p="20px 0 20px 20px"
     >
       <Box>
         <Box
@@ -178,9 +179,9 @@ const ExoCustomizer = () => {
                   ) : (
                     <SimpleGrid
                       columns={[1, 2, 3, 2, 4]}
-                      gap={2}
+                      gap="10px"
                       maxHeight="300px"
-                      overflowY="auto"
+                      overflowY="auto" pr="10px"
                     >
                       {filteredItems.map((trait) => {
                         const { id, assetId, previewImageUri } = trait;
