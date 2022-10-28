@@ -4,6 +4,7 @@ import { ReactNode } from "react";
 import { formatOnChainTokenName, formatOnChainTokenSuffix, StandardizedOnChainTokenWithRecognizedTokenData } from "../../utils/graphqlReformatter";
 import { PortalTabListBalanceProps, PortalTabListClickableProps, PortalTabListItem, PortalTabListItemProps } from "./PortalTabListItem";
 import { BigNumber } from "@ethersproject/bignumber";
+import { utils } from "ethers"
 
 export type OnChainResourceProps = {
     token: StandardizedOnChainTokenWithRecognizedTokenData,
@@ -13,6 +14,7 @@ export type OnChainResourceProps = {
 export const OnChainResource: React.FC<OnChainResourceProps> = ({ token, ...inProps }) => {
     const lineOne: string | undefined = React.useMemo(() => formatOnChainTokenName(token), [token])
     const lineOneSuffix: string | undefined = React.useMemo(() => formatOnChainTokenSuffix(token), [token])
+    const balanceEther: string | undefined = React.useMemo(() => token.treatAsFungible ? utils.formatUnits(token.balance ?? "0", token.decimals) : undefined, [token])
 
     const props: PortalTabListItemProps = {
         mediaUrl: token?.metadata?.image ?? undefined,
@@ -28,7 +30,7 @@ export const OnChainResource: React.FC<OnChainResourceProps> = ({ token, ...inPr
         checkboxValue: undefined,
         isCheckboxDisabled: undefined,
 
-        balanceEther: BigNumber.from(token.balance).div(BigNumber.from(10).pow(token.decimals)),
+        balanceEther,
 
         ...inProps
     }
