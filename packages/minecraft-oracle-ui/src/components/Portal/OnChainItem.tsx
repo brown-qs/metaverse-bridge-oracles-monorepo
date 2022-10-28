@@ -4,6 +4,7 @@ import { ReactNode } from "react";
 import { formatOnChainTokenName, formatOnChainTokenSuffix, StandardizedOnChainTokenWithRecognizedTokenData } from "../../utils/graphqlReformatter";
 import { Media } from "../Media";
 import { PortalTabListBalanceProps, PortalTabListCheckableProps, PortalTabListItem, PortalTabListItemProps } from "./PortalTabListItem";
+import { BigNumber } from "@ethersproject/bignumber";
 
 export type OnChainItemProps = {
     token: StandardizedOnChainTokenWithRecognizedTokenData,
@@ -26,7 +27,7 @@ export const OnChainItem: React.FC<OnChainItemProps> = ({ token, ...inProps }) =
 
         onClick: undefined,
 
-        balanceEther: undefined,
+        balanceEther: token.treatAsFungible ? BigNumber.from(token.balance).div(BigNumber.from(10).pow(token.decimals)) : undefined,
 
         ...inProps
     }
