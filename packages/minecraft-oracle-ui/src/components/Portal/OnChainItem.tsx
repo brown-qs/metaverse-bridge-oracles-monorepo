@@ -5,17 +5,19 @@ import { formatOnChainTokenName, formatOnChainTokenSuffix, StandardizedOnChainTo
 import { Media } from "../Media";
 import { PortalTabListBalanceProps, PortalTabListCheckableProps, PortalTabListItem, PortalTabListItemProps } from "./PortalTabListItem";
 import { BigNumber } from "@ethersproject/bignumber";
+import { utils } from "ethers"
 
 export type OnChainItemProps = {
     token: StandardizedOnChainTokenWithRecognizedTokenData,
     children?: ReactNode
 } & PortalTabListCheckableProps
 export const OnChainItem: React.FC<OnChainItemProps> = ({ token, ...inProps }) => {
+
     const lineOne: string | undefined = React.useMemo(() => formatOnChainTokenName(token), [token])
     const lineOneSuffix: string | undefined = React.useMemo(() => formatOnChainTokenSuffix(token), [token])
 
     const lineTwo: string | undefined = React.useMemo(() => token.enrapturable ? "This item will be burned into your account." : undefined, [token])
-
+    const balanceEther: string | undefined = React.useMemo(() => token.treatAsFungible ? utils.formatUnits(token.balance ?? "0", token.decimals) : undefined, [token])
     const props: PortalTabListItemProps = {
         mediaUrl: token?.metadata?.image ?? undefined,
         isLoading: false,
@@ -27,7 +29,7 @@ export const OnChainItem: React.FC<OnChainItemProps> = ({ token, ...inProps }) =
 
         onClick: undefined,
 
-        balanceEther: token.treatAsFungible ? BigNumber.from(token.balance).div(BigNumber.from(10).pow(token.decimals)) : undefined,
+        balanceEther,
 
         ...inProps
     }

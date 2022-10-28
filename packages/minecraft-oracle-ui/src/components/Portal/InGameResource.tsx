@@ -20,7 +20,7 @@ export const InGameResource: React.FC<InGameResourceProps> = ({ token, ...inProp
         lineOneSuffix,
         mediaRedOutline: false,
         lineTwo: undefined,
-        highlightable: false,
+        highlightable: true,
 
         onClick: undefined,
 
@@ -29,7 +29,7 @@ export const InGameResource: React.FC<InGameResourceProps> = ({ token, ...inProp
         checkboxValue: undefined,
         isCheckboxDisabled: undefined,
 
-        balanceEther: undefined,
+        balanceEther: token.amount,
 
         ...inProps
     }
