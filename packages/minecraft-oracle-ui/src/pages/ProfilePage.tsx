@@ -9,12 +9,11 @@ import { SKIN_LABELS } from '../constants/skins';
 import { BURNABLE_RESOURCES_IDS, ChainId, DEFAULT_CHAIN, NETWORK_NAME, PERMISSIONED_CHAINS, RARESAMA_POOP, SHIT_FART } from "../constants";
 import { AssetChainDetails } from '../components/AssetChainDetails/AssetChainDetails';
 import { Image, Text, Box, Container, Grid, List as ChakraList, ListIcon, ListItem, Stack, Tooltip, Button, Flex, SimpleGrid, GridItem, VStack, HStack, background, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useCheckboxGroup, useMediaQuery, CircularProgress } from '@chakra-ui/react';
-import { BridgeTab } from '../components/Bridge/BridgeTab';
-import { InGameItem } from '../components/Bridge/InGameItem';
+import { InGameItem } from '../components/Portal/InGameItem';
 import { CaretLeft, CaretRight, DeviceGamepad, UserCircle, Wallet } from 'tabler-icons-react';
-import { InGameResource } from '../components/Bridge/InGameResource';
-import { OnChainResource } from '../components/Bridge/OnChainResource';
-import { OnChainItem } from '../components/Bridge/OnChainItem';
+import { InGameResource } from '../components/Portal/InGameResource';
+import { OnChainResource } from '../components/Portal/OnChainResource';
+import { OnChainItem } from '../components/Portal/OnChainItem';
 import BackgroundImage from '../assets/images/bridge-background-blur.svg'
 import { useSetSkinMutation, useGetSkinsQuery, useUserProfileQuery, useGetRecognizedAssetsQuery, useGetInGameItemsQuery, useGetInGameResourcesQuery } from '../state/api/bridgeApi';
 import { Virtuoso } from 'react-virtuoso'
@@ -40,6 +39,7 @@ import { InModal } from '../components/modals/InModal';
 import { openInModal, setInModalTokens } from '../state/slices/inModalSlice';
 import { openOutModal, setOutModalTokens } from '../state/slices/outModalSlice';
 import { OutModal } from '../components/modals/OutModal';
+import { PortalTab } from '../components/Portal/PortalTab';
 
 
 const ProfilePage = () => {
@@ -400,7 +400,7 @@ const ProfilePage = () => {
                                 rowSpan={1}
                                 colSpan={{ base: 12, md: 6, lg: 4 }}
                             >
-                                <BridgeTab
+                                <PortalTab
                                     title="Available Skins"
                                     emptyMessage={!!skins ? undefined : "No available skins found."}
                                     icon={<UserCircle size="18px" />}
@@ -455,7 +455,7 @@ const ProfilePage = () => {
                                             </Grid>
                                         </VStack>
                                     }
-                                </BridgeTab>
+                                </PortalTab>
                             </GridItem>
                             {/* END SKINS */}
 
@@ -473,7 +473,7 @@ const ProfilePage = () => {
                                 rowSpan={1}
                                 colSpan={{ base: 12, md: 6, lg: 4 }}
                             >
-                                <BridgeTab
+                                <PortalTab
                                     isLoading={isInGameItemsDataLoading}
                                     title="In-Game Items"
                                     emptyMessage={inGameItems?.length ? undefined : "No in-game items found."}
@@ -533,29 +533,26 @@ const ProfilePage = () => {
                                                 }
                                                 return (
                                                     <InGameItem
-                                                        lineOne={formatInGameTokenName(token)}
-                                                        lineTwo={token.enraptured ? "Enraptured. Not exportable." : undefined}
-                                                        mediaRedOutline={token.enraptured === true}
-                                                        mediaUrl={token?.metadata?.image}
-                                                        isLoading={!!token?.metadata !== true}
-                                                        key={token.hash}
-                                                        isCheckboxDisabled={isCheckBoxDisabled(token)}
-                                                        checkboxValue={String(token.hash)}
-                                                        isChecked={inGameCheckboxGroupValue.includes(String(token.hash))}
-                                                        onCheckboxChange={(e) => {
+                                                        token={token}
 
+                                                        key={token.hash}
+
+                                                        //checkbox props
+                                                        onClick={() => {
+                                                            dispatch(setInGameItemModalToken(token))
+                                                            dispatch(openInGameItemModal())
+                                                        }}
+
+                                                        onCheckboxChange={(e) => {
                                                             if (e.target.checked) {
                                                                 setInGameCheckboxGroupValue([...inGameCheckboxGroupValue, token.hash!])
                                                             } else {
                                                                 setInGameCheckboxGroupValue([...inGameCheckboxGroupValue.filter(id => id !== token.hash)])
                                                             }
-
                                                         }}
-                                                        highlightable={true}
-                                                        onClick={() => {
-                                                            dispatch(setInGameItemModalToken(token))
-                                                            dispatch(openInGameItemModal())
-                                                        }}
+                                                        isChecked={inGameCheckboxGroupValue.includes(String(token.hash))}
+                                                        checkboxValue={String(token.hash)}
+                                                        isCheckboxDisabled={isCheckBoxDisabled(token)}
                                                     >
                                                     </InGameItem>
 
@@ -565,7 +562,7 @@ const ProfilePage = () => {
                                         </Virtuoso>
                                     }
 
-                                </BridgeTab>
+                                </PortalTab>
                             </GridItem>
                             {/* END IN-GAME ITEMS */}
 
@@ -583,7 +580,7 @@ const ProfilePage = () => {
                                 rowSpan={1}
                                 colSpan={{ base: 12, md: 6, lg: 4 }}
                             >
-                                <BridgeTab
+                                <PortalTab
                                     title="On-Chain Items"
                                     emptyMessage={emptyOnChainItemsMessage}
                                     isLoading={isOnChainItemsLoading}
@@ -647,15 +644,10 @@ const ProfilePage = () => {
                                                 }
                                                 return (
                                                     <OnChainItem
-                                                        lineOne={formatOnChainTokenName(token)}
-                                                        lineTwo={token.enrapturable ? "This item will be burned into your account." : undefined}
-                                                        mediaRedOutline={token.enrapturable === true}
-                                                        mediaUrl={token?.metadata?.image ?? ""}
-                                                        isLoading={false}
-                                                        key={token.id} //update key
-                                                        isCheckboxDisabled={isCheckBoxDisabled(token)}
-                                                        checkboxValue={token.id}
-                                                        isChecked={onChainCheckboxGroupValue.includes(token.id)}
+                                                        token={token}
+
+                                                        key={token.id}
+
                                                         onCheckboxChange={(e) => {
                                                             if (e.target.checked) {
                                                                 setOnChainCheckboxGroupValue([...onChainCheckboxGroupValue, token.id])
@@ -663,6 +655,9 @@ const ProfilePage = () => {
                                                                 setOnChainCheckboxGroupValue([...onChainCheckboxGroupValue.filter(id => id !== token.id)])
                                                             }
                                                         }}
+                                                        isChecked={onChainCheckboxGroupValue.includes(token.id)}
+                                                        checkboxValue={token.id}
+                                                        isCheckboxDisabled={isCheckBoxDisabled(token)}
                                                     >
                                                     </OnChainItem>
                                                 )
@@ -670,7 +665,7 @@ const ProfilePage = () => {
                                         >
                                         </Virtuoso>
                                     }
-                                </BridgeTab>
+                                </PortalTab>
                             </GridItem>
                             {/* END ON-CHAIN ITEMS */}
 
@@ -688,7 +683,7 @@ const ProfilePage = () => {
                                 rowSpan={1}
                                 colSpan={{ base: 12, md: 6, lg: 6 }}
                             >
-                                <BridgeTab
+                                <PortalTab
                                     title="In-Game Resources"
                                     isLoading={isInGameResourcesLoading}
                                     emptyMessage={inGameResources?.length ? undefined : "No in-game resources available."}
@@ -716,11 +711,9 @@ const ProfilePage = () => {
                                                 const token = inGameResources[index]
                                                 return (
                                                     <InGameResource
-                                                        isLoading={!!token?.metadata !== true}
-                                                        lineOne={token?.metadata?.name}
-                                                        mediaUrl={token?.metadata?.image ?? ""}
+                                                        token={token}
+
                                                         key={`${token.assetAddress}~${token.assetId}`} //update key
-                                                        balanceWei={utils.parseEther(token?.amount)}
                                                     >
                                                     </InGameResource>
                                                 )
@@ -728,7 +721,7 @@ const ProfilePage = () => {
                                         >
                                         </Virtuoso>
                                     }
-                                </BridgeTab>
+                                </PortalTab>
                             </GridItem>
                             {/* END IN-GAME RESOURCES */}
 
@@ -745,7 +738,7 @@ const ProfilePage = () => {
                                 rowSpan={1}
                                 colSpan={{ base: 12, md: 12, lg: 6 }}
                             >
-                                <BridgeTab
+                                <PortalTab
                                     title="On-Chain Resources"
                                     emptyMessage={emptyOnChainResourcesMessage}
                                     isLoading={isOnChainResourcesLoading}
@@ -758,11 +751,10 @@ const ProfilePage = () => {
                                                 const token = onChainResources[index]
                                                 return (
                                                     <OnChainResource
-                                                        lineOne={formatOnChainTokenName(token)}
-                                                        mediaUrl={token?.metadata?.image}
-                                                        balanceWei={BigNumber.from(token.balance)}
-                                                        isLoading={false}
+                                                        token={token}
+
                                                         key={token.id}
+
                                                         onClick={() => {
                                                             //user will be able to see resources in their metamask wallet as under assets, nothing is moving
                                                             dispatch(setOnChainResource(token))
@@ -776,7 +768,7 @@ const ProfilePage = () => {
                                         >
                                         </Virtuoso>
                                     }
-                                </BridgeTab>
+                                </PortalTab>
                             </GridItem>
                             {/* END ON-CHAIN RESOURCES */}
 

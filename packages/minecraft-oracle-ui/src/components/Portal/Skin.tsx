@@ -3,7 +3,6 @@ import React, { ReactNode } from "react";
 import { useSetSkinMutation } from "../../state/api/bridgeApi";
 import { SkinResponse } from "../../state/api/types";
 import { Media } from "../Media";
-import { BridgeTabListItemCheckable, BridgeTabListItemCheckableProps } from "./BridgeTabListItem";
 
 export type SkinProps = {
     skin: SkinResponse,

@@ -3,18 +3,40 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { ReactNode } from "react";
 import { Media } from "..";
 import { utils } from "ethers"
-export type BridgeTabListItemProps = {
-    mediaUrl: string | undefined | null,
-    lineOne: string | undefined | null,
+
+
+export type BasePortalTabListItemProps = {
+    mediaUrl: string | undefined,
+    lineOne: string | undefined,
     isLoading: boolean,
-    mediaRedOutline?: boolean,
-    lineTwo?: string,
-    highlightable?: boolean,
-    onClick?: () => void,
+    mediaRedOutline: boolean | undefined,
+    lineTwo: string | undefined,
+    highlightable: boolean | undefined,
+
     children?: ReactNode,
 }
 
-const BridgeTabListItem: React.FC<BridgeTabListItemProps> = ({ mediaUrl, lineOne, isLoading, mediaRedOutline, lineTwo, highlightable, onClick, children }) => {
+
+export type PortalTabListClickableProps = {
+    onClick: () => void | undefined,
+}
+
+export type PortalTabListCheckableProps = {
+    onCheckboxChange: (e: React.ChangeEvent<HTMLInputElement>) => void | undefined,
+    isChecked: boolean | undefined,
+    checkboxValue: string | undefined,
+    isCheckboxDisabled: boolean | undefined
+}
+
+export type PortalTabListBalanceProps = {
+    balanceEther: BigNumber | undefined
+}
+
+export type PortalTabListItemProps = BasePortalTabListItemProps & PortalTabListClickableProps & PortalTabListCheckableProps & PortalTabListBalanceProps
+
+//balanceEther: BigNumber
+
+export const PortalTabListItem: React.FC<PortalTabListItemProps> = ({ mediaUrl, lineOne, isLoading, mediaRedOutline, lineTwo, highlightable, onClick, children }) => {
     const _hover: CSSObject = highlightable ? { bg: "whiteAlpha.200", borderRadius: "4px" } : {}
     return (
         <Box
@@ -80,37 +102,3 @@ const BridgeTabListItem: React.FC<BridgeTabListItemProps> = ({ mediaUrl, lineOne
         </Box>
     )
 };
-
-export type BridgeTabListItemCheckableProps = BridgeTabListItemProps & { onCheckboxChange: (e: React.ChangeEvent<HTMLInputElement>) => void, isChecked: boolean, checkboxValue: string, isCheckboxDisabled: boolean }
-export const BridgeTabListItemCheckable: React.FC<BridgeTabListItemCheckableProps> = ({ checkboxValue, isCheckboxDisabled, onCheckboxChange, isChecked, ...baseProps }) => {
-    return (<BridgeTabListItem {...baseProps}>
-        <Box
-            cursor="default"
-            paddingRight="12px"
-        >
-            <Checkbox
-                value={checkboxValue}
-                isDisabled={isCheckboxDisabled}
-                isChecked={isChecked}
-                onChange={(e) => onCheckboxChange(e)}
-            >
-
-            </Checkbox>
-        </Box>
-    </BridgeTabListItem>)
-}
-
-export type BridgeTabListItemWithBalanceProps = BridgeTabListItemProps & { balanceWei: BigNumber }
-export const BridgeTabListItemWithBalance: React.FC<BridgeTabListItemWithBalanceProps> = ({ balanceWei, ...baseProps }) => {
-    return (<BridgeTabListItem {...baseProps}>
-        <Box
-            bg="rgba(255, 255, 255, 0.06)"
-            borderRadius="4px"
-            padding="8px"
-            fontFamily="Orbitron"
-            fontSize="14px !important"
-        >
-            {parseFloat(utils.formatEther(balanceWei)).toFixed(2)}
-        </Box>
-    </BridgeTabListItem>)
-}

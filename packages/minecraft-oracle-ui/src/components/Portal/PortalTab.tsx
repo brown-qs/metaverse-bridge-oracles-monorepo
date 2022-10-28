@@ -1,7 +1,7 @@
 import { VStack, HStack, Box, CircularProgress, useMediaQuery } from "@chakra-ui/react";
 import { ReactNode } from "react";
 
-export const BridgeTab: React.FC<{ title: string, children: ReactNode, isLoading?: boolean, icon?: ReactNode, footer?: ReactNode, emptyMessage?: string }> = ({ title, children, isLoading, icon, footer, emptyMessage }) => {
+export const PortalTab: React.FC<{ title: string, children: ReactNode, isLoading?: boolean, icon?: ReactNode, footer?: ReactNode, emptyMessage?: string }> = ({ title, children, isLoading, icon, footer, emptyMessage }) => {
     const [isSmallerThan285] = useMediaQuery('(max-width: 285px)')
     const topRightCornerRadius = isSmallerThan285 ? "0px" : "8px"
     return (
