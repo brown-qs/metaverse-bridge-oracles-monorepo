@@ -1,16 +1,37 @@
 import { Box, HStack } from "@chakra-ui/react";
+import React from "react";
 import { ReactNode } from "react";
-import { InGameTokenMaybeMetadata } from "../../utils/graphqlReformatter";
+import { formatInGameTokenName, formatInGameTokenSuffix, InGameTokenMaybeMetadata } from "../../utils/graphqlReformatter";
 import { Media } from "../Media";
-import { PortalTabListItem } from "./PortalTabListItem";
+import { PortalTabListItem, PortalTabListItemProps } from "./PortalTabListItem";
 
 export type InGameResourceProps = {
     token: InGameTokenMaybeMetadata,
     children?: ReactNode
 }
-export const InGameResource: React.FC<InGameResourceProps> = ({ ...inProps }) => {
-    const props = {
-        ...inProps,
+export const InGameResource: React.FC<InGameResourceProps> = ({ token, ...inProps }) => {
+    const lineOne: string | undefined = React.useMemo(() => formatInGameTokenName(token), [token])
+    const lineOneSuffix: string | undefined = React.useMemo(() => formatInGameTokenSuffix(token), [token])
+
+    const props: PortalTabListItemProps = {
+        mediaUrl: token?.metadata?.image ?? undefined,
+        isLoading: !!token?.metadata !== true,
+        lineOne,
+        lineOneSuffix,
+        mediaRedOutline: false,
+        lineTwo: undefined,
+        highlightable: false,
+
+        onClick: undefined,
+
+        onCheckboxChange: undefined,
+        isChecked: undefined,
+        checkboxValue: undefined,
+        isCheckboxDisabled: undefined,
+
+        balanceEther: undefined,
+
+        ...inProps
     }
     return (
         <PortalTabListItem
