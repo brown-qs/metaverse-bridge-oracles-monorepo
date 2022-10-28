@@ -106,6 +106,7 @@ export type BridgedAssetDto = {
     assetType: string
     amount: string
     exportable: boolean
+    treatAsFungible: boolean,
     summonable: boolean
     recognizedAssetType: string
     enraptured: boolean

@@ -15,7 +15,7 @@ import { TypeContractsCallbackProvider, TypeRecognizedAssetsProvider } from '../
 import { ConfigService } from '@nestjs/config';
 import { BridgeAssetType } from '../common/enums/AssetType';
 import { ResourceInventoryService } from '../resourceinventory/resourceinventory.service';
-import { formatEther } from 'ethers/lib/utils';
+import { formatEther, formatUnits } from 'ethers/lib/utils';
 import { BigNumber } from 'ethers';
 import { EventBus } from '@nestjs/cqrs';
 import { SkinSelectedEvent } from '../cqrs/events/skin-selected.event';
@@ -62,53 +62,45 @@ export class ProfileApiService {
 
 
     async getInGameItems(user: UserEntity): Promise<AssetDto[]> {
-        const importableAssets = await this.getRecognizedAssets(BridgeAssetType.IMPORTED)
-        const enrapturableAssets = await this.getRecognizedAssets(BridgeAssetType.ENRAPTURED)
-        const userAssets = await this.assetService.findMany({ where: { owner: user.uuid, pendingIn: false }, relations: ['collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
-        const assets = []
+        const userAssets = await this.assetService.findMany({ where: { owner: user.uuid, pendingIn: false }, relations: ['collectionFragment', 'collectionFragment.collection', 'resourceInventory', 'resourceInventory.offset'], loadEagerRelations: true })
+        const assets: AssetDto[] = []
         for (const asset of userAssets) {
             const assetAddress = asset.collectionFragment.collection.assetAddress.toLowerCase()
-            const recongizedEnraptureAsset = findRecognizedAsset(enrapturableAssets, { assetAddress, assetId: asset.assetId })
+            const treatAsFungible = asset.collectionFragment.treatAsFungible
 
-            if (!!recongizedEnraptureAsset && recongizedEnraptureAsset.recognizedAssetType.valueOf() !== RecognizedAssetType.RESOURCE.valueOf()) {
-                assets.push({
-                    amount: asset.amount,
-                    assetAddress,
-                    assetType: asset.collectionFragment.collection.assetType,
-                    assetId: asset.assetId,
-                    name: recongizedEnraptureAsset.name,
-                    exportable: !asset.enraptured,
-                    hash: asset.hash,
-                    summonable: false,
-                    recognizedAssetType: recongizedEnraptureAsset.recognizedAssetType.valueOf(),
-                    enraptured: asset.enraptured,
-                    chainId: asset.collectionFragment.collection.chainId,
-                    exportAddress: asset.assetOwner?.toLowerCase(),
-                    multiverseVersion: asset.collectionFragment.collection.multiverseVersion
-                })
-                continue
+            //combine fungibles
+            if (treatAsFungible) {
+                const existingEntry = assets.find(a => a.assetAddress === assetAddress && a.assetId === asset.assetId)
+                let balance = BigNumber.from(asset.amount)
+                if (!!asset.resourceInventory) {
+                    balance = BigNumber.from(asset?.resourceInventory?.amount ?? "0")
+                    if (!!asset.resourceInventory.offset) {
+                        balance = balance.sub(BigNumber.from(asset?.resourceInventory?.offset?.amount ?? "0"))
+                    }
+                }
+                asset.amount = formatUnits(balance, asset?.collectionFragment?.decimals ?? 18)
+
+                if (!!existingEntry) {
+                    continue
+                }
             }
 
-            const recongizedImportAsset = findRecognizedAsset(importableAssets, { assetAddress, assetId: asset.assetId })
-
-            if (!!recongizedImportAsset) {
-                assets.push({
-                    amount: asset.amount,
-                    assetAddress: asset.collectionFragment.collection.assetAddress.toLowerCase(),
-                    assetType: asset.collectionFragment.collection.assetType,
-                    assetId: asset.assetId,
-                    name: recongizedImportAsset.name,
-                    exportable: !asset.enraptured,
-                    hash: asset.hash,
-                    summonable: false,
-                    recognizedAssetType: recongizedImportAsset.recognizedAssetType.valueOf(),
-                    enraptured: asset.enraptured,
-                    chainId: asset.collectionFragment.collection.chainId,
-                    exportAddress: asset.assetOwner?.toLowerCase(),
-                    multiverseVersion: asset.collectionFragment.collection.multiverseVersion
-                })
-                continue
-            }
+            assets.push({
+                amount: asset.amount,
+                assetAddress,
+                assetType: asset.collectionFragment.collection.assetType,
+                assetId: asset.assetId,
+                name: asset.collectionFragment.name,
+                exportable: (!asset.enraptured && asset.collectionFragment.exportable),
+                treatAsFungible: asset.collectionFragment.treatAsFungible,
+                hash: asset.hash,
+                summonable: false,
+                recognizedAssetType: asset.collectionFragment.recognizedAssetType,
+                enraptured: asset.enraptured,
+                chainId: asset.collectionFragment.collection.chainId,
+                exportAddress: asset.assetOwner?.toLowerCase(),
+                multiverseVersion: asset.collectionFragment.collection.multiverseVersion
+            })
         }
         return assets
     }
@@ -124,6 +116,7 @@ export class ProfileApiService {
                 assetId: snapshot.material.assetId,
                 name: snapshot.material.name,
                 exportable: false,
+                treatAsFungible: false,
                 summonable: true,
                 recognizedAssetType: '',
                 enraptured: false,
