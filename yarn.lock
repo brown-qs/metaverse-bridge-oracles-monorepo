@@ -6379,6 +6379,7 @@ __metadata:
     "@testing-library/react": ^11.2.7
     "@types/big.js": ^6.1.1
     "@types/faker": ^5.5.6
+    "@types/numeral": ^2.0.2
     "@types/react": ^18.0.15
     "@types/react-async-script": ^1.2.1
     "@types/react-dom": ^18.0.6
@@ -6418,6 +6419,7 @@ __metadata:
     jsbi: ^3.2.1
     konva: ^8.3.8
     lint-staged: ^11.0.0
+    numeral: ^2.0.6
     os-browserify: ^0.3.0
     prettier: ^2.3.1
     process: ^0.11.10
@@ -8473,6 +8475,13 @@ __metadata:
   version: 2.4.1
   resolution: "@types/normalize-package-data@npm:2.4.1"
   checksum: e87bccbf11f95035c89a132b52b79ce69a1e3652fe55962363063c9c0dae0fe2477ebc585e03a9652adc6f381d24ba5589cc5e51849df4ced3d3e004a7d40ed5
+  languageName: node
+  linkType: hard
+
+"@types/numeral@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "@types/numeral@npm:2.0.2"
+  checksum: d8b778ef5d1b20cb5919fb2cf41108b324ccfaeccb0238caaf54bd9d4bffbbd57d7b860844f05831fb356a5dc0115b477891531325180a670076036ee1b4a8ca
   languageName: node
   linkType: hard
 
@@ -21826,6 +21835,13 @@ __metadata:
   version: 1.0.1
   resolution: "number-is-nan@npm:1.0.1"
   checksum: 13656bc9aa771b96cef209ffca31c31a03b507ca6862ba7c3f638a283560620d723d52e626d57892c7fff475f4c36ac07f0600f14544692ff595abff214b9ffb
+  languageName: node
+  linkType: hard
+
+"numeral@npm:^2.0.6":
+  version: 2.0.6
+  resolution: "numeral@npm:2.0.6"
+  checksum: 89f011116539692bf53fde380adeb0579623d00f782703c71c0062d4a8686770c404a041ff4eef454de53925a9f75bba1fa52726057b13d40473f707730b07c2
   languageName: node
   linkType: hard
 
