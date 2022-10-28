@@ -12,6 +12,8 @@ export const InGameItem: React.FC<InGameItemProps> = ({ token, ...inProps }) => 
     const lineOne: string | undefined = React.useMemo(() => formatInGameTokenName(token), [token])
     const lineOneSuffix: string | undefined = React.useMemo(() => formatInGameTokenSuffix(token), [token])
     const lineTwo: string | undefined = React.useMemo(() => token.enraptured ? "Enraptured. Not exportable." : undefined, [token])
+    const balanceEther: string | undefined = React.useMemo(() => token.treatAsFungible ? token.amount : undefined, [token])
+
     const props: PortalTabListItemProps = {
         mediaUrl: token?.metadata?.image ?? undefined,
         isLoading: !!token?.metadata !== true,
@@ -22,7 +24,7 @@ export const InGameItem: React.FC<InGameItemProps> = ({ token, ...inProps }) => 
         //lineTwo: undefined,
         highlightable: true,
 
-        balanceEther: undefined,
+        balanceEther,
 
         ...inProps
     }
