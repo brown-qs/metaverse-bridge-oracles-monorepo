@@ -91,7 +91,7 @@ const ProfilePage = () => {
                 numericId: 0,
                 balance: poopBalanceData.toString(),
                 metadata: {
-                    name: "$SFT",
+                    name: "$POOP",
                     image: "https://static.moonsama.com/static/poop.svg"
                 }
             }
@@ -163,7 +163,9 @@ const ProfilePage = () => {
         return [
             ...standardizeMarketplaceMetadata(marketplaceInGameItemsMetadata),
             ...standardizeRaresamaMetadata(raresamaInGameItemsMetadata),
-            ...standardizeExosamaMetadata(exosamaInGameItemsMetadata)
+            ...standardizeExosamaMetadata(exosamaInGameItemsMetadata),
+            RARESAMA_POOP,
+            SHIT_FART
         ]
     }, [marketplaceInGameItemsMetadata, raresamaInGameItemsMetadata, exosamaInGameItemsMetadata])
 
@@ -229,7 +231,7 @@ const ProfilePage = () => {
         if (!!chainId) {
             if (chainId === ChainId.MOONRIVER && isMarketplaceOnChainTokensFetching && !currentMarketplaceOnChainTokensData) {
                 return true
-            } else if (chainId === ChainId.MOONBEAM && isRaresamaOnChainTokensDataFetching && !currentRaresamaOnChainTokensData) {
+            } else if (chainId === ChainId.MOONBEAM && isRaresamaOnChainTokensDataFetching && !currentRaresamaOnChainTokensData && !isPoopBalanceLoading) {
                 return true
             } else if (chainId === ChainId.MAINNET && isExosamaOnChainTokensFetching && !currentExosamaOnChainTokensData) {
                 return true
@@ -238,7 +240,7 @@ const ProfilePage = () => {
         } else {
             return false
         }
-    }, [currentMarketplaceOnChainTokensData, isMarketplaceOnChainTokensFetching, isRaresamaOnChainTokensDataFetching, currentRaresamaOnChainTokensData, isExosamaOnChainTokensFetching, currentExosamaOnChainTokensData, chainId])
+    }, [isPoopBalanceLoading, currentMarketplaceOnChainTokensData, isMarketplaceOnChainTokensFetching, isRaresamaOnChainTokensDataFetching, currentRaresamaOnChainTokensData, isExosamaOnChainTokensFetching, currentExosamaOnChainTokensData, chainId])
 
     const isOnChainResourcesLoading: boolean = React.useMemo(() => {
         if (!!chainId && chainId === ChainId.MOONRIVER && isMarketplaceOnChainTokensFetching && !currentMarketplaceOnChainTokensData) {
