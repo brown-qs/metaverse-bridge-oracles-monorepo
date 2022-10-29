@@ -287,7 +287,7 @@ export const RARESAMA_POOP: StandardizedMetadata & { assetType: StringAssetType 
   assetAddress: "0xfffffffecb45afd30a637967995394cc88c0c194",
   assetId: 0,
   metadata: {
-    name: "$SFT",
+    name: "$POOP",
     image: "https://static.moonsama.com/static/poop.svg"
   }
 }
