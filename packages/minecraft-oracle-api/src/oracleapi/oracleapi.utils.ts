@@ -205,7 +205,7 @@ export function standardizeValidateAssetInParams(chainId: number, assetType: num
     })
     Joi.assert(partialResult, schema)
 
-    if (String(parseInt(partialResult.amount)) !== partialResult.amount) {
+    if (BigInt(partialResult.amount).toString() !== partialResult.amount) {
         throw new Error("invalid amount int string")
     }
 
