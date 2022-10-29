@@ -3,7 +3,6 @@ import { CompositeAssetEntity } from '../compositeasset/compositeasset.entity';
 import { CollectionEntity } from '../collection/collection.entity';
 import { CompositePartEntity } from '../compositepart/compositepart.entity';
 import { SyntheticPartEntity } from '../syntheticpart/syntheticpart.entity';
-import { CompositeSkeletonEntity } from '../composite-skeleton/composite-skeleton.entity';
 
 @Entity()
 export class CompositeCollectionFragmentEntity {
@@ -19,9 +18,6 @@ export class CompositeCollectionFragmentEntity {
 
     @ManyToOne(() => CollectionEntity, (collection) => collection.compositeCollectionFragments)
     collection: CollectionEntity;
-
-    @OneToMany(() => CompositeSkeletonEntity, (en) => en.compositeCollectionFragment)
-    skeletons?: CompositeSkeletonEntity[]
 
     @OneToMany(() => CompositeAssetEntity, (composite) => composite.compositeCollectionFragment)
     compositeAssets?: CompositeAssetEntity[];
