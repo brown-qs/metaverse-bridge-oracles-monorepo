@@ -100,12 +100,12 @@ export const PortalTabListItem: React.FC<PortalTabListItemProps> = ({ mediaUrl, 
         if (numDecimalDigits === 0) {
             result = numeral(num).format(`0a`)
         } else {
-            result = numeral(num).format(`0.${"000000".slice(-1 * numDecimalDigits)}a`).toUpperCase()
+            result = numeral(num).format(`0.${"000000".slice(-1 * numDecimalDigits)}a`)
         }
         if (result.startsWith("0.")) {
             result = result.slice(1)
         }
-        return result
+        return result.toUpperCase()
     }
 
     const _hover: CSSObject = highlightable ? { bg: "whiteAlpha.200", borderRadius: "4px" } : {}
