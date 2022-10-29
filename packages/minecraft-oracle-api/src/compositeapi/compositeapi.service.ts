@@ -1,4 +1,4 @@
-import { Injectable, Inject, UnprocessableEntityException } from "@nestjs/common";
+import { Injectable, Inject, UnprocessableEntityException, BadRequestException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config/dist/config.service";
 import MutexInterface from "async-mutex/lib/MutexInterface";
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from "nest-winston";
@@ -22,9 +22,13 @@ import { SyntheticItemService } from "../syntheticitem/syntheticitem.service";
 import S3 from 'aws-sdk/clients/s3';
 import sharp from "sharp";
 import { ProviderToken } from "../provider/token";
-import { fetchImageBufferCallback } from "./compositeapi.utils";
+import { fetchImageBufferCallback, syntheticPartToDto } from "./compositeapi.utils";
 import { EventBus } from "@nestjs/cqrs";
 import { CompositeAssetUpdatedEvent } from "../cqrs/events/composite-asset-updated.event";
+import { StringAssetType } from "../common/enums/AssetType";
+import { SyntheticItemEntity } from "../syntheticitem/syntheticitem.entity";
+import { SyntheticItemLayerEntity } from "../syntheticitemlayer/syntheticitemlayer.entity";
+import { CompositeConfigDto, CompositeConfigPartDto, CompositeConfigItemDto, CompositeConfigLayer } from "./dtos/index.dto";
 
 
 export type CompositeEnrichedAssetEntity = AssetEntity & {
@@ -87,6 +91,11 @@ export class CompositeApiService {
         const parentAssetAddress = compositeParent.assetAddress.toLowerCase()
         const parentChainId = compositeParent.chainId ?? ChainId.MOONRIVER
         const parentAssetId = compositeParent.assetId
+
+        //temporary dont let peopel save exo configs
+        if (parentChainId !== ChainId.MOONRIVER) {
+            throw new BadRequestException("No you cannot do this.")
+        }
 
         this.logger.log(`saveCompositeConfig:: started for ${parentChainId}-${parentAssetAddress}-${parentAssetId} owned by ${user.minecraftUserName}`, this.context)
         //console.log(compositeChildren)
@@ -539,4 +548,21 @@ export class CompositeApiService {
             synthetic: false
         }
     }
+
+    async getConfig(chainId: number, assetAddress: string): Promise<CompositeConfigDto> {
+        const result = await this.compositeCollectionFragmentService.findOne({ collection: { chainId: chainId, assetAddress: assetAddress?.toLowerCase() } }, { relations: ["syntheticParts", "collection", "syntheticParts.items", "syntheticParts.items.layers", "compositeParts"] })
+        if (!result) {
+            throw new BadRequestException("This asset is not permissioned for customization.")
+        }
+
+        const resp: CompositeConfigDto = {
+            chainId: result.collection.chainId,
+            assetAddress: result.collection.assetAddress,
+            assetType: result.collection.assetType,
+            name: result.collection.name,
+            parts: result.syntheticParts.sort((a, b) => a.id - b.id).map(p => syntheticPartToDto(p, result.collection.chainId)).filter(p => !!p)
+        }
+        return resp
+    }
+
 }
