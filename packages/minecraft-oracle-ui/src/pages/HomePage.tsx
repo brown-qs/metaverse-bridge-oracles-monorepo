@@ -89,7 +89,7 @@ const HomePage = () => {
           textOverflow="ellipsis"
           overflow="hidden"
         >
-          <Text fontFamily={'Orbitron'} color="white" textAlign="center">{isOauth ? "OAUTH" : "MULTIVERSE BRIDGE"}</Text>
+          <Text fontFamily={'Orbitron'} color="white" textAlign="center">{isOauth ? "OAUTH" : "MULTIVERSE PORTAL"}</Text>
         </Box>
       </Box>
 

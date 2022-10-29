@@ -83,28 +83,50 @@ export const addRegonizedTokenDataToStandardizedOnChainTokens = (tokens: Standar
 
 }
 
-export const formatOnChainTokenName = (token: StandardizedOnChainTokenWithRecognizedTokenData): string => {
-    let name = token?.metadata?.name ?? ""
+export const formatOnChainTokenName = (token: StandardizedOnChainTokenWithRecognizedTokenData): string | undefined => {
+    let name = token?.metadata?.name ?? undefined
+    const assAddress = token?.assetAddress?.toLowerCase()
 
-    if (!!token?.numericId && token?.treatAsFungible === false) {
-        //moonsamas have token id burned into name
-        if (token?.assetAddress?.toLowerCase() !== "0xb654611f84a8dc429ba3cb4fda9fad236c505a1a") {
-            name = `${name} #${token?.numericId}`
-        }
+    if (!!name && ["0xb654611f84a8dc429ba3cb4fda9fad236c505a1a"].includes(assAddress)) {
+        name = name.split(` #`)[0]
     }
     return name
 }
 
-export const formatInGameTokenName = (token: InGameTokenMaybeMetadata): string => {
-    let name = token?.metadata?.name ?? ""
+export const formatOnChainTokenSuffix = (token: StandardizedOnChainTokenWithRecognizedTokenData): string | undefined => {
+    if (![StringAssetType.ERC1155, StringAssetType.ERC721].includes(token.assetType)) {
+        return undefined
+    }
+    let suffix = !!token?.numericId ? String(token?.numericId) : undefined
+    const assAddress = token?.assetAddress?.toLowerCase()
 
-    if (!!token?.assetId) {
-        //moonsamas have token id burned into name
-        if (token?.assetAddress?.toLowerCase() !== "0xb654611f84a8dc429ba3cb4fda9fad236c505a1a") {
-            name = `${name} #${token?.assetId}`
-        }
+    if (!!suffix && ["0xb654611f84a8dc429ba3cb4fda9fad236c505a1a"].includes(assAddress)) {
+        suffix = `${token?.metadata?.name?.split(` #`)[1]}`
+    }
+    return `#${suffix}`
+}
+
+export const formatInGameTokenName = (token: InGameTokenMaybeMetadata): string | undefined => {
+    let name = token?.metadata?.name ?? undefined
+    const assAddress = token?.assetAddress?.toLowerCase()
+
+    if (!!name && ["0xb654611f84a8dc429ba3cb4fda9fad236c505a1a"].includes(assAddress)) {
+        name = name.split(` #`)[0]
     }
     return name
+}
+
+export const formatInGameTokenSuffix = (token: InGameTokenMaybeMetadata): string | undefined => {
+    if (!["ERC721", "ERC1155"].includes(token.assetType)) {
+        return undefined
+    }
+    let suffix = !!token?.assetId ? String(token?.assetId) : undefined
+    const assAddress = token?.assetAddress?.toLowerCase()
+
+    if (!!suffix && ["0xb654611f84a8dc429ba3cb4fda9fad236c505a1a"].includes(assAddress)) {
+        suffix = `${token?.metadata?.name?.split(` #`)[1]}`
+    }
+    return `#${suffix}`
 }
 
 //marketplace squid
