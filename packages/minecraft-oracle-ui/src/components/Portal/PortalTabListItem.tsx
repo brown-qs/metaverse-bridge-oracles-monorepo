@@ -94,8 +94,8 @@ export const PortalTabListItem: React.FC<PortalTabListItemProps> = ({ mediaUrl, 
             numDecimalDigits--
         }
         numDecimalDigits = Math.max(0, numDecimalDigits)
-        console.log(`num: ${num} tempFormat: ${tempFormat} numIntDigits: ${numIntDigits} numDecimalDigits: ${numDecimalDigits} negative: ${negative} letter: ${letter}`)
-        console.log({ minimumFractionDigits: numDecimalDigits, maximumFractionDigits: numDecimalDigits, notation: "compact", compactDisplay: "short" })
+        //console.log(`num: ${num} tempFormat: ${tempFormat} numIntDigits: ${numIntDigits} numDecimalDigits: ${numDecimalDigits} negative: ${negative} letter: ${letter}`)
+        // console.log({ minimumFractionDigits: numDecimalDigits, maximumFractionDigits: numDecimalDigits, notation: "compact", compactDisplay: "short" })
         let result
         if (numDecimalDigits === 0) {
             result = numeral(num).format(`0a`)

@@ -67,7 +67,9 @@ export class ProfileApiService {
         for (const asset of userAssets) {
             const assetAddress = asset.collectionFragment.collection.assetAddress.toLowerCase()
             const treatAsFungible = asset.collectionFragment.treatAsFungible
-
+            if (!asset.collectionFragment || (!asset.collectionFragment.importable && !asset.collectionFragment.enrapturable)) {
+                continue
+            }
             //combine fungibles
             if (treatAsFungible) {
                 const existingEntry = assets.find(a => a.assetAddress === assetAddress && a.assetId === asset.assetId)
