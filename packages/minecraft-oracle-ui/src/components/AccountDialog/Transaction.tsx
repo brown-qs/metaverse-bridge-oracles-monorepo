@@ -14,7 +14,7 @@ import { AllTransactionsType, TransactionType } from '../../state/slices/transac
 export const Transaction = ({ transaction }: { transaction: AllTransactionsType }) => {
 
   if (transaction.type === TransactionType.Approval) {
-    const summary = ` ${String(transaction.receipt).slice(0, 5)} APPROVE ${transaction.assetType} ${transaction.assetAddress}`
+    const summary = `APPROVE ${transaction.assetType} ${transaction.assetAddress}`
     return (
       <TransactionLink
         href={getExplorerLink(
