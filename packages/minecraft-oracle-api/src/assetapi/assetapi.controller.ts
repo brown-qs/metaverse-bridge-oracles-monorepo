@@ -260,7 +260,7 @@ export class AssetApiController {
     @Get('exos/:address')
     @HttpCode(200)
     @ApiOperation({ summary: 'Gets exos' })
-    //@UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard)
     async getExos(@Param('address') address: string): Promise<StandardizedOnChainToken[]> {
         if (typeof address !== "string") {
             throw new BadRequestException("No way jose.")
