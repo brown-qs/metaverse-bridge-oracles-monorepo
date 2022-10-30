@@ -15,7 +15,7 @@ import { InGameResource } from '../components/Portal/InGameResource';
 import { OnChainResource } from '../components/Portal/OnChainResource';
 import { OnChainItem } from '../components/Portal/OnChainItem';
 import BackgroundImage from '../assets/images/bridge-background-blur.svg'
-import { useSetSkinMutation, useGetSkinsQuery, useUserProfileQuery, useGetRecognizedAssetsQuery, useGetInGameItemsQuery, useGetInGameResourcesQuery } from '../state/api/bridgeApi';
+import { useSetSkinMutation, useGetSkinsQuery, useUserProfileQuery, useGetRecognizedAssetsQuery, useGetInGameItemsQuery, useGetInGameResourcesQuery, useGetExosMutation } from '../state/api/bridgeApi';
 import { Virtuoso } from 'react-virtuoso'
 import { CollectionFragmentDto, MultiverseVersion, SkinResponse } from '../state/api/types';
 import { useGetMarketplaceMetadataQuery, useGetMarketplaceOnChainTokensQuery } from '../state/api/generatedSquidMarketplaceApi';
@@ -104,6 +104,9 @@ const ProfilePage = () => {
     const { data: skins, error: skinsError, isLoading: skinsLoading, refetch: refetchSkins } = useGetSkinsQuery()
     const [setSkin, { error: setSkinError, isUninitialized, isLoading, isSuccess, isError, reset: setSkinReset }] = useSetSkinMutation()
 
+    //OPENSEA API HACK
+    const [getExos, { data: getExosData, error: getExosError, isUninitialized: isGetExosUninitialized, isLoading: isGetExosLoading, isSuccess: isGetExosSuccess, isError: isGetExosError, reset: resetGetExos }] = useGetExosMutation()
+
     //on chain tokens (from indexers)
     const { data: raresamaOnChainTokensData, currentData: currentRaresamaOnChainTokensData, isLoading: isRaresamaOnChainTokensDataLoading, isFetching: isRaresamaOnChainTokensDataFetching, isError: isRaresamaOnChainTokensDataError, error: raresamaOnChainTokensError, refetch: refetchRaresamaOnChainTokens } = useGetRaresamaOnChainTokensQuery({ where: { owner: { id_eq: address }, contract: { OR: [{ id_eq: "0xf27a6c72398eb7e25543d19fda370b7083474735" }, { id_eq: "0xe4bf451271d8d1b9d2a7531aa551b7c45ec95048" }] } } })
     const { data: marketplaceOnChainTokensData, currentData: currentMarketplaceOnChainTokensData, isLoading: isMarketplaceOnChainTokensLoading, isFetching: isMarketplaceOnChainTokensFetching, isError: isMarketplaceOnChainTokensError, error: marketplaceOnChainTokensError, refetch: refetchMarketplaceOnChainTokens } = useGetMarketplaceOnChainTokensQuery({ owner: address })
@@ -158,6 +161,8 @@ const ProfilePage = () => {
 
     const standardizedErc20OnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(standardizedErc20Tokens, recognizedAssetsData), [standardizedErc20Tokens, recognizedAssetsData])
 
+    //OPENSEA API HACK
+    const tempExosOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(getExosData ?? [], recognizedAssetsData), [getExosData, recognizedAssetsData])
 
     const inGameItemsMetadata: StandardizedMetadata[] = React.useMemo(() => {
         return [
@@ -181,6 +186,7 @@ const ProfilePage = () => {
             ...standardizedMarketplaceOnChainTokensWithRecognizedTokenData,
             ...standardizedRaresamaOnChainTokensWithRecognizedTokenData,
             ...standardizedExosamaOnChainTokensWithRecognizedTokenData,
+            ...tempExosOnChainTokensWithRecognizedTokenData //OPENSEA API HACK
         ].filter(tok => checkOnChainItemNotImported(tok, inGameItems))
 
     }, [standardizedMarketplaceOnChainTokensWithRecognizedTokenData, standardizedRaresamaOnChainTokensWithRecognizedTokenData, standardizedExosamaOnChainTokensWithRecognizedTokenData, standardizedErc20OnChainTokensWithRecognizedTokenData, inGameItems])
@@ -316,6 +322,14 @@ const ProfilePage = () => {
         refetchInGameResources()
         refetchSkins()
     }, [blockNumbers[ChainId.MOONRIVER], blockNumbers[ChainId.MOONBEAM], blockNumbers[ChainId.MAINNET]])
+
+
+    //opensea api hack
+    React.useEffect(() => {
+        if (!!account && !!chainId && chainId === ChainId.MAINNET) {
+            getExos(account.toLowerCase())
+        }
+    }, [account, chainId])
 
     return (
         <>
