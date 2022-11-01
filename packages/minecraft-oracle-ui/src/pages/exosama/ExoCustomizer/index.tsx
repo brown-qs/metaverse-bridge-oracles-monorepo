@@ -126,18 +126,22 @@ const ExoCustomizer = () => {
           position="relative"
           _after={{ content: '""', display: 'block', paddingBottom: '100%' }}
         >
-          {equippedImageStack.map((img) => (
-            <img
-              key={img.url}
-              style={{
-                width: '100%',
-                height: '100%',
-                position: 'absolute',
-                zIndex: img.zIndex < 0 ? 0 : img.zIndex,
-              }}
-              src={`${process.env.REACT_APP_COMPOSITE_MEDIA_URI_PREFIX}${img.url}`}
-            />
-          ))}
+          {equippedImageStack.map((img) => {
+            const zIndex =
+              img.zIndex < 0 ? 0 : img.zIndex > 1000 ? 1000 : img.zIndex;
+            return (
+              <img
+                key={img.url}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  position: 'absolute',
+                  zIndex,
+                }}
+                src={`${process.env.REACT_APP_COMPOSITE_MEDIA_URI_PREFIX}${img.url}`}
+              />
+            );
+          })}
         </Box>
       </Box>
       <Box>
@@ -173,15 +177,16 @@ const ExoCustomizer = () => {
                 <AccordionPanel pb={4}>
                   {filteredItems.length === 0 ? (
                     <Box>
-                      {name === "Expression" && "Select a Body type first"}
-                      {name === "Vibe" && "Select an Expression first"}
+                      {name === 'Expression' && 'Select a Body type first'}
+                      {name === 'Vibe' && 'Select an Expression first'}
                     </Box>
                   ) : (
                     <SimpleGrid
                       columns={[1, 2, 3, 2, 4]}
                       gap="10px"
                       maxHeight="300px"
-                      overflowY="auto" pr="10px"
+                      overflowY="auto"
+                      pr="10px"
                     >
                       {filteredItems.map((trait) => {
                         const { id, assetId, previewImageUri } = trait;
