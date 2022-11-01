@@ -8,14 +8,12 @@ const SwapPage = () => {
   return (
     <>
       <Box w="100%" h="100%"
-        bg="radial-gradient(circle at 26.53% 49.03%, #391622, transparent 40%),radial-gradient(circle at 20.31% 20.56%, rgba(255,255,255,0.5), transparent 2%),radial-gradient(circle at 84.33% 72.59%, rgba(255,255,255,0.5), transparent 2%),radial-gradient(circle at 99.49% 0.76%, #52274B, transparent 31%),radial-gradient(circle at 97.03% 42.36%, #391622, transparent 34%),radial-gradient(circle at 71.08% 5.96%, #391622, transparent 28%),radial-gradient(circle at 50% 50%, #080714, #080714 100%)"
+        bg="radial-gradient(circle at 26.53% 49.03%, #391622, transparent 40%),radial-gradient(circle at 99.49% 0.76%, #52274B, transparent 31%),radial-gradient(circle at 97.03% 42.36%, #391622, transparent 34%),radial-gradient(circle at 71.08% 5.96%, #391622, transparent 28%),radial-gradient(circle at 50% 50%, #080714, #080714 100%)"
         position="absolute"
         top="0"
         left="0"
-        right="0"
+        right="-20px"
         className="moonsamaFullHeight"
-        filter="blur(30px)"
-
       ></Box>
       <VStack
         zIndex="1"
