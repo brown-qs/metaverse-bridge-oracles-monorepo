@@ -162,7 +162,7 @@ const ProfilePage = () => {
     const standardizedErc20OnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(standardizedErc20Tokens, recognizedAssetsData), [standardizedErc20Tokens, recognizedAssetsData])
 
     //OPENSEA API HACK
-    const tempExosOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(getExosData ?? [], recognizedAssetsData), [getExosData, recognizedAssetsData])
+    // const tempExosOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(getExosData ?? [], recognizedAssetsData), [getExosData, recognizedAssetsData])
 
     const inGameItemsMetadata: StandardizedMetadata[] = React.useMemo(() => {
         return [
@@ -186,7 +186,7 @@ const ProfilePage = () => {
             ...standardizedMarketplaceOnChainTokensWithRecognizedTokenData,
             ...standardizedRaresamaOnChainTokensWithRecognizedTokenData,
             ...standardizedExosamaOnChainTokensWithRecognizedTokenData,
-            ...tempExosOnChainTokensWithRecognizedTokenData //OPENSEA API HACK
+            //   ...tempExosOnChainTokensWithRecognizedTokenData //OPENSEA API HACK
         ].filter(tok => checkOnChainItemNotImported(tok, inGameItems))
 
     }, [standardizedMarketplaceOnChainTokensWithRecognizedTokenData, standardizedRaresamaOnChainTokensWithRecognizedTokenData, standardizedExosamaOnChainTokensWithRecognizedTokenData, standardizedErc20OnChainTokensWithRecognizedTokenData, inGameItems])
@@ -324,12 +324,13 @@ const ProfilePage = () => {
     }, [blockNumbers[ChainId.MOONRIVER], blockNumbers[ChainId.MOONBEAM], blockNumbers[ChainId.MAINNET]])
 
 
+    /*
     //opensea api hack
     React.useEffect(() => {
         if (!!account && !!chainId && chainId === ChainId.MAINNET) {
             getExos(account.toLowerCase())
         }
-    }, [account, chainId])
+    }, [account, chainId])*/
 
     return (
         <>
