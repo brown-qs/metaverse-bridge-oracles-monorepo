@@ -24,6 +24,10 @@ export class AssetDto {
     @IsString()
     amount: string
 
+    @ApiProperty({ description: 'Whether the assets are combined and have a balance' })
+    @IsBoolean()
+    treatAsFungible: boolean
+
     @ApiProperty({ description: 'Whether the asset can be exported as a token' })
     @IsBoolean()
     exportable: boolean

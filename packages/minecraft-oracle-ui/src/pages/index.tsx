@@ -16,9 +16,9 @@ export const Routing = () => {
     const accessToken = useSelector(selectAccessToken)
     return (
         <Routes>
-            <Route path="/" element={!!accessToken ? <Navigate to="/bridge" /> : <HomePage />} />
+            <Route path="/" element={!!accessToken ? <Navigate to="/portal" /> : <HomePage />} />
             <Route path="/account" element={!!accessToken ? <AccountPage /> : <Navigate to="/" />} />
-            <Route path="/bridge" element={!!accessToken ? <ProfilePage /> : <Navigate to="/" />} />
+            <Route path="/portal" element={!!accessToken ? <ProfilePage /> : <Navigate to="/" />} />
             <Route path="/oauth" element={<HomePage />} />
             <Route path="/moonsama/customizer/:chainId/:assetAddress/:assetId" element={<MoonsamaCharacterDesignerPage />} />
             <Route path="/moonsama/customizer" element={<MoonsamaCharacterDesignerPage />} />
@@ -27,7 +27,7 @@ export const Routing = () => {
             <Route path="/swap" element={<SwapPage />} />
             <Route path="/customizer" element={<CustomizerPage />} />
             <Route path="/test" element={<TestPage />} />
-            <Route path="*" element={<Navigate to="/bridge" />} />
+            <Route path="*" element={<Navigate to="/portal" />} />
         </Routes>
     )
 };

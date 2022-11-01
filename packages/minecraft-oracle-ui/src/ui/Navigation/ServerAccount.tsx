@@ -15,7 +15,7 @@ const ServerAccount = ({ onClick }: { onClick?: () => void }) => {
   };
 
   const handleLogin = () => {
-    navigate("/bridge");
+    navigate("/portal");
   };
 
   const isLoggedIn = !!accessToken

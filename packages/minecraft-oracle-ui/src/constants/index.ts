@@ -1,5 +1,6 @@
 import { NewAsset } from "../hooks/marketplace/types";
 import { MultiverseVersion } from "../state/api/types";
+import { StandardizedMetadata } from "../utils/graphqlReformatter";
 import { StringAssetType } from "../utils/subgraph";
 
 export const CHAIN_ID = parseInt(process.env.REACT_APP_CHAIN_ID ?? '1285', 10);
@@ -281,14 +282,22 @@ export const SUB_ASSETS: SubAsset[] = [
 
 
 //STATIC TOKENS: 
-export const RARESAMA_POOP: NewAsset = {
+export const RARESAMA_POOP: StandardizedMetadata & { assetType: StringAssetType } = {
   assetType: StringAssetType.ERC20,
   assetAddress: "0xfffffffecb45afd30a637967995394cc88c0c194",
-  assetId: 0
+  assetId: 0,
+  metadata: {
+    name: "$POOP",
+    image: "https://static.moonsama.com/static/poop.svg"
+  }
 }
 
-export const SHIT_FART: NewAsset = {
+export const SHIT_FART: StandardizedMetadata & { assetType: StringAssetType } = {
   assetType: StringAssetType.ERC20,
   assetAddress: "0x2f82471dccf85d3f6cb498d4e792cfa9e875ab0a",
-  assetId: 0
+  assetId: 0,
+  metadata: {
+    name: "$SFT",
+    image: "https://static.moonsama.com/static/poop.svg"
+  }
 }
