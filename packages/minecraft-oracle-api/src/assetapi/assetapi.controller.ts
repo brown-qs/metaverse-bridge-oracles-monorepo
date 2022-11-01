@@ -257,6 +257,7 @@ export class AssetApiController {
         return data.map(d => this.assetApiService.collectionEntityToDto(d))
     }
 
+    /*
     @Get('exos/:address')
     @HttpCode(200)
     @ApiOperation({ summary: 'Gets exos' })
@@ -281,8 +282,11 @@ export class AssetApiController {
             exos.push(exo)
         }
         return exos
-    }
+    }*/
 }
+
+/*
+//used for getExos
 export type GetMarketplaceOnChainTokensQuery = { __typename?: 'Query', erc1155TokenOwners: Array<{ __typename?: 'ERC1155TokenOwner', id: string, balance: any, token: { __typename?: 'ERC1155Token', numericId: any, id: string, metadata?: { __typename?: 'Metadata', image?: string | null, layers?: Array<string> | null, name?: string | null, type?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', displayType?: string | null, traitType: string, value: string }> | null } | null, contract: { __typename?: 'ERC1155Contract', address?: string | null } } }>, erc721Tokens: Array<{ __typename?: 'ERC721Token', numericId: any, id: string, metadata?: { __typename?: 'Metadata', image?: string | null, layers?: Array<string> | null, name?: string | null, type?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', displayType?: string | null, traitType: string, value: string }> | null } | null, contract: { __typename?: 'ERC721Contract', address?: string | null } }> };
 type ERC721MarketplaceOnChainTokenType = GetMarketplaceOnChainTokensQuery["erc721Tokens"][0]
 
@@ -293,3 +297,4 @@ export type StandardizedOnChainToken = {
     balance?: string,
     metadata?: NonNullable<ERC721MarketplaceOnChainTokenType["metadata"]>,
 }
+*/
