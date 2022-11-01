@@ -5,7 +5,7 @@ import {
   AccordionItem,
   AccordionPanel,
   Alert,
-  Box,
+  Box, Button,
   Grid,
   SimpleGrid,
   Spinner,
@@ -15,6 +15,7 @@ import TraitCard from 'pages/components/TraitCard/TraitCard';
 import { useEffect, useState } from 'react';
 import { MoonsamaSpinner } from '../../../components/MoonsamaSpinner';
 import { current } from '@reduxjs/toolkit';
+import GhostButton from "../../components/GhostButton";
 
 // type ILayer = {
 //   url: string;
@@ -212,6 +213,7 @@ const ExoCustomizer = () => {
             );
           })}
         </Accordion>
+        <GhostButton m="20px 0" onClick={() => setEquippedTraits({})}>Reset</GhostButton>
       </Box>
     </Grid>
   );
