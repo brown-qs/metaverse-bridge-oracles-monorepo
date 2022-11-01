@@ -5,6 +5,7 @@ import { Media } from "..";
 import { utils } from "ethers"
 import React from "react";
 import numeral from "numeral"
+import { numberFormatter } from "../../constants";
 
 export type BasePortalTabListItemProps = {
     mediaUrl: string | undefined,
@@ -50,63 +51,7 @@ export const PortalTabListItem: React.FC<PortalTabListItemProps> = ({ mediaUrl, 
         return numberFormatter(balanceEther)
     }, [balanceEther])
 
-    function numberFormatter(num: string) {
-        //needs to always be 6 digits!!
-        //cant do 5 because of -10k no room for decimal place
 
-        let tempFormat = numeral(num).format("0.00000a")
-
-        if (tempFormat === "NaN") {
-            return "<.0000"
-        }
-        //adds leading 0
-        if (tempFormat.startsWith("0.")) {
-            tempFormat = tempFormat.slice(1)
-        }
-
-        let numWithoutSignAndLetter = tempFormat
-        let negative = false
-        let letter = false
-        if (tempFormat.includes("-")) {
-            negative = true
-            numWithoutSignAndLetter = numWithoutSignAndLetter.replace("-", "")
-        }
-
-        const lastChar = tempFormat.slice(-1)
-        if (lastChar.toLowerCase() !== lastChar.toUpperCase()) {
-            letter = true
-            numWithoutSignAndLetter = numWithoutSignAndLetter.replace(lastChar, "")
-        }
-
-        let intDigits = numWithoutSignAndLetter
-        if (intDigits.includes(".")) {
-            intDigits = intDigits.split(".")[0]
-        }
-
-        const numIntDigits = intDigits.length
-
-        //start with 4 because decimal takes 1 character
-        let numDecimalDigits = 5 - numIntDigits
-        if (negative) {
-            numDecimalDigits--
-        }
-        if (letter) {
-            numDecimalDigits--
-        }
-        numDecimalDigits = Math.max(0, numDecimalDigits)
-        //console.log(`num: ${num} tempFormat: ${tempFormat} numIntDigits: ${numIntDigits} numDecimalDigits: ${numDecimalDigits} negative: ${negative} letter: ${letter}`)
-        // console.log({ minimumFractionDigits: numDecimalDigits, maximumFractionDigits: numDecimalDigits, notation: "compact", compactDisplay: "short" })
-        let result
-        if (numDecimalDigits === 0) {
-            result = numeral(num).format(`0a`)
-        } else {
-            result = numeral(num).format(`0.${"000000".slice(-1 * numDecimalDigits)}a`)
-        }
-        if (result.startsWith("0.")) {
-            result = result.slice(1)
-        }
-        return result.toUpperCase()
-    }
 
     const _hover: CSSObject = highlightable ? { bg: "whiteAlpha.200", borderRadius: "4px" } : {}
     return (
