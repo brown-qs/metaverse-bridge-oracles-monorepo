@@ -4,7 +4,7 @@ import WhiteLogo from 'assets/images/moonsama-glitch-white.svg';
 import LeftImage from 'assets/images/home/left.png';
 import RightImageFlip from 'assets/images/home/right.png';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Image, Button, Stack, useMediaQuery, Text, VStack, Box, FormControl, FormLabel, Input, FormHelperText, useToast } from '@chakra-ui/react';
+import { Image, Button, Stack, useMediaQuery, Text, VStack, Box, FormControl, FormLabel, Input, FormHelperText, useToast, HStack } from '@chakra-ui/react';
 import { Mail, MailForward } from 'tabler-icons-react';
 import BackgroundImage from '../assets/images/home/background.jpg'
 import { useDisclosure } from '@chakra-ui/react'
@@ -71,10 +71,13 @@ const HomePage = () => {
 
       {/* START Title Text*/}
       <Box
+
         zIndex="10"
+        left="calc(-1 * var(--moonsama-leftright-padding))"
+        right="0px"
+
         position="absolute"
-        top="18%"
-        w="100%"
+        top="15%"
         flex="1"
         paddingRight="22px"
         paddingLeft="22px"
@@ -113,6 +116,7 @@ const HomePage = () => {
         <VStack
           spacing="0"
           width="100%"
+
         >
 
 
@@ -172,21 +176,26 @@ const HomePage = () => {
 
 
       </VStack>
-      <Stack
+      <HStack
+        spacing="0"
+        overflowY="hidden"
+
+        position="relative"
         direction="column"
         alignItems='center'
         textAlign='center'
         height="calc(100vh - 64px)"
         overflow="hidden"
         backgroundImage={`url(${BackgroundImage})`}
-        w="100%"
+        left="calc(-1 * var(--moonsama-leftright-padding))"
+        w="100vw"
         backgroundSize="cover"
         backgroundRepeat="no-repeat"
       >
         {!isMobileViewport && <Image src={LeftImage} sx={{ position: "absolute", left: 0, bottom: 0, maxHeight: "70%", maxWidth: "50%" }} alt="" />}
         {!isMobileViewport && <Image src={RightImageFlip} sx={{ position: "absolute", "right": 0, bottom: 0, maxHeight: "70%", maxWidth: "50%" }} alt="" />}
         {isMobileViewport && <Image src={LeftImage} sx={{ position: "absolute", "right": '50%', bottom: 0, transform: 'translateX(50%)', maxHeight: "40%" }} alt="" />}
-      </Stack >
+      </HStack >
       {isOauth && <>
         <OauthModal />
       </>}
