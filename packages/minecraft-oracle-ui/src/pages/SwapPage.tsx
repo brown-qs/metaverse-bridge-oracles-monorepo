@@ -1,10 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { useClasses } from 'hooks';
+import { useActiveWeb3React, useClasses } from 'hooks';
 import { Container, Image, Alert, AlertDescription, AlertIcon, AlertTitle, Box, Button, CloseButton, Heading, HStack, Stack, Tag, TagCloseButton, TagLabel, TagLeftIcon, TagRightIcon, useToast, VStack } from '@chakra-ui/react';
-import { DeviceGamepad2, Pencil, Tags, User } from 'tabler-icons-react';
+import { ArrowsRightLeft, DeviceGamepad2, Pencil, Tags, User, Wallet } from 'tabler-icons-react';
 import BackgroundImage from '../assets/images/bridge-background-blur.svg'
+import { ChainId, numberFormatter, RARESAMA_POOP } from '../constants';
+import { getAssetBalance } from '../hooks/useBalances/useBalances';
+import { useQuery } from 'react-query';
+import { utils } from "ethers"
 
 const SwapPage = () => {
+  const { account, chainId, library } = useActiveWeb3React()
+
+  const { isLoading: isPoopBalanceLoading, data: poopBalanceData, refetch: refetchPoopBalance } = useQuery(
+    ['getAssetBalance', RARESAMA_POOP, account],
+    () => getAssetBalance(RARESAMA_POOP, library!, account!),
+    {
+      enabled: !!library && !!account && chainId === ChainId.MOONBEAM
+    }
+  )
   return (
     <>
 
@@ -64,8 +77,18 @@ const SwapPage = () => {
               textAlign="center"
               fontSize="30px"
               lineHeight="36px"
+              h="36px"
             >
-              1234
+              {!!account
+                ?
+                <>
+                  {numberFormatter(utils.formatUnits(poopBalanceData?.toString() ?? "0", 18))}
+                </>
+                :
+                <>
+                  0
+                </>
+              }
             </Box>
             <Box h="12px"></Box>
             <Box
@@ -76,11 +99,29 @@ const SwapPage = () => {
               fontFamily="Rubik"
               fontWeight="400"
             >
-              CLICK THE BUTTON TO SWAP THIS AMOUNT OF <Box as="span" fontWeight="700">$POOP</Box> FOR <Box as="span" fontWeight="700">$SAMA</Box>
+              {!!account
+                ?
+                <>
+                  CLICK THE BUTTON TO SWAP THIS AMOUNT OF <Box as="span" fontWeight="700">$POOP</Box> FOR <Box as="span" fontWeight="700">$SAMA</Box>
+
+                </>
+                :
+                <>
+                  CONNECT YOUR WALLET TO SEE THE <Box as="span" fontWeight="700">$POOP</Box> BALANCE TO BE CONVERTED TO <Box as="span" fontWeight="700">$SAMA</Box>
+
+                </>
+              }
+
             </Box>
             <Box h="12px"></Box>
             <Box w="100%">
-              <Button w="100%">SWAP $POOP FOR $SAMA</Button>
+              {!!account
+                ?
+                <Button leftIcon={<ArrowsRightLeft></ArrowsRightLeft>} w="100%">SWAP $POOP FOR $SAMA</Button>
+                :
+                <Button leftIcon={<Wallet />} w="100%">CONNECT WALLET</Button>
+              }
+
             </Box>
           </VStack>
         </VStack>
