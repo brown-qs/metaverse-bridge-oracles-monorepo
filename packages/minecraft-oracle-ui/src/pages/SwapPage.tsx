@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useActiveWeb3React, useClasses } from 'hooks';
+import { useAccountDialog, useActiveWeb3React, useClasses } from 'hooks';
 import { Container, Image, Alert, AlertDescription, AlertIcon, AlertTitle, Box, Button, CloseButton, Heading, HStack, Stack, Tag, TagCloseButton, TagLabel, TagLeftIcon, TagRightIcon, useToast, VStack } from '@chakra-ui/react';
 import { ArrowsRightLeft, DeviceGamepad2, Pencil, Tags, User, Wallet } from 'tabler-icons-react';
 import BackgroundImage from '../assets/images/bridge-background-blur.svg'
@@ -7,9 +7,12 @@ import { ChainId, numberFormatter, RARESAMA_POOP } from '../constants';
 import { getAssetBalance } from '../hooks/useBalances/useBalances';
 import { useQuery } from 'react-query';
 import { utils } from "ethers"
+import useAddNetworkToMetamaskCb from '../hooks/useAddNetworkToMetamask/useAddNetworkToMetamask';
 
 const SwapPage = () => {
   const { account, chainId, library } = useActiveWeb3React()
+  const { isAccountDialogOpen, onAccountDialogOpen, onAccountDialogClose } = useAccountDialog();
+  const { addNetwork } = useAddNetworkToMetamaskCb()
 
   const { isLoading: isPoopBalanceLoading, data: poopBalanceData, refetch: refetchPoopBalance } = useQuery(
     ['getAssetBalance', RARESAMA_POOP, account],
@@ -18,6 +21,16 @@ const SwapPage = () => {
       enabled: !!library && !!account && chainId === ChainId.MOONBEAM
     }
   )
+
+  const isMoonbeam: boolean = React.useMemo(() => {
+    if (!!account && !!chainId) {
+      return chainId === ChainId.MOONBEAM
+    } else {
+      return false
+    }
+  }, [chainId, account])
+
+  const noPoop: boolean = React.useMemo(() => (numberFormatter(utils.formatUnits(poopBalanceData?.toString() ?? "0", 18)) === ".00000"), [poopBalanceData])
   return (
     <>
 
@@ -82,7 +95,21 @@ const SwapPage = () => {
               {!!account
                 ?
                 <>
-                  {numberFormatter(utils.formatUnits(poopBalanceData?.toString() ?? "0", 18))}
+
+                  {isMoonbeam ?
+                    <>
+                      {isPoopBalanceLoading
+                        ?
+                        <></>
+                        :
+                        <>{numberFormatter(utils.formatUnits(poopBalanceData?.toString() ?? "0", 18)).replace(".00000", "0")}</>
+                      }
+                    </>
+                    :
+                    <>
+                      {"0"}
+                    </>
+                  }
                 </>
                 :
                 <>
@@ -102,8 +129,17 @@ const SwapPage = () => {
               {!!account
                 ?
                 <>
-                  CLICK THE BUTTON TO SWAP THIS AMOUNT OF <Box as="span" fontWeight="700">$POOP</Box> FOR <Box as="span" fontWeight="700">$SAMA</Box>
+                  {isMoonbeam ?
+                    <>
+                      CLICK THE BUTTON TO SWAP THIS AMOUNT OF <Box as="span" fontWeight="700">$POOP</Box> FOR <Box as="span" fontWeight="700">$SAMA</Box>
 
+                    </>
+                    :
+                    <>
+                      CHANGE NETWORK TO SWAP <Box as="span" fontWeight="700">$POOP</Box> FOR <Box as="span" fontWeight="700">$SAMA</Box>
+
+                    </>
+                  }
                 </>
                 :
                 <>
@@ -117,9 +153,16 @@ const SwapPage = () => {
             <Box w="100%">
               {!!account
                 ?
-                <Button leftIcon={<ArrowsRightLeft></ArrowsRightLeft>} w="100%">SWAP $POOP FOR $SAMA</Button>
+                <>
+                  {isMoonbeam
+                    ?
+                    <Button isLoading={isPoopBalanceLoading} isDisabled={noPoop} leftIcon={<ArrowsRightLeft></ArrowsRightLeft>} w="100%">SWAP $POOP FOR $SAMA</Button>
+                    :
+                    <Button onClick={() => addNetwork(ChainId.MOONBEAM)} leftIcon={<ArrowsRightLeft></ArrowsRightLeft>} w="100%">CHANGE TO MOONBEAM</Button>
+                  }
+                </>
                 :
-                <Button leftIcon={<Wallet />} w="100%">CONNECT WALLET</Button>
+                <Button onClick={() => onAccountDialogOpen()} leftIcon={<Wallet />} w="100%">CONNECT WALLET</Button>
               }
 
             </Box>
