@@ -4,21 +4,16 @@ import BackgroundImage from '../assets/images/home/background.jpg'
 import MoonsamaNav from '../ui/Navigation/MoonsamaNav'
 
 export const MoonsamaLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
-  return (
-    <VStack
-      h="100vh"
-      spacing="0"
-      alignItems="stretch"
-      minWidth="320px"
+  return (<Box
+    bg="#080714"
+    sx={{ "--moonsama-nav-height": "64px", "--moonsama-leftright-padding": { base: "16px", lg: "48px" } }}
+  >
+    <MoonsamaNav />
+    <Box
+      as='main'
+      sx={{ px: 'var(--moonsama-leftright-padding)', pt: 'var(--moonsama-nav-height)', minHeight: 'calc(100vh)' }}
     >
-      <MoonsamaNav />
-      <Box
-        position="relative"
-        flex="1"
-        background="#161328"
-      >
-        {children}
-      </Box>
-    </VStack >
-  )
+      {children}
+    </Box>
+  </Box >)
 };
