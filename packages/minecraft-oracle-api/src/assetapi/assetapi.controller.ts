@@ -1,4 +1,5 @@
 import {
+    BadRequestException,
     Body,
     Controller,
     Get,
@@ -33,6 +34,7 @@ import { Not, IsNull } from 'typeorm';
 import { CollectionFragmentEntity } from '../collectionfragment/collectionfragment.entity';
 import { CollectionService } from '../collection/collection.service';
 import { RecognizedAssetsDto } from './dtos/recognized-assets.dto';
+import axios from "axios"
 
 @ApiTags('asset')
 @Controller('asset')
@@ -254,4 +256,45 @@ export class AssetApiController {
         const data = await this.collectionService.findMany({ where: { chainId: Not(IsNull()) }, relations: ["collectionFragments", "chain"] });
         return data.map(d => this.assetApiService.collectionEntityToDto(d))
     }
+
+    /*
+    @Get('exos/:address')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Gets exos' })
+    @UseGuards(JwtAuthGuard)
+    async getExos(@Param('address') address: string): Promise<StandardizedOnChainToken[]> {
+        if (typeof address !== "string") {
+            throw new BadRequestException("No way jose.")
+        }
+        console.log(`https://api.opensea.io/api/v1/assets?${address.toLowerCase()}&collection_slug=exosama-expect-chaos&limit=30`)
+        const res = await axios.get(`https://api.opensea.io/api/v1/assets?owner=${address.toLowerCase()}&collection_slug=exosama-expect-chaos&limit=30`, { headers: { "X-API-Key": "5f63d943b9a648ba904dd9cc81a795c8" } });
+        const exos: StandardizedOnChainToken[] = []
+        for (const asset of res.data.assets) {
+            const exo: StandardizedOnChainToken = {
+                id: String(asset.id),
+                assetAddress: asset.asset_contract.address.toLowerCase(),
+                numericId: parseInt(asset.token_id),
+                metadata: {
+                    name: asset.name,
+                    image: asset.image_thumbnail_url
+                }
+            }
+            exos.push(exo)
+        }
+        return exos
+    }*/
 }
+
+/*
+//used for getExos
+export type GetMarketplaceOnChainTokensQuery = { __typename?: 'Query', erc1155TokenOwners: Array<{ __typename?: 'ERC1155TokenOwner', id: string, balance: any, token: { __typename?: 'ERC1155Token', numericId: any, id: string, metadata?: { __typename?: 'Metadata', image?: string | null, layers?: Array<string> | null, name?: string | null, type?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', displayType?: string | null, traitType: string, value: string }> | null } | null, contract: { __typename?: 'ERC1155Contract', address?: string | null } } }>, erc721Tokens: Array<{ __typename?: 'ERC721Token', numericId: any, id: string, metadata?: { __typename?: 'Metadata', image?: string | null, layers?: Array<string> | null, name?: string | null, type?: string | null, description?: string | null, composite?: boolean | null, attributes?: Array<{ __typename?: 'Attribute', displayType?: string | null, traitType: string, value: string }> | null } | null, contract: { __typename?: 'ERC721Contract', address?: string | null } }> };
+type ERC721MarketplaceOnChainTokenType = GetMarketplaceOnChainTokensQuery["erc721Tokens"][0]
+
+export type StandardizedOnChainToken = {
+    id: string,
+    assetAddress: string,
+    numericId: number,
+    balance?: string,
+    metadata?: NonNullable<ERC721MarketplaceOnChainTokenType["metadata"]>,
+}
+*/

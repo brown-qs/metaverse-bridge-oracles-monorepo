@@ -1,4 +1,4 @@
-import { Link as ChakraLink, Box, Button, CircularProgress, FormControl, FormErrorMessage, HStack, Input, ToastId, useToast, VStack, FormHelperText, FormLabel, NumberInput, NumberDecrementStepper, NumberIncrementStepper, NumberInputField, NumberInputStepper } from "@chakra-ui/react";
+import { Link as ChakraLink, Box, Button, CircularProgress, FormControl, FormErrorMessage, HStack, Input, ToastId, useToast, VStack, FormHelperText, FormLabel, NumberInput, NumberDecrementStepper, NumberIncrementStepper, NumberInputField, NumberInputStepper, InputRightElement } from "@chakra-ui/react";
 import { isPending } from "@reduxjs/toolkit";
 import { useWeb3React } from "@web3-react/core";
 import React from "react";
@@ -8,14 +8,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowsRightLeft, Checks, Flame, Mail, MessageReport, Select, Wallet } from "tabler-icons-react";
 import { ReduxModal } from ".";
-import { DEFAULT_CHAIN, PERMISSIONED_CHAINS, NETWORK_NAME, ChainId, BURNABLE_RESOURCES_IDS, MULTIVERSE_BRIDGE_V1_WAREHOUSE_ADDRESS, MULTIVERSE_BRIDGE_V2_WAREHOUSE_ADDRESS, WAREHOUSE_ADDRESS } from "../../constants";
+import { DEFAULT_CHAIN, PERMISSIONED_CHAINS, NETWORK_NAME, ChainId, BURNABLE_RESOURCES_IDS, MULTIVERSE_BRIDGE_V1_WAREHOUSE_ADDRESS, MULTIVERSE_BRIDGE_V2_WAREHOUSE_ADDRESS, WAREHOUSE_ADDRESS, numberFormatter } from "../../constants";
 import { useActiveWeb3React, useClasses } from "../../hooks";
 import { useEnraptureConfirmCallback, useExportConfirmCallback } from "../../hooks/multiverse/useConfirm";
 import { AssetRequest, EnraptureAssetCallbackState, useEnraptureAssetCallback } from "../../hooks/multiverse/useEnraptureAsset";
 import { ExportAssetCallbackState, useExportAssetCallback } from "../../hooks/multiverse/useExportAsset";
 import useAddNetworkToMetamaskCb from "../../hooks/useAddNetworkToMetamask/useAddNetworkToMetamask";
 import { ApprovalState, approveAsset, checkApproval, useApproveCallback } from "../../hooks/useApproveCallback/useApproveCallback";
-import { useBalances } from "../../hooks/useBalances/useBalances";
+import { getAssetBalance, useBalances } from "../../hooks/useBalances/useBalances";
 import { rtkQueryErrorFormatter, useActiveGameQuery, useEmailLoginCodeVerifyMutation, useInMutation, useSummonMutation } from "../../state/api/bridgeApi";
 import { closeEmailCodeModal, selectEmailCodeModalOpen } from "../../state/slices/emailCodeModalSlice";
 
@@ -31,6 +31,7 @@ import { closeInModal, selectInModalOpen, selectInModalTokens } from "../../stat
 import { StandardizedOnChainTokenWithRecognizedTokenData } from "../../utils/graphqlReformatter";
 import { useMutation, useQuery } from "react-query";
 import { assetInTransaction } from "../../hooks/multiverse/useImportAsset";
+import { utils } from "ethers"
 
 export function InModal() {
     const { chainId, account, library } = useActiveWeb3React();
@@ -87,6 +88,14 @@ export function InModal() {
 
         }
     })
+
+    const { isLoading: isBalanceLoading, data: balanceData, refetch: refetchBalance } = useQuery(
+        ['getAssetBalance', inTokens?.[0]?.assetAddress, inTokens?.[0]?.assetType, account],
+        () => getAssetBalance({ assetType: inTokens?.[0]?.assetType!, assetAddress: inTokens?.[0]?.assetAddress!, assetId: 0 }, library!, account!),
+        {
+            enabled: !!library && !!account && isFungible && !!inTokens?.[0]?.assetAddress && isOpen && !!inTokens?.[0]?.assetType
+        }
+    )
 
     const { isLoading: isCheckApprovalLoading, isFetching: isCheckApprovalFetching, data: checkApprovalData, refetch: refetchCheckApproval, error: checkApprovalError } = useQuery(
         ['checkApproval', inTokens?.[0]?.assetAddress, inTokens?.[0]?.assetType, account, warehouseAddress],
@@ -199,6 +208,14 @@ export function InModal() {
 
             >
             </ReduxModal >)
+    } else if (isFungible && isBalanceLoading) {
+        return <ReduxModal
+            {...baseProps}
+            message="Balance loading. Please wait a moment."
+            bottomButtonText="Cancel"
+        >
+            <MoonsamaSpinner></MoonsamaSpinner>
+        </ReduxModal >
     } else if (isFungible && typeof amount !== 'string') {
         return <ReduxModal
             {...baseProps}
@@ -206,28 +223,42 @@ export function InModal() {
             bottomButtonText="Cancel"
         >
             <VStack spacing="0" w="100%">
-                <NumberInput
-                    inputMode="numeric"
-                    w="100%"
-                    defaultValue={1}
-                    precision={0}
-                    min={1}
-                    value={value}
-                    onChange={(val) => setValue(val)}
-                >
-                    <NumberInputField />
-                    <NumberInputStepper>
-                        <NumberIncrementStepper />
-                        <NumberDecrementStepper />
-                    </NumberInputStepper>
-                </NumberInput>
+                <Box>Balance: {numberFormatter(utils.formatUnits(balanceData ?? "0", inTokens?.[0]?.decimals))}</Box>
+                <Box h='24px'></Box>
+                <HStack spacing="0" w="100%">
+                    <NumberInput
+                        inputMode="numeric"
+                        w="100%"
+                        defaultValue={1}
+                        precision={0}
+                        min={1}
+                        value={value}
+                        onChange={(val) => setValue(val)}
+                    >
+                        <NumberInputField />
+                        <NumberInputStepper>
+                            <NumberIncrementStepper />
+                            <NumberDecrementStepper />
+                        </NumberInputStepper>
+                    </NumberInput>
+                    <Box w="16px"></Box>
+                    <Button
+                        isDisabled={value?.length === 0}
+                        //will keep refreshing until approval is recognized
+                        onClick={() => {
+                            setAmount(balanceData?.toString() ?? "1")
+                        }}
+                    >
+                        MAX
+                    </Button>
+                </HStack>
                 <Box h='24px'></Box>
                 <Button
                     w="100%"
                     isDisabled={value?.length === 0}
                     //will keep refreshing until approval is recognized
                     onClick={() => {
-                        setAmount(parseEther(value).toString())
+                        setAmount(utils.parseUnits(value, inTokens?.[0]?.decimals).toString())
                     }}
                 >
                     SET
@@ -354,7 +385,7 @@ export function InModal() {
 
                 {amount &&
                     <Box paddingBottom="16px">
-                        Amount: {formatEther(amount)}
+                        Amount: {numberFormatter(utils.formatUnits(amount, inTokens?.[0]?.decimals))}
                     </Box>}
                 <Button
                     w="100%"

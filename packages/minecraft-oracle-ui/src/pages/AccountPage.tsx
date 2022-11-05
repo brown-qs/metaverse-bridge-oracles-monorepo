@@ -308,7 +308,7 @@ const AccountPage = () => {
       overflow="visible">
 
       <Box position="absolute" w="100%" h="100%" bg="#080714">
-        <Image src={BackgroundImage} w="552px" h="622px" position="absolute" top="0" right="0" filter="blur(10px)"></Image>
+        <Image src={BackgroundImage} w="552px" h="622px" position="absolute" top="0" right="calc(-1 * var(--moonsama-leftright-padding))" filter="blur(10px)"></Image>
       </Box>
       {profileLoading
         ?
@@ -324,7 +324,7 @@ const AccountPage = () => {
           margin="auto"
           zIndex="2"
           templateColumns={{ base: 'repeat(1, 1fr)', md: 'repeat(2, 1fr)' }}
-          w={{ base: "min(calc(100% - 22px), 900px)", md: "min(calc(100% - 80px), 900px)" }}
+          w="min(100%, 900px)"
         >
           {/** START title + logout */}
           <GridItem zIndex="2" paddingBottom={{ base: "8px", md: "40px" }}>

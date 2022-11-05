@@ -63,9 +63,14 @@ export default function MoonsamaNav() {
   )
   return (
     <Box
+      as="header"
       minHeight="64px"
       h="64px"
       overflow="hidden"
+      zIndex="200"
+      w="100%"
+      position="fixed"
+      boxShadow="md"
       sx={{
         display: "flex",
         flexDirection: "row",
@@ -73,8 +78,6 @@ export default function MoonsamaNav() {
         alignItems: "center",
         padding: "8px 16px",
         background: "gray.800",
-        zIndex: 1,
-        boxShadow: "0px 20px 25px -5px rgba(0, 0, 0, 0.1), 0px 10px 10px -5px rgba(0, 0, 0, 0.04)"
       }}
 
     >
