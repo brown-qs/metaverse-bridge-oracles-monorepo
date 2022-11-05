@@ -105,7 +105,7 @@ const ProfilePage = () => {
     const [setSkin, { error: setSkinError, isUninitialized, isLoading, isSuccess, isError, reset: setSkinReset }] = useSetSkinMutation()
 
     //OPENSEA API HACK
-    const [getExos, { data: getExosData, error: getExosError, isUninitialized: isGetExosUninitialized, isLoading: isGetExosLoading, isSuccess: isGetExosSuccess, isError: isGetExosError, reset: resetGetExos }] = useGetExosMutation()
+    //const [getExos, { data: getExosData, error: getExosError, isUninitialized: isGetExosUninitialized, isLoading: isGetExosLoading, isSuccess: isGetExosSuccess, isError: isGetExosError, reset: resetGetExos }] = useGetExosMutation()
 
     //on chain tokens (from indexers)
     const { data: raresamaOnChainTokensData, currentData: currentRaresamaOnChainTokensData, isLoading: isRaresamaOnChainTokensDataLoading, isFetching: isRaresamaOnChainTokensDataFetching, isError: isRaresamaOnChainTokensDataError, error: raresamaOnChainTokensError, refetch: refetchRaresamaOnChainTokens } = useGetRaresamaOnChainTokensQuery({ where: { owner: { id_eq: address }, contract: { OR: [{ id_eq: "0xf27a6c72398eb7e25543d19fda370b7083474735" }, { id_eq: "0xe4bf451271d8d1b9d2a7531aa551b7c45ec95048" }] } } })
@@ -162,7 +162,7 @@ const ProfilePage = () => {
     const standardizedErc20OnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(standardizedErc20Tokens, recognizedAssetsData), [standardizedErc20Tokens, recognizedAssetsData])
 
     //OPENSEA API HACK
-    const tempExosOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(getExosData ?? [], recognizedAssetsData), [getExosData, recognizedAssetsData])
+    // const tempExosOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(getExosData ?? [], recognizedAssetsData), [getExosData, recognizedAssetsData])
 
     const inGameItemsMetadata: StandardizedMetadata[] = React.useMemo(() => {
         return [
@@ -186,7 +186,7 @@ const ProfilePage = () => {
             ...standardizedMarketplaceOnChainTokensWithRecognizedTokenData,
             ...standardizedRaresamaOnChainTokensWithRecognizedTokenData,
             ...standardizedExosamaOnChainTokensWithRecognizedTokenData,
-            ...tempExosOnChainTokensWithRecognizedTokenData //OPENSEA API HACK
+            //   ...tempExosOnChainTokensWithRecognizedTokenData //OPENSEA API HACK
         ].filter(tok => checkOnChainItemNotImported(tok, inGameItems))
 
     }, [standardizedMarketplaceOnChainTokensWithRecognizedTokenData, standardizedRaresamaOnChainTokensWithRecognizedTokenData, standardizedExosamaOnChainTokensWithRecognizedTokenData, standardizedErc20OnChainTokensWithRecognizedTokenData, inGameItems])
@@ -324,17 +324,18 @@ const ProfilePage = () => {
     }, [blockNumbers[ChainId.MOONRIVER], blockNumbers[ChainId.MOONBEAM], blockNumbers[ChainId.MAINNET]])
 
 
+    /*
     //opensea api hack
     React.useEffect(() => {
         if (!!account && !!chainId && chainId === ChainId.MAINNET) {
             getExos(account.toLowerCase())
         }
-    }, [account, chainId])
+    }, [account, chainId])*/
 
     return (
         <>
             <Container
-                bg="#080714"
+
                 backgroundPosition="top right"
                 backgroundRepeat="no-repeat"
                 backgroundSize='600px 700px'
@@ -345,7 +346,7 @@ const ProfilePage = () => {
                 position="relative"
                 overflow="visible">
                 <Box position="absolute" w="100%" h="100%" bg="#080714">
-                    <Image src={BackgroundImage} w="552px" h="622px" position="absolute" top="0" right="0" filter="blur(10px)"></Image>
+                    <Image src={BackgroundImage} w="552px" h="622px" position="absolute" top="0" right="calc(-1 * var(--moonsama-leftright-padding))" filter="blur(10px)"></Image>
                 </Box>
                 {profileLoading
                     ?
@@ -373,8 +374,8 @@ const ProfilePage = () => {
                             <GridItem
                                 zIndex="2"
                                 padding={{
-                                    base: "96px 11px 0 11px",
-                                    md: "96px 40px 0 40px"
+                                    base: "96px 0 0 0",
+                                    md: "96px 0 0 0"
                                 }}
                                 rowSpan={1}
                                 colSpan={{ base: 12, md: 12, lg: 12 }}
@@ -409,8 +410,8 @@ const ProfilePage = () => {
                                 zIndex="2"
 
                                 padding={{
-                                    base: "16px 11px 7px 11px",
-                                    md: "16px 8px 7px 40px"
+                                    base: "16px 0 7px 0",
+                                    md: "16px 8px 7px 0"
                                 }}
                                 overflow="hidden"
                                 rowSpan={1}
@@ -482,8 +483,8 @@ const ProfilePage = () => {
                                 zIndex="2"
 
                                 padding={{
-                                    base: "16px 11px 6px 11px",
-                                    md: "16px 40px 6px 8px",
+                                    base: "16px 0 6px 0",
+                                    md: "16px 0 6px 8px",
                                     lg: "16px 8px 6px 8px"
                                 }}
                                 rowSpan={1}
@@ -589,9 +590,9 @@ const ProfilePage = () => {
                                 zIndex="2"
 
                                 padding={{
-                                    base: "16px 11px 6px 11px",
-                                    md: "8px 8px 6px 40px",
-                                    lg: "16px 40px 6px 8px"
+                                    base: "16px 0 6px 0",
+                                    md: "8px 8px 6px 0",
+                                    lg: "16px 0 6px 8px"
                                 }}
                                 rowSpan={1}
                                 colSpan={{ base: 12, md: 6, lg: 4 }}
@@ -692,9 +693,9 @@ const ProfilePage = () => {
                                 zIndex="2"
 
                                 padding={{
-                                    base: "16px 11px 6px 11px",
-                                    md: "8px 40px 6px 8px",
-                                    lg: "8px 8px 14px 40px"
+                                    base: "16px 0 6px 0",
+                                    md: "8px 0 6px 8px",
+                                    lg: "8px 8px 14px 0"
                                 }}
                                 rowSpan={1}
                                 colSpan={{ base: 12, md: 6, lg: 6 }}
@@ -747,9 +748,9 @@ const ProfilePage = () => {
                             <GridItem
                                 zIndex="2"
                                 padding={{
-                                    base: "16px 11px 7px 11px",
-                                    md: "8px 40px 15px 40px",
-                                    lg: "8px 40px 15px 8px"
+                                    base: "16px 0 7px 0",
+                                    md: "8px 0 15px 0",
+                                    lg: "8px 0 15px 8px"
                                 }}
                                 rowSpan={1}
                                 colSpan={{ base: 12, md: 12, lg: 6 }}

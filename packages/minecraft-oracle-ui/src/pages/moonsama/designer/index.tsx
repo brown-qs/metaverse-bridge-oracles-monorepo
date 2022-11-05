@@ -985,8 +985,11 @@ const CharacterDesignerPage = () => {
 
   return (
     <Container
+      position="relative"
+      left="calc(-1 * var(--moonsama-leftright-padding))"
+      right="calc(-2 * var(--moonsama-leftright-padding))"
       sx={{ background: 'url("/moonsama/egg-pattern.svg"), url("/moonsama/background-aurora.svg") top right no-repeat, radial-gradient(73.61% 73.46% at 49.9% 50%, rgba(123, 97, 255, 0.5) 13.27%, rgba(123, 97, 255, 0) 100%), linear-gradient(77.59deg, #4A4A77 -1.39%, #1B1B3A 44.24%);', backgroundBlendMode: 'overlay, hard-light', backgroundSize: 'auto, contain, auto' }}
-      minWidth="100%"
+      minWidth="100vw"
       margin="0"
       padding="0"
       minHeight={{ base: "calc(100vh - 64px)", xl: "calc(100vh - 164px)" }}
