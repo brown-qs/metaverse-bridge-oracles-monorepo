@@ -11,23 +11,15 @@ import { UserEntity } from "../user/user/user.entity";
         //add limit so view is not editable
         //https://stackoverflow.com/questions/58026241/how-to-create-a-read-only-view-in-postgresql-similar-to-oracle
         return connection.createQueryBuilder()
-            .select("asset.hash", "hash")
-            .addSelect("asset.ownerUuid", "uuid")
-            .addSelect(`asset.metadata->'tokenURI'->'name'`, "name")
-            .addSelect("user.email", "email")
-            .addSelect("user.minecraftUserName", "minecraftUserName")
-            .addSelect("collection_fragment.name", "collectionName")
-            .where("asset.pendingIn = false")
-            .from(AssetEntity, "asset")
-            .leftJoin(CollectionFragmentEntity, "collection_fragment", "collection_fragment.id = asset.collectionFragmentId")
-            .leftJoin(UserEntity, "user", "user.uuid = asset.ownerUuid")
+            .select(`collection_fragment.name`, "name")
+            .addSelect(`collection_fragment.recognizedAssetType`, "recognizedAssetType")
+            .from(CollectionFragmentEntity, "collection_fragment")
             .orderBy("collection_fragment.name", "ASC")
-            .orderBy("asset.ownerUuid", "ASC")
             .limit(1000 * 1000 * 1000)
 
     }
 })
-export class ZUserAssetView {
+export class ZAssetTotalsView {
     @ViewColumn()
     uuid: string
 
