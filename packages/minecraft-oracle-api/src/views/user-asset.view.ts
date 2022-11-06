@@ -17,6 +17,7 @@ import { UserEntity } from "../user/user/user.entity";
             .addSelect("user.email", "email")
             .addSelect("user.minecraftUserName", "minecraftUserName")
             .addSelect("collection_fragment.name", "collectionName")
+            .where("asset.pendingIn = false")
             .from(AssetEntity, "asset")
             .leftJoin(CollectionFragmentEntity, "collection_fragment", "collection_fragment.id = asset.collectionFragmentId")
             .leftJoin(UserEntity, "user", "user.uuid = asset.ownerUuid")
