@@ -105,7 +105,7 @@ const ProfilePage = () => {
     const [setSkin, { error: setSkinError, isUninitialized, isLoading, isSuccess, isError, reset: setSkinReset }] = useSetSkinMutation()
 
     //OPENSEA API HACK
-    //const [getExos, { data: getExosData, error: getExosError, isUninitialized: isGetExosUninitialized, isLoading: isGetExosLoading, isSuccess: isGetExosSuccess, isError: isGetExosError, reset: resetGetExos }] = useGetExosMutation()
+    const [getExos, { data: getExosData, error: getExosError, isUninitialized: isGetExosUninitialized, isLoading: isGetExosLoading, isSuccess: isGetExosSuccess, isError: isGetExosError, reset: resetGetExos }] = useGetExosMutation()
 
     //on chain tokens (from indexers)
     const { data: raresamaOnChainTokensData, currentData: currentRaresamaOnChainTokensData, isLoading: isRaresamaOnChainTokensDataLoading, isFetching: isRaresamaOnChainTokensDataFetching, isError: isRaresamaOnChainTokensDataError, error: raresamaOnChainTokensError, refetch: refetchRaresamaOnChainTokens } = useGetRaresamaOnChainTokensQuery({ where: { owner: { id_eq: address }, contract: { OR: [{ id_eq: "0xf27a6c72398eb7e25543d19fda370b7083474735" }, { id_eq: "0xe4bf451271d8d1b9d2a7531aa551b7c45ec95048" }] } } })
@@ -162,7 +162,7 @@ const ProfilePage = () => {
     const standardizedErc20OnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(standardizedErc20Tokens, recognizedAssetsData), [standardizedErc20Tokens, recognizedAssetsData])
 
     //OPENSEA API HACK
-    // const tempExosOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(getExosData ?? [], recognizedAssetsData), [getExosData, recognizedAssetsData])
+    const tempExosOnChainTokensWithRecognizedTokenData: StandardizedOnChainTokenWithRecognizedTokenData[] = React.useMemo(() => addRegonizedTokenDataToStandardizedOnChainTokens(getExosData ?? [], recognizedAssetsData), [getExosData, recognizedAssetsData])
 
     const inGameItemsMetadata: StandardizedMetadata[] = React.useMemo(() => {
         return [
@@ -186,7 +186,7 @@ const ProfilePage = () => {
             ...standardizedMarketplaceOnChainTokensWithRecognizedTokenData,
             ...standardizedRaresamaOnChainTokensWithRecognizedTokenData,
             ...standardizedExosamaOnChainTokensWithRecognizedTokenData,
-            //   ...tempExosOnChainTokensWithRecognizedTokenData //OPENSEA API HACK
+            ...tempExosOnChainTokensWithRecognizedTokenData //OPENSEA API HACK
         ].filter(tok => checkOnChainItemNotImported(tok, inGameItems))
 
     }, [standardizedMarketplaceOnChainTokensWithRecognizedTokenData, standardizedRaresamaOnChainTokensWithRecognizedTokenData, standardizedExosamaOnChainTokensWithRecognizedTokenData, standardizedErc20OnChainTokensWithRecognizedTokenData, inGameItems])
@@ -324,13 +324,13 @@ const ProfilePage = () => {
     }, [blockNumbers[ChainId.MOONRIVER], blockNumbers[ChainId.MOONBEAM], blockNumbers[ChainId.MAINNET]])
 
 
-    /*
+
     //opensea api hack
     React.useEffect(() => {
         if (!!account && !!chainId && chainId === ChainId.MAINNET) {
             getExos(account.toLowerCase())
         }
-    }, [account, chainId])*/
+    }, [account, chainId])
 
     return (
         <>
