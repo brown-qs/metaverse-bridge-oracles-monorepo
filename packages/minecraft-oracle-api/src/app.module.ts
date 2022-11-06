@@ -104,6 +104,7 @@ import { CollectionFragmentRoutingModule } from './collectionfragmentrouting/col
 import { CollectionFragmentRoutingEntity } from './collectionfragmentrouting/collectionfragmentrouting.entity';
 import { SyntheticItemLayerModule } from './syntheticitemlayer/syntheticitemlayer.module';
 import { SyntheticItemLayerEntity } from './syntheticitemlayer/syntheticitemlayer.entity';
+import { ZAssetTotalsView } from './views/asset-totals.view';
 
 
 
@@ -175,6 +176,7 @@ import { SyntheticItemLayerEntity } from './syntheticitemlayer/syntheticitemlaye
                     ResourceInventoryEntity,
                     ResourceInventoryOffsetEntity,
                     ZUserAssetView,
+                    ZAssetTotalsView,
                     MinecraftUserNameEntity,
                     MinecraftUuidEntity,
                     EmailEntity,
