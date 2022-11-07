@@ -76,10 +76,11 @@ export default function MoonsamaNav() {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        padding: "8px 16px",
         background: "gray.800",
       }}
-
+      padding="8px 16px"
+      paddingLeft="var(--moonsama-leftright-padding)"
+      paddingRight={{ base: "16px", xl: "var(--moonsama-leftright-padding)" }}
     >
       <HStack cursor={isOauth ? "default" : "pointer"} onClick={() => { if (!isOauth) { navgiate("/portal") } }}>
         {isLargerThan1300
