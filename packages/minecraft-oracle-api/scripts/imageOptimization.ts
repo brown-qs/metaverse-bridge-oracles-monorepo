@@ -58,7 +58,7 @@ async function main() {
     q.on("idle", () => {
         console.log("Were finished!")
     })
-    const images = await getDirRecursive("/Users/me/Downloads/0xac5c7493036de60e63eb81c5e9a440b42f47ebf5")
+    const images = await getDirRecursive("/Users/me/Downloads/1285/0xb654611f84a8dc429ba3cb4fda9fad236c505a1a")
 
     for (const img of images) {
         q.add(() => processImage(img.path))
