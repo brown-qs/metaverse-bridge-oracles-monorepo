@@ -28,6 +28,7 @@ export const Routing = () => {
             <Route path="/swap" element={<SwapPage />} />
             <Route path="/customizer" element={<CustomizerPage />} />
             <Route path="/customizer/library" element={<CustomizerLibrary />} />
+            <Route path="/customizer/library/:librarySection" element={<CustomizerLibrary />} />
             <Route path="/test" element={<TestPage />} />
             <Route path="*" element={<Navigate to="/portal" />} />
         </Routes>
