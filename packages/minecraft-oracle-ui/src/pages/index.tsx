@@ -11,7 +11,7 @@ import SwapPage from './SwapPage';
 import CustomizerPage from './CustomizerPage';
 import ExoAssets from "./exosama/ExoAssets";
 import ExoCustomizer from "./exosama/ExoCustomizer";
-import CustomizerLibrary from './CustomizerLibrary';
+import CustomizerLibrary from './CustomizerLibraryPage';
 
 export const Routing = () => {
     const accessToken = useSelector(selectAccessToken)
@@ -27,8 +27,8 @@ export const Routing = () => {
             <Route path="/exosama/customizer" element={<ExoCustomizer />} />
             <Route path="/swap" element={<SwapPage />} />
             <Route path="/customizer" element={<CustomizerPage />} />
-            <Route path="/customizer/library" element={<CustomizerLibrary />} />
-            <Route path="/customizer/library/:librarySection" element={<CustomizerLibrary />} />
+            <Route path="/customizer/library" element={<CustomizerPage />} />
+            <Route path="/customizer/library/:librarySection" element={<CustomizerPage />} />
             <Route path="/test" element={<TestPage />} />
             <Route path="*" element={<Navigate to="/portal" />} />
         </Routes>

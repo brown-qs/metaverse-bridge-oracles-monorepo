@@ -11,8 +11,11 @@ import { useGetMarketplaceMetadataQuery, useGetMarketplaceOnChainTokensQuery } f
 import { useGetRaresamaMetadataQuery, useGetRaresamaOnChainTokensQuery } from '../state/api/generatedSquidRaresamaApi';
 import { address } from 'faker';
 import { useGetRecognizedAssetsQuery, useGetInGameItemsQuery } from '../state/api/bridgeApi';
+import { Navigate, useParams } from 'react-router-dom';
+import CustomizerLibrary from '../components/Customizer/CustomizerLibrary';
 
 const CustomizerPage = () => {
+  /*
   const blockNumbers = useSelector(selectBlockNumbers)
   const { account, chainId, library } = useActiveWeb3React()
   const address: string = React.useMemo(() => account?.toLowerCase() ?? "0x999999999999999999999999999", [account])
@@ -117,6 +120,17 @@ const CustomizerPage = () => {
     refetchInGameItems()
   }, [blockNumbers[ChainId.MOONRIVER], blockNumbers[ChainId.MOONBEAM], blockNumbers[ChainId.MAINNET]])
 
-  return <></>
+  return <></>*/
+  const { librarySection } = useParams<{ librarySection?: string }>();
+
+  const libraryPages = ["staked", "wallet", "exosama", "moonsama"]
+
+  if (!libraryPages.includes(librarySection ?? "")) {
+    return <Navigate to="/customizer/library/exosama"></Navigate>
+  }
+
+  return <CustomizerLibrary librarySection={librarySection ?? "exosama"}></CustomizerLibrary>
+
+
 }
 export default CustomizerPage;
