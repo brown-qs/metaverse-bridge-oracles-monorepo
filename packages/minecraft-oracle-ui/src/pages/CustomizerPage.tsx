@@ -13,9 +13,10 @@ import { address } from 'faker';
 import { useGetRecognizedAssetsQuery, useGetInGameItemsQuery } from '../state/api/bridgeApi';
 import { Navigate, useParams } from 'react-router-dom';
 import CustomizerLibrary from '../components/Customizer/CustomizerLibrary';
+import { selectAccessToken } from '../state/slices/authSlice';
 
 const CustomizerPage = () => {
-  /*
+
   const blockNumbers = useSelector(selectBlockNumbers)
   const { account, chainId, library } = useActiveWeb3React()
   const address: string = React.useMemo(() => account?.toLowerCase() ?? "0x999999999999999999999999999", [account])
@@ -120,7 +121,6 @@ const CustomizerPage = () => {
     refetchInGameItems()
   }, [blockNumbers[ChainId.MOONRIVER], blockNumbers[ChainId.MOONBEAM], blockNumbers[ChainId.MAINNET]])
 
-  return <></>*/
   const { librarySection } = useParams<{ librarySection?: string }>();
 
   const libraryPages = ["staked", "wallet", "exosama", "moonsama"]
