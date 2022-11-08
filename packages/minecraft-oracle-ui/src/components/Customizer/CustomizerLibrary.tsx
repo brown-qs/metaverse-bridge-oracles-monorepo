@@ -13,6 +13,8 @@ import { useGetExosamaOnChainTokensQuery } from "../../state/api/generatedSquidE
 import { useGetMarketplaceOnChainTokensQuery } from "../../state/api/generatedSquidMarketplaceApi"
 import { StandardizedOnChainToken, standardizeMarketplaceOnChainTokens, standardizeExosamaOnChainTokens } from "../../utils/graphqlReformatter"
 import LibraryVirtualList from "./LibraryVirtualList"
+import { selectBlockNumbers } from "../../state/slices/blockNumbersSlice"
+import { ChainId } from "../../constants"
 
 export type CustomizerLibraryAsset = {
     chainId: number,
@@ -29,7 +31,7 @@ export type CustomizerLibraryProps = {
 
 const CustomizerLibrary = ({ librarySection, children }: CustomizerLibraryProps) => {
 
-
+    const blockNumbers = useSelector(selectBlockNumbers)
     const { account, chainId, library } = useActiveWeb3React()
     const accessToken = useSelector(selectAccessToken)
     const address: string = React.useMemo(() => account?.toLowerCase() ?? "0x999999999999999999999999999", [account])
@@ -42,6 +44,18 @@ const CustomizerLibrary = ({ librarySection, children }: CustomizerLibraryProps)
     const standardizedMarketplaceOnChainTokens: StandardizedOnChainToken[] = React.useMemo(() => standardizeMarketplaceOnChainTokens(marketplaceOnChainTokensData), [marketplaceOnChainTokensData])
     const standardizedExosamaOnChainTokens: StandardizedOnChainToken[] = React.useMemo(() => standardizeExosamaOnChainTokens(exosamaOnChainTokensData), [exosamaOnChainTokensData])
 
+    React.useEffect(() => {
+        refetchExosamaOnChainTokens()
+    }, [blockNumbers[ChainId.MAINNET]])
+
+
+    React.useEffect(() => {
+        refetchMarketplaceOnChainTokens()
+    }, [blockNumbers[ChainId.MOONRIVER]])
+
+    React.useEffect(() => {
+        refetchInGameItems()
+    }, [blockNumbers[ChainId.MOONRIVER], blockNumbers[ChainId.MOONBEAM], blockNumbers[ChainId.MAINNET]])
 
 
     const [tokenId, setTokenId] = React.useState<string>()
@@ -124,13 +138,13 @@ const CustomizerLibrary = ({ librarySection, children }: CustomizerLibraryProps)
             return "Please login to see your staked NFTs."
         }
         if (customizerAssets?.length === 0) {
-            return "No available or matching assets."
+            return "Not available or no matching assets."
         }
         return undefined
     }, [account, librarySection, customizerAssets])
 
     React.useEffect(() => {
-        if (!!errorMessage && errorMessage !== "No available or matching assets.") {
+        if (!!errorMessage && errorMessage !== "Not available or no matching assets.") {
             setTokenId(undefined)
         }
     }, [errorMessage])
@@ -177,7 +191,7 @@ const CustomizerLibrary = ({ librarySection, children }: CustomizerLibraryProps)
                         <VStack spacing="0" w="105px">
                             <FormControl isInvalid={false}>
                                 <FormLabel>Token ID</FormLabel>
-                                <NumberInput min={1} max={10000} step={1} inputMode="numeric" precision={0} value={tokenId} onChange={(e) => setTokenId(e)} isDisabled={!!errorMessage && errorMessage !== "No available or matching assets."}>
+                                <NumberInput min={1} max={10000} step={1} inputMode="numeric" precision={0} value={tokenId} onChange={(e) => setTokenId(e)} isDisabled={!!errorMessage && errorMessage !== "Not available or no matching assets."}>
                                     <NumberInputField />
                                 </NumberInput>
                             </FormControl>
@@ -194,7 +208,7 @@ const CustomizerLibrary = ({ librarySection, children }: CustomizerLibraryProps)
                                     ?
                                     <LibraryVirtualList numColumns={numColumns!} columnWidth={columnWidth!} rowHeight={rowHeight!} gridWidth={gridWidth!} gridHeight={gridHeight!} assets={customizerAssets}></LibraryVirtualList>
                                     :
-                                    <Box>Grid Dimensions not ready</Box>
+                                    <Box></Box>
                                 }
                             </>}
 

@@ -56,9 +56,11 @@ const CustomizerCard = ({ imageUrl, height, width, children }: CustomizerCardPro
                 <Box opacity={(smallImageLoaded && !smallImageError) ? "1" : "0"} top="0" right="0" bottom="0" left="0" position="absolute">
                     <Image htmlWidth={width} htmlHeight={width} src={smallImageUrl} onError={smallImageErrorCb} onLoad={smallImageLoadCb}></Image>
                 </Box>
-                <Box opacity={(fullImageLoaded || fullImageError) ? "1" : "0"} top="0" right="0" bottom="0" left="0" position="absolute">
-                    <Image fallback={<ImageFallback></ImageFallback>} htmlWidth={width} htmlHeight={width} src={fullImageUrl} onError={fullImageErrorCb} onLoad={fullImageLoadCb}></Image>
-                </Box>
+                <Fade in={fullImageLoaded}>
+                    <Box opacity={(fullImageLoaded || fullImageError) ? "1" : "0"} top="0" right="0" bottom="0" left="0" position="absolute">
+                        <Image fallback={<ImageFallback></ImageFallback>} htmlWidth={width} htmlHeight={width} src={fullImageUrl} onError={fullImageErrorCb} onLoad={fullImageLoadCb}></Image>
+                    </Box>
+                </Fade>
             </Box>
             <VStack flex="1" w="100%" justifyContent="space-between" bg="gray.700" padding="8px" paddingTop="12px" spacing="0">
                 {children}
