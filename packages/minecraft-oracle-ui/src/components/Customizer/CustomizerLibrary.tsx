@@ -12,8 +12,9 @@ import { useGetInGameItemsQuery } from "../../state/api/bridgeApi"
 import { useGetExosamaOnChainTokensQuery } from "../../state/api/generatedSquidExosamaApi"
 import { useGetMarketplaceOnChainTokensQuery } from "../../state/api/generatedSquidMarketplaceApi"
 import { StandardizedOnChainToken, standardizeMarketplaceOnChainTokens, standardizeExosamaOnChainTokens } from "../../utils/graphqlReformatter"
+import LibraryVirtualList from "./LibraryVirtualList"
 
-export type CustomizerAsset = {
+export type CustomizerLibraryAsset = {
     chainId: number,
     assetAddress: string,
     assetId: number,
@@ -27,6 +28,8 @@ export type CustomizerLibraryProps = {
 }
 
 const CustomizerLibrary = ({ librarySection, children }: CustomizerLibraryProps) => {
+
+
     const { account, chainId, library } = useActiveWeb3React()
     const accessToken = useSelector(selectAccessToken)
     const address: string = React.useMemo(() => account?.toLowerCase() ?? "0x999999999999999999999999999", [account])
@@ -40,11 +43,12 @@ const CustomizerLibrary = ({ librarySection, children }: CustomizerLibraryProps)
     const standardizedExosamaOnChainTokens: StandardizedOnChainToken[] = React.useMemo(() => standardizeExosamaOnChainTokens(exosamaOnChainTokensData), [exosamaOnChainTokensData])
 
 
-    const FixedSizeGrid = _FixedSizeGrid as ComponentType<FixedSizeGridProps>;
 
     const [tokenId, setTokenId] = React.useState<string>()
     const navigate = useNavigate()
     const listContainerRef = useRef<any>()
+    const listRef = useRef<any>()
+
     const dimensions = useDimensions(listContainerRef, true)
 
     const gridWidth: number | undefined = React.useMemo(() => dimensions?.contentBox?.width, [dimensions?.contentBox?.width])
@@ -62,8 +66,8 @@ const CustomizerLibrary = ({ librarySection, children }: CustomizerLibraryProps)
     const rowHeight: number | undefined = React.useMemo(() => !!columnWidth ? Math.min(Math.floor(columnWidth * 1.4), 580) : undefined, [columnWidth])
     const gridDimensionsReady: boolean = React.useMemo(() => !!numColumns && !!gridWidth && !!columnWidth && !!gridHeight && !!rowHeight, [gridWidth, columnWidth, gridHeight, numColumns, rowHeight])
 
-    const allCustomizerAssets: CustomizerAsset[] = React.useMemo(() => {
-        let assets: CustomizerAsset[] = []
+    const allCustomizerAssets: CustomizerLibraryAsset[] = React.useMemo(() => {
+        let assets: CustomizerLibraryAsset[] = []
         for (let i = 1; i <= 10000; i++) {
             assets.push({ chainId: 1, assetAddress: "0xac5c7493036de60e63eb81c5e9a440b42f47ebf5", assetId: i, inWallet: false, staked: false, edited: false })
         }
@@ -90,8 +94,8 @@ const CustomizerLibrary = ({ librarySection, children }: CustomizerLibraryProps)
     }, [inGameItemsData, standardizedMarketplaceOnChainTokens, standardizedExosamaOnChainTokens])
 
 
-    const customizerAssets: CustomizerAsset[] = React.useMemo(() => {
-        let assets: CustomizerAsset[] = allCustomizerAssets
+    const customizerAssets: CustomizerLibraryAsset[] = React.useMemo(() => {
+        let assets: CustomizerLibraryAsset[] = allCustomizerAssets
         if (librarySection === "exosama") {
             assets = assets.filter(a => a.assetAddress === "0xac5c7493036de60e63eb81c5e9a440b42f47ebf5")
         } else if (librarySection === "moonsama") {
@@ -136,34 +140,7 @@ const CustomizerLibrary = ({ librarySection, children }: CustomizerLibraryProps)
     }, [librarySection])
 
 
-    const LibraryCell = memo(({ columnIndex, rowIndex, style, data }: GridChildComponentProps) => {
-        const w: number = parseInt(style?.width as string) - 8
-        const h: number = parseInt(style?.height as string) - 8
-        console.log(style)
 
-        const asset = customizerAssets[(data.numCols * rowIndex) + columnIndex]
-
-        if (!!asset) {
-            return (
-                <Box style={style}>
-                    <LibraryCustomizerCard
-                        owned={asset.inWallet || asset.staked}
-                        edited={false}
-                        width={w}
-                        height={h}
-                        chainId={asset.chainId}
-                        assetAddress={asset.assetAddress}
-                        assetId={asset.assetId}
-                        imageUrl={`${process.env.REACT_APP_COMPOSITE_MEDIA_URI_PREFIX}/customizer/${asset.chainId}/${asset.assetAddress}/${asset.assetId}.png`}
-                    ></LibraryCustomizerCard>
-                </Box>
-
-            )
-        } else {
-            return <></>
-        }
-
-    }, areEqual);
     return (
         <Box bg="gray.900" className="moonsamaFullHeight" position="relative" left="calc(-1 * var(--moonsama-leftright-padding))" w="calc(max(320px, 100vw))" overflowX="scroll">
             <Stack spacing="0" w="100%" h="100%" direction={{ base: "column", md: "row" }} >
@@ -215,24 +192,7 @@ const CustomizerLibrary = ({ librarySection, children }: CustomizerLibraryProps)
                                 {gridDimensionsReady
 
                                     ?
-
-                                    <FixedSizeGrid
-                                        style={{ overflowX: "hidden" }}
-                                        columnCount={numColumns!}
-                                        columnWidth={columnWidth!}
-                                        rowCount={Math.ceil(customizerAssets.length / numColumns!)}
-                                        rowHeight={rowHeight!}
-
-                                        height={gridHeight!}
-                                        width={gridWidth!}
-                                        //traitOptionsAssets, numCols, fetchingCustomizations, selectedAsset: getSelectedAsset(expanded), onSelectAsset: selectAsset, myCustomizations
-                                        itemData={{ numCols: numColumns!, rowHeight: rowHeight!, columnWidth: columnWidth! }}
-                                        overscanRowCount={3}
-                                    // className={grid}
-                                    >
-                                        {LibraryCell}
-                                    </FixedSizeGrid>
-
+                                    <LibraryVirtualList numColumns={numColumns!} columnWidth={columnWidth!} rowHeight={rowHeight!} gridWidth={gridWidth!} gridHeight={gridHeight!} assets={customizerAssets}></LibraryVirtualList>
                                     :
                                     <Box>Grid Dimensions not ready</Box>
                                 }
