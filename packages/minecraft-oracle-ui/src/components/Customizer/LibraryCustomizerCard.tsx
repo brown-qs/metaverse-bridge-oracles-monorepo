@@ -28,7 +28,12 @@ const LibraryCustomizerCard = ({ imageUrl, width, chainId, assetAddress, assetId
     }
 
     const handleCustomizeClick = () => {
-        navigate(`/customizer/${chainId}/${assetAddress}/${assetId}`)
+        if (String(chainId) === "1") {
+            navigate(`/exosama/customizer`)
+        } else {
+            navigate(`/moonsama/customizer/${chainId}/${assetAddress}/${assetId}`)
+        }
+
     }
     return (<CustomizerCard imageUrl={imageUrl} width={width} height={height}>
         <HStack spacing="0" w="100%" fontFamily="Rubik" fontSize="16px" lineHeight="24px" minHeight="24px" overflow="hidden" justifyContent="space-between">
