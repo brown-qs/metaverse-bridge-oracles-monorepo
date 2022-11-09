@@ -1,7 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { Type } from "class-transformer"
-import { IsNotEmpty, IsNumber, IsEnum, IsEthereumAddress, IsString, IsBoolean, ArrayMinSize, IsArray, ValidateNested, IsAlphanumeric } from "class-validator"
+import { IsNotEmpty, IsNumber, IsEnum, IsEthereumAddress, IsString, IsBoolean, ArrayMinSize, IsArray, ValidateNested, IsAlphanumeric, ValidateIf } from "class-validator"
 import { StringAssetType } from "../../common/enums/AssetType"
+import { TransactionStatus } from "../../config/constants"
 
 export class InRequestDto {
     @ApiProperty({ description: 'Chain ID' })
@@ -60,6 +61,17 @@ export class InConfirmResponseDto {
     @IsBoolean()
     confirmed: boolean
 }
+
+export class SwapResponseDto {
+    @IsNotEmpty()
+    @IsEnum(TransactionStatus)
+    transactionStatus: TransactionStatus
+
+    @IsString()
+    @ValidateIf((object, value) => value !== null)
+    transactionHash: string | null
+}
+
 
 
 

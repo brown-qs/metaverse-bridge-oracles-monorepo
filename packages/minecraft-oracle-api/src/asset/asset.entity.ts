@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import { UserEntity } from '../user/user/user.entity';
 import { Column, Entity, Index, ManyToOne, PrimaryColumn } from 'typeorm';
-import { RecognizedAssetType } from '../config/constants';
+import { RecognizedAssetType, TransactionStatus } from '../config/constants';
 import { CompositeAssetEntity } from '../compositeasset/compositeasset.entity';
 import { CollectionFragmentEntity } from '../collectionfragment/collectionfragment.entity';
 import { ResourceInventoryEntity } from '../resourceinventory/resourceinventory.entity';
@@ -80,6 +80,20 @@ export class AssetEntity {
         default: RecognizedAssetType.NONE
     })
     recognizedAssetType?: RecognizedAssetType
+
+    //whether to automatically summon an asset after it has been enraptured eg 1-click swaps
+    @IsBoolean()
+    @Column({ nullable: false, default: false })
+    autoSwap?: boolean;
+
+    @IsEnum(TransactionStatus)
+    @Column({ nullable: true, default: null })
+    summonTransactionStatus?: TransactionStatus
+
+    @IsString()
+    @Column({ nullable: true, default: null })
+    summonTransactionHash?: string
+
 
     @IsJSON()
     @Column({ type: 'json', nullable: true })

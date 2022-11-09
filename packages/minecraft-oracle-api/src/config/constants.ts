@@ -50,6 +50,14 @@ export enum RecognizedAssetType {
   NATIVE_TOKEN = 'NATIVE_TOKEN'
 }
 
+export enum TransactionStatus {
+  QUEUED = 'QUEUED',
+  ERROR = 'ERROR',
+  IN_PROGRESS = 'IN_PROGRESS',
+  SUCCESS = 'SUCCESS',
+}
+
+
 export enum MultiverseVersion {
   V1 = 1,
   V2 = 2
