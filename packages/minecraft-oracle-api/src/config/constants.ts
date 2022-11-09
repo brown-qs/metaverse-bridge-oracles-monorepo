@@ -4,7 +4,8 @@ export enum ChainId {
   MAINNET = 1,
   MOONBEAM = 1284,
   MOONRIVER = 1285,
-  VOLTA = 73799
+  VOLTA = 73799,
+  EXOSAMANETWORK = 2109
 }
 
 export const RPC_URLS: { [chainId: number]: string } = {
@@ -49,6 +50,14 @@ export enum RecognizedAssetType {
   MISC_ART = 'MISC_ART',
   NATIVE_TOKEN = 'NATIVE_TOKEN'
 }
+
+export enum TransactionStatus {
+  QUEUED = 'QUEUED',
+  ERROR = 'ERROR',
+  IN_PROGRESS = 'IN_PROGRESS',
+  SUCCESS = 'SUCCESS',
+}
+
 
 export enum MultiverseVersion {
   V1 = 1,
