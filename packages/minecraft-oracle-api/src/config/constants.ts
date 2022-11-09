@@ -46,7 +46,8 @@ export enum RecognizedAssetType {
   PONDSAMA_FISH = 'PONDSAMA_FISH',
   GROMLIN = 'GROMLIN',
   EXOSAMA = 'EXOSAMA',
-  MISC_ART = 'MISC_ART'
+  MISC_ART = 'MISC_ART',
+  NATIVE_TOKEN = 'NATIVE_TOKEN'
 }
 
 export enum MultiverseVersion {
