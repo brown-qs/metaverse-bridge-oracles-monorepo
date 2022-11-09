@@ -224,7 +224,8 @@ export class OracleApiService {
             recognizedAssetType: collectionFragment.recognizedAssetType,
             collectionFragment,
             createdAt: new Date(),
-            modifiedAt: new Date()
+            modifiedAt: new Date(),
+            autoSwap
         })
         this.logger.debug(`${funcCallPrefix} requestHash: ${requestHash} salt: ${salt} hash: ${hash} request prepared from NEW salt: ${[hash, payload, signature]}`, this.context)
         return { hash, data: payload, signature, confirmed: false }
@@ -465,6 +466,8 @@ export class OracleApiService {
         //make sure summon is done only once, pray to god typeorm doesn't fuck us over here. According to typeorm affected is only supported on some db drivers, postgres seems to have it
         const { affected } = await this.assetService.update({ hash, summonTransactionStatus: null }, { summonTransactionStatus: TransactionStatus.QUEUED })
         if (affected === 1) {
+
+            await this.assetService.update({ hash }, { modifiedAt: new Date() })
             this.logger.debug(`${funcCallPrefix} updating transaction status 1 row affected, proceeding with summon.`, this.context)
         } else {
             this.logger.debug(`${funcCallPrefix} affected ${affected}, NOT summoning.`, this.context)
@@ -500,7 +503,7 @@ export class OracleApiService {
                 this.logger.debug(`${funcCallPrefix} summon mutex: start summon...`, this.context)
 
 
-                await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.IN_PROGRESS })
+                await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.IN_PROGRESS, modifiedAt: new Date() })
 
                 //Should we populate data with enraptured asset bridge hash for safety???
                 const d = ethers.utils.formatBytes32String("")
@@ -508,12 +511,12 @@ export class OracleApiService {
                 this.logger.debug(`${funcCallPrefix} summon mutex: summon complete`, this.context)
 
                 //TO DO: FILL IN HASH
-                await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.SUCCESS, summonTransactionHash: "" })
+                await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.SUCCESS, summonTransactionHash: "", modifiedAt: new Date() })
                 return receipt
 
             } catch (e) {
                 this.logger.error(`${funcCallPrefix} summon mutex: error`, e, this.context)
-                await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.ERROR })
+                await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.ERROR, modifiedAt: new Date() })
             }
 
             /*
