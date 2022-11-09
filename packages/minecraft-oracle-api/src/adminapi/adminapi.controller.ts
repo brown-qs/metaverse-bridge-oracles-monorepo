@@ -356,7 +356,7 @@ export class AdminApiController {
         @User() caller: UserEntity,
         @Body() dto: BankDto
     ): Promise<boolean> {
-        if (caller.role !== UserRole.ADMIN) {
+        if (caller.role !== UserRole.BANKER_ADMIN) {
             throw new ForbiddenException('Not admin')
         }
         const res = await this.gameApiService.bank(dto)
