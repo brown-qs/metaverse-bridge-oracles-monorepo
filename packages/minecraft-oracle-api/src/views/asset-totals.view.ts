@@ -12,7 +12,7 @@ import { UserEntity } from "../user/user/user.entity";
         //https://stackoverflow.com/questions/58026241/how-to-create-a-read-only-view-in-postgresql-similar-to-oracle
         return connection.createQueryBuilder()
             .select(`collection_fragment.name`, "name")
-            .addSelect(`collection_fragment.recognizedAssetType`, "recognizedAssetType")
+            // .addSelect(`collection_fragment.recognizedAssetType`, "recognizedAssetType")
             .from(CollectionFragmentEntity, "collection_fragment")
             .orderBy("collection_fragment.name", "ASC")
             .limit(1000 * 1000 * 1000)

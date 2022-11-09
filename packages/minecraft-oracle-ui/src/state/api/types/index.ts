@@ -182,6 +182,17 @@ export interface CallparamDto {
     confirmed: boolean
 }
 
+export enum TransactionStatus {
+    QUEUED = 'QUEUED',
+    ERROR = 'ERROR',
+    IN_PROGRESS = 'IN_PROGRESS',
+    SUCCESS = 'SUCCESS',
+}
+export interface SwapResponseDto {
+    transactionStatus: TransactionStatus,
+    transactionHash: string | null
+}
+
 export interface CompositeConfigDto {
     chainId: number,
     assetAddress: string,
