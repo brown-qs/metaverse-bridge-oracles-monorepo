@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import { parseEther, formatEther } from '@ethersproject/units';
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowsRightLeft, Checks, Flame, Mail, MessageReport, Select, Wallet } from "tabler-icons-react";
+import { ArrowsLeftRight, ArrowsRightLeft, Checks, Flame, Mail, MessageReport, Select, Wallet } from "tabler-icons-react";
 import { ReduxModal } from ".";
 import { DEFAULT_CHAIN, PERMISSIONED_CHAINS, NETWORK_NAME, ChainId, BURNABLE_RESOURCES_IDS, MULTIVERSE_BRIDGE_V1_WAREHOUSE_ADDRESS, MULTIVERSE_BRIDGE_V2_WAREHOUSE_ADDRESS, WAREHOUSE_ADDRESS, numberFormatter } from "../../constants";
 import { useActiveWeb3React, useClasses } from "../../hooks";
@@ -16,7 +16,7 @@ import { ExportAssetCallbackState, useExportAssetCallback } from "../../hooks/mu
 import useAddNetworkToMetamaskCb from "../../hooks/useAddNetworkToMetamask/useAddNetworkToMetamask";
 import { ApprovalState, approveAsset, checkApproval, useApproveCallback } from "../../hooks/useApproveCallback/useApproveCallback";
 import { getAssetBalance, useBalances } from "../../hooks/useBalances/useBalances";
-import { rtkQueryErrorFormatter, useActiveGameQuery, useEmailLoginCodeVerifyMutation, useInMutation, useSummonMutation } from "../../state/api/bridgeApi";
+import { rtkQueryErrorFormatter, useActiveGameQuery, useEmailLoginCodeVerifyMutation, useInMutation, useSummonMutation, useSwapInMutation } from "../../state/api/bridgeApi";
 import { closeEmailCodeModal, selectEmailCodeModalOpen } from "../../state/slices/emailCodeModalSlice";
 
 import { closeInGameItemModal, selectInGameItemModalOpen } from "../../state/slices/inGameItemModalSlice";
@@ -31,15 +31,15 @@ import { StandardizedOnChainTokenWithRecognizedTokenData } from "../../utils/gra
 import { useMutation, useQuery } from "react-query";
 import { assetInTransaction } from "../../hooks/multiverse/useImportAsset";
 import { utils } from "ethers"
-import { closeMigrateModal, selectMigrateModalOpen, selectMigrateModalTokens } from "../../state/slices/migrateModalSlice";
+import { closeSwapModal, selectSwapModalOpen, selectSwapModalTokens } from "../../state/slices/swapModalSlice";
 
-export function MigrateModal() {
+export function SwapModal() {
     const { chainId, account, library } = useActiveWeb3React();
     const dispatch = useDispatch()
-    const inTokens = useSelector(selectMigrateModalTokens)
-    const isOpen = useSelector(selectMigrateModalOpen)
-    const [setIn, { data: setInData, error: setInError, isUninitialized: isSetInUninitialized, isLoading: isSetInLoading, isSuccess: isSetInSuccess, isError: isSetInError, reset: setInReset }] = useInMutation()
-    const [value, setValue] = React.useState('1')
+    const inTokens = useSelector(selectSwapModalTokens)
+    const isOpen = useSelector(selectSwapModalOpen)
+    const [setIn, { data: setInData, error: setInError, isUninitialized: isSetInUninitialized, isLoading: isSetInLoading, isSuccess: isSetInSuccess, isError: isSetInError, reset: setInReset }] = useSwapInMutation()
+    const [value, setValue] = React.useState('.01')
     const [amount, setAmount] = React.useState<string | undefined>(undefined)
     const assetInTransactionStable = React.useCallback(() => assetInTransaction(
         inTokens?.[0]?.multiverseVersion!,
@@ -50,7 +50,8 @@ export function MigrateModal() {
         inTokens.map((tok, i) => ({
             bridgeHash: setInData?.[i]?.hash!,
             ...onChainTokenTokenToInDto(tok, account!, amount ?? "1")
-        }))
+        })),
+        true
     ), [inTokens, library, account, setInData])
 
     const signTransactionMutation = useMutation(async () => {
@@ -122,8 +123,8 @@ export function MigrateModal() {
         if (isOpen && !!inTokens?.[0] && !!account) {
             refetchCheckApproval()
             if (isFungible) {
-                if (typeof amount === "string") {
-                    const inParams: InRequestDto[] = inTokens.map(tok => onChainTokenTokenToInDto(tok, account, amount))
+                if (!!balanceData) {
+                    const inParams: InRequestDto[] = inTokens.map(tok => onChainTokenTokenToInDto(tok, account, balanceData.toString()))
                     setIn({ requests: inParams })
 
                 }
@@ -142,7 +143,7 @@ export function MigrateModal() {
                 setAmount(undefined)
             }
         }
-    }, [isOpen, inTokens, account, isFungible, amount])
+    }, [isOpen, inTokens, account, isFungible, balanceData])
 
     React.useEffect(() => {
         if (isOpen && (approveMutation?.isSuccess === true) && checkApprovalData?.toString() === "0" && !isCheckApprovalFetching) {
@@ -152,14 +153,14 @@ export function MigrateModal() {
     }, [approveMutation?.isSuccess, checkApprovalData, isCheckApprovalFetching, isOpen])
 
     const baseProps = {
-        title: isEnrapture ? "Enrapture" : "Import",
-        isOpenSelector: selectMigrateModalOpen,
-        closeActionCreator: closeMigrateModal,
+        title: "SWAP",
+        isOpenSelector: selectSwapModalOpen,
+        closeActionCreator: closeSwapModal,
         iconBackgroundColor: "teal.200",
         iconColor: "var(--chakra-colors-gray-800)",
         closeOnOverlayClick: false,
         onBottomButtonClick: () => {
-            dispatch(closeMigrateModal())
+            dispatch(closeSwapModal())
         }
     }
 
@@ -193,7 +194,7 @@ export function MigrateModal() {
             <ReduxModal
                 {...baseProps}
                 title="Asset Inflow"
-                message="Error: Unable to fetch import params. Please refresh and try again."
+                message={`Error: Unable to fetch import params. Please refresh and try again. ${rtkQueryErrorFormatter(setInError)}`}
                 bottomButtonText="Close"
 
             >
@@ -216,10 +217,10 @@ export function MigrateModal() {
         >
             <MoonsamaSpinner></MoonsamaSpinner>
         </ReduxModal >
-    } else if (isFungible && typeof amount !== 'string') {
+    } else if (false && isFungible && typeof amount !== 'string') {
         return <ReduxModal
             {...baseProps}
-            message={`Please set the amount you want to ${isEnrapture ? "enrapture" : "import"}.`}
+            message={`Please set the amount you want to swap.`}
             bottomButtonText="Cancel"
         >
             <VStack spacing="0" w="100%">
@@ -227,11 +228,11 @@ export function MigrateModal() {
                 <Box h='24px'></Box>
                 <HStack spacing="0" w="100%">
                     <NumberInput
-                        inputMode="numeric"
+                        inputMode="decimal"
                         w="100%"
-                        defaultValue={1}
-                        precision={0}
-                        min={1}
+                        defaultValue={.01}
+                        precision={.01}
+                        min={.01}
                         value={value}
                         onChange={(val) => setValue(val)}
                     >
@@ -276,7 +277,7 @@ export function MigrateModal() {
     } else if (checkApprovalData?.toString() === "0") {
         return <ReduxModal
             {...baseProps}
-            message="Token approval required. You must approve this token/collection to be moved into the Moonsama warehouse. Wallet action required."
+            message="Token approval required. You must approve $POOP to convert it to $SAMA. Check your wallet for an action."
             bottomButtonText="Cancel"
         >
             <Button
@@ -353,7 +354,7 @@ export function MigrateModal() {
                 <Box w="100%" paddingTop="16px">
                     <Button
                         onClick={() => {
-                            dispatch(closeMigrateModal())
+                            dispatch(closeSwapModal())
                         }}
                         leftIcon={<Checks />}
                         w="100%">GOT IT!</Button>
@@ -374,10 +375,7 @@ export function MigrateModal() {
     } else {
         return (<ReduxModal
             {...baseProps}
-            message={isEnrapture
-                ? `You are about to enrapture one or more items to the metaverse to use them in-game. They will be burned into the metaverse and not exportable.`
-                : `You are about to import one or more items to the metaverse to use them in-game, and you will be able to export them back to your wallet afterward.`
-            }
+            message={"You are about to swap $POOP for $SAMA."}
             bottomButtonText="Cancel"
         // onBottomButtonClick={handleClose}
         >
@@ -390,12 +388,12 @@ export function MigrateModal() {
                 <Button
                     w="100%"
                     isLoading={signTransactionMutation.isLoading}
-                    leftIcon={isEnrapture ? <Flame /> : <Checks />}
+                    leftIcon={<ArrowsLeftRight></ArrowsLeftRight>}
                     onClick={() => {
                         signTransactionMutation.mutate()
                     }}
                 >
-                    {isEnrapture ? "ENRAPTURE" : "IMPORT"} TO METAVERSE
+                    SWAP
                 </Button>
             </VStack>
         </ReduxModal>)
