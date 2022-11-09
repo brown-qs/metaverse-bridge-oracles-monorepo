@@ -133,7 +133,7 @@ export class OracleApiService {
 
             if (!swapRoute) {
                 this.logger.debug(`${funcCallPrefix} couldn't find swap route for collection fragment id: ${collectionFragment?.id} asset id: ${data.assetId}`, this.context)
-                throw new BadRequestException("Swap not supported.")
+                throw new BadRequestException("No swap route.")
             }
         }
 
@@ -450,7 +450,7 @@ export class OracleApiService {
 
         if (!swapRoute) {
             this.logger.debug(`${funcCallPrefix} couldn't find swap route for collection fragment id: ${assetEntry?.collectionFragment?.id} asset id: ${assetEntry.assetId}`, this.context)
-            throw new BadRequestException("Swap not supported.")
+            throw new BadRequestException("No swap route.")
         }
 
         this.logger.debug(`${funcCallPrefix} swap route: ${assetEntry.collectionFragment.collection.assetAddress} #${assetEntry.assetId} > ${swapRoute.outCollectionFragment.collection.assetAddress} #${swapRoute.outAssetId}`, this.context)

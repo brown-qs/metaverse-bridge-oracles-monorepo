@@ -15,6 +15,8 @@ import { setInModalTokens, openInModal } from '../state/slices/inModalSlice';
 import { selectBlockNumbers } from '../state/slices/blockNumbersSlice';
 import { StandardizedOnChainTokenWithRecognizedTokenData } from '../utils/graphqlReformatter';
 import { MultiverseVersion, RecognizedAssetType } from '../state/api/types';
+import { openSwapModal, setSwapModalTokens } from '../state/slices/swapModalSlice';
+import { SwapModal } from '../components/modals/SwapModal';
 
 const SwapPage = () => {
   const { account, chainId, library } = useActiveWeb3React()
@@ -195,8 +197,8 @@ const SwapPage = () => {
                         multiverseVersion: MultiverseVersion.V2,
 
                       }
-                      dispatch(setInModalTokens([token]))
-                      dispatch(openInModal())
+                      dispatch(setSwapModalTokens([token]))
+                      dispatch(openSwapModal())
                     }} isLoading={isPoopBalanceLoading} isDisabled={noPoop} leftIcon={<ArrowsRightLeft></ArrowsRightLeft>} w="100%">{narrowerThan390 ? "SWAP" : "SWAP $POOP FOR $SAMA"}</Button>
                     :
                     <Button onClick={() => addNetwork(ChainId.MOONBEAM)} leftIcon={<ArrowsRightLeft></ArrowsRightLeft>} w="100%">{narrowerThan390 ? "MOONBEAM" : "CHANGE TO MOONBEAM"}</Button>
@@ -210,7 +212,7 @@ const SwapPage = () => {
           </VStack>
         </VStack>
       </VStack>
-      <InModal />
+      <SwapModal />
     </>
   )
 }

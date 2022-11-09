@@ -50,7 +50,8 @@ export function InModal() {
         inTokens.map((tok, i) => ({
             bridgeHash: setInData?.[i]?.hash!,
             ...onChainTokenTokenToInDto(tok, account!, amount ?? "1")
-        }))
+        })),
+        false
     ), [inTokens, library, account, setInData])
 
     const signTransactionMutation = useMutation(async () => {
@@ -193,7 +194,7 @@ export function InModal() {
             <ReduxModal
                 {...baseProps}
                 title="Asset Inflow"
-                message="Error: Unable to fetch import params. Please refresh and try again."
+                message={`Error: Unable to fetch import params. Please refresh and try again. ${rtkQueryErrorFormatter(setInError)}`}
                 bottomButtonText="Close"
 
             >
