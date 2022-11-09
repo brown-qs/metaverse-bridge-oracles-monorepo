@@ -54,8 +54,9 @@ export default function MoonsamaNav() {
 
   const buttons = (
     <>
+      <Button h="50px" variant="moonsamaGhost" onClick={() => { navgiate("/swap"); onClose() }}>SWAP</Button>
       <Button h="50px" variant="moonsamaGhost" onClick={() => { navgiate("/portal"); onClose() }}>PORTAL</Button>
-      <Button as="a" href="https://marketplace.moonsama.com" target="_blank" h="50px" rightIcon={<ChevronUpRight color="#3BEFB8"></ChevronUpRight>} variant="moonsamaGhost">MARKETPLACE</Button>
+      <Button as="a" href="https://marketplace.moonsama.com" target="_blank" h="50px" rightIcon={<ChevronUpRight color="#3BEFB8"></ChevronUpRight>} variant="moonsamaGhost">MARKET</Button>
       <Button as="a" href="https://mcapi.moonsama.com" target="_blank" h="50px" rightIcon={<ChevronUpRight color="#3BEFB8"></ChevronUpRight>} variant="moonsamaGhost">MCAPI</Button>
       <Button as="a" href="https://wiki.moonsama.com" target="_blank" h="50px" rightIcon={<ChevronUpRight color="#3BEFB8"></ChevronUpRight>} variant="moonsamaGhost">DOCS</Button>
       <Button h="50px" rightIcon={<Brush color="#3BEFB8"></Brush>} variant="moonsamaGhost" onClick={() => { navgiate("/customizer"); onClose() }}>CUSTOMIZER</Button>
