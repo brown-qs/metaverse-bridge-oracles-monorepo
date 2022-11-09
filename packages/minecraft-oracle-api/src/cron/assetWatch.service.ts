@@ -5,7 +5,7 @@ import { AssetService } from '../asset/asset.service';
 
 import { Interval } from '@nestjs/schedule';
 import { CLEAN_CRON_INTERVAL_MS, IMPORT_CONFIRM_CRON_INTERVAL_MS } from '../config/constants';
-import { LessThan, MoreThanOrEqual } from 'typeorm';
+import { IsNull, LessThan, MoreThanOrEqual } from 'typeorm';
 import { OracleApiService } from '../oracleapi/oracleapi.service';
 
 
@@ -43,7 +43,15 @@ export class AssetWatchService {
         return;
       }
       this.lastConfirmPatrol = now
-      const assets = await this.assetService.findMany({ where: [{ pendingIn: true, expiration: MoreThanOrEqual(now) }, { pendingOut: true, expiration: MoreThanOrEqual(now) }], relations: ['owner', 'collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
+      const assets = await this.assetService.findMany({
+        where:
+          [
+            { pendingIn: true, expiration: MoreThanOrEqual(now), autoSwap: false },
+            { pendingOut: true, expiration: MoreThanOrEqual(now) },
+            { enraptured: true, pendingIn: false, summonTransactionStatus: IsNull(), autoSwap: true }, //autoswap
+          ]
+        , relations: ['owner', 'collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true
+      })
 
       this.logger.debug(`${funcCallPrefix} found ${assets.length} assets to check`, this.context);
 
@@ -53,7 +61,7 @@ export class AssetWatchService {
         this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash} pendingIn: ${asset.pendingIn} pendingOut: ${asset.pendingOut}`, this.context);
 
         try {
-          if (asset.pendingIn) {
+          if (asset.pendingIn && !asset.autoSwap) {
             this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash}, confirming in...`, this.context);
             //database updates are handled in below function, no need to do it here
             const inSuccess = await this.oracleApiService.inConfirm(asset.hash, asset.owner)
@@ -64,6 +72,14 @@ export class AssetWatchService {
             //database removal is handled in below function, no need to do it here
             const outSuccess = await this.oracleApiService.outConfirm(asset.hash, asset.owner)
             this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash}, successful out? ${outSuccess}`, this.context);
+          }
+
+          if (asset.autoSwap === true && asset.summonTransactionStatus === null) {
+            this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash}, auto swap...`, this.context);
+            //database removal is handled in below function, no need to do it here
+            const swapResult = await this.oracleApiService.swap(asset.hash, asset.owner)
+            this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash}, swap result? ${JSON.stringify(swapResult)}`, this.context);
+
           }
         } catch (e) {
           this.logger.error(`${funcCallPrefix} asset: ${i} hash: ${asset.hash} in or out confirm threw error ${e}`, e, this.context);

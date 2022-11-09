@@ -5,7 +5,7 @@ import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { TextureService } from '../texture/texture.service';
 import { UserEntity } from '../user/user/user.entity';
 import { GameService } from '../game/game.service';
-import { CALLDATA_EXPIRATION_MS, CALLDATA_EXPIRATION_THRESHOLD, METAVERSE, MultiverseVersion, RecognizedAssetType } from '../config/constants';
+import { CALLDATA_EXPIRATION_MS, CALLDATA_EXPIRATION_THRESHOLD, METAVERSE, MultiverseVersion, RecognizedAssetType, TransactionStatus } from '../config/constants';
 import { calculateMetaAssetHash, encodeExportWithSigData, encodeImportOrEnraptureWithSigData, getSalt, getSignature, StandardizedValidatedAssetInParams, standardizeValidateAssetInParams, utf8ToKeccak } from './oracleapi.utils';
 import { BigNumber, Contract, ethers } from 'ethers';
 import { ProviderToken } from '../provider/token';
@@ -45,7 +45,10 @@ import { CollectionFragmentService } from '../collectionfragment/collectionfragm
 import { CallparamDto } from './dtos/callparams.dto';
 import { HashAndChainIdDto } from './dtos/hashandchainid.dto';
 import { exist } from 'joi';
-import { InRequestDto } from './dtos/index.dto';
+import { InRequestDto, SwapResponseDto } from './dtos/index.dto';
+import { InjectConnection } from '@nestjs/typeorm';
+import { Connection } from 'typeorm';
+import { CollectionFragmentRoutingService } from '../collectionfragmentrouting/collectionfragmentrouting.service';
 
 @Injectable()
 export class OracleApiService {
@@ -71,10 +74,14 @@ export class OracleApiService {
         private readonly materialService: MaterialService,
         private readonly resourceInventoryService: ResourceInventoryService,
         private readonly collectionFragmentService: CollectionFragmentService,
+        private readonly collectionFragmentRoutingService: CollectionFragmentRoutingService,
+
         private configService: ConfigService,
         @Inject(ProviderToken.ORACLE_WALLET_CALLBACK) private getOracle: TypeOracleWalletProvider,
         @Inject(ProviderToken.RECOGNIZED_CHAIN_ASSETS_CALLBACK) private getRecognizedAsset: TypeRecognizedChainAssetsProvider,
-        @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
+        @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger,
+        @InjectConnection() private connection: Connection,
+
     ) {
         this.context = OracleApiService.name
         this.locks = new Map();
@@ -82,8 +89,8 @@ export class OracleApiService {
         this.defaultChainId = this.configService.get<number>('network.defaultChainId')
     }
 
-    public async inRequest(data: InRequestDto, user?: UserEntity): Promise<CallparamDto> {
-        const funcCallPrefix = `[${makeid(5)}] inRequest:: uuid: ${user?.uuid}`
+    public async inRequest(data: InRequestDto, autoSwap: boolean, user?: UserEntity): Promise<CallparamDto> {
+        const funcCallPrefix = `[${makeid(5)}] inRequest:: uuid: ${user?.uuid} autoSwap: ${autoSwap}`
         this.logger.debug(`${funcCallPrefix} START ImportDto: ${JSON.stringify(data)}`, this.context)
 
         let enraptureCollectionFrag = findRecognizedAsset(await this.getRecognizedAsset(data.chainId, BridgeAssetType.ENRAPTURED), { assetAddress: data.assetAddress, assetId: String(data.assetId) });
@@ -111,6 +118,25 @@ export class OracleApiService {
             throw new UnprocessableEntityException(`Not permissioned asset`)
         }
 
+        if (autoSwap && !collectionFragment.enrapturable) {
+            this.logger.error(`${funcCallPrefix} cannot auto swap a non-enrapturable asset`, null, this.context)
+            throw new UnprocessableEntityException(`Cannot migrate a non-enrapturable asset`)
+        }
+
+        if (autoSwap && !collectionFragment.swapable) {
+            this.logger.error(`${funcCallPrefix} asset is not swapable`, null, this.context)
+            throw new UnprocessableEntityException(`Asset is not swapable`)
+        }
+
+        if (autoSwap) {
+            const swapRoute = await this.collectionFragmentRoutingService.findOne({ inCollectionFragment: collectionFragment, inAssetId: data.assetId })
+
+            if (!swapRoute) {
+                this.logger.debug(`${funcCallPrefix} couldn't find swap route for collection fragment id: ${collectionFragment?.id} asset id: ${data.assetId}`, this.context)
+                throw new BadRequestException("No swap route.")
+            }
+        }
+
         const chainId = collectionFragment.collection.chainId
         const enraptured = collectionFragment.enrapturable === true
         this.logger.debug(`${funcCallPrefix} chainId: ${chainId} enraptured: ${String(enraptured)}`, this.context)
@@ -132,7 +158,7 @@ export class OracleApiService {
         const requestHash = await utf8ToKeccak(JSON.stringify(standardizedParams))
         this.logger.debug(`${funcCallPrefix} requestHash: ${requestHash}`, this.context)
 
-        const assetEntry = await this.assetService.findOne({ requestHash, collectionFragment, enraptured, pendingIn: true, owner: (!!user ? user : null) }, { order: { expiration: 'DESC' }, relations: ['owner', 'collectionFragment'] })
+        const assetEntry = await this.assetService.findOne({ autoSwap, requestHash, collectionFragment, enraptured, pendingIn: true, owner: (!!user ? user : null) }, { order: { expiration: 'DESC' }, relations: ['owner', 'collectionFragment'] })
 
         if (!!assetEntry) {
             this.logger.debug(`${funcCallPrefix} has existing entry`, this.context)
@@ -350,7 +376,6 @@ export class OracleApiService {
         })()
 
 
-        // TODO disgustang
         if (!!owner) {
             if (assetEntry.collectionFragment.treatAsFungible === true) {
                 const cid = ResourceInventoryService.calculateId({ chainId: chainEntity.chainId, assetAddress, assetId, uuid: owner.uuid })
@@ -395,6 +420,113 @@ export class OracleApiService {
             this.eventBus.publish(new AssetAddedEvent(owner.uuid))
         }
         return true
+    }
+
+
+
+    public async swap(hash: string, user?: UserEntity): Promise<SwapResponseDto> {
+        const funcCallPrefix = `[${makeid(5)}] swap:: hash: ${hash} uuid: ${user?.uuid}`
+        this.logger.debug(`${funcCallPrefix} START`, this.context)
+
+        const enraptureFinished = await this.inConfirm(hash, user)
+        if (!enraptureFinished) {
+            this.logger.debug(`${funcCallPrefix} Enrapture hasn't finished`, this.context)
+            throw new BadRequestException("Enrapture hasn't finished.")
+        }
+
+        const assetEntry = await this.assetService.findOne({ hash }, { relations: ['collectionFragment', 'collectionFragment.collection', 'collectionFragment.collection.chain', 'owner'], loadEagerRelations: true })
+
+        if (!assetEntry.autoSwap) {
+            this.logger.debug(`${funcCallPrefix} asset does not has autoswap enabled.`, this.context)
+            throw new BadRequestException("Only auto swaps are supported right now.")
+        }
+
+        if (!assetEntry.enraptured) {
+            this.logger.debug(`${funcCallPrefix} asset is not enraptured.`, this.context)
+            throw new BadRequestException("Only enraptured assets can be swapped.")
+        }
+
+        const swapRoute = await this.collectionFragmentRoutingService.findOne({ inCollectionFragment: assetEntry.collectionFragment, inAssetId: parseInt(assetEntry.assetId) }, { relations: ['collectionFragment', 'collectionFragment.collection', 'collectionFragment.collection.chain'], loadEagerRelations: true })
+
+        if (!swapRoute) {
+            this.logger.debug(`${funcCallPrefix} couldn't find swap route for collection fragment id: ${assetEntry?.collectionFragment?.id} asset id: ${assetEntry.assetId}`, this.context)
+            throw new BadRequestException("No swap route.")
+        }
+
+        this.logger.debug(`${funcCallPrefix} swap route: ${assetEntry.collectionFragment.collection.assetAddress} #${assetEntry.assetId} > ${swapRoute.outCollectionFragment.collection.assetAddress} #${swapRoute.outAssetId}`, this.context)
+
+
+
+        if (assetEntry.summonTransactionStatus !== null) {
+            this.logger.debug(`${funcCallPrefix} summon seems to already have started. Transaction status: ${assetEntry.summonTransactionStatus}`, this.context)
+            return { transactionStatus: assetEntry.summonTransactionStatus, transactionHash: assetEntry.summonTransactionHash }
+        }
+
+        //make sure summon is done only once, pray to god typeorm doesn't fuck us over here. According to typeorm affected is only supported on some db drivers, postgres seems to have it
+        const { affected } = await this.assetService.update({ hash, summonTransactionStatus: null }, { summonTransactionStatus: TransactionStatus.QUEUED })
+        if (affected === 1) {
+            this.logger.debug(`${funcCallPrefix} updating transaction status 1 row affected, proceeding with summon.`, this.context)
+        } else {
+            this.logger.debug(`${funcCallPrefix} affected ${affected}, NOT summoning.`, this.context)
+            const tempAsset = await this.assetService.findOne({ hash })
+            return { transactionStatus: tempAsset.summonTransactionStatus, transactionHash: tempAsset.summonTransactionHash }
+        }
+
+        this.logger.debug(`${funcCallPrefix} Waiting for mutex...`, this.context)
+
+        this.ensureLock('oracle_summon')
+        const oracleLock = this.locks.get('oracle_summon')
+
+        await oracleLock.runExclusive(async () => {
+            this.logger.debug(`${funcCallPrefix} summon mutex: start`, this.context)
+
+            const assetForCheck = await this.assetService.findOne({ hash })
+
+
+            if (assetForCheck.summonTransactionStatus !== TransactionStatus.QUEUED) {
+                this.logger.debug(`${funcCallPrefix} summon mutex: doesnt pass sanity check, transaction is not Queued current status: ${assetForCheck.summonTransactionStatus}`, this.context)
+                return
+            }
+
+            const chainEntity = assetEntry.collectionFragment.collection.chain
+            const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
+            const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
+
+            let contract = new Contract(chainEntity.multiverseV2Address, METAVERSE_V2_ABI, oracle)
+
+            let receipt
+            try {
+
+                this.logger.debug(`${funcCallPrefix} summon mutex: start summon...`, this.context)
+
+
+                await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.IN_PROGRESS })
+
+                //Should we populate data with enraptured asset bridge hash for safety???
+                const d = ethers.utils.formatBytes32String("")
+                receipt = await ((await contract.summon(METAVERSE, assetEntry.owner, [swapRoute.outCollectionFragment.collection.assetAddress], [swapRoute.outAssetId], [assetEntry.amount], d, { value: 0, gasPrice: '3000000000', gasLimit: '1000000' })).wait())
+                this.logger.debug(`${funcCallPrefix} summon mutex: summon complete`, this.context)
+
+                //TO DO: FILL IN HASH
+                await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.SUCCESS, summonTransactionHash: "" })
+                return receipt
+
+            } catch (e) {
+                this.logger.error(`${funcCallPrefix} summon mutex: error`, e, this.context)
+                await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.ERROR })
+            }
+
+            /*
+            user.lastUsedAddress = recipient.toLowerCase()
+            if (!user.usedAddresses.includes(user.lastUsedAddress)) {
+                user.usedAddresses.push(user.lastUsedAddress)
+            }
+            await this.userService.update(user.uuid, { usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress })*/
+
+        })
+
+        const returnAsset = await this.assetService.findOne({ hash })
+        return { transactionStatus: returnAsset.summonTransactionStatus, transactionHash: returnAsset.summonTransactionHash }
     }
 
 

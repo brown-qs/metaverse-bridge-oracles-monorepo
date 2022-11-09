@@ -69,8 +69,13 @@ export const BlockNumberManager = () => {
                                                             try {
                                                                 //{ hash: a.bridgeHash, chainId: a.chainId }
                                                                 if (DEBUG) console.log(`BlockNumberManager:: transaction hash: ${transaction.hash} trying to confirm bridgeHash: ${a.bridgeHash}`)
+                                                                if (transaction.swap === true) {
+                                                                    store.dispatch(bridgeApi.endpoints.swap.initiate({ hash: a.bridgeHash }) as any)
 
-                                                                store.dispatch(bridgeApi.endpoints.inConfirm.initiate({ hash: a.bridgeHash }) as any)
+                                                                } else {
+                                                                    store.dispatch(bridgeApi.endpoints.inConfirm.initiate({ hash: a.bridgeHash }) as any)
+
+                                                                }
 
                                                             } catch (e) {
 

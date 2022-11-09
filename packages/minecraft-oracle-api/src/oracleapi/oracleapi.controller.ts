@@ -16,7 +16,7 @@ import { CallparamDto } from './dtos/callparams.dto';
 import { OracleApiService } from './oracleapi.service';
 import { SummonDto } from './dtos/summon.dto';
 import { HashAndChainIdDto } from './dtos/hashandchainid.dto';
-import { InBatchRequestDto, InConfirmRequestDto, InConfirmResponseDto, OutBatchRequestDto, OutConfirmRequestDto, OutConfirmResponseDto } from './dtos/index.dto';
+import { InBatchRequestDto, InConfirmRequestDto, InConfirmResponseDto, OutBatchRequestDto, OutConfirmRequestDto, OutConfirmResponseDto, SwapResponseDto } from './dtos/index.dto';
 
 @ApiTags('oracle')
 @Controller('oracle')
@@ -32,28 +32,33 @@ export class OracleApiController {
     }
 
 
-    /*
-    @Put('swap')
+
+    //enrapture for autoswap aka '1 click swap', user is always null in asset_entity, for one click migrations only 
+    //autoSwap = true, user = null on asset_entity
+    @Put('swap-in')
     @HttpCode(200)
-    @ApiOperation({ summary: 'Swap assets' })
+    @ApiOperation({ summary: 'Enrapture assets for auto-swap' })
     async swap(
         @Body() data: InBatchRequestDto
     ): Promise<CallparamDto[]> {
         if (data?.requests?.length !== 1) {
             throw new BadRequestException("Only 1 swap accepted at this time.")
         }
-        return await Promise.all(data.requests.map(d => this.oracleApiService.inRequest(d)))
+        return await Promise.all(data.requests.map(d => this.oracleApiService.inRequest(d, true)))
     }
 
-    @Put('swap/confirm')
+    //called after PUT /swap-in to do summon (will be done by cron job if not called)
+    //can be used in the future to summon assets that were enraptured using PUT /in
+    @Put('swap')
     @HttpCode(200)
-    @ApiOperation({ summary: 'Swap assets' })
+    @ApiOperation({ summary: 'Summon enraptured assets' })
     async swapConfirm(
         @Body() dto: InConfirmRequestDto
-    ): Promise<InConfirmResponseDto> {
-        const success = await this.oracleApiService.inConfirm(dto.hash)
-        return { confirmed: success }
-    }*/
+    ): Promise<SwapResponseDto> {
+        const result = await this.oracleApiService.swap(dto.hash)
+
+        return result
+    }
 
     @Put('in')
     @HttpCode(200)
@@ -64,7 +69,7 @@ export class OracleApiController {
         @User() user: UserEntity,
         @Body() data: InBatchRequestDto
     ): Promise<CallparamDto[]> {
-        return await Promise.all(data.requests.map(d => this.oracleApiService.inRequest(d, user)))
+        return await Promise.all(data.requests.map(d => this.oracleApiService.inRequest(d, false, user)))
     }
 
     @Put('in/confirm')
