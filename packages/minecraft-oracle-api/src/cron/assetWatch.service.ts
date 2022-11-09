@@ -43,7 +43,7 @@ export class AssetWatchService {
         return;
       }
       this.lastConfirmPatrol = now
-      const assets = await this.assetService.findMany({ where: [{ pendingIn: true, expiration: MoreThanOrEqual(now) }, { pendingOut: true, expiration: MoreThanOrEqual(now) }], relations: ['owner', 'collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
+      const assets = await this.assetService.findMany({ where: [{ pendingIn: true, expiration: MoreThanOrEqual(now), autoSwap: false }, { pendingOut: true, expiration: MoreThanOrEqual(now) }], relations: ['owner', 'collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
 
       this.logger.debug(`${funcCallPrefix} found ${assets.length} assets to check`, this.context);
 
@@ -53,7 +53,7 @@ export class AssetWatchService {
         this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash} pendingIn: ${asset.pendingIn} pendingOut: ${asset.pendingOut}`, this.context);
 
         try {
-          if (asset.pendingIn) {
+          if (asset.pendingIn && !asset.autoSwap) {
             this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash}, confirming in...`, this.context);
             //database updates are handled in below function, no need to do it here
             const inSuccess = await this.oracleApiService.inConfirm(asset.hash, asset.owner)

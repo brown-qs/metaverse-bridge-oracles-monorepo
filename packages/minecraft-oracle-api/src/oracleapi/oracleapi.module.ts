@@ -18,9 +18,11 @@ import { CompositeAssetModule } from '../compositeasset/compositeasset.module';
 import { MaterialModule } from '../material/material.module';
 import { ResourceInventoryModule } from '../resourceinventory/resourceinventory.module';
 import { CqrsModule } from '@nestjs/cqrs';
+import { CollectionFragmentRoutingModule } from '../collectionfragmentrouting/collectionfragmentrouting.module';
 
 @Module({
     imports: [
+        CollectionFragmentRoutingModule,
         CqrsModule,
         AssetModule,
         UserModule,
