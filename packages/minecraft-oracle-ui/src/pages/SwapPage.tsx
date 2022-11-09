@@ -3,11 +3,18 @@ import { useAccountDialog, useActiveWeb3React, useClasses } from 'hooks';
 import { Container, Image, Alert, AlertDescription, AlertIcon, AlertTitle, Box, Button, CloseButton, Heading, HStack, Stack, Tag, TagCloseButton, TagLabel, TagLeftIcon, TagRightIcon, useToast, VStack, useMediaQuery } from '@chakra-ui/react';
 import { ArrowsRightLeft, DeviceGamepad2, Pencil, Tags, User, Wallet } from 'tabler-icons-react';
 import BackgroundImage from '../assets/images/bridge-background-blur.svg'
-import { ChainId, numberFormatter, RARESAMA_POOP } from '../constants';
+import { ChainId, MULTIVERSE_BRIDGE_V2_WAREHOUSE_ADDRESS, numberFormatter, RARESAMA_POOP } from '../constants';
 import { getAssetBalance } from '../hooks/useBalances/useBalances';
 import { useQuery } from 'react-query';
 import { utils } from "ethers"
 import useAddNetworkToMetamaskCb from '../hooks/useAddNetworkToMetamask/useAddNetworkToMetamask';
+import { checkApproval } from '../hooks/useApproveCallback/useApproveCallback';
+import { InModal } from '../components/modals/InModal';
+import { useDispatch, useSelector } from 'react-redux';
+import { setInModalTokens, openInModal } from '../state/slices/inModalSlice';
+import { selectBlockNumbers } from '../state/slices/blockNumbersSlice';
+import { StandardizedOnChainTokenWithRecognizedTokenData } from '../utils/graphqlReformatter';
+import { MultiverseVersion, RecognizedAssetType } from '../state/api/types';
 
 const SwapPage = () => {
   const { account, chainId, library } = useActiveWeb3React()
@@ -15,6 +22,8 @@ const SwapPage = () => {
   const { addNetwork } = useAddNetworkToMetamaskCb()
   const [shorterThan515] = useMediaQuery('(max-height: 515px)')
   const [narrowerThan390] = useMediaQuery('(max-width: 390px)')
+  const blockNumbers = useSelector(selectBlockNumbers)
+  const dispatch = useDispatch()
 
   const { isLoading: isPoopBalanceLoading, data: poopBalanceData, refetch: refetchPoopBalance } = useQuery(
     ['getAssetBalance', RARESAMA_POOP, account],
@@ -31,6 +40,9 @@ const SwapPage = () => {
       return false
     }
   }, [chainId, account])
+  React.useEffect(() => {
+    refetchPoopBalance()
+  }, [blockNumbers[ChainId.MOONBEAM]])
 
   const noPoop: boolean = React.useMemo(() => (numberFormatter(utils.formatUnits(poopBalanceData?.toString() ?? "0", 18)) === ".00000"), [poopBalanceData])
   return (
@@ -163,7 +175,29 @@ const SwapPage = () => {
                 <>
                   {isMoonbeam
                     ?
-                    <Button isLoading={isPoopBalanceLoading} isDisabled={noPoop} leftIcon={<ArrowsRightLeft></ArrowsRightLeft>} w="100%">{narrowerThan390 ? "SWAP" : "SWAP $POOP FOR $SAMA"}</Button>
+                    <Button onClick={() => {
+                      const token: StandardizedOnChainTokenWithRecognizedTokenData = {
+                        id: "RARESAMA_POOP",
+                        assetAddress: RARESAMA_POOP.assetAddress,
+                        numericId: 0,
+                        chainId: 1284,
+                        assetType: RARESAMA_POOP.assetType,
+                        recognizedCollectionName: "RESOURCE",
+                        recognizedCollectionFragmentName: "RESOURCE",
+                        recognizedAssetType: RecognizedAssetType.RESOURCE,
+                        decimals: 18,
+                        treatAsFungible: true,
+                        enrapturable: true,
+                        importable: false,
+                        exportable: false,
+                        summonable: false,
+                        gamepass: false,
+                        multiverseVersion: MultiverseVersion.V2,
+
+                      }
+                      dispatch(setInModalTokens([token]))
+                      dispatch(openInModal())
+                    }} isLoading={isPoopBalanceLoading} isDisabled={noPoop} leftIcon={<ArrowsRightLeft></ArrowsRightLeft>} w="100%">{narrowerThan390 ? "SWAP" : "SWAP $POOP FOR $SAMA"}</Button>
                     :
                     <Button onClick={() => addNetwork(ChainId.MOONBEAM)} leftIcon={<ArrowsRightLeft></ArrowsRightLeft>} w="100%">{narrowerThan390 ? "MOONBEAM" : "CHANGE TO MOONBEAM"}</Button>
                   }
@@ -176,6 +210,7 @@ const SwapPage = () => {
           </VStack>
         </VStack>
       </VStack>
+      <InModal />
     </>
   )
 }
