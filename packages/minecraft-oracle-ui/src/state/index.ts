@@ -21,7 +21,7 @@ import storage from 'redux-persist/lib/storage'
 import inModalSlice from './slices/inModalSlice';
 import transactionsSlice from './slices/transactionsSlice';
 import outModalSlice from './slices/outModalSlice';
-import migrateModalSlice from './slices/migrateModalSlice';
+import swapModalSlice from './slices/swapModalSlice';
 
 
 
@@ -54,7 +54,7 @@ const rootReducer = combineReducers({
   kiltLoginModal: kiltLoginModalSlice,
   summonModal: summonModalSlice,
   inModal: inModalSlice,
-  migrateModal: migrateModalSlice,
+  swapModal: swapModalSlice,
   outModal: outModalSlice,
   blockNumbers: blockNumbersSlice,
   oauth: oauthSlice,
