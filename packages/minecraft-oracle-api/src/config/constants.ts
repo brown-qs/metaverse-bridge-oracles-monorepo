@@ -4,7 +4,8 @@ export enum ChainId {
   MAINNET = 1,
   MOONBEAM = 1284,
   MOONRIVER = 1285,
-  VOLTA = 73799
+  VOLTA = 73799,
+  EXOSAMANETWORK = 2109
 }
 
 export const RPC_URLS: { [chainId: number]: string } = {
