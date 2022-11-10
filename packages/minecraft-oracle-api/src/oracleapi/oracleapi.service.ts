@@ -43,7 +43,7 @@ import { METAVERSE_V2_ABI } from '../common/contracts/MetaverseV2';
 import { ChainEntity } from '../chain/chain.entity';
 import { CollectionFragmentService } from '../collectionfragment/collectionfragment.service';
 import { CallparamDto } from './dtos/callparams.dto';
-import { InRequestDto, SwapResponseDto } from './dtos/index.dto';
+import { InRequestDto, MigrateResponseDto } from './dtos/index.dto';
 import { InjectConnection } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
 import { CollectionFragmentRoutingService } from '../collectionfragmentrouting/collectionfragmentrouting.service';
@@ -88,8 +88,8 @@ export class OracleApiService {
         this.defaultChainId = this.configService.get<number>('network.defaultChainId')
     }
 
-    public async inRequest(data: InRequestDto, autoSwap: boolean, user?: UserEntity): Promise<CallparamDto> {
-        const funcCallPrefix = `[${makeid(5)}] inRequest:: uuid: ${user?.uuid} autoSwap: ${autoSwap}`
+    public async inRequest(data: InRequestDto, autoMigrate: boolean, user?: UserEntity): Promise<CallparamDto> {
+        const funcCallPrefix = `[${makeid(5)}] inRequest:: uuid: ${user?.uuid} autoMigrate: ${autoMigrate}`
         this.logger.debug(`${funcCallPrefix} START ImportDto: ${JSON.stringify(data)}`, this.context)
 
         let enraptureCollectionFrag = findRecognizedAsset(await this.getRecognizedAsset(data.chainId, BridgeAssetType.ENRAPTURED), { assetAddress: data.assetAddress, assetId: String(data.assetId) });
@@ -117,22 +117,22 @@ export class OracleApiService {
             throw new UnprocessableEntityException(`Not permissioned asset`)
         }
 
-        if (autoSwap && !collectionFragment.enrapturable) {
-            this.logger.error(`${funcCallPrefix} cannot auto swap a non-enrapturable asset`, null, this.context)
+        if (autoMigrate && !collectionFragment.enrapturable) {
+            this.logger.error(`${funcCallPrefix} cannot auto migrate a non-enrapturable asset`, null, this.context)
             throw new UnprocessableEntityException(`Cannot migrate a non-enrapturable asset`)
         }
 
-        if (autoSwap && !collectionFragment.swapable) {
-            this.logger.error(`${funcCallPrefix} asset is not swapable`, null, this.context)
-            throw new UnprocessableEntityException(`Asset is not swapable`)
+        if (autoMigrate && !collectionFragment.migratable) {
+            this.logger.error(`${funcCallPrefix} asset is not migratable`, null, this.context)
+            throw new UnprocessableEntityException(`Asset is not migratable`)
         }
 
-        if (autoSwap) {
-            const swapRoute = await this.collectionFragmentRoutingService.findOne({ inCollectionFragment: collectionFragment, inAssetId: data.assetId })
+        if (autoMigrate) {
+            const migrateRoute = await this.collectionFragmentRoutingService.findOne({ inCollectionFragment: collectionFragment, inAssetId: data.assetId })
 
-            if (!swapRoute) {
-                this.logger.debug(`${funcCallPrefix} couldn't find swap route for collection fragment id: ${collectionFragment?.id} asset id: ${data.assetId}`, this.context)
-                throw new BadRequestException("No swap route.")
+            if (!migrateRoute) {
+                this.logger.debug(`${funcCallPrefix} couldn't find migrate route for collection fragment id: ${collectionFragment?.id} asset id: ${data.assetId}`, this.context)
+                throw new BadRequestException("No migrate route.")
             }
         }
 
@@ -157,7 +157,7 @@ export class OracleApiService {
         const requestHash = await utf8ToKeccak(JSON.stringify(standardizedParams))
         this.logger.debug(`${funcCallPrefix} requestHash: ${requestHash}`, this.context)
 
-        const assetEntry = await this.assetService.findOne({ autoSwap, requestHash, collectionFragment, enraptured, pendingIn: true, owner: (!!user ? user : null) }, { order: { expiration: 'DESC' }, relations: ['owner', 'collectionFragment'] })
+        const assetEntry = await this.assetService.findOne({ autoMigrate, requestHash, collectionFragment, enraptured, pendingIn: true, owner: (!!user ? user : null) }, { order: { expiration: 'DESC' }, relations: ['owner', 'collectionFragment'] })
 
         if (!!assetEntry) {
             this.logger.debug(`${funcCallPrefix} has existing entry`, this.context)
@@ -224,7 +224,7 @@ export class OracleApiService {
             collectionFragment,
             createdAt: new Date(),
             modifiedAt: new Date(),
-            autoSwap
+            autoMigrate
         })
         this.logger.debug(`${funcCallPrefix} requestHash: ${requestHash} salt: ${salt} hash: ${hash} request prepared from NEW salt: ${[hash, payload, signature]}`, this.context)
         return { hash, data: payload, signature, confirmed: false }
@@ -424,8 +424,8 @@ export class OracleApiService {
 
 
 
-    public async swap(hash: string, user?: UserEntity): Promise<SwapResponseDto> {
-        const funcCallPrefix = `[${makeid(5)}] swap:: hash: ${hash} uuid: ${user?.uuid}`
+    public async migrate(hash: string, user?: UserEntity): Promise<MigrateResponseDto> {
+        const funcCallPrefix = `[${makeid(5)}] migrate:: hash: ${hash} uuid: ${user?.uuid}`
         this.logger.debug(`${funcCallPrefix} START`, this.context)
 
         const enraptureFinished = await this.inConfirm(hash, user)
@@ -436,24 +436,24 @@ export class OracleApiService {
 
         const assetEntry = await this.assetService.findOne({ hash }, { relations: ['collectionFragment', 'collectionFragment.collection', 'collectionFragment.collection.chain', 'owner'], loadEagerRelations: true })
 
-        if (!assetEntry.autoSwap) {
-            this.logger.debug(`${funcCallPrefix} asset does not has autoswap enabled.`, this.context)
-            throw new BadRequestException("Only auto swaps are supported right now.")
+        if (!assetEntry.autoMigrate) {
+            this.logger.debug(`${funcCallPrefix} asset does not has autoMigrate enabled.`, this.context)
+            throw new BadRequestException("Only auto migrations are supported right now.")
         }
 
         if (!assetEntry.enraptured) {
             this.logger.debug(`${funcCallPrefix} asset is not enraptured.`, this.context)
-            throw new BadRequestException("Only enraptured assets can be swapped.")
+            throw new BadRequestException("Only enraptured assets can be migrated.")
         }
 
-        const swapRoute = await this.collectionFragmentRoutingService.findOne({ inCollectionFragment: assetEntry.collectionFragment, inAssetId: parseInt(assetEntry.assetId) }, { relations: ['outCollectionFragment', 'outCollectionFragment.collection', 'outCollectionFragment.collection.chain'], loadEagerRelations: true })
+        const migrateRoute = await this.collectionFragmentRoutingService.findOne({ inCollectionFragment: assetEntry.collectionFragment, inAssetId: parseInt(assetEntry.assetId) }, { relations: ['outCollectionFragment', 'outCollectionFragment.collection', 'outCollectionFragment.collection.chain'], loadEagerRelations: true })
 
-        if (!swapRoute) {
-            this.logger.debug(`${funcCallPrefix} couldn't find swap route for collection fragment id: ${assetEntry?.collectionFragment?.id} asset id: ${assetEntry.assetId}`, this.context)
-            throw new BadRequestException("No swap route.")
+        if (!migrateRoute) {
+            this.logger.debug(`${funcCallPrefix} couldn't find migration route for collection fragment id: ${assetEntry?.collectionFragment?.id} asset id: ${assetEntry.assetId}`, this.context)
+            throw new BadRequestException("No migration route.")
         }
 
-        this.logger.debug(`${funcCallPrefix} swap route: ${assetEntry.collectionFragment.collection.assetAddress} #${assetEntry.assetId} > ${swapRoute.outCollectionFragment.collection.assetAddress} #${swapRoute.outAssetId}`, this.context)
+        this.logger.debug(`${funcCallPrefix} migration route: ${assetEntry.collectionFragment.collection.assetAddress} #${assetEntry.assetId} > ${migrateRoute.outCollectionFragment.collection.assetAddress} #${migrateRoute.outAssetId}`, this.context)
 
 
         if (assetEntry.summonTransactionStatus !== null) {
@@ -474,7 +474,7 @@ export class OracleApiService {
         }
 
         this.logger.debug(`${funcCallPrefix} Waiting for mutex...`, this.context)
-        
+
         const oracleLock = this.getOrCreateLock(OracleApiService.SUMMON_LOCK_KEY)
 
         await oracleLock.runExclusive(async () => {
@@ -488,7 +488,7 @@ export class OracleApiService {
                 return
             }
 
-            const chainEntity = swapRoute.outCollectionFragment.collection.chain
+            const chainEntity = migrateRoute.outCollectionFragment.collection.chain
             const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
             const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
 
@@ -504,8 +504,8 @@ export class OracleApiService {
 
                 //Should we populate data with enraptured asset bridge hash for safety???
                 const d: any = []
-                console.log(METAVERSE, assetEntry.assetOwner, swapRoute.outCollectionFragment.collection.assetAddress, [swapRoute.outAssetId], [assetEntry.amount], d)
-                receipt = await ((await contract.summon(METAVERSE, assetEntry.assetOwner, swapRoute.outCollectionFragment.collection.assetAddress, [swapRoute.outAssetId], [assetEntry.amount], d, { gasPrice: '1000000000', gasLimit: '7000000' })).wait())
+                console.log(METAVERSE, assetEntry.assetOwner, migrateRoute.outCollectionFragment.collection.assetAddress, [migrateRoute.outAssetId], [assetEntry.amount], d)
+                receipt = await ((await contract.summon(METAVERSE, assetEntry.assetOwner, migrateRoute.outCollectionFragment.collection.assetAddress, [migrateRoute.outAssetId], [assetEntry.amount], d, { gasPrice: '1000000000', gasLimit: '7000000' })).wait())
                 this.logger.debug(`${funcCallPrefix} summon mutex: summon complete`, this.context)
 
                 await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.SUCCESS, summonTransactionHash: receipt.transactionHash, modifiedAt: new Date() })

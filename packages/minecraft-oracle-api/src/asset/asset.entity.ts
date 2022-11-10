@@ -81,10 +81,10 @@ export class AssetEntity {
     })
     recognizedAssetType?: RecognizedAssetType
 
-    //whether to automatically summon an asset after it has been enraptured eg 1-click swaps
+    //whether to automatically summon an asset after it has been enraptured eg 1-click migrations
     @IsBoolean()
     @Column({ nullable: false, default: false })
-    autoSwap?: boolean;
+    autoMigrate?: boolean;
 
     @IsEnum(TransactionStatus)
     @Column({ nullable: true, default: null })
