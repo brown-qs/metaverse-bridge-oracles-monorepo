@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Scope, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '../user/user/user.service';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
@@ -43,8 +43,6 @@ import { METAVERSE_V2_ABI } from '../common/contracts/MetaverseV2';
 import { ChainEntity } from '../chain/chain.entity';
 import { CollectionFragmentService } from '../collectionfragment/collectionfragment.service';
 import { CallparamDto } from './dtos/callparams.dto';
-import { HashAndChainIdDto } from './dtos/hashandchainid.dto';
-import { exist } from 'joi';
 import { InRequestDto, SwapResponseDto } from './dtos/index.dto';
 import { InjectConnection } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
@@ -55,6 +53,7 @@ export class OracleApiService {
 
     private locks: Map<string, MutexInterface>;
 
+    public static readonly SUMMON_LOCK_KEY = 'oracle_summon'
     private readonly context: string;
     private readonly oraclePrivateKey: string;
     private readonly defaultChainId: number;
@@ -236,7 +235,7 @@ export class OracleApiService {
         const funcCallPrefix = `[${makeid(5)}] inConfirm:: hash: ${hash} uuid: ${user?.uuid}`
         this.logger.debug(`${funcCallPrefix} START`, this.context)
 
-        const assetEntry = await this.assetService.findOne({ hash }, { relations: ['collectionFragment', 'collectionFragment.collection', 'collectionFragment.collection.chain', 'owner'], loadEagerRelations: true })
+        const assetEntry = await this.assetService.findOne({ hash }, { relations: ['owner', 'collectionFragment', 'collectionFragment.collection', 'collectionFragment.collection.chain'], loadEagerRelations: true })
 
         try {
             this.confirmAssetEntry(assetEntry, hash, user)
@@ -447,7 +446,7 @@ export class OracleApiService {
             throw new BadRequestException("Only enraptured assets can be swapped.")
         }
 
-        const swapRoute = await this.collectionFragmentRoutingService.findOne({ inCollectionFragment: assetEntry.collectionFragment, inAssetId: parseInt(assetEntry.assetId) }, { relations: ['collectionFragment', 'collectionFragment.collection', 'collectionFragment.collection.chain'], loadEagerRelations: true })
+        const swapRoute = await this.collectionFragmentRoutingService.findOne({ inCollectionFragment: assetEntry.collectionFragment, inAssetId: parseInt(assetEntry.assetId) }, { relations: ['outCollectionFragment', 'outCollectionFragment.collection', 'outCollectionFragment.collection.chain'], loadEagerRelations: true })
 
         if (!swapRoute) {
             this.logger.debug(`${funcCallPrefix} couldn't find swap route for collection fragment id: ${assetEntry?.collectionFragment?.id} asset id: ${assetEntry.assetId}`, this.context)
@@ -455,7 +454,6 @@ export class OracleApiService {
         }
 
         this.logger.debug(`${funcCallPrefix} swap route: ${assetEntry.collectionFragment.collection.assetAddress} #${assetEntry.assetId} > ${swapRoute.outCollectionFragment.collection.assetAddress} #${swapRoute.outAssetId}`, this.context)
-
 
 
         if (assetEntry.summonTransactionStatus !== null) {
@@ -476,9 +474,8 @@ export class OracleApiService {
         }
 
         this.logger.debug(`${funcCallPrefix} Waiting for mutex...`, this.context)
-
-        this.ensureLock('oracle_summon')
-        const oracleLock = this.locks.get('oracle_summon')
+        
+        const oracleLock = this.getOrCreateLock(OracleApiService.SUMMON_LOCK_KEY)
 
         await oracleLock.runExclusive(async () => {
             this.logger.debug(`${funcCallPrefix} summon mutex: start`, this.context)
@@ -491,7 +488,7 @@ export class OracleApiService {
                 return
             }
 
-            const chainEntity = assetEntry.collectionFragment.collection.chain
+            const chainEntity = swapRoute.outCollectionFragment.collection.chain
             const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
             const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
 
@@ -506,15 +503,16 @@ export class OracleApiService {
                 await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.IN_PROGRESS, modifiedAt: new Date() })
 
                 //Should we populate data with enraptured asset bridge hash for safety???
-                const d = ethers.utils.formatBytes32String("")
-                receipt = await ((await contract.summon(METAVERSE, assetEntry.owner, [swapRoute.outCollectionFragment.collection.assetAddress], [swapRoute.outAssetId], [assetEntry.amount], d, { value: 0, gasPrice: '3000000000', gasLimit: '1000000' })).wait())
+                const d: any = []
+                console.log(METAVERSE, assetEntry.assetOwner, swapRoute.outCollectionFragment.collection.assetAddress, [swapRoute.outAssetId], [assetEntry.amount], d)
+                receipt = await ((await contract.summon(METAVERSE, assetEntry.assetOwner, swapRoute.outCollectionFragment.collection.assetAddress, [swapRoute.outAssetId], [assetEntry.amount], d, { gasPrice: '1000000000', gasLimit: '7000000' })).wait())
                 this.logger.debug(`${funcCallPrefix} summon mutex: summon complete`, this.context)
 
-                //TO DO: FILL IN HASH
-                await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.SUCCESS, summonTransactionHash: "", modifiedAt: new Date() })
+                await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.SUCCESS, summonTransactionHash: receipt.transactionHash, modifiedAt: new Date() })
                 return receipt
 
             } catch (e) {
+                console.log(e)
                 this.logger.error(`${funcCallPrefix} summon mutex: error`, e, this.context)
                 await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.ERROR, modifiedAt: new Date() })
             }
@@ -743,15 +741,12 @@ export class OracleApiService {
             throw new UnprocessableEntityException(`Blacklisted`)
         }
 
-        this.ensureLock('oracle_summon')
-        const oracleLock = this.locks.get('oracle_summon')
+        const inventoryItems = await this.inventoryService.findMany({ relations: ['owner', 'material', 'material.collectionFragment', 'material.collectionFragment.collection'], where: { owner: { uuid: user.uuid }, summonInProgress: false }, loadEagerRelations: true })
 
-        const snapshots = await this.inventoryService.findMany({ relations: ['owner', 'material'], where: { owner: { uuid: user.uuid }, summonInProgress: false } })
+        if (!inventoryItems || inventoryItems.length === 0) {
+            const inventoryItemsSummonInProgress = await this.inventoryService.findMany({ relations: ['owner'], where: { owner: { uuid: user.uuid }, summonInProgress: true } })
 
-        if (!snapshots || snapshots.length === 0) {
-            const snapshots2 = await this.inventoryService.findMany({ relations: ['owner'], where: { owner: { uuid: user.uuid }, summonInProgress: true } })
-
-            if (!snapshots2 || snapshots2.length === 0) {
+            if (!inventoryItemsSummonInProgress || inventoryItemsSummonInProgress.length === 0) {
                 return false
             } else {
                 return true
@@ -759,24 +754,26 @@ export class OracleApiService {
         }
 
         await Promise.all(
-            snapshots.map(async (snap) => {
-                snap.summonInProgress = true
-                await this.inventoryService.update(snap.id, { summonInProgress: snap.summonInProgress })
+            inventoryItems.map(async (item) => {
+                item.summonInProgress = true
+                await this.inventoryService.update(item.id, { summonInProgress: item.summonInProgress })
             })
         )
+
+        const oracleLock = this.getOrCreateLock(OracleApiService.SUMMON_LOCK_KEY)
 
         const res = await oracleLock.runExclusive(async () => {
 
             // safety vibe check
-            if (!snapshots[0].summonInProgress) {
+            if (!inventoryItems[0].summonInProgress) {
                 this.logger.warn(`Summon: summonInProgress vibe check fail for ${user.uuid}`, this.context)
                 return false
             }
 
             const groups: { [key: string]: { ids: string[], amounts: string[], entities: InventoryEntity[] } } = {}
-            snapshots.map(snapshot => {
-                const amount = (snapshot.material.multiplier ?? 1) * Number.parseFloat(snapshot.amount)
-                const assetAddress = snapshot.material.assetAddress.toLowerCase()
+            inventoryItems.map(item => {
+                const amount = (item.material?.multiplier ?? 1) * Number.parseFloat(item.amount)
+                const assetAddress = item.material?.collectionFragment?.collection?.assetAddress?.toLowerCase()
                 if (!(assetAddress in groups)) {
                     groups[assetAddress] = {
                         ids: [],
@@ -785,11 +782,9 @@ export class OracleApiService {
                     }
                 }
                 groups[assetAddress]['amounts'].push(ethers.utils.parseEther(amount.toString()).toString())
-                groups[assetAddress]['ids'].push(snapshot.material.assetId)
-                groups[assetAddress]['entities'].push(snapshot)
+                groups[assetAddress]['ids'].push(item.material.assetId)
+                groups[assetAddress]['entities'].push(item)
             })
-
-            const addresses = Object.keys(groups)
 
             const chainEntity = await this.chainService.findOne({ chainId })
             const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
@@ -803,6 +798,8 @@ export class OracleApiService {
                 throw new UnprocessableEntityException('Summon MultiverseAddress error.')
             }
 
+            const addresses = Object.keys(groups)
+
             for (let i = 0; i < addresses.length; i++) {
                 try {
 
@@ -811,7 +808,7 @@ export class OracleApiService {
                     //console.log({METAVERSE, recipient, ids, amounts, i})
                     // console.log("SummonResult",this.metaverseChain[chainId])
 
-                    const receipt = await ((await contract.summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], { value: 0, gasPrice: '3000000000', gasLimit: '1000000' })).wait())
+                    const receipt = await ((await contract.summon(METAVERSE, recipient, ids, amounts, [], { value: 0, gasPrice: '3000000000', gasLimit: '1000000' })).wait())
 
                     try {
                         await this.inventoryService.removeAll(groups[addresses[i]].entities)
@@ -898,13 +895,12 @@ export class OracleApiService {
         }
     }
 
-    private ensureLock(key: string) {
+    private getOrCreateLock(key: string) {
         if (!this.locks.has(key)) {
             this.locks.set(key, new Mutex());
         }
+        return this.locks.get(key)
     }
-
-
 }
 
 function makeid(length: number): string {
