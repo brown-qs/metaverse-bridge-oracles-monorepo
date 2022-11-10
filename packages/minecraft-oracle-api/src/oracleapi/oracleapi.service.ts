@@ -5,7 +5,7 @@ import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { TextureService } from '../texture/texture.service';
 import { UserEntity } from '../user/user/user.entity';
 import { GameService } from '../game/game.service';
-import { CALLDATA_EXPIRATION_MS, CALLDATA_EXPIRATION_THRESHOLD, ChainId, METAVERSE, MultiverseVersion, RecognizedAssetType, TransactionStatus } from '../config/constants';
+import { CALLDATA_EXPIRATION_MS, ChainId, METAVERSE, MultiverseVersion, TransactionStatus } from '../config/constants';
 import { calculateMetaAssetHash, encodeExportWithSigData, encodeImportOrEnraptureWithSigData, getSalt, getSignature, StandardizedValidatedAssetInParams, standardizeValidateAssetInParams, utf8ToKeccak } from './oracleapi.utils';
 import { BigNumber, Contract, ethers } from 'ethers';
 import { ProviderToken } from '../provider/token';
@@ -795,16 +795,17 @@ export class OracleApiService {
                     const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
 
                     let contract: Contract;
+                    let receipt: any
                     if (!!chainEntity.multiverseV1Address) {
                         contract = new Contract(chainEntity.multiverseV1Address, METAVERSE_ABI, oracle)
+                        receipt = await (await contract.summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], { gasPrice: '1000000000', gasLimit: '5000000' })).wait()
                     } else if (!!chainEntity.multiverseV2Address) {
                         contract = new Contract(chainEntity.multiverseV2Address, METAVERSE_V2_ABI, oracle)
+                        receipt = await (await contract.summon(METAVERSE, recipient, assetAddress, ids, amounts, [], { gasPrice: '1000000000', gasLimit: '5000000' })).wait()
                     } else {
                         this.logger.error(`Summon: failiure not find MultiverseAddress`)
                         throw new UnprocessableEntityException('Summon MultiverseAddress error.')
                     }
-
-                    const receipt = await (await contract.summon(METAVERSE, recipient, assetAddress, ids, amounts, [], { gasPrice: '1000000000', gasLimit: '1000000' })).wait()
 
                     try {
                         await this.inventoryService.removeAll(groups[addresses[i]].entities)
