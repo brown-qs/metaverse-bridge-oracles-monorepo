@@ -5,13 +5,12 @@ import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { TextureService } from '../texture/texture.service';
 import { UserEntity } from '../user/user/user.entity';
 import { GameService } from '../game/game.service';
-import { CALLDATA_EXPIRATION_MS, CALLDATA_EXPIRATION_THRESHOLD, METAVERSE, MultiverseVersion, RecognizedAssetType, TransactionStatus } from '../config/constants';
+import { CALLDATA_EXPIRATION_MS, CALLDATA_EXPIRATION_THRESHOLD, ChainId, METAVERSE, MultiverseVersion, RecognizedAssetType, TransactionStatus } from '../config/constants';
 import { calculateMetaAssetHash, encodeExportWithSigData, encodeImportOrEnraptureWithSigData, getSalt, getSignature, StandardizedValidatedAssetInParams, standardizeValidateAssetInParams, utf8ToKeccak } from './oracleapi.utils';
 import { BigNumber, Contract, ethers } from 'ethers';
 import { ProviderToken } from '../provider/token';
 import { AssetService } from '../asset/asset.service';
 import { findRecognizedAsset, stringAssetTypeToAssetType } from '../utils';
-import { MetaAsset } from './oracleapi.types';
 import { SummonDto } from './dtos/summon.dto';
 import { AssetEntity } from '../asset/asset.entity';
 import { Mutex, MutexInterface } from 'async-mutex';
@@ -496,23 +495,20 @@ export class OracleApiService {
 
             let receipt
             try {
-
                 this.logger.debug(`${funcCallPrefix} summon mutex: start summon...`, this.context)
-
 
                 await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.IN_PROGRESS, modifiedAt: new Date() })
 
                 //Should we populate data with enraptured asset bridge hash for safety???
                 const d: any = []
-                console.log(METAVERSE, assetEntry.assetOwner, migrateRoute.outCollectionFragment.collection.assetAddress, [migrateRoute.outAssetId], [assetEntry.amount], d)
+                // console.log(METAVERSE, assetEntry.assetOwner, migrateRoute.outCollectionFragment.collection.assetAddress, [migrateRoute.outAssetId], [assetEntry.amount], d)
                 receipt = await ((await contract.summon(METAVERSE, assetEntry.assetOwner, migrateRoute.outCollectionFragment.collection.assetAddress, [migrateRoute.outAssetId], [assetEntry.amount], d, { gasPrice: '1000000000', gasLimit: '7000000' })).wait())
                 this.logger.debug(`${funcCallPrefix} summon mutex: summon complete`, this.context)
 
                 await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.SUCCESS, summonTransactionHash: receipt.transactionHash, modifiedAt: new Date() })
                 return receipt
-
             } catch (e) {
-                console.log(e)
+                // console.log(e)
                 this.logger.error(`${funcCallPrefix} summon mutex: error`, e, this.context)
                 await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.ERROR, modifiedAt: new Date() })
             }
@@ -523,13 +519,11 @@ export class OracleApiService {
                 user.usedAddresses.push(user.lastUsedAddress)
             }
             await this.userService.update(user.uuid, { usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress })*/
-
         })
 
         const returnAsset = await this.assetService.findOne({ hash })
         return { transactionStatus: returnAsset.summonTransactionStatus, transactionHash: returnAsset.summonTransactionHash }
     }
-
 
 
     public async outRequest(hash: string, user?: UserEntity): Promise<CallparamDto> {
@@ -566,9 +560,6 @@ export class OracleApiService {
             this.logger.error(`${funcCallPrefix} couldn't get oracle`, null, this.context)
             throw new UnprocessableEntityException(`Oracle could not serve the request`)
         }
-
-
-
 
 
         const multiverseVersion = assetEntry.collectionFragment.collection.multiverseVersion
@@ -770,7 +761,7 @@ export class OracleApiService {
                 return false
             }
 
-            const groups: { [key: string]: { ids: string[], amounts: string[], entities: InventoryEntity[] } } = {}
+            const groups: { [key: string]: { ids: string[], amounts: string[], chainId: number, entities: InventoryEntity[] } } = {}
             inventoryItems.map(item => {
                 const amount = (item.material?.multiplier ?? 1) * Number.parseFloat(item.amount)
                 const assetAddress = item.material?.collectionFragment?.collection?.assetAddress?.toLowerCase()
@@ -778,37 +769,42 @@ export class OracleApiService {
                     groups[assetAddress] = {
                         ids: [],
                         amounts: [],
-                        entities: []
+                        entities: [],
+                        chainId: ChainId.EXOSAMANETWORK
                     }
                 }
                 groups[assetAddress]['amounts'].push(ethers.utils.parseEther(amount.toString()).toString())
                 groups[assetAddress]['ids'].push(item.material.assetId)
                 groups[assetAddress]['entities'].push(item)
+                groups[assetAddress]['chainId'] = item.material.collectionFragment.collection.chainId
             })
-
-            const chainEntity = await this.chainService.findOne({ chainId })
-            const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
-            const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
-
-            let contract: Contract;
-            if (chainEntity.multiverseV1Address)
-                contract = new Contract(chainEntity.multiverseV1Address, METAVERSE_ABI, oracle)
-            else {
-                this.logger.error(`Summon: failiure not find MultiverseAddress`)
-                throw new UnprocessableEntityException('Summon MultiverseAddress error.')
-            }
 
             const addresses = Object.keys(groups)
 
             for (let i = 0; i < addresses.length; i++) {
                 try {
-
                     const ids = groups[addresses[i]].ids
                     const amounts = groups[addresses[i]].amounts
+                    const assetChainId = groups[addresses[i]].chainId
+                    const assetAddress = addresses[i]
                     //console.log({METAVERSE, recipient, ids, amounts, i})
                     // console.log("SummonResult",this.metaverseChain[chainId])
 
-                    const receipt = await ((await contract.summon(METAVERSE, recipient, ids, amounts, [], { value: 0, gasPrice: '3000000000', gasLimit: '1000000' })).wait())
+                    const chainEntity = await this.chainService.findOne({ chainId: assetChainId })
+                    const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
+                    const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
+
+                    let contract: Contract;
+                    if (!!chainEntity.multiverseV1Address) {
+                        contract = new Contract(chainEntity.multiverseV1Address, METAVERSE_ABI, oracle)
+                    } else if (!!chainEntity.multiverseV2Address) {
+                        contract = new Contract(chainEntity.multiverseV2Address, METAVERSE_V2_ABI, oracle)
+                    } else {
+                        this.logger.error(`Summon: failiure not find MultiverseAddress`)
+                        throw new UnprocessableEntityException('Summon MultiverseAddress error.')
+                    }
+
+                    const receipt = await (await contract.summon(METAVERSE, recipient, assetAddress, ids, amounts, [], { gasPrice: '1000000000', gasLimit: '1000000' })).wait()
 
                     try {
                         await this.inventoryService.removeAll(groups[addresses[i]].entities)
