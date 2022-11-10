@@ -11,6 +11,8 @@ import { AssetEntity } from '../asset/asset.entity';
 import { CompositePartEntity } from '../compositepart/compositepart.entity';
 import { ResourceInventoryEntity } from '../resourceinventory/resourceinventory.entity';
 import { CollectionFragmentRoutingEntity } from '../collectionfragmentrouting/collectionfragmentrouting.entity';
+import { InventoryEntity } from 'src/playerinventory/inventory.entity';
+import { MaterialEntity } from 'src/material/material.entity';
 
 
 @Entity()
@@ -84,4 +86,7 @@ export class CollectionFragmentEntity {
 
     @OneToMany(() => ResourceInventoryEntity, (rie) => rie.collectionFragment)
     resourceInventoryItems?: ResourceInventoryEntity[];
+
+    @OneToMany(() => MaterialEntity, (material) => material.collectionFragment)
+    materials?: MaterialEntity[];
 }
