@@ -212,9 +212,7 @@ export class GameApiService {
 
         const permittedMaterials: PermittedMaterial[] = materials.map(material => {
             return {
-                name: material.name,
-                key: material.key,
-                ordinal: material.ordinal
+                name: material.name
             }
         })
 
@@ -273,8 +271,8 @@ export class GameApiService {
             return undefined
         }
 
-        if (validate && (snapshot.amount > material.maxStackSize || snapshot.amount < 0)) {
-            this.logger.error(`processSnapshots-${user.uuid}:: material ${snapshot.materialName} had invalid amount. Received: ${snapshot.amount}. Allowed: [0, ${material.maxStackSize}]`, null, this.context)
+        if (validate && (snapshot.amount < 0)) {
+            this.logger.error(`processSnapshots-${user.uuid}:: material ${snapshot.materialName} had invalid amount. Received: ${snapshot.amount}. Allowed: [0, inf)`, null, this.context)
             return undefined
         }
 
@@ -369,153 +367,6 @@ export class GameApiService {
         return true
     }
 
-    public async communism(settings: CommunismDto) {
-
-        const mintT = settings.minTimePlayed ?? 3600000
-        const averageM = settings.averageMultiplier ?? 1.0
-        const finalDeduction = settings.deductionMultiplier ?? 0.5
-        const msamasOnly = settings.moonsamasOnly ?? true
-        const punishAll = settings.deductFromEveryone ?? true
-        const gameId = settings.gameId
-
-        const game = !!gameId ? (await this.gameService.findOne({ id: gameId }) ?? null) : null
-
-        let items: SnapshotItemEntity[] = []
-        let batch: SnapshotItemEntity[] = []
-        let skip = 0
-        let take = 100
-
-        const gameFindCondition = game?.id ? { id: game.id } : null
-
-        do {
-            batch = await this.snapshotService.findMany({ where: { game: gameFindCondition }, take, skip, relations: ['material', 'owner', 'game'] })
-
-            if (!!batch && batch.length > 0) {
-                items = items.concat(batch)
-            }
-
-            skip += take
-
-        } while (!!batch && batch.length > 0)
-
-        let counter: { [key: string]: number } = {}
-        let users: { [key: string]: { exists: boolean, eligible: boolean, power: number, adjustedPower: number } } = {}
-        let allDistinct = 0
-        let gganbuDistinct = 0
-        let powerSum = 0
-
-        // we sum ap all the materials for all users
-        items.map(x => {
-            if (!x.material.gganbuExcluded) {
-                counter[x.material.name] = typeof counter[x.material.name] === 'undefined' ? Number.parseFloat(x.amount) : counter[x.material.name] + Number.parseFloat(x.amount)
-            }
-        })
-
-        // we fetch all users
-        const allUsers = await this.userService.findMany({})
-        this.logger.warn(`Communism:: ${allUsers.length} users found`, this.context)
-
-        for (let i = 0; i < allUsers.length; i++) {
-            const user = allUsers[i]
-
-            const playStats = await this.playSessionStatService.findOne({ id: PlaySessionStatService.calculateId({ uuid: user.uuid, gameId }) })
-
-            this.logger.debug(`Communism:: ${user.uuid} played ${playStats?.timePlayed}`, this.context)
-
-            const tPlayed = playStats?.timePlayed ? Number.parseFloat(playStats?.timePlayed) : 0
-
-            let playedEnough = false
-            if (tPlayed >= mintT) {
-                playedEnough = true
-            } else {
-                this.logger.warn(`Communism:: ${user.uuid} not eligible for gganbu`, this.context)
-            }
-
-            if (!users[user.uuid]) {
-                allDistinct += 1
-                const power = (playStats?.power ?? 0)
-                const hasPower = power > 0
-                const adjustedPower = hasPower ? adjustPower(power) : 0
-                users[user.uuid] = {
-                    exists: true,
-                    eligible: false,
-                    power,
-                    adjustedPower
-                }
-
-                if (
-                    playedEnough &&
-                    (
-                        (msamasOnly && hasPower)
-                        || !msamasOnly
-                    )
-                ) {
-                    users[user.uuid].eligible = true
-                    gganbuDistinct += 1
-                    powerSum += adjustedPower
-                }
-            }
-        }
-
-        // we only divide the average by the gganbu eligible user numbers
-        const materials = Object.keys(counter)
-        let gganbuEntities: GganbuEntity[] = []
-        await Promise.all(materials.map(async (key) => {
-            counter[key] = averageM * counter[key]
-            gganbuEntities.push({
-                id: GganbuService.calculateId({ materialName: key, gameId: game?.id }),
-                amount: counter[key].toString(),
-                game,
-                material: await this.materialService.findOne({ name: key }),
-                powerSum
-            })
-        }))
-
-        this.logger.debug(`Communism:: final gganbu amounts: ${JSON.stringify(counter)}`, this.context)
-
-        this.gganbuService.createAll(gganbuEntities)
-
-        const userUuids = Object.keys(users)
-
-        // we iterate on all users
-        for (let i = 0; i < userUuids.length; i++) {
-            const uuid = userUuids[i]
-            const user = await this.userService.findOne({ uuid })
-
-            // get user's snapshot items
-            const snaps = items.filter(snap => snap.owner.uuid === uuid)
-
-            // we iterate in material names
-            const x = materials.map(async (materialName) => {
-
-                // check if user had a snasphot item with that material
-                const existingSnap = snaps.find(x => x.material.name === materialName)
-                if (!!existingSnap) {
-                    // if yes, we reduce the original amount for gganbu and add the average if eligible
-                    this.logger.debug(`Communism:: ${uuid} snap for ${materialName} existed. Adding..`, this.context)
-
-                    const gganbuAmount = users[uuid]?.eligible ? counter[existingSnap.material.name] * users[uuid].adjustedPower / powerSum : 0
-
-                    const finalfinaldeduction = punishAll ? finalDeduction : (users[uuid]?.eligible ? finalDeduction : 1)
-                    const amount = ((Number.parseFloat(existingSnap.amount) * finalfinaldeduction) + gganbuAmount).toString()
-
-                    this.logger.debug(`Communism:: ${uuid} snap for ${materialName} deduction multiplier: ${finalfinaldeduction}, amount: ${amount}, eligible: ${users[uuid]?.eligible}`, this.context)
-                    await this.snapshotService.update(existingSnap.id, { amount })
-                } else {
-                    this.logger.debug(`Communism:: ${uuid} snap for ${materialName} not found. Creating..`, this.context)
-                    const amount = counter[materialName] * users[uuid].adjustedPower / powerSum
-
-                    if (users[uuid]?.eligible) {
-                        await this.assignSnapshot(user, game, { amount, materialName }, false, false)
-                    } else {
-                        this.logger.debug(`Communism:: ${uuid} snap for ${materialName} not eligible`, this.context)
-                    }
-                }
-            })
-            await Promise.all(x)
-        }
-    }
-
     private async updateSnaplogs(snaplogs: SnaplogEntity[]) {
 
         let createList = []
@@ -601,16 +452,15 @@ export class GameApiService {
 
                 await Promise.all(userSnapshots.map(async (snapshot) => slock.runExclusive(async () => {
                     const amount = (snapshot.material.multiplier ?? 1) * Number.parseFloat(snapshot.amount)
-                    const materialName = snapshot.material.mapsTo ?? snapshot.material.name
+                    const materialName = snapshot.material.name
                     const id = InventoryService.calculateId({ uuid: user.uuid, materialName: materialName })
                     if (!inventoryMap[id]) {
-                        const material = snapshot.material.mapsTo ? (await this.materialService.findOne({ name: materialName })) : snapshot.material
+                        const material = snapshot.material
                         inventoryMap[id] = {
                             inv: {
                                 amount: amount.toString(),
                                 material,
                                 owner: snapshot.owner,
-                                summonable: true,
                                 id
                             },
                             snaps: [snapshot]
