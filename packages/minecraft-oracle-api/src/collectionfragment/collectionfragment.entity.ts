@@ -60,7 +60,7 @@ export class CollectionFragmentEntity {
 
     @Column({ default: false })
     @IsBoolean()
-    swapable: boolean;
+    migratable: boolean;
 
     @Column()
     @IsString()

@@ -62,7 +62,7 @@ export class InConfirmResponseDto {
     confirmed: boolean
 }
 
-export class SwapResponseDto {
+export class MigrateResponseDto {
     @IsNotEmpty()
     @IsEnum(TransactionStatus)
     transactionStatus: TransactionStatus

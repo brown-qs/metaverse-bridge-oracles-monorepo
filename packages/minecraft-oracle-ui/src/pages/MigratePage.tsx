@@ -15,10 +15,10 @@ import { setInModalTokens, openInModal } from '../state/slices/inModalSlice';
 import { selectBlockNumbers } from '../state/slices/blockNumbersSlice';
 import { StandardizedOnChainTokenWithRecognizedTokenData } from '../utils/graphqlReformatter';
 import { MultiverseVersion, RecognizedAssetType } from '../state/api/types';
-import { openSwapModal, setSwapModalTokens } from '../state/slices/swapModalSlice';
-import { SwapModal } from '../components/modals/SwapModal';
+import { openMigrateModal, setMigrateModalTokens } from '../state/slices/migrateModalSlice';
+import { MigrateModal } from '../components/modals/MigrateModal';
 
-const SwapPage = () => {
+const MigratePage = () => {
   const { account, chainId, library } = useActiveWeb3React()
   const { isAccountDialogOpen, onAccountDialogOpen, onAccountDialogClose } = useAccountDialog();
   const { addNetwork } = useAddNetworkToMetamaskCb()
@@ -152,12 +152,12 @@ const SwapPage = () => {
                 <>
                   {isMoonbeam ?
                     <>
-                      CLICK THE BUTTON TO SWAP THIS AMOUNT OF <Box as="span" fontWeight="700">$POOP</Box> FOR <Box as="span" fontWeight="700">$SAMA</Box>
+                      CLICK THE BUTTON TO MIGRATE THIS AMOUNT OF <Box as="span" fontWeight="700">$POOP</Box> FOR <Box as="span" fontWeight="700">$SAMA</Box>
 
                     </>
                     :
                     <>
-                      CHANGE NETWORK TO SWAP <Box as="span" fontWeight="700">$POOP</Box> FOR <Box as="span" fontWeight="700">$SAMA</Box>
+                      CHANGE NETWORK TO MIGRATE <Box as="span" fontWeight="700">$POOP</Box> FOR <Box as="span" fontWeight="700">$SAMA</Box>
 
                     </>
                   }
@@ -197,9 +197,9 @@ const SwapPage = () => {
                         multiverseVersion: MultiverseVersion.V2,
 
                       }
-                      dispatch(setSwapModalTokens([token]))
-                      dispatch(openSwapModal())
-                    }} isLoading={isPoopBalanceLoading} isDisabled={noPoop} leftIcon={<ArrowsRightLeft></ArrowsRightLeft>} w="100%">{narrowerThan390 ? "SWAP" : "SWAP $POOP FOR $SAMA"}</Button>
+                      dispatch(setMigrateModalTokens([token]))
+                      dispatch(openMigrateModal())
+                    }} isLoading={isPoopBalanceLoading} isDisabled={noPoop} leftIcon={<ArrowsRightLeft></ArrowsRightLeft>} w="100%">{narrowerThan390 ? "MIGRATE" : "MIGRATE $POOP FOR $SAMA"}</Button>
                     :
                     <Button onClick={() => addNetwork(ChainId.MOONBEAM)} leftIcon={<ArrowsRightLeft></ArrowsRightLeft>} w="100%">{narrowerThan390 ? "MOONBEAM" : "CHANGE TO MOONBEAM"}</Button>
                   }
@@ -212,9 +212,9 @@ const SwapPage = () => {
           </VStack>
         </VStack>
       </VStack>
-      <SwapModal />
+      <MigrateModal />
     </>
   )
 }
 
-export default SwapPage
+export default MigratePage

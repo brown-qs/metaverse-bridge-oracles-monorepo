@@ -16,7 +16,7 @@ import { ExportAssetCallbackState, useExportAssetCallback } from "../../hooks/mu
 import useAddNetworkToMetamaskCb from "../../hooks/useAddNetworkToMetamask/useAddNetworkToMetamask";
 import { ApprovalState, approveAsset, checkApproval, useApproveCallback } from "../../hooks/useApproveCallback/useApproveCallback";
 import { getAssetBalance, useBalances } from "../../hooks/useBalances/useBalances";
-import { rtkQueryErrorFormatter, useActiveGameQuery, useEmailLoginCodeVerifyMutation, useInMutation, useSummonMutation, useSwapInMutation } from "../../state/api/bridgeApi";
+import { rtkQueryErrorFormatter, useActiveGameQuery, useEmailLoginCodeVerifyMutation, useInMutation, useSummonMutation, useMigrateInMutation } from "../../state/api/bridgeApi";
 import { closeEmailCodeModal, selectEmailCodeModalOpen } from "../../state/slices/emailCodeModalSlice";
 
 import { closeInGameItemModal, selectInGameItemModalOpen } from "../../state/slices/inGameItemModalSlice";
@@ -31,14 +31,14 @@ import { StandardizedOnChainTokenWithRecognizedTokenData } from "../../utils/gra
 import { useMutation, useQuery } from "react-query";
 import { assetInTransaction } from "../../hooks/multiverse/useImportAsset";
 import { utils } from "ethers"
-import { closeSwapModal, selectSwapModalOpen, selectSwapModalTokens } from "../../state/slices/swapModalSlice";
+import { closeMigrateModal, selectMigrateModalOpen, selectMigrateModalTokens } from "../../state/slices/migrateModalSlice";
 
-export function SwapModal() {
+export function MigrateModal() {
     const { chainId, account, library } = useActiveWeb3React();
     const dispatch = useDispatch()
-    const inTokens = useSelector(selectSwapModalTokens)
-    const isOpen = useSelector(selectSwapModalOpen)
-    const [setIn, { data: setInData, error: setInError, isUninitialized: isSetInUninitialized, isLoading: isSetInLoading, isSuccess: isSetInSuccess, isError: isSetInError, reset: setInReset }] = useSwapInMutation()
+    const inTokens = useSelector(selectMigrateModalTokens)
+    const isOpen = useSelector(selectMigrateModalOpen)
+    const [setIn, { data: setInData, error: setInError, isUninitialized: isSetInUninitialized, isLoading: isSetInLoading, isSuccess: isSetInSuccess, isError: isSetInError, reset: setInReset }] = useMigrateInMutation()
     const [value, setValue] = React.useState('.01')
     const [amount, setAmount] = React.useState<string | undefined>(undefined)
     const assetInTransactionStable = React.useCallback(() => assetInTransaction(
@@ -153,14 +153,14 @@ export function SwapModal() {
     }, [approveMutation?.isSuccess, checkApprovalData, isCheckApprovalFetching, isOpen])
 
     const baseProps = {
-        title: "SWAP",
-        isOpenSelector: selectSwapModalOpen,
-        closeActionCreator: closeSwapModal,
+        title: "MIGRATE",
+        isOpenSelector: selectMigrateModalOpen,
+        closeActionCreator: closeMigrateModal,
         iconBackgroundColor: "teal.200",
         iconColor: "var(--chakra-colors-gray-800)",
         closeOnOverlayClick: false,
         onBottomButtonClick: () => {
-            dispatch(closeSwapModal())
+            dispatch(closeMigrateModal())
         }
     }
 
@@ -220,7 +220,7 @@ export function SwapModal() {
     } else if (false && isFungible && typeof amount !== 'string') {
         return <ReduxModal
             {...baseProps}
-            message={`Please set the amount you want to swap.`}
+            message={`Please set the amount you want to migrate.`}
             bottomButtonText="Cancel"
         >
             <VStack spacing="0" w="100%">
@@ -354,7 +354,7 @@ export function SwapModal() {
                 <Box w="100%" paddingTop="16px">
                     <Button
                         onClick={() => {
-                            dispatch(closeSwapModal())
+                            dispatch(closeMigrateModal())
                         }}
                         leftIcon={<Checks />}
                         w="100%">GOT IT!</Button>
@@ -375,7 +375,7 @@ export function SwapModal() {
     } else {
         return (<ReduxModal
             {...baseProps}
-            message={"You are about to swap $POOP for $SAMA."}
+            message={"You are about to migrate $POOP for $SAMA."}
             bottomButtonText="Cancel"
         // onBottomButtonClick={handleClose}
         >
@@ -393,7 +393,7 @@ export function SwapModal() {
                         signTransactionMutation.mutate()
                     }}
                 >
-                    SWAP
+                    MIGRATE
                 </Button>
             </VStack>
         </ReduxModal>)

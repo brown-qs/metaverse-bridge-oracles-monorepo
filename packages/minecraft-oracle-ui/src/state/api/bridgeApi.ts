@@ -3,7 +3,7 @@ import { BaseQueryFn, createApi, FetchArgs, fetchBaseQuery, FetchBaseQueryError 
 import { AppState } from ".."
 import { StandardizedOnChainToken } from "../../utils/graphqlReformatter"
 import { setTokens } from "../slices/authSlice"
-import { BridgedAssetDto, CallparamDto, CompositeConfigDto, EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse, InBatchRequestDto, InConfirmRequestDto, InConfirmResponseDto, Oauth2PublicClientDto, OutBatchRequestDto, OutConfirmRequestDto, OutConfirmResponseDto, RecognizedAssetsDto, SkinResponse, SkinSelectRequest, SwapResponseDto, UserProfileResponse } from "./types"
+import { BridgedAssetDto, CallparamDto, CompositeConfigDto, EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse, InBatchRequestDto, InConfirmRequestDto, InConfirmResponseDto, MigrateResponseDto, Oauth2PublicClientDto, OutBatchRequestDto, OutConfirmRequestDto, OutConfirmResponseDto, RecognizedAssetsDto, SkinResponse, SkinSelectRequest, UserProfileResponse } from "./types"
 
 
 // ---------------------------------------------------------- //
@@ -114,16 +114,16 @@ export const bridgeApi = createApi({
             }),
             invalidatesTags: ["Profile"]
         }),
-        swapIn: builder.mutation<CallparamDto[], InBatchRequestDto>({
+        migrateIn: builder.mutation<CallparamDto[], InBatchRequestDto>({
             query: (body) => ({
-                url: `/oracle/swap-in`,
+                url: `/oracle/migrate-in`,
                 method: "PUT",
                 body
             }),
         }),
-        swap: builder.mutation<SwapResponseDto, InConfirmRequestDto>({
+        migrate: builder.mutation<MigrateResponseDto, InConfirmRequestDto>({
             query: (body) => ({
-                url: `/oracle/swap`,
+                url: `/oracle/migrate`,
                 method: "PUT",
                 body
             }),
@@ -246,4 +246,4 @@ export const rtkQueryErrorFormatter = (error: any): string => {
     return strErr
 }
 
-export const { useSwapInMutation, useSwapMutation, useGetExosMutation, useCustomizerConfigQuery, useInMutation, useOutMutation, useOutConfirmMutation, useInConfirmMutation, useActiveGameQuery, useOauthInfoQuery, useOauthAuthorizeMutation, useSummonMutation, useGetInGameResourcesQuery, useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
+export const { useMigrateInMutation, useMigrateMutation, useGetExosMutation, useCustomizerConfigQuery, useInMutation, useOutMutation, useOutConfirmMutation, useInConfirmMutation, useActiveGameQuery, useOauthInfoQuery, useOauthAuthorizeMutation, useSummonMutation, useGetInGameResourcesQuery, useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
