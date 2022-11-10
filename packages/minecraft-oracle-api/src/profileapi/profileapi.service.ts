@@ -109,7 +109,14 @@ export class ProfileApiService {
     }
 
     async getInGameResources(user: UserEntity): Promise<AssetDto[]> {
-        const inventoryItems = await this.inventoryService.findMany({ relations: ['owner', 'collectionFragment', 'collectionFragment.collection', 'collectionFragment.collection.chain'], where: { owner: { uuid: user.uuid } }, loadEagerRelations: true })
+        const inventoryItems = await this.inventoryService.findMany({
+            relations: [
+                'owner',
+                'material',
+                'material.collectionFragment',
+                'material.collectionFragment.collection',
+                'material.collectionFragment.collection.chain'
+            ], where: { owner: { uuid: user.uuid } }, loadEagerRelations: true })
 
         const resources: AssetDto[] = inventoryItems.map(item => {
             return {
