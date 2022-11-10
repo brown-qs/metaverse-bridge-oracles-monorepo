@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Checks, Mail, Wallet } from "tabler-icons-react";
 import { ReduxModal } from ".";
-import { DEFAULT_CHAIN, NETWORK_NAME, PERMISSIONED_CHAINS } from "../../constants";
+import { ChainId, DEFAULT_CHAIN, NETWORK_NAME, PERMISSIONED_CHAINS } from "../../constants";
 import { useActiveWeb3React } from "../../hooks";
 import { rtkQueryErrorFormatter, useEmailLoginCodeVerifyMutation, useSummonMutation } from "../../state/api/bridgeApi";
 import { closeEmailCodeModal, selectEmailCodeModalOpen } from "../../state/slices/emailCodeModalSlice";
@@ -94,11 +94,12 @@ export function SummonModal() {
                             setSelectedChainId(event.target.value);
                         }}
                     >
-                        {PERMISSIONED_CHAINS.map((chain) => {
+                        {/* {PERMISSIONED_CHAINS.map((chain) => {
                             return (
                                 <option key={chain} value={chain}>{NETWORK_NAME[chain]}</option>
                             );
-                        })}
+                        })} */}
+                        <option key={ChainId.EXOSAMANETWORK} value={ChainId.EXOSAMANETWORK}>{NETWORK_NAME[ChainId.EXOSAMANETWORK]}</option>
                     </Select>
                 </Box>
                 <Box w="100%" paddingTop="16px">
