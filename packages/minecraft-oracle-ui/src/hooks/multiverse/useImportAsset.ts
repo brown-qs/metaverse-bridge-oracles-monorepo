@@ -17,7 +17,7 @@ import store from '../../state';
 import { addInTransaction, InAsset } from '../../state/slices/transactionsSlice';
 
 
-export async function assetInTransaction(mv: MultiverseVersion, library: Web3Provider, account: string, calls: string[], signatures: string[], inAssets: InAsset[], swap: boolean) {
+export async function assetInTransaction(mv: MultiverseVersion, library: Web3Provider, account: string, calls: string[], signatures: string[], inAssets: InAsset[], migrate: boolean) {
     const chainId = inAssets[0].chainId
     const contractAddress = getContractAddress(mv, chainId)
     const abi = (mv === MultiverseVersion.V1) ? METAVERSE_V1_ABI : METAVERSE_V2_ABI
@@ -91,7 +91,7 @@ export async function assetInTransaction(mv: MultiverseVersion, library: Web3Pro
         throw new Error("Couldn't get chainId.")
     }
 
-    store.dispatch(addInTransaction({ hash: result.hash, assets: inAssets, swap }))
+    store.dispatch(addInTransaction({ hash: result.hash, assets: inAssets, migrate }))
 
 
     return result

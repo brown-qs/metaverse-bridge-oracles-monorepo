@@ -1,8 +1,7 @@
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { WinstonModule } from 'nest-winston';
+import { WinstonModule, utilities as winstonUtilities } from 'nest-winston';
 import * as winston from 'winston';
-import { nestLikeConsoleFormat } from './utils';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
@@ -17,7 +16,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: WinstonModule.createLogger({
       level: process.env.LOG_LEVEL ? process.env.LOG_LEVEL : 'info',
-      format: winston.format.combine(winston.format.timestamp(), nestLikeConsoleFormat()),
+      //format: winston.format.combine(winston.format.timestamp(), nestLikeConsoleFormat()),
+      format: winston.format.combine(winston.format.timestamp(), winstonUtilities.format.nestLike()),
       transports: [new winston.transports.Console()]
     })
   });
@@ -27,8 +27,8 @@ async function bootstrap() {
   app.enableCors();
   app.setGlobalPrefix('/api/v1');
   const options = new DocumentBuilder()
-    .setTitle('Moonsama Minecraft Oracle')
-    .setDescription(`Oracle for the Minecraft Moonriver bridge of the Moonsama metaverse`)
+    .setTitle('Moonsama Multiverse Oracle')
+    .setDescription(`Oracle of the Moonsama Multiverse Portal`)
     .setVersion('1.0')
     .addBearerAuth({ scheme: 'bearer', type: 'http' })
     .addApiKey({ type: 'apiKey', in: 'header', name: 'AuthenticationHeader' }, 'AuthenticationHeader')

@@ -30,7 +30,7 @@ export const Transaction = ({ transaction }: { transaction: AllTransactionsType 
     if (transaction.assets.length === 1) {
       ass = 'ASSET'
     }
-    const summary = `${transaction.assets.length} ${ass} ${transaction.swap ? "SWAP" : "IN"} ${transaction.assets[0].assetType} ${transaction.assets[0].assetAddress}`
+    const summary = `${transaction.assets.length} ${ass} ${transaction.migrate ? "MIGRATE" : "IN"} ${transaction.assets[0].assetType} ${transaction.assets[0].assetAddress}`
     return (
       <TransactionLink
         href={getExplorerLink(
