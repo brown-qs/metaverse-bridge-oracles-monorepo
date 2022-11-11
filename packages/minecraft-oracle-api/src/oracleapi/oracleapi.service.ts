@@ -46,6 +46,7 @@ import { InRequestDto, MigrateResponseDto } from './dtos/index.dto';
 import { InjectConnection } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
 import { CollectionFragmentRoutingService } from '../collectionfragmentrouting/collectionfragmentrouting.service';
+import { CollectionFragmentEntity } from '../collectionfragment/collectionfragment.entity';
 
 @Injectable()
 export class OracleApiService {
@@ -152,6 +153,15 @@ export class OracleApiService {
         }
 
         const multiverseVersion = collectionFragment.collection.multiverseVersion
+
+        if (multiverseVersion === MultiverseVersion.V1 && !collectionFragment.collection.chain.multiverseV1Address) {
+            this.logger.debug(`${funcCallPrefix} no multiverse address set.`, this.context)
+            throw new BadRequestException("No multiverse address set.")
+        } else if (multiverseVersion === MultiverseVersion.V2 && !collectionFragment.collection.chain.multiverseV2Address) {
+            this.logger.debug(`${funcCallPrefix} no multiverse address set.`, this.context)
+            throw new BadRequestException("No multiverse address set.")
+        }
+
         const oracle = await this.getOracle(chainId)
         const requestHash = await utf8ToKeccak(JSON.stringify(standardizedParams))
         this.logger.debug(`${funcCallPrefix} requestHash: ${requestHash}`, this.context)
@@ -563,6 +573,15 @@ export class OracleApiService {
 
 
         const multiverseVersion = assetEntry.collectionFragment.collection.multiverseVersion
+
+        if (multiverseVersion === MultiverseVersion.V1 && !assetEntry.collectionFragment.collection.chain.multiverseV1Address) {
+            this.logger.debug(`${funcCallPrefix} no multiverse address set.`, this.context)
+            throw new BadRequestException("No multiverse address set.")
+        } else if (multiverseVersion === MultiverseVersion.V2 && !assetEntry.collectionFragment.collection.chain.multiverseV2Address) {
+            this.logger.debug(`${funcCallPrefix} no multiverse address set.`, this.context)
+            throw new BadRequestException("No multiverse address set.")
+        }
+
         const salt = await getSalt()
         const expiration = Date.now() + CALLDATA_EXPIRATION_MS
         const expirationContract = (Math.floor(expiration / 1000)).toString()
@@ -869,6 +888,7 @@ export class OracleApiService {
             }
         }
     }
+
 
     private getContract(multiverseVersion: MultiverseVersion, chainEntity: ChainEntity, oracle: ethers.Wallet): Contract {
         if (multiverseVersion === MultiverseVersion.V1) {
