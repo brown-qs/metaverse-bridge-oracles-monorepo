@@ -82,7 +82,8 @@ export class ProfileApiService {
                 }
                 asset.amount = formatUnits(balance, asset?.collectionFragment?.decimals ?? 18)
 
-                if (!!existingEntry) {
+                if (!!existingEntry) { 
+
                     continue
                 }
             }
@@ -108,24 +109,30 @@ export class ProfileApiService {
     }
 
     async getInGameResources(user: UserEntity): Promise<AssetDto[]> {
-        const snapshots = await this.inventoryService.findMany({ relations: ['material', 'owner'], where: { owner: { uuid: user.uuid } } })
+        const inventoryItems = await this.inventoryService.findMany({
+            relations: [
+                'owner',
+                'material',
+                'material.collectionFragment',
+                'material.collectionFragment.collection',
+                'material.collectionFragment.collection.chain'
+            ], where: { owner: { uuid: user.uuid } }, loadEagerRelations: true })
 
-        const resources: AssetDto[] = snapshots.map(snapshot => {
+        const resources: AssetDto[] = inventoryItems.map(item => {
             return {
-                amount: snapshot.amount,
-                assetAddress: snapshot.material.assetAddress,
-                assetType: snapshot.material.assetType,
-                assetId: snapshot.material.assetId,
-                name: snapshot.material.name,
+                amount: item.amount,
+                assetAddress: item.material.collectionFragment.collection.assetAddress,
+                assetType: item.material.collectionFragment.collection.assetType,
+                assetId: item.material.assetId,
+                name: item.material.name,
                 exportable: false,
                 treatAsFungible: false,
                 summonable: true,
-                recognizedAssetType: '',
+                recognizedAssetType: item.material.collectionFragment.recognizedAssetType,
                 enraptured: false,
-                chainId: 1285, // resources are multi chain
+                chainId: item.material.collectionFragment.collection.chainId,
                 exportAddress: undefined,
-                multiverseVersion: MultiverseVersion.V1
-
+                multiverseVersion: MultiverseVersion.V2
             }
         })
         return resources

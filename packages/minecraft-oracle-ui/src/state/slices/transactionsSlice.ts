@@ -45,7 +45,7 @@ export type InAsset = { bridgeHash: string } & InRequestDto
 export interface InTransaction extends BaseTransaction {
     type: TransactionType.In,
     assets: InAsset[],
-    swap: boolean
+    migrate: boolean
 }
 
 export interface OutTransaction extends BaseTransaction {
@@ -86,7 +86,7 @@ const transactionsSlice = createSlice({
                 state.approvalTransactions.push(trans)
             }
         },
-        addInTransaction: (state, action: PayloadAction<Pick<InTransaction, "hash" | "assets" | "swap">>) => {
+        addInTransaction: (state, action: PayloadAction<Pick<InTransaction, "hash" | "assets" | "migrate">>) => {
             const payload = action.payload
             const trans: InTransaction = {
                 hash: payload.hash,
@@ -96,7 +96,7 @@ const transactionsSlice = createSlice({
                 lastCheckedBlock: 0,
 
                 assets: payload.assets,
-                swap: payload.swap
+                migrate: payload.migrate
             }
             if (!state.inTransactions.find(t => t.hash === trans.hash)) {
                 state.inTransactions.push(trans)
