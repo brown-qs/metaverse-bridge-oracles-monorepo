@@ -3,7 +3,7 @@ import { NewAsset } from "../hooks/marketplace/types";
 import { MultiverseVersion } from "../state/api/types";
 import { StandardizedMetadata } from "../utils/graphqlReformatter";
 import { StringAssetType } from "../utils/subgraph";
-
+import PoopImage from "../assets/images/poop.svg"
 export const CHAIN_ID = parseInt(process.env.REACT_APP_CHAIN_ID ?? '1285', 10);
 
 export const SUBGRAPH_URL =
@@ -116,7 +116,8 @@ export const WMOVR_ADDRESS: { [chainId in ChainId]?: string } = {
 export const EXPLORER_URL: { [chainId in ChainId]?: string } = {
   [ChainId.VOLTA]: 'https://volta-explorer.energyweb.org',
   [ChainId.MOONRIVER]: 'https://moonriver.moonscan.io/',
-  [ChainId.MOONBEAM]: 'https://moonbeam.moonscan.io/'
+  [ChainId.MOONBEAM]: 'https://moonbeam.moonscan.io/',
+  [ChainId.EXOSAMANETWORK]: 'https://explorer.exosama.com/'
 };
 
 export const MULTIVERSE_BRIDGE_V1_ADDRESS: { [chainId in ChainId]?: string } = {
@@ -295,7 +296,8 @@ export const RARESAMA_POOP: StandardizedMetadata & { assetType: StringAssetType 
   assetId: 0,
   metadata: {
     name: "$POOP",
-    image: "https://static.moonsama.com/static/poop.svg"
+    //image: "https://static.moonsama.com/static/poop.svg"
+    image: PoopImage
   }
 }
 
@@ -305,7 +307,7 @@ export const SHIT_FART: StandardizedMetadata & { assetType: StringAssetType } = 
   assetId: 0,
   metadata: {
     name: "$SFT",
-    image: "https://static.moonsama.com/static/poop.svg"
+    image: PoopImage
   }
 }
 

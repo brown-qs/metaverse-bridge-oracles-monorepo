@@ -35,6 +35,7 @@ const WALLET_VIEWS = {
   OPTIONS_SECONDARY: 'options_secondary',
   ACCOUNT: 'account',
   PENDING: 'pending',
+  NETWORK_SELECTION: 'network_selection'
 };
 
 export const AccountDialog = () => {
@@ -45,6 +46,7 @@ export const AccountDialog = () => {
   >();
   const [, setPendingError] = useState<boolean>();
   const [walletView, setWalletView] = useState(WALLET_VIEWS.ACCOUNT);
+  const [pendingChainSwitch, setPendingChainSwitch] = useState<ChainId | undefined>(undefined)
 
   const allTransactions = useSelector(selectAllTransactionsFromLastDay);
   //console.log("sortedRecentTransactions: ", sortedRecentTransactions)
@@ -80,6 +82,7 @@ export const AccountDialog = () => {
     if (isAccountDialogOpen) {
       setPendingError(false);
       setWalletView(WALLET_VIEWS.ACCOUNT);
+      setPendingChainSwitch(undefined)
     }
   }, [isAccountDialogOpen]);
 
@@ -103,6 +106,16 @@ export const AccountDialog = () => {
     activePrevious,
     connectorPrevious,
   ]);
+
+  React.useEffect(() => {
+    setPendingChainSwitch(undefined)
+  }, [walletView])
+
+  React.useEffect(() => {
+    if (!!pendingChainSwitch && !!chainId && pendingChainSwitch === chainId) {
+      setWalletView(WALLET_VIEWS.ACCOUNT)
+    }
+  }, [pendingChainSwitch, chainId])
 
 
 
@@ -267,6 +280,34 @@ export const AccountDialog = () => {
         </Button>
       })}
     </MoonsamaModal>)
+  } else if (walletView === WALLET_VIEWS.NETWORK_SELECTION) {
+    return (<MoonsamaModal
+      title="NETWORK"
+      isOpen={isAccountDialogOpen}
+      onClose={onAccountDialogClose}
+      message="Choose a supported network."
+      bottomButtonText='Cancel'
+      onBottomButtonClick={() => setWalletView(WALLET_VIEWS.ACCOUNT)}
+    >
+      {PERMISSIONED_CHAINS.map((chainId, i) => {
+        return <Button
+          isDisabled={!!pendingChainSwitch}
+          isLoading={pendingChainSwitch === chainId}
+
+          marginTop={(i > 0) ? "24px" : "0px"}
+          width="100%"
+          key={`${chainId}-${i}`}
+          leftIcon={<ArrowsRightLeft />}
+          onClick={() => {
+            setPendingChainSwitch(chainId)
+            addNetwork(chainId as ChainId)
+
+          }}
+        >
+          Switch to {NETWORK_NAME[chainId]}
+        </Button>
+      })}
+    </MoonsamaModal>)
   } else if (error && !(error instanceof UnsupportedChainIdError)) {
     return (<MoonsamaModal
       title="Something went wrong"
@@ -309,8 +350,6 @@ export const AccountDialog = () => {
       title="Wallet"
       isOpen={isAccountDialogOpen}
       onClose={onAccountDialogClose}
-      bottomButtonText="Change Wallet"
-      onBottomButtonClick={() => setWalletView(WALLET_VIEWS.OPTIONS)}
     >
       <VStack lineHeight="24px" fontSize="16px" color="whiteAlpha.700" fontFamily="Rubik" w="100%">
         {showConnectedAccountDetails()}
@@ -339,6 +378,25 @@ export const AccountDialog = () => {
             <Text>Your transactions will appear here...</Text>
           </Box>
         )}
+
+        <Box paddingTop="16px"></Box>
+        <HStack spacing="0" w="100%" justifyContent="space-around">
+          <Box
+            cursor="pointer"
+            lineHeight="24px"
+            fontFamily="Rubik"
+            color="whiteAlpha.700"
+            onClick={() => { setWalletView(WALLET_VIEWS.OPTIONS) }}
+          >Change Wallet</Box>
+          <Box
+            cursor="pointer"
+            lineHeight="24px"
+            fontFamily="Rubik"
+            color="whiteAlpha.700"
+            onClick={() => { setWalletView(WALLET_VIEWS.NETWORK_SELECTION) }}
+          >Change Network</Box>
+        </HStack>
+
       </VStack>
     </MoonsamaModal>)
   } else if (account && walletView === WALLET_VIEWS.OPTIONS) {
