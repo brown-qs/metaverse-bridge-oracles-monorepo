@@ -79,7 +79,7 @@ const ProfilePage = () => {
                 balance: shitFartBalanceData.toString(),
                 metadata: {
                     name: "$SFT",
-                    image: "https://static.moonsama.com/static/poop.svg"
+                    image: SHIT_FART?.metadata?.image!
                 }
             }
             resultTokens.push(token)
@@ -92,13 +92,15 @@ const ProfilePage = () => {
                 balance: poopBalanceData.toString(),
                 metadata: {
                     name: "$POOP",
-                    image: "https://static.moonsama.com/static/poop.svg"
+                    image: RARESAMA_POOP?.metadata?.image!
                 }
             }
             resultTokens.push(token)
         }
         return resultTokens
     }, [shitFartBalanceData, poopBalanceData])
+
+
 
     //skins
     const { data: skins, error: skinsError, isLoading: skinsLoading, refetch: refetchSkins } = useGetSkinsQuery()
@@ -345,9 +347,6 @@ const ProfilePage = () => {
                 height="100%"
                 position="relative"
                 overflow="visible">
-                <Box position="absolute" w="100%" h="100%" bg="#080714">
-                    <Image src={BackgroundImage} w="552px" h="622px" position="absolute" top="0" right="calc(-1 * var(--moonsama-leftright-padding))" filter="blur(10px)"></Image>
-                </Box>
                 {profileLoading
                     ?
                     <VStack className="moonsamaFullHeight">
