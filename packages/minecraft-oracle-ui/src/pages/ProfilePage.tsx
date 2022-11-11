@@ -23,7 +23,7 @@ import { Media } from '../components';
 import { BigNumber, utils } from 'ethers';
 import { addRegonizedTokenDataToStandardizedOnChainTokens, checkOnChainItemNotImported, formatInGameTokenName, formatOnChainTokenName, inGameMetadataParams, InGameTokenMaybeMetadata, inGameTokensCombineMetadata, StandardizedMetadata, StandardizedOnChainToken, StandardizedOnChainTokenWithRecognizedTokenData, standardizeExosamaMetadata, standardizeExosamaOnChainTokens, standardizeMarketplaceMetadata, standardizeMarketplaceOnChainTokens, standardizeRaresamaMetadata, standardizeRaresamaOnChainTokens } from '../utils/graphqlReformatter';
 import { useDispatch, useSelector } from 'react-redux';
-import { openSummonModal } from '../state/slices/summonModalSlice';
+import { openSummonModal, selectSummonModalOpen, setSummonModalSummonAddresses } from '../state/slices/summonModalSlice';
 import { SummonModal } from '../components/modals/SummonModal';
 import { useGetRaresamaMetadataQuery, useGetRaresamaOnChainTokensQuery } from '../state/api/generatedSquidRaresamaApi';
 import { selectBlockNumbers } from '../state/slices/blockNumbersSlice';
@@ -41,13 +41,17 @@ import { openOutModal, setOutModalTokens } from '../state/slices/outModalSlice';
 import { OutModal } from '../components/modals/OutModal';
 import { PortalTab } from '../components/Portal/PortalTab';
 
-
+export type SummonAddress = {
+    address: string,
+    gamePassesFromAddress: InGameTokenMaybeMetadata[]
+}
 const ProfilePage = () => {
     const dispatch = useDispatch()
     const blockNumbers = useSelector(selectBlockNumbers)
+    const summonModalOpen = useSelector(selectSummonModalOpen)
+
     const { account, chainId, library } = useActiveWeb3React()
 
-    const address: string = React.useMemo(() => account?.toLowerCase() ?? "0x999999999999999999999999999", [account])
 
     //profile
     const { data: profile, error, isLoading: profileLoading } = useUserProfileQuery()
@@ -110,9 +114,9 @@ const ProfilePage = () => {
     // const [getExos, { data: getExosData, error: getExosError, isUninitialized: isGetExosUninitialized, isLoading: isGetExosLoading, isSuccess: isGetExosSuccess, isError: isGetExosError, reset: resetGetExos }] = useGetExosMutation()
 
     //on chain tokens (from indexers)
-    const { data: raresamaOnChainTokensData, currentData: currentRaresamaOnChainTokensData, isLoading: isRaresamaOnChainTokensDataLoading, isFetching: isRaresamaOnChainTokensDataFetching, isError: isRaresamaOnChainTokensDataError, error: raresamaOnChainTokensError, refetch: refetchRaresamaOnChainTokens } = useGetRaresamaOnChainTokensQuery({ where: { owner: { id_eq: address }, contract: { OR: [{ id_eq: "0xf27a6c72398eb7e25543d19fda370b7083474735" }, { id_eq: "0xe4bf451271d8d1b9d2a7531aa551b7c45ec95048" }] } } })
-    const { data: marketplaceOnChainTokensData, currentData: currentMarketplaceOnChainTokensData, isLoading: isMarketplaceOnChainTokensLoading, isFetching: isMarketplaceOnChainTokensFetching, isError: isMarketplaceOnChainTokensError, error: marketplaceOnChainTokensError, refetch: refetchMarketplaceOnChainTokens } = useGetMarketplaceOnChainTokensQuery({ owner: address })
-    const { data: exosamaOnChainTokensData, currentData: currentExosamaOnChainTokensData, isLoading: isExosamaOnChainTokensLoading, isFetching: isExosamaOnChainTokensFetching, isError: isExosamaOnChainTokensError, error: exosamaOnChainTokensError, refetch: refetchExosamaOnChainTokens } = useGetExosamaOnChainTokensQuery({ owner: address })
+    const { data: raresamaOnChainTokensData, currentData: currentRaresamaOnChainTokensData, isLoading: isRaresamaOnChainTokensDataLoading, isFetching: isRaresamaOnChainTokensDataFetching, isError: isRaresamaOnChainTokensDataError, error: raresamaOnChainTokensError, refetch: refetchRaresamaOnChainTokens } = useGetRaresamaOnChainTokensQuery({ where: { owner: { id_eq: account! }, contract: { OR: [{ id_eq: "0xf27a6c72398eb7e25543d19fda370b7083474735" }, { id_eq: "0xe4bf451271d8d1b9d2a7531aa551b7c45ec95048" }] } } }, { skip: !account })
+    const { data: marketplaceOnChainTokensData, currentData: currentMarketplaceOnChainTokensData, isLoading: isMarketplaceOnChainTokensLoading, isFetching: isMarketplaceOnChainTokensFetching, isError: isMarketplaceOnChainTokensError, error: marketplaceOnChainTokensError, refetch: refetchMarketplaceOnChainTokens } = useGetMarketplaceOnChainTokensQuery({ owner: account! }, { skip: !account })
+    const { data: exosamaOnChainTokensData, currentData: currentExosamaOnChainTokensData, isLoading: isExosamaOnChainTokensLoading, isFetching: isExosamaOnChainTokensFetching, isError: isExosamaOnChainTokensError, error: exosamaOnChainTokensError, refetch: refetchExosamaOnChainTokens } = useGetExosamaOnChainTokensQuery({ owner: account! }, { skip: !account })
 
     //in game tokens (from nestjs server)
     const { data: recognizedAssetsData, isLoading: isRecognizedAssetsLoading, isFetching: isRecognizedAssetsFetching, isError: isRecognizedAssetsError, error: recognizedAssetsError, refetch: refetchRecognizedAssets } = useGetRecognizedAssetsQuery()
@@ -295,6 +299,27 @@ const ProfilePage = () => {
     }, [onChainResources, account, chainId])
 
 
+    const summonAddresses: SummonAddress[] = React.useMemo(() => {
+        const summonGroups: SummonAddress[] = []
+        for (const asset of inGameItems) {
+            if (!asset.gamepass) {
+                continue
+            }
+            const exportAddress = asset.exportAddress.toLowerCase()
+            const existingEntry = summonGroups.find(s => s.address.toLowerCase() === exportAddress)
+            if (!!existingEntry) {
+                existingEntry.gamePassesFromAddress.push(asset)
+            } else {
+                summonGroups.push({ address: exportAddress, gamePassesFromAddress: [asset] })
+            }
+        }
+
+        return summonGroups
+    }, [inGameItems])
+
+
+
+
     React.useEffect(() => {
         if (!!account && chainId === ChainId.MOONRIVER) {
             refetchShitFartBalance()
@@ -326,7 +351,12 @@ const ProfilePage = () => {
     }, [blockNumbers[ChainId.MOONRIVER], blockNumbers[ChainId.MOONBEAM], blockNumbers[ChainId.MAINNET]])
 
 
-
+    //metadata isn't necessary loaded on tokens, so refresh is things change
+    React.useEffect(() => {
+        if (summonModalOpen) {
+            dispatch(setSummonModalSummonAddresses(summonAddresses))
+        }
+    }, [summonAddresses, summonModalOpen])
     //opensea api hack
     /* React.useEffect(() => {
          if (!!account && !!chainId && chainId === ChainId.MAINNET) {
@@ -708,7 +738,7 @@ const ProfilePage = () => {
                                             rightIcon={<CaretRight></CaretRight>}
                                             onClick={() => {
                                                 if (!!account) {
-                                                    console.log("open summon modal")
+                                                    dispatch(setSummonModalSummonAddresses(summonAddresses))
                                                     dispatch(openSummonModal())
                                                 } else {
                                                     onAccountDialogOpen()

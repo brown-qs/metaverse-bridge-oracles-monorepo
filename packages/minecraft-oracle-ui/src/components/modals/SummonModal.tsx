@@ -1,19 +1,26 @@
-import { Box, Button, CircularProgress, FormControl, FormErrorMessage, HStack, Input, Select, ToastId, useToast, VStack } from "@chakra-ui/react";
+import { Avatar, AvatarGroup, Box, Button, CircularProgress, FormControl, FormErrorMessage, HStack, Input, Radio, Select, ToastId, useToast, VStack, WrapItem } from "@chakra-ui/react";
+import React from "react";
 import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { Checks, Mail, Wallet } from "tabler-icons-react";
+import { Checks, Mail, Photo, Wallet } from "tabler-icons-react";
 import { ReduxModal } from ".";
 import { ChainId, DEFAULT_CHAIN, NETWORK_NAME, PERMISSIONED_CHAINS } from "../../constants";
 import { useActiveWeb3React } from "../../hooks";
 import { rtkQueryErrorFormatter, useEmailLoginCodeVerifyMutation, useSummonMutation } from "../../state/api/bridgeApi";
 import { closeEmailCodeModal, selectEmailCodeModalOpen } from "../../state/slices/emailCodeModalSlice";
 import { closeInGameItemModal, selectInGameItemModalOpen } from "../../state/slices/inGameItemModalSlice";
-import { closeSummonModal, selectSummonModalOpen } from "../../state/slices/summonModalSlice";
+import { closeSummonModal, selectSummonModalOpen, selectSummonModalSummonAddresses } from "../../state/slices/summonModalSlice";
+import uriToHttp from "../../utils/uriToHttp";
 import { AddressDisplayComponent } from "../form/AddressDisplayComponent";
 
 export function SummonModal() {
     const dispatch = useDispatch()
+    const summonAddresses = useSelector(selectSummonModalSummonAddresses)
+    const isOpen = useSelector(selectSummonModalOpen)
+
+    const [summonAddress, setSummonAddress] = React.useState<string | undefined>(undefined)
+
     const [summon, { data, error, isUninitialized, isLoading, isSuccess, isError, reset }] = useSummonMutation()
     const [selectedChainId, setSelectedChainId] = useState<number>(DEFAULT_CHAIN);
     const { account } = useActiveWeb3React();
@@ -22,6 +29,12 @@ export function SummonModal() {
         reset()
         dispatch(closeSummonModal())
     };
+
+    React.useEffect(() => {
+        if (!isOpen) {
+            setSummonAddress(undefined)
+        }
+    }, [isOpen])
 
     const recipient = account
 
@@ -70,22 +83,36 @@ export function SummonModal() {
         return (<ReduxModal
             {...baseProps}
             title="Summon resources"
-            message="You are about to mint all your in-game resources to your on-chain wallet address:"
+            message="Please choose a wallet address with game passes to mint all your in-game resources:"
             bottomButtonText="Cancel"
             onBottomButtonClick={() => { handleClose() }}
         >
             <VStack spacing="0">
-                <Box w="100%" h="48px" bg="whiteAlpha.100" borderRadius="8px">
-                    <HStack padding="12px">
-                        <Box flex="1" color="whiteAlpha.700">Address</Box>
-                        <Box><AddressDisplayComponent
-                            charsShown={7}
-                            copyTooltipLabel='Copy address'
-                        >
-                            {recipient}
-                        </AddressDisplayComponent></Box>
+                <Box w="100%" >
+                    <VStack spacing='0' maxHeight="130px" overflowY="scroll">
+                        {summonAddresses.map(sAddress =>
+                            <HStack padding="12px" spacing="0" w="100%" h="58px">
+                                <Box alignSelf="center" paddingRight="8px" position="relative" top="4px"><Radio isChecked={summonAddress === sAddress.address.toLowerCase()} onChange={(e) => setSummonAddress(e.target.value)} colorScheme="teal" value={sAddress.address.toLowerCase()}></Radio></Box>
+                                <Box alignSelf="center" h="100%" flex="1">
+                                    <AvatarGroup size='sm' max={4}>
+                                        {sAddress.gamePassesFromAddress.map(gp =>
+                                            <Avatar icon={<Photo color="var(--chakra-colors-teal-200)"></Photo>} bg="gray.700" name={""} src={uriToHttp(gp?.metadata?.image ?? undefined)?.[0]} />
+                                        )}
+                                    </AvatarGroup>
+                                </Box>
+                                <Box alignSelf="center" >
+                                    <AddressDisplayComponent
+                                        charsShown={7}
+                                        copyTooltipLabel='Copy address'
+                                    >
+                                        {sAddress.address}
+                                    </AddressDisplayComponent></Box>
+                            </HStack>
 
-                    </HStack>
+                        )}
+                    </VStack>
+
+
                 </Box>
                 <Box w="100%" paddingTop="16px">
                     <Select
@@ -105,10 +132,10 @@ export function SummonModal() {
                 <Box w="100%" paddingTop="16px">
                     <Button onClick={() => {
                         setSelectedChainId(DEFAULT_CHAIN);
-                        summon({ recipient: account ?? "", chainId: selectedChainId })
+                        summon({ recipient: summonAddress!, chainId: selectedChainId })
                     }}
                         leftIcon={<Wallet></Wallet>}
-                        isDisabled={false && selectedChainId === 0}
+                        isDisabled={!summonAddress}
                         w="100%">SUMMON TO WALLET</Button>
                 </Box>
             </VStack>
