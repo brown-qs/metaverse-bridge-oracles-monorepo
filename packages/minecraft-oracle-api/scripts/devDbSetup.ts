@@ -37,6 +37,46 @@ async function main() {
         }
     }
 
+    //add grimagromlins
+    try {
+        await connection.manager.insert<CollectionEntity>(CollectionEntity, { "assetAddress": "0xe4bf451271d8d1b9d2a7531aa551b7c45ec95048", assetType: StringAssetType.ERC721, name: "Grimagromlins", chainId: 1285, multiverseVersion: MultiverseVersion.V2 })
+    } catch (e) { }
+
+    const grimagromlinsCollection = await connection.manager.findOne<CollectionEntity>(CollectionEntity, { "assetAddress": "0xe4bf451271d8d1b9d2a7531aa551b7c45ec95048", assetType: StringAssetType.ERC721, name: "$SFT", chainId: 1285, multiverseVersion: MultiverseVersion.V2 })
+
+    for (let i = 0; i < 1000; i++) {
+        try {
+            await connection.manager.insert<CollectionFragmentEntity>(CollectionFragmentEntity, { treatAsFungible: false, migratable: true, decimals: 1, collection: grimagromlinsCollection, recognizedAssetType: RecognizedAssetType.GROMLIN, enrapturable: false, importable: true, exportable: true, summonable: false, gamepass: false, name: "Grimagromlins", idRange: null })
+            break;
+        } catch (e) {
+            if (!JSON.stringify(e).includes(`"detail":"Key (id)=`)) {
+                break
+            }
+        }
+    }
+
+
+    //add liquid shit
+    try {
+        await connection.manager.insert<CollectionEntity>(CollectionEntity, { "assetAddress": "0x17098f04db67fdcf216f488f4aec0da71c0fc132", assetType: StringAssetType.ERC20, name: "LIQUID SHIT", chainId: 2109, multiverseVersion: MultiverseVersion.V2 })
+    } catch (e) { }
+
+    //add liquid shit
+    const liquidShit = await connection.manager.findOne<CollectionEntity>(CollectionEntity, { "assetAddress": "0x17098f04db67fdcf216f488f4aec0da71c0fc132" })
+
+
+    for (let i = 0; i < 1000; i++) {
+        try {
+            await connection.manager.insert<CollectionFragmentEntity>(CollectionFragmentEntity, { treatAsFungible: true, migratable: true, decimals: 18, collection: liquidShit, recognizedAssetType: RecognizedAssetType.RESOURCE, enrapturable: false, importable: true, exportable: true, summonable: true, gamepass: false, name: "LIQUID SHIT", idRange: null })
+            break;
+        } catch (e) {
+            if (!JSON.stringify(e).includes(`"detail":"Key (id)=`)) {
+                break
+            }
+        }
+    }
+
+
 
     process.exit(0);
 }
