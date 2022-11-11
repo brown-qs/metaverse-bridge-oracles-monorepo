@@ -375,12 +375,18 @@ export function MigrateModal() {
     } else {
         return (<ReduxModal
             {...baseProps}
-            message={"You are about to migrate $POOP for $SAMA."}
+            message={"You are about to migrate all your $POOP on Moonbeam to $SAMA tokens on the Exosama Network on a 1:1 basis. This action is irreversible."}
             bottomButtonText="Cancel"
         // onBottomButtonClick={handleClose}
         >
             <VStack spacing="0">
-
+                <Box
+                    fontSize="16px"
+                    lineHeight="24px"
+                    paddingBottom="16px"
+                    fontFamily="Rubik"
+                    color="whiteAlpha.700"
+                >If you would like to migrate your $POOP and also receive extra rewards, please visit the <ChakraLink href={"/portal"}>Portal</ChakraLink> to enrapture your $POOP and migrate through Carnage. A gamepass is required.</Box>
                 {amount &&
                     <Box paddingBottom="16px">
                         Amount: {numberFormatter(utils.formatUnits(amount, inTokens?.[0]?.decimals))}
