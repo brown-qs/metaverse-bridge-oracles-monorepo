@@ -67,6 +67,7 @@ export const SUPPORTED_METAMASK_NETWORKS: { [key: number]: AddEthereumChainParam
             name: 'Exosama Network',
             symbol: 'SAMA',
             decimals: 18
-        }
+        },
+        iconUrls: ["https://raw.githubusercontent.com/nico-ma1/Exosama-Network-Brand/main/sama-token.svg"]
     }
 }
