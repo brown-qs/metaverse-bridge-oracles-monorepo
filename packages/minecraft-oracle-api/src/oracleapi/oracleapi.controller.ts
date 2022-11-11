@@ -16,7 +16,7 @@ import { CallparamDto } from './dtos/callparams.dto';
 import { OracleApiService } from './oracleapi.service';
 import { SummonDto } from './dtos/summon.dto';
 import { HashAndChainIdDto } from './dtos/hashandchainid.dto';
-import { InBatchRequestDto, InConfirmRequestDto, InConfirmResponseDto, OutBatchRequestDto, OutConfirmRequestDto, OutConfirmResponseDto, SwapResponseDto } from './dtos/index.dto';
+import { InBatchRequestDto, InConfirmRequestDto, InConfirmResponseDto, OutBatchRequestDto, OutConfirmRequestDto, OutConfirmResponseDto, MigrateResponseDto } from './dtos/index.dto';
 
 @ApiTags('oracle')
 @Controller('oracle')
@@ -33,29 +33,29 @@ export class OracleApiController {
 
 
 
-    //enrapture for autoswap aka '1 click swap', user is always null in asset_entity, for one click migrations only 
-    //autoSwap = true, user = null on asset_entity
-    @Put('swap-in')
+    //enrapture for autoMigrate aka '1 click migrate', user is always null in asset_entity, for one click migrations only 
+    //autoMigrate = true, user = null on asset_entity
+    @Put('migrate-in')
     @HttpCode(200)
-    @ApiOperation({ summary: 'Enrapture assets for auto-swap' })
-    async swap(
+    @ApiOperation({ summary: 'Enrapture assets for auto-migrate' })
+    async migrate(
         @Body() data: InBatchRequestDto
     ): Promise<CallparamDto[]> {
         if (data?.requests?.length !== 1) {
-            throw new BadRequestException("Only 1 swap accepted at this time.")
+            throw new BadRequestException("Only 1 migrate accepted at this time.")
         }
         return await Promise.all(data.requests.map(d => this.oracleApiService.inRequest(d, true)))
     }
 
-    //called after PUT /swap-in to do summon (will be done by cron job if not called)
+    //called after PUT /migrate-in to do summon (will be done by cron job if not called)
     //can be used in the future to summon assets that were enraptured using PUT /in
-    @Put('swap')
+    @Put('migrate')
     @HttpCode(200)
     @ApiOperation({ summary: 'Summon enraptured assets' })
-    async swapConfirm(
+    async migrateConfirm(
         @Body() dto: InConfirmRequestDto
-    ): Promise<SwapResponseDto> {
-        const result = await this.oracleApiService.swap(dto.hash)
+    ): Promise<MigrateResponseDto> {
+        const result = await this.oracleApiService.migrate(dto.hash)
 
         return result
     }

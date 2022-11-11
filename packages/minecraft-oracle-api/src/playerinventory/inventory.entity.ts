@@ -4,7 +4,8 @@ import {
 } from 'class-validator';
 import { Column, Entity, Index, ManyToOne, PrimaryColumn } from 'typeorm';
 import { UserEntity } from '../user/user/user.entity';
-import { MaterialEntity } from '../material/material.entity';
+import { CollectionFragmentEntity } from 'src/collectionfragment/collectionfragment.entity';
+import { MaterialEntity } from 'src/material/material.entity';
 
 @Entity()
 @Index(['id'], {unique: true})
@@ -16,15 +17,11 @@ export class InventoryEntity {
 
     @PrimaryColumn()
     @IsString()
-    id: string; // convention:: {user uuid}-{materialName}
+    id: string; // convention:: {user uuid}-{chainId}-{assetAddress}-{assetId}
 
     @Column()
     @IsString()
     amount: string;
-
-    @Column()
-    @IsBoolean()
-    summonable: boolean;
     
     @Column({default: false})
     @IsBoolean()

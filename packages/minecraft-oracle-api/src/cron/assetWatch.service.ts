@@ -46,9 +46,9 @@ export class AssetWatchService {
       const assets = await this.assetService.findMany({
         where:
           [
-            { pendingIn: true, expiration: MoreThanOrEqual(now), autoSwap: false },
+            { pendingIn: true, expiration: MoreThanOrEqual(now), autoMigrate: false },
             { pendingOut: true, expiration: MoreThanOrEqual(now) },
-            { enraptured: true, pendingIn: false, summonTransactionStatus: IsNull(), autoSwap: true }, //autoswap
+            { enraptured: true, pendingIn: false, summonTransactionStatus: IsNull(), autoMigrate: true }, //automigrate
           ]
         , relations: ['owner', 'collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true
       })
@@ -61,7 +61,7 @@ export class AssetWatchService {
         this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash} pendingIn: ${asset.pendingIn} pendingOut: ${asset.pendingOut}`, this.context);
 
         try {
-          if (asset.pendingIn && !asset.autoSwap) {
+          if (asset.pendingIn && !asset.autoMigrate) {
             this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash}, confirming in...`, this.context);
             //database updates are handled in below function, no need to do it here
             const inSuccess = await this.oracleApiService.inConfirm(asset.hash, asset.owner)
@@ -74,11 +74,11 @@ export class AssetWatchService {
             this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash}, successful out? ${outSuccess}`, this.context);
           }
 
-          if (asset.autoSwap === true && asset.summonTransactionStatus === null) {
-            this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash}, auto swap...`, this.context);
+          if (asset.autoMigrate === true && asset.summonTransactionStatus === null) {
+            this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash}, auto migrate...`, this.context);
             //database removal is handled in below function, no need to do it here
-            const swapResult = await this.oracleApiService.swap(asset.hash, asset.owner)
-            this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash}, swap result? ${JSON.stringify(swapResult)}`, this.context);
+            const migrateResult = await this.oracleApiService.migrate(asset.hash, asset.owner)
+            this.logger.debug(`${funcCallPrefix} asset: ${i} hash: ${asset.hash}, migrate result? ${JSON.stringify(migrateResult)}`, this.context);
 
           }
         } catch (e) {

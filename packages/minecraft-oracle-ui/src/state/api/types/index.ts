@@ -188,7 +188,7 @@ export enum TransactionStatus {
     IN_PROGRESS = 'IN_PROGRESS',
     SUCCESS = 'SUCCESS',
 }
-export interface SwapResponseDto {
+export interface MigrateResponseDto {
     transactionStatus: TransactionStatus,
     transactionHash: string | null
 }
