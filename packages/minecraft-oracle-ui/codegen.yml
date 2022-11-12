@@ -3,6 +3,16 @@ config:
   namingConvention:
     enumValues: keep
 generates:
+  ./src/state/api/generatedSubgraphExnApi.ts:
+    schema: https://exosama-subgraph.moonsama.com/subgraphs/name/moonsama/nft-1155-rss/graphql
+    documents:
+      - src/subgraph/exn/*
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-rtk-query:
+          importBaseApiFrom: ./baseGeneratedSubgraphExnApi
+          exportHooks: true
   ./src/state/api/generatedSquidMarketplaceApi.ts:
     schema: https://squid.subsquid.io/moonsama-multiverse/graphql
     documents:
