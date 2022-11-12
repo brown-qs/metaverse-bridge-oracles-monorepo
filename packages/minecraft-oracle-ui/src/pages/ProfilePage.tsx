@@ -58,7 +58,7 @@ const ProfilePage = () => {
 
     //erc20 token balances
     const { isLoading: isPoopBalanceLoading, data: poopBalanceData, refetch: refetchPoopBalance } = useQuery(
-        ['getAssetBalance', RARESAMA_POOP, account],
+        ['getAssetBalance', RARESAMA_POOP, account?.toLowerCase()],
         () => getAssetBalance(RARESAMA_POOP, library!, account!),
         {
             enabled: !!library && !!account && chainId === ChainId.MOONBEAM
@@ -66,7 +66,7 @@ const ProfilePage = () => {
     )
 
     const { isLoading: isShitFartBalanceLoading, data: shitFartBalanceData, refetch: refetchShitFartBalance } = useQuery( //test token, wont show up if you dont have it
-        ['getAssetBalance', SHIT_FART, account],
+        ['getAssetBalance', SHIT_FART, account?.toLowerCase()],
         () => getAssetBalance(SHIT_FART, library!, account!),
         {
             enabled: !!library && !!account && chainId === ChainId.MOONRIVER
@@ -114,9 +114,9 @@ const ProfilePage = () => {
     // const [getExos, { data: getExosData, error: getExosError, isUninitialized: isGetExosUninitialized, isLoading: isGetExosLoading, isSuccess: isGetExosSuccess, isError: isGetExosError, reset: resetGetExos }] = useGetExosMutation()
 
     //on chain tokens (from indexers)
-    const { data: raresamaOnChainTokensData, currentData: currentRaresamaOnChainTokensData, isLoading: isRaresamaOnChainTokensDataLoading, isFetching: isRaresamaOnChainTokensDataFetching, isError: isRaresamaOnChainTokensDataError, error: raresamaOnChainTokensError, refetch: refetchRaresamaOnChainTokens } = useGetRaresamaOnChainTokensQuery({ where: { owner: { id_eq: account! }, contract: { OR: [{ id_eq: "0xf27a6c72398eb7e25543d19fda370b7083474735" }, { id_eq: "0xe4bf451271d8d1b9d2a7531aa551b7c45ec95048" }] } } }, { skip: !account })
-    const { data: marketplaceOnChainTokensData, currentData: currentMarketplaceOnChainTokensData, isLoading: isMarketplaceOnChainTokensLoading, isFetching: isMarketplaceOnChainTokensFetching, isError: isMarketplaceOnChainTokensError, error: marketplaceOnChainTokensError, refetch: refetchMarketplaceOnChainTokens } = useGetMarketplaceOnChainTokensQuery({ owner: account! }, { skip: !account })
-    const { data: exosamaOnChainTokensData, currentData: currentExosamaOnChainTokensData, isLoading: isExosamaOnChainTokensLoading, isFetching: isExosamaOnChainTokensFetching, isError: isExosamaOnChainTokensError, error: exosamaOnChainTokensError, refetch: refetchExosamaOnChainTokens } = useGetExosamaOnChainTokensQuery({ owner: account! }, { skip: !account })
+    const { data: raresamaOnChainTokensData, currentData: currentRaresamaOnChainTokensData, isLoading: isRaresamaOnChainTokensDataLoading, isFetching: isRaresamaOnChainTokensDataFetching, isError: isRaresamaOnChainTokensDataError, error: raresamaOnChainTokensError, refetch: refetchRaresamaOnChainTokens } = useGetRaresamaOnChainTokensQuery({ where: { owner: { id_eq: account?.toLowerCase()! }, contract: { OR: [{ id_eq: "0xf27a6c72398eb7e25543d19fda370b7083474735" }, { id_eq: "0xe4bf451271d8d1b9d2a7531aa551b7c45ec95048" }] } } }, { skip: !account })
+    const { data: marketplaceOnChainTokensData, currentData: currentMarketplaceOnChainTokensData, isLoading: isMarketplaceOnChainTokensLoading, isFetching: isMarketplaceOnChainTokensFetching, isError: isMarketplaceOnChainTokensError, error: marketplaceOnChainTokensError, refetch: refetchMarketplaceOnChainTokens } = useGetMarketplaceOnChainTokensQuery({ owner: account?.toLowerCase()! }, { skip: !account })
+    const { data: exosamaOnChainTokensData, currentData: currentExosamaOnChainTokensData, isLoading: isExosamaOnChainTokensLoading, isFetching: isExosamaOnChainTokensFetching, isError: isExosamaOnChainTokensError, error: exosamaOnChainTokensError, refetch: refetchExosamaOnChainTokens } = useGetExosamaOnChainTokensQuery({ owner: account?.toLowerCase()! }, { skip: !account })
 
     //in game tokens (from nestjs server)
     const { data: recognizedAssetsData, isLoading: isRecognizedAssetsLoading, isFetching: isRecognizedAssetsFetching, isError: isRecognizedAssetsError, error: recognizedAssetsError, refetch: refetchRecognizedAssets } = useGetRecognizedAssetsQuery()
