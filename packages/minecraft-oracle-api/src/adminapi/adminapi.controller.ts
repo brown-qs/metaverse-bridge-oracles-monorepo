@@ -131,38 +131,6 @@ export class AdminApiController {
         return success
     }
 
-    @Put('materials')
-    @HttpCode(200)
-    @ApiOperation({ summary: 'Adds or updates recognized materials' })
-    @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard)
-    async addMaterials(
-        @User() caller: UserEntity,
-        @Body() materials: MaterialsDto,
-    ): Promise<boolean> {
-        if (caller.role !== UserRole.ADMIN) {
-            throw new ForbiddenException('Not admin')
-        }
-        const success = await this.adminApiService.saveMaterials(materials.materials)
-        return success
-    }
-
-    @Delete('materials')
-    @HttpCode(200)
-    @ApiOperation({ summary: 'Deletes recognized materials' })
-    @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard)
-    async deleteMaterials(
-        @User() caller: UserEntity,
-        @Body() materials: MaterialsDto,
-    ): Promise<boolean> {
-        if (caller.role !== UserRole.ADMIN) {
-            throw new ForbiddenException('Not admin')
-        }
-        const success = await this.adminApiService.deleteMaterials(materials.materials)
-        return success
-    }
-
     @Put('textures')
     @HttpCode(200)
     @ApiOperation({ summary: 'Adds or updates recognized textures' })
@@ -331,22 +299,6 @@ export class AdminApiController {
         }
     }*/
 
-    @Put('communism')
-    @HttpCode(200)
-    @ApiOperation({ summary: 'Server wide gganbu snapshot resource distribution' })
-    @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard)
-    async communism(
-        @User() caller: UserEntity,
-        @Body() dto: CommunismDto
-    ): Promise<boolean> {
-        if (caller.role !== UserRole.ADMIN) {
-            throw new ForbiddenException('Not admin')
-        }
-        await this.gameApiService.communism(dto)
-        return true
-    }
-
     @Put('bank')
     @HttpCode(200)
     @ApiOperation({ summary: 'Processes snapshot items and banks them into the user inventory.' })
@@ -356,7 +308,7 @@ export class AdminApiController {
         @User() caller: UserEntity,
         @Body() dto: BankDto
     ): Promise<boolean> {
-        if (caller.role !== UserRole.ADMIN) {
+        if (caller.role !== UserRole.BANKER_ADMIN) {
             throw new ForbiddenException('Not admin')
         }
         const res = await this.gameApiService.bank(dto)

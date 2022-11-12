@@ -10,6 +10,11 @@ type MediaType = 'image' | 'video' | 'audio' | 'xml' | 'other' | undefined;
 const mediaArray: MediaType[] = ['audio', 'image', 'video', 'xml'];
 
 export const useFileType = (uri?: string) => {
+  let DEBUG = false
+  if (uri?.startsWith("/static")) {
+    DEBUG = false
+  }
+  if (DEBUG) console.log(`useFileType:: uri: ${uri}`)
   const [fileType, setFileType] = useState<FileTypeResult | undefined>(
     undefined
   );
@@ -20,7 +25,10 @@ export const useFileType = (uri?: string) => {
   const url = useUriToHttp(uri);
 
   const getMediaType = useCallback(() => {
+    if (DEBUG) console.log(`useFileType:: getMediaType: start`)
+
     if (fileType) {
+      if (DEBUG) console.log(`useFileType:: getMediaType: fileType:${fileType}`)
 
       const [media, secondOne] = fileType.mime.split('/');
       if (mediaArray.includes(media as MediaType)) {
@@ -32,6 +40,8 @@ export const useFileType = (uri?: string) => {
       }
       return 'other';
     } else if (url?.toLowerCase().includes(".svg")) {
+      if (DEBUG) console.log(`useFileType:: getMediaType: hard coded as svg`)
+
       return 'image'
     }
   }, [fileType]);
@@ -40,9 +50,16 @@ export const useFileType = (uri?: string) => {
     const getFileType = async () => {
       setMediaUrl(url);
       setIsLoading(true);
+      if (DEBUG) console.log(`useFileType:: getFileType: before fetch url: ${url}`)
+
       const res = url ? await fetch(url) : undefined;
+      if (DEBUG) console.log(`useFileType:: getFileType: after fetch`)
+
       if (res?.body) {
+        if (DEBUG) console.log(`useFileType:: getFileType: inside res?.body`)
+
         let type = await fromStream(res?.body);
+        if (DEBUG) console.log(`useFileType:: getFileType: after from stream`)
 
 
         try {
@@ -65,6 +82,9 @@ export const useFileType = (uri?: string) => {
           setIsLoading(false);
         }
         setFileType(type);
+      } else {
+        if (DEBUG) console.log(`useFileType:: getFileType: res?.body not defined`, res)
+
       }
     };
     getFileType();

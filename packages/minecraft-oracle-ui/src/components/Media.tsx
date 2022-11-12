@@ -15,6 +15,11 @@ export interface MediaProps extends BoxProps {
 };
 
 export const Media = ({ uri, imageProps, videoProps, ...props }: MediaProps) => {
+    let DEBUG = false
+    if (uri?.startsWith("/static")) {
+        DEBUG = false
+    }
+    if (DEBUG) console.log(`Media:: uri: ${uri} START`)
     //hack to replace statis pod video
     const mediaUri = uri?.replace("ipfs://QmQCeS76BRezJ5S7ezkVjeHcHJXjvGzDrZSEdjdwFYuGTB", "https://moonsama.mypinata.cloud/ipfs/QmUEuEv55cY6ZM5VWWSPVUpHjmsrJKrn526VQZs24qqNES/1.jpg")
     const { getMediaType, mediaUrl, isLoading } = useFileType(mediaUri);
@@ -58,6 +63,7 @@ export const Media = ({ uri, imageProps, videoProps, ...props }: MediaProps) => 
     const loading = isLoading || mediaLoading
     const loadingOrError = (loading || mediaError)
     const brokenImage = mediaError || !mediaUrl
+    if (DEBUG) console.log(`Media:: loading: ${loading} mediaLoading: ${mediaLoading}`)
 
     const gradient = "linear-gradient(90deg, rgba(255, 255, 255, .01) 0px, rgba(255, 255, 255, .1) 40px, rgba(255, 255, 255, .01) 80px)"
     const skeletonAnimation = keyframes`

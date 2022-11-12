@@ -3,7 +3,7 @@ import { tr } from "date-fns/locale";
 import { AppState } from ".."
 import { ChainId } from "../../constants";
 import { StringAssetType } from "../../utils/subgraph";
-import { InRequestDto, Oauth2PublicClientDto } from "../api/types"
+import { InRequestDto, Oauth2PublicClientDto, TransactionStatus } from "../api/types"
 export interface TransactionReceipt {
     to: string;
     from: string;
@@ -44,7 +44,10 @@ export interface ApprovalTransaction extends BaseTransaction {
 export type InAsset = { bridgeHash: string } & InRequestDto
 export interface InTransaction extends BaseTransaction {
     type: TransactionType.In,
-    assets: InAsset[]
+    assets: InAsset[],
+    migrate: boolean,
+    migrationStatus?: TransactionStatus,
+    outTransactionHash?: string,
 }
 
 export interface OutTransaction extends BaseTransaction {
@@ -85,7 +88,7 @@ const transactionsSlice = createSlice({
                 state.approvalTransactions.push(trans)
             }
         },
-        addInTransaction: (state, action: PayloadAction<Pick<InTransaction, "hash" | "assets">>) => {
+        addInTransaction: (state, action: PayloadAction<Pick<InTransaction, "hash" | "assets" | "migrate">>) => {
             const payload = action.payload
             const trans: InTransaction = {
                 hash: payload.hash,
@@ -94,7 +97,8 @@ const transactionsSlice = createSlice({
                 receipt: undefined,
                 lastCheckedBlock: 0,
 
-                assets: payload.assets
+                assets: payload.assets,
+                migrate: payload.migrate
             }
             if (!state.inTransactions.find(t => t.hash === trans.hash)) {
                 state.inTransactions.push(trans)
@@ -142,6 +146,30 @@ const transactionsSlice = createSlice({
                 }
             }
         },
+        setOutTransactionHash: (state, action: PayloadAction<{ bridgeHash: string, outTransactionHash: string }>) => {
+            const payload = action.payload;
+            for (const [transactionTypeString, transactions] of Object.entries(state)) {
+                const matchingTransaction = (transactions as any)?.find((t: InTransaction) => t?.assets?.[0]?.bridgeHash === payload.bridgeHash)
+                if (!!matchingTransaction) {
+                    if (!matchingTransaction.outTransactionHash) {
+                        matchingTransaction.outTransactionHash = payload.outTransactionHash
+                    } else {
+                        console.log("setReceipt:: tried to set receipt after it had already been set.")
+                    }
+                    break;
+                }
+            }
+        },
+        setMigrationStatus: (state, action: PayloadAction<{ bridgeHash: string, migrationStatus: TransactionStatus }>) => {
+            const payload = action.payload;
+            for (const [transactionTypeString, transactions] of Object.entries(state)) {
+                const matchingTransaction = (transactions as any)?.find((t: InTransaction) => t?.assets?.[0]?.bridgeHash === payload.bridgeHash)
+                if (!!matchingTransaction) {
+                    matchingTransaction.migrationStatus = payload.migrationStatus
+                    break;
+                }
+            }
+        },
         clearAllTransactions: (state, action: PayloadAction<void>) => {
             for (const [transactionTypeString, transactions] of Object.entries(state)) {
                 if (Array.isArray(transactions)) {
@@ -152,7 +180,7 @@ const transactionsSlice = createSlice({
     }
 })
 
-export const { addApprovalTransaction, clearAllTransactions, addInTransaction, addOutTransaction, updateLastCheckedBlock, setReceipt } = transactionsSlice.actions
+export const { setMigrationStatus, setOutTransactionHash, addApprovalTransaction, clearAllTransactions, addInTransaction, addOutTransaction, updateLastCheckedBlock, setReceipt } = transactionsSlice.actions
 export default transactionsSlice.reducer
 
 export const selectApprovalTransactions = (state: AppState) => state?.newTransactions?.approvalTransactions
@@ -178,7 +206,14 @@ export const selectAllTransactionsFromLastDay: (state: AppState) => AllTransacti
 })
 
 export const shouldCheckTransactionOnBlock = (transaction: AllTransactionsType, latestBlock: number): boolean => {
-    if (!!transaction.receipt) return false;
+
+    if (transaction.type === TransactionType.In && transaction.migrate) {
+        if (!!transaction.outTransactionHash) {
+            return false
+        }
+    } else if (!!transaction.receipt) {
+        return false
+    }
     if (!transaction.lastCheckedBlock) return true;
     const blocksSinceCheck = latestBlock - transaction.lastCheckedBlock
     if (blocksSinceCheck < 1) return false;
