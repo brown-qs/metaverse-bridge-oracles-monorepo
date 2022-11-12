@@ -12,6 +12,9 @@ export class SummonLogEntity {
     chainId: number
 
     @Column({ nullable: false })
+    summonSession: string
+
+    @Column({ nullable: false })
     assetAddress: string
 
     @Column('text', { array: true, default: [] })

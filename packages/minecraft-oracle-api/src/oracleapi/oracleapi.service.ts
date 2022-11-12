@@ -852,13 +852,13 @@ export class OracleApiService {
                         contract = new Contract(chainEntity.multiverseV1Address, METAVERSE_ABI, oracle)
                         receipt = await (await contract.summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], { gasPrice: '1000000000', gasLimit: '5000000' })).wait()
                         try {
-                            await this.summonLogService.create({ uuid: user.uuid, chainId: chainEntity.chainId, assetAddress, assetIds: ids, assetAmounts: amounts, recipient: recipient.toLowerCase(), transactionHash: receipt.transactionHash.toLowerCase(), createdAt: new Date() })
+                            await this.summonLogService.create({ uuid: user.uuid, summonSession: funcId, chainId: chainEntity.chainId, assetAddress, assetIds: ids, assetAmounts: amounts, recipient: recipient.toLowerCase(), transactionHash: receipt.transactionHash.toLowerCase(), createdAt: new Date() })
                         } catch (e) { }
                     } else if (!!chainEntity.multiverseV2Address) {
                         contract = new Contract(chainEntity.multiverseV2Address, METAVERSE_V2_ABI, oracle)
                         receipt = await (await contract.summon(METAVERSE, recipient, assetAddress, ids, amounts, [], { gasPrice: '1000000000', gasLimit: '5000000' })).wait()
                         try {
-                            await this.summonLogService.create({ uuid: user.uuid, chainId: chainEntity.chainId, assetAddress, assetIds: ids, assetAmounts: amounts, recipient: recipient.toLowerCase(), transactionHash: receipt.transactionHash.toLowerCase(), createdAt: new Date() })
+                            await this.summonLogService.create({ uuid: user.uuid, summonSession: funcId, chainId: chainEntity.chainId, assetAddress, assetIds: ids, assetAmounts: amounts, recipient: recipient.toLowerCase(), transactionHash: receipt.transactionHash.toLowerCase(), createdAt: new Date() })
                         } catch (e) { }
                     } else {
                         this.logger.error(`${funcCallPrefix} failure not find MultiverseAddress`)
