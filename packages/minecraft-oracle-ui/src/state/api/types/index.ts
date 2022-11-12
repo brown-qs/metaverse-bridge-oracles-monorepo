@@ -110,6 +110,7 @@ export type BridgedAssetDto = {
     summonable: boolean
     recognizedAssetType: string
     enraptured: boolean
+    gamepass: boolean
     chainId: number
     exportAddress: string
     hash?: string

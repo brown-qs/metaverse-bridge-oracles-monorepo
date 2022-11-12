@@ -46,7 +46,7 @@ export class AssetWatchService {
       const assets = await this.assetService.findMany({
         where:
           [
-            { pendingIn: true, expiration: MoreThanOrEqual(now), autoMigrate: false },
+            { pendingIn: true, expiration: MoreThanOrEqual(now) },
             { pendingOut: true, expiration: MoreThanOrEqual(now) },
             { enraptured: true, pendingIn: false, summonTransactionStatus: IsNull(), autoMigrate: true }, //automigrate
           ]

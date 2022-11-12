@@ -6,6 +6,11 @@ export const useUriToHttp = (uriOrUrl?: string) => {
     if (!uriOrUrl) {
       return undefined;
     }
+
+    //relative path
+    if (uriOrUrl?.startsWith("/")) {
+      return uriOrUrl
+    }
     return uriToHttp(uriOrUrl, false)?.[0];
   }, [uriOrUrl]);
 };

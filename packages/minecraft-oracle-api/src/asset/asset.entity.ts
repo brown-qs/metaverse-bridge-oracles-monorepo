@@ -87,13 +87,16 @@ export class AssetEntity {
     autoMigrate?: boolean;
 
     @IsEnum(TransactionStatus)
-    @Column({ nullable: true, default: null })
+    @Column({ type: 'enum', enum: TransactionStatus, nullable: true, default: null })
     summonTransactionStatus?: TransactionStatus
 
     @IsString()
     @Column({ nullable: true, default: null })
     summonTransactionHash?: string
 
+    @Column({ type: "timestamptz", default: null, nullable: true })
+    @IsDate()
+    summonedAt?: Date;
 
     @IsJSON()
     @Column({ type: 'json', nullable: true })
