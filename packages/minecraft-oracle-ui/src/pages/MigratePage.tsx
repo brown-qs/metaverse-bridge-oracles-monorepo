@@ -3,7 +3,7 @@ import { useAccountDialog, useActiveWeb3React, useClasses } from 'hooks';
 import { Container, Image, Alert, AlertDescription, AlertIcon, AlertTitle, Box, Button, CloseButton, Heading, HStack, Stack, Tag, TagCloseButton, TagLabel, TagLeftIcon, TagRightIcon, useToast, VStack, useMediaQuery } from '@chakra-ui/react';
 import { ArrowsRightLeft, DeviceGamepad2, Pencil, Tags, User, Wallet } from 'tabler-icons-react';
 import BackgroundImage from '../assets/images/bridge-background-blur.svg'
-import { ChainId, MULTIVERSE_BRIDGE_V2_WAREHOUSE_ADDRESS, numberFormatter, RARESAMA_POOP } from '../constants';
+import { ChainId, MULTIVERSE_BRIDGE_V2_WAREHOUSE_ADDRESS, numberFormatter, RARESAMA_POOP, SHIT_FART } from '../constants';
 import { getAssetBalance } from '../hooks/useBalances/useBalances';
 import { useQuery } from 'react-query';
 import { utils } from "ethers"
@@ -178,6 +178,7 @@ const MigratePage = () => {
                   {isMoonbeam
                     ?
                     <Button onClick={() => {
+
                       const token: StandardizedOnChainTokenWithRecognizedTokenData = {
                         id: "RARESAMA_POOP",
                         assetAddress: RARESAMA_POOP.assetAddress,
@@ -197,6 +198,7 @@ const MigratePage = () => {
                         multiverseVersion: MultiverseVersion.V2,
 
                       }
+
                       dispatch(setMigrateModalTokens([token]))
                       dispatch(openMigrateModal())
                     }} isLoading={isPoopBalanceLoading} isDisabled={noPoop} leftIcon={<ArrowsRightLeft></ArrowsRightLeft>} w="100%">{narrowerThan390 ? "MIGRATE" : "MIGRATE $POOP FOR $SAMA"}</Button>
