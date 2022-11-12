@@ -44,8 +44,12 @@ import { CollectionFragmentService } from '../collectionfragment/collectionfragm
 import { CallparamDto } from './dtos/callparams.dto';
 import { InRequestDto, MigrateResponseDto } from './dtos/index.dto';
 import { InjectConnection } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
+import { Connection, ILike } from 'typeorm';
 import { CollectionFragmentRoutingService } from '../collectionfragmentrouting/collectionfragmentrouting.service';
+import { CollectionFragmentEntity } from '../collectionfragment/collectionfragment.entity';
+import { InLogService } from '../in-log/in-log.service';
+import { MigrationLogService } from '../migration-log/migration-log.service';
+import { SummonLogService } from '../summon-log/summon-log.service';
 
 @Injectable()
 export class OracleApiService {
@@ -73,6 +77,11 @@ export class OracleApiService {
         private readonly resourceInventoryService: ResourceInventoryService,
         private readonly collectionFragmentService: CollectionFragmentService,
         private readonly collectionFragmentRoutingService: CollectionFragmentRoutingService,
+
+        private readonly inLogService: InLogService,
+        private readonly migrationLogService: MigrationLogService,
+        private readonly summonLogService: SummonLogService,
+
 
         private configService: ConfigService,
         @Inject(ProviderToken.ORACLE_WALLET_CALLBACK) private getOracle: TypeOracleWalletProvider,
@@ -152,6 +161,15 @@ export class OracleApiService {
         }
 
         const multiverseVersion = collectionFragment.collection.multiverseVersion
+
+        if (multiverseVersion === MultiverseVersion.V1 && !collectionFragment.collection.chain.multiverseV1Address) {
+            this.logger.debug(`${funcCallPrefix} no multiverse address set.`, this.context)
+            throw new BadRequestException("No multiverse address set.")
+        } else if (multiverseVersion === MultiverseVersion.V2 && !collectionFragment.collection.chain.multiverseV2Address) {
+            this.logger.debug(`${funcCallPrefix} no multiverse address set.`, this.context)
+            throw new BadRequestException("No multiverse address set.")
+        }
+
         const oracle = await this.getOracle(chainId)
         const requestHash = await utf8ToKeccak(JSON.stringify(standardizedParams))
         this.logger.debug(`${funcCallPrefix} requestHash: ${requestHash}`, this.context)
@@ -223,8 +241,10 @@ export class OracleApiService {
             collectionFragment,
             createdAt: new Date(),
             modifiedAt: new Date(),
-            autoMigrate
+            autoMigrate,
         })
+        //log all hashes so we know what user is associated with which bridge hash incase we need to reconstruct
+        await this.inLogService.create({ hash: hash, uuid: user?.uuid, createdAt: new Date() })
         this.logger.debug(`${funcCallPrefix} requestHash: ${requestHash} salt: ${salt} hash: ${hash} request prepared from NEW salt: ${[hash, payload, signature]}`, this.context)
         return { hash, data: payload, signature, confirmed: false }
     }
@@ -433,7 +453,14 @@ export class OracleApiService {
             throw new BadRequestException("Enrapture hasn't finished.")
         }
 
+
+
         const assetEntry = await this.assetService.findOne({ hash }, { relations: ['collectionFragment', 'collectionFragment.collection', 'collectionFragment.collection.chain', 'owner'], loadEagerRelations: true })
+
+        if (assetEntry.pendingIn) {
+            this.logger.debug(`${funcCallPrefix} asset is pending in.`, this.context)
+            throw new BadRequestException("Asset is pending in.")
+        }
 
         if (!assetEntry.autoMigrate) {
             this.logger.debug(`${funcCallPrefix} asset does not has autoMigrate enabled.`, this.context)
@@ -472,6 +499,14 @@ export class OracleApiService {
             return { transactionStatus: tempAsset.summonTransactionStatus, transactionHash: tempAsset.summonTransactionHash }
         }
 
+        //double check this bridge hash has never been summoned before
+        const existingSummon = await this.migrationLogService.findOne({ bridgeHash: hash })
+        if (!!existingSummon) {
+            this.logger.debug(`${funcCallPrefix} CRITICAL!!! migration summon attempted that was already completed`, this.context)
+            const tempAsset = await this.assetService.findOne({ hash })
+            return { transactionStatus: tempAsset.summonTransactionStatus, transactionHash: tempAsset.summonTransactionHash }
+        }
+
         this.logger.debug(`${funcCallPrefix} Waiting for mutex...`, this.context)
 
         const oracleLock = this.getOrCreateLock(OracleApiService.SUMMON_LOCK_KEY)
@@ -505,7 +540,8 @@ export class OracleApiService {
                 receipt = await ((await contract.summon(METAVERSE, assetEntry.assetOwner, migrateRoute.outCollectionFragment.collection.assetAddress, [migrateRoute.outAssetId], [assetEntry.amount], d, { gasPrice: '1000000000', gasLimit: '7000000' })).wait())
                 this.logger.debug(`${funcCallPrefix} summon mutex: summon complete`, this.context)
 
-                await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.SUCCESS, summonTransactionHash: receipt.transactionHash, modifiedAt: new Date() })
+                await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.SUCCESS, summonTransactionHash: receipt.transactionHash.toLowerCase(), summonedAt: new Date(), modifiedAt: new Date() })
+                await this.migrationLogService.create({ bridgeHash: hash, summonTransactionHash: receipt.transactionHash.toLowerCase(), createdAt: new Date() })
                 return receipt
             } catch (e) {
                 // console.log(e)
@@ -563,6 +599,15 @@ export class OracleApiService {
 
 
         const multiverseVersion = assetEntry.collectionFragment.collection.multiverseVersion
+
+        if (multiverseVersion === MultiverseVersion.V1 && !assetEntry.collectionFragment.collection.chain.multiverseV1Address) {
+            this.logger.debug(`${funcCallPrefix} no multiverse address set.`, this.context)
+            throw new BadRequestException("No multiverse address set.")
+        } else if (multiverseVersion === MultiverseVersion.V2 && !assetEntry.collectionFragment.collection.chain.multiverseV2Address) {
+            this.logger.debug(`${funcCallPrefix} no multiverse address set.`, this.context)
+            throw new BadRequestException("No multiverse address set.")
+        }
+
         const salt = await getSalt()
         const expiration = Date.now() + CALLDATA_EXPIRATION_MS
         const expirationContract = (Math.floor(expiration / 1000)).toString()
@@ -720,16 +765,23 @@ export class OracleApiService {
 
 
     public async userSummonRequest(user: UserEntity, { recipient, chainId }: SummonDto): Promise<boolean> {
-        this.logger.debug(`userSummonRequest user ${user.uuid} to ${recipient} ID is ${chainId}`, this.context)
+        const funcId = makeid(5)
+        const funcCallPrefix = `[${funcId}] userSummonRequest:: uuid: ${user?.uuid}`
+        this.logger.debug(`${funcCallPrefix} to ${recipient}`, this.context)
 
         if (!recipient || recipient.length !== 42 || !recipient.startsWith('0x')) {
-            this.logger.error(`Summon: recipient invalid: ${recipient}}`, null, this.context)
+            this.logger.error(`${funcCallPrefix} recipient invalid: ${recipient}}`, null, this.context)
             throw new UnprocessableEntityException('Recipient invalid')
         }
 
         if (user.blacklisted) {
-            this.logger.error(`userSummonRequest: user blacklisted`, null, this.context)
+            this.logger.error(`${funcCallPrefix} user blacklisted`, null, this.context)
             throw new UnprocessableEntityException(`Blacklisted`)
+        }
+        const gamepass = await this.assetService.findOne({ owner: user, assetOwner: ILike(recipient?.toLowerCase()), collectionFragment: { gamepass: true } }, { relations: ["collectionFragment"] })
+        if (!gamepass) {
+            this.logger.error(`${funcCallPrefix} no gamepasses associated with recipient.`, null, this.context)
+            throw new UnprocessableEntityException(`No gamepasses associated with recipient.`)
         }
 
         const inventoryItems = await this.inventoryService.findMany({ relations: ['owner', 'material', 'material.collectionFragment', 'material.collectionFragment.collection'], where: { owner: { uuid: user.uuid }, summonInProgress: false }, loadEagerRelations: true })
@@ -757,7 +809,7 @@ export class OracleApiService {
 
             // safety vibe check
             if (!inventoryItems[0].summonInProgress) {
-                this.logger.warn(`Summon: summonInProgress vibe check fail for ${user.uuid}`, this.context)
+                this.logger.warn(`${funcCallPrefix} vibe check fail for ${user.uuid}`, this.context)
                 return false
             }
 
@@ -799,24 +851,29 @@ export class OracleApiService {
                     if (!!chainEntity.multiverseV1Address) {
                         contract = new Contract(chainEntity.multiverseV1Address, METAVERSE_ABI, oracle)
                         receipt = await (await contract.summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], { gasPrice: '1000000000', gasLimit: '5000000' })).wait()
+                        try {
+                            await this.summonLogService.create({ uuid: user.uuid, summonSession: funcId, chainId: chainEntity.chainId, assetAddress, assetIds: ids, assetAmounts: amounts, recipient: recipient.toLowerCase(), transactionHash: receipt.transactionHash.toLowerCase(), createdAt: new Date() })
+                        } catch (e) { }
                     } else if (!!chainEntity.multiverseV2Address) {
                         contract = new Contract(chainEntity.multiverseV2Address, METAVERSE_V2_ABI, oracle)
                         receipt = await (await contract.summon(METAVERSE, recipient, assetAddress, ids, amounts, [], { gasPrice: '1000000000', gasLimit: '5000000' })).wait()
+                        try {
+                            await this.summonLogService.create({ uuid: user.uuid, summonSession: funcId, chainId: chainEntity.chainId, assetAddress, assetIds: ids, assetAmounts: amounts, recipient: recipient.toLowerCase(), transactionHash: receipt.transactionHash.toLowerCase(), createdAt: new Date() })
+                        } catch (e) { }
                     } else {
-                        this.logger.error(`Summon: failiure not find MultiverseAddress`)
+                        this.logger.error(`${funcCallPrefix} failure not find MultiverseAddress`)
                         throw new UnprocessableEntityException('Summon MultiverseAddress error.')
                     }
 
                     try {
                         await this.inventoryService.removeAll(groups[addresses[i]].entities)
                     } catch (e) {
-                        this.logger.error(`Summon: failiure to remove entities, ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
+                        this.logger.error(`${funcCallPrefix} failure to remove entities, ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
                     }
 
-                    this.logger.log(`Summon: successful summon for user ${user.uuid}`, this.context)
+                    this.logger.log(`${funcCallPrefix} successful summon for user ${user.uuid}`, this.context)
                 } catch (e) {
-                    //console.log(e)
-                    this.logger.error(`Summon: failiure to summon ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
+                    this.logger.error(`${funcCallPrefix} failure to summon ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
 
                     await Promise.all(
                         groups[addresses[i]].entities.map(async (snap) => {
@@ -869,6 +926,7 @@ export class OracleApiService {
             }
         }
     }
+
 
     private getContract(multiverseVersion: MultiverseVersion, chainEntity: ChainEntity, oracle: ethers.Wallet): Contract {
         if (multiverseVersion === MultiverseVersion.V1) {

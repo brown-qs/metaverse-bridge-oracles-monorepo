@@ -12,7 +12,7 @@ import { CompositePartEntity } from '../compositepart/compositepart.entity';
 import { ResourceInventoryEntity } from '../resourceinventory/resourceinventory.entity';
 import { CollectionFragmentRoutingEntity } from '../collectionfragmentrouting/collectionfragmentrouting.entity';
 import { InventoryEntity } from 'src/playerinventory/inventory.entity';
-import { MaterialEntity } from 'src/material/material.entity';
+import { MaterialEntity } from '../material/material.entity';
 
 
 @Entity()

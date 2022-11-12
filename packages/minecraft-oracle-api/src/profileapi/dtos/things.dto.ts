@@ -44,6 +44,10 @@ export class AssetDto {
     @IsBoolean()
     enraptured: boolean
 
+    @ApiProperty({ description: 'Whether the asset is a gamepass' })
+    @IsBoolean()
+    gamepass: boolean
+
     @ApiPropertyOptional({ description: 'Chain id where asset lives' })
     @IsString()
     chainId: number
