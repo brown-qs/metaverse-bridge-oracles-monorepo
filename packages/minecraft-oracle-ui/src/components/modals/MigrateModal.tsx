@@ -33,6 +33,7 @@ import { assetInTransaction } from "../../hooks/multiverse/useImportAsset";
 import { utils } from "ethers"
 import { closeMigrateModal, selectMigrateModalOpen, selectMigrateModalTokens } from "../../state/slices/migrateModalSlice";
 
+const DEV = true
 export function MigrateModal() {
     const { chainId, account, library } = useActiveWeb3React();
     const dispatch = useDispatch()
@@ -124,6 +125,7 @@ export function MigrateModal() {
             refetchCheckApproval()
             if (isFungible) {
                 if (!!balanceData) {
+                    //TO DO: CHANGE BACK  balanceData.toString()
                     const inParams: InRequestDto[] = inTokens.map(tok => onChainTokenTokenToInDto(tok, account, balanceData.toString()))
                     setIn({ requests: inParams })
 
@@ -266,7 +268,7 @@ export function MigrateModal() {
                 </Button>
             </VStack>
         </ReduxModal>
-    } else if (isCheckApprovalLoading || isSetInLoading) {
+    } else if ((isCheckApprovalLoading || isSetInLoading) && !signTransactionMutation?.isSuccess) {
         return <ReduxModal
             {...baseProps}
             message="Checking for token approval and/or waiting for inflow parameters. Please wait a moment."
@@ -329,12 +331,12 @@ export function MigrateModal() {
         return (<ReduxModal
             {...baseProps}
             TablerIcon={Checks}
-            message={`Confirming ${isEnrapture ? "enrapture" : "import"} with the multiverse oracle...`}
+            message={`Migration in progress. Please check your wallet in the menu bar for the status of the migration transactions.`}
         >
             <VStack spacing="0">
                 <Box w="100%" h="48px" bg="whiteAlpha.100" borderRadius="8px">
                     <HStack padding="12px" overflow="ellipsis" w="100%" whiteSpace="nowrap">
-                        <Box flex="1" color="whiteAlpha.700">Transaction</Box>
+                        <Box flex="1" color="whiteAlpha.700">In Transaction</Box>
                         <Box overflow="hidden" textOverflow="ellipsis">
                             {!!signTransactionMutation.data && (
                                 <ChakraLink isExternal
