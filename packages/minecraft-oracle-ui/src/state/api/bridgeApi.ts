@@ -3,7 +3,8 @@ import { BaseQueryFn, createApi, FetchArgs, fetchBaseQuery, FetchBaseQueryError 
 import { AppState } from ".."
 import { StandardizedOnChainToken } from "../../utils/graphqlReformatter"
 import { setTokens } from "../slices/authSlice"
-import { BridgedAssetDto, CallparamDto, CompositeConfigDto, EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse, InBatchRequestDto, InConfirmRequestDto, InConfirmResponseDto, Oauth2PublicClientDto, OutBatchRequestDto, OutConfirmRequestDto, OutConfirmResponseDto, RecognizedAssetsDto, SkinResponse, SkinSelectRequest, UserProfileResponse } from "./types"
+import { setMigrationStatus, setOutTransactionHash } from "../slices/transactionsSlice"
+import { BridgedAssetDto, CallparamDto, CompositeConfigDto, EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse, InBatchRequestDto, InConfirmRequestDto, InConfirmResponseDto, MigrateResponseDto, Oauth2PublicClientDto, OutBatchRequestDto, OutConfirmRequestDto, OutConfirmResponseDto, RecognizedAssetsDto, SkinResponse, SkinSelectRequest, UserProfileResponse } from "./types"
 
 
 // ---------------------------------------------------------- //
@@ -113,6 +114,36 @@ export const bridgeApi = createApi({
                 body
             }),
             invalidatesTags: ["Profile"]
+        }),
+        migrateIn: builder.mutation<CallparamDto[], InBatchRequestDto>({
+            query: (body) => ({
+                url: `/oracle/migrate-in`,
+                method: "PUT",
+                body
+            }),
+        }),
+        migrate: builder.mutation<MigrateResponseDto, InConfirmRequestDto>({
+            query: (body) => ({
+                url: `/oracle/migrate`,
+                method: "PUT",
+                body
+            }),
+            async onQueryStarted(args, { dispatch, queryFulfilled }) {
+                try {
+                    const result = await queryFulfilled;
+                    if (!!result?.data) {
+                        const transactionStatus = result?.data?.transactionStatus
+                        const transactionHash = result?.data?.transactionHash
+                        console.log(`migrate:: bridge hash: ${args.hash} transactionStatus: ${transactionStatus} transactionHash: ${transactionHash}`)
+                        if (!!transactionStatus) {
+                            dispatch(setMigrationStatus({ bridgeHash: args.hash, migrationStatus: transactionStatus }));
+                        }
+                        if (!!transactionHash) {
+                            dispatch(setOutTransactionHash({ bridgeHash: args.hash, outTransactionHash: transactionHash }));
+                        }
+                    }
+                } catch (error) { }
+            }
         }),
         in: builder.mutation<CallparamDto[], InBatchRequestDto>({
             query: (body) => ({
@@ -232,4 +263,4 @@ export const rtkQueryErrorFormatter = (error: any): string => {
     return strErr
 }
 
-export const { useGetExosMutation, useCustomizerConfigQuery, useInMutation, useOutMutation, useOutConfirmMutation, useInConfirmMutation, useActiveGameQuery, useOauthInfoQuery, useOauthAuthorizeMutation, useSummonMutation, useGetInGameResourcesQuery, useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
+export const { useMigrateInMutation, useMigrateMutation, useGetExosMutation, useCustomizerConfigQuery, useInMutation, useOutMutation, useOutConfirmMutation, useInConfirmMutation, useActiveGameQuery, useOauthInfoQuery, useOauthAuthorizeMutation, useSummonMutation, useGetInGameResourcesQuery, useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi

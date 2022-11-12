@@ -5,10 +5,10 @@ import {
     IsString
 } from 'class-validator';
 import { InventoryEntity } from '../playerinventory/inventory.entity';
-import { Column, Entity, Index, OneToMany, PrimaryColumn } from 'typeorm';
-import { StringAssetType } from '../common/enums/AssetType';
+import { Column, Entity, Index, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
 import { SnaplogEntity } from '../snaplog/snaplog.entity';
+import { CollectionFragmentEntity } from '../collectionfragment/collectionfragment.entity';
 
 @Entity()
 @Index(['name'], {unique: true})
@@ -22,35 +22,6 @@ export class MaterialEntity {
     @IsString()
     name: string;
 
-    @Column({unique: true})
-    @IsString()
-    key: string;
-
-    @Column()
-    @IsNumber()
-    hashCode: number;
-
-    @Column({unique: true})
-    @IsNumber()
-    ordinal: number;
-
-    @IsNumber()
-    @Column()
-    maxStackSize: number;
-
-    @Column()
-    @IsEnum(StringAssetType)
-    @Column({
-        type: 'enum',
-        enum: StringAssetType,
-        default: StringAssetType.NONE
-    })
-    assetType: StringAssetType;
-
-    @Column()
-    @IsString()
-    assetAddress: string;
-
     @Column()
     @IsString()
     assetId: string;
@@ -58,29 +29,14 @@ export class MaterialEntity {
     @IsNumber()
     @Column({default: 1, nullable: false})
     multiplier?: number;
-    
-    @IsBoolean()
-    @Column()
-    snapshottable: boolean;
-    
-    @IsBoolean()
-    @Column()
-    importable: boolean;
 
     @IsBoolean()
     @Column()
-    exportable: boolean;
+    snapshottable: boolean;
 
     @IsBoolean()
     @Column()
     equippable: boolean;
-
-    @Column({default: false})
-    gganbuExcluded?: boolean;
-
-    @IsString()
-    @Column({nullable: true})
-    mapsTo?: string;
 
     @OneToMany(() => SnapshotItemEntity, (snapshotItem) => snapshotItem.material )
     snapshots?: SnapshotItemEntity[];
@@ -88,6 +44,9 @@ export class MaterialEntity {
     @OneToMany(() => SnaplogEntity, (snaplog) => snaplog.material )
     snaplogs?: SnaplogEntity[];
 
-    @OneToMany(() => InventoryEntity, (iitem) => iitem.material )
+    @OneToMany(() => InventoryEntity, (ie) => ie.material )
     inventoryItems?: InventoryEntity[];
+
+    @ManyToOne(() => CollectionFragmentEntity, (fragment) => fragment.materials)
+    collectionFragment: CollectionFragmentEntity;
 }

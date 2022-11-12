@@ -48,6 +48,8 @@ import { ZUserAssetView, ZUserBaitView } from '../src/views'
 import { RecognizedAssetType } from '../src/config/constants'
 import { UserRole } from '../src/common/enums/UserRole'
 import { findRecognizedAsset } from '../src/utils/misc'
+import { CollectionFragmentRoutingEntity } from '../src/collectionfragmentrouting/collectionfragmentrouting.entity'
+import { SyntheticItemLayerEntity } from '../src/syntheticitemlayer/syntheticitemlayer.entity'
 
 config()
 
@@ -64,50 +66,52 @@ async function main() {
             port: Number.parseInt(process.env.TYPEORM_PORT),
             database: process.env.TYPEORM_DATABASE,
             entities: [
-                EmailChangeEntity,
-                MinecraftLinkEntity,
-                KiltSessionEntity,
-                EmailLoginKeyEntity,
-                UserEntity,
-                SnapshotItemEntity,
-                InventoryEntity,
-                TextureEntity,
-                SkinEntity,
-                PlayerScoreEntity,
-                MaterialEntity,
-                GameEntity,
-                GameTypeEntity,
-                AchievementEntity,
-                PlayerAchievementEntity,
-                SecretEntity,
-                AssetEntity,
-                SummonEntity,
-                PlaySessionEntity,
-                PlaySessionStatEntity,
-                GganbuEntity,
-                SnaplogEntity,
-                GameItemTypeEntity,
-                PlayerGameItemEntity,
-                GameScoreTypeEntity,
-                ChainEntity,
-                CollectionEntity,
-                CollectionFragmentEntity,
-                CompositeCollectionFragmentEntity,
-                CompositeAssetEntity,
-                CompositePartEntity,
-                SyntheticPartEntity,
-                SyntheticItemEntity,
-                ResourceInventoryEntity,
-                ResourceInventoryOffsetEntity,
-                ZUserAssetView,
-                MinecraftUserNameEntity,
-                MinecraftUuidEntity,
-                EmailEntity,
-                DidEntity,
-                KiltDappEntity,
-                Oauth2ClientEntity,
-                Oauth2AuthorizationEntity,
-                ZUserBaitView
+                    SyntheticItemLayerEntity,
+                    CollectionFragmentRoutingEntity,
+                    EmailChangeEntity,
+                    MinecraftLinkEntity,
+                    KiltSessionEntity,
+                    EmailLoginKeyEntity,
+                    UserEntity,
+                    SnapshotItemEntity,
+                    InventoryEntity,
+                    TextureEntity,
+                    SkinEntity,
+                    PlayerScoreEntity,
+                    MaterialEntity,
+                    GameEntity,
+                    GameTypeEntity,
+                    AchievementEntity,
+                    PlayerAchievementEntity,
+                    SecretEntity,
+                    AssetEntity,
+                    SummonEntity,
+                    PlaySessionEntity,
+                    PlaySessionStatEntity,
+                    GganbuEntity,
+                    SnaplogEntity,
+                    GameItemTypeEntity,
+                    PlayerGameItemEntity,
+                    GameScoreTypeEntity,
+                    ChainEntity,
+                    CollectionEntity,
+                    CollectionFragmentEntity,
+                    CompositeCollectionFragmentEntity,
+                    CompositeAssetEntity,
+                    CompositePartEntity,
+                    SyntheticPartEntity,
+                    SyntheticItemEntity,
+                    ResourceInventoryEntity,
+                    ResourceInventoryOffsetEntity,
+                    ZUserAssetView,
+                    MinecraftUserNameEntity,
+                    MinecraftUuidEntity,
+                    EmailEntity,
+                    DidEntity,
+                    KiltDappEntity,
+                    Oauth2ClientEntity,
+                    Oauth2AuthorizationEntity,
+                    ZUserBaitView
             ],
             synchronize: false
         })
@@ -132,41 +136,43 @@ async function main() {
 
         const displayname = user?.minecraftUserName ?? user?.gamerTag ?? user?.uuid
         console.log(displayname)
-        // for (let j = 0; j < user.assets.length; j++) {
-        //     const asset = user.assets[j]
-        //     if (asset.pendingIn) {
-        //         continue
-        //     }
+        for (let j = 0; j < user.assets.length; j++) {
+            const asset = user.assets[j]
+            if (asset.pendingIn) {
+                continue
+            }
             
-        //     const assetAddress = asset.collectionFragment.collection.assetAddress
-        //     const assetId = asset.assetId
+            const assetAddress = asset.collectionFragment.collection.assetAddress
+            const assetId = asset.assetId
 
-        //     const recognizedAsset = findRecognizedAsset(fragments, {assetAddress, assetId})
+            const recognizedAsset = findRecognizedAsset(fragments, {assetAddress, assetId})
 
-        //     console.log('    ', assetAddress, assetId, asset.recognizedAssetType)
+            console.log('    ', assetAddress, assetId, asset.recognizedAssetType)
 
-        //     const texture = await connection.manager.getRepository(TextureEntity).findOne({ where: { assetAddress, assetId } })
-        //     if (!!texture) {
-        //         await connection.manager.getRepository(SkinEntity).save(
-        //             { id: SkinEntity.toId(user.uuid, assetAddress, assetId), owner: user, texture }
-        //         )
-        //         console.log('    skin set')
-        //     }
-        //     const rat = recognizedAsset.recognizedAssetType
-        //     const pass = recognizedAsset.gamepass
-        //     if (!asset.recognizedAssetType || (asset.recognizedAssetType.valueOf() !== rat && !!rat)) {
-        //         await connection.manager.getRepository(AssetEntity).update(asset.hash, {recognizedAssetType: rat})
-        //         console.log('    assset type set', rat)
-        //     }
-        // }
+            const texture = await connection.manager.getRepository(TextureEntity).findOne({ where: { assetAddress, assetId } })
+            if (!!texture) {
+                await connection.manager.getRepository(SkinEntity).save(
+                    { id: SkinEntity.toId(user.uuid, assetAddress, assetId), owner: user, texture }
+                )
+                console.log('    skin set')
+            }
+            const rat = recognizedAsset.recognizedAssetType
+            const pass = recognizedAsset.gamepass
+            if (!asset.recognizedAssetType || (asset.recognizedAssetType.valueOf() !== rat && !!rat)) {
+                await connection.manager.getRepository(AssetEntity).update(asset.hash, {recognizedAssetType: rat})
+                console.log('    assset type set', rat)
+            }
+        }
 
-        const recmap = user.assets.map(asset => findRecognizedAsset(fragments, {assetAddress: asset.collectionFragment.collection.assetAddress, assetId: asset.assetId}))
+        const recmap = user.assets.map(asset => findRecognizedAsset(fragments, {assetAddress: asset.collectionFragment.collection.assetAddress, assetId: asset.assetId})) ?? []
         const rec = (recmap.find(cf => cf.gamepass === true))
         const numPassAssets = recmap.reduce((prev, curr) => {return (prev + (curr.gamepass ? 1: 0))}, 0)
         const hasGamePass = rec !== null && rec !== undefined
 
-        console.log('set', displayname, hasGamePass, numPassAssets, hasGamePass ? UserRole.PLAYER: UserRole.NONE)
-        await connection.manager.getRepository(UserEntity).update(user.uuid, {allowedToPlay: hasGamePass, numGamePassAsset: numPassAssets, role: hasGamePass ? UserRole.PLAYER: UserRole.NONE})
+        const isAdmin = user.role?.valueOf() === UserRole.ADMIN.valueOf()
+
+        console.log('set', displayname, hasGamePass, numPassAssets, isAdmin ? UserRole.ADMIN : (hasGamePass ? UserRole.PLAYER: UserRole.NONE))
+        await connection.manager.getRepository(UserEntity).update(user.uuid, {relationsUpdatedAt: new Date(), allowedToPlay: hasGamePass, numGamePassAsset: numPassAssets, role: isAdmin ? UserRole.ADMIN: (hasGamePass ? UserRole.PLAYER: UserRole.NONE)})
 
         // if (user.allowedToPlay !== hasGamePass || !user.role || user.role.valueOf() === UserRole.NONE.valueOf()) {
         //     console.log('set', displayname, hasGamePass, numPassAssets, hasGamePass ? UserRole.PLAYER: UserRole.NONE)

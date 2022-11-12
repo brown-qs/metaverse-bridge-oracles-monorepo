@@ -4,7 +4,7 @@ import { CollectionFragmentEntity } from "../collectionfragment/collectionfragme
 
 
 @Entity()
-@Unique(["inCollectionFragment"])
+@Unique(["inCollectionFragment", "inAssetId"])
 export class CollectionFragmentRoutingEntity {
     @PrimaryGeneratedColumn()
     id: number;
@@ -15,8 +15,14 @@ export class CollectionFragmentRoutingEntity {
     @ManyToOne(() => CollectionFragmentEntity, (en) => en.inRoutes, { nullable: false })
     inCollectionFragment: CollectionFragmentEntity;
 
+    @Column({ type: "integer", nullable: false })
+    inAssetId: number
+
     @ManyToOne(() => CollectionFragmentEntity, (en) => en.inRoutes, { nullable: false })
     outCollectionFragment: CollectionFragmentEntity;
+
+    @Column({ type: "integer", nullable: false })
+    outAssetId: number
 
     @ManyToMany(() => CollectionFragmentEntity, { nullable: true })
     @JoinTable({ name: "collection_fragment_routing_additional_entity" })

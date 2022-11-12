@@ -7,10 +7,10 @@ import AccountPage from './AccountPage';
 import { useSelector } from 'react-redux';
 import { selectAccessToken } from '../state/slices/authSlice';
 import TestPage from './TestPage';
-import SwapPage from './SwapPage';
 import CustomizerPage from './CustomizerPage';
-import ExoAssets from "./exosama/ExoAssets";
-import ExoCustomizer from "./exosama/ExoCustomizer";
+import ExoCustomizer from './exosama/ExoCustomizer';
+import ExoAssets from './exosama/ExoAssets';
+import MigratePage from './MigratePage';
 
 export const Routing = () => {
     const accessToken = useSelector(selectAccessToken)
@@ -20,12 +20,17 @@ export const Routing = () => {
             <Route path="/account" element={!!accessToken ? <AccountPage /> : <Navigate to="/" />} />
             <Route path="/portal" element={!!accessToken ? <ProfilePage /> : <Navigate to="/" />} />
             <Route path="/oauth" element={<HomePage />} />
+            <Route path="/migrate" element={<MigratePage />} />
+
             <Route path="/moonsama/customizer/:chainId/:assetAddress/:assetId" element={<MoonsamaCharacterDesignerPage />} />
             <Route path="/moonsama/customizer" element={<MoonsamaCharacterDesignerPage />} />
             <Route path="/exosama/assets" element={<ExoAssets />} />
             <Route path="/exosama/customizer" element={<ExoCustomizer />} />
-            <Route path="/swap" element={<SwapPage />} />
+
             <Route path="/customizer" element={<CustomizerPage />} />
+            <Route path="/customizer/library" element={<CustomizerPage />} />
+            <Route path="/customizer/library/:librarySection" element={<CustomizerPage />} />
+            <Route path="/customizer/:chainId/:assetAddress/:assetId" element={<CustomizerPage />} />
             <Route path="/test" element={<TestPage />} />
             <Route path="*" element={<Navigate to="/portal" />} />
         </Routes>

@@ -110,6 +110,7 @@ export type BridgedAssetDto = {
     summonable: boolean
     recognizedAssetType: string
     enraptured: boolean
+    gamepass: boolean
     chainId: number
     exportAddress: string
     hash?: string
@@ -180,6 +181,17 @@ export interface CallparamDto {
     signature: string
     hash: string
     confirmed: boolean
+}
+
+export enum TransactionStatus {
+    QUEUED = 'QUEUED',
+    ERROR = 'ERROR',
+    IN_PROGRESS = 'IN_PROGRESS',
+    SUCCESS = 'SUCCESS',
+}
+export interface MigrateResponseDto {
+    transactionStatus: TransactionStatus,
+    transactionHash: string | null
 }
 
 export interface CompositeConfigDto {

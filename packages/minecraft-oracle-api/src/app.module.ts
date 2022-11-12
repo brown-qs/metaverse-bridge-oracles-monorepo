@@ -105,6 +105,14 @@ import { CollectionFragmentRoutingEntity } from './collectionfragmentrouting/col
 import { SyntheticItemLayerModule } from './syntheticitemlayer/syntheticitemlayer.module';
 import { SyntheticItemLayerEntity } from './syntheticitemlayer/syntheticitemlayer.entity';
 import { ZAssetTotalsView } from './views/asset-totals.view';
+import { MigrationLogModule } from './migration-log/migration-log.module';
+import { SummonLogModule } from './summon-log/summon-log.module';
+import { InLogModule } from './in-log/in-log.module';
+import { AuditLogModule } from './audit-log/audit-log.module';
+import { AuditLogEntity } from './audit-log/audit-log.entity';
+import { InLogEntity } from './in-log/in-log.entity';
+import { MigrationLogEntity } from './migration-log/migration-log.entity';
+import { SummonLogEntity } from './summon-log/summon-log.entity';
 
 
 
@@ -184,7 +192,11 @@ import { ZAssetTotalsView } from './views/asset-totals.view';
                     KiltDappEntity,
                     Oauth2ClientEntity,
                     Oauth2AuthorizationEntity,
-                    ZUserBaitView
+                    ZUserBaitView,
+                    AuditLogEntity,
+                    InLogEntity,
+                    MigrationLogEntity,
+                    SummonLogEntity,
                 ],
                 synchronize: configService.get<boolean>('typeorm.synchronize'),
                 logging: configService.get<boolean>('typeorm.logging'),
@@ -255,7 +267,11 @@ import { ZAssetTotalsView } from './views/asset-totals.view';
         DidModule,
         KiltDappModule,
         MoonsamaCqrsModule,
-        SyntheticItemLayerModule
+        SyntheticItemLayerModule,
+        MigrationLogModule,
+        SummonLogModule,
+        InLogModule,
+        AuditLogModule
     ],
     controllers: [],
     providers: []

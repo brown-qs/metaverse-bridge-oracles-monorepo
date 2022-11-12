@@ -10,7 +10,7 @@ import { setBlockNumber } from "../state/slices/blockNumbersSlice";
 import { selectAllTransactions, selectAllTransactionsFromLastDay, setReceipt, shouldCheckTransactionOnBlock, transactionToChainId, TransactionType } from "../state/slices/transactionsSlice";
 import store from "../state";
 import { bridgeApi } from "../state/api/bridgeApi";
-const DEBUG = false
+const DEBUG = true
 export const BlockNumberManager = () => {
     const accessToken = useSelector(selectAccessToken)
     const providersRef = useRef<ethers.providers.JsonRpcProvider[]>([])
@@ -69,8 +69,13 @@ export const BlockNumberManager = () => {
                                                             try {
                                                                 //{ hash: a.bridgeHash, chainId: a.chainId }
                                                                 if (DEBUG) console.log(`BlockNumberManager:: transaction hash: ${transaction.hash} trying to confirm bridgeHash: ${a.bridgeHash}`)
+                                                                if (transaction.migrate === true) {
+                                                                    store.dispatch(bridgeApi.endpoints.migrate.initiate({ hash: a.bridgeHash }) as any)
 
-                                                                store.dispatch(bridgeApi.endpoints.inConfirm.initiate({ hash: a.bridgeHash }) as any)
+                                                                } else {
+                                                                    store.dispatch(bridgeApi.endpoints.inConfirm.initiate({ hash: a.bridgeHash }) as any)
+
+                                                                }
 
                                                             } catch (e) {
 

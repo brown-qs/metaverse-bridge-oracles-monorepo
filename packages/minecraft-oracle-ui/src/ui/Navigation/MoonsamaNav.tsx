@@ -54,11 +54,12 @@ export default function MoonsamaNav() {
 
   const buttons = (
     <>
+      <Button h="50px" variant="moonsamaGhost" onClick={() => { navgiate("/migrate"); onClose() }}>MIGRATE</Button>
       <Button h="50px" variant="moonsamaGhost" onClick={() => { navgiate("/portal"); onClose() }}>PORTAL</Button>
-      <Button as="a" href="https://marketplace.moonsama.com" target="_blank" h="50px" rightIcon={<ChevronUpRight color="#3BEFB8"></ChevronUpRight>} variant="moonsamaGhost">MARKETPLACE</Button>
+      <Button as="a" href="https://marketplace.moonsama.com" target="_blank" h="50px" rightIcon={<ChevronUpRight color="#3BEFB8"></ChevronUpRight>} variant="moonsamaGhost">MARKET</Button>
       <Button as="a" href="https://mcapi.moonsama.com" target="_blank" h="50px" rightIcon={<ChevronUpRight color="#3BEFB8"></ChevronUpRight>} variant="moonsamaGhost">MCAPI</Button>
       <Button as="a" href="https://wiki.moonsama.com" target="_blank" h="50px" rightIcon={<ChevronUpRight color="#3BEFB8"></ChevronUpRight>} variant="moonsamaGhost">DOCS</Button>
-      <Button h="50px" rightIcon={<Brush color="#3BEFB8"></Brush>} variant="moonsamaGhost" onClick={() => { navgiate("/moonsama/customizer"); onClose() }}>CUSTOMIZER</Button>
+      <Button h="50px" rightIcon={<Brush color="#3BEFB8"></Brush>} variant="moonsamaGhost" onClick={() => { navgiate("/customizer"); onClose() }}>CUSTOMIZER</Button>
     </>
   )
   return (
@@ -76,13 +77,14 @@ export default function MoonsamaNav() {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        padding: "8px 16px",
         background: "gray.800",
       }}
-
+      padding="8px 16px"
+      paddingLeft="var(--moonsama-leftright-padding)"
+      paddingRight={{ base: "16px", xl: "var(--moonsama-leftright-padding)" }}
     >
       <HStack cursor={isOauth ? "default" : "pointer"} onClick={() => { if (!isOauth) { navgiate("/portal") } }}>
-        {isLargerThan1300
+        {false && isLargerThan1300
           ?
           <svg width="232" height="23" viewBox="0 0 474 48" fill="none" xmlns="http://www.w3.org/2000/svg"><g clipPath="url(#a)"><path d="M29.334 20.72 9.647.07H0V48h12.926V22.29l16.408 17.167 16.338-17.168V48h12.997V.07h-9.647L29.334 20.72ZM62.758 48h53.881V.202h-53.88V48Zm12.886-35.691h28.029v23.585H75.644V12.309ZM120.648 48h53.881V.202h-53.881V48Zm12.967-35.691h28.028v23.585h-28.028V12.309Zm84.207 15.183L188.427 0h-9.849v48h12.926V20.65L220.899 48h9.849V0h-12.926v27.492Zm30.306-15.183h37.068V.202h-49.984V26.46l37.331 5.537v3.492h-37.746V48h50.672V21.672l-37.341-5.466v-3.897ZM314.956 0l-25.458 38.637V48h58.709v-9.363L322.75 0h-7.794Zm-7.531 34.942 11.357-17.299 11.489 17.3h-22.846Zm74.136-14.222L361.873.07h-9.637V48h12.916V22.29l16.409 17.167 16.347-17.168V48h12.987V.07h-9.636l-19.698 20.65ZM448.175 0h-7.794l-25.437 38.637V48h58.709v-9.363L448.175 0ZM432.86 34.942l11.358-17.299 11.478 17.3H432.86Z" fill="#fff" /></g><defs><clipPath id="a"><path fill="#fff" d="M0 0h473.613v48H0z" /></clipPath></defs></svg>
           :
