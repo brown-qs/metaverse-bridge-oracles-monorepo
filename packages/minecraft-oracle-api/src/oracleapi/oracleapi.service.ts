@@ -47,6 +47,9 @@ import { InjectConnection } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
 import { CollectionFragmentRoutingService } from '../collectionfragmentrouting/collectionfragmentrouting.service';
 import { CollectionFragmentEntity } from '../collectionfragment/collectionfragment.entity';
+import { InLogService } from '../in-log/in-log.service';
+import { MigrationLogService } from '../migration-log/migration-log.service';
+import { SummonLogService } from '../summon-log/summon-log.service';
 
 @Injectable()
 export class OracleApiService {
@@ -74,6 +77,11 @@ export class OracleApiService {
         private readonly resourceInventoryService: ResourceInventoryService,
         private readonly collectionFragmentService: CollectionFragmentService,
         private readonly collectionFragmentRoutingService: CollectionFragmentRoutingService,
+
+        private readonly inLogService: InLogService,
+        private readonly migrationLogService: MigrationLogService,
+        private readonly summonLogService: SummonLogService,
+
 
         private configService: ConfigService,
         @Inject(ProviderToken.ORACLE_WALLET_CALLBACK) private getOracle: TypeOracleWalletProvider,
@@ -235,6 +243,8 @@ export class OracleApiService {
             modifiedAt: new Date(),
             autoMigrate,
         })
+        //log all hashes so we know what user is associated with which bridge hash incase we need to reconstruct
+        await this.inLogService.create({ hash: hash, uuid: user?.uuid, createdAt: new Date() })
         this.logger.debug(`${funcCallPrefix} requestHash: ${requestHash} salt: ${salt} hash: ${hash} request prepared from NEW salt: ${[hash, payload, signature]}`, this.context)
         return { hash, data: payload, signature, confirmed: false }
     }
@@ -443,6 +453,8 @@ export class OracleApiService {
             throw new BadRequestException("Enrapture hasn't finished.")
         }
 
+
+
         const assetEntry = await this.assetService.findOne({ hash }, { relations: ['collectionFragment', 'collectionFragment.collection', 'collectionFragment.collection.chain', 'owner'], loadEagerRelations: true })
 
         if (assetEntry.pendingIn) {
@@ -487,6 +499,14 @@ export class OracleApiService {
             return { transactionStatus: tempAsset.summonTransactionStatus, transactionHash: tempAsset.summonTransactionHash }
         }
 
+        //double check this bridge hash has never been summoned before
+        const existingSummon = await this.migrationLogService.findOne({ bridgeHash: hash })
+        if (!!existingSummon) {
+            this.logger.debug(`${funcCallPrefix} CRITICAL!!! migration summon attempted that was already completed`, this.context)
+            const tempAsset = await this.assetService.findOne({ hash })
+            return { transactionStatus: tempAsset.summonTransactionStatus, transactionHash: tempAsset.summonTransactionHash }
+        }
+
         this.logger.debug(`${funcCallPrefix} Waiting for mutex...`, this.context)
 
         const oracleLock = this.getOrCreateLock(OracleApiService.SUMMON_LOCK_KEY)
@@ -521,6 +541,7 @@ export class OracleApiService {
                 this.logger.debug(`${funcCallPrefix} summon mutex: summon complete`, this.context)
 
                 await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.SUCCESS, summonTransactionHash: receipt.transactionHash, summonedAt: new Date(), modifiedAt: new Date() })
+                await this.migrationLogService.create({ bridgeHash: hash, summonTransactionHash: receipt.transactionHash, createdAt: new Date() })
                 return receipt
             } catch (e) {
                 // console.log(e)
