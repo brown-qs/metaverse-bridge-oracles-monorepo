@@ -30,17 +30,46 @@ export const Transaction = ({ transaction }: { transaction: AllTransactionsType 
     if (transaction.assets.length === 1) {
       ass = 'ASSET'
     }
-    const summary = `${transaction.assets.length} ${ass} ${transaction.migrate ? "MIGRATE" : "IN"} ${transaction.assets[0].assetType} ${transaction.assets[0].assetAddress}`
-    return (
-      <TransactionLink
-        href={getExplorerLink(
-          transaction.assets[0].chainId,
-          transaction.hash,
-          'transaction'
-        )}
-        linkText={`${summary}`}
-      />
-    );
+
+
+    if (transaction.migrate) {
+      const inSummary = `MIGRATION: $POOP IN`
+      const outSummary = `MIGRATION: $SAMA OUT STATUS: ${transaction.migrationStatus?.toUpperCase() ?? "QUEUED"}`
+
+      return (
+        <>
+          <TransactionLink
+            href={getExplorerLink(
+              transaction.assets[0].chainId,
+              transaction.hash,
+              'transaction'
+            )}
+            linkText={`${inSummary}`}
+          />
+          <TransactionLink
+            href={getExplorerLink(
+              ChainId.EXOSAMANETWORK,
+              transaction.outTransactionHash ?? "",
+              'transaction'
+            )}
+            linkText={`${outSummary}`}
+          />
+        </>
+      );
+    } else {
+      const summary = `${transaction.assets.length} ${ass} IN ${transaction.assets[0].assetType} ${transaction.assets[0].assetAddress}`
+      return (
+        <TransactionLink
+          href={getExplorerLink(
+            transaction.assets[0].chainId,
+            transaction.hash,
+            'transaction'
+          )}
+          linkText={`${summary}`}
+        />
+      );
+    }
+
   } else if (transaction.type === TransactionType.Out) {
     let ass = `ASSETS`
     if (transaction.bridgeHashes.length === 1) {

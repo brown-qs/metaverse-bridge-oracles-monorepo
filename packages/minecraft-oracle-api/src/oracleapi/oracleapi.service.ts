@@ -233,7 +233,7 @@ export class OracleApiService {
             collectionFragment,
             createdAt: new Date(),
             modifiedAt: new Date(),
-            autoMigrate
+            autoMigrate,
         })
         this.logger.debug(`${funcCallPrefix} requestHash: ${requestHash} salt: ${salt} hash: ${hash} request prepared from NEW salt: ${[hash, payload, signature]}`, this.context)
         return { hash, data: payload, signature, confirmed: false }
@@ -445,6 +445,11 @@ export class OracleApiService {
 
         const assetEntry = await this.assetService.findOne({ hash }, { relations: ['collectionFragment', 'collectionFragment.collection', 'collectionFragment.collection.chain', 'owner'], loadEagerRelations: true })
 
+        if (assetEntry.pendingIn) {
+            this.logger.debug(`${funcCallPrefix} asset is pending in.`, this.context)
+            throw new BadRequestException("Asset is pending in.")
+        }
+
         if (!assetEntry.autoMigrate) {
             this.logger.debug(`${funcCallPrefix} asset does not has autoMigrate enabled.`, this.context)
             throw new BadRequestException("Only auto migrations are supported right now.")
@@ -515,7 +520,7 @@ export class OracleApiService {
                 receipt = await ((await contract.summon(METAVERSE, assetEntry.assetOwner, migrateRoute.outCollectionFragment.collection.assetAddress, [migrateRoute.outAssetId], [assetEntry.amount], d, { gasPrice: '1000000000', gasLimit: '7000000' })).wait())
                 this.logger.debug(`${funcCallPrefix} summon mutex: summon complete`, this.context)
 
-                await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.SUCCESS, summonTransactionHash: receipt.transactionHash, modifiedAt: new Date() })
+                await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.SUCCESS, summonTransactionHash: receipt.transactionHash, summonedAt: new Date(), modifiedAt: new Date() })
                 return receipt
             } catch (e) {
                 // console.log(e)
