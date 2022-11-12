@@ -3,6 +3,7 @@ import { BaseQueryFn, createApi, FetchArgs, fetchBaseQuery, FetchBaseQueryError 
 import { AppState } from ".."
 import { StandardizedOnChainToken } from "../../utils/graphqlReformatter"
 import { setTokens } from "../slices/authSlice"
+import { setMigrationStatus, setOutTransactionHash } from "../slices/transactionsSlice"
 import { BridgedAssetDto, CallparamDto, CompositeConfigDto, EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse, InBatchRequestDto, InConfirmRequestDto, InConfirmResponseDto, MigrateResponseDto, Oauth2PublicClientDto, OutBatchRequestDto, OutConfirmRequestDto, OutConfirmResponseDto, RecognizedAssetsDto, SkinResponse, SkinSelectRequest, UserProfileResponse } from "./types"
 
 
@@ -127,6 +128,22 @@ export const bridgeApi = createApi({
                 method: "PUT",
                 body
             }),
+            async onQueryStarted(args, { dispatch, queryFulfilled }) {
+                try {
+                    const result = await queryFulfilled;
+                    if (!!result?.data) {
+                        const transactionStatus = result?.data?.transactionStatus
+                        const transactionHash = result?.data?.transactionHash
+                        console.log(`migrate:: bridge hash: ${args.hash} transactionStatus: ${transactionStatus} transactionHash: ${transactionHash}`)
+                        if (!!transactionStatus) {
+                            dispatch(setMigrationStatus({ bridgeHash: args.hash, migrationStatus: transactionStatus }));
+                        }
+                        if (!!transactionHash) {
+                            dispatch(setOutTransactionHash({ bridgeHash: args.hash, outTransactionHash: transactionHash }));
+                        }
+                    }
+                } catch (error) { }
+            }
         }),
         in: builder.mutation<CallparamDto[], InBatchRequestDto>({
             query: (body) => ({

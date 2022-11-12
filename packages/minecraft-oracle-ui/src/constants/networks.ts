@@ -13,7 +13,7 @@ export interface AddEthereumChainParameter {
     iconUrls?: string[]; // Currently ignored.
 }
 
-export const SUPPORTED_METAMASK_NETWORKS: {[key: number]: AddEthereumChainParameter} = {
+export const SUPPORTED_METAMASK_NETWORKS: { [key: number]: AddEthereumChainParameter } = {
     [ChainId.MOONRIVER]: {
         chainId: '0x505',
         chainName: 'Moonriver',
@@ -57,5 +57,17 @@ export const SUPPORTED_METAMASK_NETWORKS: {[key: number]: AddEthereumChainParame
             symbol: 'ETH',
             decimals: 18
         }
+    },
+    [ChainId.EXOSAMANETWORK]: {
+        chainId: '0x83D',
+        chainName: 'Exosama Network',
+        rpcUrls: ['https://rpc.exosama.com'],
+        blockExplorerUrls: ['https://explorer.exosama.com'],
+        nativeCurrency: {
+            name: 'Exosama Network',
+            symbol: 'SAMA',
+            decimals: 18
+        },
+        iconUrls: ["https://raw.githubusercontent.com/nico-ma1/Exosama-Network-Brand/main/sama-token.svg"]
     }
 }

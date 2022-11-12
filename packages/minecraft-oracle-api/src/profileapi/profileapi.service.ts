@@ -82,7 +82,7 @@ export class ProfileApiService {
                 }
                 asset.amount = formatUnits(balance, asset?.collectionFragment?.decimals ?? 18)
 
-                if (!!existingEntry) { 
+                if (!!existingEntry) {
 
                     continue
                 }
@@ -100,6 +100,7 @@ export class ProfileApiService {
                 summonable: false,
                 recognizedAssetType: asset.collectionFragment.recognizedAssetType,
                 enraptured: asset.enraptured,
+                gamepass: asset.collectionFragment.gamepass,
                 chainId: asset.collectionFragment.collection.chainId,
                 exportAddress: asset.assetOwner?.toLowerCase(),
                 multiverseVersion: asset.collectionFragment.collection.multiverseVersion
@@ -116,7 +117,8 @@ export class ProfileApiService {
                 'material.collectionFragment',
                 'material.collectionFragment.collection',
                 'material.collectionFragment.collection.chain'
-            ], where: { owner: { uuid: user.uuid } }, loadEagerRelations: true })
+            ], where: { owner: { uuid: user.uuid } }, loadEagerRelations: true
+        })
 
         const resources: AssetDto[] = inventoryItems.map(item => {
             return {
@@ -130,6 +132,7 @@ export class ProfileApiService {
                 summonable: true,
                 recognizedAssetType: item.material.collectionFragment.recognizedAssetType,
                 enraptured: false,
+                gamepass: false,
                 chainId: item.material.collectionFragment.collection.chainId,
                 exportAddress: undefined,
                 multiverseVersion: MultiverseVersion.V2
