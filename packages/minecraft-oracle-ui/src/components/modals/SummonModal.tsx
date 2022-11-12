@@ -33,6 +33,7 @@ export function SummonModal() {
     React.useEffect(() => {
         if (!isOpen) {
             setSummonAddress(undefined)
+            reset()
         }
     }, [isOpen])
 

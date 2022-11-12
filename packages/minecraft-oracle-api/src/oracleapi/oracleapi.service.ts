@@ -778,10 +778,8 @@ export class OracleApiService {
             this.logger.error(`${funcCallPrefix} user blacklisted`, null, this.context)
             throw new UnprocessableEntityException(`Blacklisted`)
         }
-        const gamepass = this.assetService.findOne({ owner: user, assetOwner: ILike(recipient?.toLowerCase()), collectionFragment: { gamepass: true } })
-        if (!!gamepass) {
-            console.log(JSON.stringify(gamepass))
-        } else {
+        const gamepass = await this.assetService.findOne({ owner: user, assetOwner: ILike(recipient?.toLowerCase()), collectionFragment: { gamepass: true } }, { relations: ["collectionFragment"] })
+        if (!gamepass) {
             this.logger.error(`${funcCallPrefix} no gamepasses associated with recipient.`, null, this.context)
             throw new UnprocessableEntityException(`No gamepasses associated with recipient.`)
         }
@@ -853,9 +851,15 @@ export class OracleApiService {
                     if (!!chainEntity.multiverseV1Address) {
                         contract = new Contract(chainEntity.multiverseV1Address, METAVERSE_ABI, oracle)
                         receipt = await (await contract.summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], { gasPrice: '1000000000', gasLimit: '5000000' })).wait()
+                        try {
+                            await this.summonLogService.create({ uuid: user.uuid, chainId: chainEntity.chainId, assetAddress, assetIds: ids, assetAmounts: amounts, recipient: recipient.toLowerCase(), transactionHash: receipt.transactionHash.toLowerCase(), createdAt: new Date() })
+                        } catch (e) { }
                     } else if (!!chainEntity.multiverseV2Address) {
                         contract = new Contract(chainEntity.multiverseV2Address, METAVERSE_V2_ABI, oracle)
                         receipt = await (await contract.summon(METAVERSE, recipient, assetAddress, ids, amounts, [], { gasPrice: '1000000000', gasLimit: '5000000' })).wait()
+                        try {
+                            await this.summonLogService.create({ uuid: user.uuid, chainId: chainEntity.chainId, assetAddress, assetIds: ids, assetAmounts: amounts, recipient: recipient.toLowerCase(), transactionHash: receipt.transactionHash.toLowerCase(), createdAt: new Date() })
+                        } catch (e) { }
                     } else {
                         this.logger.error(`${funcCallPrefix} failure not find MultiverseAddress`)
                         throw new UnprocessableEntityException('Summon MultiverseAddress error.')
@@ -869,7 +873,6 @@ export class OracleApiService {
 
                     this.logger.log(`${funcCallPrefix} successful summon for user ${user.uuid}`, this.context)
                 } catch (e) {
-                    //console.log(e)
                     this.logger.error(`${funcCallPrefix} failure to summon ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
 
                     await Promise.all(
