@@ -18,9 +18,17 @@ import { CompositeAssetModule } from '../compositeasset/compositeasset.module';
 import { MaterialModule } from '../material/material.module';
 import { ResourceInventoryModule } from '../resourceinventory/resourceinventory.module';
 import { CqrsModule } from '@nestjs/cqrs';
+import { CollectionFragmentRoutingModule } from '../collectionfragmentrouting/collectionfragmentrouting.module';
+import { SummonLogModule } from '../summon-log/summon-log.module';
+import { InLogModule } from '../in-log/in-log.module';
+import { MigrationLogModule } from '../migration-log/migration-log.module';
 
 @Module({
     imports: [
+        SummonLogModule,
+        InLogModule,
+        MigrationLogModule,
+        CollectionFragmentRoutingModule,
         CqrsModule,
         AssetModule,
         UserModule,

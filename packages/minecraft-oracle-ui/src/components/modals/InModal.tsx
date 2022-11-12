@@ -32,6 +32,7 @@ import { StandardizedOnChainTokenWithRecognizedTokenData } from "../../utils/gra
 import { useMutation, useQuery } from "react-query";
 import { assetInTransaction } from "../../hooks/multiverse/useImportAsset";
 import { utils } from "ethers"
+import { BigNumber } from "@ethersproject/bignumber";
 
 export function InModal() {
     const { chainId, account, library } = useActiveWeb3React();
@@ -50,7 +51,8 @@ export function InModal() {
         inTokens.map((tok, i) => ({
             bridgeHash: setInData?.[i]?.hash!,
             ...onChainTokenTokenToInDto(tok, account!, amount ?? "1")
-        }))
+        })),
+        false
     ), [inTokens, library, account, setInData])
 
     const signTransactionMutation = useMutation(async () => {
@@ -140,6 +142,7 @@ export function InModal() {
                 signTransactionMutation.reset()
                 approveMutation.reset()
                 setAmount(undefined)
+                setValue("1")
             }
         }
     }, [isOpen, inTokens, account, isFungible, amount])
@@ -150,6 +153,22 @@ export function InModal() {
         }
 
     }, [approveMutation?.isSuccess, checkApprovalData, isCheckApprovalFetching, isOpen])
+
+    const insufficientBalance: boolean = React.useMemo(() => {
+        if (!!balanceData && !!value) {
+            return utils.parseUnits(value, inTokens?.[0]?.decimals).gt(balanceData)
+        }
+        return false
+    }, [value, balanceData, inTokens])
+
+    const remainingBalance: string = React.useMemo(() => {
+        if (!!balanceData && !!value) {
+            const currentValue = utils.parseUnits(value, inTokens?.[0]?.decimals)
+            const remainder = balanceData.sub(currentValue)
+            return numberFormatter(utils.formatUnits(remainder, inTokens?.[0]?.decimals))
+        }
+        return ""
+    }, [value, balanceData, inTokens])
 
     const baseProps = {
         title: isEnrapture ? "Enrapture" : "Import",
@@ -193,7 +212,7 @@ export function InModal() {
             <ReduxModal
                 {...baseProps}
                 title="Asset Inflow"
-                message="Error: Unable to fetch import params. Please refresh and try again."
+                message={`Error: Unable to fetch import params. Please refresh and try again. ${rtkQueryErrorFormatter(setInError)}`}
                 bottomButtonText="Close"
 
             >
@@ -225,28 +244,42 @@ export function InModal() {
             <VStack spacing="0" w="100%">
                 <Box>Balance: {numberFormatter(utils.formatUnits(balanceData ?? "0", inTokens?.[0]?.decimals))}</Box>
                 <Box h='24px'></Box>
-                <HStack spacing="0" w="100%">
-                    <NumberInput
-                        inputMode="numeric"
-                        w="100%"
-                        defaultValue={1}
-                        precision={0}
-                        min={1}
-                        value={value}
-                        onChange={(val) => setValue(val)}
-                    >
-                        <NumberInputField />
-                        <NumberInputStepper>
-                            <NumberIncrementStepper />
-                            <NumberDecrementStepper />
-                        </NumberInputStepper>
-                    </NumberInput>
+                <HStack spacing="0" w="100%" alignItems="flex-start">
+                    <FormControl>
+                        <NumberInput
+                            isInvalid={insufficientBalance}
+                            inputMode="numeric"
+                            w="100%"
+                            defaultValue={1}
+                            precision={0}
+                            min={1}
+                            value={value}
+                            onChange={(val) => setValue(val)}
+                            onKeyUp={(e) => {
+                                if (e.key === 'Enter') {
+                                    setAmount(utils.parseUnits(value, inTokens?.[0]?.decimals).toString())
+                                }
+                            }}
+                        >
+                            <NumberInputField />
+                            <NumberInputStepper>
+                                <NumberIncrementStepper />
+                                <NumberDecrementStepper />
+                            </NumberInputStepper>
+                        </NumberInput>
+                        {insufficientBalance
+                            ?
+                            <FormHelperText color="red">Insufficient balance.</FormHelperText>
+                            :
+                            <FormHelperText>{remainingBalance} remaining.</FormHelperText>
+                        }
+                    </FormControl>
                     <Box w="16px"></Box>
                     <Button
                         isDisabled={value?.length === 0}
                         //will keep refreshing until approval is recognized
                         onClick={() => {
-                            setAmount(balanceData?.toString() ?? "1")
+                            setValue(utils.formatUnits(balanceData ?? "0", inTokens?.[0]?.decimals).toString())
                         }}
                     >
                         MAX
@@ -255,7 +288,7 @@ export function InModal() {
                 <Box h='24px'></Box>
                 <Button
                     w="100%"
-                    isDisabled={value?.length === 0}
+                    isDisabled={value?.length === 0 || insufficientBalance}
                     //will keep refreshing until approval is recognized
                     onClick={() => {
                         setAmount(utils.parseUnits(value, inTokens?.[0]?.decimals).toString())

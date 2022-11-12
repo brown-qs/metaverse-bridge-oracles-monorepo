@@ -1,17 +1,16 @@
-import { BadRequestException, Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Scope, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '../user/user/user.service';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
 import { TextureService } from '../texture/texture.service';
 import { UserEntity } from '../user/user/user.entity';
 import { GameService } from '../game/game.service';
-import { CALLDATA_EXPIRATION_MS, CALLDATA_EXPIRATION_THRESHOLD, METAVERSE, MultiverseVersion, RecognizedAssetType } from '../config/constants';
+import { CALLDATA_EXPIRATION_MS, ChainId, METAVERSE, MultiverseVersion, TransactionStatus } from '../config/constants';
 import { calculateMetaAssetHash, encodeExportWithSigData, encodeImportOrEnraptureWithSigData, getSalt, getSignature, StandardizedValidatedAssetInParams, standardizeValidateAssetInParams, utf8ToKeccak } from './oracleapi.utils';
 import { BigNumber, Contract, ethers } from 'ethers';
 import { ProviderToken } from '../provider/token';
 import { AssetService } from '../asset/asset.service';
 import { findRecognizedAsset, stringAssetTypeToAssetType } from '../utils';
-import { MetaAsset } from './oracleapi.types';
 import { SummonDto } from './dtos/summon.dto';
 import { AssetEntity } from '../asset/asset.entity';
 import { Mutex, MutexInterface } from 'async-mutex';
@@ -43,15 +42,21 @@ import { METAVERSE_V2_ABI } from '../common/contracts/MetaverseV2';
 import { ChainEntity } from '../chain/chain.entity';
 import { CollectionFragmentService } from '../collectionfragment/collectionfragment.service';
 import { CallparamDto } from './dtos/callparams.dto';
-import { HashAndChainIdDto } from './dtos/hashandchainid.dto';
-import { exist } from 'joi';
-import { InRequestDto } from './dtos/index.dto';
+import { InRequestDto, MigrateResponseDto } from './dtos/index.dto';
+import { InjectConnection } from '@nestjs/typeorm';
+import { Connection, ILike } from 'typeorm';
+import { CollectionFragmentRoutingService } from '../collectionfragmentrouting/collectionfragmentrouting.service';
+import { CollectionFragmentEntity } from '../collectionfragment/collectionfragment.entity';
+import { InLogService } from '../in-log/in-log.service';
+import { MigrationLogService } from '../migration-log/migration-log.service';
+import { SummonLogService } from '../summon-log/summon-log.service';
 
 @Injectable()
 export class OracleApiService {
 
     private locks: Map<string, MutexInterface>;
 
+    public static readonly SUMMON_LOCK_KEY = 'oracle_summon'
     private readonly context: string;
     private readonly oraclePrivateKey: string;
     private readonly defaultChainId: number;
@@ -71,10 +76,19 @@ export class OracleApiService {
         private readonly materialService: MaterialService,
         private readonly resourceInventoryService: ResourceInventoryService,
         private readonly collectionFragmentService: CollectionFragmentService,
+        private readonly collectionFragmentRoutingService: CollectionFragmentRoutingService,
+
+        private readonly inLogService: InLogService,
+        private readonly migrationLogService: MigrationLogService,
+        private readonly summonLogService: SummonLogService,
+
+
         private configService: ConfigService,
         @Inject(ProviderToken.ORACLE_WALLET_CALLBACK) private getOracle: TypeOracleWalletProvider,
         @Inject(ProviderToken.RECOGNIZED_CHAIN_ASSETS_CALLBACK) private getRecognizedAsset: TypeRecognizedChainAssetsProvider,
-        @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
+        @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger,
+        @InjectConnection() private connection: Connection,
+
     ) {
         this.context = OracleApiService.name
         this.locks = new Map();
@@ -82,8 +96,8 @@ export class OracleApiService {
         this.defaultChainId = this.configService.get<number>('network.defaultChainId')
     }
 
-    public async inRequest(data: InRequestDto, user?: UserEntity): Promise<CallparamDto> {
-        const funcCallPrefix = `[${makeid(5)}] inRequest:: uuid: ${user?.uuid}`
+    public async inRequest(data: InRequestDto, autoMigrate: boolean, user?: UserEntity): Promise<CallparamDto> {
+        const funcCallPrefix = `[${makeid(5)}] inRequest:: uuid: ${user?.uuid} autoMigrate: ${autoMigrate}`
         this.logger.debug(`${funcCallPrefix} START ImportDto: ${JSON.stringify(data)}`, this.context)
 
         let enraptureCollectionFrag = findRecognizedAsset(await this.getRecognizedAsset(data.chainId, BridgeAssetType.ENRAPTURED), { assetAddress: data.assetAddress, assetId: String(data.assetId) });
@@ -111,6 +125,25 @@ export class OracleApiService {
             throw new UnprocessableEntityException(`Not permissioned asset`)
         }
 
+        if (autoMigrate && !collectionFragment.enrapturable) {
+            this.logger.error(`${funcCallPrefix} cannot auto migrate a non-enrapturable asset`, null, this.context)
+            throw new UnprocessableEntityException(`Cannot migrate a non-enrapturable asset`)
+        }
+
+        if (autoMigrate && !collectionFragment.migratable) {
+            this.logger.error(`${funcCallPrefix} asset is not migratable`, null, this.context)
+            throw new UnprocessableEntityException(`Asset is not migratable`)
+        }
+
+        if (autoMigrate) {
+            const migrateRoute = await this.collectionFragmentRoutingService.findOne({ inCollectionFragment: collectionFragment, inAssetId: data.assetId })
+
+            if (!migrateRoute) {
+                this.logger.debug(`${funcCallPrefix} couldn't find migrate route for collection fragment id: ${collectionFragment?.id} asset id: ${data.assetId}`, this.context)
+                throw new BadRequestException("No migrate route.")
+            }
+        }
+
         const chainId = collectionFragment.collection.chainId
         const enraptured = collectionFragment.enrapturable === true
         this.logger.debug(`${funcCallPrefix} chainId: ${chainId} enraptured: ${String(enraptured)}`, this.context)
@@ -128,11 +161,20 @@ export class OracleApiService {
         }
 
         const multiverseVersion = collectionFragment.collection.multiverseVersion
+
+        if (multiverseVersion === MultiverseVersion.V1 && !collectionFragment.collection.chain.multiverseV1Address) {
+            this.logger.debug(`${funcCallPrefix} no multiverse address set.`, this.context)
+            throw new BadRequestException("No multiverse address set.")
+        } else if (multiverseVersion === MultiverseVersion.V2 && !collectionFragment.collection.chain.multiverseV2Address) {
+            this.logger.debug(`${funcCallPrefix} no multiverse address set.`, this.context)
+            throw new BadRequestException("No multiverse address set.")
+        }
+
         const oracle = await this.getOracle(chainId)
         const requestHash = await utf8ToKeccak(JSON.stringify(standardizedParams))
         this.logger.debug(`${funcCallPrefix} requestHash: ${requestHash}`, this.context)
 
-        const assetEntry = await this.assetService.findOne({ requestHash, collectionFragment, enraptured, pendingIn: true, owner: (!!user ? user : null) }, { order: { expiration: 'DESC' }, relations: ['owner', 'collectionFragment'] })
+        const assetEntry = await this.assetService.findOne({ autoMigrate, requestHash, collectionFragment, enraptured, pendingIn: true, owner: (!!user ? user : null) }, { order: { expiration: 'DESC' }, relations: ['owner', 'collectionFragment'] })
 
         if (!!assetEntry) {
             this.logger.debug(`${funcCallPrefix} has existing entry`, this.context)
@@ -198,8 +240,11 @@ export class OracleApiService {
             recognizedAssetType: collectionFragment.recognizedAssetType,
             collectionFragment,
             createdAt: new Date(),
-            modifiedAt: new Date()
+            modifiedAt: new Date(),
+            autoMigrate,
         })
+        //log all hashes so we know what user is associated with which bridge hash incase we need to reconstruct
+        await this.inLogService.create({ hash: hash, uuid: user?.uuid, createdAt: new Date() })
         this.logger.debug(`${funcCallPrefix} requestHash: ${requestHash} salt: ${salt} hash: ${hash} request prepared from NEW salt: ${[hash, payload, signature]}`, this.context)
         return { hash, data: payload, signature, confirmed: false }
     }
@@ -209,7 +254,7 @@ export class OracleApiService {
         const funcCallPrefix = `[${makeid(5)}] inConfirm:: hash: ${hash} uuid: ${user?.uuid}`
         this.logger.debug(`${funcCallPrefix} START`, this.context)
 
-        const assetEntry = await this.assetService.findOne({ hash }, { relations: ['collectionFragment', 'collectionFragment.collection', 'collectionFragment.collection.chain', 'owner'], loadEagerRelations: true })
+        const assetEntry = await this.assetService.findOne({ hash }, { relations: ['owner', 'collectionFragment', 'collectionFragment.collection', 'collectionFragment.collection.chain'], loadEagerRelations: true })
 
         try {
             this.confirmAssetEntry(assetEntry, hash, user)
@@ -350,7 +395,6 @@ export class OracleApiService {
         })()
 
 
-        // TODO disgustang
         if (!!owner) {
             if (assetEntry.collectionFragment.treatAsFungible === true) {
                 const cid = ResourceInventoryService.calculateId({ chainId: chainEntity.chainId, assetAddress, assetId, uuid: owner.uuid })
@@ -399,6 +443,125 @@ export class OracleApiService {
 
 
 
+    public async migrate(hash: string, user?: UserEntity): Promise<MigrateResponseDto> {
+        const funcCallPrefix = `[${makeid(5)}] migrate:: hash: ${hash} uuid: ${user?.uuid}`
+        this.logger.debug(`${funcCallPrefix} START`, this.context)
+
+        const enraptureFinished = await this.inConfirm(hash, user)
+        if (!enraptureFinished) {
+            this.logger.debug(`${funcCallPrefix} Enrapture hasn't finished`, this.context)
+            throw new BadRequestException("Enrapture hasn't finished.")
+        }
+
+
+
+        const assetEntry = await this.assetService.findOne({ hash }, { relations: ['collectionFragment', 'collectionFragment.collection', 'collectionFragment.collection.chain', 'owner'], loadEagerRelations: true })
+
+        if (assetEntry.pendingIn) {
+            this.logger.debug(`${funcCallPrefix} asset is pending in.`, this.context)
+            throw new BadRequestException("Asset is pending in.")
+        }
+
+        if (!assetEntry.autoMigrate) {
+            this.logger.debug(`${funcCallPrefix} asset does not has autoMigrate enabled.`, this.context)
+            throw new BadRequestException("Only auto migrations are supported right now.")
+        }
+
+        if (!assetEntry.enraptured) {
+            this.logger.debug(`${funcCallPrefix} asset is not enraptured.`, this.context)
+            throw new BadRequestException("Only enraptured assets can be migrated.")
+        }
+
+        const migrateRoute = await this.collectionFragmentRoutingService.findOne({ inCollectionFragment: assetEntry.collectionFragment, inAssetId: parseInt(assetEntry.assetId) }, { relations: ['outCollectionFragment', 'outCollectionFragment.collection', 'outCollectionFragment.collection.chain'], loadEagerRelations: true })
+
+        if (!migrateRoute) {
+            this.logger.debug(`${funcCallPrefix} couldn't find migration route for collection fragment id: ${assetEntry?.collectionFragment?.id} asset id: ${assetEntry.assetId}`, this.context)
+            throw new BadRequestException("No migration route.")
+        }
+
+        this.logger.debug(`${funcCallPrefix} migration route: ${assetEntry.collectionFragment.collection.assetAddress} #${assetEntry.assetId} > ${migrateRoute.outCollectionFragment.collection.assetAddress} #${migrateRoute.outAssetId}`, this.context)
+
+
+        if (assetEntry.summonTransactionStatus !== null) {
+            this.logger.debug(`${funcCallPrefix} summon seems to already have started. Transaction status: ${assetEntry.summonTransactionStatus}`, this.context)
+            return { transactionStatus: assetEntry.summonTransactionStatus, transactionHash: assetEntry.summonTransactionHash }
+        }
+
+        //make sure summon is done only once, pray to god typeorm doesn't fuck us over here. According to typeorm affected is only supported on some db drivers, postgres seems to have it
+        const { affected } = await this.assetService.update({ hash, summonTransactionStatus: null }, { summonTransactionStatus: TransactionStatus.QUEUED })
+        if (affected === 1) {
+
+            await this.assetService.update({ hash }, { modifiedAt: new Date() })
+            this.logger.debug(`${funcCallPrefix} updating transaction status 1 row affected, proceeding with summon.`, this.context)
+        } else {
+            this.logger.debug(`${funcCallPrefix} affected ${affected}, NOT summoning.`, this.context)
+            const tempAsset = await this.assetService.findOne({ hash })
+            return { transactionStatus: tempAsset.summonTransactionStatus, transactionHash: tempAsset.summonTransactionHash }
+        }
+
+        //double check this bridge hash has never been summoned before
+        const existingSummon = await this.migrationLogService.findOne({ bridgeHash: hash })
+        if (!!existingSummon) {
+            this.logger.debug(`${funcCallPrefix} CRITICAL!!! migration summon attempted that was already completed`, this.context)
+            const tempAsset = await this.assetService.findOne({ hash })
+            return { transactionStatus: tempAsset.summonTransactionStatus, transactionHash: tempAsset.summonTransactionHash }
+        }
+
+        this.logger.debug(`${funcCallPrefix} Waiting for mutex...`, this.context)
+
+        const oracleLock = this.getOrCreateLock(OracleApiService.SUMMON_LOCK_KEY)
+
+        await oracleLock.runExclusive(async () => {
+            this.logger.debug(`${funcCallPrefix} summon mutex: start`, this.context)
+
+            const assetForCheck = await this.assetService.findOne({ hash })
+
+
+            if (assetForCheck.summonTransactionStatus !== TransactionStatus.QUEUED) {
+                this.logger.debug(`${funcCallPrefix} summon mutex: doesnt pass sanity check, transaction is not Queued current status: ${assetForCheck.summonTransactionStatus}`, this.context)
+                return
+            }
+
+            const chainEntity = migrateRoute.outCollectionFragment.collection.chain
+            const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
+            const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
+
+            let contract = new Contract(chainEntity.multiverseV2Address, METAVERSE_V2_ABI, oracle)
+
+            let receipt
+            try {
+                this.logger.debug(`${funcCallPrefix} summon mutex: start summon...`, this.context)
+
+                await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.IN_PROGRESS, modifiedAt: new Date() })
+
+                //Should we populate data with enraptured asset bridge hash for safety???
+                const d: any = []
+                // console.log(METAVERSE, assetEntry.assetOwner, migrateRoute.outCollectionFragment.collection.assetAddress, [migrateRoute.outAssetId], [assetEntry.amount], d)
+                receipt = await ((await contract.summon(METAVERSE, assetEntry.assetOwner, migrateRoute.outCollectionFragment.collection.assetAddress, [migrateRoute.outAssetId], [assetEntry.amount], d, { gasPrice: '1000000000', gasLimit: '7000000' })).wait())
+                this.logger.debug(`${funcCallPrefix} summon mutex: summon complete`, this.context)
+
+                await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.SUCCESS, summonTransactionHash: receipt.transactionHash.toLowerCase(), summonedAt: new Date(), modifiedAt: new Date() })
+                await this.migrationLogService.create({ bridgeHash: hash, summonTransactionHash: receipt.transactionHash.toLowerCase(), createdAt: new Date() })
+                return receipt
+            } catch (e) {
+                // console.log(e)
+                this.logger.error(`${funcCallPrefix} summon mutex: error`, e, this.context)
+                await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.ERROR, modifiedAt: new Date() })
+            }
+
+            /*
+            user.lastUsedAddress = recipient.toLowerCase()
+            if (!user.usedAddresses.includes(user.lastUsedAddress)) {
+                user.usedAddresses.push(user.lastUsedAddress)
+            }
+            await this.userService.update(user.uuid, { usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress })*/
+        })
+
+        const returnAsset = await this.assetService.findOne({ hash })
+        return { transactionStatus: returnAsset.summonTransactionStatus, transactionHash: returnAsset.summonTransactionHash }
+    }
+
+
     public async outRequest(hash: string, user?: UserEntity): Promise<CallparamDto> {
         const funcCallPrefix = `[${makeid(5)}] outRequest:: hash: ${hash} uuid: ${user?.uuid}`
         this.logger.debug(`${funcCallPrefix} START`, this.context)
@@ -435,10 +598,16 @@ export class OracleApiService {
         }
 
 
-
-
-
         const multiverseVersion = assetEntry.collectionFragment.collection.multiverseVersion
+
+        if (multiverseVersion === MultiverseVersion.V1 && !assetEntry.collectionFragment.collection.chain.multiverseV1Address) {
+            this.logger.debug(`${funcCallPrefix} no multiverse address set.`, this.context)
+            throw new BadRequestException("No multiverse address set.")
+        } else if (multiverseVersion === MultiverseVersion.V2 && !assetEntry.collectionFragment.collection.chain.multiverseV2Address) {
+            this.logger.debug(`${funcCallPrefix} no multiverse address set.`, this.context)
+            throw new BadRequestException("No multiverse address set.")
+        }
+
         const salt = await getSalt()
         const expiration = Date.now() + CALLDATA_EXPIRATION_MS
         const expirationContract = (Math.floor(expiration / 1000)).toString()
@@ -596,27 +765,31 @@ export class OracleApiService {
 
 
     public async userSummonRequest(user: UserEntity, { recipient, chainId }: SummonDto): Promise<boolean> {
-        this.logger.debug(`userSummonRequest user ${user.uuid} to ${recipient} ID is ${chainId}`, this.context)
+        const funcId = makeid(5)
+        const funcCallPrefix = `[${funcId}] userSummonRequest:: uuid: ${user?.uuid}`
+        this.logger.debug(`${funcCallPrefix} to ${recipient}`, this.context)
 
         if (!recipient || recipient.length !== 42 || !recipient.startsWith('0x')) {
-            this.logger.error(`Summon: recipient invalid: ${recipient}}`, null, this.context)
+            this.logger.error(`${funcCallPrefix} recipient invalid: ${recipient}}`, null, this.context)
             throw new UnprocessableEntityException('Recipient invalid')
         }
 
         if (user.blacklisted) {
-            this.logger.error(`userSummonRequest: user blacklisted`, null, this.context)
+            this.logger.error(`${funcCallPrefix} user blacklisted`, null, this.context)
             throw new UnprocessableEntityException(`Blacklisted`)
         }
+        const gamepass = await this.assetService.findOne({ owner: user, assetOwner: ILike(recipient?.toLowerCase()), collectionFragment: { gamepass: true } }, { relations: ["collectionFragment"] })
+        if (!gamepass) {
+            this.logger.error(`${funcCallPrefix} no gamepasses associated with recipient.`, null, this.context)
+            throw new UnprocessableEntityException(`No gamepasses associated with recipient.`)
+        }
 
-        this.ensureLock('oracle_summon')
-        const oracleLock = this.locks.get('oracle_summon')
+        const inventoryItems = await this.inventoryService.findMany({ relations: ['owner', 'material', 'material.collectionFragment', 'material.collectionFragment.collection'], where: { owner: { uuid: user.uuid }, summonInProgress: false }, loadEagerRelations: true })
 
-        const snapshots = await this.inventoryService.findMany({ relations: ['owner', 'material'], where: { owner: { uuid: user.uuid }, summonInProgress: false } })
+        if (!inventoryItems || inventoryItems.length === 0) {
+            const inventoryItemsSummonInProgress = await this.inventoryService.findMany({ relations: ['owner'], where: { owner: { uuid: user.uuid }, summonInProgress: true } })
 
-        if (!snapshots || snapshots.length === 0) {
-            const snapshots2 = await this.inventoryService.findMany({ relations: ['owner'], where: { owner: { uuid: user.uuid }, summonInProgress: true } })
-
-            if (!snapshots2 || snapshots2.length === 0) {
+            if (!inventoryItemsSummonInProgress || inventoryItemsSummonInProgress.length === 0) {
                 return false
             } else {
                 return true
@@ -624,70 +797,83 @@ export class OracleApiService {
         }
 
         await Promise.all(
-            snapshots.map(async (snap) => {
-                snap.summonInProgress = true
-                await this.inventoryService.update(snap.id, { summonInProgress: snap.summonInProgress })
+            inventoryItems.map(async (item) => {
+                item.summonInProgress = true
+                await this.inventoryService.update(item.id, { summonInProgress: item.summonInProgress })
             })
         )
+
+        const oracleLock = this.getOrCreateLock(OracleApiService.SUMMON_LOCK_KEY)
 
         const res = await oracleLock.runExclusive(async () => {
 
             // safety vibe check
-            if (!snapshots[0].summonInProgress) {
-                this.logger.warn(`Summon: summonInProgress vibe check fail for ${user.uuid}`, this.context)
+            if (!inventoryItems[0].summonInProgress) {
+                this.logger.warn(`${funcCallPrefix} vibe check fail for ${user.uuid}`, this.context)
                 return false
             }
 
-            const groups: { [key: string]: { ids: string[], amounts: string[], entities: InventoryEntity[] } } = {}
-            snapshots.map(snapshot => {
-                const amount = (snapshot.material.multiplier ?? 1) * Number.parseFloat(snapshot.amount)
-                const assetAddress = snapshot.material.assetAddress.toLowerCase()
+            const groups: { [key: string]: { ids: string[], amounts: string[], chainId: number, entities: InventoryEntity[] } } = {}
+            inventoryItems.map(item => {
+                const amount = (item.material?.multiplier ?? 1) * Number.parseFloat(item.amount)
+                const assetAddress = item.material?.collectionFragment?.collection?.assetAddress?.toLowerCase()
                 if (!(assetAddress in groups)) {
                     groups[assetAddress] = {
                         ids: [],
                         amounts: [],
-                        entities: []
+                        entities: [],
+                        chainId: ChainId.EXOSAMANETWORK
                     }
                 }
                 groups[assetAddress]['amounts'].push(ethers.utils.parseEther(amount.toString()).toString())
-                groups[assetAddress]['ids'].push(snapshot.material.assetId)
-                groups[assetAddress]['entities'].push(snapshot)
+                groups[assetAddress]['ids'].push(item.material.assetId)
+                groups[assetAddress]['entities'].push(item)
+                groups[assetAddress]['chainId'] = item.material.collectionFragment.collection.chainId
             })
 
             const addresses = Object.keys(groups)
 
-            const chainEntity = await this.chainService.findOne({ chainId })
-            const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
-            const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
-
-            let contract: Contract;
-            if (chainEntity.multiverseV1Address)
-                contract = new Contract(chainEntity.multiverseV1Address, METAVERSE_ABI, oracle)
-            else {
-                this.logger.error(`Summon: failiure not find MultiverseAddress`)
-                throw new UnprocessableEntityException('Summon MultiverseAddress error.')
-            }
-
             for (let i = 0; i < addresses.length; i++) {
                 try {
-
                     const ids = groups[addresses[i]].ids
                     const amounts = groups[addresses[i]].amounts
+                    const assetChainId = groups[addresses[i]].chainId
+                    const assetAddress = addresses[i]
                     //console.log({METAVERSE, recipient, ids, amounts, i})
                     // console.log("SummonResult",this.metaverseChain[chainId])
 
-                    const receipt = await ((await contract.summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], { value: 0, gasPrice: '3000000000', gasLimit: '1000000' })).wait())
+                    const chainEntity = await this.chainService.findOne({ chainId: assetChainId })
+                    const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
+                    const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
+
+                    let contract: Contract;
+                    let receipt: any
+                    if (!!chainEntity.multiverseV1Address) {
+                        contract = new Contract(chainEntity.multiverseV1Address, METAVERSE_ABI, oracle)
+                        receipt = await (await contract.summonFromMetaverse(METAVERSE, recipient, ids, amounts, [], { gasPrice: '1000000000', gasLimit: '5000000' })).wait()
+                        try {
+                            await this.summonLogService.create({ uuid: user.uuid, summonSession: funcId, chainId: chainEntity.chainId, assetAddress, assetIds: ids, assetAmounts: amounts, recipient: recipient.toLowerCase(), transactionHash: receipt.transactionHash.toLowerCase(), createdAt: new Date() })
+                        } catch (e) { }
+                    } else if (!!chainEntity.multiverseV2Address) {
+                        contract = new Contract(chainEntity.multiverseV2Address, METAVERSE_V2_ABI, oracle)
+                        receipt = await (await contract.summon(METAVERSE, recipient, assetAddress, ids, amounts, [], { gasPrice: '1000000000', gasLimit: '5000000' })).wait()
+                        try {
+                            await this.summonLogService.create({ uuid: user.uuid, summonSession: funcId, chainId: chainEntity.chainId, assetAddress, assetIds: ids, assetAmounts: amounts, recipient: recipient.toLowerCase(), transactionHash: receipt.transactionHash.toLowerCase(), createdAt: new Date() })
+                        } catch (e) { }
+                    } else {
+                        this.logger.error(`${funcCallPrefix} failure not find MultiverseAddress`)
+                        throw new UnprocessableEntityException('Summon MultiverseAddress error.')
+                    }
 
                     try {
                         await this.inventoryService.removeAll(groups[addresses[i]].entities)
                     } catch (e) {
-                        this.logger.error(`Summon: failiure to remove entities, ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
+                        this.logger.error(`${funcCallPrefix} failure to remove entities, ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
                     }
 
-                    this.logger.log(`Summon: successful summon for user ${user.uuid}`, this.context)
+                    this.logger.log(`${funcCallPrefix} successful summon for user ${user.uuid}`, this.context)
                 } catch (e) {
-                    //console.log(e)
-                    this.logger.error(`Summon: failiure to summon ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
+                    this.logger.error(`${funcCallPrefix} failure to summon ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
 
                     await Promise.all(
                         groups[addresses[i]].entities.map(async (snap) => {
@@ -741,6 +927,7 @@ export class OracleApiService {
         }
     }
 
+
     private getContract(multiverseVersion: MultiverseVersion, chainEntity: ChainEntity, oracle: ethers.Wallet): Contract {
         if (multiverseVersion === MultiverseVersion.V1) {
             if (chainEntity.multiverseV1Address) {
@@ -763,13 +950,12 @@ export class OracleApiService {
         }
     }
 
-    private ensureLock(key: string) {
+    private getOrCreateLock(key: string) {
         if (!this.locks.has(key)) {
             this.locks.set(key, new Mutex());
         }
+        return this.locks.get(key)
     }
-
-
 }
 
 function makeid(length: number): string {

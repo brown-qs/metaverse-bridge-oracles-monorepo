@@ -3,7 +3,7 @@ import { NewAsset } from "../hooks/marketplace/types";
 import { MultiverseVersion } from "../state/api/types";
 import { StandardizedMetadata } from "../utils/graphqlReformatter";
 import { StringAssetType } from "../utils/subgraph";
-
+import PoopImage from "../assets/images/poop.svg"
 export const CHAIN_ID = parseInt(process.env.REACT_APP_CHAIN_ID ?? '1285', 10);
 
 export const SUBGRAPH_URL =
@@ -41,24 +41,27 @@ export enum ChainId {
   EWC = 246,
   VOLTA = 73799,
   MOONRIVER = 1285,
-  MOONBEAM = 1284
+  MOONBEAM = 1284,
+  EXOSAMANETWORK = 2109,
 }
 
-export const PERMISSIONED_CHAINS = [ChainId.MOONRIVER, ChainId.MOONBEAM, ChainId.MAINNET]
+export const PERMISSIONED_CHAINS = [ChainId.EXOSAMANETWORK, ChainId.MAINNET, ChainId.MOONBEAM, ChainId.MOONRIVER]
 export const DEFAULT_CHAIN = ChainId.MOONRIVER
 
 export const RPC_URLS: { [chainId: number]: string } = {
   [ChainId.MOONRIVER]: 'https://rpc.api.moonriver.moonbeam.network',
   [ChainId.MOONBEAM]: 'https://moonbeam-rpc.moonsama.com',
   [ChainId.MAINNET]: 'https://cloudflare-eth.com',
-  [ChainId.ROPSTEN]: 'https://ropsten.infura.io/v3/'
+  [ChainId.ROPSTEN]: 'https://ropsten.infura.io/v3/',
+  [ChainId.EXOSAMANETWORK]: 'https://rpc.exosama.com'
 };
 
 export const NATIVE_TOKEN_SYMBOL: { [chainId: number]: string } = {
   [ChainId.MOONRIVER]: 'MOVR',
   [ChainId.MOONBEAM]: 'GLMR',
   [ChainId.MAINNET]: 'ETH',
-  [ChainId.ROPSTEN]: 'ETH'
+  [ChainId.ROPSTEN]: 'ETH',
+  [ChainId.EXOSAMANETWORK]: 'SAMA'
 };
 
 export const NETWORK_NAME: { [chainId: number]: string } = {
@@ -66,6 +69,7 @@ export const NETWORK_NAME: { [chainId: number]: string } = {
   [ChainId.MOONBEAM]: 'Moonbeam',
   [ChainId.MAINNET]: 'Ethereum',
   [ChainId.ROPSTEN]: 'Ropsten',
+  [ChainId.EXOSAMANETWORK]: 'Exosama Network',
 };
 
 export const MULTICALL_NETWORKS: { [chainId: number]: string } = {
@@ -76,7 +80,8 @@ export const MULTICALL_NETWORKS: { [chainId: number]: string } = {
   [ChainId.GÖRLI]: '0x77dCa2C955b15e9dE4dbBCf1246B4B85b651e50e',
   [ChainId.VOLTA]: '0xf097d0eAb2dC8B6396a6433978567C443a691815', // latest multicall 2 deployments
   [ChainId.MOONRIVER]: '0x8B60499C8e99d1218Df15ba6e8f0937e1878b86c', // latest multicall 2 deployments
-  [ChainId.MOONBEAM]: '0x7A88A713F806073e0027179E2DfeD4100b888F25' // latest multicall v2
+  [ChainId.MOONBEAM]: '0x7A88A713F806073e0027179E2DfeD4100b888F25', // latest multicall v2
+  [ChainId.EXOSAMANETWORK]: '0x24177dbba8b87d61c0aae341202b7dc5e772fea1',
 };
 
 export enum SUPPORTED_CONTRACTS {
@@ -92,7 +97,8 @@ export const MARKETPLACE_V1_ADDRESS: { [chainId in ChainId]?: string } = {
 export const WAREHOUSE_ADDRESS: { [chainId in ChainId]?: string } = {
   [ChainId.VOLTA]: '0xE796e4CC54856b5d88E44aAca85e3B7D633c34a1',
   [ChainId.MOONRIVER]: '0xe41509E3034f3f1C7Ea918423Da60B2bA6F14087',
-  [ChainId.MOONBEAM]: '0x108E9B2BFB98402208E4172f5045BF605F148eEb'
+  [ChainId.MOONBEAM]: '0x108E9B2BFB98402208E4172f5045BF605F148eEb',
+  [ChainId.EXOSAMANETWORK]: '0x108E9B2BFB98402208E4172f5045BF605F148eEb'
 };
 
 export const RECOGNIZED_COLLECTIONS_ADDRESS: { [chainId in ChainId]?: string } =
@@ -110,7 +116,8 @@ export const WMOVR_ADDRESS: { [chainId in ChainId]?: string } = {
 export const EXPLORER_URL: { [chainId in ChainId]?: string } = {
   [ChainId.VOLTA]: 'https://volta-explorer.energyweb.org',
   [ChainId.MOONRIVER]: 'https://moonriver.moonscan.io/',
-  [ChainId.MOONBEAM]: 'https://moonbeam.moonscan.io/'
+  [ChainId.MOONBEAM]: 'https://moonbeam.moonscan.io/',
+  [ChainId.EXOSAMANETWORK]: 'https://explorer.exosama.com/'
 };
 
 export const MULTIVERSE_BRIDGE_V1_ADDRESS: { [chainId in ChainId]?: string } = {
@@ -289,7 +296,8 @@ export const RARESAMA_POOP: StandardizedMetadata & { assetType: StringAssetType 
   assetId: 0,
   metadata: {
     name: "$POOP",
-    image: "https://static.moonsama.com/static/poop.svg"
+    //image: "https://static.moonsama.com/static/poop.svg"
+    image: PoopImage
   }
 }
 
@@ -299,7 +307,7 @@ export const SHIT_FART: StandardizedMetadata & { assetType: StringAssetType } = 
   assetId: 0,
   metadata: {
     name: "$SFT",
-    image: "https://static.moonsama.com/static/poop.svg"
+    image: PoopImage
   }
 }
 
