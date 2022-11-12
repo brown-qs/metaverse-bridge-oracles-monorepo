@@ -44,7 +44,7 @@ import { CollectionFragmentService } from '../collectionfragment/collectionfragm
 import { CallparamDto } from './dtos/callparams.dto';
 import { InRequestDto, MigrateResponseDto } from './dtos/index.dto';
 import { InjectConnection } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
+import { Connection, ILike } from 'typeorm';
 import { CollectionFragmentRoutingService } from '../collectionfragmentrouting/collectionfragmentrouting.service';
 import { CollectionFragmentEntity } from '../collectionfragment/collectionfragment.entity';
 import { InLogService } from '../in-log/in-log.service';
@@ -540,8 +540,8 @@ export class OracleApiService {
                 receipt = await ((await contract.summon(METAVERSE, assetEntry.assetOwner, migrateRoute.outCollectionFragment.collection.assetAddress, [migrateRoute.outAssetId], [assetEntry.amount], d, { gasPrice: '1000000000', gasLimit: '7000000' })).wait())
                 this.logger.debug(`${funcCallPrefix} summon mutex: summon complete`, this.context)
 
-                await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.SUCCESS, summonTransactionHash: receipt.transactionHash, summonedAt: new Date(), modifiedAt: new Date() })
-                await this.migrationLogService.create({ bridgeHash: hash, summonTransactionHash: receipt.transactionHash, createdAt: new Date() })
+                await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.SUCCESS, summonTransactionHash: receipt.transactionHash.toLowerCase(), summonedAt: new Date(), modifiedAt: new Date() })
+                await this.migrationLogService.create({ bridgeHash: hash, summonTransactionHash: receipt.transactionHash.toLowerCase(), createdAt: new Date() })
                 return receipt
             } catch (e) {
                 // console.log(e)
@@ -765,16 +765,25 @@ export class OracleApiService {
 
 
     public async userSummonRequest(user: UserEntity, { recipient, chainId }: SummonDto): Promise<boolean> {
-        this.logger.debug(`userSummonRequest user ${user.uuid} to ${recipient} ID is ${chainId}`, this.context)
+        const funcId = makeid(5)
+        const funcCallPrefix = `[${funcId}] userSummonRequest:: uuid: ${user?.uuid}`
+        this.logger.debug(`${funcCallPrefix} to ${recipient}`, this.context)
 
         if (!recipient || recipient.length !== 42 || !recipient.startsWith('0x')) {
-            this.logger.error(`Summon: recipient invalid: ${recipient}}`, null, this.context)
+            this.logger.error(`${funcCallPrefix} recipient invalid: ${recipient}}`, null, this.context)
             throw new UnprocessableEntityException('Recipient invalid')
         }
 
         if (user.blacklisted) {
-            this.logger.error(`userSummonRequest: user blacklisted`, null, this.context)
+            this.logger.error(`${funcCallPrefix} user blacklisted`, null, this.context)
             throw new UnprocessableEntityException(`Blacklisted`)
+        }
+        const gamepass = this.assetService.findOne({ owner: user, assetOwner: ILike(recipient?.toLowerCase()), collectionFragment: { gamepass: true } })
+        if (!!gamepass) {
+            console.log(JSON.stringify(gamepass))
+        } else {
+            this.logger.error(`${funcCallPrefix} no gamepasses associated with recipient.`, null, this.context)
+            throw new UnprocessableEntityException(`No gamepasses associated with recipient.`)
         }
 
         const inventoryItems = await this.inventoryService.findMany({ relations: ['owner', 'material', 'material.collectionFragment', 'material.collectionFragment.collection'], where: { owner: { uuid: user.uuid }, summonInProgress: false }, loadEagerRelations: true })
@@ -802,7 +811,7 @@ export class OracleApiService {
 
             // safety vibe check
             if (!inventoryItems[0].summonInProgress) {
-                this.logger.warn(`Summon: summonInProgress vibe check fail for ${user.uuid}`, this.context)
+                this.logger.warn(`${funcCallPrefix} vibe check fail for ${user.uuid}`, this.context)
                 return false
             }
 
@@ -848,20 +857,20 @@ export class OracleApiService {
                         contract = new Contract(chainEntity.multiverseV2Address, METAVERSE_V2_ABI, oracle)
                         receipt = await (await contract.summon(METAVERSE, recipient, assetAddress, ids, amounts, [], { gasPrice: '1000000000', gasLimit: '5000000' })).wait()
                     } else {
-                        this.logger.error(`Summon: failiure not find MultiverseAddress`)
+                        this.logger.error(`${funcCallPrefix} failure not find MultiverseAddress`)
                         throw new UnprocessableEntityException('Summon MultiverseAddress error.')
                     }
 
                     try {
                         await this.inventoryService.removeAll(groups[addresses[i]].entities)
                     } catch (e) {
-                        this.logger.error(`Summon: failiure to remove entities, ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
+                        this.logger.error(`${funcCallPrefix} failure to remove entities, ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
                     }
 
-                    this.logger.log(`Summon: successful summon for user ${user.uuid}`, this.context)
+                    this.logger.log(`${funcCallPrefix} successful summon for user ${user.uuid}`, this.context)
                 } catch (e) {
                     //console.log(e)
-                    this.logger.error(`Summon: failiure to summon ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
+                    this.logger.error(`${funcCallPrefix} failure to summon ids ${JSON.stringify(groups[addresses[i]].ids)}`, e, this.context)
 
                     await Promise.all(
                         groups[addresses[i]].entities.map(async (snap) => {
