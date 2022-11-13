@@ -2,54 +2,14 @@ import { MaterialEntity } from '../src/material/material.entity'
 import { Connection, createConnection, getConnection } from 'typeorm'
 
 import { config } from 'dotenv'
-import { SnapshotItemEntity } from '../src/snapshot/snapshotItem.entity'
 import { UserEntity } from '../src/user/user/user.entity'
 import { TextureEntity } from '../src/texture/texture.entity'
 import { AssetEntity } from '../src/asset/asset.entity'
-import { SummonEntity } from '../src/summon/summon.entity'
-import { InventoryEntity } from '../src/playerinventory/inventory.entity'
-import { PlaySessionEntity } from '../src/playsession/playsession.entity'
-import { PlaySessionStatEntity } from '../src/playsession/playsessionstat.entity'
 import { SkinEntity } from '../src/skin/skin.entity'
-import { GameEntity } from '../src/game/game.entity'
-import { GameTypeEntity } from '../src/gametype/gametype.entity'
-import { AchievementEntity } from '../src/achievement/achievement.entity'
-import { PlayerAchievementEntity } from '../src/playerachievement/playerachievement.entity'
-import { PlayerScoreEntity } from '../src/playerscore/playerscore.entity'
-import { GganbuEntity } from '../src/gganbu/gganbu.entity'
-import { SnaplogEntity } from '../src/snaplog/snaplog.entity'
-import { GameItemTypeEntity } from '../src/gameitemtype/gameitemtype.entity'
-import { PlayerGameItemEntity } from '../src/playergameitem/playergameitem.entity'
-import { GameScoreTypeEntity } from '../src/gamescoretype/gamescoretype.entity'
-import { ChainEntity } from '../src/chain/chain.entity'
-import { CollectionEntity } from '../src/collection/collection.entity'
 import { CollectionFragmentEntity } from '../src/collectionfragment/collectionfragment.entity'
-import { CompositeAssetEntity } from '../src/compositeasset/compositeasset.entity'
-import { CompositeCollectionFragmentEntity } from '../src/compositecollectionfragment/compositecollectionfragment.entity'
-import { CompositePartEntity } from '../src/compositepart/compositepart.entity'
-import { ResourceInventoryEntity } from '../src/resourceinventory/resourceinventory.entity'
-import { SecretEntity } from '../src/secret/secret.entity'
-import { SyntheticItemEntity } from '../src/syntheticitem/syntheticitem.entity'
-import { SyntheticPartEntity } from '../src/syntheticpart/syntheticpart.entity'
-import { ResourceInventoryOffsetEntity } from '../src/resourceinventoryoffset/resourceinventoryoffset.entity'
-import { BigNumber } from 'ethers'
-import { EmailEntity } from '../src/user/email/email.entity'
-import { KiltSessionEntity } from '../src/user/kilt-session/kilt-session.entity'
-import { KiltDappEntity } from '../src/user/kilt-dapp/kilt-dapp.entity'
-import { DidEntity } from '../src/user/did/did.entity'
-import { EmailChangeEntity } from '../src/user/email-change/email-change.entity'
-import { EmailLoginKeyEntity } from '../src/user/email-login-key/email-login-key.entity'
-import { MinecraftLinkEntity } from '../src/user/minecraft-link/minecraft-link.entity'
-import { MinecraftUserNameEntity } from '../src/user/minecraft-user-name/minecraft-user-name.entity'
-import { MinecraftUuidEntity } from '../src/user/minecraft-uuid/minecraft-uuid.entity'
-import { Oauth2AuthorizationEntity } from '../src/oauth2api/oauth2-authorization/oauth2-authorization.entity'
-import { Oauth2ClientEntity } from '../src/oauth2api/oauth2-client/oauth2-client.entity'
-import { ZUserAssetView, ZUserBaitView } from '../src/views'
-import { RecognizedAssetType } from '../src/config/constants'
 import { UserRole } from '../src/common/enums/UserRole'
 import { findRecognizedAsset } from '../src/utils/misc'
-import { CollectionFragmentRoutingEntity } from '../src/collectionfragmentrouting/collectionfragmentrouting.entity'
-import { SyntheticItemLayerEntity } from '../src/syntheticitemlayer/syntheticitemlayer.entity'
+import { appEntities } from '../src/app.module'
 
 config()
 
@@ -65,54 +25,7 @@ async function main() {
             host: process.env.TYPEORM_HOST,
             port: Number.parseInt(process.env.TYPEORM_PORT),
             database: process.env.TYPEORM_DATABASE,
-            entities: [
-                    SyntheticItemLayerEntity,
-                    CollectionFragmentRoutingEntity,
-                    EmailChangeEntity,
-                    MinecraftLinkEntity,
-                    KiltSessionEntity,
-                    EmailLoginKeyEntity,
-                    UserEntity,
-                    SnapshotItemEntity,
-                    InventoryEntity,
-                    TextureEntity,
-                    SkinEntity,
-                    PlayerScoreEntity,
-                    MaterialEntity,
-                    GameEntity,
-                    GameTypeEntity,
-                    AchievementEntity,
-                    PlayerAchievementEntity,
-                    SecretEntity,
-                    AssetEntity,
-                    SummonEntity,
-                    PlaySessionEntity,
-                    PlaySessionStatEntity,
-                    GganbuEntity,
-                    SnaplogEntity,
-                    GameItemTypeEntity,
-                    PlayerGameItemEntity,
-                    GameScoreTypeEntity,
-                    ChainEntity,
-                    CollectionEntity,
-                    CollectionFragmentEntity,
-                    CompositeCollectionFragmentEntity,
-                    CompositeAssetEntity,
-                    CompositePartEntity,
-                    SyntheticPartEntity,
-                    SyntheticItemEntity,
-                    ResourceInventoryEntity,
-                    ResourceInventoryOffsetEntity,
-                    ZUserAssetView,
-                    MinecraftUserNameEntity,
-                    MinecraftUuidEntity,
-                    EmailEntity,
-                    DidEntity,
-                    KiltDappEntity,
-                    Oauth2ClientEntity,
-                    Oauth2AuthorizationEntity,
-                    ZUserBaitView
-            ],
+            entities: appEntities,
             synchronize: false
         })
     } catch (err) {
@@ -158,10 +71,8 @@ async function main() {
             }
             const rat = recognizedAsset.recognizedAssetType
             const pass = recognizedAsset.gamepass
-            if (!asset.recognizedAssetType || (asset.recognizedAssetType.valueOf() !== rat && !!rat)) {
-                await connection.manager.getRepository(AssetEntity).update(asset.hash, {recognizedAssetType: rat})
-                console.log('    assset type set', rat)
-            }
+            await connection.manager.getRepository(AssetEntity).update(asset.hash, {recognizedAssetType: rat})
+            console.log('    assset type set', rat)
         }
 
         const recmap = user.assets.map(asset => findRecognizedAsset(fragments, {assetAddress: asset.collectionFragment.collection.assetAddress, assetId: asset.assetId})) ?? []
@@ -169,7 +80,7 @@ async function main() {
         const numPassAssets = recmap.reduce((prev, curr) => {return (prev + (curr.gamepass ? 1: 0))}, 0)
         const hasGamePass = rec !== null && rec !== undefined
 
-        const isAdmin = user.role?.valueOf() === UserRole.ADMIN.valueOf()
+        const isAdmin = user.role?.valueOf() === UserRole.ADMIN.valueOf() || user.role?.valueOf() === UserRole.BANKER_ADMIN.valueOf()
 
         console.log('set', displayname, hasGamePass, numPassAssets, isAdmin ? UserRole.ADMIN : (hasGamePass ? UserRole.PLAYER: UserRole.NONE))
         await connection.manager.getRepository(UserEntity).update(user.uuid, {relationsUpdatedAt: new Date(), allowedToPlay: hasGamePass, numGamePassAsset: numPassAssets, role: isAdmin ? UserRole.ADMIN: (hasGamePass ? UserRole.PLAYER: UserRole.NONE)})

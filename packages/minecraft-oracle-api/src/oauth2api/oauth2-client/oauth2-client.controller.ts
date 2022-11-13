@@ -1,10 +1,10 @@
 import { BadRequestException, Body, Controller, ForbiddenException, Get, Inject, Param, Patch, Post, UnprocessableEntityException, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiBearerAuth, ApiTags, ApiCreatedResponse, ApiResponse } from '@nestjs/swagger';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
-import { JwtAuthGuard } from 'src/authapi/jwt-auth.guard';
-import { UserRole } from 'src/common/enums/UserRole';
-import { UserEntity } from 'src/user/user/user.entity';
-import { User } from 'src/utils/decorators';
+import { JwtAuthGuard } from '../../authapi/jwt-auth.guard';
+import { UserRole } from '../../common/enums/UserRole';
+import { UserEntity } from '../../user/user/user.entity';
+import { User } from '../../utils/decorators';
 import { Oauth2PrettyScope, Oauth2Scope, scopeToPrettyScope } from '../../common/enums/Oauth2Scope';
 import { Oauth2ClientDto } from './dtos/oauth2client.dto';
 import { Oauth2ClientUpdateDto } from './dtos/oauth2clientupdate.dto';
