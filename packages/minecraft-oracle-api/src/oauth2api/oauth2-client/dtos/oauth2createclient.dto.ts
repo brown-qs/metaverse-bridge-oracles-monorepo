@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger"
 import { Type } from "class-transformer"
 import { ArrayUnique, IsAlphanumeric, IsAscii, IsDefined, IsEnum, IsInt, IsNotEmpty, isNumber, IsNumber, IsNumberString, isNumberString, IsOptional, IsString, IsUrl, MaxLength, Min } from "class-validator"
-import { Oauth2Scope } from "src/common/enums/Oauth2Scope"
+import { Oauth2Scope } from "../../../common/enums/Oauth2Scope"
 
 export class Oauth2CreateClientDto {
     @ApiProperty({ description: 'Name of your OAuth 2.0 client' })
