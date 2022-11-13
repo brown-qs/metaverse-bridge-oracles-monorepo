@@ -4,6 +4,29 @@ import { MultiverseVersion } from "../state/api/types";
 import { StandardizedMetadata } from "../utils/graphqlReformatter";
 import { StringAssetType } from "../utils/subgraph";
 import PoopImage from "../assets/images/poop.svg"
+import SamaImage from "../assets/images/sama.svg"
+
+import AlphaWood from "../assets/images/resource/1.png"
+import AlphaStone from "../assets/images/resource/2.png"
+import AlphaIron from "../assets/images/resource/3.png"
+import AlphaGold from "../assets/images/resource/4.png"
+import AlphaExperience from "../assets/images/resource/5.png"
+import AlphaBullets from "../assets/images/resource/6.png"
+import AlphaGrenades from "../assets/images/resource/7.png"
+import AlphaShampoo from "../assets/images/resource/8.png"
+import AlphaSnacks from "../assets/images/resource/9.png"
+import AlphaGrain from "../assets/images/resource/10.png"
+import AlphaString from "../assets/images/resource/11.png"
+import AlphaFish from "../assets/images/resource/12.png"
+import AlphaBait from "../assets/images/resource/13.png"
+import AlphaMoonstone from "../assets/images/resource/14.png"
+import BetaPumpkin from "../assets/images/resource/15.png"
+import BetaBloodCrystals from "../assets/images/resource/16.png"
+import BetaDna from "../assets/images/resource/17.png"
+import BetaMobidium from "../assets/images/resource/18.png"
+
+
+//["Alpha Wood", "Alpha Stone", "Alpha Iron", "Alpha Gold", "Alpha Experience", "Alpha Bullets", "Alpha Grenades", "Alpha Shampoo", "Alpha Snacks", "Alpha Grain", "Alpha String", "Alpha Fish", "Alpha Bait", "Alpha Moonstone", "Beta Pumpkin", "Beta Blood Crystals", "Beta DNA", "Beta Mobidium"]
 export const CHAIN_ID = parseInt(process.env.REACT_APP_CHAIN_ID ?? '1285', 10);
 
 export const SUBGRAPH_URL =
@@ -288,9 +311,9 @@ export const SUB_ASSETS: SubAsset[] = [
   }
 ]
 
-
+type HardCodedToken = StandardizedMetadata & { assetType: StringAssetType }
 //STATIC TOKENS: 
-export const RARESAMA_POOP: StandardizedMetadata & { assetType: StringAssetType } = {
+export const RARESAMA_POOP: HardCodedToken = {
   assetType: StringAssetType.ERC20,
   assetAddress: "0xfffffffecb45afd30a637967995394cc88c0c194",
   assetId: 0,
@@ -301,7 +324,7 @@ export const RARESAMA_POOP: StandardizedMetadata & { assetType: StringAssetType 
   }
 }
 
-export const SHIT_FART: StandardizedMetadata & { assetType: StringAssetType } = {
+export const SHIT_FART: HardCodedToken = {
   assetType: StringAssetType.ERC20,
   assetAddress: "0x2f82471dccf85d3f6cb498d4e792cfa9e875ab0a",
   assetId: 0,
@@ -311,6 +334,169 @@ export const SHIT_FART: StandardizedMetadata & { assetType: StringAssetType } = 
   }
 }
 
+export const SAMA: HardCodedToken = {
+  assetType: StringAssetType.NATIVE,
+  assetAddress: "0x710ddbaa47a4ccdc85a507a264865260e82c18ee",
+  assetId: 0,
+  metadata: {
+    name: "$SAMA",
+    image: SamaImage
+  }
+}
+
+const BASE_EXN_RSS = {
+  assetType: StringAssetType.ERC1155,
+  assetAddress: "0xa402b15ac207b881c049e472755a7814148dd191"
+}
+
+export const EXN_RSS: HardCodedToken[] = [
+  {
+    ...BASE_EXN_RSS,
+    assetId: 1,
+    metadata: {
+      name: "Alpha Wood",
+      image: AlphaWood,
+    }
+  },
+  {
+    ...BASE_EXN_RSS,
+    assetId: 2,
+    metadata: {
+      name: "Alpha Stone",
+      image: AlphaStone,
+    }
+  },
+  {
+    ...BASE_EXN_RSS,
+    assetId: 3,
+    metadata: {
+      name: "Alpha Iron",
+      image: AlphaIron,
+    }
+  },
+  {
+    ...BASE_EXN_RSS,
+    assetId: 4,
+    metadata: {
+      name: "Alpha Gold",
+      image: AlphaGold,
+    }
+  },
+  {
+    ...BASE_EXN_RSS,
+    assetId: 5,
+    metadata: {
+      name: "Alpha Experience",
+      image: AlphaExperience,
+    }
+  },
+  {
+    ...BASE_EXN_RSS,
+    assetId: 6,
+    metadata: {
+      name: "Alpha Bullets",
+      image: AlphaBullets,
+    }
+  },
+  {
+    ...BASE_EXN_RSS,
+    assetId: 7,
+    metadata: {
+      name: "Alpha Grenades",
+      image: AlphaGrenades,
+    }
+  },
+  {
+    ...BASE_EXN_RSS,
+    assetId: 8,
+    metadata: {
+      name: "Alpha Shampoo",
+      image: AlphaShampoo,
+    }
+  },
+  {
+    ...BASE_EXN_RSS,
+    assetId: 9,
+    metadata: {
+      name: "Alpha Snacks",
+      image: AlphaSnacks,
+    }
+  },
+  {
+    ...BASE_EXN_RSS,
+    assetId: 10,
+    metadata: {
+      name: "Alpha Grain",
+      image: AlphaGrain,
+    }
+  },
+  {
+    ...BASE_EXN_RSS,
+    assetId: 11,
+    metadata: {
+      name: "Alpha String",
+      image: AlphaString,
+    }
+  },
+  {
+    ...BASE_EXN_RSS,
+    assetId: 12,
+    metadata: {
+      name: "Alpha Fish",
+      image: AlphaFish,
+    }
+  },
+  {
+    ...BASE_EXN_RSS,
+    assetId: 13,
+    metadata: {
+      name: "Alpha Bait",
+      image: AlphaBait,
+    }
+  },
+  {
+    ...BASE_EXN_RSS,
+    assetId: 14,
+    metadata: {
+      name: "Alpha Moonstone",
+      image: AlphaMoonstone,
+    }
+  },
+  {
+    ...BASE_EXN_RSS,
+    assetId: 15,
+    metadata: {
+      name: "Beta Pumpkin",
+      image: BetaPumpkin,
+    }
+  },
+  {
+    ...BASE_EXN_RSS,
+    assetId: 16,
+    metadata: {
+      name: "Beta Blood Crystals",
+      image: BetaBloodCrystals,
+    }
+  },
+  {
+    ...BASE_EXN_RSS,
+    assetId: 17,
+    metadata: {
+      name: "Beta DNA",
+      image: BetaDna,
+    }
+  },
+  {
+    ...BASE_EXN_RSS,
+    assetId: 18,
+    metadata: {
+      name: "Beta Mobidium",
+      image: BetaMobidium,
+    }
+  },
+
+]
+console.log(EXN_RSS)
 export function numberFormatter(num: string) {
   //needs to always be 6 digits!!
   //cant do 5 because of -10k no room for decimal place
