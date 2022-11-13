@@ -6,7 +6,7 @@ import { countGamePassAssets } from 'utils';
 import { useAssetDialog } from '../hooks/useAssetDialog/useAssetDialog';
 import React, { FC, ReactNode, useEffect, useState } from 'react';
 import { SKIN_LABELS } from '../constants/skins';
-import { BURNABLE_RESOURCES_IDS, ChainId, DEFAULT_CHAIN, NETWORK_NAME, PERMISSIONED_CHAINS, RARESAMA_POOP, SHIT_FART } from "../constants";
+import { BURNABLE_RESOURCES_IDS, ChainId, DEFAULT_CHAIN, EXN_RSS, NETWORK_NAME, PERMISSIONED_CHAINS, RARESAMA_POOP, SAMA, SHIT_FART } from "../constants";
 import { AssetChainDetails } from '../components/AssetChainDetails/AssetChainDetails';
 import { Image, Text, Box, Container, Grid, List as ChakraList, ListIcon, ListItem, Stack, Tooltip, Button, Flex, SimpleGrid, GridItem, VStack, HStack, background, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useCheckboxGroup, useMediaQuery, CircularProgress } from '@chakra-ui/react';
 import { InGameItem } from '../components/Portal/InGameItem';
@@ -176,7 +176,7 @@ const ProfilePage = () => {
             ...standardizeRaresamaMetadata(raresamaInGameItemsMetadata),
             ...standardizeExosamaMetadata(exosamaInGameItemsMetadata),
             RARESAMA_POOP,
-            SHIT_FART
+            SHIT_FART,
         ]
     }, [marketplaceInGameItemsMetadata, raresamaInGameItemsMetadata, exosamaInGameItemsMetadata])
 
@@ -200,7 +200,10 @@ const ProfilePage = () => {
 
     const inGameResourcesMetadata: StandardizedMetadata[] = React.useMemo(() => {
         return [
-            ...standardizeMarketplaceMetadata(marketplaceInGameResourcesMetadata)
+            ...standardizeMarketplaceMetadata(marketplaceInGameResourcesMetadata),
+            ...EXN_RSS,
+            SAMA
+
         ]
     }, [marketplaceInGameResourcesMetadata])
 
