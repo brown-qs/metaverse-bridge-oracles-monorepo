@@ -562,6 +562,17 @@ export class CompositeApiService {
             name: result.collection.name,
             parts: result.syntheticParts.sort((a, b) => a.id - b.id).map(p => syntheticPartToDto(p, result.collection.chainId)).filter(p => !!p)
         }
+        const expressionParts = resp.parts.find(p => p.name === "Expression")
+        const vibeParts = resp.parts.find(p => p.name === "Vibe")
+
+        //donnie wants expression before vibe
+        if (!!expressionParts && !!vibeParts) {
+            const expressionIdx = resp.parts.indexOf(expressionParts)
+            const vibeIdx = resp.parts.indexOf(vibeParts)
+            resp.parts[expressionIdx] = vibeParts
+            resp.parts[vibeIdx] = expressionParts
+
+        }
         return resp
     }
 
