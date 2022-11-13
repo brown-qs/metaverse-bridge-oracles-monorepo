@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonLogger } from 'nest-winston';
-import { Oauth2Scope } from 'src/common/enums/Oauth2Scope';
-import { UserEntity } from 'src/user/user/user.entity';
+import { Oauth2Scope } from '../../common/enums/Oauth2Scope';
+import { UserEntity } from '../../user/user/user.entity';
 import { FindConditions, FindManyOptions, FindOneOptions, ObjectID, Repository, UpdateResult } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { Oauth2ClientDto } from './dtos/oauth2client.dto';
