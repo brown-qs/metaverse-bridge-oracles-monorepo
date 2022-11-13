@@ -10,7 +10,7 @@ import { setBlockNumber } from "../state/slices/blockNumbersSlice";
 import { selectAllTransactions, selectAllTransactionsFromLastDay, setReceipt, shouldCheckTransactionOnBlock, transactionToChainId, TransactionType } from "../state/slices/transactionsSlice";
 import store from "../state";
 import { bridgeApi } from "../state/api/bridgeApi";
-const DEBUG = true
+const DEBUG = false
 export const BlockNumberManager = () => {
     const accessToken = useSelector(selectAccessToken)
     const providersRef = useRef<ethers.providers.JsonRpcProvider[]>([])
