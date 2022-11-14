@@ -327,6 +327,17 @@ export class OracleApiService {
         }
 
 
+        //make sure inConfirm is done only once so fungible inventory is not double counted, pray to god typeorm doesn't fuck us over here. According to typeorm affected is only supported on some db drivers, postgres seems to have it
+        const { affected } = await this.assetService.update({ hash, pendingIn: true }, { pendingIn: false })
+        if (affected === 1) {
+            await this.assetService.update({ hash }, { modifiedAt: new Date() })
+            this.logger.debug(`${funcCallPrefix} first time confirming inRequest, doing extra stuff like adding fungible inventory.`, this.context)
+        } else {
+            this.logger.debug(`${funcCallPrefix} affected ${affected}, NOT doing extra stuff.`, this.context)
+            return true
+        }
+
+
         if (!!owner) {
             // assign skin if asset unlocks one
             const texture = await this.textureService.findOne({ assetAddress, assetId })

@@ -107,7 +107,7 @@ const HomePage = () => {
         alignItems='center'
         spacing="0"
         position="absolute"
-        top="0"
+        top="var(--moonsama-nav-height)"
         left="0"
         right="0"
         className="moonsamaFullHeight"

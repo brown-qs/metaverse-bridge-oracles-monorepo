@@ -1,0 +1,14 @@
+query getExnSubraphOnChainTokens($owner: ID!) {
+  owner(id: $owner) {
+    id
+    ownedTokens {
+      balance
+      token {
+        contract {
+          id
+        }
+        id
+      }
+    }
+  }
+}
