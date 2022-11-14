@@ -156,7 +156,15 @@ const CustomizerLibrary = ({ librarySection, children }: CustomizerLibraryProps)
 
 
     return (
-        <Box bg="gray.900" className="moonsamaFullHeight" position="relative" left="calc(-1 * var(--moonsama-leftright-padding))" w="calc(max(320px, 100vw))" overflowX="scroll">
+        <Box
+            bg="gray.900"
+            position="absolute"
+            left="0"
+            top="var(--moonsama-nav-height)"
+            w="calc(max(320px, 100vw))"
+            overflowX="scroll"
+            bottom="0"
+        >
             <Stack spacing="0" w="100%" h="100%" direction={{ base: "column", md: "row" }} >
                 {/** START Library Nav, on chain/wallet, etc */}
                 <Stack fontWeight="400" fontFamily="Rubik" spacing="0" w={{ base: "100%", md: "225px" }} bg="gray.800" paddingBottom="16px" paddingLeft="var(--moonsama-leftright-padding)" direction={{ base: "row", md: "column" }} justifyContent={{ base: "space-around", md: "flex-start" }}>

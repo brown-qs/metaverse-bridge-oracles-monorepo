@@ -4,6 +4,7 @@ import { bridgeApi } from './api/bridgeApi';
 import { api as generatedSquidMarketplaceApi } from './api/generatedSquidMarketplaceApi';
 import { api as generatedSquidRaresamaApi } from './api/generatedSquidRaresamaApi';
 import { api as generatedSquidExosamaApi } from './api/generatedSquidExosamaApi';
+import { api as generatedSubgraphExnApi } from './api/generatedSubgraphExnApi';
 import application from './application/reducer';
 import { updateVersion } from './global/actions';
 import authSlice from './slices/authSlice';
@@ -61,8 +62,8 @@ const rootReducer = combineReducers({
   [bridgeApi.reducerPath]: bridgeApi.reducer,
   [generatedSquidMarketplaceApi.reducerPath]: generatedSquidMarketplaceApi.reducer,
   [generatedSquidRaresamaApi.reducerPath]: generatedSquidRaresamaApi.reducer,
-  [generatedSquidExosamaApi.reducerPath]: generatedSquidExosamaApi.reducer
-
+  [generatedSquidExosamaApi.reducerPath]: generatedSquidExosamaApi.reducer,
+  [generatedSubgraphExnApi.reducerPath]: generatedSubgraphExnApi.reducer
 });
 
 const rootPersistConfig = {
@@ -76,7 +77,7 @@ const persistedReducer = persistReducer(rootPersistConfig, rootReducer)
 
 const store = configureStore({
   reducer: persistedReducer,
-  middleware: (getDefaultMiddleware) => [...getDefaultMiddleware(), bridgeApi.middleware, generatedSquidMarketplaceApi.middleware, generatedSquidRaresamaApi.middleware],
+  middleware: (getDefaultMiddleware) => [...getDefaultMiddleware(), bridgeApi.middleware, generatedSquidMarketplaceApi.middleware, generatedSquidRaresamaApi.middleware, generatedSquidExosamaApi.middleware, generatedSubgraphExnApi.middleware],
 });
 export const persistor = persistStore(store)
 // optional, but required for refetchOnFocus/refetchOnReconnect behaviors
