@@ -1,6 +1,8 @@
+import { EXN_RSS } from "../constants"
 import { GetExosamaMetadataQuery, GetExosamaMetadataQueryVariables, GetExosamaOnChainTokensQuery } from "../state/api/generatedSquidExosamaApi"
 import { Erc1155TokenWhereInput, Erc721TokenWhereInput, GetMarketplaceMetadataQuery, GetMarketplaceMetadataQueryVariables, GetMarketplaceOnChainTokensQuery, useGetMarketplaceOnChainTokensQuery } from "../state/api/generatedSquidMarketplaceApi"
 import { GetRaresamaMetadataQuery, GetRaresamaMetadataQueryVariables, GetRaresamaOnChainTokensQuery, TokenWhereInput } from "../state/api/generatedSquidRaresamaApi"
+import { GetExnSubraphOnChainTokensQuery } from "../state/api/generatedSubgraphExnApi"
 import { BridgedAssetDto, CollectionFragmentDto, MultiverseVersion, RecognizedAssetsDto, RecognizedAssetType, } from "../state/api/types"
 import { StringAssetType } from "./subgraph"
 
@@ -40,7 +42,7 @@ export type StandardizedOnChainTokenWithRecognizedTokenData = StandardizedOnChai
 const sortAndFilterStandardizedOnChainTokens = (tokens: StandardizedOnChainToken[]): StandardizedOnChainToken[] => {
     return tokens
         .filter(tok => tok?.balance !== "0")
-        .sort((a, b) => a.id.localeCompare(b.id))
+        .sort((a, b) => a.id.localeCompare(b.id, 'en', { numeric: true }))
 }
 
 export const addRegonizedTokenDataToStandardizedOnChainTokens = (tokens: StandardizedOnChainToken[], recognizedAssetData: RecognizedAssetsDto[] | undefined): StandardizedOnChainTokenWithRecognizedTokenData[] => {
@@ -138,6 +140,37 @@ export const standardizeExosamaOnChainTokens = (tokens: GetExosamaOnChainTokensQ
         return sortAndFilterStandardizedOnChainTokens([
             ...tokens.erc721Tokens.map(tok => standardizeMarketplaceOnChainErc721Token(tok)).filter(isStandardizedOnChainToken)
         ])
+    } else {
+        return []
+    }
+}
+
+export const standardizeExnSubgraphOnChainTokens = (tokens: GetExnSubraphOnChainTokensQuery | undefined): StandardizedOnChainToken[] => {
+    if (!!tokens) {
+        const standardizedOnChainTokens: StandardizedOnChainToken[] = []
+        const ownedTokens = tokens?.owner?.ownedTokens ?? []
+        for (const tok of ownedTokens) {
+            const assetAddress = tok?.token?.contract?.id?.toLowerCase()
+            const assetId = tok?.token?.id
+            if (!!assetAddress && assetId) {
+                const matchingMeta = EXN_RSS.find(t => t.assetAddress.toLowerCase() === assetAddress.toLowerCase() && String(t.assetId) === assetId)
+                if (!!matchingMeta) {
+                    const standardizedToken: StandardizedOnChainToken = {
+                        id: `${assetAddress.toLowerCase()}~${assetId}`,
+                        assetAddress: assetAddress.toLowerCase(),
+                        numericId: parseInt(assetId),
+                        balance: tok.balance,
+                        metadata: {
+                            name: matchingMeta.metadata?.name,
+                            image: matchingMeta.metadata?.image
+                        }
+                    }
+                    standardizedOnChainTokens.push(standardizedToken)
+                }
+            }
+
+        }
+        return [...sortAndFilterStandardizedOnChainTokens(standardizedOnChainTokens)]
     } else {
         return []
     }
