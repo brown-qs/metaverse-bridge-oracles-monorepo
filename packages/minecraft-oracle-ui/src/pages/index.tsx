@@ -11,6 +11,7 @@ import CustomizerPage from './CustomizerPage';
 import ExoCustomizer from './exosama/ExoCustomizer';
 import ExoAssets from './exosama/ExoAssets';
 import MigratePage from './MigratePage';
+import FaucetPage from './FaucetPage';
 
 export const Routing = () => {
     const accessToken = useSelector(selectAccessToken)
@@ -21,6 +22,7 @@ export const Routing = () => {
             <Route path="/portal" element={!!accessToken ? <ProfilePage /> : <Navigate to="/" />} />
             <Route path="/oauth" element={<HomePage />} />
             <Route path="/migrate" element={<MigratePage />} />
+            <Route path="/faucet" element={!!accessToken ? <FaucetPage /> : <Navigate to="/" />} />
 
             <Route path="/moonsama/customizer/:chainId/:assetAddress/:assetId" element={<MoonsamaCharacterDesignerPage />} />
             <Route path="/moonsama/customizer" element={<MoonsamaCharacterDesignerPage />} />
