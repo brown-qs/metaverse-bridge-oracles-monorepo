@@ -163,8 +163,6 @@ export class OracleApiService {
                 this.logger.error(`${funcCallPrefix} summon mutex: error`, e, this.context)
                 await this.userService.update({ uuid: user.uuid }, { exnFaucetTransactionStatus: TransactionStatus.ERROR })
             }
-
-
         })
         return await this.faucetStatus(user)
     }
