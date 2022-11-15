@@ -48,9 +48,9 @@ const FaucetPage = () => {
         }
       } else {
         if (!!account) {
-          <>CLICK TO CLAIM .05 <Box as="span" fontWeight="700">$SAMA</Box></>
+          return <>CLICK TO CLAIM .05 <Box as="span" fontWeight="700">$SAMA</Box></>
         } else {
-          <>CONNECT YOUR WALLET TO USE THE <Box as="span" fontWeight="700">$SAMA</Box> FAUCET. THE FAUCET CAN ONLY BE USED ONCE PER USER.</>
+          return <>CONNECT YOUR WALLET TO USE THE <Box as="span" fontWeight="700">$SAMA</Box> FAUCET. THE FAUCET CAN ONLY BE USED ONCE PER USER.</>
         }
       }
     }
@@ -93,7 +93,7 @@ const FaucetPage = () => {
         :
         <VStack
           spacing="0"
-          width="min(calc(100% - 70px), 896px)"
+          width="min(calc(100% - 70px), 500px)"
         >
           {/**START COIN ICONS */}
           <VStack spacing="0" display={shorterThan515 ? "none" : "block"}>
@@ -133,7 +133,7 @@ const FaucetPage = () => {
               {!!account
                 ?
                 <>
-                  <Button onClick={() => { }} leftIcon={<Droplet></Droplet>} w="100%">CLAIM $SAMA</Button>
+                  <Button onClick={() => { }} w="100%">CLAIM $SAMA</Button>
                 </>
                 :
                 <>
