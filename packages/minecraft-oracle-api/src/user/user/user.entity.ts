@@ -1,5 +1,6 @@
 import {
     IsBoolean,
+    IsDate,
     IsEnum,
     IsNumber,
     IsString
@@ -23,9 +24,11 @@ import { KiltSessionEntity } from '../kilt-session/kilt-session.entity';
 import { EmailLoginKeyEntity } from '../email-login-key/email-login-key.entity';
 import { EmailEntity } from '../email/email.entity';
 import { Oauth2ClientEntity } from '../../oauth2api/oauth2-client/oauth2-client.entity';
+import { TransactionStatus } from '../../config/constants';
 
 @Entity()
 @Unique(['email'])
+@Unique(['exnFaucetAddress'])
 export class UserEntity {
     //cannot use uuid type or postgres will insert hyphens and screw up our existing minecraft uuids
     @PrimaryColumn()
@@ -100,6 +103,22 @@ export class UserEntity {
 
     @Column('text', { array: true, default: [] })
     usedAddresses?: string[];
+
+    @IsEnum(TransactionStatus)
+    @Column({ type: 'enum', enum: TransactionStatus, nullable: true, default: null })
+    exnFaucetTransactionStatus?: TransactionStatus
+
+    @IsString()
+    @Column({ nullable: true, default: null })
+    exnFaucetTransactionHash?: string
+
+    @IsDate()
+    @Column({ type: "timestamptz", default: null, nullable: true })
+    exnFaucetSummonedAt?: Date;
+
+    @IsString()
+    @Column({ nullable: true, default: null })
+    exnFaucetAddress?: string
 
     @OneToMany(() => AssetEntity, (ae) => ae.owner)
     assets?: AssetEntity[];

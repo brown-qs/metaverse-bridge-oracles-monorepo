@@ -2,6 +2,7 @@ import {
     BadRequestException,
     Body,
     Controller,
+    Get,
     HttpCode,
     Inject,
     Put,
@@ -16,7 +17,7 @@ import { CallparamDto } from './dtos/callparams.dto';
 import { OracleApiService } from './oracleapi.service';
 import { SummonDto } from './dtos/summon.dto';
 import { HashAndChainIdDto } from './dtos/hashandchainid.dto';
-import { InBatchRequestDto, InConfirmRequestDto, InConfirmResponseDto, OutBatchRequestDto, OutConfirmRequestDto, OutConfirmResponseDto, MigrateResponseDto } from './dtos/index.dto';
+import { InBatchRequestDto, InConfirmRequestDto, InConfirmResponseDto, OutBatchRequestDto, OutConfirmRequestDto, OutConfirmResponseDto, MigrateResponseDto, FaucetResponseDto, FaucetRequestDto } from './dtos/index.dto';
 
 @ApiTags('oracle')
 @Controller('oracle')
@@ -31,6 +32,31 @@ export class OracleApiController {
         this.context = OracleApiController.name;
     }
 
+    /*
+    @Get('faucet')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Get faucet status.' })
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    async getFaucet(
+        @User() user: UserEntity,
+    ): Promise<FaucetResponseDto> {
+        return await this.oracleApiService.faucetStatus(user)
+    }
+
+    //called after PUT /migrate-in to do summon (will be done by cron job if not called)
+    //can be used in the future to summon assets that were enraptured using PUT /in
+    @Put('faucet')
+    @HttpCode(200)
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    @ApiOperation({ summary: 'Request faucet.' })
+    async faucet(
+        @User() user: UserEntity,
+        @Body() dto: FaucetRequestDto
+    ): Promise<FaucetResponseDto> {
+        return await this.oracleApiService.faucet(dto.address, user)
+    }*/
 
 
     //enrapture for autoMigrate aka '1 click migrate', user is always null in asset_entity, for one click migrations only 
