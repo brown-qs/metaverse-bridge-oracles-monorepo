@@ -42,7 +42,7 @@ import { METAVERSE_V2_ABI } from '../common/contracts/MetaverseV2';
 import { ChainEntity } from '../chain/chain.entity';
 import { CollectionFragmentService } from '../collectionfragment/collectionfragment.service';
 import { CallparamDto } from './dtos/callparams.dto';
-import { InRequestDto, MigrateResponseDto } from './dtos/index.dto';
+import { FaucetResponseDto, InRequestDto, MigrateResponseDto } from './dtos/index.dto';
 import { InjectConnection } from '@nestjs/typeorm';
 import { Connection, ILike } from 'typeorm';
 import { CollectionFragmentRoutingService } from '../collectionfragmentrouting/collectionfragmentrouting.service';
@@ -94,6 +94,90 @@ export class OracleApiService {
         this.locks = new Map();
         this.oraclePrivateKey = this.configService.get<string>('network.oracle.privateKey');
         this.defaultChainId = this.configService.get<number>('network.defaultChainId')
+    }
+    public async faucet(address: string, user: UserEntity): Promise<FaucetResponseDto> {
+        const funcCallPrefix = `[${makeid(5)}] faucet:: address: ${address.toLowerCase()} uuid: ${user?.uuid}`
+        this.logger.debug(`${funcCallPrefix} START`, this.context)
+
+        if (typeof user.uuid !== "string" || user.uuid.length < 5) {
+            this.logger.debug(`${funcCallPrefix} user failed sanity check ${JSON.stringify(user)}`, this.context)
+            throw new BadRequestException("Invalid user.")
+        }
+
+        const chainEntity = await this.chainService.findOne({ chainId: ChainId.EXOSAMANETWORK })
+
+        if (!chainEntity.faucetEnabled) {
+            throw new BadRequestException("Faucet disabled.")
+        }
+
+        //make sure faucet is only used once, pray to god typeorm doesn't fuck us over here. According to typeorm affected is only supported on some db drivers, postgres seems to have it
+        const { affected } = await this.userService.update({ uuid: user.uuid, exnFaucetTransactionStatus: null }, { exnFaucetTransactionStatus: TransactionStatus.QUEUED, exnFaucetAddress: address.toLowerCase(), exnFaucetSummonedAt: new Date() })
+        if (affected === 1) {
+            this.logger.debug(`${funcCallPrefix} first time using faucet proceeding with summon.`, this.context)
+        } else {
+            this.logger.debug(`${funcCallPrefix} summon seems to already have started.`, this.context)
+            return await this.faucetStatus(user)
+        }
+
+        const oracleLock = this.getOrCreateLock(OracleApiService.SUMMON_LOCK_KEY)
+
+        await oracleLock.runExclusive(async () => {
+            this.logger.debug(`${funcCallPrefix} summon mutex: start`, this.context)
+
+            const userForCheck = await this.userService.findOne({ uuid: user.uuid })
+
+
+            if (userForCheck.exnFaucetTransactionStatus !== TransactionStatus.QUEUED) {
+                this.logger.debug(`${funcCallPrefix} summon mutex: doesnt pass sanity check, transaction is not Queued current status: ${userForCheck.exnFaucetTransactionStatus}`, this.context)
+                return
+            }
+
+            const provider = new ethers.providers.JsonRpcProvider(chainEntity.rpcUrl);
+            const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
+
+            let contract = new Contract(chainEntity.multiverseV2Address, METAVERSE_V2_ABI, oracle)
+
+            let receipt
+            try {
+                this.logger.debug(`${funcCallPrefix} summon mutex: start summon...`, this.context)
+
+                await this.userService.update({ uuid: user.uuid }, { exnFaucetTransactionStatus: TransactionStatus.IN_PROGRESS })
+
+                //Should we populate data with enraptured asset bridge hash for safety???
+                const amount = "50000000000000000"
+                const d: any = []
+                // console.log(METAVERSE, assetEntry.assetOwner, migrateRoute.outCollectionFragment.collection.assetAddress, [migrateRoute.outAssetId], [assetEntry.amount], d)
+                receipt = await ((await contract.summon(METAVERSE, address?.toLowerCase(), "0x710ddbaa47a4ccdc85a507a264865260e82c18ee", [0], [amount], d, { gasPrice: '1000000000', gasLimit: '7000000' })).wait())
+                this.logger.debug(`${funcCallPrefix} summon mutex: summon complete`, this.context)
+
+                await this.userService.update({ uuid: user.uuid }, { exnFaucetTransactionStatus: TransactionStatus.SUCCESS, exnFaucetTransactionHash: receipt.transactionHash.toLowerCase() })
+                user.lastUsedAddress = address.toLowerCase()
+                if (!user.usedAddresses.includes(user.lastUsedAddress)) {
+                    user.usedAddresses.push(user.lastUsedAddress)
+                }
+                await this.userService.update(user.uuid, { usedAddresses: user.usedAddresses, lastUsedAddress: user.lastUsedAddress })
+
+                return receipt
+            } catch (e) {
+                // console.log(e)
+                this.logger.error(`${funcCallPrefix} summon mutex: error`, e, this.context)
+                await this.userService.update({ uuid: user.uuid }, { exnFaucetTransactionStatus: TransactionStatus.ERROR })
+            }
+        })
+        return await this.faucetStatus(user)
+    }
+
+    public async faucetStatus(user: UserEntity): Promise<FaucetResponseDto> {
+        const funcCallPrefix = `[${makeid(5)}] faucetStatus:: uuid: ${user?.uuid}`
+        this.logger.debug(`${funcCallPrefix} START`, this.context)
+
+        const userEntity = this.userService.findOne({ uuid: user.uuid })
+        if (!!userEntity) {
+            return { transactionStatus: user.exnFaucetTransactionStatus, transactionHash: user.exnFaucetTransactionHash }
+        } else {
+            throw new BadRequestException("User not found.")
+        }
+
     }
 
     public async inRequest(data: InRequestDto, autoMigrate: boolean, user?: UserEntity): Promise<CallparamDto> {
