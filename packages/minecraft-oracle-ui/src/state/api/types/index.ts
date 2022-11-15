@@ -229,3 +229,13 @@ export interface CompositeConfigLayer {
     zIndex: number,
     imageUri: string
 }
+
+export interface FaucetRequestDto {
+    address: string
+    "g-recaptcha-response": string
+}
+
+export interface FaucetResponseDto {
+    transactionStatus: TransactionStatus
+    transactionHash: string | null
+}
