@@ -50,6 +50,10 @@ export class ChainEntity {
     @IsBoolean()
     allowed: boolean;
 
+    @Column({ nullable: false, default: false })
+    @IsBoolean()
+    faucetEnabled: boolean;
+
     @OneToMany(() => CollectionEntity, (cc) => cc.chain)
     compositeCollections?: CollectionEntity[]
 }
