@@ -14,10 +14,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setInModalTokens, openInModal } from '../state/slices/inModalSlice';
 import { selectBlockNumbers } from '../state/slices/blockNumbersSlice';
 import { StandardizedOnChainTokenWithRecognizedTokenData } from '../utils/graphqlReformatter';
-import { MultiverseVersion, RecognizedAssetType } from '../state/api/types';
+import { MultiverseVersion, RecognizedAssetType, TransactionStatus } from '../state/api/types';
 import { openMigrateModal, setMigrateModalTokens } from '../state/slices/migrateModalSlice';
 import { MigrateModal } from '../components/modals/MigrateModal';
 import PoopImage from "../assets/images/poop.svg"
+import { rtkQueryErrorFormatter, useFaucetStatusQuery } from '../state/api/bridgeApi';
+import { MoonsamaSpinner } from '../components/MoonsamaSpinner';
 
 const FaucetPage = () => {
   const { account, chainId, library } = useActiveWeb3React()
@@ -28,33 +30,70 @@ const FaucetPage = () => {
   const { addNetwork } = useAddNetworkToMetamaskCb()
   const dispatch = useDispatch()
 
+  const { data, error, isLoading, refetch } = useFaucetStatusQuery()
 
+  const getMessage = () => {
+    console.log(`data: `, data)
+    if (!!error || !(!!data)) {
+      return <>THERE WAS AN ERROR LOADING THE PAGE. PLEASE REFRESH. <Box color="red" fontFamily="Rubik">{!!error && rtkQueryErrorFormatter(error)}</Box></>
+    } else if (!!data) {
+      if (!!data.transactionStatus) {
+        if (data.transactionStatus === TransactionStatus.SUCCESS) {
+          return <>SUCCESS! <Box as="span" fontWeight="700">$SAMA</Box> has landed in your wallet!</>
+        } else if (data.transactionStatus === TransactionStatus.ERROR) {
+          return <>THERE WAS AN ERROR WITH THE FAUCET. PLEASE CONTACT SUPPORT.</>
+        } else {
+          return <>TRANSACTION IN PROGRESS.</>
 
+        }
+      } else {
+        if (!!account) {
+          <>CLICK TO CLAIM .05 <Box as="span" fontWeight="700">$SAMA</Box></>
+        } else {
+          <>CONNECT YOUR WALLET TO USE THE <Box as="span" fontWeight="700">$SAMA</Box> FAUCET. THE FAUCET CAN ONLY BE USED ONCE PER USER.</>
+        }
+      }
+    }
+    return <></>
+  }
 
-
+  const showButton: boolean = React.useMemo(() => {
+    if (!!data) {
+      if (!data.transactionStatus) {
+        return true
+      } else {
+        return false
+      }
+    } else {
+      return false
+    }
+  }, [data])
   return (
-    <>
-
-      <VStack
-        zIndex="1"
-        direction={'column'}
-        justifyContent='center'
-        alignItems='center'
-        spacing="0"
-        position="relative"
-        left="calc(-1 * var(--moonsama-leftright-padding))"
-        className="moonsamaFullHeight"
-        w="100vw"
-        overflow="hidden"
-        bg="radial-gradient(circle at 71.94% 92.8%, #3f0869, transparent 74%),radial-gradient(circle at 16.41% 12.33%, #16132B, transparent 82%),radial-gradient(circle at 78.26% 57.48%, #000000, transparent 67%),radial-gradient(circle at 23.24% 57.62%, #16132B, transparent 81%),radial-gradient(circle at 50% 50%, #213152, #213152 100%)"
-      >
+    <VStack
+      zIndex="1"
+      direction={'column'}
+      justifyContent='center'
+      alignItems='center'
+      spacing="0"
+      position="relative"
+      left="calc(-1 * var(--moonsama-leftright-padding))"
+      className="moonsamaFullHeight"
+      w="100vw"
+      overflow="hidden"
+      bg="radial-gradient(circle at 71.94% 92.8%, #3f0869, transparent 74%),radial-gradient(circle at 16.41% 12.33%, #16132B, transparent 82%),radial-gradient(circle at 78.26% 57.48%, #000000, transparent 67%),radial-gradient(circle at 23.24% 57.62%, #16132B, transparent 81%),radial-gradient(circle at 50% 50%, #213152, #213152 100%)"
+    >
 
 
+      {isLoading
+        ?
+        <>
+          <MoonsamaSpinner></MoonsamaSpinner>
+        </>
 
+        :
         <VStack
           spacing="0"
           width="min(calc(100% - 70px), 896px)"
-
         >
           {/**START COIN ICONS */}
           <VStack spacing="0" display={shorterThan515 ? "none" : "block"}>
@@ -86,22 +125,11 @@ const FaucetPage = () => {
               fontFamily="Rubik"
               fontWeight="400"
             >
-              {!!account
-                ?
-                <>
-                  CLICK TO CLAIM .05 <Box as="span" fontWeight="700">$SAMA</Box>
-
-                </>
-                :
-                <>
-                  CONNECT YOUR WALLET TO USE THE <Box as="span" fontWeight="700">$SAMA</Box> FAUCET. THE FAUCET CAN ONLY BE USED ONCE PER USER.
-
-                </>
-              }
+              {getMessage()}
 
             </Box>
-            <Box h="12px"></Box>
-            <Box w="100%">
+            <Box h="12px" display={!!showButton ? "block" : "none"}></Box>
+            <Box w="100%" display={!!showButton ? "block" : "none"}>
               {!!account
                 ?
                 <>
@@ -117,9 +145,8 @@ const FaucetPage = () => {
             </Box>
           </VStack>
         </VStack>
-      </VStack>
-      <MigrateModal />
-    </>
+      }
+    </VStack>
   )
 }
 
