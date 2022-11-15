@@ -229,3 +229,8 @@ export interface CompositeConfigLayer {
     zIndex: number,
     imageUri: string
 }
+
+export interface FaucetResponseDto {
+    transactionStatus: TransactionStatus
+    transactionHash: string | null
+}
