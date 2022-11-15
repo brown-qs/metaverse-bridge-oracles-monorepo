@@ -108,6 +108,10 @@ export class FaucetRequestDto {
     @IsEthereumAddress()
     @IsLowercase()
     address: string;
+
+    @IsNotEmpty()
+    @IsString()
+    "g-recaptcha-response": string;
 }
 
 export class FaucetResponseDto {
