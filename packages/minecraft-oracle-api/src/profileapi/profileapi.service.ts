@@ -120,7 +120,7 @@ export class ProfileApiService {
             ], where: { owner: { uuid: user.uuid } }, loadEagerRelations: true
         })
 
-        const resources: AssetDto[] = inventoryItems.map(item => {
+        const resources: AssetDto[] = inventoryItems.filter(i => !!i?.material?.collectionFragment?.collection?.chainId).map(item => {
             return {
                 amount: item.amount,
                 assetAddress: item.material.collectionFragment.collection.assetAddress,
