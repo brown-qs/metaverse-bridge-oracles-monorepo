@@ -230,6 +230,11 @@ export interface CompositeConfigLayer {
     imageUri: string
 }
 
+export interface FaucetRequestDto {
+    address: string
+    "g-recaptcha-response": string
+}
+
 export interface FaucetResponseDto {
     transactionStatus: TransactionStatus
     transactionHash: string | null
