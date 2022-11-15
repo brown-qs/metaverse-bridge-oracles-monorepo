@@ -47,6 +47,7 @@ async function main() {
             const diffEthers = diffWei.div(BigNumber.from(10).pow(18))
             //,${resourceInventory.amount},${bn.toString()},${diffWei.toString()}
             tsvRows.push(`${resourceInvId},${name},${dbValEthers},${calculatedSumEthers},${diffEthers}`)
+            await connection.manager.update<ResourceInventoryEntity>(ResourceInventoryEntity, { id: resourceInvId }, { amount: bn.toString() })
         }
     }
     console.log("CSV\n\n\n\n")
