@@ -4,7 +4,7 @@ import { AppState } from ".."
 import { StandardizedOnChainToken } from "../../utils/graphqlReformatter"
 import { setTokens } from "../slices/authSlice"
 import { setMigrationStatus, setOutTransactionHash } from "../slices/transactionsSlice"
-import { BridgedAssetDto, CallparamDto, CompositeConfigDto, EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse, FaucetResponseDto, InBatchRequestDto, InConfirmRequestDto, InConfirmResponseDto, MigrateResponseDto, Oauth2PublicClientDto, OutBatchRequestDto, OutConfirmRequestDto, OutConfirmResponseDto, RecognizedAssetsDto, SkinResponse, SkinSelectRequest, UserProfileResponse } from "./types"
+import { BridgedAssetDto, CallparamDto, CompositeConfigDto, EmailLoginCode, EmailLoginCodeResponse, EmailLoginCodeVerifyResponse, FaucetRequestDto, FaucetResponseDto, InBatchRequestDto, InConfirmRequestDto, InConfirmResponseDto, MigrateResponseDto, Oauth2PublicClientDto, OutBatchRequestDto, OutConfirmRequestDto, OutConfirmResponseDto, RecognizedAssetsDto, SkinResponse, SkinSelectRequest, UserProfileResponse } from "./types"
 
 
 // ---------------------------------------------------------- //
@@ -246,6 +246,13 @@ export const bridgeApi = createApi({
         faucetStatus: builder.query<FaucetResponseDto, void>({
             query: () => (`/oracle/faucet`),
         }),
+        faucet: builder.mutation<FaucetResponseDto, FaucetRequestDto>({
+            query: (body) => ({
+                url: `/oracle/faucet`,
+                method: "PUT",
+                body
+            }),
+        }),
     }),
 
 })
@@ -266,4 +273,4 @@ export const rtkQueryErrorFormatter = (error: any): string => {
     return strErr
 }
 
-export const { useFaucetStatusQuery, useMigrateInMutation, useMigrateMutation, useGetExosMutation, useCustomizerConfigQuery, useInMutation, useOutMutation, useOutConfirmMutation, useInConfirmMutation, useActiveGameQuery, useOauthInfoQuery, useOauthAuthorizeMutation, useSummonMutation, useGetInGameResourcesQuery, useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
+export const { useFaucetMutation, useFaucetStatusQuery, useMigrateInMutation, useMigrateMutation, useGetExosMutation, useCustomizerConfigQuery, useInMutation, useOutMutation, useOutConfirmMutation, useInConfirmMutation, useActiveGameQuery, useOauthInfoQuery, useOauthAuthorizeMutation, useSummonMutation, useGetInGameResourcesQuery, useMinecraftUnlinkMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useGamerTagSetMutation, useEmailChangeMutation, useGetInGameItemsQuery, useGetRecognizedAssetsQuery, useSetSkinMutation, useEmailLoginCodeMutation, useUserProfileQuery, useEmailLoginCodeVerifyMutation, useGetSkinsQuery } = bridgeApi
