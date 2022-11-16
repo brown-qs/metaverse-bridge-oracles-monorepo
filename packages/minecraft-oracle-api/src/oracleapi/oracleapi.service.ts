@@ -111,8 +111,19 @@ export class OracleApiService {
         }
 
         //make sure faucet is only used once, pray to god typeorm doesn't fuck us over here. According to typeorm affected is only supported on some db drivers, postgres seems to have it
-        const { affected } = await this.userService.update({ uuid: user.uuid, exnFaucetTransactionStatus: null }, { exnFaucetTransactionStatus: TransactionStatus.QUEUED, exnFaucetAddress: address.toLowerCase(), exnFaucetSummonedAt: new Date() })
-        if (affected === 1) {
+        let result
+        try {
+            result = await this.userService.update({ uuid: user.uuid, exnFaucetTransactionStatus: null }, { exnFaucetTransactionStatus: TransactionStatus.QUEUED, exnFaucetAddress: address.toLowerCase(), exnFaucetSummonedAt: new Date() })
+        } catch (e) {
+            const errStr = String(e)
+            this.logger.debug(`${funcCallPrefix} wallet has already been used with faucet.`, this.context)
+            if (errStr.includes("duplicate key")) {
+                throw new BadRequestException("Wallet already used with faucet.")
+            }
+            throw e
+        }
+
+        if (result.affected === 1) {
             this.logger.debug(`${funcCallPrefix} first time using faucet proceeding with summon.`, this.context)
         } else {
             this.logger.debug(`${funcCallPrefix} summon seems to already have started.`, this.context)
@@ -136,7 +147,7 @@ export class OracleApiService {
             const oracle = new ethers.Wallet(this.oraclePrivateKey, provider);
 
             let contract = new Contract(chainEntity.multiverseV2Address, METAVERSE_V2_ABI, oracle)
-
+            console.log(`MV ADDRESS: ${chainEntity.multiverseV2Address}`)
             let receipt
             try {
                 this.logger.debug(`${funcCallPrefix} summon mutex: start summon...`, this.context)
@@ -159,8 +170,7 @@ export class OracleApiService {
 
                 return receipt
             } catch (e) {
-                // console.log(e)
-                this.logger.error(`${funcCallPrefix} summon mutex: error`, e, this.context)
+                this.logger.error(`${funcCallPrefix} summon mutex: error ${JSON.stringify(e)}`, e, this.context)
                 await this.userService.update({ uuid: user.uuid }, { exnFaucetTransactionStatus: TransactionStatus.ERROR })
             }
         })
@@ -640,7 +650,7 @@ export class OracleApiService {
                 return receipt
             } catch (e) {
                 // console.log(e)
-                this.logger.error(`${funcCallPrefix} summon mutex: error`, e, this.context)
+                this.logger.error(`${funcCallPrefix} summon mutex: error ${JSON.stringify(e)}`, e, this.context)
                 await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.ERROR, modifiedAt: new Date() })
             }
 

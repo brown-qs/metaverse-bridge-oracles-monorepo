@@ -22,9 +22,11 @@ import { CollectionFragmentRoutingModule } from '../collectionfragmentrouting/co
 import { SummonLogModule } from '../summon-log/summon-log.module';
 import { InLogModule } from '../in-log/in-log.module';
 import { MigrationLogModule } from '../migration-log/migration-log.module';
+import { CaptchaModule } from '../captcha/captcha.module';
 
 @Module({
     imports: [
+        CaptchaModule,
         SummonLogModule,
         InLogModule,
         MigrationLogModule,
