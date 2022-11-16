@@ -21,19 +21,63 @@ import PoopImage from "../assets/images/poop.svg"
 import { rtkQueryErrorFormatter, useFaucetMutation, useFaucetStatusQuery } from '../state/api/bridgeApi';
 import { MoonsamaSpinner } from '../components/MoonsamaSpinner';
 import { getExplorerLink } from '../utils';
+import { useCaptcha } from '../hooks/useCaptcha/useCaptcha';
 
 const FaucetPage = () => {
   const { account, chainId, library } = useActiveWeb3React()
   const [narrowerThan390] = useMediaQuery('(max-width: 390px)')
   const [shorterThan515] = useMediaQuery('(max-height: 515px)')
+  const toast = useToast()
 
   const { isAccountDialogOpen, onAccountDialogOpen, onAccountDialogClose } = useAccountDialog();
   const { addNetwork } = useAddNetworkToMetamaskCb()
   const dispatch = useDispatch()
 
+  const [isFaucetLoading, setIsFaucetLoading] = React.useState<boolean>(false)
   const { data, error, isLoading, refetch } = useFaucetStatusQuery()
   const [doFaucet, { error: doFaucetError, isUninitialized, isLoading: isDoFaucetLoading, isSuccess: isDoFaucetSuccess, isError: isDoFaucetError, reset: doFaucetReset }] = useFaucetMutation()
+  const { executeCaptcha, resetCaptcha, setCaptchaVisible, isCaptchaLoading, isCaptchaVisible, isCaptchaError, isCaptchaSolved, captchaError, captchaSolution } = useCaptcha()
 
+  React.useEffect(() => {
+    setCaptchaVisible(true)
+    return () => setCaptchaVisible(false)
+  }, [])
+
+  React.useEffect(() => {
+    if (isCaptchaSolved && !!captchaSolution) {
+      doFaucet({ address: account?.toLowerCase() ?? "", "g-recaptcha-response": captchaSolution })
+      resetCaptcha()
+
+    }
+  }, [isCaptchaSolved])
+
+  React.useEffect(() => {
+    if (isDoFaucetError) {
+      toast({
+        title: 'Faucet error.',
+        description: rtkQueryErrorFormatter(doFaucetError),
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      })
+    }
+
+  }, [isDoFaucetError])
+
+  React.useEffect(() => {
+    if (isFaucetLoading && (isDoFaucetError || isDoFaucetSuccess)) {
+      setIsFaucetLoading(false)
+      doFaucetReset()
+    }
+    if (isDoFaucetSuccess) {
+      refetch()
+    }
+  }, [isDoFaucetSuccess, isDoFaucetError, isFaucetLoading])
+
+  const handleDoFaucet = () => {
+    setIsFaucetLoading(true)
+    executeCaptcha()
+  }
   const getMessage = () => {
     if (!!error || !(!!data)) {
       return <>THERE WAS AN ERROR LOADING THE PAGE. PLEASE REFRESH. <Box color="red" fontFamily="Rubik">{!!error && rtkQueryErrorFormatter(error)}</Box></>
@@ -70,7 +114,7 @@ const FaucetPage = () => {
         }
       } else {
         if (!!account) {
-          return <>CLICK TO CLAIM .05 <Box as="span" fontWeight="700">$SAMA</Box></>
+          return <>CLICK TO CLAIM 0.05 <Box as="span" fontWeight="700">$SAMA</Box></>
         } else {
           return <>CONNECT YOUR WALLET TO USE THE <Box as="span" fontWeight="700">$SAMA</Box> FAUCET. THE FAUCET CAN ONLY BE USED ONCE PER USER.</>
         }
@@ -92,7 +136,7 @@ const FaucetPage = () => {
   }, [data])
   return (
     <VStack
-      zIndex="1"
+      zIndex="0"
       direction={'column'}
       justifyContent='center'
       alignItems='center'
@@ -115,7 +159,7 @@ const FaucetPage = () => {
         :
         <VStack
           spacing="0"
-          width="min(calc(100% - 70px), 700px)"
+          width="max(320px, min(calc(100% - 70px), 720px))"
         >
           {/**START COIN ICONS */}
           <VStack spacing="0" display={shorterThan515 ? "none" : "block"}>
@@ -155,7 +199,7 @@ const FaucetPage = () => {
               {!!account
                 ?
                 <>
-                  <Button onClick={() => { }} w="100%">CLAIM $SAMA</Button>
+                  <Button onClick={() => handleDoFaucet()} w="100%" isLoading={isFaucetLoading}>CLAIM $SAMA</Button>
                 </>
                 :
                 <>
