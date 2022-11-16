@@ -170,8 +170,7 @@ export class OracleApiService {
 
                 return receipt
             } catch (e) {
-                // console.log(e)
-                this.logger.error(`${funcCallPrefix} summon mutex: error`, e, this.context)
+                this.logger.error(`${funcCallPrefix} summon mutex: error ${JSON.stringify(e)}`, e, this.context)
                 await this.userService.update({ uuid: user.uuid }, { exnFaucetTransactionStatus: TransactionStatus.ERROR })
             }
         })
@@ -651,7 +650,7 @@ export class OracleApiService {
                 return receipt
             } catch (e) {
                 // console.log(e)
-                this.logger.error(`${funcCallPrefix} summon mutex: error`, e, this.context)
+                this.logger.error(`${funcCallPrefix} summon mutex: error ${JSON.stringify(e)}`, e, this.context)
                 await this.assetService.update({ hash }, { summonTransactionStatus: TransactionStatus.ERROR, modifiedAt: new Date() })
             }
 
