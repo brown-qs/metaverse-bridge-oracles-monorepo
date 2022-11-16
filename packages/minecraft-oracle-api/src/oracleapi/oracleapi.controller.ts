@@ -32,7 +32,7 @@ export class OracleApiController {
         this.context = OracleApiController.name;
     }
 
-    /*
+
     @Get('faucet')
     @HttpCode(200)
     @ApiOperation({ summary: 'Get faucet status.' })
@@ -56,7 +56,7 @@ export class OracleApiController {
         @Body() dto: FaucetRequestDto
     ): Promise<FaucetResponseDto> {
         return await this.oracleApiService.faucet(dto.address, user)
-    }*/
+    }
 
 
     //enrapture for autoMigrate aka '1 click migrate', user is always null in asset_entity, for one click migrations only 
