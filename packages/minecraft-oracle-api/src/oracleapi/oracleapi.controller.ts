@@ -18,6 +18,7 @@ import { OracleApiService } from './oracleapi.service';
 import { SummonDto } from './dtos/summon.dto';
 import { HashAndChainIdDto } from './dtos/hashandchainid.dto';
 import { InBatchRequestDto, InConfirmRequestDto, InConfirmResponseDto, OutBatchRequestDto, OutConfirmRequestDto, OutConfirmResponseDto, MigrateResponseDto, FaucetResponseDto, FaucetRequestDto } from './dtos/index.dto';
+import { CaptchaService } from '../captcha/captcha.service';
 
 @ApiTags('oracle')
 @Controller('oracle')
@@ -27,6 +28,7 @@ export class OracleApiController {
 
     constructor(
         private readonly oracleApiService: OracleApiService,
+        private readonly captchaService: CaptchaService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
         this.context = OracleApiController.name;
@@ -55,6 +57,7 @@ export class OracleApiController {
         @User() user: UserEntity,
         @Body() dto: FaucetRequestDto
     ): Promise<FaucetResponseDto> {
+        await this.captchaService.validateCaptcha(dto['g-recaptcha-response'])
         return await this.oracleApiService.faucet(dto.address, user)
     }
 
