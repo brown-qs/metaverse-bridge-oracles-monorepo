@@ -70,8 +70,9 @@ https://squid.subsquid.io/raresama-moonbeam/graphql
     */
     const indexers = [
         //"https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2"
-        "https://moonbeam-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2",
+        // "https://moonbeam-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2",
         //   "https://mainnet-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge-v2",
+        "https://moonriver-subgraph.moonsama.com/subgraphs/name/moonsama/multiverse-bridge"
     ]
     for (const indexer of indexers) {
         const client = new ApolloClient({
@@ -82,7 +83,7 @@ https://squid.subsquid.io/raresama-moonbeam/graphql
         let metaAssets: any = []
         let page = 0
         while (true) {
-            const query = gql`{
+            let query = gql`{
                 metaAssets(first: ${PAGE_SIZE}, skip: ${page * PAGE_SIZE}, where: {active: true}, orderBy: modifiedAt) {
                   salt
                   owner {
@@ -100,6 +101,26 @@ https://squid.subsquid.io/raresama-moonbeam/graphql
                   modifiedAt
                 }
               }`
+            if (!indexer.includes("-v2")) {
+                query = gql`{
+                    metaAssets(first: ${PAGE_SIZE}, skip: ${page * PAGE_SIZE}, where: {active: true}, orderBy: createdAt) {
+                      salt
+                      owner {
+                        id
+                      }
+                      id
+                      enraptured
+                      asset {
+                        assetId
+                        assetAddress
+                        assetType
+                      }
+                      amount
+                      active
+                      createdAt
+                    }
+                  }`
+            }
             let result
             try {
                 result = await client.query(
@@ -152,8 +173,8 @@ https://squid.subsquid.io/raresama-moonbeam/graphql
             //console.log(`Checking that meta asset #${i} is in database...`)
             const assetTypes = ["UNKNOWN", "NATIVE", "ERC20", "ERC721", "ERC1155"]
             const assetId = mAsset.asset.assetId
-            const modifiedAtDate = new Date(mAsset.modifiedAt * 1000)
-            const timeDiff = new Date().getTime() - mAsset.modifiedAt * 1000
+            const modifiedAtDate = new Date((mAsset.modifiedAt || mAsset.createdAt) * 1000)
+            const timeDiff = new Date().getTime() - (mAsset.modifiedAt || mAsset.createdAt) * 1000
             const olderThanOneDay = timeDiff > 1000 * 60 * 60 * 24
             const modifiedAtPretty = dayjs(modifiedAtDate).format()
             const assetEntity = await connection.manager.findOne<AssetEntity>(AssetEntity, { hash: mAsset.id })
@@ -162,9 +183,9 @@ https://squid.subsquid.io/raresama-moonbeam/graphql
             if (!collection) {
                 throw new Error(`Couldn't find recognized collection for asset ${mAsset.asset.assetAddress.toLowerCase()}`)
             }
-            const client = new ethers.providers.JsonRpcProvider(collection.chain.rpcUrl);
-            const oracle = new ethers.Wallet(process.env.ORACLE_PRIVATE_KEY, client);
-            const contract = new Contract(collection.chain.multiverseV2Address, METAVERSE_V2_ABI, oracle)
+            //  const client = new ethers.providers.JsonRpcProvider(collection.chain.rpcUrl);
+            //const oracle = new ethers.Wallet(process.env.ORACLE_PRIVATE_KEY, client);
+            //const contract = new Contract(collection.chain.multiverseV2Address, METAVERSE_V2_ABI, oracle)
 
 
             if (!!assetEntity) {
