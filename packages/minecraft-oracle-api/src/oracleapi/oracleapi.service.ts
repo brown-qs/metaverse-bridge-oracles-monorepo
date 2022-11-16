@@ -158,7 +158,7 @@ export class OracleApiService {
                 const amount = "50000000000000000"
                 const d: any = []
                 // console.log(METAVERSE, assetEntry.assetOwner, migrateRoute.outCollectionFragment.collection.assetAddress, [migrateRoute.outAssetId], [assetEntry.amount], d)
-                receipt = await ((await contract.summon(METAVERSE, address?.toLowerCase(), "0x17098f04db67fdcf216f488f4aec0da71c0fc132", [0], [amount], d, { gasPrice: '1000000000', gasLimit: '7000000' })).wait())
+                receipt = await ((await contract.summon(METAVERSE, address?.toLowerCase(), "0x710ddbaa47a4ccdc85a507a264865260e82c18ee", [0], [amount], d, { gasPrice: '1000000000', gasLimit: '7000000' })).wait())
                 this.logger.debug(`${funcCallPrefix} summon mutex: summon complete`, this.context)
 
                 await this.userService.update({ uuid: user.uuid }, { exnFaucetTransactionStatus: TransactionStatus.SUCCESS, exnFaucetTransactionHash: receipt.transactionHash.toLowerCase() })
