@@ -113,6 +113,7 @@ import { AuditLogEntity } from './audit-log/audit-log.entity';
 import { InLogEntity } from './in-log/in-log.entity';
 import { MigrationLogEntity } from './migration-log/migration-log.entity';
 import { SummonLogEntity } from './summon-log/summon-log.entity';
+import { CaptchaModule } from './captcha/captcha.module';
 
 export const appEntities = [
     SyntheticItemLayerEntity,
@@ -271,7 +272,8 @@ export const appEntities = [
         MigrationLogModule,
         SummonLogModule,
         InLogModule,
-        AuditLogModule
+        AuditLogModule,
+        CaptchaModule
     ],
     controllers: [],
     providers: []
