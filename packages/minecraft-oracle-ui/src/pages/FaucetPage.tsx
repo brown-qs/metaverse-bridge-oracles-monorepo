@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAccountDialog, useActiveWeb3React, useClasses } from 'hooks';
-import { Container, Image, Alert, AlertDescription, AlertIcon, AlertTitle, Box, Button, CloseButton, Heading, HStack, Stack, Tag, TagCloseButton, TagLabel, TagLeftIcon, TagRightIcon, useToast, VStack, useMediaQuery } from '@chakra-ui/react';
+import { Link as ChakraLink, Container, Image, Alert, AlertDescription, AlertIcon, AlertTitle, Box, Button, CloseButton, Heading, HStack, Stack, Tag, TagCloseButton, TagLabel, TagLeftIcon, TagRightIcon, useToast, VStack, useMediaQuery } from '@chakra-ui/react';
 import { ArrowsRightLeft, DeviceGamepad2, Droplet, Pencil, Tags, User, Wallet } from 'tabler-icons-react';
 import BackgroundImage from '../assets/images/bridge-background-blur.svg'
 import { ChainId, MULTIVERSE_BRIDGE_V2_WAREHOUSE_ADDRESS, numberFormatter, RARESAMA_POOP, SHIT_FART } from '../constants';
@@ -18,28 +18,94 @@ import { MultiverseVersion, RecognizedAssetType, TransactionStatus } from '../st
 import { openMigrateModal, setMigrateModalTokens } from '../state/slices/migrateModalSlice';
 import { MigrateModal } from '../components/modals/MigrateModal';
 import PoopImage from "../assets/images/poop.svg"
-import { rtkQueryErrorFormatter, useFaucetStatusQuery } from '../state/api/bridgeApi';
+import { rtkQueryErrorFormatter, useFaucetMutation, useFaucetStatusQuery } from '../state/api/bridgeApi';
 import { MoonsamaSpinner } from '../components/MoonsamaSpinner';
+import { getExplorerLink } from '../utils';
+import { useCaptcha } from '../hooks/useCaptcha/useCaptcha';
 
 const FaucetPage = () => {
   const { account, chainId, library } = useActiveWeb3React()
   const [narrowerThan390] = useMediaQuery('(max-width: 390px)')
   const [shorterThan515] = useMediaQuery('(max-height: 515px)')
+  const toast = useToast()
 
   const { isAccountDialogOpen, onAccountDialogOpen, onAccountDialogClose } = useAccountDialog();
   const { addNetwork } = useAddNetworkToMetamaskCb()
   const dispatch = useDispatch()
 
+  const [isFaucetLoading, setIsFaucetLoading] = React.useState<boolean>(false)
   const { data, error, isLoading, refetch } = useFaucetStatusQuery()
+  const [doFaucet, { error: doFaucetError, isUninitialized, isLoading: isDoFaucetLoading, isSuccess: isDoFaucetSuccess, isError: isDoFaucetError, reset: doFaucetReset }] = useFaucetMutation()
+  const { executeCaptcha, resetCaptcha, setCaptchaVisible, isCaptchaLoading, isCaptchaVisible, isCaptchaError, isCaptchaSolved, captchaError, captchaSolution } = useCaptcha()
 
+  React.useEffect(() => {
+    setCaptchaVisible(true)
+    return () => setCaptchaVisible(false)
+  }, [])
+
+  React.useEffect(() => {
+    if (isCaptchaSolved && !!captchaSolution) {
+      doFaucet({ address: account?.toLowerCase() ?? "", "g-recaptcha-response": captchaSolution })
+      resetCaptcha()
+
+    }
+  }, [isCaptchaSolved])
+
+  React.useEffect(() => {
+    if (isDoFaucetError) {
+      toast({
+        title: 'Faucet error.',
+        description: rtkQueryErrorFormatter(doFaucetError),
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      })
+    }
+
+  }, [isDoFaucetError])
+
+  React.useEffect(() => {
+    if (isFaucetLoading && (isDoFaucetError || isDoFaucetSuccess)) {
+      setIsFaucetLoading(false)
+      doFaucetReset()
+    }
+    if (isDoFaucetSuccess) {
+      refetch()
+    }
+  }, [isDoFaucetSuccess, isDoFaucetError, isFaucetLoading])
+
+  const handleDoFaucet = () => {
+    setIsFaucetLoading(true)
+    executeCaptcha()
+  }
   const getMessage = () => {
-    console.log(`data: `, data)
     if (!!error || !(!!data)) {
       return <>THERE WAS AN ERROR LOADING THE PAGE. PLEASE REFRESH. <Box color="red" fontFamily="Rubik">{!!error && rtkQueryErrorFormatter(error)}</Box></>
     } else if (!!data) {
       if (!!data.transactionStatus) {
         if (data.transactionStatus === TransactionStatus.SUCCESS) {
-          return <>SUCCESS! <Box as="span" fontWeight="700">$SAMA</Box> has landed in your wallet!</>
+          return <>
+            <Box>
+              <Box as="span" fontWeight="700">$SAMA</Box> has landed in your wallet!
+            </Box>
+            <Box w="100%" bg="whiteAlpha.100" borderRadius="8px" marginTop="16px">
+              <HStack padding="12px" overflow="ellipsis" w="100%" whiteSpace="nowrap" >
+                <Box flex="1" color="whiteAlpha.700" >Transaction</Box>
+                <Box overflow="hidden" textOverflow="ellipsis" color="teal.200">
+                  <ChakraLink isExternal
+                    href={getExplorerLink(
+                      ChainId.EXOSAMANETWORK,
+                      String(data.transactionHash),
+                      'transaction'
+                    )}
+                  >
+                    {data.transactionHash}
+                  </ChakraLink>
+                </Box>
+
+              </HStack>
+            </Box>
+          </>
         } else if (data.transactionStatus === TransactionStatus.ERROR) {
           return <>THERE WAS AN ERROR WITH THE FAUCET. PLEASE CONTACT SUPPORT.</>
         } else {
@@ -48,7 +114,7 @@ const FaucetPage = () => {
         }
       } else {
         if (!!account) {
-          return <>CLICK TO CLAIM .05 <Box as="span" fontWeight="700">$SAMA</Box></>
+          return <>CLICK TO CLAIM 0.05 <Box as="span" fontWeight="700">$SAMA</Box></>
         } else {
           return <>CONNECT YOUR WALLET TO USE THE <Box as="span" fontWeight="700">$SAMA</Box> FAUCET. THE FAUCET CAN ONLY BE USED ONCE PER USER.</>
         }
@@ -70,7 +136,7 @@ const FaucetPage = () => {
   }, [data])
   return (
     <VStack
-      zIndex="1"
+      zIndex="0"
       direction={'column'}
       justifyContent='center'
       alignItems='center'
@@ -93,7 +159,7 @@ const FaucetPage = () => {
         :
         <VStack
           spacing="0"
-          width="min(calc(100% - 70px), 500px)"
+          width="max(320px, min(calc(100% - 70px), 720px))"
         >
           {/**START COIN ICONS */}
           <VStack spacing="0" display={shorterThan515 ? "none" : "block"}>
@@ -133,7 +199,7 @@ const FaucetPage = () => {
               {!!account
                 ?
                 <>
-                  <Button onClick={() => { }} w="100%">CLAIM $SAMA</Button>
+                  <Button onClick={() => handleDoFaucet()} w="100%" isLoading={isFaucetLoading}>CLAIM $SAMA</Button>
                 </>
                 :
                 <>
