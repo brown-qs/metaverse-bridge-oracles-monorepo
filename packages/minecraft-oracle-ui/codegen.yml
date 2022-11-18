@@ -4,7 +4,7 @@ config:
     enumValues: keep
 generates:
   ./src/state/api/generatedSubgraphExnApi.ts:
-    schema: https://exosama-subgraph.moonsama.com/subgraphs/name/moonsama/nft-1155-rss
+    schema: https://exosama-subgraph.moonsama.com/subgraphs/name/moonsama/nft-1155-rss-v2
     documents:
       - src/subgraph/exn/*
     plugins:
