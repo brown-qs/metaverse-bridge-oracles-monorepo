@@ -6,24 +6,16 @@ import { StringAssetType } from "../utils/subgraph";
 import PoopImage from "../assets/images/poop.svg"
 import SamaImage from "../assets/images/sama.svg"
 
-import AlphaWood from "../assets/images/resource/1.png"
-import AlphaStone from "../assets/images/resource/2.png"
-import AlphaIron from "../assets/images/resource/3.png"
-import AlphaGold from "../assets/images/resource/4.png"
-import AlphaExperience from "../assets/images/resource/5.png"
-import AlphaBullets from "../assets/images/resource/6.png"
-import AlphaGrenades from "../assets/images/resource/7.png"
-import AlphaShampoo from "../assets/images/resource/8.png"
-import AlphaSnacks from "../assets/images/resource/9.png"
-import AlphaGrain from "../assets/images/resource/10.png"
-import AlphaString from "../assets/images/resource/11.png"
-import AlphaFish from "../assets/images/resource/12.png"
-import AlphaBait from "../assets/images/resource/13.png"
-import AlphaMoonstone from "../assets/images/resource/14.png"
-import BetaPumpkin from "../assets/images/resource/15.png"
-import BetaBloodCrystals from "../assets/images/resource/16.png"
-import BetaDna from "../assets/images/resource/17.png"
-import BetaMobidium from "../assets/images/resource/18.png"
+import BetaPumpkin from "../assets/images/resource/1.png"
+import BetaBloodCrystals from "../assets/images/resource/2.png"
+import BetaDna from "../assets/images/resource/3.png"
+import BetaMobidium from "../assets/images/resource/4.png"
+import BetaWood from "../assets/images/resource/5.png"
+import BetaStone from "../assets/images/resource/6.png"
+import BetaIron from "../assets/images/resource/7.png"
+import BetaGold from "../assets/images/resource/8.png"
+
+
 
 
 //["Alpha Wood", "Alpha Stone", "Alpha Iron", "Alpha Gold", "Alpha Experience", "Alpha Bullets", "Alpha Grenades", "Alpha Shampoo", "Alpha Snacks", "Alpha Grain", "Alpha String", "Alpha Fish", "Alpha Bait", "Alpha Moonstone", "Beta Pumpkin", "Beta Blood Crystals", "Beta DNA", "Beta Mobidium"]
@@ -346,7 +338,7 @@ export const SAMA: HardCodedToken = {
 
 const BASE_EXN_RSS = {
   assetType: StringAssetType.ERC1155,
-  assetAddress: "0xa402b15ac207b881c049e472755a7814148dd191"
+  assetAddress: "0x95370351df734b6a712ba18848b47574d3e90e61"
 }
 
 export const EXN_RSS: HardCodedToken[] = [
@@ -354,146 +346,66 @@ export const EXN_RSS: HardCodedToken[] = [
     ...BASE_EXN_RSS,
     assetId: 1,
     metadata: {
-      name: "Alpha Wood",
-      image: AlphaWood,
+      name: "Pumkin",
+      image: BetaPumpkin,
     }
   },
   {
     ...BASE_EXN_RSS,
     assetId: 2,
     metadata: {
-      name: "Alpha Stone",
-      image: AlphaStone,
+      name: "Blood Crystals",
+      image: BetaBloodCrystals,
     }
   },
   {
     ...BASE_EXN_RSS,
     assetId: 3,
     metadata: {
-      name: "Alpha Iron",
-      image: AlphaIron,
+      name: "DNA",
+      image: BetaDna,
     }
   },
   {
     ...BASE_EXN_RSS,
     assetId: 4,
     metadata: {
-      name: "Alpha Gold",
-      image: AlphaGold,
+      name: "Mobidium",
+      image: BetaMobidium,
     }
   },
   {
     ...BASE_EXN_RSS,
     assetId: 5,
     metadata: {
-      name: "Alpha Experience",
-      image: AlphaExperience,
+      name: "Wood",
+      image: BetaWood,
     }
   },
   {
     ...BASE_EXN_RSS,
     assetId: 6,
     metadata: {
-      name: "Alpha Bullets",
-      image: AlphaBullets,
+      name: "Stone",
+      image: BetaStone,
     }
   },
   {
     ...BASE_EXN_RSS,
     assetId: 7,
     metadata: {
-      name: "Alpha Grenades",
-      image: AlphaGrenades,
+      name: "Iron",
+      image: BetaIron,
     }
   },
   {
     ...BASE_EXN_RSS,
     assetId: 8,
     metadata: {
-      name: "Alpha Shampoo",
-      image: AlphaShampoo,
+      name: "Gold",
+      image: BetaGold,
     }
-  },
-  {
-    ...BASE_EXN_RSS,
-    assetId: 9,
-    metadata: {
-      name: "Alpha Snacks",
-      image: AlphaSnacks,
-    }
-  },
-  {
-    ...BASE_EXN_RSS,
-    assetId: 10,
-    metadata: {
-      name: "Alpha Grain",
-      image: AlphaGrain,
-    }
-  },
-  {
-    ...BASE_EXN_RSS,
-    assetId: 11,
-    metadata: {
-      name: "Alpha String",
-      image: AlphaString,
-    }
-  },
-  {
-    ...BASE_EXN_RSS,
-    assetId: 12,
-    metadata: {
-      name: "Alpha Fish",
-      image: AlphaFish,
-    }
-  },
-  {
-    ...BASE_EXN_RSS,
-    assetId: 13,
-    metadata: {
-      name: "Alpha Bait",
-      image: AlphaBait,
-    }
-  },
-  {
-    ...BASE_EXN_RSS,
-    assetId: 14,
-    metadata: {
-      name: "Alpha Moonstone",
-      image: AlphaMoonstone,
-    }
-  },
-  {
-    ...BASE_EXN_RSS,
-    assetId: 15,
-    metadata: {
-      name: "Beta Pumpkin",
-      image: BetaPumpkin,
-    }
-  },
-  {
-    ...BASE_EXN_RSS,
-    assetId: 16,
-    metadata: {
-      name: "Beta Blood Crystals",
-      image: BetaBloodCrystals,
-    }
-  },
-  {
-    ...BASE_EXN_RSS,
-    assetId: 17,
-    metadata: {
-      name: "Beta DNA",
-      image: BetaDna,
-    }
-  },
-  {
-    ...BASE_EXN_RSS,
-    assetId: 18,
-    metadata: {
-      name: "Beta Mobidium",
-      image: BetaMobidium,
-    }
-  },
+  }
 
 ]
 console.log(EXN_RSS)
