@@ -245,7 +245,8 @@ const ProfilePage = () => {
             if (!!chainId && ![ChainId.MOONRIVER, ChainId.EXOSAMANETWORK].includes(chainId)) {
                 return false
             }
-            return tok.summonable
+
+            return tok.summonable && tok.chainId === chainId
         })
 
     }, [allStandardizedOnChainTokensWithRecognizedTokenData, chainId])
