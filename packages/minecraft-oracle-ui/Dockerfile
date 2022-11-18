@@ -19,6 +19,7 @@ ARG DID_CONFIGURATION_URL=https://backend-development.moonsama.com/api/v1/auth/k
 ARG REACT_APP_SQUID_MULTIVERSE_URL=https://squid.subsquid.io/moonsama-multiverse/graphql
 ARG REACT_APP_SQUID_RARESAMA_URL=https://squid.subsquid.io/raresama/graphql
 ARG REACT_APP_SQUID_EXOSAMA_URL=https://squid.subsquid.io/exosama-squid/graphql
+ARG REACT_APP_SUBGRAPH_EXN_URL=https://exosama-subgraph.moonsama.com/subgraphs/name/moonsama/nft-1155-rss-v2
 RUN yarn
 
 WORKDIR /home/node/packages/minecraft-oracle-ui
