@@ -78,7 +78,7 @@ export function SummonModal() {
         return (<ReduxModal
             {...baseProps}
             title="Summon resources"
-            message="It seems you didn't have any metaverse resources to summon, or something went wrong. Try again later or contact support."
+            message={`It seems you didn't have any metaverse resources to summon, or something went wrong. Try again later or contact support. ${rtkQueryErrorFormatter(error)}`}
         ></ReduxModal>)
     } else {
         return (<ReduxModal
