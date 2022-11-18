@@ -20,6 +20,9 @@ export class SyntheticPartEntity {
     @Column()
     assetAddress: string
 
+    @Column({ type: "int", default: 0, nullable: false })
+    displayOrder?: number
+
     @Column({ nullable: true })
     name?: string
 
