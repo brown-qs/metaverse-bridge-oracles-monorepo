@@ -1,6 +1,7 @@
 import { Box, HStack } from "@chakra-ui/react";
 import React from "react";
 import { ReactNode } from "react";
+import { NETWORK_NAME } from "../../constants";
 import { formatInGameTokenName, formatInGameTokenSuffix, InGameTokenMaybeMetadata } from "../../utils/graphqlReformatter";
 import { Media } from "../Media";
 import { PortalTabListItem, PortalTabListItemProps } from "./PortalTabListItem";
@@ -19,7 +20,7 @@ export const InGameResource: React.FC<InGameResourceProps> = ({ token, ...inProp
         lineOne,
         lineOneSuffix,
         mediaRedOutline: false,
-        lineTwo: undefined,
+        lineTwo: NETWORK_NAME[token.chainId] ?? undefined,
         highlightable: true,
 
         onClick: undefined,
