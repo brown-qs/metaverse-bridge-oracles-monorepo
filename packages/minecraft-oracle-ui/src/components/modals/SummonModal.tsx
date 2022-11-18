@@ -115,6 +115,7 @@ export function SummonModal() {
 
 
                 </Box>
+                {/*
                 <Box w="100%" paddingTop="16px">
                     <Select
                         defaultValue={selectedChainId}
@@ -122,14 +123,10 @@ export function SummonModal() {
                             setSelectedChainId(event.target.value);
                         }}
                     >
-                        {/* {PERMISSIONED_CHAINS.map((chain) => {
-                            return (
-                                <option key={chain} value={chain}>{NETWORK_NAME[chain]}</option>
-                            );
-                        })} */}
+
                         <option key={ChainId.EXOSAMANETWORK} value={ChainId.EXOSAMANETWORK}>{NETWORK_NAME[ChainId.EXOSAMANETWORK]}</option>
                     </Select>
-                </Box>
+                </Box>*/}
                 <Box w="100%" paddingTop="16px">
                     <Button onClick={() => {
                         setSelectedChainId(DEFAULT_CHAIN);
