@@ -1,5 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import {Injectable} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { FindConditions, FindManyOptions, FindOneOptions, ObjectID, RemoveOptions, Repository, UpdateResult } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
@@ -11,12 +11,8 @@ export class ResourceInventoryOffsetService {
         @InjectRepository(ResourceInventoryOffsetEntity)
         private readonly repository: Repository<ResourceInventoryOffsetEntity>,
         private configService: ConfigService
-    ) {}
+    ) { }
 
-    public static calculateId(dto: {chainId: string | number; assetAddress: string; assetId: string | number, uuid: string}): string {
-        return `${dto.uuid}-${dto.chainId}-${dto.assetAddress}-${dto.assetId}`
-    }
-    
     public async create(snapshotItem: ResourceInventoryOffsetEntity): Promise<ResourceInventoryOffsetEntity> {
         const u = await this.repository.save(snapshotItem);
         return u;
@@ -46,7 +42,7 @@ export class ResourceInventoryOffsetService {
         return (await this.repository.findOne(conditions)) !== undefined;
     }
 
-    public async findById(id: string): Promise<ResourceInventoryOffsetEntity> {
+    public async findById(id: number): Promise<ResourceInventoryOffsetEntity> {
         const result: ResourceInventoryOffsetEntity = await this.repository.findOne({ id });
         return result;
     }
@@ -60,7 +56,7 @@ export class ResourceInventoryOffsetService {
         const results: ResourceInventoryOffsetEntity[] = await this.repository.find(params);
         return results;
     }
-    
+
     public async findOne(params: FindConditions<ResourceInventoryOffsetEntity>, options?: FindOneOptions<ResourceInventoryOffsetEntity>): Promise<ResourceInventoryOffsetEntity> {
         const result: ResourceInventoryOffsetEntity = await this.repository.findOne(params, options);
         return result;
