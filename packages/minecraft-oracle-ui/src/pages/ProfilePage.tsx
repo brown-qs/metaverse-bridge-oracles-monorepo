@@ -1,8 +1,6 @@
 
 import { useAccountDialog, useActiveWeb3React } from 'hooks';
-import { stringToStringAssetType } from 'utils/subgraph';
-import { Fraction } from 'utils/Fraction';
-import { countGamePassAssets } from 'utils';
+
 import { useAssetDialog } from '../hooks/useAssetDialog/useAssetDialog';
 import React, { FC, ReactNode, useEffect, useState } from 'react';
 import { SKIN_LABELS } from '../constants/skins';
@@ -14,7 +12,6 @@ import { CaretLeft, CaretRight, DeviceGamepad, UserCircle, Wallet } from 'tabler
 import { InGameResource } from '../components/Portal/InGameResource';
 import { OnChainResource } from '../components/Portal/OnChainResource';
 import { OnChainItem } from '../components/Portal/OnChainItem';
-import BackgroundImage from '../assets/images/bridge-background-blur.svg'
 import { useSetSkinMutation, useGetSkinsQuery, useUserProfileQuery, useGetRecognizedAssetsQuery, useGetInGameItemsQuery, useGetInGameResourcesQuery, useGetExosMutation } from '../state/api/bridgeApi';
 import { Virtuoso } from 'react-virtuoso'
 import { CollectionFragmentDto, MultiverseVersion, SkinResponse } from '../state/api/types';
