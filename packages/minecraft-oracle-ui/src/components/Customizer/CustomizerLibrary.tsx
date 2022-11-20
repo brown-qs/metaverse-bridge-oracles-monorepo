@@ -68,7 +68,7 @@ const CustomizerLibrary = ({ librarySection, children }: CustomizerLibraryProps)
     const gridWidth: number | undefined = React.useMemo(() => dimensions?.contentBox?.width, [dimensions?.contentBox?.width])
     const numColumns: number | undefined = React.useMemo(() => {
         if (!!gridWidth) {
-            return Math.floor(gridWidth / 250)
+            return Math.floor(gridWidth / 200)
         } else {
             return undefined
         }
@@ -77,7 +77,14 @@ const CustomizerLibrary = ({ librarySection, children }: CustomizerLibraryProps)
     const columnWidth: number | undefined = React.useMemo(() => (!!gridWidth && !!numColumns) ? Math.floor(gridWidth / numColumns) : undefined, [gridWidth, numColumns])
 
     const gridHeight: number | undefined = React.useMemo(() => dimensions?.contentBox?.height, [dimensions?.contentBox?.height])
-    const rowHeight: number | undefined = React.useMemo(() => !!columnWidth ? Math.min(Math.floor(columnWidth * 1.4), 580) : undefined, [columnWidth])
+    const rowHeight: number | undefined = React.useMemo(() => {
+        if (!!columnWidth && !!numColumns) {
+            let maxHeight = (numColumns > 1) ? 580 : 420
+            return columnWidth + 96
+        } else {
+            return undefined
+        }
+    }, [columnWidth, numColumns])
     const gridDimensionsReady: boolean = React.useMemo(() => !!numColumns && !!gridWidth && !!columnWidth && !!gridHeight && !!rowHeight, [gridWidth, columnWidth, gridHeight, numColumns, rowHeight])
 
     const allCustomizerAssets: CustomizerLibraryAsset[] = React.useMemo(() => {
