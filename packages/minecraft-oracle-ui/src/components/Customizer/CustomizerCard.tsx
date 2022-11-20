@@ -13,10 +13,11 @@ export type CustomizerCardProps = {
     imageUrl: string,
     width: number,
     height: number,
+    selected: boolean,
     children?: ReactNode,
 }
 
-const CustomizerCard = ({ imageUrl, height, width, children }: CustomizerCardProps) => {
+const CustomizerCard = ({ imageUrl, height, width, children, selected }: CustomizerCardProps) => {
     /* const smallImageLoadRef = React.useRef<boolean>(false)
      const smallImageErrorRef = React.useRef<boolean>(false)
      const fullImageLoadRef = React.useRef<boolean>(false)
@@ -50,7 +51,7 @@ const CustomizerCard = ({ imageUrl, height, width, children }: CustomizerCardPro
     background-position: ${width}px;
   }`
     return (
-        <VStack spacing="0" w={width} minH={height} h={height} borderRadius="12px" overflow="hidden" boxShadow="md">
+        <VStack spacing="0" w={width} minH={height} h={height} borderRadius="12px" overflow="hidden" border={selected ? "2px solid var(--chakra-colors-teal-200)" : "2px solid transparent"} _hover={{ border: selected ? "2px solid var(--chakra-colors-teal-200)" : "2px solid var(--chakra-colors-whiteAlpha-600)" }}>
             <Box w={width} h={width} bg="whiteAlpha.50" position="relative">
                 <Box opacity={(fullImageLoaded || fullImageError || smallImageLoaded) ? "0" : "1"} top="0" right="0" bottom="0" left="0" position="absolute" animation={`${skeletonAnimation} 1.6s linear infinite`}></Box>
                 <Box opacity={(smallImageLoaded && !smallImageError) ? "1" : "0"} top="0" right="0" bottom="0" left="0" position="absolute">

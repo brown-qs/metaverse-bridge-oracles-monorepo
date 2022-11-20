@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useActiveWeb3React, useClasses } from 'hooks';
 import { Alert, AlertDescription, AlertIcon, AlertTitle, Box, Button, CloseButton, Heading, HStack, Stack, Tag, TagCloseButton, TagLabel, TagLeftIcon, TagRightIcon, useToast, VStack } from '@chakra-ui/react';
 import { DeviceGamepad2, Pencil, Tags, User } from 'tabler-icons-react';
 import { ChainId } from '../constants';
@@ -26,9 +25,6 @@ const CustomizerPage = () => {
 
   if (!!chainId && !!assetAddress && !!assetId) {
     return <IndividualCustomizer chainId={parseInt(chainId)} assetAddress={assetAddress.toLowerCase()} assetId={parseInt(assetId)}></IndividualCustomizer>
-
-  } else if (!libraryPages.includes(librarySection ?? "")) {
-    return <Navigate to="/customizer/library/exosama"></Navigate>
   }
 
   return <CustomizerLibrary librarySection={librarySection ?? "exosama"}></CustomizerLibrary>

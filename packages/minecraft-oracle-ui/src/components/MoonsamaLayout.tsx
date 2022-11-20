@@ -1,6 +1,6 @@
 import { Box, Container, VStack } from '@chakra-ui/react'
+import React from 'react';
 import { ReactNode } from 'react';
-import BackgroundImage from '../assets/images/home/background.jpg'
 import MoonsamaNav from '../ui/Navigation/MoonsamaNav'
 
 export const MoonsamaLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
