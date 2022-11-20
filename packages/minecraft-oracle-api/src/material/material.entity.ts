@@ -11,7 +11,7 @@ import { SnaplogEntity } from '../snaplog/snaplog.entity';
 import { CollectionFragmentEntity } from '../collectionfragment/collectionfragment.entity';
 
 @Entity()
-@Index(['name'], {unique: true})
+@Index(['name'], { unique: true })
 export class MaterialEntity {
 
     constructor(material: Partial<MaterialEntity>) {
@@ -27,7 +27,7 @@ export class MaterialEntity {
     assetId: string;
 
     @IsNumber()
-    @Column({default: 1, nullable: false})
+    @Column({ default: 1, nullable: false })
     multiplier?: number;
 
     @IsBoolean()
@@ -38,15 +38,22 @@ export class MaterialEntity {
     @Column()
     equippable: boolean;
 
-    @OneToMany(() => SnapshotItemEntity, (snapshotItem) => snapshotItem.material )
+    @OneToMany(() => SnapshotItemEntity, (snapshotItem) => snapshotItem.material)
     snapshots?: SnapshotItemEntity[];
 
-    @OneToMany(() => SnaplogEntity, (snaplog) => snaplog.material )
+    @OneToMany(() => SnaplogEntity, (snaplog) => snaplog.material)
     snaplogs?: SnaplogEntity[];
 
-    @OneToMany(() => InventoryEntity, (ie) => ie.material )
+    @OneToMany(() => InventoryEntity, (ie) => ie.material)
     inventoryItems?: InventoryEntity[];
 
     @ManyToOne(() => CollectionFragmentEntity, (fragment) => fragment.materials)
     collectionFragment: CollectionFragmentEntity;
+
+    @ManyToOne(() => CollectionFragmentEntity, (fragment) => fragment.materials, { nullable: true })
+    fungibleInputCollectionFragment: CollectionFragmentEntity;
+
+    @IsNumber()
+    @Column({ nullable: true, default: null })
+    fungibleInputAssetId: number;
 }
