@@ -27,9 +27,10 @@ const TraitSection = ({ part }: TraitSectionProps) => {
         const colWidth = twoCol ? Math.floor(width / 2) : width
         let padSubtract = twoCol ? lrPadding : lrPadding * 2
         if (twoCol) {
-            padSubtract = padSubtract + 20
+            padSubtract = padSubtract + 10
         }
-        return Math.floor(colWidth - padSubtract)
+        let gWidth = Math.floor(colWidth - padSubtract)
+        return Math.min(gWidth, 758)
     }, [width])
 
     const numColumns: number = React.useMemo(() => {
