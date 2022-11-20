@@ -208,6 +208,9 @@ export class AssetApiController {
         return result
     }
 
+    /*
+        //cannot use anymore bc there are multiple offsets
+
     @Put('resourceinventory/offset/player/:trimmedUuid')
     @HttpCode(200)
     @ApiOperation({ summary: 'Create player resource inventory offset' })
@@ -220,7 +223,7 @@ export class AssetApiController {
         const user = await this.userService.findOne({ uuid }, { relations: ['assets'] })
         const result = await this.assetApiService.setResourceInventoryPlayer(user, dto)
         return result
-    }
+    }*/
 
     @Get('fungible/balances/player/:trimmedUuid')
     @HttpCode(200)

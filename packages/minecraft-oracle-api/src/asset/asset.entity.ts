@@ -81,6 +81,15 @@ export class AssetEntity {
     })
     recognizedAssetType?: RecognizedAssetType
 
+    @IsString()
+    @Column({ nullable: true, default: null })
+    transactionHash?: string
+
+
+    @IsDate()
+    @Column({ type: "timestamptz", nullable: true, default: null })
+    transactionTime?: Date
+
     //whether to automatically summon an asset after it has been enraptured eg 1-click migrations
     @IsBoolean()
     @Column({ nullable: false, default: false })
