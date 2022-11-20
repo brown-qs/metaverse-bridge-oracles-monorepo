@@ -388,6 +388,7 @@ export class GameApiService {
         }
     }
 
+    /*
     public async bank(dto: BankDto): Promise<boolean> {
 
         this.ensureLock('bank')
@@ -423,14 +424,14 @@ export class GameApiService {
             const allUsers = await this.userService.findMany({})
             this.logger.warn(`Bank:: ${allUsers.length} users found`, this.context)
 
-            /*
-            allUsers.map(user => {
-                if (!users[user.uuid]) {
-                    users[user.uuid] = true
-                    distinct+=1
-                }
-            })
-            */
+       
+           // allUsers.map(user => {
+            //    if (!users[user.uuid]) {
+            //         users[user.uuid] = true
+            //         distinct+=1
+            //     }
+         //    })
+      
 
             if (!items || items.length === 0) {
                 this.logger.warn(`Bank: snapshotted items were not found`, this.context)
@@ -533,7 +534,7 @@ export class GameApiService {
         })
 
         return res
-    }
+    }*/
 
     async getWorldPlots(world: string): Promise<AssetEntity[]> {
         const assets = await this.assetService.findMany({ where: { world, recognizedAssetType: RecognizedAssetType.PLOT } })

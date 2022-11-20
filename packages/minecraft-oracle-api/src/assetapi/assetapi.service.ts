@@ -165,6 +165,8 @@ export class AssetApiService {
         })
     }
 
+    /*
+    //cannot use anymore bc there are multiple offsets
     async setResourceInventoryOffsetPlayer(user: UserEntity, dto: SetResourceInventoryOffsetItems): Promise<boolean> {
         await Promise.all(dto.items.map(async (x) => {
             const id = ResourceInventoryOffsetService.calculateId({ ...x, uuid: user.uuid })
@@ -183,21 +185,31 @@ export class AssetApiService {
         }))
         this.eventBus.publish(new ResourceInventoryOffsetUpdatedEvent(user.uuid))
         return true
-    }
+    }*/
 
     async getFungibleBalancesForPlayer(user: UserEntity): Promise<FungibleBalanceEntryDto> {
-        const res = await this.resourceInventoryService.findMany({ where: { owner: { uuid: user.uuid } }, relations: ['owner', 'offset', 'collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
+        const res = await this.resourceInventoryService.findMany({ where: { owner: { uuid: user.uuid } }, relations: ['owner', 'offsets', 'collectionFragment', 'collectionFragment.collection'], loadEagerRelations: true })
 
         if (!res) {
             return { balances: [], user: { uuid: user.uuid, name: user.minecraftUserName } }
         }
         const results = await Promise.all(res.map(async (x) => {
+            let amount: string
+            if (!!x?.offsets?.[0]) {
+                let totalOffsets = BigNumber.from("0")
+                for (const offset of x.offsets) {
+                    totalOffsets = totalOffsets.add(offset.amount ?? '0')
+                }
+                amount = formatEther(BigNumber.from(x.amount).sub(totalOffsets))
+            } else {
+                amount = formatEther(x.amount)
+            }
             return {
                 assetId: x.assetId,
                 assetAddress: x.collectionFragment.collection.assetAddress,
                 chainId: x.collectionFragment.collection.chainId,
                 assetType: x.collectionFragment.collection.assetType,
-                amount: x.offset?.amount ? formatEther(BigNumber.from(x.amount).sub(x.offset?.amount ?? '0')) : formatEther(x.amount)
+                amount
             }
         }))
 
@@ -210,22 +222,34 @@ export class AssetApiService {
 
         const specs = typeof dto.specifics === 'string' ? [dto.specifics] : dto.specifics
 
-        const res = dto.specifics ? await this.userService.findMany({ where: { uuid: In(specs) }, relations: ['resourceInventoryItems', 'resourceInventoryItems.offset', 'resourceInventoryItems.collectionFragment', 'resourceInventoryItems.collectionFragment.collection'], loadEagerRelations: true, order: { uuid: 'ASC' } })
-            : await this.userService.findMany({ relations: ['resourceInventoryItems', 'resourceInventoryItems.offset', 'resourceInventoryItems.collectionFragment', 'resourceInventoryItems.collectionFragment.collection'], loadEagerRelations: true, take, skip, order: { uuid: 'ASC' } })
+        const res = dto.specifics ? await this.userService.findMany({ where: { uuid: In(specs) }, relations: ['resourceInventoryItems', 'resourceInventoryItems.offsets', 'resourceInventoryItems.collectionFragment', 'resourceInventoryItems.collectionFragment.collection'], loadEagerRelations: true, order: { uuid: 'ASC' } })
+            : await this.userService.findMany({ relations: ['resourceInventoryItems', 'resourceInventoryItems.offsets', 'resourceInventoryItems.collectionFragment', 'resourceInventoryItems.collectionFragment.collection'], loadEagerRelations: true, take, skip, order: { uuid: 'ASC' } })
 
         const results = res.map((user) => {
+
             return {
                 user: {
                     uuid: user.uuid,
                     name: user.minecraftUserName
                 },
                 balances: user.resourceInventoryItems.map(x => {
+
+                    let amount: string
+                    if (!!x?.offsets?.[0]) {
+                        let totalOffsets = BigNumber.from("0")
+                        for (const offset of x.offsets) {
+                            totalOffsets = totalOffsets.add(offset.amount ?? '0')
+                        }
+                        amount = formatEther(BigNumber.from(x.amount).sub(totalOffsets))
+                    } else {
+                        amount = formatEther(x.amount)
+                    }
                     return {
                         assetId: x.assetId,
                         assetAddress: x.collectionFragment.collection.assetAddress,
                         chainId: x.collectionFragment.collection.chainId,
                         assetType: x.collectionFragment.collection.assetType,
-                        amount: x.offset?.amount ? formatEther(BigNumber.from(x.amount).sub(x.offset?.amount ?? '0')) : formatEther(x.amount)
+                        amount
                     }
                 })
             }

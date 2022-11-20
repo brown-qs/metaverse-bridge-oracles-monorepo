@@ -9,7 +9,7 @@ import { AssetEntity } from '../asset/asset.entity';
 import { ResourceInventoryOffsetEntity } from '../resourceinventoryoffset/resourceinventoryoffset.entity';
 
 @Entity()
-@Index(['id'], {unique: true})
+@Index(['id'], { unique: true })
 export class ResourceInventoryEntity {
 
     constructor(item: Partial<ResourceInventoryEntity>) {
@@ -20,7 +20,7 @@ export class ResourceInventoryEntity {
     @IsString()
     id: string; // convention:: {user uuid}-{materialName}
 
-    @Column({nullable: true, default: '0'})
+    @Column({ nullable: true, default: '0' })
     @IsString()
     amount: string;
 
@@ -28,8 +28,8 @@ export class ResourceInventoryEntity {
     @IsBoolean()
     assetId: string;
 
-    @OneToOne(() => ResourceInventoryOffsetEntity, (offset) => offset.resourceInventory)
-    offset?: ResourceInventoryOffsetEntity;
+    @OneToMany(() => ResourceInventoryOffsetEntity, (offset) => offset.resourceInventory)
+    offsets?: ResourceInventoryOffsetEntity[];
 
     @ManyToOne(() => UserEntity, (user) => user.resourceInventoryItems)
     owner: UserEntity;
