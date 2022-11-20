@@ -15,7 +15,7 @@ export class ResourceInventoryOffsetEntity {
 
     @PrimaryGeneratedColumn()
     @IsNumber()
-    id: number; // convention:: {user uuid}-{materialName}
+    id?: number; // convention:: {user uuid}-{materialName}
 
     @Column({ nullable: true, default: '0' })
     @IsString()
