@@ -5,15 +5,17 @@ import { useNavigate } from "react-router-dom"
 import { PhotoOff } from "tabler-icons-react"
 import CustomizerCard, { CustomizerCardProps } from "./CustomizerCard"
 
-type LibraryCustomizerCardProps = {
+type TraitCustomizerCardProps = {
     owned: boolean,
-    edited: boolean,
+    equipped: boolean,
+    default: boolean,
     chainId: number,
     assetAddress: string,
-    assetId: number
+    assetId: number,
+    synthetic: boolean
 } & Omit<CustomizerCardProps, "selected">
 
-const LibraryCustomizerCard = ({ imageUrl, width, chainId, assetAddress, assetId, height, owned, edited }: LibraryCustomizerCardProps) => {
+const TraitCustomizerCard = ({ imageUrl, width, chainId, assetAddress, assetId, height, owned }: TraitCustomizerCardProps) => {
 
     const navigate = useNavigate()
     const marketplaceUrl: string = React.useMemo(() => {
@@ -56,8 +58,7 @@ const LibraryCustomizerCard = ({ imageUrl, width, chainId, assetAddress, assetId
             </HStack>
             <HStack spacing="0">
                 {owned && <Tag variant='solid' bg="teal.400" color="white">Owned</Tag>}
-                {edited && <><Box w="8px"></Box>
-                    <Tag variant='solid' bg='purple.300' color="white">Edited</Tag></>}
+
             </HStack>
         </HStack>
         <HStack spacing="0" w="100%">
@@ -68,4 +69,4 @@ const LibraryCustomizerCard = ({ imageUrl, width, chainId, assetAddress, assetId
     </CustomizerCard>)
 }
 
-export default LibraryCustomizerCard
+export default TraitCustomizerCard
