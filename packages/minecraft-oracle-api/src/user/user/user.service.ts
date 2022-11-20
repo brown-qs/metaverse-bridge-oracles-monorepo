@@ -258,8 +258,8 @@ export class UserService {
 
                     //   throw new Error("Stop here")
                     //merge bait :)
-                    const emailUserBait = await queryRunner.manager.findOne(ResourceInventoryEntity, { where: { id: Like(`${userUuid}-%`) }, relations: ["offset"] })
-                    const mcUserBait = await queryRunner.manager.findOne(ResourceInventoryEntity, { where: { id: Like(`${minecraftUuid}-%`) }, relations: ["offset"] })
+                    const emailUserBait = await queryRunner.manager.findOne(ResourceInventoryEntity, { where: { id: Like(`${userUuid}-1285-0x1b30a3b5744e733d8d2f19f0812e3f79152a8777-14`) }, relations: ["offsets"] })
+                    const mcUserBait = await queryRunner.manager.findOne(ResourceInventoryEntity, { where: { id: Like(`${minecraftUuid}-1285-0x1b30a3b5744e733d8d2f19f0812e3f79152a8777-14`) }, relations: ["offsets"] })
 
                     if (!!emailUserBait && !!mcUserBait) {
                         this.logger.debug(`user.service::linkMinecraftByUserUuid both users have bait, needs to be added.`, this.context)
@@ -273,21 +273,26 @@ export class UserService {
                         //move over all bait to email user
                         this.logger.debug(`user.service::linkMinecraftByUserUuid moving over all bait to email user...`, this.context)
 
-                        await queryRunner.manager.update(ResourceInventoryEntity, { id: Like(`${userUuid}-%`) }, { amount: addedBait })
+                        await queryRunner.manager.update(ResourceInventoryEntity, { id: Like(`${userUuid}-1285-0x1b30a3b5744e733d8d2f19f0812e3f79152a8777-14`) }, { amount: addedBait })
 
                         //zero out minecraft user, will be deleted after keys in asset_entity are updated
                         this.logger.debug(`user.service::linkMinecraftByUserUuid zeroing out bait in mc user...`, this.context)
-                        await queryRunner.manager.update(ResourceInventoryEntity, { id: Like(`${minecraftUuid}-%`) }, { amount: BigNumber.from("0").toString() })
+                        await queryRunner.manager.update(ResourceInventoryEntity, { id: Like(`${minecraftUuid}`) }, { amount: BigNumber.from("0").toString() })
 
 
                         //update keys on asset_entity to point to email user
                         this.logger.debug(`user.service::linkMinecraftByUserUuid updating resourceInventoryId on asset_entity to all be email user based`, this.context)
                         await queryRunner.manager.update(AssetEntity, { resourceInventory: { id: mcUserBait.id } }, { resourceInventory: { id: emailUserBait.id } })
 
+                        this.logger.debug(`user.service::linkMinecraftByUserUuid moving resource inventory offset to new uuid`, this.context)
+                        await queryRunner.manager.update(ResourceInventoryOffsetEntity, { resourceInventory: { id: `${minecraftUuid}-1285-0x1b30a3b5744e733d8d2f19f0812e3f79152a8777-14` } }, { resourceInventory: { id: `${userUuid}-1285-0x1b30a3b5744e733d8d2f19f0812e3f79152a8777-14` } })
+
+
                         this.logger.debug(`user.service::linkMinecraftByUserUuid deleting old minecraft resource_inventory_entity rows`, this.context)
+                        const oldMcResourceId = mcUserBait.id
+                        const newMcResourceId = oldMcResourceId.replace(`${minecraftUuid}-`, `${userUuid}-`)
 
                         //ResourceInventoryEntity's id cascades to update the fk relationship in asset_entity, but no rows should reference it since we moved over all the fk's to asset_entity
-                        await queryRunner.manager.delete(ResourceInventoryOffsetEntity, { id: Like(`${minecraftUuid}-%`) })
                         await queryRunner.manager.delete(ResourceInventoryEntity, { id: Like(`${minecraftUuid}-%`) })
                         this.logger.debug(`user.service::linkMinecraftByUserUuid successfully merged bait!`, this.context)
 
@@ -295,7 +300,7 @@ export class UserService {
                         this.logger.debug(`user.service::linkMinecraftByUserUuid just mc user has bait`, this.context)
 
                         //update id on resource_inventory_entity will cascade to fks on asset_entity and resource_inventory_offset_entity, then just need to update id on resource_inventory_offset_entity
-                        const mcUserBait = await queryRunner.manager.findOne(ResourceInventoryEntity, { where: { id: Like(`${minecraftUuid}-%`) }, relations: ["offset"] })
+                        const mcUserBait = await queryRunner.manager.findOne(ResourceInventoryEntity, { where: { id: Like(`${minecraftUuid}-%`) }, relations: ["offsets"] })
                         const mcUserBaitAmount = BigNumber.from(mcUserBait?.amount ?? '0')
                         this.logger.debug(`user.service::linkMinecraftByUserUuid [MC User] Bait: ${formatEther(mcUserBaitAmount)}`, this.context)
 
