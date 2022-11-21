@@ -521,7 +521,8 @@ export class GameApiService {
                                     amount: parseEther(newItem.inv.amount).toString(),
                                     resourceInventory,
                                     at: new Date(game.startedAt),
-                                    note: game.id ?? null
+                                    note: game.id ?? null,
+                                    game
                                 })
                             }
                         } else {

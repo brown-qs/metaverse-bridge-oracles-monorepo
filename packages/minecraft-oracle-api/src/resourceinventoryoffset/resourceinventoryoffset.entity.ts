@@ -4,6 +4,7 @@ import {
     IsString
 } from 'class-validator';
 import { Column, Entity, Index, OneToOne, PrimaryColumn, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { GameEntity } from '../game/game.entity';
 import { ResourceInventoryEntity } from '../resourceinventory/resourceinventory.entity';
 
 @Entity()
@@ -32,4 +33,7 @@ export class ResourceInventoryOffsetEntity {
     //we need cascade update here because user migrations change the id of ResourceInventoryEntity because it contains uuid
     @ManyToOne(() => ResourceInventoryEntity, (rie) => rie.offsets, { onUpdate: "CASCADE" })
     resourceInventory: ResourceInventoryEntity;
+
+    @ManyToOne(() => GameEntity, (en) => en.resourceInventoryOffsets, { nullable: true })
+    game?: GameEntity;
 }
