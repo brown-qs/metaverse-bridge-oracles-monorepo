@@ -14,13 +14,32 @@ export const InGameResource: React.FC<InGameResourceProps> = ({ token, ...inProp
     const lineOne: string | undefined = React.useMemo(() => formatInGameTokenName(token), [token])
     const lineOneSuffix: string | undefined = React.useMemo(() => formatInGameTokenSuffix(token), [token])
 
+    const lineTwo: string | undefined = React.useMemo(() => {
+        let lineTwo = ""
+        if (!!NETWORK_NAME[token.chainId]) {
+            lineTwo = NETWORK_NAME[token.chainId]
+        }
+
+        if (token.inventorySummonEnabled === false) {
+            if (lineTwo.length === 0) {
+                lineTwo = "Summon disabled."
+            } else {
+                lineTwo = lineTwo + ". Summon disabled."
+            }
+        }
+
+        if (lineTwo.length === 0) {
+            return undefined
+        }
+        return lineTwo
+    }, [token])
     const props: PortalTabListItemProps = {
         mediaUrl: token?.metadata?.image ?? undefined,
         isLoading: !!token?.metadata !== true,
         lineOne,
         lineOneSuffix,
         mediaRedOutline: false,
-        lineTwo: NETWORK_NAME[token.chainId] ?? undefined,
+        lineTwo,
         highlightable: true,
 
         onClick: undefined,

@@ -23,7 +23,6 @@ export function SummonModal() {
 
     const [summon, { data, error, isUninitialized, isLoading, isSuccess, isError, reset }] = useSummonMutation()
     const [selectedChainId, setSelectedChainId] = useState<number>(DEFAULT_CHAIN);
-    const { account } = useActiveWeb3React();
 
     const handleClose = () => {
         reset()
@@ -37,7 +36,6 @@ export function SummonModal() {
         }
     }, [isOpen])
 
-    const recipient = account
 
     const baseProps = {
         isOpenSelector: selectSummonModalOpen,
