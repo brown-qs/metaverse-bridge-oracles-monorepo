@@ -5,13 +5,14 @@ import {
     IsString
 } from 'class-validator';
 import { InventoryEntity } from '../playerinventory/inventory.entity';
-import { Column, Entity, Index, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import { Column, Entity, Index, ManyToOne, OneToMany, PrimaryColumn, Unique } from 'typeorm';
 import { SnapshotItemEntity } from '../snapshot/snapshotItem.entity';
 import { SnaplogEntity } from '../snaplog/snaplog.entity';
 import { CollectionFragmentEntity } from '../collectionfragment/collectionfragment.entity';
 
 @Entity()
 @Index(['name'], { unique: true })
+@Unique(["fungibleInputCollectionFragment", "fungibleInputAssetId"])
 export class MaterialEntity {
 
     constructor(material: Partial<MaterialEntity>) {
