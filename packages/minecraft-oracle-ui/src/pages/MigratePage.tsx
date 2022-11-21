@@ -195,6 +195,7 @@ const MigratePage = () => {
                         importable: false,
                         exportable: false,
                         summonable: false,
+                        inventorySummonEnabled: false,
                         gamepass: false,
                         multiverseVersion: MultiverseVersion.V2,
 
