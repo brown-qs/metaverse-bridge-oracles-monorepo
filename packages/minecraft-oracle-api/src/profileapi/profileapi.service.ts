@@ -105,6 +105,7 @@ export class ProfileApiService {
                 treatAsFungible: asset.collectionFragment.treatAsFungible,
                 hash: asset.hash,
                 summonable: false,
+                inventorySummonEnabled: false, //just a dumbass hardcode, its not relevant here
                 recognizedAssetType: asset.collectionFragment.recognizedAssetType,
                 enraptured: asset.enraptured,
                 gamepass: asset.collectionFragment.gamepass,
@@ -137,12 +138,13 @@ export class ProfileApiService {
                 exportable: false,
                 treatAsFungible: false,
                 summonable: true,
+                inventorySummonEnabled: item.material.collectionFragment.collection.chain.inventorySummonEnabled,
                 recognizedAssetType: item.material.collectionFragment.recognizedAssetType,
                 enraptured: false,
                 gamepass: false,
                 chainId: item.material.collectionFragment.collection.chainId,
                 exportAddress: undefined,
-                multiverseVersion: MultiverseVersion.V2
+                multiverseVersion: MultiverseVersion.V2,
             }
         })
         return resources
