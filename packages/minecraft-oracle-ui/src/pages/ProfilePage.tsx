@@ -759,12 +759,8 @@ const ProfilePage = () => {
                                         <Button
                                             rightIcon={<CaretRight></CaretRight>}
                                             onClick={() => {
-                                                if (!!account) {
-                                                    dispatch(setSummonModalSummonAddresses(summonAddresses))
-                                                    dispatch(openSummonModal())
-                                                } else {
-                                                    onAccountDialogOpen()
-                                                }
+                                                dispatch(setSummonModalSummonAddresses(summonAddresses))
+                                                dispatch(openSummonModal())
                                             }}
                                             isDisabled={isSummonButtonDisabled} w="100%">SUMMON ALL RESOURCES
                                         </Button>
