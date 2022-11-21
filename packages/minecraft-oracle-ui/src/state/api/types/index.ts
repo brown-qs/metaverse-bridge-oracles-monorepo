@@ -106,8 +106,9 @@ export type BridgedAssetDto = {
     assetType: string
     amount: string
     exportable: boolean
-    treatAsFungible: boolean,
+    treatAsFungible: boolean
     summonable: boolean
+    inventorySummonEnabled: boolean
     recognizedAssetType: string
     enraptured: boolean
     gamepass: boolean
