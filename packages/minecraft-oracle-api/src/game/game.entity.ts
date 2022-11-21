@@ -14,6 +14,8 @@ import { PlaySessionStatEntity } from '../playsession/playsessionstat.entity';
 import { GameItemTypeEntity } from '../gameitemtype/gameitemtype.entity';
 import { PlayerGameItemEntity } from '../playergameitem/playergameitem.entity';
 import { GameScoreTypeEntity } from '../gamescoretype/gamescoretype.entity';
+import { ResourceInventoryEntity } from '../resourceinventory/resourceinventory.entity';
+import { ResourceInventoryOffsetEntity } from '../resourceinventoryoffset/resourceinventoryoffset.entity';
 
 
 @Entity()
@@ -23,7 +25,7 @@ export class GameEntity {
         Object.assign(this, entity);
     }
 
-    @PrimaryColumn({unique: true})
+    @PrimaryColumn({ unique: true })
     id: string;
 
     @Column({ nullable: true, default: false })
@@ -50,7 +52,7 @@ export class GameEntity {
     @IsString()
     image?: string;
 
-    @Column({type: "bigint"})
+    @Column({ type: "bigint" })
     @IsString()
     startedAt: string;
 
@@ -65,7 +67,7 @@ export class GameEntity {
     @Column({ nullable: true })
     @IsString()
     state?: string;
-  
+
 
     @OneToMany(() => AchievementEntity, (achievement) => achievement.game)
     achievements?: AchievementEntity[];
@@ -99,4 +101,7 @@ export class GameEntity {
 
     @OneToMany(() => GameScoreTypeEntity, (gameScoreType) => gameScoreType.game)
     gameScoreTypes?: GameScoreTypeEntity[];
+
+    @OneToMany(() => ResourceInventoryOffsetEntity, (en) => en.game)
+    resourceInventoryOffsets?: ResourceInventoryOffsetEntity[];
 }
