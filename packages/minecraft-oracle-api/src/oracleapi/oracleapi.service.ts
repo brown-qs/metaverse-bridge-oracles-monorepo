@@ -876,17 +876,17 @@ export class OracleApiService {
 
         if (!recipient || recipient.length !== 42 || !recipient.startsWith('0x')) {
             this.logger.error(`${funcCallPrefix} recipient invalid: ${recipient}}`, null, this.context)
-            throw new UnprocessableEntityException('Recipient invalid')
+            throw new BadRequestException('Recipient invalid')
         }
 
         if (user.blacklisted) {
             this.logger.error(`${funcCallPrefix} user blacklisted`, null, this.context)
-            throw new UnprocessableEntityException(`Blacklisted`)
+            throw new BadRequestException(`Blacklisted`)
         }
         const gamepass = await this.assetService.findOne({ owner: user, assetOwner: ILike(recipient?.toLowerCase()), collectionFragment: { gamepass: true } }, { relations: ["collectionFragment"] })
         if (!gamepass) {
             this.logger.error(`${funcCallPrefix} no gamepasses associated with recipient.`, null, this.context)
-            throw new UnprocessableEntityException(`No gamepasses associated with recipient.`)
+            throw new BadRequestException(`No gamepasses associated with recipient.`)
         }
 
         const inventoryItems = await this.inventoryService.findMany({ relations: ['owner', 'material', 'material.collectionFragment', 'material.collectionFragment.collection', 'material.collectionFragment.collection.chain'], where: { owner: { uuid: user.uuid }, summonInProgress: false, material: { collectionFragment: { collection: { chain: { inventorySummonEnabled: true } } } } }, loadEagerRelations: true })
