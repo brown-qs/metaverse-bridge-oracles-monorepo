@@ -889,12 +889,8 @@ export class OracleApiService {
             throw new UnprocessableEntityException(`No gamepasses associated with recipient.`)
         }
 
-        const inventoryItems = await this.inventoryService.findMany({ relations: ['owner', 'material', 'material.collectionFragment', 'material.collectionFragment.collection'], where: { owner: { uuid: user.uuid }, summonInProgress: false }, loadEagerRelations: true })
-        const missingRelationships = inventoryItems.some(i => !(!!i?.material?.collectionFragment?.collection?.chainId))
-        if (missingRelationships) {
-            this.logger.error(`${funcCallPrefix} summon stopping due to missing relationships.`, null, this.context)
-            throw new UnprocessableEntityException(`Summon failed due to inventory being incorrectly configured. Please contact support.`)
-        }
+        const inventoryItems = await this.inventoryService.findMany({ relations: ['owner', 'material', 'material.collectionFragment', 'material.collectionFragment.collection', 'material.collectionFragment.collection.chain'], where: { owner: { uuid: user.uuid }, summonInProgress: false, material: { collectionFragment: { collection: { chain: { inventorySummonEnabled: true } } } } }, loadEagerRelations: true })
+
 
         if (!inventoryItems || inventoryItems.length === 0) {
             const inventoryItemsSummonInProgress = await this.inventoryService.findMany({ relations: ['owner'], where: { owner: { uuid: user.uuid }, summonInProgress: true } })
