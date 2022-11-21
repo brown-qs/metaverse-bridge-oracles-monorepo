@@ -13,10 +13,11 @@ export type CustomizerCardProps = {
     imageUrl: string,
     width: number,
     height: number,
+    selected: boolean,
     children?: ReactNode,
 }
 
-const CustomizerCard = ({ imageUrl, height, width, children }: CustomizerCardProps) => {
+const CustomizerCard = ({ imageUrl, height, width, children, selected }: CustomizerCardProps) => {
     /* const smallImageLoadRef = React.useRef<boolean>(false)
      const smallImageErrorRef = React.useRef<boolean>(false)
      const fullImageLoadRef = React.useRef<boolean>(false)
@@ -50,19 +51,19 @@ const CustomizerCard = ({ imageUrl, height, width, children }: CustomizerCardPro
     background-position: ${width}px;
   }`
     return (
-        <VStack spacing="0" w={width} minH={height} h={height} borderRadius="12px" overflow="hidden" boxShadow="md">
+        <VStack spacing="0" w={width} minH={height} h={height} borderRadius="12px" overflow="hidden" border={selected ? "2px solid var(--chakra-colors-teal-200)" : "2px solid transparent"} _hover={{ border: selected ? "2px solid var(--chakra-colors-teal-200)" : "2px solid var(--chakra-colors-whiteAlpha-600)" }}>
             <Box w={width} h={width} bg="whiteAlpha.50" position="relative">
                 <Box opacity={(fullImageLoaded || fullImageError || smallImageLoaded) ? "0" : "1"} top="0" right="0" bottom="0" left="0" position="absolute" animation={`${skeletonAnimation} 1.6s linear infinite`}></Box>
                 <Box opacity={(smallImageLoaded && !smallImageError) ? "1" : "0"} top="0" right="0" bottom="0" left="0" position="absolute">
-                    <Image htmlWidth={width} htmlHeight={width} src={smallImageUrl} onError={smallImageErrorCb} onLoad={smallImageLoadCb}></Image>
+                    <Image transform="scale(1.02)" htmlWidth={width} htmlHeight={width} src={smallImageUrl} onError={smallImageErrorCb} onLoad={smallImageLoadCb}></Image>
                 </Box>
                 <Fade in={fullImageLoaded}>
                     <Box opacity={(fullImageLoaded || fullImageError) ? "1" : "0"} top="0" right="0" bottom="0" left="0" position="absolute">
-                        <Image fallback={<ImageFallback></ImageFallback>} htmlWidth={width} htmlHeight={width} src={fullImageUrl} onError={fullImageErrorCb} onLoad={fullImageLoadCb}></Image>
+                        <Image transform="scale(1.02)" fallback={<ImageFallback></ImageFallback>} htmlWidth={width} htmlHeight={width} src={fullImageUrl} onError={fullImageErrorCb} onLoad={fullImageLoadCb}></Image>
                     </Box>
                 </Fade>
             </Box>
-            <VStack flex="1" w="100%" justifyContent="space-between" bg="gray.700" padding="8px" paddingTop="12px" spacing="0">
+            <VStack flex="1" w="100%" justifyContent="space-between" bg="gray.700" padding="8px" paddingTop="12px" spacing="0" zIndex="1">
                 {children}
             </VStack>
         </VStack >)

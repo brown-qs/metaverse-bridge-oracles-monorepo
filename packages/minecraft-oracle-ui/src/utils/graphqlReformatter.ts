@@ -34,6 +34,7 @@ export type RecognizedTokenDataType = {
     importable: boolean
     exportable: boolean
     summonable: boolean
+    inventorySummonEnabled: boolean
     gamepass: boolean
     multiverseVersion: MultiverseVersion
 }
@@ -72,6 +73,7 @@ export const addRegonizedTokenDataToStandardizedOnChainTokens = (tokens: Standar
                     importable: collectionFragment.importable,
                     exportable: collectionFragment.exportable,
                     summonable: collectionFragment.summonable,
+                    inventorySummonEnabled: false,
                     gamepass: collectionFragment.gamepass,
                     multiverseVersion: recognizedAsset.multiverseVersion,
                     ...tok

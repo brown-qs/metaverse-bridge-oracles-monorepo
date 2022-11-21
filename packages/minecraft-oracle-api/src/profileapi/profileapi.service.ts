@@ -62,7 +62,7 @@ export class ProfileApiService {
 
 
     async getInGameItems(user: UserEntity): Promise<AssetDto[]> {
-        const userAssets = await this.assetService.findMany({ where: { owner: user.uuid, pendingIn: false }, relations: ['collectionFragment', 'collectionFragment.collection', 'resourceInventory', 'resourceInventory.offset'], loadEagerRelations: true })
+        const userAssets = await this.assetService.findMany({ where: { owner: user.uuid, pendingIn: false }, relations: ['collectionFragment', 'collectionFragment.collection', 'resourceInventory', 'resourceInventory.offsets'], loadEagerRelations: true })
         const assets: AssetDto[] = []
         for (const asset of userAssets) {
             const assetAddress = asset.collectionFragment.collection.assetAddress.toLowerCase()
@@ -73,12 +73,19 @@ export class ProfileApiService {
             //combine fungibles
             if (treatAsFungible) {
                 const existingEntry = assets.find(a => a.assetAddress === assetAddress && a.assetId === asset.assetId)
-                let balance = BigNumber.from(asset.amount)
+                let balance = BigNumber.from("0")
                 if (!!asset.resourceInventory) {
                     balance = BigNumber.from(asset?.resourceInventory?.amount ?? "0")
-                    if (!!asset.resourceInventory.offset) {
-                        balance = balance.sub(BigNumber.from(asset?.resourceInventory?.offset?.amount ?? "0"))
+
+
+                    if (!!asset?.resourceInventory?.offsets?.[0]) {
+                        let totalOffsets = BigNumber.from("0")
+                        for (const offset of asset?.resourceInventory?.offsets) {
+                            totalOffsets = totalOffsets.add(offset.amount ?? '0')
+                        }
+                        balance = balance.sub(totalOffsets)
                     }
+
                 }
                 asset.amount = formatUnits(balance, asset?.collectionFragment?.decimals ?? 18)
 
@@ -98,6 +105,7 @@ export class ProfileApiService {
                 treatAsFungible: asset.collectionFragment.treatAsFungible,
                 hash: asset.hash,
                 summonable: false,
+                inventorySummonEnabled: false, //just a dumbass hardcode, its not relevant here
                 recognizedAssetType: asset.collectionFragment.recognizedAssetType,
                 enraptured: asset.enraptured,
                 gamepass: asset.collectionFragment.gamepass,
@@ -130,12 +138,13 @@ export class ProfileApiService {
                 exportable: false,
                 treatAsFungible: false,
                 summonable: true,
+                inventorySummonEnabled: item.material.collectionFragment.collection.chain.inventorySummonEnabled,
                 recognizedAssetType: item.material.collectionFragment.recognizedAssetType,
                 enraptured: false,
                 gamepass: false,
                 chainId: item.material.collectionFragment.collection.chainId,
                 exportAddress: undefined,
-                multiverseVersion: MultiverseVersion.V2
+                multiverseVersion: MultiverseVersion.V2,
             }
         })
         return resources
