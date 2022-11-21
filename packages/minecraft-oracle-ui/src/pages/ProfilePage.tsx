@@ -220,6 +220,16 @@ const ProfilePage = () => {
 
     }, [inGameResourcesData, inGameResourcesMetadata])
 
+    const isSummonButtonDisabled: boolean = React.useMemo(() => {
+
+        const summonableResources = inGameResources.filter(r => r.inventorySummonEnabled === true)
+
+        if (inGameResources.length === 0 || summonableResources.length === 0) {
+            return true
+        }
+        return false
+    }, [inGameResources])
+
 
     const onChainItems: StandardizedOnChainTokenWithRecognizedTokenData[] = React.useMemo(() => {
         return (allStandardizedOnChainTokensWithRecognizedTokenData ?? []).filter((tok) => {
@@ -756,7 +766,7 @@ const ProfilePage = () => {
                                                     onAccountDialogOpen()
                                                 }
                                             }}
-                                            isDisabled={!inGameResources?.length} w="100%">SUMMON ALL RESOURCES
+                                            isDisabled={isSummonButtonDisabled} w="100%">SUMMON ALL RESOURCES
                                         </Button>
                                     }
                                     icon={<DeviceGamepad size="18px" />}
