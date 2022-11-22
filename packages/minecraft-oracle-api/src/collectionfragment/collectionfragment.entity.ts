@@ -89,4 +89,7 @@ export class CollectionFragmentEntity {
 
     @OneToMany(() => MaterialEntity, (material) => material.collectionFragment)
     materials?: MaterialEntity[];
+
+    @OneToMany(() => MaterialEntity, (en) => en.collectionFragment, { nullable: true })
+    materialFungibleInputs: MaterialEntity[];
 }

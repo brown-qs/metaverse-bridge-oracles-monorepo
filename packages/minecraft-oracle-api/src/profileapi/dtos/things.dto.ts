@@ -32,9 +32,13 @@ export class AssetDto {
     @IsBoolean()
     exportable: boolean
 
-    @ApiProperty({ description: 'Whether the asset can be summoned as a token' })
+    @ApiProperty({ description: 'Whether to show asset in-game resource/ on-chain resources' })
     @IsBoolean()
     summonable: boolean
+
+    @ApiProperty({ description: 'Asset will be shown in inventory but not able to be summoned if false' })
+    @IsBoolean()
+    inventorySummonEnabled: boolean
 
     @ApiProperty({ description: 'Recognized Asset Type, MSAMA | TICKET | TEST | PLOT | OFFHAND | WEAPON_SKIN | TEMPORARY_TICKET' })
     @IsString()

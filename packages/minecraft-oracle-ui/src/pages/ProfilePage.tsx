@@ -1,8 +1,6 @@
 
 import { useAccountDialog, useActiveWeb3React } from 'hooks';
-import { stringToStringAssetType } from 'utils/subgraph';
-import { Fraction } from 'utils/Fraction';
-import { countGamePassAssets } from 'utils';
+
 import { useAssetDialog } from '../hooks/useAssetDialog/useAssetDialog';
 import React, { FC, ReactNode, useEffect, useState } from 'react';
 import { SKIN_LABELS } from '../constants/skins';
@@ -14,7 +12,6 @@ import { CaretLeft, CaretRight, DeviceGamepad, UserCircle, Wallet } from 'tabler
 import { InGameResource } from '../components/Portal/InGameResource';
 import { OnChainResource } from '../components/Portal/OnChainResource';
 import { OnChainItem } from '../components/Portal/OnChainItem';
-import BackgroundImage from '../assets/images/bridge-background-blur.svg'
 import { useSetSkinMutation, useGetSkinsQuery, useUserProfileQuery, useGetRecognizedAssetsQuery, useGetInGameItemsQuery, useGetInGameResourcesQuery, useGetExosMutation } from '../state/api/bridgeApi';
 import { Virtuoso } from 'react-virtuoso'
 import { CollectionFragmentDto, MultiverseVersion, SkinResponse } from '../state/api/types';
@@ -222,6 +219,16 @@ const ProfilePage = () => {
             .sort((a, b) => `${a.assetAddress}~${a.assetId}`.localeCompare(`${b.assetAddress}~${b.assetId}`, 'en', { numeric: true }))
 
     }, [inGameResourcesData, inGameResourcesMetadata])
+
+    const isSummonButtonDisabled: boolean = React.useMemo(() => {
+
+        const summonableResources = inGameResources.filter(r => r.inventorySummonEnabled === true)
+
+        if (inGameResources.length === 0 || summonableResources.length === 0) {
+            return true
+        }
+        return false
+    }, [inGameResources])
 
 
     const onChainItems: StandardizedOnChainTokenWithRecognizedTokenData[] = React.useMemo(() => {
@@ -752,14 +759,10 @@ const ProfilePage = () => {
                                         <Button
                                             rightIcon={<CaretRight></CaretRight>}
                                             onClick={() => {
-                                                if (!!account) {
-                                                    dispatch(setSummonModalSummonAddresses(summonAddresses))
-                                                    dispatch(openSummonModal())
-                                                } else {
-                                                    onAccountDialogOpen()
-                                                }
+                                                dispatch(setSummonModalSummonAddresses(summonAddresses))
+                                                dispatch(openSummonModal())
                                             }}
-                                            isDisabled={!inGameResources?.length} w="100%">SUMMON ALL RESOURCES
+                                            isDisabled={isSummonButtonDisabled} w="100%">SUMMON ALL RESOURCES
                                         </Button>
                                     }
                                     icon={<DeviceGamepad size="18px" />}

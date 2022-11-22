@@ -1,0 +1,71 @@
+import React, { ComponentType, memo } from "react"
+import { CompositeConfigPartDto } from "../../state/api/types"
+import { GridChildComponentProps, areEqual, FixedSizeGrid as _FixedSizeGrid, FixedSizeGridProps } from "react-window"
+import { Box } from "@chakra-ui/react"
+import TraitCustomizerCard from "./TraitCustomizerCard"
+
+export type TraitVirtualListProps = {
+    numColumns: number,
+    columnWidth: number,
+    rowHeight: number,
+    gridWidth: number,
+    gridHeight: number,
+    part: CompositeConfigPartDto
+}
+
+
+const TraitVirtualList = ({ numColumns, columnWidth, rowHeight, gridWidth, gridHeight, part }: TraitVirtualListProps) => {
+    React.useEffect(() => {
+        console.log("TraitVirtualList:: MOUNT ")
+    }, [])
+    console.log(`TraitVirtualList:: ${gridWidth}`)
+    const FixedSizeGrid = _FixedSizeGrid as ComponentType<FixedSizeGridProps>;
+    const TraitCell = memo(({ columnIndex, rowIndex, style, data }: GridChildComponentProps) => {
+        let w: number = parseInt(style?.width as string) - 8
+        let h: number = parseInt(style?.height as string) - 8
+
+        //   w = w + 8
+        //h = h + 8
+        const asset = data.part.items[(data.numCols * rowIndex) + columnIndex]
+
+        if (!!asset) {
+            return (
+                <Box style={style}>
+                    <TraitCustomizerCard
+                        owned={false}
+                        synthetic={data.part.synthetic}
+                        default={true}
+                        equipped={false}
+                        width={w}
+                        height={h}
+                        chainId={part.chainId}
+                        assetAddress={part.assetAddress}
+                        assetId={asset.assetId}
+                        imageUrl={`${process.env.REACT_APP_COMPOSITE_MEDIA_URI_PREFIX}/customizer/${part.chainId}/${part.assetAddress}/${asset.assetId}.png`}
+                    ></TraitCustomizerCard>
+                </Box>
+
+            )
+        } else {
+            return <></>
+        }
+
+    }, areEqual);
+
+    return (<FixedSizeGrid
+        style={{ overflowX: "hidden" }}
+        columnCount={numColumns}
+        columnWidth={columnWidth}
+        rowCount={Math.ceil(part.items.length / numColumns)}
+        rowHeight={rowHeight}
+
+        height={gridHeight}
+        width={gridWidth}
+        itemData={{ numCols: numColumns, part }}
+        overscanRowCount={3}
+    // className={grid}
+    >
+        {TraitCell}
+    </FixedSizeGrid>)
+}
+export default React.memo(TraitVirtualList)
