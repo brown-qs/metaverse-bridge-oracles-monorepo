@@ -388,6 +388,7 @@ export class GameApiService {
         }
     }
 
+
     public async bank(dto: BankDto): Promise<boolean> {
 
         this.ensureLock('bank')
@@ -401,8 +402,9 @@ export class GameApiService {
             let take = 100
 
             const gameFindCondition = dto?.gameId ? { id: dto.gameId } : null
+            const game = await this.gameService.findOne(gameFindCondition)
             do {
-                batch = await this.snapshotService.findMany({ where: { game: gameFindCondition }, take, skip, relations: ['material', 'owner', 'game'] })
+                batch = await this.snapshotService.findMany({ where: { game: gameFindCondition }, take, skip, relations: ['material', 'owner', 'game', 'material.fungibleInputCollectionFragment'] })
                 //console.log(batch)
 
                 if (!!batch && batch.length > 0) {
@@ -423,14 +425,14 @@ export class GameApiService {
             const allUsers = await this.userService.findMany({})
             this.logger.warn(`Bank:: ${allUsers.length} users found`, this.context)
 
-            /*
-            allUsers.map(user => {
-                if (!users[user.uuid]) {
-                    users[user.uuid] = true
-                    distinct+=1
-                }
-            })
-            */
+
+            // allUsers.map(user => {
+            //    if (!users[user.uuid]) {
+            //         users[user.uuid] = true
+            //         distinct+=1
+            //     }
+            //    })
+
 
             if (!items || items.length === 0) {
                 this.logger.warn(`Bank: snapshotted items were not found`, this.context)
@@ -471,7 +473,7 @@ export class GameApiService {
                     }
                 })))
 
-                const existingInvItems = await this.inventoryService.findMany({ where: { owner: user.uuid }, relations: ['owner', 'material'] })
+                const existingInvItems = await this.inventoryService.findMany({ where: { owner: user.uuid }, relations: ['owner', 'material', 'material.fungibleInputCollectionFragment'] })
 
                 // update inventory item and delete snapshot item on success
                 await Promise.all(Object.keys(inventoryMap).map(async (id: string) => {
@@ -504,24 +506,27 @@ export class GameApiService {
                         this.logger.error(e, null, this.context)
                     }
 
-                    // FIXME event sourcing
-                    // FIXME hardcoding
-                    if (newItem.inv.material.name === 'FISH_SPECIMEN') {
-                        const _id = `${newItem.inv.owner.uuid}-1285-0x1b30a3b5744e733d8d2f19f0812e3f79152a8777-14`
-                        const offset = await this.resourceInventoryOffsetService.findOne({ id: _id }, { relations: ['resourceInventory', 'resourceInventory.owner'], loadEagerRelations: true })
-                        if (!offset) {
+
+                    //SET fungibleInputCollectionFragment and fungibleInputAssetId on material entity so
+                    if (!!newItem?.inv?.material?.fungibleInputCollectionFragment && !isNaN(newItem.inv.material.fungibleInputAssetId) && newItem?.inv?.material?.fungibleInputCollectionFragment.treatAsFungible === true) {
+                        const chainId = newItem?.inv?.material?.fungibleInputCollectionFragment?.collection?.chainId
+                        const assetAddress = newItem?.inv?.material?.fungibleInputCollectionFragment?.collection?.assetAddress
+                        const assetId = newItem.inv.material.fungibleInputAssetId
+                        const _id = `${newItem.inv.owner.uuid}-${chainId}-${assetAddress}-${assetId}`
+                        const resourceInventory = await this.resourceInventoryService.findOne({ id: _id }, { relations: ['owner'], loadEagerRelations: true })
+                        if (!!resourceInventory) {
                             const resourceInventory = await this.resourceInventoryService.findOne({ id: _id })
-                            resourceInventory.owner
                             if (!!resourceInventory) {
                                 await this.resourceInventoryOffsetService.create({
-                                    id: _id,
                                     amount: parseEther(newItem.inv.amount).toString(),
-                                    resourceInventory
+                                    resourceInventory,
+                                    at: new Date(game.startedAt),
+                                    note: game.id ?? null,
+                                    game
                                 })
                             }
                         } else {
-                            const updatedAmount = parseEther(newItem.inv.amount).add(offset.amount).toString()
-                            await this.resourceInventoryOffsetService.update(_id, { amount: updatedAmount })
+                            console.log(`bank:: couldn't find resource inventory entry for ${_id} uuid: ${newItem.inv.owner.uuid}`)
                         }
                     }
                 }))

@@ -18,6 +18,7 @@ import { ChainId } from "../../constants"
 import GhostButton from "../../pages/components/GhostButton"
 import TraitCard from "../../pages/components/TraitCard/TraitCard"
 import { MoonsamaSpinner } from "../MoonsamaSpinner"
+import IndividualCustomizerView from "./IndividualCustomizerView"
 
 export type IndividualCustomizerProps = {
     chainId: number,
@@ -77,63 +78,9 @@ const IndividualCustomizer = ({ chainId, assetAddress, assetId }: IndividualCust
 
 
     return (
-        <Grid
-            templateColumns={{ base: 'repeat(1, 1fr)', lg: 'repeat(2, 1fr)' }}
-            maxWidth="1536px"
-            margin="0 auto"
-            gap="20px"
-        >
-            <Box>
-                <Box
-                    bgImg="https://dev.static.moonsama.com/customizer-ui/exosama-preview-background.jpg"
-                    bgSize="cover"
-                    bgColor="rgba(255, 255, 255, 0.05)"
-                    transition="0.2s"
-                    position="relative"
-                    _after={{ content: '""', display: 'block', paddingBottom: '100%' }}
-                >
-                </Box>
-            </Box>
-            <Box>
-                <Accordion allowToggle>
-                    {customizerConfigData.parts.map((part) => {
-                        const { name, items } = part;
-
-                        /*
-                        // Filter Expressions and Vibes based on body type
-                        let filteredItems = items;
-                        if (['Expression', 'Vibe'].includes(name)) {
-                            filteredItems = filteredItems.filter((item) => {
-                                return item.attributes.map((a) => a.value).includes(bodyType);
-                            });
-                        }
-                        if (['Vibe'].includes(name)) {
-                            filteredItems = filteredItems.filter((item) => {
-                                return item.attributes
-                                    .map((a) => a.value)
-                                    .includes(expressionType);
-                            });
-                        }*/
-
-                        return (
-                            <AccordionItem key={name}>
-                                <h2>
-                                    <AccordionButton>
-                                        <Box flex="1" textAlign="left" fontFamily="Orbitron">
-                                            {name}
-                                        </Box>
-                                        <AccordionIcon />
-                                    </AccordionButton>
-                                </h2>
-                                <AccordionPanel h="300px">
-
-                                </AccordionPanel>
-                            </AccordionItem>
-                        );
-                    })}
-                </Accordion>
-            </Box>
-        </Grid>
+        <Box>
+            <IndividualCustomizerView customizerConfig={customizerConfigData}></IndividualCustomizerView>
+        </Box>
     )
 }
 
