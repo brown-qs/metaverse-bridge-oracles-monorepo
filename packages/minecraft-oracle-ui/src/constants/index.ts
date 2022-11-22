@@ -408,7 +408,6 @@ export const EXN_RSS: HardCodedToken[] = [
   }
 
 ]
-console.log(EXN_RSS)
 export function numberFormatter(num: string) {
   //needs to always be 6 digits!!
   //cant do 5 because of -10k no room for decimal place
