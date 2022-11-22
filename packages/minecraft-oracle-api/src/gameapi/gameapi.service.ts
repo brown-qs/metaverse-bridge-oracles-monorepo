@@ -388,7 +388,15 @@ export class GameApiService {
         }
     }
 
+    public async deleteSnapshots(): Promise<void> {
+        this.ensureLock('bank')
+        const banklock = this.locks.get('bank')
 
+        await banklock.runExclusive(async () => {
+            const snapshots = await this.snapshotService.findMany({})
+            await this.snapshotService.removeAll(snapshots)
+        })
+    }
     public async bank(dto: BankDto): Promise<boolean> {
 
         this.ensureLock('bank')
@@ -404,7 +412,7 @@ export class GameApiService {
             const gameFindCondition = dto?.gameId ? { id: dto.gameId } : null
             const game = await this.gameService.findOne(gameFindCondition)
             do {
-                batch = await this.snapshotService.findMany({ where: { game: gameFindCondition }, take, skip, relations: ['material', 'owner', 'game', 'material.fungibleInputCollectionFragment'] })
+                batch = await this.snapshotService.findMany({ where: { game: gameFindCondition }, take, skip, relations: ['material', 'owner', 'game', 'material.fungibleInputCollectionFragment', 'material.fungibleInputCollectionFragment.collection', 'material.fungibleInputCollectionFragment.collection.chain'] })
                 //console.log(batch)
 
                 if (!!batch && batch.length > 0) {
@@ -473,8 +481,7 @@ export class GameApiService {
                     }
                 })))
 
-                const existingInvItems = await this.inventoryService.findMany({ where: { owner: user.uuid }, relations: ['owner', 'material', 'material.fungibleInputCollectionFragment'] })
-
+                const existingInvItems = await this.inventoryService.findMany({ where: { owner: user.uuid }, relations: ['owner', 'material'] })
                 // update inventory item and delete snapshot item on success
                 await Promise.all(Object.keys(inventoryMap).map(async (id: string) => {
                     const newItem = inventoryMap[id]
@@ -508,23 +515,20 @@ export class GameApiService {
 
 
                     //SET fungibleInputCollectionFragment and fungibleInputAssetId on material entity so
-                    if (!!newItem?.inv?.material?.fungibleInputCollectionFragment && !isNaN(newItem.inv.material.fungibleInputAssetId) && newItem?.inv?.material?.fungibleInputCollectionFragment.treatAsFungible === true) {
+                    if (!!newItem?.inv?.material?.fungibleInputCollectionFragment && !isNaN(newItem?.inv?.material?.fungibleInputAssetId) && newItem?.inv?.material?.fungibleInputCollectionFragment?.treatAsFungible === true) {
                         const chainId = newItem?.inv?.material?.fungibleInputCollectionFragment?.collection?.chainId
                         const assetAddress = newItem?.inv?.material?.fungibleInputCollectionFragment?.collection?.assetAddress
                         const assetId = newItem.inv.material.fungibleInputAssetId
                         const _id = `${newItem.inv.owner.uuid}-${chainId}-${assetAddress}-${assetId}`
                         const resourceInventory = await this.resourceInventoryService.findOne({ id: _id }, { relations: ['owner'], loadEagerRelations: true })
                         if (!!resourceInventory) {
-                            const resourceInventory = await this.resourceInventoryService.findOne({ id: _id })
-                            if (!!resourceInventory) {
-                                await this.resourceInventoryOffsetService.create({
-                                    amount: parseEther(newItem.inv.amount).toString(),
-                                    resourceInventory,
-                                    at: new Date(game.startedAt),
-                                    note: game.id ?? null,
-                                    game
-                                })
-                            }
+                            await this.resourceInventoryOffsetService.create({
+                                amount: parseEther(newItem.inv.amount).toString(),
+                                resourceInventory,
+                                at: new Date(parseInt(game.startedAt)),
+                                note: game.id ?? null,
+                                game
+                            })
                         } else {
                             console.log(`bank:: couldn't find resource inventory entry for ${_id} uuid: ${newItem.inv.owner.uuid}`)
                         }
