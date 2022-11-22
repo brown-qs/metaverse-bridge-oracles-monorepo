@@ -388,7 +388,15 @@ export class GameApiService {
         }
     }
 
+    public async deleteSnapshots(): Promise<void> {
+        this.ensureLock('bank')
+        const banklock = this.locks.get('bank')
 
+        await banklock.runExclusive(async () => {
+            const snapshots = await this.snapshotService.findMany({})
+            await this.snapshotService.removeAll(snapshots)
+        })
+    }
     public async bank(dto: BankDto): Promise<boolean> {
 
         this.ensureLock('bank')
