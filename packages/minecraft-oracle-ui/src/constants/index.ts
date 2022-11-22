@@ -346,7 +346,7 @@ export const EXN_RSS: HardCodedToken[] = [
     ...BASE_EXN_RSS,
     assetId: 1,
     metadata: {
-      name: "Pumkin",
+      name: "Pumpkin",
       image: BetaPumpkin,
     }
   },
