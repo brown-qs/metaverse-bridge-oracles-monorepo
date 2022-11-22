@@ -190,6 +190,15 @@ export class GameApiController {
         return successArray
     }
 
+    @Delete('snapshots')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Wipes snapshot_item_entity' })
+    @ApiBearerAuth('AuthenticationHeader')
+    @UseGuards(SharedSecretGuard)
+    async deleteSnapshots(): Promise<void> {
+        await this.gameApiService.deleteSnapshots()
+    }
+
     @Put('player/:uuid/serverId')
     @HttpCode(200)
     @ApiOperation({ summary: 'Sets server id for a user' })
