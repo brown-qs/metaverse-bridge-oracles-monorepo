@@ -28,5 +28,4 @@ const customizerSlice = createSlice({
 export const { setMigrateModalTokens } = customizerSlice.actions
 export default customizerSlice.reducer
 
-export const selectMigrateModalOpen = (state: AppState) => state?.migrateModal?.modalOpen
-export const selectMigrateModalTokens = (state: AppState) => state?.migrateModal?.tokens
+export const selectCustomizerCustomizations = (state: AppState) => state?.customizer?.customizations
