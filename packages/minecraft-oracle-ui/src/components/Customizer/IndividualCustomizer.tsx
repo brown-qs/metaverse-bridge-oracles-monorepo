@@ -103,7 +103,12 @@ const IndividualCustomizer = ({ chainId, assetAddress, assetId }: IndividualCust
         return undefined
     }, [metadataArray])
 
-    React.useEffect(() => { }, [metadata])
+    //if its the first time with the NFT, set the metadata to the default metadata
+    React.useEffect(() => {
+        if (!!metadata && !!customizerConfigData) {
+
+        }
+    }, [metadata, customizerConfigData])
 
 
     if (pageLoading) {
