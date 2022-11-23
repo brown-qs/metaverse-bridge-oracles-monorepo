@@ -3,6 +3,7 @@ import { AssetEntity } from './asset.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindConditions, FindManyOptions, FindOneOptions, ObjectID, UpdateResult, DeleteResult } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import { StakedAssetDto } from './dto/index.dto';
 
 @Injectable()
 export class AssetService {
@@ -58,5 +59,16 @@ export class AssetService {
     public async delete(conditions: FindConditions<AssetEntity>): Promise<DeleteResult> {
         const result = await this.repository.delete(conditions)
         return result
+    }
+
+    public assetEntityToDto(asset: AssetEntity): StakedAssetDto {
+        const stakedAsset: StakedAssetDto = {
+            portalHash: asset.hash,
+            enraptured: asset.enraptured,
+            amount: asset.amount,
+            metadata: asset.metadata,
+            assetId: parseInt(asset.assetId)
+        }
+        return stakedAsset
     }
 }
