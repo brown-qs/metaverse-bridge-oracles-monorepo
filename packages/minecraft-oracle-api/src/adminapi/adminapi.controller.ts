@@ -59,7 +59,7 @@ export class AdminApiController {
         this.context = AdminApiController.name;
     }
 
-    @Put('player/blacklist')
+    @Put('user/blacklist')
     @HttpCode(200)
     @ApiOperation({ summary: 'Adds a player to blacklist.' })
     @ApiBearerAuth()
@@ -71,7 +71,7 @@ export class AdminApiController {
         await this.userService.blacklist(dto.uuid, caller.uuid, dto.note)
     }
 
-    @Put('player/unblacklist')
+    @Put('user/unblacklist')
     @HttpCode(200)
     @ApiOperation({ summary: 'Removes a player from blacklist.' })
     @ApiBearerAuth()
