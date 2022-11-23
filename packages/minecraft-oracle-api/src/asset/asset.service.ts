@@ -66,6 +66,7 @@ export class AssetService {
             portalHash: asset.hash,
             enraptured: asset.enraptured,
             amount: asset.amount,
+            recognizedAssetType: asset.recognizedAssetType,
             metadata: asset.metadata,
             assetId: parseInt(asset.assetId)
         }

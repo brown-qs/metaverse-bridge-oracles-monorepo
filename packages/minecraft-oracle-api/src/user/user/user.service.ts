@@ -124,6 +124,8 @@ export class UserService {
         if (result.affected === 1) {
             const user = await this.findByUuid(userUuid)
             await this.blacklistLogService.create({ user, note, initiator, action: BlacklistAction.Blacklist, createdAt: new Date() })
+        } else {
+            throw new BadRequestException("User is already blacklisted.")
         }
     }
 
@@ -139,6 +141,8 @@ export class UserService {
         if (result.affected === 1) {
             const user = await this.findByUuid(userUuid)
             await this.blacklistLogService.create({ user, note, initiator, action: BlacklistAction.UnBlacklist, createdAt: new Date() })
+        } else {
+            throw new BadRequestException("User is not currently blacklisted.")
         }
     }
 
