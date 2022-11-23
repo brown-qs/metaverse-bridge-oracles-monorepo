@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AuthLayout, Loader } from 'ui';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
-import { Container, Image, Alert, AlertDescription, AlertIcon, Box, Button, CircularProgress, HStack, Stack, Tag, TagCloseButton, TagLabel, TagLeftIcon, TagRightIcon, VStack, Grid, GridItem, FormControl, FormHelperText, FormLabel, Input, FormErrorMessage, InputRightElement, IconButton, useToast, useClipboard } from '@chakra-ui/react';
+import { Link as ChakraLink, Container, Image, Alert, AlertDescription, AlertIcon, Box, Button, CircularProgress, HStack, Stack, Tag, TagCloseButton, TagLabel, TagLeftIcon, TagRightIcon, VStack, Grid, GridItem, FormControl, FormHelperText, FormLabel, Input, FormErrorMessage, InputRightElement, IconButton, useToast, useClipboard } from '@chakra-ui/react';
 import { CircleX, Copy, DeviceFloppy, DeviceGamepad2, Link, Pencil, PencilOff, Power, Tags, Unlink, User } from 'tabler-icons-react';
 import { useSelector } from 'react-redux';
 import { selectAccessToken, setTokens } from '../state/slices/authSlice';
@@ -509,15 +509,24 @@ const AccountPage = () => {
               </GridItem>
               <GridItem zIndex="2" paddingTop="24px">
                 <Box {...sectionInputProps}>
-                  <Button onClick={() => {
-                    onCopy()
-                    toast({
-                      title: 'JWT copied to clipboard.',
-                      status: 'success',
-                      duration: 5000,
-                      isClosable: true,
-                    })
-                  }} rightIcon={<Copy></Copy>}>Copy JWT</Button>
+                  <VStack spacing="0">
+                    <Box>
+                      <Button onClick={() => {
+                        onCopy()
+                        toast({
+                          title: 'JWT copied to clipboard.',
+                          status: 'success',
+                          duration: 5000,
+                          isClosable: true,
+                        })
+                      }} rightIcon={<Copy></Copy>}>Copy JWT</Button>
+                    </Box>
+                    <Box h="8px"></Box>
+                    <Box>
+                      <ChakraLink isExternal target="_blank" href={`${process.env.REACT_APP_BACKEND_API_URL}/docs`}>Open Swagger</ChakraLink>
+                    </Box>
+                  </VStack>
+
                 </Box>
               </GridItem>
             </>
