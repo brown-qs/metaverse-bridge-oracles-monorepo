@@ -31,6 +31,8 @@ import { EmailEntity } from '../email/email.entity';
 import { EventBus } from "@nestjs/cqrs";
 import { UserProfileUpdatedEvent } from '../../cqrs/events/user-profile-updated.event';
 import { SanitizeService, TextNormalizationMode } from '../../sanitize/sanitize.service';
+import { BlacklistLogService } from '../../blacklist-log/blacklist-log.service';
+import { BlacklistAction } from '../../blacklist-log/blacklist-log.entity';
 @Injectable()
 export class UserService {
     context: string;
@@ -41,7 +43,8 @@ export class UserService {
         private readonly repository: Repository<UserEntity>,
         private readonly eventBus: EventBus,
         private readonly configService: ConfigService,
-        private readonly sanitizeService: SanitizeService
+        private readonly sanitizeService: SanitizeService,
+        private readonly blacklistLogService: BlacklistLogService
     ) {
         this.context = UserService.name
     }
@@ -107,6 +110,36 @@ export class UserService {
     public async findByIds(uuids: string[]) {
         const entities: UserEntity[] = await this.repository.findByIds(uuids);
         return entities;
+    }
+
+    public async blacklist(userUuid: string, initiatorUuid: string, note: string) {
+        if (typeof userUuid !== "string" || typeof initiatorUuid !== "string") {
+            throw new Error("userUuid or initiatorUuid is not a string")
+        }
+        const initiator = await this.findByUuid(initiatorUuid)
+        if (!(!!initiator)) {
+            throw new BadRequestException("Initiator is invalid.")
+        }
+        const result = await this.update({ uuid: userUuid, blacklisted: false }, { blacklisted: true })
+        if (result.affected === 1) {
+            const user = await this.findByUuid(userUuid)
+            await this.blacklistLogService.create({ user, note, initiator, action: BlacklistAction.Blacklist, createdAt: new Date() })
+        }
+    }
+
+    public async unBlacklist(userUuid: string, initiatorUuid: string, note: string) {
+        if (typeof userUuid !== "string" || typeof initiatorUuid !== "string") {
+            throw new Error("userUuid or initiatorUuid is not a string")
+        }
+        const initiator = await this.findByUuid(initiatorUuid)
+        if (!(!!initiator)) {
+            throw new BadRequestException("Initiator is invalid.")
+        }
+        const result = await this.update({ uuid: userUuid, blacklisted: true }, { blacklisted: false })
+        if (result.affected === 1) {
+            const user = await this.findByUuid(userUuid)
+            await this.blacklistLogService.create({ user, note, initiator, action: BlacklistAction.UnBlacklist, createdAt: new Date() })
+        }
     }
 
     public async linkMinecraftByUserUuid(userUuid: string, minecraftUuid: string, minecraftUserName: string, hasGame: boolean) {

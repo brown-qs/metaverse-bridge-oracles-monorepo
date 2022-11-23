@@ -6,9 +6,11 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
 import { SanitizeModule } from '../../sanitize/sanitize.module';
+import { BlacklistLogModule } from '../../blacklist-log/blacklist-log.module';
 
 @Module({
     imports: [
+        BlacklistLogModule,
         SanitizeModule,
         CqrsModule,
         forwardRef(() => TypeOrmModule.forFeature([UserEntity]))
