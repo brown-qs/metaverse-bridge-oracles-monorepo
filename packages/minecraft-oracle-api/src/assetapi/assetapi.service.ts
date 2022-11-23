@@ -23,6 +23,7 @@ import { ResourceInventoryOffsetUpdatedEvent } from '../cqrs/events/resource-inv
 import { RecognizedAssetsDto } from './dtos/recognized-assets.dto';
 import { CollectionEntity } from '../collection/collection.entity';
 import { StringAssetType } from '../common/enums/AssetType';
+import { StakedAssetWithCollectionInfoDto } from '../asset/dto/index.dto';
 
 @Injectable()
 export class AssetApiService {
@@ -38,9 +39,22 @@ export class AssetApiService {
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) { }
 
-    async userAssets(user: UserEntity) {
-        let userAssets = await this.assetService.findMany({ where: { owner: user.uuid, pendingIn: false } })
-        return userAssets
+    async userAssets(user: UserEntity): Promise<StakedAssetWithCollectionInfoDto[]> {
+        let userAssets = await this.assetService.findMany({ where: { owner: user.uuid, pendingIn: false }, relations: ["collectionFragment", "collectionFragment.collection"] })
+        const assets: StakedAssetWithCollectionInfoDto[] = []
+        for (const ass of userAssets) {
+            if (!!ass?.collectionFragment?.collection) {
+                const asset: StakedAssetWithCollectionInfoDto = {
+                    ...this.assetService.assetEntityToDto(ass),
+                    chainId: ass.collectionFragment.collection.chainId,
+                    assetType: ass.collectionFragment.collection.assetType,
+                    assetAddress: ass.collectionFragment.collection.assetAddress.toLowerCase(),
+
+                }
+                assets.push(asset)
+            }
+        }
+        return assets
     }
 
     async allUserAssets(dto: AllAssetsQueryDto) {
