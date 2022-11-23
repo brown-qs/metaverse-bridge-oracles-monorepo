@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { AuthLayout, Loader } from 'ui';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
-import { Container, Image, Alert, AlertDescription, AlertIcon, Box, Button, CircularProgress, HStack, Stack, Tag, TagCloseButton, TagLabel, TagLeftIcon, TagRightIcon, VStack, Grid, GridItem, FormControl, FormHelperText, FormLabel, Input, FormErrorMessage, InputRightElement, IconButton, useToast } from '@chakra-ui/react';
-import { CircleX, DeviceFloppy, DeviceGamepad2, Link, Pencil, PencilOff, Power, Tags, Unlink, User } from 'tabler-icons-react';
+import { Container, Image, Alert, AlertDescription, AlertIcon, Box, Button, CircularProgress, HStack, Stack, Tag, TagCloseButton, TagLabel, TagLeftIcon, TagRightIcon, VStack, Grid, GridItem, FormControl, FormHelperText, FormLabel, Input, FormErrorMessage, InputRightElement, IconButton, useToast, useClipboard } from '@chakra-ui/react';
+import { CircleX, Copy, DeviceFloppy, DeviceGamepad2, Link, Pencil, PencilOff, Power, Tags, Unlink, User } from 'tabler-icons-react';
 import { useSelector } from 'react-redux';
 import { selectAccessToken, setTokens } from '../state/slices/authSlice';
 import { rtkQueryErrorFormatter, useEmailChangeMutation, useGamerTagSetMutation, useMinecraftLinkMutation, useMinecraftRedirectMutation, useMinecraftUnlinkMutation, useUserProfileQuery } from '../state/api/bridgeApi';
@@ -13,12 +13,15 @@ import { isValid } from 'date-fns';
 import { useCaptcha } from '../hooks/useCaptcha/useCaptcha';
 import { openEmailCodeModal } from '../state/slices/emailCodeModalSlice';
 import { EmailCodeModal } from '../components/modals/EmailCodeModal';
+import { UserRole } from '../state/api/types';
 
 const AccountPage = () => {
   const { search } = useLocation()
 
   const toast = useToast()
   const accessToken = useSelector(selectAccessToken)
+  const { onCopy, value, hasCopied } = useClipboard(accessToken ?? "");
+
   const dispatch = useDispatch()
   const { executeCaptcha, resetCaptcha, setCaptchaVisible, isCaptchaLoading, isCaptchaVisible, isCaptchaError, isCaptchaSolved, captchaError, captchaSolution } = useCaptcha()
 
@@ -492,6 +495,33 @@ const AccountPage = () => {
               </HStack>
             </Box>
           </GridItem>
+          {/** END gamertag */}
+
+
+          {/** START admin */}
+          {!!profile?.role && [UserRole.ADMIN, UserRole.BANKER_ADMIN].includes(profile.role) &&
+            <>
+              <GridItem zIndex="2" paddingTop="24px">
+                <VStack alignItems="flex-start" spacing="0">
+                  <Box {...sectionTitleProps}>Special Role</Box>
+                  <Box {...sectionDescriptionProps}>Your role is {profile.role}. Click to copy your JWT for API use.</Box>
+                </VStack>
+              </GridItem>
+              <GridItem zIndex="2" paddingTop="24px">
+                <Box {...sectionInputProps}>
+                  <Button onClick={() => {
+                    onCopy()
+                    toast({
+                      title: 'JWT copied to clipboard.',
+                      status: 'success',
+                      duration: 5000,
+                      isClosable: true,
+                    })
+                  }} rightIcon={<Copy></Copy>}>Copy JWT</Button>
+                </Box>
+              </GridItem>
+            </>
+          }
           {/** END gamertag */}
 
         </Grid>
