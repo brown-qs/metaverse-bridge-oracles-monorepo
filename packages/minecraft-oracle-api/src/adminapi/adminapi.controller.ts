@@ -65,7 +65,7 @@ export class AdminApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async blacklist(@User() caller: UserEntity, @Body() dto: BlacklistUserRequestDto): Promise<void> {
-        if (caller.role !== UserRole.ADMIN) {
+        if (![UserRole.ADMIN_SUPPORT, UserRole.ADMIN].includes(caller.role)) {
             throw new ForbiddenException('Not admin')
         }
         await this.userService.blacklist(dto.uuid, caller.uuid, dto.note)
@@ -77,7 +77,7 @@ export class AdminApiController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     async unblacklist(@User() caller: UserEntity, @Body() dto: UnBlacklistUserRequestDto): Promise<void> {
-        if (caller.role !== UserRole.ADMIN) {
+        if (![UserRole.ADMIN_SUPPORT, UserRole.ADMIN].includes(caller.role)) {
             throw new ForbiddenException('Not admin')
         }
         await this.userService.unBlacklist(dto.uuid, caller.uuid, dto.note)

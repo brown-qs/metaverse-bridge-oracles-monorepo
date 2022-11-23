@@ -499,7 +499,7 @@ const AccountPage = () => {
 
 
           {/** START admin */}
-          {!!profile?.role && [UserRole.ADMIN, UserRole.BANKER_ADMIN].includes(profile.role) &&
+          {!!profile?.role && [UserRole.ADMIN, UserRole.ADMIN_SUPPORT, UserRole.BANKER_ADMIN].includes(profile.role) &&
             <>
               <GridItem zIndex="2" paddingTop="24px">
                 <VStack alignItems="flex-start" spacing="0">
