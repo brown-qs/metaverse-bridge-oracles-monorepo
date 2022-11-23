@@ -25,6 +25,7 @@ import { EmailLoginKeyEntity } from '../email-login-key/email-login-key.entity';
 import { EmailEntity } from '../email/email.entity';
 import { Oauth2ClientEntity } from '../../oauth2api/oauth2-client/oauth2-client.entity';
 import { TransactionStatus } from '../../config/constants';
+import { BlacklistLogEntity } from '../../blacklist-log/blacklist-log.entity';
 
 @Entity()
 @Unique(['email'])
@@ -176,6 +177,12 @@ export class UserEntity {
 
     @OneToMany(() => Oauth2ClientEntity, (en) => en.owner)
     oauth2Clients?: Oauth2ClientEntity[]
+
+    @OneToMany(() => BlacklistLogEntity, (en) => en.user)
+    blacklistLogs?: BlacklistLogEntity[]
+
+    @OneToMany(() => BlacklistLogEntity, (en) => en.initiator)
+    blacklistLogInitiations?: BlacklistLogEntity[]
 }
 
 //resource_inventory_entity id example: 92e1e5635d684e1294c6c6cceb8c9b71-1285-0x1b30a3b5744e733d8d2f19f0812e3f79152a8777-14
