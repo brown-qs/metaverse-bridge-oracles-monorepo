@@ -38,7 +38,7 @@ import { BlacklistDto } from './dtos/blacklist.dto';
 import { GameTypeService } from '../gametype/gametype.service';
 import { GameService } from '../game/game.service';
 import { BankDto } from '../gameapi/dtos/bank.dto';
-import { RecoverAssetDto, UpdateMetadataDto } from './dtos/index.dto';
+import { BlacklistUserRequestDto, RecoverAssetDto, UnBlacklistUserRequestDto, UpdateMetadataDto } from './dtos/index.dto';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -57,6 +57,30 @@ export class AdminApiController {
         @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {
         this.context = AdminApiController.name;
+    }
+
+    @Put('user/blacklist')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Adds a player to blacklist.' })
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    async blacklist(@User() caller: UserEntity, @Body() dto: BlacklistUserRequestDto): Promise<void> {
+        if (![UserRole.ADMIN_SUPPORT, UserRole.ADMIN].includes(caller.role)) {
+            throw new ForbiddenException('Not admin')
+        }
+        await this.userService.blacklist(dto.uuid, caller.uuid, dto.note)
+    }
+
+    @Put('user/unblacklist')
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Removes a player from blacklist.' })
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    async unblacklist(@User() caller: UserEntity, @Body() dto: UnBlacklistUserRequestDto): Promise<void> {
+        if (![UserRole.ADMIN_SUPPORT, UserRole.ADMIN].includes(caller.role)) {
+            throw new ForbiddenException('Not admin')
+        }
+        await this.userService.unBlacklist(dto.uuid, caller.uuid, dto.note)
     }
 
     @Get('player/:uuid/profile')
@@ -312,23 +336,6 @@ export class AdminApiController {
             throw new ForbiddenException('Not admin')
         }
         const res = await this.gameApiService.bank(dto)
-        return res
-    }
-
-    @Put('player/:uuid/blacklist')
-    @HttpCode(200)
-    @ApiOperation({ summary: 'Sets blacklist status of a user' })
-    @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard)
-    async blacklist(
-        @User() caller: UserEntity,
-        @Param('uuid') uuid: string,
-        @Body() dto: BlacklistDto
-    ): Promise<boolean> {
-        if (caller.role !== UserRole.ADMIN) {
-            throw new ForbiddenException('Not admin')
-        }
-        const res = await this.adminApiService.blacklist({ uuid }, dto.blacklist)
         return res
     }
 
