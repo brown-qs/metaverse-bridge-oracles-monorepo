@@ -114,6 +114,8 @@ import { InLogEntity } from './in-log/in-log.entity';
 import { MigrationLogEntity } from './migration-log/migration-log.entity';
 import { SummonLogEntity } from './summon-log/summon-log.entity';
 import { CaptchaModule } from './captcha/captcha.module';
+import { BlacklistLogModule } from './blacklist-log/blacklist-log.module';
+import { BlacklistLogEntity } from './blacklist-log/blacklist-log.entity';
 
 export const appEntities = [
     SyntheticItemLayerEntity,
@@ -167,6 +169,7 @@ export const appEntities = [
     InLogEntity,
     MigrationLogEntity,
     SummonLogEntity,
+    BlacklistLogEntity,
 ]
 
 @Module({
@@ -273,7 +276,8 @@ export const appEntities = [
         SummonLogModule,
         InLogModule,
         AuditLogModule,
-        CaptchaModule
+        CaptchaModule,
+        BlacklistLogModule
     ],
     controllers: [],
     providers: []

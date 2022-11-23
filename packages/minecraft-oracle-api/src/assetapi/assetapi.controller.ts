@@ -35,6 +35,7 @@ import { CollectionFragmentEntity } from '../collectionfragment/collectionfragme
 import { CollectionService } from '../collection/collection.service';
 import { RecognizedAssetsDto } from './dtos/recognized-assets.dto';
 import axios from "axios"
+import { StakedAssetWithCollectionInfoDto } from '../asset/dto/index.dto';
 
 @ApiTags('asset')
 @Controller('asset')
@@ -116,7 +117,7 @@ export class AssetApiController {
     @ApiOperation({ summary: `Fetches a user's assets` })
     @ApiBearerAuth('AuthenticationHeader')
     @UseGuards(SharedSecretGuard)
-    async userAssets(@Param('uuid') uuid: string): Promise<AssetEntity[]> {
+    async userAssets(@Param('uuid') uuid: string): Promise<StakedAssetWithCollectionInfoDto[]> {
         const user = await this.userService.findByUuid(uuid)
         const res = await this.assetApiService.userAssets(user)
         return res
