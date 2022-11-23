@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional, ApiResponseProperty } from "@nestjs/s
 import { Type } from "class-transformer"
 import { IsAlphanumeric, IsDefined, IsInt, IsNotEmpty, isNumber, IsNumber, IsNumberString, isNumberString, IsOptional, Length, Min } from "class-validator"
 import { AssetEntity } from "../../asset/asset.entity"
+import { StakedAssetWithCollectionInfoDto } from "../../asset/dto/index.dto"
 import { StringAssetType } from "../../common/enums/AssetType"
 import { UserRole } from "../../common/enums/UserRole"
 import { PlayEligibilityReason } from "../../config/constants"
@@ -23,8 +24,8 @@ export class UserDataDto {
     @ApiProperty({ isArray: true, type: PlayerSkinDto })
     skins: PlayerSkinDto[]
 
-    @ApiProperty({ isArray: true, type: AssetEntity })
-    assets: AssetEntity[]
+    @ApiProperty({ isArray: true, type: StakedAssetWithCollectionInfoDto })
+    assets: StakedAssetWithCollectionInfoDto[]
 
     @ApiProperty()
     balances: FungibleBalanceEntryDto
