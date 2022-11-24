@@ -57,7 +57,7 @@ export const AssetChainDetails = ({ data, borderOn }: { data?: InGameTokenMaybeM
                 </AddressDisplayComponent>}
             </Stack>
             <Stack spacing="0" direction="row" alignItems="center">
-                <Box flex="1">Bridge entry hash</Box>
+                <Box flex="1">Portal entry hash</Box>
                 <Box>
                     {hash && <AddressDisplayComponent
                         className={`${formValue} ${formValueTokenDetails}`}
