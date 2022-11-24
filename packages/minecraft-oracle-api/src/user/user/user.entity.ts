@@ -133,6 +133,9 @@ export class UserEntity {
     @OneToMany(() => SnaplogEntity, (snaplog) => snaplog.owner)
     snaplogs?: SnaplogEntity[];
 
+    @OneToMany(() => SnaplogEntity, (snaplog) => snaplog.user)
+    newSnaplogs?: SnaplogEntity[];
+
     @OneToMany(() => InventoryEntity, (iitem) => iitem.owner)
     inventoryItems?: InventoryEntity[];
 
