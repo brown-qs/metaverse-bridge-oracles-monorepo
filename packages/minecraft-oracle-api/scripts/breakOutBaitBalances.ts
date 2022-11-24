@@ -15,7 +15,7 @@ import { AssetEntity } from '../src/asset/asset.entity';
 import { BigNumber } from 'ethers';
 import { formatEther, parseEther } from 'ethers/lib/utils';
 import { ResourceInventoryEntity } from '../src/resourceinventory/resourceinventory.entity';
-import { Like } from 'typeorm';
+import { ILike, Like } from 'typeorm';
 import { ResourceInventoryOffset } from '../src/assetapi/dtos/resourceinventoryoffset.dto';
 import { ResourceInventoryOffsetEntity } from '../src/resourceinventoryoffset/resourceinventoryoffset.entity';
 import { of } from 'fp-ts/lib/ReaderT';
@@ -27,19 +27,20 @@ config()
 async function main() {
     //just for movr because we dont have an indexer
     const connection = await getDatabaseConnection("breakoutbaitbalances")
-    const result = await connection.manager.find<ResourceInventoryEntity>(ResourceInventoryEntity, { where: { id: Like("1285-0x1b30a3b5744e733d8d2f19f0812e3f79152a8777-14") }, relations: ["resourceInventoryOffset", "owner"] })
-    for (const userBaitBalance of result) {
+    const results = await connection.manager.find<ResourceInventoryEntity>(ResourceInventoryEntity, { where: { id: ILike("%1285-0x1b30a3b5744e733d8d2f19f0812e3f79152a8777-14") }, relations: ["offsets", "owner"] })
+    console.log(`${results.length} users with bait balances`)
+    for (const userBaitBalance of results) {
         const owner = userBaitBalance.owner
         console.log(`uuid: ${owner.uuid}`)
 
-        const queryRunner = this.connection.createQueryRunner()
+        const queryRunner = connection.createQueryRunner()
 
         //do in transaction so everything rolled back if shit fucks up
         await queryRunner.connect();
 
         await queryRunner.startTransaction();
         try {
-            const rssInv: ResourceInventoryEntity = await queryRunner.manager.findOne(ResourceInventoryEntity, { where: { id: Like("1285-0x1b30a3b5744e733d8d2f19f0812e3f79152a8777-14"), owner }, relations: ["resourceInventoryOffset", "owner"] })
+            const rssInv: ResourceInventoryEntity = await queryRunner.manager.findOne(ResourceInventoryEntity, { where: { id: ILike("%1285-0x1b30a3b5744e733d8d2f19f0812e3f79152a8777-14"), owner }, relations: ["offsets", "owner"] })
             const nullNoteOffsets = rssInv.offsets.filter((o: any) => !(!!o.note))
             if (nullNoteOffsets.length === 0) {
                 console.log(`uuid: ${owner.uuid} has no old offset doing nothing`)
@@ -48,12 +49,15 @@ async function main() {
                 const originalOffsetAmountWei = BigNumber.from(offset.amount)
                 //parseEther(newItem.inv.amount)
                 //find games
-                const snapLogs = await queryRunner.manager.find(SnaplogEntity, { where: { id: Like("FISH_SPECIMEN"), owner }, relations: ["game"] })
+                const snapLogs = await queryRunner.manager.find(SnaplogEntity, { where: { id: ILike("%FISH_SPECIMEN%"), owner }, relations: ["game"] })
+                console.log(`uuid: ${owner.uuid} has ${snapLogs.length} games with fishing`)
+
                 let snaplogFishTotal = BigNumber.from("0")
                 for (const snapLog of snapLogs) {
                     if (["minecraft-carnage-2022-10-16", "minecraft-carnage-2022-10-23"].includes(snapLog.game.id)) {
                         continue
                     }
+
                     snaplogFishTotal = snaplogFishTotal.add(parseEther(snapLog.amount))
                 }
 

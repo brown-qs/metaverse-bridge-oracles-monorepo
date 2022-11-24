@@ -1,6 +1,7 @@
 import { Connection, createConnection, getConnection } from "typeorm";
 import { AchievementEntity } from "../src/achievement/achievement.entity";
 import { AssetEntity } from "../src/asset/asset.entity";
+import { BlacklistLogEntity } from "../src/blacklist-log/blacklist-log.entity";
 import { ChainEntity } from "../src/chain/chain.entity";
 import { CollectionEntity } from "../src/collection/collection.entity";
 import { CollectionFragmentEntity } from "../src/collectionfragment/collectionfragment.entity";
@@ -59,7 +60,7 @@ export const getDatabaseConnection = async (connectionName: string): Promise<Con
             host: process.env.TYPEORM_HOST,
             port: Number.parseInt(process.env.TYPEORM_PORT),
             database: process.env.TYPEORM_DATABASE,
-            entities: [SyntheticItemLayerEntity, CollectionFragmentRoutingEntity, MinecraftUuidEntity, MinecraftUserNameEntity, DidEntity, KiltDappEntity, Oauth2ClientEntity, KiltSessionEntity, MinecraftLinkEntity, EmailLoginKeyEntity, EmailChangeEntity, EmailEntity, SyntheticItemEntity, SyntheticPartEntity, CompositeAssetEntity, ResourceInventoryOffsetEntity, ResourceInventoryEntity, CompositeCollectionFragmentEntity, CompositePartEntity, CollectionFragmentEntity, CollectionEntity, GameScoreTypeEntity, PlayerGameItemEntity, GameItemTypeEntity, SnaplogEntity, GganbuEntity, GameTypeEntity, PlayerScoreEntity, PlayerAchievementEntity, AchievementEntity, GameEntity, ChainEntity, MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity, SkinEntity, AssetEntity, SummonEntity, InventoryEntity, PlaySessionEntity, PlaySessionStatEntity],
+            entities: [BlacklistLogEntity, SyntheticItemLayerEntity, CollectionFragmentRoutingEntity, MinecraftUuidEntity, MinecraftUserNameEntity, DidEntity, KiltDappEntity, Oauth2ClientEntity, KiltSessionEntity, MinecraftLinkEntity, EmailLoginKeyEntity, EmailChangeEntity, EmailEntity, SyntheticItemEntity, SyntheticPartEntity, CompositeAssetEntity, ResourceInventoryOffsetEntity, ResourceInventoryEntity, CompositeCollectionFragmentEntity, CompositePartEntity, CollectionFragmentEntity, CollectionEntity, GameScoreTypeEntity, PlayerGameItemEntity, GameItemTypeEntity, SnaplogEntity, GganbuEntity, GameTypeEntity, PlayerScoreEntity, PlayerAchievementEntity, AchievementEntity, GameEntity, ChainEntity, MaterialEntity, SnapshotItemEntity, UserEntity, TextureEntity, SkinEntity, AssetEntity, SummonEntity, InventoryEntity, PlaySessionEntity, PlaySessionStatEntity],
             synchronize: true
         })
     } catch (err) {
