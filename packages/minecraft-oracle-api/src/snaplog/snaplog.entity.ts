@@ -30,6 +30,9 @@ export class SnaplogEntity {
     @ManyToOne(() => UserEntity, (user) => user.snaplogs, { createForeignKeyConstraints: false })
     owner: UserEntity;
 
+    @ManyToOne(() => UserEntity, (user) => user.newSnaplogs, { createForeignKeyConstraints: true, nullable: true })
+    user: UserEntity;
+
     @ManyToOne(() => GameEntity, (game) => game.snaplogs)
     game?: GameEntity;
 }
