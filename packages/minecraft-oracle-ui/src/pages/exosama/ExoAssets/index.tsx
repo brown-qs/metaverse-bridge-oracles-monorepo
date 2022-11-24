@@ -33,7 +33,7 @@ const ExoAssets = () => {
               color="white"
               as="h4"
             >
-              Bridged NFTs
+              Imported NFTs
             </Heading>
           </Box>
           <Flex>
