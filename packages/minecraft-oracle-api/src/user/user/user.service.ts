@@ -33,6 +33,8 @@ import { UserProfileUpdatedEvent } from '../../cqrs/events/user-profile-updated.
 import { SanitizeService, TextNormalizationMode } from '../../sanitize/sanitize.service';
 import { BlacklistLogService } from '../../blacklist-log/blacklist-log.service';
 import { BlacklistAction } from '../../blacklist-log/blacklist-log.entity';
+import { SnaplogEntity } from '../../snaplog/snaplog.entity';
+import { SnaplogMergeEntity } from '../../snaplog-merge/snaplog-merge.entity';
 @Injectable()
 export class UserService {
     context: string;
@@ -226,8 +228,7 @@ export class UserService {
                         { entity: AssetEntity, fk: "owner", },
                         { entity: SummonEntity, fk: "owner" },
                         { entity: SnapshotItemEntity, fk: "owner" },
-                        //we will just leave this alone, fk constraint was removed
-                        //{ entity: SnaplogEntity, fk: "owner" },
+                        { entity: SnaplogEntity, fk: "user" },
                         { entity: InventoryEntity, fk: "owner" },
                         { entity: SkinEntity, fk: "owner" },
                         { entity: ResourceInventoryEntity, fk: "owner" },
@@ -242,6 +243,25 @@ export class UserService {
                         await queryRunner.manager.update(entity, { [fk]: minecraftUuid }, { [fk]: userUuid })
                     }
 
+                    //merge snaplogs
+                    const snaplogs = await queryRunner.manager.find(SnaplogEntity, { id: Like(`${minecraftUuid}-%`), user: { uuid: userUuid } })
+                    for (const sLog of snaplogs) {
+                        const oldId = sLog.id
+                        const newId = sLog.id.replace(`${minecraftUuid}-`, `${userUuid}-`)
+
+                        const moonsamaUserRow = await queryRunner.manager.findOne<SnaplogEntity>(SnaplogEntity, { id: newId })
+                        if (!!moonsamaUserRow) {
+                            const existingAmount = parseEther(moonsamaUserRow.amount)
+                            const amountToMerge = parseEther(sLog.amount)
+                            this.logger.debug(`user.service::linkMinecraftByUserUuid Two users were merged into one because of migration, adding snaplog balances`, this.context)
+
+                            await queryRunner.manager.insert<SnaplogMergeEntity>(SnaplogMergeEntity, { id: oldId, amount: formatEther(amountToMerge), processedAt: sLog.processedAt, adjustedPower: sLog.adjustedPower, material: sLog.material, user: { uuid: userUuid } })
+                            await queryRunner.manager.update<SnaplogEntity>(SnaplogEntity, { id: newId }, { amount: formatEther(existingAmount.add(amountToMerge)) })
+                            await queryRunner.manager.remove(sLog)
+                        } else {
+                            await queryRunner.manager.update<SnaplogEntity>(SnaplogEntity, { id: oldId }, { id: newId })
+                        }
+                    }
 
                     //merge inventory
                     const emailUserInventoryRows = await queryRunner.manager.find(InventoryEntity, { where: { id: Like(`${userUuid}-%`) } })
