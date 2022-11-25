@@ -15,19 +15,16 @@ export type TraitVirtualListProps = {
 
 
 const TraitVirtualList = ({ numColumns, columnWidth, rowHeight, gridWidth, gridHeight, part }: TraitVirtualListProps) => {
-    React.useEffect(() => {
-        console.log("TraitVirtualList:: MOUNT ")
-    }, [])
-    console.log(`TraitVirtualList:: ${gridWidth}`)
+
     const FixedSizeGrid = _FixedSizeGrid as ComponentType<FixedSizeGridProps>;
     const TraitCell = memo(({ columnIndex, rowIndex, style, data }: GridChildComponentProps) => {
         let w: number = parseInt(style?.width as string) - 8
         let h: number = parseInt(style?.height as string) - 8
-
+        const part: CompositeConfigPartDto = data.part
         //   w = w + 8
         //h = h + 8
-        const asset = data.part.items[(data.numCols * rowIndex) + columnIndex]
-
+        const asset = part.items[(data.numCols * rowIndex) + columnIndex]
+        const traitValue = asset?.attributes?.[0]?.value ?? ""
         if (!!asset) {
             return (
                 <Box style={style}>
@@ -41,6 +38,7 @@ const TraitVirtualList = ({ numColumns, columnWidth, rowHeight, gridWidth, gridH
                         chainId={part.chainId}
                         assetAddress={part.assetAddress}
                         assetId={asset.assetId}
+                        traitValue={traitValue}
                         imageUrl={`${process.env.REACT_APP_COMPOSITE_MEDIA_URI_PREFIX}/customizer/${part.chainId}/${part.assetAddress}/${asset.assetId}.png`}
                     ></TraitCustomizerCard>
                 </Box>
