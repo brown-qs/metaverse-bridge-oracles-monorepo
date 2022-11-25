@@ -47,7 +47,7 @@ const Sidebar: FunctionComponent = () => {
           <Text color="gray.400" fontSize="12px" letterSpacing="0.05em">
             MY NFTS
           </Text>
-          <SideButton to="#" icon={bridgeIcon} label="Bridged" />
+          <SideButton to="#" icon={bridgeIcon} label="Imported" />
           <SideButton to="#" icon={walletIcon} label="Wallet" />
         </VStack>
         <VStack alignItems="flex-start" gap={2} p="0 16px" w="100%">

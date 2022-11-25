@@ -5,12 +5,7 @@ import { GameEntity } from '../game/game.entity';
 
 @Entity()
 @Index(['id'], { unique: true })
-export class SnaplogEntity {
-
-    constructor(snapshotItem: Partial<SnaplogEntity>) {
-        Object.assign(this, snapshotItem);
-    }
-
+export class SnaplogMergeEntity {
     @PrimaryColumn()
     id: string; // convention:: {user uuid}-{materialName}
 
@@ -26,13 +21,7 @@ export class SnaplogEntity {
     @ManyToOne(() => MaterialEntity, (material) => material.snaplogs)
     material: MaterialEntity;
 
-    //decided to override fk constraint because weren't sure how to handle user merging
-    @ManyToOne(() => UserEntity, (user) => user.snaplogs, { createForeignKeyConstraints: false })
-    owner: UserEntity;
-
-    @ManyToOne(() => UserEntity, (user) => user.newSnaplogs, { createForeignKeyConstraints: true, nullable: true })
+    @ManyToOne(() => UserEntity, (user) => user.snaplogMerges, { nullable: false })
     user: UserEntity;
 
-    @ManyToOne(() => GameEntity, (game) => game.snaplogs)
-    game?: GameEntity;
 }

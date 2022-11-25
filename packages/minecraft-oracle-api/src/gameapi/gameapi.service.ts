@@ -499,7 +499,8 @@ export class GameApiService {
                                 return {
                                     ...snap,
                                     processedAt: Date.now().toString(),
-                                    adjustedPower: adjustPower(stats?.power ?? 0)
+                                    adjustedPower: adjustPower(stats?.power ?? 0),
+                                    user
                                 }
                             })
                             await this.updateSnaplogs(logs)
