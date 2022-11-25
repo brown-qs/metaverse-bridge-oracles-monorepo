@@ -9,9 +9,9 @@ import { FixedSizeGrid as _FixedSizeGrid, GridChildComponentProps, areEqual, Fix
 import { useSelector } from "react-redux"
 import { selectAccessToken } from "../../state/slices/authSlice"
 import { useCustomizerConfigQuery, useGetInGameItemsQuery } from "../../state/api/bridgeApi"
-import { useGetExosamaOnChainTokensQuery } from "../../state/api/generatedSquidExosamaApi"
-import { useGetMarketplaceOnChainTokensQuery } from "../../state/api/generatedSquidMarketplaceApi"
-import { StandardizedOnChainToken, standardizeMarketplaceOnChainTokens, standardizeExosamaOnChainTokens } from "../../utils/graphqlReformatter"
+import { useGetExosamaMetadataQuery, useGetExosamaOnChainTokensQuery } from "../../state/api/generatedSquidExosamaApi"
+import { useGetMarketplaceMetadataQuery, useGetMarketplaceOnChainTokensQuery } from "../../state/api/generatedSquidMarketplaceApi"
+import { StandardizedOnChainToken, standardizeMarketplaceOnChainTokens, standardizeExosamaOnChainTokens, StandardizedMetadata, standardizeExosamaMetadata, standardizeMarketplaceMetadata } from "../../utils/graphqlReformatter"
 import LibraryVirtualList from "./LibraryVirtualList"
 import { selectBlockNumbers } from "../../state/slices/blockNumbersSlice"
 import { ChainId } from "../../constants"
@@ -40,6 +40,11 @@ const IndividualCustomizer = ({ chainId, assetAddress, assetId }: IndividualCust
     const { data: exosamaOnChainTokensData, currentData: currentExosamaOnChainTokensData, isLoading: isExosamaOnChainTokensLoading, isFetching: isExosamaOnChainTokensFetching, isError: isExosamaOnChainTokensError, error: exosamaOnChainTokensError, refetch: refetchExosamaOnChainTokens } = useGetExosamaOnChainTokensQuery({ owner: String(account) }, { skip: !account || chainId !== ChainId.MAINNET })
     const { data: inGameItemsData, isLoading: isInGameItemsDataLoading, isFetching: isInGameItemsDataFetching, isError: isInGameItemsError, error: inGameItemsError, refetch: refetchInGameItems } = useGetInGameItemsQuery(undefined, { skip: !accessToken })
 
+    const { data: moonsamaMetadata, isLoading: isMoonsamaMetadataLoading, isFetching: isMoonsamaMetadataFetching, isError: isMoonsamaMetadataError, error: moonsamaMetadataError } = useGetMarketplaceMetadataQuery({}, { skip: chainId !== ChainId.MOONRIVER })
+
+    const { data: exosamaMetadata, isLoading: isExosamaMetadataLoading, isFetching: isExosamaMetadataFetching, isError: isExosamaMetadataError, error: exosamaMetadataError } = useGetExosamaMetadataQuery({ erc721Where: { numericId_eq: assetId } }, { skip: chainId !== ChainId.MAINNET })
+
+
     const standardizedMarketplaceOnChainTokens: StandardizedOnChainToken[] = React.useMemo(() => standardizeMarketplaceOnChainTokens(marketplaceOnChainTokensData), [marketplaceOnChainTokensData])
     const standardizedExosamaOnChainTokens: StandardizedOnChainToken[] = React.useMemo(() => standardizeExosamaOnChainTokens(exosamaOnChainTokensData), [exosamaOnChainTokensData])
 
@@ -66,7 +71,45 @@ const IndividualCustomizer = ({ chainId, assetAddress, assetId }: IndividualCust
         return !!matchingToken
     }, [inGameItemsData])
 
-    const pageLoading: boolean = React.useMemo(() => isCustomizerConfigLoading, [isCustomizerConfigLoading])
+    const pageLoading: boolean = React.useMemo(() => {
+        if (isCustomizerConfigLoading) {
+            return true
+        }
+
+        if (chainId === ChainId.MAINNET && isExosamaMetadataLoading) {
+            return true
+        }
+
+        if (chainId === ChainId.MOONRIVER && isMoonsamaMetadataLoading) {
+            return true
+        }
+
+        return false
+    }, [isCustomizerConfigLoading, isExosamaMetadataLoading, isMoonsamaMetadataLoading, chainId])
+
+    const metadataArray: StandardizedMetadata[] = React.useMemo(() => {
+        return [
+            ...standardizeMarketplaceMetadata(moonsamaMetadata),
+            ...standardizeExosamaMetadata(exosamaMetadata),
+        ]
+    }, [moonsamaMetadata, exosamaMetadata])
+
+    const metadata: StandardizedMetadata | undefined = React.useMemo(() => {
+        for (const m of metadataArray) {
+            if (m?.assetAddress?.toLowerCase() === assetAddress.toLowerCase() && m?.assetId === assetId) {
+                return m
+            }
+        }
+        return undefined
+    }, [metadataArray])
+
+    //if its the first time with the NFT, set the metadata to the default metadata
+    React.useEffect(() => {
+        if (!!metadata && !!customizerConfigData) {
+
+        }
+    }, [metadata, customizerConfigData])
+
 
     if (pageLoading) {
         return (<VStack className="moonsamaFullHeight"><MoonsamaSpinner></MoonsamaSpinner></VStack>)
@@ -74,6 +117,10 @@ const IndividualCustomizer = ({ chainId, assetAddress, assetId }: IndividualCust
 
     if (!customizerConfigData) {
         return (<Box>Unable to load customizer configuration, please refresh.</Box>)
+    }
+
+    if (!metadata) {
+        return (<Box>Unable to get starting metadata, please refresh.</Box>)
     }
 
 
