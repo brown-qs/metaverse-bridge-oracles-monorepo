@@ -26,6 +26,7 @@ import { EmailEntity } from '../email/email.entity';
 import { Oauth2ClientEntity } from '../../oauth2api/oauth2-client/oauth2-client.entity';
 import { TransactionStatus } from '../../config/constants';
 import { BlacklistLogEntity } from '../../blacklist-log/blacklist-log.entity';
+import { SnaplogMergeEntity } from '../../snaplog-merge/snaplog-merge.entity';
 
 @Entity()
 @Unique(['email'])
@@ -135,6 +136,9 @@ export class UserEntity {
 
     @OneToMany(() => SnaplogEntity, (snaplog) => snaplog.user)
     newSnaplogs?: SnaplogEntity[];
+
+    @OneToMany(() => SnaplogMergeEntity, (en) => en.user)
+    snaplogMerges?: SnaplogMergeEntity[];
 
     @OneToMany(() => InventoryEntity, (iitem) => iitem.owner)
     inventoryItems?: InventoryEntity[];
