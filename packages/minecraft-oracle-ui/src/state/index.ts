@@ -23,7 +23,7 @@ import inModalSlice from './slices/inModalSlice';
 import transactionsSlice from './slices/transactionsSlice';
 import outModalSlice from './slices/outModalSlice';
 import migrateModalSlice from './slices/migrateModalSlice';
-
+import customizerSlice from './slices/customizerSlice';
 
 
 
@@ -58,6 +58,7 @@ const rootReducer = combineReducers({
   migrateModal: migrateModalSlice,
   outModal: outModalSlice,
   blockNumbers: blockNumbersSlice,
+  customizer: customizerSlice,
   oauth: oauthSlice,
   [bridgeApi.reducerPath]: bridgeApi.reducer,
   [generatedSquidMarketplaceApi.reducerPath]: generatedSquidMarketplaceApi.reducer,
