@@ -116,6 +116,8 @@ import { SummonLogEntity } from './summon-log/summon-log.entity';
 import { CaptchaModule } from './captcha/captcha.module';
 import { BlacklistLogModule } from './blacklist-log/blacklist-log.module';
 import { BlacklistLogEntity } from './blacklist-log/blacklist-log.entity';
+import { SnaplogMergeModule } from './snaplog-merge/snaplog-merge.module';
+import { SnaplogMergeEntity } from './snaplog-merge/snaplog-merge.entity';
 
 export const appEntities = [
     SyntheticItemLayerEntity,
@@ -170,6 +172,7 @@ export const appEntities = [
     MigrationLogEntity,
     SummonLogEntity,
     BlacklistLogEntity,
+    SnaplogMergeEntity,
 ]
 
 @Module({
@@ -277,7 +280,8 @@ export const appEntities = [
         InLogModule,
         AuditLogModule,
         CaptchaModule,
-        BlacklistLogModule
+        BlacklistLogModule,
+        SnaplogMergeModule
     ],
     controllers: [],
     providers: []
