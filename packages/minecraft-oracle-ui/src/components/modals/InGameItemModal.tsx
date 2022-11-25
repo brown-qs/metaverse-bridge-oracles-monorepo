@@ -31,7 +31,7 @@ export function InGameItemModal() {
                 </div>
                 <div >
                     <div >
-                        {`Bridge balance: ${inGameItem?.amount}`}
+                        {`Portal balance: ${inGameItem?.amount}`}
                     </div>
                 </div>
             </Box>

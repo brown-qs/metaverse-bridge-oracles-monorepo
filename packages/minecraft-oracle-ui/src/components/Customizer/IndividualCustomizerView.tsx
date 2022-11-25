@@ -20,6 +20,7 @@ import TraitCard from "../../pages/components/TraitCard/TraitCard"
 import { MoonsamaSpinner } from "../MoonsamaSpinner"
 import { CompositeConfigDto } from "../../state/api/types"
 import TraitSection from "./TraitSection"
+import CustomizerCanvas from "./CustomizerCanvas"
 
 export type IndividualCustomizerViewProps = {
     customizerConfig: CompositeConfigDto,

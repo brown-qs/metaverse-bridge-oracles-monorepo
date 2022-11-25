@@ -62,9 +62,9 @@ const LibraryCustomizerCard = ({ imageUrl, width, chainId, assetAddress, assetId
             </HStack>
         </HStack>
         <HStack spacing="0" w="100%">
-            <Button flex="1" variant="moonsamaGhost" onClick={() => handleViewClick()}>View</Button>
+            <Button flex="1" onClick={() => handleViewClick()}>View</Button>
             <Box w="8px"></Box>
-            <Button flex="1" variant="moonsamaGhost" onClick={() => handleCustomizeClick()}>Customize</Button>
+            <Button flex="1" onClick={() => handleCustomizeClick()}>Customize</Button>
         </HStack>
     </CustomizerCard>)
 }
