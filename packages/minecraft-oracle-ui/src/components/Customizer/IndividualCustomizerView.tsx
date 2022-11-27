@@ -24,10 +24,11 @@ import CustomizerCanvas from "./CustomizerCanvas"
 
 export type IndividualCustomizerViewProps = {
     customizerConfig: CompositeConfigDto,
+    assetId: number
 }
 
 
-const IndividualCustomizerView = ({ customizerConfig }: IndividualCustomizerViewProps) => {
+const IndividualCustomizerView = ({ customizerConfig, assetId }: IndividualCustomizerViewProps) => {
 
     return (
         <Grid
@@ -40,14 +41,8 @@ const IndividualCustomizerView = ({ customizerConfig }: IndividualCustomizerView
             w="100%"
         >
             <Box>
-                <Box
-                    bgImg="https://dev.static.moonsama.com/customizer-ui/exosama-preview-background.jpg"
-                    bgSize="cover"
-                    bgColor="rgba(255, 255, 255, 0.05)"
-                    transition="0.2s"
-                    position="relative"
-                    _after={{ content: '""', display: 'block', paddingBottom: '100%' }}
-                >
+                <Box>
+                    <CustomizerCanvas customizerConfig={customizerConfig} chainId={customizerConfig.chainId} assetAddress={customizerConfig.assetAddress} assetId={assetId} />
                 </Box>
             </Box>
             <Box>
