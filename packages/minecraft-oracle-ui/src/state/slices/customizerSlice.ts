@@ -13,6 +13,7 @@ export interface CustomizerCustomization {
     parentChainId: ChainId,
     parentAssetAddress: string,
     parentAssetId: number,
+    defaultAssets: CustomizerAsset[],
     assets: CustomizerAsset[]
 }
 export interface CustomizerSlice {
@@ -31,7 +32,7 @@ const customizerSlice = createSlice({
                 state.customizations.push(customization)
             }
         },
-        addCustomizerAssets: (state, action: PayloadAction<CustomizerCustomization>) => {
+        addCustomizerAssets: (state, action: PayloadAction<Omit<CustomizerCustomization, "defaultAssets">>) => {
             const customization = action.payload
             const existing = state.customizations.find(c => c.parentChainId === customization.parentChainId && c.parentAssetAddress.toLowerCase() === customization.parentAssetAddress.toLowerCase() && c.parentAssetId === customization.parentAssetId)
             if (!!existing) {
@@ -43,7 +44,7 @@ const customizerSlice = createSlice({
                 }
             }
         },
-        removeCustomizerAssets: (state, action: PayloadAction<CustomizerCustomization>) => {
+        removeCustomizerAssets: (state, action: PayloadAction<Omit<CustomizerCustomization, "defaultAssets">>) => {
             const customization = action.payload
             const existing = state.customizations.find(c => c.parentChainId === customization.parentChainId && c.parentAssetAddress.toLowerCase() === customization.parentAssetAddress.toLowerCase() && c.parentAssetId === customization.parentAssetId)
             if (!!existing) {
