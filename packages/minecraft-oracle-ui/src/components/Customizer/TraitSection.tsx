@@ -13,10 +13,6 @@ const TraitSection = ({ part }: TraitSectionProps) => {
 
     const { width } = useWindowDimensions();
 
-    React.useEffect(() => {
-        console.log("WINDOW DIMENSIONS CHANGE")
-    }, [width])
-
     const gridWidth: number = React.useMemo(() => {
         let twoCol = false
         if (width >= 992) {
