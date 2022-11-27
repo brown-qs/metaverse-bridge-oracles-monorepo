@@ -76,7 +76,7 @@ const IndividualCustomizerView = ({ customizerConfig, assetId }: IndividualCusto
                                     </AccordionButton>
                                 </h2>
                                 <AccordionPanel h="300px" padding="0">
-                                    <TraitSection part={part}></TraitSection>
+                                    <TraitSection parentChainId={customizerConfig.chainId} parentAssetAddress={customizerConfig.assetAddress} parentAssetId={assetId} part={part}></TraitSection>
                                 </AccordionPanel>
                             </AccordionItem>
                         );

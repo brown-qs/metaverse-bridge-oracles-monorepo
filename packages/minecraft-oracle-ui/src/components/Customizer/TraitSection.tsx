@@ -1,15 +1,19 @@
 import { Box, useDimensions } from "@chakra-ui/react"
 import React, { useRef } from "react"
+import { ChainId } from "../../constants"
 import { useWindowDimensions } from "../../hooks/useWindowDimensions"
 import { CompositeConfigPartDto } from "../../state/api/types"
 import TraitVirtualList from "./TraitVirtualList"
 
 export type TraitSectionProps = {
+    parentChainId: ChainId,
+    parentAssetAddress: string,
+    parentAssetId: number,
     part: CompositeConfigPartDto
 }
 
 
-const TraitSection = ({ part }: TraitSectionProps) => {
+const TraitSection = ({ parentChainId, parentAssetAddress, parentAssetId, part }: TraitSectionProps) => {
 
     const { width } = useWindowDimensions();
 
@@ -39,8 +43,7 @@ const TraitSection = ({ part }: TraitSectionProps) => {
 
 
     return <Box w={gridWidth} h="300px" minH="300px" overflow="hidden">
-        <TraitVirtualList numColumns={numColumns} columnWidth={columnWidth} rowHeight={rowHeight} gridWidth={gridWidth} gridHeight={300} part={part}></TraitVirtualList>
-
+        <TraitVirtualList numColumns={numColumns} columnWidth={columnWidth} rowHeight={rowHeight} gridWidth={gridWidth} gridHeight={300} part={part} parentChainId={parentChainId} parentAssetAddress={parentAssetAddress} parentAssetId={parentAssetId}></TraitVirtualList>
     </Box>
 }
 export default TraitSection
