@@ -1,5 +1,5 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { AppState } from ".."
+import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit"
+import store, { AppState } from ".."
 import { ChainId } from "../../constants"
 import { StandardizedOnChainTokenWithRecognizedTokenData } from "../../utils/graphqlReformatter"
 import { CompositeConfigItemDto } from "../api/types"
@@ -13,10 +13,20 @@ export interface CustomizerCustomization {
     parentChainId: ChainId,
     parentAssetAddress: string,
     parentAssetId: number,
+    defaultAssets: CustomizerAsset[],
     assets: CustomizerAsset[]
 }
 export interface CustomizerSlice {
     customizations: CustomizerCustomization[]
+}
+
+export interface SelectAsset {
+    parentChainId: ChainId,
+    parentAssetAddress: string,
+    parentAssetId: number,
+    chainId: ChainId,
+    assetAddress: string,
+    assetId: number
 }
 
 const customizerSlice = createSlice({
@@ -31,7 +41,7 @@ const customizerSlice = createSlice({
                 state.customizations.push(customization)
             }
         },
-        addCustomizerAssets: (state, action: PayloadAction<CustomizerCustomization>) => {
+        addCustomizerAssets: (state, action: PayloadAction<Omit<CustomizerCustomization, "defaultAssets">>) => {
             const customization = action.payload
             const existing = state.customizations.find(c => c.parentChainId === customization.parentChainId && c.parentAssetAddress.toLowerCase() === customization.parentAssetAddress.toLowerCase() && c.parentAssetId === customization.parentAssetId)
             if (!!existing) {
@@ -43,7 +53,7 @@ const customizerSlice = createSlice({
                 }
             }
         },
-        removeCustomizerAssets: (state, action: PayloadAction<CustomizerCustomization>) => {
+        removeCustomizerAssets: (state, action: PayloadAction<Omit<CustomizerCustomization, "defaultAssets">>) => {
             const customization = action.payload
             const existing = state.customizations.find(c => c.parentChainId === customization.parentChainId && c.parentAssetAddress.toLowerCase() === customization.parentAssetAddress.toLowerCase() && c.parentAssetId === customization.parentAssetId)
             if (!!existing) {
@@ -64,3 +74,23 @@ export const { addCustomization, addCustomizerAssets, removeCustomizerAssets } =
 export default customizerSlice.reducer
 
 export const selectCustomizerCustomizations = (state: AppState) => state?.customizer?.customizations
+
+export const selectCustomizationAsset = createSelector(
+    [
+        // Usual first input - extract value from `state`
+        state => state?.customizer?.customizations,
+        // Take the second arg, `category`, and forward to the output selector
+        (state, asset: SelectAsset) => asset
+    ],
+    // Output selector gets (`items, category)` as args
+    (customizations: CustomizerCustomization[], asset): { equipped: boolean, default: boolean } => {
+        const currCustomization = customizations?.find(c => c.parentChainId === asset.parentChainId && c.parentAssetAddress === asset.parentAssetAddress && c.parentAssetId === asset.parentAssetId)
+        if (!!currCustomization) {
+            const isDefault = currCustomization.defaultAssets.some(a => a.chainId === asset.chainId && a.assetAddress === asset.assetAddress && a.assetId === asset.assetId)
+            const isEquipped = currCustomization.assets.some(a => a.chainId === asset.chainId && a.assetAddress === asset.assetAddress && a.assetId === asset.assetId)
+            return { equipped: isEquipped, default: isDefault }
+        } else {
+            return { equipped: false, default: false }
+        }
+    }
+)
