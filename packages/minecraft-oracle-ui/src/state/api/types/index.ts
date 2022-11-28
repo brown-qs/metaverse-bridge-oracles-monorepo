@@ -223,7 +223,7 @@ export interface CompositeConfigItemDto {
 }
 
 export interface CompositeConfigNftAttribute {
-    trait_name: string,
+    trait_type: string,
     value: string
 }
 

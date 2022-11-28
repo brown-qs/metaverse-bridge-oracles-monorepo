@@ -6,7 +6,7 @@ import { PhotoOff, Stack3, Wallet } from "tabler-icons-react"
 import { useActiveWeb3React } from "../../hooks"
 import LibraryCustomizerCard from "./LibraryCustomizerCard"
 import { FixedSizeGrid as _FixedSizeGrid, GridChildComponentProps, areEqual, FixedSizeGridProps } from 'react-window';
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { selectAccessToken } from "../../state/slices/authSlice"
 import { useCustomizerConfigQuery, useGetInGameItemsQuery } from "../../state/api/bridgeApi"
 import { useGetExosamaMetadataQuery, useGetExosamaOnChainTokensQuery } from "../../state/api/generatedSquidExosamaApi"
@@ -19,6 +19,8 @@ import GhostButton from "../../pages/components/GhostButton"
 import TraitCard from "../../pages/components/TraitCard/TraitCard"
 import { MoonsamaSpinner } from "../MoonsamaSpinner"
 import IndividualCustomizerView from "./IndividualCustomizerView"
+import { addCustomization, CustomizerAsset, CustomizerCustomization } from "../../state/slices/customizerSlice"
+import { CompositeConfigDto, CompositeConfigItemDto } from "../../state/api/types"
 
 export type IndividualCustomizerProps = {
     chainId: number,
@@ -29,7 +31,7 @@ export type IndividualCustomizerProps = {
 
 const IndividualCustomizer = ({ chainId, assetAddress, assetId }: IndividualCustomizerProps) => {
     const navigate = useNavigate()
-
+    const dispatch = useDispatch()
     const blockNumbers = useSelector(selectBlockNumbers)
     const { account } = useActiveWeb3React()
     const accessToken = useSelector(selectAccessToken)
@@ -103,10 +105,61 @@ const IndividualCustomizer = ({ chainId, assetAddress, assetId }: IndividualCust
         return undefined
     }, [metadataArray])
 
+    //a CompositeConfigItemDto can have multiple attributes eg expression, vibe, body type for exos
+    //attributes that depend on each other, 
+    type MetaAttribute = {
+        traitType: string,
+        value: string
+    }
+    const attributeToCustomizerAsset = (customizerConfig: CompositeConfigDto, allAttributes: MetaAttribute[], traitType: string, traitValue: string): CustomizerAsset | undefined => {
+        for (const part of customizerConfig.parts) {
+            for (const item of part.items) {
+                const attrs = item.attributes
+                if (attrs[0].trait_type !== traitType || attrs[0].value !== traitValue) {
+                    continue
+                }
+                //if multiple attributes make sure they are contained in metadata
+                let allAttributesMatch = true
+                for (const attr of attrs) {
+                    const matchingAttr = allAttributes.some(a => a.traitType === attr.trait_type && a.value === attr.value)
+                    if (!matchingAttr) {
+                        allAttributesMatch = false
+                        break;
+                    }
+                }
+
+                if (allAttributesMatch) {
+                    const customizerAsset: CustomizerAsset = {
+                        chainId: part.chainId,
+                        assetAddress: part.assetAddress,
+                        assetId: item.assetId
+                    }
+                    return customizerAsset
+                }
+            }
+        }
+
+        return undefined
+    }
     //if its the first time with the NFT, set the metadata to the default metadata
     React.useEffect(() => {
-        if (!!metadata && !!customizerConfigData) {
-
+        if (!!metadata?.metadata?.attributes && !!customizerConfigData) {
+            const defaultAssets: CustomizerAsset[] = []
+            const attributes = metadata.metadata.attributes
+            for (const attribute of attributes) {
+                const customizerAsset = attributeToCustomizerAsset(customizerConfigData, attributes, attribute.traitType, attribute.value)
+                if (!!customizerAsset) {
+                    defaultAssets.push(customizerAsset)
+                }
+            }
+            const customization: CustomizerCustomization = {
+                parentChainId: chainId,
+                parentAssetAddress: assetAddress.toLowerCase(),
+                parentAssetId: assetId,
+                defaultAssets,
+                assets: defaultAssets
+            }
+            dispatch(addCustomization(customization))
         }
     }, [metadata, customizerConfigData])
 
@@ -119,14 +172,14 @@ const IndividualCustomizer = ({ chainId, assetAddress, assetId }: IndividualCust
         return (<Box>Unable to load customizer configuration, please refresh.</Box>)
     }
 
-    if (!metadata) {
+    if (!(!!metadata?.metadata?.attributes)) {
         return (<Box>Unable to get starting metadata, please refresh.</Box>)
     }
 
 
     return (
         <Box>
-            <IndividualCustomizerView customizerConfig={customizerConfigData}></IndividualCustomizerView>
+            <IndividualCustomizerView customizerConfig={customizerConfigData} assetId={assetId}></IndividualCustomizerView>
         </Box>
     )
 }

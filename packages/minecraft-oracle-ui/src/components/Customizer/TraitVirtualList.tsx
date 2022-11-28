@@ -3,6 +3,9 @@ import { CompositeConfigPartDto } from "../../state/api/types"
 import { GridChildComponentProps, areEqual, FixedSizeGrid as _FixedSizeGrid, FixedSizeGridProps } from "react-window"
 import { Box } from "@chakra-ui/react"
 import TraitCustomizerCard from "./TraitCustomizerCard"
+import { ChainId } from "../../constants"
+import { useDispatch, useSelector } from "react-redux"
+import { addCustomizerAssets, CustomizerCustomization, removeCustomizerAssets, selectCustomizerCustomizations } from "../../state/slices/customizerSlice"
 
 export type TraitVirtualListProps = {
     numColumns: number,
@@ -10,11 +13,16 @@ export type TraitVirtualListProps = {
     rowHeight: number,
     gridWidth: number,
     gridHeight: number,
-    part: CompositeConfigPartDto
+    part: CompositeConfigPartDto,
+    parentChainId: ChainId,
+    parentAssetAddress: string,
+    parentAssetId: number,
 }
 
 
-const TraitVirtualList = ({ numColumns, columnWidth, rowHeight, gridWidth, gridHeight, part }: TraitVirtualListProps) => {
+const TraitVirtualList = ({ numColumns, columnWidth, rowHeight, gridWidth, gridHeight, part, parentChainId, parentAssetAddress, parentAssetId }: TraitVirtualListProps) => {
+
+
 
     const FixedSizeGrid = _FixedSizeGrid as ComponentType<FixedSizeGridProps>;
     const TraitCell = memo(({ columnIndex, rowIndex, style, data }: GridChildComponentProps) => {
@@ -25,6 +33,8 @@ const TraitVirtualList = ({ numColumns, columnWidth, rowHeight, gridWidth, gridH
         //h = h + 8
         const asset = part.items[(data.numCols * rowIndex) + columnIndex]
         const traitValue = asset?.attributes?.[0]?.value ?? ""
+
+
         if (!!asset) {
             return (
                 <Box style={style}>
@@ -32,7 +42,6 @@ const TraitVirtualList = ({ numColumns, columnWidth, rowHeight, gridWidth, gridH
                         owned={false}
                         synthetic={data.part.synthetic}
                         default={true}
-                        equipped={false}
                         width={w}
                         height={h}
                         chainId={part.chainId}
@@ -40,6 +49,9 @@ const TraitVirtualList = ({ numColumns, columnWidth, rowHeight, gridWidth, gridH
                         assetId={asset.assetId}
                         traitValue={traitValue}
                         imageUrl={`${process.env.REACT_APP_COMPOSITE_MEDIA_URI_PREFIX}/customizer/${part.chainId}/${part.assetAddress}/${asset.assetId}.png`}
+                        parentChainId={parentChainId}
+                        parentAssetAddress={parentAssetAddress}
+                        parentAssetId={parentAssetId}
                     ></TraitCustomizerCard>
                 </Box>
 
