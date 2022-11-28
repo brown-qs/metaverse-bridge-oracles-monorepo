@@ -24,7 +24,7 @@ import transactionsSlice from './slices/transactionsSlice';
 import outModalSlice from './slices/outModalSlice';
 import migrateModalSlice from './slices/migrateModalSlice';
 import customizerSlice from './slices/customizerSlice';
-
+import imageCacheSlice from './slices/imageCacheSlice'
 
 
 const authPersistConfig = {
@@ -60,6 +60,7 @@ const rootReducer = combineReducers({
   blockNumbers: blockNumbersSlice,
   customizer: customizerSlice,
   oauth: oauthSlice,
+  imageCache: imageCacheSlice,
   [bridgeApi.reducerPath]: bridgeApi.reducer,
   [generatedSquidMarketplaceApi.reducerPath]: generatedSquidMarketplaceApi.reducer,
   [generatedSquidRaresamaApi.reducerPath]: generatedSquidRaresamaApi.reducer,

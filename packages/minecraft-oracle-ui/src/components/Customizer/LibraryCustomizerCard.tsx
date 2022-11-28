@@ -29,8 +29,7 @@ const LibraryCustomizerCard = ({ imageUrl, width, chainId, assetAddress, assetId
 
     const handleCustomizeClick = () => {
         if (String(chainId) === "1") {
-            //  navigate(`/customizer/${chainId}/${assetAddress}/${assetId}`)
-            navigate(`/exosama/customizer`)
+            navigate(`/customizer/${chainId}/${assetAddress}/${assetId}`)
         } else {
             navigate(`/moonsama/customizer/${chainId}/${assetAddress}/${assetId}`)
         }
