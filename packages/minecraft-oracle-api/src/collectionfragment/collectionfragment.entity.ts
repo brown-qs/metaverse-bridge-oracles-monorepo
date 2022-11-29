@@ -62,6 +62,14 @@ export class CollectionFragmentEntity {
     @IsBoolean()
     migratable: boolean;
 
+    @Column({ default: false })
+    @IsBoolean()
+    lendable?: boolean;
+
+    @Column({ type: "int", default: null, nullable: true })
+    @IsNumber()
+    monetaryValueRank?: number;
+
     @Column()
     @IsString()
     name: string;
