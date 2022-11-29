@@ -17,7 +17,6 @@ export const OnChainItem: React.FC<OnChainItemProps> = ({ token, ...inProps }) =
     const lineOneSuffix: string | undefined = React.useMemo(() => formatOnChainTokenSuffix(token), [token])
 
     const lineTwo: string | undefined = React.useMemo(() => token.enrapturable ? "This item will be burned into your account." : undefined, [token])
-    console.log("MEDIA URL: " + token?.metadata?.image)
     const balanceEther: string | undefined = React.useMemo(() => token.treatAsFungible ? utils.formatUnits(token.balance ?? "0", token.decimals) : undefined, [token])
     const props: PortalTabListItemProps = {
         mediaUrl: token?.metadata?.image ?? undefined,
