@@ -93,7 +93,7 @@ export function InModal() {
 
     const { isLoading: isBalanceLoading, data: balanceData, refetch: refetchBalance } = useQuery(
         ['getAssetBalance', inTokens?.[0]?.assetAddress, inTokens?.[0]?.assetType, account],
-        () => getAssetBalance({ assetType: inTokens?.[0]?.assetType!, assetAddress: inTokens?.[0]?.assetAddress!, assetId: 0 }, library!, account!),
+        () => getAssetBalance({ assetType: inTokens?.[0]?.assetType!, assetAddress: inTokens?.[0]?.assetAddress!, assetId: inTokens?.[0]?.numericId ?? 0 }, library!, account!),
         {
             enabled: !!library && !!account && isFungible && !!inTokens?.[0]?.assetAddress && isOpen && !!inTokens?.[0]?.assetType
         }
