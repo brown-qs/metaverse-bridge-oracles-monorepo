@@ -87,6 +87,10 @@ export class UserEntity {
     @Column({ default: false })
     vip?: boolean;
 
+    @IsBoolean()
+    @Column({ default: true, nullable: false })
+    lendeeAllowed?: boolean;
+
     @IsNumber()
     @Column({ default: 0 })
     numGamePassAsset?: number;
