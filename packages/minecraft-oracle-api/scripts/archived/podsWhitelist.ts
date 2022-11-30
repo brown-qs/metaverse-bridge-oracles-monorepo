@@ -1,17 +1,13 @@
 import { config } from 'dotenv'
-import { CompositeCollectionFragmentEntity } from '../src/compositecollectionfragment/compositecollectionfragment.entity'
 
-import { getDatabaseConnection } from './common'
 import { promises as fs } from 'fs';
 import path from "path"
-import { SyntheticItemLayerEntity } from '../src/syntheticitemlayer/syntheticitemlayer.entity'
-import { syntheticPartToDto } from '../src/compositeapi/compositeapi.utils'
-import { CompositeConfigDto, CompositeConfigLayer } from '../src/compositeapi/dtos/index.dto'
 import sharp from "sharp"
 import axios from "axios"
 import Jimp from 'jimp/es';
 import { execSync } from "child_process"
-import { UserEntity } from '../src/user/user/user.entity';
+import { UserEntity } from '../../src/user/user/user.entity';
+import { getDatabaseConnection } from '../common';
 
 //import distance from "sharp-phash/distance"
 config()
@@ -1180,8 +1176,10 @@ async function main() {
 
         const result = { uuid, email: userEntity.email.email, minecraftUsername: userEntity.minecraftUserName, walletAddress: mostValuableGamepass.assetOwner.toLowerCase(), collectionFragmentName: mostValuableGamepass.collectionFragment.name, recognizedAssetType: mostValuableGamepass.collectionFragment.recognizedAssetType, gamePassChainId: mostValuableGamepass.collectionFragment.collection.chainId, gamePassCollectionAddress: mostValuableGamepass.collectionFragment.collection.assetAddress, gamePassAssetId: mostValuableGamepass.assetId }
         results.push(result)
+
+        console.log(result.walletAddress)
     }
-    console.log(JSON.stringify(results))
+    //console.log(JSON.stringify(results))
 }
 main()
 
